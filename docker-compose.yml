@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: shopjoy-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: shopjoy
+      MYSQL_USER: shopjoy
+      MYSQL_PASSWORD: shopjoy123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis:
+    image: redis:7-alpine
+    container_name: shopjoy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  admin:
+    build: .
+    container_name: shopjoy-admin
+    ports:
+      - "8888:8888"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=shopjoy
+      - MYSQL_USER=shopjoy
+      - MYSQL_PASSWORD=shopjoy123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    command: ["/usr/local/bin/admin", "-f", "/etc/admin/admin-api.yaml"]
+
+  shop:
+    build: .
+    container_name: shopjoy-shop
+    ports:
+      - "8889:8889"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=shopjoy
+      - MYSQL_USER=shopjoy
+      - MYSQL_PASSWORD=shopjoy123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    command: ["/usr/local/bin/shop", "-f", "/etc/shop/shop-api.yaml"]
+
+  shop-admin:
+    build: ./shop-admin
+    container_name: shopjoy-admin-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - admin
+
+  joy:
+    build: ./joy
+    container_name: shopjoy-shop-ui
+    ports:
+      - "3001:80"
+    depends_on:
+      - shop
+
+volumes:
+  mysql_data:
+  redis_data:
