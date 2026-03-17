@@ -1,0 +1,206 @@
+package product
+
+import (
+	"context"
+	"time"
+
+	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"gorm.io/gorm"
+)
+
+type Service interface {
+	CreateProduct(ctx context.Context, req CreateProductRequest) (*ProductResponse, error)
+	UpdateProduct(ctx context.Context, req UpdateProductRequest) (*ProductResponse, error)
+	DeleteProduct(ctx context.Context, id int64) error
+	GetProduct(ctx context.Context, id int64) (*ProductResponse, error)
+	GetProductList(ctx context.Context, req QueryProductRequest) (*ProductListResponse, error)
+	PutOnSale(ctx context.Context, id int64) (*ProductResponse, error)
+	TakeOffSale(ctx context.Context, id int64) (*ProductResponse, error)
+	UpdateStock(ctx context.Context, req UpdateStockRequest) error
+	DeductStock(ctx context.Context, req DeductStockRequest) error
+}
+
+type service struct {
+	db          *gorm.DB
+	productRepo product.Repository
+	idGen       snowflake.Snowflake
+}
+
+func NewService(db *gorm.DB, repo product.Repository, idGen snowflake.Snowflake) Service {
+	return &service{
+		db:          db,
+		productRepo: repo,
+		idGen:       idGen,
+	}
+}
+
+func (s *service) CreateProduct(ctx context.Context, req CreateProductRequest) (*ProductResponse, error) {
+	id, err := s.idGen.NextID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	price := ToDomainMoney(req.Price, req.Currency)
+	p, err := product.NewProduct(id, req.Name, req.Description, price, req.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
+
+	if err := s.productRepo.Create(ctx, s.db, p); err != nil {
+		return nil, err
+	}
+
+	return FromDomainProduct(p), nil
+}
+
+func (s *service) UpdateProduct(ctx context.Context, req UpdateProductRequest) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	price := ToDomainMoney(req.Price, req.Currency)
+	if err := p.UpdatePrice(price); err != nil {
+		return nil, err
+	}
+
+	p.Name = req.Name
+	p.Description = req.Description
+	p.CategoryID = req.CategoryID
+	p.UpdatedAt = time.Now()
+
+	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
+		return nil, err
+	}
+
+	return FromDomainProduct(p), nil
+}
+
+func (s *service) DeleteProduct(ctx context.Context, id int64) error {
+	return s.productRepo.Delete(ctx, s.db, id)
+}
+
+func (s *service) GetProduct(ctx context.Context, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, id)
+	if err != nil {
+		return nil, err
+	}
+	return FromDomainProduct(p), nil
+}
+
+func (s *service) GetProductList(ctx context.Context, req QueryProductRequest) (*ProductListResponse, error) {
+	query := product.Query{
+		Name:       req.Name,
+		CategoryID: req.CategoryID,
+		Status:     ParseStatus(req.Status),
+		MinPrice:   req.MinPrice,
+		MaxPrice:   req.MaxPrice,
+		Page:       req.Page,
+		PageSize:   req.PageSize,
+	}
+
+	products, total, err := s.productRepo.FindList(ctx, s.db, query)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &ProductListResponse{
+		List:     make([]*ProductResponse, len(products)),
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}
+
+	for i, p := range products {
+		resp.List[i] = FromDomainProduct(p)
+	}
+
+	return resp, nil
+}
+
+func (s *service) PutOnSale(ctx context.Context, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := p.PutOnSale(); err != nil {
+		return nil, err
+	}
+
+	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
+		return nil, err
+	}
+
+	return FromDomainProduct(p), nil
+}
+
+func (s *service) TakeOffSale(ctx context.Context, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := p.TakeOffSale(); err != nil {
+		return nil, err
+	}
+
+	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
+		return nil, err
+	}
+
+	return FromDomainProduct(p), nil
+}
+
+func (s *service) UpdateStock(ctx context.Context, req UpdateStockRequest) error {
+	p, err := s.productRepo.FindByID(ctx, s.db, req.ID)
+	if err != nil {
+		return err
+	}
+
+	if err := p.UpdateStock(req.Quantity); err != nil {
+		return err
+	}
+
+	return s.productRepo.Update(ctx, s.db, p)
+}
+
+func (s *service) DeductStock(ctx context.Context, req DeductStockRequest) error {
+	return s.productRepo.UpdateStock(ctx, s.db, req.ID, -req.Quantity)
+}
+
+// CreateProductWithTx 创建商品（带事务示例）
+func (s *service) CreateProductWithTx(ctx context.Context, req CreateProductRequest) (*ProductResponse, error) {
+	var result *product.Product
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		id, err := s.idGen.NextID(ctx)
+		if err != nil {
+			return err
+		}
+
+		price := ToDomainMoney(req.Price, req.Currency)
+		p, err := product.NewProduct(id, req.Name, req.Description, price, req.CategoryID)
+		if err != nil {
+			return err
+		}
+
+		p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
+
+		if err := s.productRepo.Create(ctx, tx, p); err != nil {
+			return err
+		}
+
+		result = p
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return FromDomainProduct(result), nil
+}

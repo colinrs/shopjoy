@@ -1,3 +1,5 @@
+import "product.api"
+
 type Request {
 	Name string `path:"name,options=you|me"`
 }

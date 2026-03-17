@@ -1,0 +1,101 @@
+type (
+	CreateProductReq {
+		Name        string `json:"name"`
+		Description string `json:"description,optional"`
+		Price       int64  `json:"price"`
+		Currency    string `json:"currency,optional"`
+		CostPrice   int64  `json:"cost_price,optional"`
+		CategoryID  int64  `json:"category_id"`
+	}
+
+	CreateProductResp {
+		ID int64 `json:"id"`
+	}
+
+	UpdateProductReq {
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description,optional"`
+		Price       int64  `json:"price"`
+		Currency    string `json:"currency,optional"`
+		CategoryID  int64  `json:"category_id"`
+	}
+
+	GetProductReq {
+		ID int64 `path:"id"`
+	}
+
+	ProductDetailResp {
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Price       int64  `json:"price"`
+		Currency    string `json:"currency"`
+		CostPrice   int64  `json:"cost_price"`
+		Stock       int    `json:"stock"`
+		Status      string `json:"status"`
+		CategoryID  int64  `json:"category_id"`
+		CreatedAt   string `json:"created_at"`
+		UpdatedAt   string `json:"updated_at"`
+	}
+
+	ListProductReq {
+		Name       string `form:"name,optional"`
+		CategoryID int64  `form:"category_id,optional"`
+		Status     string `form:"status,optional"`
+		MinPrice   int64  `form:"min_price,optional"`
+		MaxPrice   int64  `form:"max_price,optional"`
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"page_size,default=20"`
+	}
+
+	ListProductResp {
+		List     []*ProductDetailResp `json:"list"`
+		Total    int64                `json:"total"`
+		Page     int                  `json:"page"`
+		PageSize int                  `json:"page_size"`
+	}
+
+	PutOnSaleReq {
+		ID int64 `path:"id"`
+	}
+
+	TakeOffSaleReq {
+		ID int64 `path:"id"`
+	}
+
+	UpdateStockReq {
+		ID       int64 `path:"id"`
+		Quantity int   `json:"quantity"`
+	}
+)
+
+service admin-api {
+	@doc "创建商品"
+	@handler CreateProductHandler
+	post /api/v1/products (CreateProductReq) returns (CreateProductResp)
+
+	@doc "更新商品"
+	@handler UpdateProductHandler
+	put /api/v1/products/:id (UpdateProductReq) returns (ProductDetailResp)
+
+	@doc "获取商品详情"
+	@handler GetProductHandler
+	get /api/v1/products/:id (GetProductReq) returns (ProductDetailResp)
+
+	@doc "获取商品列表"
+	@handler ListProductHandler
+	get /api/v1/products (ListProductReq) returns (ListProductResp)
+
+	@doc "上架商品"
+	@handler PutOnSaleHandler
+	post /api/v1/products/:id/on-sale (PutOnSaleReq) returns (ProductDetailResp)
+
+	@doc "下架商品"
+	@handler TakeOffSaleHandler
+	post /api/v1/products/:id/off-sale (TakeOffSaleReq) returns (ProductDetailResp)
+
+	@doc "更新库存"
+	@handler UpdateStockHandler
+	put /api/v1/products/:id/stock (UpdateStockReq) returns (ProductDetailResp)
+}

@@ -3,10 +3,80 @@
 
 package types
 
+type CreateProductReq struct {
+	Name        string `json:"name"`
+	Description string `json:"description,optional"`
+	Price       int64  `json:"price"`
+	Currency    string `json:"currency,optional"`
+	CostPrice   int64  `json:"cost_price,optional"`
+	CategoryID  int64  `json:"category_id"`
+}
+
+type CreateProductResp struct {
+	ID int64 `json:"id"`
+}
+
+type GetProductReq struct {
+	ID int64 `path:"id"`
+}
+
+type ListProductReq struct {
+	Name       string `form:"name,optional"`
+	CategoryID int64  `form:"category_id,optional"`
+	Status     string `form:"status,optional"`
+	MinPrice   int64  `form:"min_price,optional"`
+	MaxPrice   int64  `form:"max_price,optional"`
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"page_size,default=20"`
+}
+
+type ListProductResp struct {
+	List     []*ProductDetailResp `json:"list"`
+	Total    int64                `json:"total"`
+	Page     int                  `json:"page"`
+	PageSize int                  `json:"page_size"`
+}
+
+type ProductDetailResp struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Currency    string `json:"currency"`
+	CostPrice   int64  `json:"cost_price"`
+	Stock       int    `json:"stock"`
+	Status      string `json:"status"`
+	CategoryID  int64  `json:"category_id"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+type PutOnSaleReq struct {
+	ID int64 `path:"id"`
+}
+
 type Request struct {
 	Name string `path:"name,options=you|me"`
 }
 
 type Response struct {
 	Message string `json:"message"`
+}
+
+type TakeOffSaleReq struct {
+	ID int64 `path:"id"`
+}
+
+type UpdateProductReq struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description,optional"`
+	Price       int64  `json:"price"`
+	Currency    string `json:"currency,optional"`
+	CategoryID  int64  `json:"category_id"`
+}
+
+type UpdateStockReq struct {
+	ID       int64 `path:"id"`
+	Quantity int   `json:"quantity"`
 }

@@ -1,7 +1,7 @@
 # CACHE ABSTRACTION
 
 **Generated:** 2026-01-24 22:45:30
-**Parent:** ../AGENTS.md
+**Parent:** ../../AGENTS.md
 
 ## OVERVIEW
 Cache abstraction layer with multiple implementations (Redis, Ristretto memory cache).

@@ -1,3 +1,13 @@
 Name: admin-api
 Host: 0.0.0.0
 Port: 8888
+
+MySQL:
+  Host: 127.0.0.1
+  Port: 3306
+  UserName: root
+  Password: password
+  Database: shopjoy
+  MaxIdleConn: 10
+  MaxOpenConn: 100
+  ConnMaxLifeTime: 3600
