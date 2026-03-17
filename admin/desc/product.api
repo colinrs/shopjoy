@@ -7,11 +7,9 @@ type (
 		CostPrice   int64  `json:"cost_price,optional"`
 		CategoryID  int64  `json:"category_id"`
 	}
-
 	CreateProductResp {
 		ID int64 `json:"id"`
 	}
-
 	UpdateProductReq {
 		ID          int64  `json:"id"`
 		Name        string `json:"name"`
@@ -20,11 +18,9 @@ type (
 		Currency    string `json:"currency,optional"`
 		CategoryID  int64  `json:"category_id"`
 	}
-
 	GetProductReq {
 		ID int64 `path:"id"`
 	}
-
 	ProductDetailResp {
 		ID          int64  `json:"id"`
 		Name        string `json:"name"`
@@ -38,7 +34,6 @@ type (
 		CreatedAt   string `json:"created_at"`
 		UpdatedAt   string `json:"updated_at"`
 	}
-
 	ListProductReq {
 		Name       string `form:"name,optional"`
 		CategoryID int64  `form:"category_id,optional"`
@@ -48,22 +43,18 @@ type (
 		Page       int    `form:"page,default=1"`
 		PageSize   int    `form:"page_size,default=20"`
 	}
-
 	ListProductResp {
 		List     []*ProductDetailResp `json:"list"`
 		Total    int64                `json:"total"`
 		Page     int                  `json:"page"`
 		PageSize int                  `json:"page_size"`
 	}
-
 	PutOnSaleReq {
 		ID int64 `path:"id"`
 	}
-
 	TakeOffSaleReq {
 		ID int64 `path:"id"`
 	}
-
 	UpdateStockReq {
 		ID       int64 `path:"id"`
 		Quantity int   `json:"quantity"`
@@ -99,3 +90,4 @@ service admin-api {
 	@handler UpdateStockHandler
 	put /api/v1/products/:id/stock (UpdateStockReq) returns (ProductDetailResp)
 }
+

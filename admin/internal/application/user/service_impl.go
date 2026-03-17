@@ -1,0 +1,213 @@
+package user
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"gorm.io/gorm"
+)
+
+type ServiceImpl struct {
+	db       *gorm.DB
+	userRepo domain.Repository
+	idGen    snowflake.Snowflake
+}
+
+func NewService(db *gorm.DB, userRepo domain.Repository, idGen snowflake.Snowflake) Service {
+	return &ServiceImpl{
+		db:       db,
+		userRepo: userRepo,
+		idGen:    idGen,
+	}
+}
+
+func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
+	exists, err := s.userRepo.Exists(ctx, s.db, req.TenantID, req.Email, req.Phone)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, domain.ErrDuplicateUser
+	}
+
+	id, err := s.idGen.NextID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	u := &domain.User{
+		ID:       id,
+		TenantID: req.TenantID,
+		Email:    req.Email,
+		Phone:    req.Phone,
+		Name:     req.Name,
+		Avatar:   req.Avatar,
+		Gender:   req.Gender,
+		Status:   domain.StatusActive,
+		Audit:    shared.NewAuditInfo(0),
+	}
+
+	if req.Birthday != "" {
+		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
+			u.Birthday = &t
+		}
+	}
+
+	if err := u.SetPassword(req.Password); err != nil {
+		return nil, err
+	}
+
+	if err := s.userRepo.Create(ctx, s.db, u); err != nil {
+		return nil, err
+	}
+
+	return toUserResponse(u), nil
+}
+
+func (s *ServiceImpl) Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, req.TenantID, req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Name = req.Name
+	u.Avatar = req.Avatar
+	u.Gender = req.Gender
+
+	if req.Birthday != "" {
+		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
+			u.Birthday = &t
+		}
+	}
+
+	u.Audit.Update(0)
+
+	if err := s.userRepo.Update(ctx, s.db, u); err != nil {
+		return nil, err
+	}
+
+	return toUserResponse(u), nil
+}
+
+func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequest) error {
+	if req.NewPassword != req.ConfirmPassword {
+		return errors.New("passwords do not match")
+	}
+
+	u, err := s.userRepo.FindByID(ctx, s.db, req.TenantID, req.UserID)
+	if err != nil {
+		return err
+	}
+
+	if !u.CheckPassword(req.OldPassword) {
+		return domain.ErrWrongPassword
+	}
+
+	if err := u.SetPassword(req.NewPassword); err != nil {
+		return err
+	}
+
+	u.Audit.Update(0)
+	return s.userRepo.Update(ctx, s.db, u)
+}
+
+func (s *ServiceImpl) GetByID(ctx context.Context, tenantID shared.TenantID, id int64) (*UserResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return nil, err
+	}
+	return toUserResponse(u), nil
+}
+
+func (s *ServiceImpl) GetByEmail(ctx context.Context, tenantID shared.TenantID, email string) (*UserResponse, error) {
+	u, err := s.userRepo.FindByEmail(ctx, s.db, tenantID, email)
+	if err != nil {
+		return nil, err
+	}
+	return toUserResponse(u), nil
+}
+
+func (s *ServiceImpl) List(ctx context.Context, tenantID shared.TenantID, req QueryRequest) (*UserListResponse, error) {
+	query := domain.Query{
+		PageQuery: req.PageQuery,
+		Name:      req.Name,
+		Email:     req.Email,
+		Phone:     req.Phone,
+		Status:    req.Status,
+	}
+	query.PageQuery.Validate()
+
+	users, total, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &UserListResponse{
+		List:     make([]*UserResponse, len(users)),
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}
+
+	for i, u := range users {
+		resp.List[i] = toUserResponse(u)
+	}
+
+	return resp, nil
+}
+
+func (s *ServiceImpl) Suspend(ctx context.Context, tenantID shared.TenantID, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return err
+	}
+
+	if err := u.Suspend(); err != nil {
+		return err
+	}
+
+	u.Audit.Update(0)
+	return s.userRepo.Update(ctx, s.db, u)
+}
+
+func (s *ServiceImpl) Activate(ctx context.Context, tenantID shared.TenantID, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return err
+	}
+
+	if err := u.Activate(); err != nil {
+		return err
+	}
+
+	u.Audit.Update(0)
+	return s.userRepo.Update(ctx, s.db, u)
+}
+
+func toUserResponse(u *domain.User) *UserResponse {
+	resp := &UserResponse{
+		ID:        u.ID,
+		TenantID:  u.TenantID.Int64(),
+		Email:     u.Email,
+		Phone:     u.Phone,
+		Name:      u.Name,
+		Avatar:    u.Avatar,
+		Gender:    int(u.Gender),
+		Status:    int(u.Status),
+		CreatedAt: u.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
+	}
+
+	if u.Birthday != nil {
+		resp.Birthday = u.Birthday.Format("2006-01-02")
+	}
+
+	if u.LastLogin != nil {
+		resp.LastLogin = u.LastLogin.Format("2006-01-02 15:04:05")
+	}
+
+	return resp
+}

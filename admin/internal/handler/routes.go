@@ -4,9 +4,11 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/rest"
 )
@@ -68,4 +70,50 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/users",
+				Handler: ListUsersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/users/:id",
+				Handler: GetUserHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/users/:id",
+				Handler: UpdateUserHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/users/login",
+				Handler: LoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/users/password",
+				Handler: ChangePasswordHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/users/register",
+				Handler: RegisterHandler(serverCtx),
+			},
+		})
+}
+
+func getTenantID(r *http.Request) (shared.TenantID, error) {
+	tenantIDStr := r.Header.Get("X-Tenant-ID")
+	if tenantIDStr == "" {
+		return 0, fmt.Errorf("tenant id required")
+	}
+	var id int64
+	if _, err := fmt.Sscanf(tenantIDStr, "%d", &id); err != nil {
+		return 0, err
+	}
+	return shared.TenantID(id), nil
 }

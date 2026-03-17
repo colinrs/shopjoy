@@ -41,6 +41,7 @@ require (
 	github.com/grafana/pyroscope-go v1.2.7 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
+	github.com/hibiken/asynq v0.26.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
@@ -58,7 +59,9 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/spf13/cast v1.10.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.etcd.io/etcd/api/v3 v3.6.8 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.8 // indirect
@@ -82,6 +85,7 @@ require (
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/grpc v1.71.1 // indirect

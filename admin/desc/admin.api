@@ -1,4 +1,5 @@
 import "product.api"
+import "user.api"
 
 type Request {
 	Name string `path:"name,options=you|me"`

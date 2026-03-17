@@ -88,15 +88,27 @@ golangci-lint run ./pkg/...
 ```
 
 ### go-zero Code Generation
+
+**IMPORTANT: After updating `.api` definition files, ALWAYS use `make api` to regenerate code. Do NOT use `goctl` directly.**
+
+```bash
+# Correct way - use Makefile (runs format + gen)
+cd shop && make api
+cd admin && make api
+
+# Or from root to regenerate all
+make api
+```
+
+**Why:** The Makefile ensures consistent code generation with proper flags and style settings.
+
 ```bash
 # Install goctl (required for code generation)
 go install github.com/zeromicro/go-zero/tools/goctl@latest
 
-# Generate API code from .api files
-goctl api go --api ./desc/shop.api --dir ./ --style=go_zero
-
-# Format API definitions
-goctl api format --dir ./desc
+# Manual goctl commands (NOT recommended - use Makefile instead)
+# goctl api go --api ./desc/shop.api --dir ./ --style=go_zero
+# goctl api format --dir ./desc
 
 # Generate Swagger docs
 goctl api plugin -plugin goctl-swagger="swagger -filename shop.json" -api ./desc/shop.api -dir swagger

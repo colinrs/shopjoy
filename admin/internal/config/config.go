@@ -5,7 +5,14 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+type JWTConfig struct {
+	Secret        string
+	AccessExpiry  int64
+	RefreshExpiry int64
+}
+
 type Config struct {
 	rest.RestConf
 	MySQL infra.DBConfig
+	JWT   JWTConfig
 }

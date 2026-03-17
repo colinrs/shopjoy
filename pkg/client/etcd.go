@@ -8,7 +8,7 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/zeromicro/go-zero/core/logx"
-
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
 )
 

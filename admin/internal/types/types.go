@@ -3,6 +3,12 @@
 
 package types
 
+type ChangePasswordRequest struct {
+	OldPassword     string `json:"old_password"`
+	NewPassword     string `json:"new_password" validate:"min=6"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
 type CreateProductReq struct {
 	Name        string `json:"name"`
 	Description string `json:"description,optional"`
@@ -18,6 +24,20 @@ type CreateProductResp struct {
 
 type GetProductReq struct {
 	ID int64 `path:"id"`
+}
+
+type GetUserRequest struct {
+	ID int64 `path:"id"`
+}
+
+type GetUserResponse struct {
+	ID        int64  `json:"id"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Name      string `json:"name"`
+	Avatar    string `json:"avatar"`
+	Status    int    `json:"status"`
+	CreatedAt string `json:"created_at"`
 }
 
 type ListProductReq struct {
@@ -37,6 +57,32 @@ type ListProductResp struct {
 	PageSize int                  `json:"page_size"`
 }
 
+type ListUsersRequest struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Name     string `form:"name,optional"`
+	Email    string `form:"email,optional"`
+}
+
+type ListUsersResponse struct {
+	List     []*GetUserResponse `json:"list"`
+	Total    int64              `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"page_size"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type LoginResponse struct {
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token"`
+	ExpiresIn    int64    `json:"expires_in"`
+	User         UserInfo `json:"user"`
+}
+
 type ProductDetailResp struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -53,6 +99,20 @@ type ProductDetailResp struct {
 
 type PutOnSaleReq struct {
 	ID int64 `path:"id"`
+}
+
+type RegisterRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Phone    string `json:"phone,optional"`
+	Password string `json:"password" validate:"required,min=6"`
+	Name     string `json:"name" validate:"required"`
+}
+
+type RegisterResponse struct {
+	ID        int64  `json:"id"`
+	Email     string `json:"email"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
 }
 
 type Request struct {
@@ -79,4 +139,17 @@ type UpdateProductReq struct {
 type UpdateStockReq struct {
 	ID       int64 `path:"id"`
 	Quantity int   `json:"quantity"`
+}
+
+type UpdateUserRequest struct {
+	ID     int64  `path:"id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar,optional"`
+}
+
+type UserInfo struct {
+	ID     int64  `json:"id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }

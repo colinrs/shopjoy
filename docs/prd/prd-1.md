@@ -6,7 +6,7 @@
 
 ### 1. 项目概述
 
-**产品名称**：ShopGo SaaS  
+**产品名称**：shopjoy SaaS  
 **产品定位**：轻量级、多租户独立电商 SaaS 平台，帮助中小企业 5 分钟开通独立店铺，支持自有域名、主题切换、商品管理、订单履约、营销促销全链路。  
 **核心价值**：低代码开店、高性能、强扩展性、代码结构清晰长期可维护。  
 **目标用户**：
@@ -20,37 +20,30 @@
 - 后端统一使用 **go-zero** 框架（单体应用模式，后期可按 Bounded Context 拆微服务）
 - 严格遵循 **DDD（领域驱动设计）** 指导业务与代码对齐
 - 异步任务统一使用 **asyncq**（基于 Redis 的轻量异步队列）
-- 项目分为：`admin-api`、`shop-api`、`pkg`、`shop-admin`、`shop`
+- 项目分为：`admin`、`shop`、`pkg`、`shop-admin`、`joy`
 
 ### 2. 项目目录结构（go-zero + DDD 风格）
 
 ```bash
-shopgo-saas/
-├── admin-api/                          # 管理后台 API（go-zero）
+shopjoy/
+├── admin/                          # 管理后台 API（go-zero）
 │   ├── internal/
 │   │   ├── config/
 │   │   ├── handler/
 │   │   ├── logic/                      # Application Layer
 │   │   ├── domain/                     # DDD 领域层（按 Bounded Context 组织）
-│   │   │   ├── identity/
-│   │   │   ├── catalog/
-│   │   │   ├── sales/
-│   │   │   ├── promotion/              # 原 Marketing Context
-│   │   │   ├── storefront/
-│   │   │   ├── fulfillment/
-│   │   │   └── shared/                 # 共享内核
 │   │   ├── repository/
 │   │   ├── event/
 │   │   ├── asyncq/                     # 异步任务统一入口
 │   │   ├── types/
 │   │   └── middleware/                 # tenant、auth、log 等
-│   ├── etc/admin-api.yaml
+│   ├── etc/admin.yaml
 │   ├── admin.go
 │   └── desc/                           # *.api 文件
 │
-├── shop-api/                           # 商城买家端 API（go-zero）
-│   ├── internal/ （结构同 admin-api，领域模型可复用 pkg）
-│   ├── etc/shop-api.yaml
+├── shop/                           # 商城买家端 API（go-zero）
+│   ├── internal/ （结构同 admin，领域模型可复用 pkg）
+│   ├── etc/shop.yaml
 │   ├── shop.go
 │   └── desc/
 │
@@ -65,7 +58,7 @@ shopgo-saas/
 │   └── middleware/
 │
 ├── shop-admin/                         # Vue3 管理后台前端（Element Plus）
-├── shop/                               # Vue3 商城前端（买家端，多主题）
+├── joy/                               # Vue3 商城前端（买家端，多主题）
 ├── deploy/
 ├── docs/                               # DDD 上下文地图、ER 图、API 文档
 ├── go.mod
