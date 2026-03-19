@@ -1,47 +1,31 @@
 import request from '@/utils/request'
 
-export function login(data: any) {
-  return request({
-    url: '/users/login',
-    method: 'post',
-    data
-  })
-}
-
-export function register(data: any) {
-  return request({
-    url: '/users/register',
-    method: 'post',
-    data
-  })
-}
-
 export function getUserInfo(id: number) {
   return request({
-    url: `/users/${id}`,
+    url: `/api/v1/users/${id}`,
     method: 'get'
   })
 }
 
-export function getUserList(params: any) {
+export function getUserList(params: {
+  page: number
+  page_size: number
+  name?: string
+  email?: string
+}) {
   return request({
-    url: '/users',
+    url: '/api/v1/users',
     method: 'get',
     params
   })
 }
 
-export function updateUser(id: number, data: any) {
+export function updateUser(id: number, data: {
+  name: string
+  avatar?: string
+}) {
   return request({
-    url: `/users/${id}`,
-    method: 'put',
-    data
-  })
-}
-
-export function changePassword(data: any) {
-  return request({
-    url: '/users/password',
+    url: `/api/v1/users/${id}`,
     method: 'put',
     data
   })
