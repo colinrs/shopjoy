@@ -1,14 +1,17 @@
-import axios from 'axios'
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { handleAdminError } from './error-codes'
+import type { ApiResponse, ErrorResponse } from './types'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 10000
 })
 
+// Request interceptor
 request.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
@@ -16,28 +19,91 @@ request.interceptors.request.use(
     config.headers['X-Tenant-ID'] = '1'
     return config
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error)
   }
 )
 
+// Response interceptor
 request.interceptors.response.use(
   (response) => {
-    const res = response.data
+    const res = response.data as ApiResponse
+
+    // Business error code check (code !== 0)
     if (res.code !== 0) {
-      ElMessage.error(res.message || '请求失败')
-      return Promise.reject(new Error(res.message))
+      const errorResponse: ErrorResponse = {
+        code: res.code,
+        msg: res.msg,
+        httpStatus: response.status,
+        data: res.data
+      }
+
+      const errorConfig = handleAdminError(errorResponse)
+
+      // Handle based on action type
+      switch (errorConfig.action) {
+        case 'logout':
+          ElMessage.error(errorConfig.message)
+          const userStore = useUserStore()
+          userStore.clearToken()
+          window.location.href = errorConfig.redirectPath || '/login'
+          break
+        case 'redirect':
+          ElMessage.error(errorConfig.message)
+          window.location.href = errorConfig.redirectPath || '/'
+          break
+        case 'toast':
+          ElMessage.error(errorConfig.message)
+          break
+        case 'none':
+          // Silent handling
+          break
+        default:
+          ElMessage.error(errorConfig.message)
+      }
+
+      return Promise.reject(new Error(errorConfig.message))
     }
+
     return res.data
   },
-  (error) => {
+  (error: AxiosError<ApiResponse>) => {
     const { response } = error
-    if (response?.status === 401) {
-      const userStore = useUserStore()
-      userStore.clearToken()
-      window.location.href = '/login'
+
+    // Handle HTTP errors (non-200 responses)
+    if (response) {
+      const errorResponse: ErrorResponse = {
+        code: response.data?.code,
+        msg: response.data?.msg,
+        message: error.message,
+        httpStatus: response.status
+      }
+
+      const errorConfig = handleAdminError(errorResponse)
+
+      switch (errorConfig.action) {
+        case 'logout':
+          ElMessage.error(errorConfig.message)
+          const userStore = useUserStore()
+          userStore.clearToken()
+          window.location.href = errorConfig.redirectPath || '/login'
+          break
+        case 'redirect':
+          ElMessage.error(errorConfig.message)
+          window.location.href = errorConfig.redirectPath || '/'
+          break
+        case 'toast':
+          ElMessage.error(errorConfig.message)
+          break
+        default:
+          ElMessage.error(errorConfig.message)
+      }
+
+      return Promise.reject(error)
     }
-    ElMessage.error(error.message || '网络错误')
+
+    // Network error (no response)
+    ElMessage.error('网络连接失败，请检查网络')
     return Promise.reject(error)
   }
 )
