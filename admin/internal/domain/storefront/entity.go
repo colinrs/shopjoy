@@ -20,7 +20,7 @@ type Shop struct {
 	SocialLinks  map[string]string
 	SEO          SEOConfig
 	Status       shared.Status
-	Audit        shared.AuditInfo
+	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
 func (s *Shop) TableName() string {
@@ -67,7 +67,7 @@ type Page struct {
 	SEO      SEOConfig
 	Status   shared.Status
 	Sort     int
-	Audit    shared.AuditInfo
+	Audit    shared.AuditInfo `gorm:"embedded"`
 }
 
 type PageType int

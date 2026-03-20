@@ -385,6 +385,8 @@ watch(activeTab, () => {
   searchQuery.value = ''
   filterType.value = 0
   filterStatus.value = 0
+  tableData.value = []
+  total.value = 0
   loadData()
 })
 

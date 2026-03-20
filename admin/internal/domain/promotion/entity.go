@@ -37,7 +37,7 @@ type Promotion struct {
 	Rules       []PromotionRule
 	StartAt     time.Time
 	EndAt       time.Time
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (p *Promotion) TableName() string {
@@ -88,7 +88,7 @@ type PromotionRule struct {
 	ConditionValue int64
 	ActionType     ActionType
 	ActionValue    int64
-	MaxDiscount    shared.Money
+	MaxDiscount    shared.Money `gorm:"embedded"`
 }
 
 type ConditionType int

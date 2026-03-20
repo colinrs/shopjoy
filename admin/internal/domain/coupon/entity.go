@@ -43,7 +43,7 @@ type Coupon struct {
 	Status       Status
 	StartAt      time.Time
 	EndAt        time.Time
-	Audit        shared.AuditInfo
+	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
 func (c *Coupon) TableName() string {

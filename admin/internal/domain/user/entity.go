@@ -40,7 +40,7 @@ type User struct {
 	Birthday  *time.Time
 	Status    Status
 	LastLogin *time.Time
-	Audit     shared.AuditInfo
+	Audit     shared.AuditInfo `gorm:"embedded"`
 }
 
 func (u *User) TableName() string {

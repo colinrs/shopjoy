@@ -36,7 +36,7 @@ type Payment struct {
 	TenantID      shared.TenantID
 	OrderID       string
 	UserID        int64
-	Amount        shared.Money
+	Amount        shared.Money `gorm:"embedded"`
 	Status        Status
 	Method        Method
 	TransactionID string
@@ -44,7 +44,7 @@ type Payment struct {
 	ExpireAt      time.Time
 	NotifyURL     string
 	ReturnURL     string
-	Audit         shared.AuditInfo
+	Audit         shared.AuditInfo `gorm:"embedded"`
 }
 
 func (p *Payment) TableName() string {
@@ -89,12 +89,12 @@ type Refund struct {
 	PaymentID     string
 	OrderID       string
 	UserID        int64
-	Amount        shared.Money
+	Amount        shared.Money `gorm:"embedded"`
 	Reason        string
 	Status        RefundStatus
 	TransactionID string
 	RefundedAt    *time.Time
-	Audit         shared.AuditInfo
+	Audit         shared.AuditInfo `gorm:"embedded"`
 }
 
 type RefundStatus int

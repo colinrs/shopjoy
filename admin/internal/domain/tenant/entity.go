@@ -41,7 +41,7 @@ type Tenant struct {
 	ContactEmail string
 	Address      string
 	ExpireAt     *time.Time
-	Audit        shared.AuditInfo
+	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
 func (t *Tenant) TableName() string {

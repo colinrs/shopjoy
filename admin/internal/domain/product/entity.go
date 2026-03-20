@@ -104,8 +104,8 @@ type Product struct {
 	ID          int64     // 商品ID
 	Name        string    // 商品名称
 	Description string    // 商品描述
-	Price       Money     // 售价
-	CostPrice   Money     // 成本价
+	Price       Money     `gorm:"embedded"` // 售价
+	CostPrice   Money     `gorm:"embedded"` // 成本价
 	Stock       int       // 库存
 	Status      Status    // 状态
 	CategoryID  int64     // 分类ID

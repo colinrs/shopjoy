@@ -22,7 +22,7 @@ type Role struct {
 	Description string
 	Status      Status
 	IsSystem    bool
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (r *Role) TableName() string {

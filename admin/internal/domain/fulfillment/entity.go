@@ -28,10 +28,10 @@ type Shipment struct {
 	TrackingNo  string
 	Items       []ShipmentItem
 	Weight      float64
-	Cost        shared.Money
+	Cost        shared.Money `gorm:"embedded"`
 	ShippedAt   *time.Time
 	DeliveredAt *time.Time
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (s *Shipment) TableName() string {
@@ -90,10 +90,10 @@ type Refund struct {
 	Reason      string
 	Description string
 	Images      []string
-	Amount      shared.Money
+	Amount      shared.Money `gorm:"embedded"`
 	ApprovedAt  *time.Time
 	CompletedAt *time.Time
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (r *Refund) TableName() string {

@@ -52,10 +52,10 @@ type Order struct {
 	UserID         int64
 	OrderNo        string
 	Status         Status
-	TotalAmount    shared.Money
-	DiscountAmount shared.Money
-	FreightAmount  shared.Money
-	PayAmount      shared.Money
+	TotalAmount    shared.Money `gorm:"embedded"`
+	DiscountAmount shared.Money `gorm:"embedded"`
+	FreightAmount  shared.Money `gorm:"embedded"`
+	PayAmount      shared.Money `gorm:"embedded"`
 	Currency       string
 	Items          []OrderItem
 	Address        ShippingAddress
@@ -65,7 +65,7 @@ type Order struct {
 	ShippedAt      *time.Time
 	CompletedAt    *time.Time
 	CancelledAt    *time.Time
-	Audit          shared.AuditInfo
+	Audit          shared.AuditInfo `gorm:"embedded"`
 }
 
 func (o *Order) TableName() string {
@@ -143,9 +143,9 @@ type OrderItem struct {
 	ProductName string
 	SKUName     string
 	Image       string
-	Price       shared.Money
+	Price       shared.Money `gorm:"embedded"`
 	Quantity    int
-	TotalAmount shared.Money
+	TotalAmount shared.Money `gorm:"embedded"`
 }
 
 func (oi *OrderItem) TableName() string {

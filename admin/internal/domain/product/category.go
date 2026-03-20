@@ -26,7 +26,7 @@ type Category struct {
 	Icon     string
 	Image    string
 	Status   CategoryStatus
-	Audit    shared.AuditInfo
+	Audit    shared.AuditInfo `gorm:"embedded"`
 }
 
 func (c *Category) TableName() string {
@@ -58,7 +58,7 @@ type Brand struct {
 	Website     string
 	Sort        int
 	Status      shared.Status
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (b *Brand) TableName() string {
@@ -74,7 +74,7 @@ type Attribute struct {
 	Options    []string
 	IsRequired bool
 	Status     shared.Status
-	Audit      shared.AuditInfo
+	Audit      shared.AuditInfo `gorm:"embedded"`
 }
 
 type AttributeInputType int
@@ -91,11 +91,11 @@ type SKU struct {
 	ID         int64
 	ProductID  int64
 	Code       string
-	Price      shared.Money
+	Price      shared.Money `gorm:"embedded"`
 	Stock      int
 	Attributes map[string]string
 	Status     shared.Status
-	Audit      shared.AuditInfo
+	Audit      shared.AuditInfo `gorm:"embedded"`
 }
 
 func (s *SKU) TableName() string {

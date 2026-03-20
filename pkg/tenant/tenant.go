@@ -53,7 +53,7 @@ type Tenant struct {
 	ContactName  string
 	ContactPhone string
 	ContactEmail string
-	Audit        shared.AuditInfo
+	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
 func (t *Tenant) IsActive() bool {

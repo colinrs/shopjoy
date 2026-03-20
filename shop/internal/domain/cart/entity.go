@@ -107,11 +107,11 @@ type CartItem struct {
 	ProductName string
 	SKUName     string
 	Image       string
-	Price       shared.Money
+	Price       shared.Money `gorm:"embedded"`
 	Quantity    int
-	TotalAmount shared.Money
+	TotalAmount shared.Money `gorm:"embedded"`
 	Selected    bool
-	Audit       shared.AuditInfo
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 func (ci *CartItem) TableName() string {
