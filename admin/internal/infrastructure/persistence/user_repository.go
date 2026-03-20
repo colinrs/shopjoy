@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ func (r *UserRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID sha
 	var u user.User
 	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, user.ErrUserNotFound
+		return nil, code.ErrUserNotFound
 	}
 	return &u, err
 }
@@ -36,7 +37,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, db *gorm.DB, tenantID 
 	var u user.User
 	err := db.WithContext(ctx).Where("email = ? AND tenant_id = ?", email, tenantID.Int64()).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, user.ErrUserNotFound
+		return nil, code.ErrUserNotFound
 	}
 	return &u, err
 }
@@ -45,7 +46,7 @@ func (r *UserRepository) FindByPhone(ctx context.Context, db *gorm.DB, tenantID 
 	var u user.User
 	err := db.WithContext(ctx).Where("phone = ? AND tenant_id = ?", phone, tenantID.Int64()).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, user.ErrUserNotFound
+		return nil, code.ErrUserNotFound
 	}
 	return &u, err
 }

@@ -2,18 +2,11 @@ package promotion
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrPromotionNotFound   = errors.New("promotion not found")
-	ErrInvalidPromotion    = errors.New("invalid promotion")
-	ErrPromotionExpired    = errors.New("promotion expired")
-	ErrPromotionNotStarted = errors.New("promotion not started")
 )
 
 type Status int
@@ -73,7 +66,7 @@ func (p *Promotion) CanApply(cartAmount shared.Money) bool {
 
 func (p *Promotion) Apply(cartAmount shared.Money) (shared.Money, error) {
 	if !p.IsActive() {
-		return cartAmount, ErrPromotionExpired
+		return cartAmount, code.ErrPromotionExpired
 	}
 
 	bestDiscount := shared.NewMoney(0, cartAmount.Currency)

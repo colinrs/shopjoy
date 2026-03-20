@@ -2,10 +2,10 @@ package user
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
@@ -31,7 +31,7 @@ func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*Use
 		return nil, err
 	}
 	if exists {
-		return nil, domain.ErrDuplicateUser
+		return nil, code.ErrUserDuplicateUser
 	}
 
 	id, err := s.idGen.NextID(ctx)
@@ -95,7 +95,7 @@ func (s *ServiceImpl) Update(ctx context.Context, req UpdateUserRequest) (*UserR
 
 func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequest) error {
 	if req.NewPassword != req.ConfirmPassword {
-		return errors.New("passwords do not match")
+		return code.ErrUserPasswordMismatch
 	}
 
 	u, err := s.userRepo.FindByID(ctx, s.db, req.TenantID, req.UserID)
@@ -104,7 +104,7 @@ func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequ
 	}
 
 	if !u.CheckPassword(req.OldPassword) {
-		return domain.ErrWrongPassword
+		return code.ErrUserWrongPassword
 	}
 
 	if err := u.SetPassword(req.NewPassword); err != nil {

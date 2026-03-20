@@ -3,7 +3,6 @@
 package shared
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -42,7 +41,7 @@ func NewMoney(amount int64, currency string) Money {
 // Add 金额相加
 func (m Money) Add(other Money) (Money, error) {
 	if m.Currency != other.Currency {
-		return Money{}, ErrCurrencyMismatch
+		return Money{}, fmt.Errorf("currency mismatch: %s vs %s", m.Currency, other.Currency)
 	}
 	return NewMoney(m.Amount+other.Amount, m.Currency), nil
 }
@@ -50,10 +49,10 @@ func (m Money) Add(other Money) (Money, error) {
 // Subtract 金额相减
 func (m Money) Subtract(other Money) (Money, error) {
 	if m.Currency != other.Currency {
-		return Money{}, ErrCurrencyMismatch
+		return Money{}, fmt.Errorf("currency mismatch: %s vs %s", m.Currency, other.Currency)
 	}
 	if m.Amount < other.Amount {
-		return Money{}, ErrInsufficientAmount
+		return Money{}, fmt.Errorf("insufficient amount: %d < %d", m.Amount, other.Amount)
 	}
 	return NewMoney(m.Amount-other.Amount, m.Currency), nil
 }
@@ -142,26 +141,6 @@ func (a *AuditInfo) Update(updatedBy int64) {
 	a.UpdatedAt = time.Now().UTC()
 	a.UpdatedBy = updatedBy
 }
-
-// ==================== 共享错误 ====================
-
-var (
-	// 金额相关错误
-	ErrCurrencyMismatch   = errors.New("currency mismatch")
-	ErrInsufficientAmount = errors.New("insufficient amount")
-	ErrInvalidAmount      = errors.New("invalid amount")
-
-	// 租户相关错误
-	ErrInvalidTenantID = errors.New("invalid tenant id")
-	ErrTenantNotFound  = errors.New("tenant not found")
-
-	// 通用错误
-	ErrNotFound     = errors.New("resource not found")
-	ErrDuplicate    = errors.New("duplicate resource")
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrForbidden    = errors.New("forbidden")
-	ErrInvalidParam = errors.New("invalid parameter")
-)
 
 // ==================== 分页相关 ====================
 

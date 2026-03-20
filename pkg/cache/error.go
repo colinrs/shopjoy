@@ -1,10 +1,8 @@
 package cache
 
-import (
-	"errors"
-)
+import "github.com/colinrs/shopjoy/pkg/code"
 
 var (
-	ErrNotFound   = errors.New("not found")
-	ErrFromSource = errors.New("from source err")
+	ErrNotFound   = code.ErrCacheNotFound
+	ErrFromSource = code.ErrCacheFromSource
 )

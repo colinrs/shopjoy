@@ -2,15 +2,9 @@ package storefront
 
 import (
 	"context"
-	"errors"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrShopNotFound = errors.New("shop not found")
-	ErrInvalidShop  = errors.New("invalid shop")
 )
 
 type Shop struct {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
 
@@ -91,7 +92,7 @@ func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return product.ErrProductNotFound
+		return code.ErrProductNotFound
 	}
 	return nil
 }
@@ -101,7 +102,7 @@ func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*pro
 	err := db.WithContext(ctx).First(&model, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, product.ErrProductNotFound
+			return nil, code.ErrProductNotFound
 		}
 		return nil, err
 	}
@@ -179,7 +180,7 @@ func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, id int64, de
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return product.ErrInsufficientStock
+		return code.ErrProductInsufficientStock
 	}
 	return nil
 }

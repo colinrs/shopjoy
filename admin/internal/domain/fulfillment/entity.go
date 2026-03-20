@@ -2,17 +2,11 @@ package fulfillment
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrShipmentNotFound = errors.New("shipment not found")
-	ErrInvalidTracking  = errors.New("invalid tracking number")
-	ErrAlreadyShipped   = errors.New("order already shipped")
 )
 
 type ShipmentStatus int
@@ -46,10 +40,10 @@ func (s *Shipment) TableName() string {
 
 func (s *Shipment) Ship(carrier, trackingNo string) error {
 	if s.Status != ShipmentStatusPending {
-		return ErrAlreadyShipped
+		return code.ErrShipmentAlreadyShipped
 	}
 	if carrier == "" || trackingNo == "" {
-		return ErrInvalidTracking
+		return code.ErrShipmentInvalidTracking
 	}
 	s.Carrier = carrier
 	s.TrackingNo = trackingNo

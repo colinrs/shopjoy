@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -31,16 +32,16 @@ func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID sha
 	var rl role.Role
 	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, role.ErrRoleNotFound
+		return nil, code.ErrRoleNotFound
 	}
 	return &rl, err
 }
 
-func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*role.Role, error) {
+func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, codeStr string) (*role.Role, error) {
 	var rl role.Role
-	err := db.WithContext(ctx).Where("code = ? AND tenant_id = ?", code, tenantID.Int64()).First(&rl).Error
+	err := db.WithContext(ctx).Where("code = ? AND tenant_id = ?", codeStr, tenantID.Int64()).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, role.ErrRoleNotFound
+		return nil, code.ErrRoleNotFound
 	}
 	return &rl, err
 }

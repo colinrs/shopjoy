@@ -2,9 +2,9 @@ package order
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"github.com/colinrs/shopjoy/shop/internal/domain/cart"
@@ -35,7 +35,7 @@ func (s *ServiceImpl) CreateOrder(ctx context.Context, req CreateOrderRequest) (
 	}
 
 	if cart.IsEmpty() {
-		return nil, errors.New("cart is empty")
+		return nil, code.ErrOrderCartEmpty
 	}
 
 	orderID := order.GenerateOrderNo(req.TenantID)
@@ -137,7 +137,7 @@ func (s *ServiceImpl) CancelOrder(ctx context.Context, tenantID shared.TenantID,
 	}
 
 	if o.UserID != userID {
-		return shared.ErrForbidden
+		return code.ErrForbidden
 	}
 
 	return o.Cancel(reason)

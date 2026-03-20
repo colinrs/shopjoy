@@ -2,21 +2,12 @@ package user
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrInvalidEmail    = errors.New("invalid email format")
-	ErrInvalidPhone    = errors.New("invalid phone format")
-	ErrPasswordTooWeak = errors.New("password too weak")
-	ErrUserNotFound    = errors.New("user not found")
-	ErrDuplicateUser   = errors.New("duplicate user")
-	ErrWrongPassword   = errors.New("wrong password")
 )
 
 type Status int
@@ -58,7 +49,7 @@ func (u *User) TableName() string {
 
 func (u *User) SetPassword(plainPassword string) error {
 	if len(plainPassword) < 6 {
-		return ErrPasswordTooWeak
+		return code.ErrUserPasswordTooWeak
 	}
 	hashed, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -84,7 +75,7 @@ func (u *User) UpdateLastLogin() {
 
 func (u *User) Suspend() error {
 	if u.Status == StatusDeleted {
-		return errors.New("user already deleted")
+		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusSuspended
 	return nil
@@ -92,7 +83,7 @@ func (u *User) Suspend() error {
 
 func (u *User) Activate() error {
 	if u.Status == StatusDeleted {
-		return errors.New("user already deleted")
+		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusActive
 	return nil

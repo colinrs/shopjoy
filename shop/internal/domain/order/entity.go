@@ -2,22 +2,12 @@ package order
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrOrderNotFound      = errors.New("order not found")
-	ErrInvalidOrderStatus = errors.New("invalid order status")
-	ErrOrderAlreadyPaid   = errors.New("order already paid")
-	ErrOrderNotPaid       = errors.New("order not paid")
-	ErrOrderExpired       = errors.New("order expired")
-	ErrInsufficientStock  = errors.New("insufficient stock")
-	ErrInvalidAmount      = errors.New("invalid amount")
 )
 
 type Status int
@@ -101,10 +91,10 @@ func (o *Order) CalculateTotals() {
 
 func (o *Order) Pay(paymentID string) error {
 	if o.Status != StatusPendingPayment {
-		return ErrInvalidOrderStatus
+		return code.ErrOrderInvalidStatus
 	}
 	if time.Now().After(o.ExpireAt) {
-		return ErrOrderExpired
+		return code.ErrOrderExpired
 	}
 	now := time.Now().UTC()
 	o.Status = StatusPaid
@@ -114,7 +104,7 @@ func (o *Order) Pay(paymentID string) error {
 
 func (o *Order) Cancel(reason string) error {
 	if o.Status != StatusPendingPayment {
-		return ErrInvalidOrderStatus
+		return code.ErrOrderInvalidStatus
 	}
 	now := time.Now().UTC()
 	o.Status = StatusCancelled
@@ -125,7 +115,7 @@ func (o *Order) Cancel(reason string) error {
 
 func (o *Order) Ship(trackingNo, carrier string) error {
 	if o.Status != StatusPaid && o.Status != StatusPendingShipment {
-		return ErrInvalidOrderStatus
+		return code.ErrOrderInvalidStatus
 	}
 	now := time.Now().UTC()
 	o.Status = StatusShipped
@@ -137,7 +127,7 @@ func (o *Order) Ship(trackingNo, carrier string) error {
 
 func (o *Order) Complete() error {
 	if o.Status != StatusShipped {
-		return ErrInvalidOrderStatus
+		return code.ErrOrderInvalidStatus
 	}
 	now := time.Now().UTC()
 	o.Status = StatusCompleted

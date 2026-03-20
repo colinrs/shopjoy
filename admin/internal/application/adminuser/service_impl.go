@@ -2,10 +2,10 @@ package adminuser
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
@@ -37,7 +37,7 @@ func (s *service) RegisterTenantAdmin(ctx context.Context, req RegisterRequest) 
 		return nil, err
 	}
 	if exists {
-		return nil, adminuser.ErrDuplicateUser
+		return nil, code.ErrAdminDuplicateUser
 	}
 
 	// 创建管理员账号
@@ -81,19 +81,19 @@ func (s *service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 		if err != nil {
 			user, err = s.repo.FindByMobile(ctx, s.db, req.Account)
 			if err != nil {
-				return nil, adminuser.ErrUserNotFound
+				return nil, code.ErrAdminUserNotFound
 			}
 		}
 	}
 
 	// 检查状态
 	if !user.CanLogin() {
-		return nil, errors.New("account disabled or deleted")
+		return nil, code.ErrAdminAccountDisabled
 	}
 
 	// 验证密码
 	if !user.CheckPassword(req.Password) {
-		return nil, adminuser.ErrWrongPassword
+		return nil, code.ErrAdminWrongPassword
 	}
 
 	// 更新最后登录时间
@@ -144,7 +144,7 @@ func (s *service) UpdateProfile(ctx context.Context, req UpdateProfileRequest) (
 
 func (s *service) ChangePassword(ctx context.Context, req ChangePasswordRequest) error {
 	if req.NewPassword != req.ConfirmPassword {
-		return errors.New("passwords do not match")
+		return code.ErrAdminPasswordMismatch
 	}
 
 	user, err := s.repo.FindByID(ctx, s.db, req.UserID)
@@ -154,7 +154,7 @@ func (s *service) ChangePassword(ctx context.Context, req ChangePasswordRequest)
 
 	// 验证旧密码
 	if !user.CheckPassword(req.OldPassword) {
-		return adminuser.ErrWrongPassword
+		return code.ErrAdminWrongPassword
 	}
 
 	// 设置新密码
@@ -214,7 +214,7 @@ func (s *service) List(ctx context.Context, operatorID int64, req ListRequest) (
 
 func (s *service) Disable(ctx context.Context, operatorID, targetID int64) error {
 	if operatorID == targetID {
-		return adminuser.ErrCannotDeleteSelf
+		return code.ErrAdminCannotDeleteSelf
 	}
 
 	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
@@ -229,7 +229,7 @@ func (s *service) Disable(ctx context.Context, operatorID, targetID int64) error
 
 	// 权限检查
 	if !operator.CanManageTenant(target.TenantID) {
-		return errors.New("permission denied")
+		return code.ErrAdminPermissionDenied
 	}
 
 	if err := target.Disable(); err != nil {
@@ -252,7 +252,7 @@ func (s *service) Enable(ctx context.Context, operatorID, targetID int64) error 
 
 	// 权限检查
 	if !operator.CanManageTenant(target.TenantID) {
-		return errors.New("permission denied")
+		return code.ErrAdminPermissionDenied
 	}
 
 	if err := target.Enable(); err != nil {

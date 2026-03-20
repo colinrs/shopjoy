@@ -318,6 +318,50 @@ return nil, code.ErrParam
 code.NewErr(code.WithMsg("custom message"), code.WithHTTPCode(400))
 ```
 
+**Standard HTTP Error Codes:**
+
+For specific scenarios, use the predefined errors in `pkg/code/code.go` with correct HTTP status codes:
+
+| Scenario | Error | HTTP Code | Business Code |
+|----------|-------|-----------|---------------|
+| Token expired | `code.ErrTokenExpired` | 401 | 40101 |
+| Invalid token | `code.ErrTokenInvalid` | 401 | 40102 |
+| Unauthorized | `code.ErrUnauthorized` | 401 | 40100 |
+| Forbidden | `code.ErrForbidden` | 403 | 40300 |
+| Not found | `code.ErrNotFound` | 404 | 40400 |
+| Rate limited | `code.ErrTooManyRequests` | 429 | 42900 |
+| Internal error | `code.ErrInternalServer` | 500 | 50000 |
+| Service unavailable | `code.ErrServiceUnavailable` | 503 | 50300 |
+
+```go
+// Example: Return token expired error with correct HTTP status
+func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        token, err := jwt.Parse(tokenString, ...)
+        if err != nil {
+            // Returns 401 status code automatically
+            return nil, code.ErrTokenExpired
+        }
+        next(w, r)
+    }
+}
+
+// Example: Return rate limit error
+func RateLimitMiddleware() rest.Middleware {
+    return func(next http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            if isRateLimited(r) {
+                // Returns 429 status code automatically
+                return nil, code.ErrTooManyRequests
+            }
+            next(w, r)
+        }
+    }
+}
+```
+
+**IMPORTANT:** Always use `*code.Err` type for errors that need specific HTTP status codes. The `pkg/response/response.go` handler will automatically use the correct HTTP status from `Err.HTTPCode`.
+
 ### Error Handling (Vue)
 - Use try-catch for async operations
 - Display user-friendly error messages

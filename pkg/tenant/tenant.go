@@ -2,8 +2,8 @@ package tenant
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
@@ -62,13 +62,13 @@ func (t *Tenant) IsActive() bool {
 
 func (t *Tenant) Validate() error {
 	if !t.ID.IsValid() {
-		return shared.ErrInvalidTenantID
+		return code.ErrTenantInvalidID
 	}
 	if t.Name == "" {
-		return fmt.Errorf("tenant name is required")
+		return code.ErrTenantNameRequired
 	}
 	if t.Code == "" {
-		return fmt.Errorf("tenant code is required")
+		return code.ErrTenantCodeRequired
 	}
 	return nil
 }

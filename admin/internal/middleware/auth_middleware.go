@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/httpy"
 	"github.com/golang-jwt/jwt/v4"
@@ -27,14 +28,14 @@ func NewAuthMiddleware(jwtSecret string) rest.Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				httpy.ResultCtx(r, w, nil, &AuthError{Msg: "missing authorization header"})
+				httpy.ResultCtx(r, w, nil, code.ErrUnauthorized)
 				return
 			}
 
 			// Bearer token
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				httpy.ResultCtx(r, w, nil, &AuthError{Msg: "invalid authorization header format"})
+				httpy.ResultCtx(r, w, nil, code.ErrTokenInvalid)
 				return
 			}
 
@@ -46,7 +47,7 @@ func NewAuthMiddleware(jwtSecret string) rest.Middleware {
 			})
 
 			if err != nil || !token.Valid {
-				httpy.ResultCtx(r, w, nil, &AuthError{Msg: "invalid or expired token"})
+				httpy.ResultCtx(r, w, nil, code.ErrTokenExpired)
 				return
 			}
 
@@ -59,12 +60,4 @@ func NewAuthMiddleware(jwtSecret string) rest.Middleware {
 			next(w, r.WithContext(ctx))
 		}
 	}
-}
-
-type AuthError struct {
-	Msg string
-}
-
-func (e *AuthError) Error() string {
-	return e.Msg
 }

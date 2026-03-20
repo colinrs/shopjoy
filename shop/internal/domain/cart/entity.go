@@ -2,17 +2,11 @@ package cart
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrCartItemNotFound = errors.New("cart item not found")
-	ErrInvalidQuantity  = errors.New("invalid quantity")
-	ErrCartEmpty        = errors.New("cart is empty")
 )
 
 type Cart struct {
@@ -30,7 +24,7 @@ func (c *Cart) TableName() string {
 
 func (c *Cart) AddItem(productID, skuID int64, quantity int, price shared.Money, productName, skuName, image string) error {
 	if quantity <= 0 {
-		return ErrInvalidQuantity
+		return code.ErrCartInvalidQuantity
 	}
 
 	for i := range c.Items {
@@ -72,7 +66,7 @@ func (c *Cart) UpdateItem(skuID int64, quantity int) error {
 			return nil
 		}
 	}
-	return ErrCartItemNotFound
+	return code.ErrCartItemNotFound
 }
 
 func (c *Cart) RemoveItem(skuID int64) error {
@@ -83,7 +77,7 @@ func (c *Cart) RemoveItem(skuID int64) error {
 			return nil
 		}
 	}
-	return ErrCartItemNotFound
+	return code.ErrCartItemNotFound
 }
 
 func (c *Cart) Clear() {

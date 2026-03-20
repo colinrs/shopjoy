@@ -2,21 +2,12 @@ package coupon
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrCouponNotFound    = errors.New("coupon not found")
-	ErrCouponExpired     = errors.New("coupon expired")
-	ErrCouponUsedUp      = errors.New("coupon used up")
-	ErrCouponNotStarted  = errors.New("coupon not started")
-	ErrCouponAlreadyUsed = errors.New("coupon already used")
-	ErrInvalidCouponCode = errors.New("invalid coupon code")
 )
 
 type Status int
@@ -77,10 +68,10 @@ func (c *Coupon) IsActive() bool {
 
 func (c *Coupon) CanUse(userID int64, cartAmount shared.Money) error {
 	if !c.IsActive() {
-		return ErrCouponExpired
+		return code.ErrCouponExpired
 	}
 	if cartAmount.Amount < c.MinAmount {
-		return errors.New("cart amount below minimum")
+		return code.ErrCouponAmountBelowMin
 	}
 	return nil
 }
@@ -110,10 +101,10 @@ func (c *Coupon) CalculateDiscount(cartAmount shared.Money) shared.Money {
 
 func (c *Coupon) Use() error {
 	if !c.IsActive() {
-		return ErrCouponExpired
+		return code.ErrCouponExpired
 	}
 	if c.TotalCount > 0 && c.UsedCount >= c.TotalCount {
-		return ErrCouponUsedUp
+		return code.ErrCouponUsedUp
 	}
 	c.UsedCount++
 	return nil

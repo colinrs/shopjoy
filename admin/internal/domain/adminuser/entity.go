@@ -1,21 +1,11 @@
 package adminuser
 
 import (
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrInvalidEmail     = errors.New("invalid email format")
-	ErrInvalidPhone     = errors.New("invalid phone format")
-	ErrPasswordTooWeak  = errors.New("password too weak")
-	ErrUserNotFound     = errors.New("admin user not found")
-	ErrDuplicateUser    = errors.New("duplicate admin user")
-	ErrWrongPassword    = errors.New("wrong password")
-	ErrCannotDeleteSelf = errors.New("cannot delete yourself")
 )
 
 // Type 管理员类型
@@ -75,7 +65,7 @@ func (u *AdminUser) TableName() string {
 // SetPassword 设置密码（bcrypt加密）
 func (u *AdminUser) SetPassword(plainPassword string) error {
 	if len(plainPassword) < 6 {
-		return ErrPasswordTooWeak
+		return code.ErrAdminPasswordTooWeak
 	}
 	hashed, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -129,7 +119,7 @@ func (u *AdminUser) CanManageTenant(tenantID int64) bool {
 // Disable 禁用账号
 func (u *AdminUser) Disable() error {
 	if u.Status == StatusDeleted {
-		return errors.New("user already deleted")
+		return code.ErrAdminAlreadyDeleted
 	}
 	u.Status = StatusDisabled
 	return nil
@@ -138,7 +128,7 @@ func (u *AdminUser) Disable() error {
 // Enable 启用账号
 func (u *AdminUser) Enable() error {
 	if u.Status == StatusDeleted {
-		return errors.New("user already deleted")
+		return code.ErrAdminAlreadyDeleted
 	}
 	u.Status = StatusActive
 	return nil

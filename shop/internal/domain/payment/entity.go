@@ -2,20 +2,12 @@ package payment
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrPaymentNotFound = errors.New("payment not found")
-	ErrInvalidAmount   = errors.New("invalid payment amount")
-	ErrPaymentFailed   = errors.New("payment failed")
-	ErrAlreadyPaid     = errors.New("payment already completed")
-	ErrPaymentExpired  = errors.New("payment expired")
 )
 
 type Status int
@@ -65,13 +57,13 @@ func (p *Payment) IsExpired() bool {
 
 func (p *Payment) Pay(transactionID string) error {
 	if p.Status == StatusSuccess {
-		return ErrAlreadyPaid
+		return code.ErrPaymentAlreadyPaid
 	}
 	if p.Status == StatusFailed {
-		return ErrPaymentFailed
+		return code.ErrPaymentFailed
 	}
 	if p.IsExpired() {
-		return ErrPaymentExpired
+		return code.ErrPaymentExpired
 	}
 
 	now := time.Now().UTC()

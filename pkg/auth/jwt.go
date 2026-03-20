@@ -1,16 +1,11 @@
 package auth
 
 import (
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/golang-jwt/jwt/v4"
-)
-
-var (
-	ErrInvalidToken = errors.New("invalid token")
-	ErrTokenExpired = errors.New("token expired")
 )
 
 type Claims struct {
@@ -80,19 +75,19 @@ func (j *JWTManager) ParseToken(tokenString string) (*Claims, error) {
 	})
 
 	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) {
-			return nil, ErrTokenExpired
+		if err.Error() == "token is expired" {
+			return nil, code.ErrAuthTokenExpired
 		}
-		return nil, ErrInvalidToken
+		return nil, code.ErrAuthTokenInvalid
 	}
 
 	if !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, code.ErrAuthTokenInvalid
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, code.ErrAuthTokenInvalid
 	}
 
 	return claims, nil

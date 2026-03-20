@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,7 @@ func (r *AdminUserRepository) FindByID(ctx context.Context, db *gorm.DB, id int6
 	var user adminuser.AdminUser
 	err := db.WithContext(ctx).Where("id = ?", id).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, adminuser.ErrUserNotFound
+		return nil, code.ErrAdminUserNotFound
 	}
 	return &user, err
 }
@@ -39,7 +40,7 @@ func (r *AdminUserRepository) FindByEmail(ctx context.Context, db *gorm.DB, emai
 	var user adminuser.AdminUser
 	err := db.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, adminuser.ErrUserNotFound
+		return nil, code.ErrAdminUserNotFound
 	}
 	return &user, err
 }
@@ -48,7 +49,7 @@ func (r *AdminUserRepository) FindByUsername(ctx context.Context, db *gorm.DB, u
 	var user adminuser.AdminUser
 	err := db.WithContext(ctx).Where("username = ?", username).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, adminuser.ErrUserNotFound
+		return nil, code.ErrAdminUserNotFound
 	}
 	return &user, err
 }
@@ -57,7 +58,7 @@ func (r *AdminUserRepository) FindByMobile(ctx context.Context, db *gorm.DB, mob
 	var user adminuser.AdminUser
 	err := db.WithContext(ctx).Where("mobile = ?", mobile).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, adminuser.ErrUserNotFound
+		return nil, code.ErrAdminUserNotFound
 	}
 	return &user, err
 }

@@ -2,18 +2,10 @@ package product
 
 import (
 	"context"
-	"errors"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrCategoryNotFound  = errors.New("category not found")
-	ErrDuplicateCategory = errors.New("duplicate category")
-	ErrInvalidCategory   = errors.New("invalid category")
-	ErrHasChildren       = errors.New("category has children")
-	ErrHasProducts       = errors.New("category has products")
 )
 
 type CategoryStatus int
@@ -116,7 +108,7 @@ func (s *SKU) IsAvailable() bool {
 
 func (s *SKU) DeductStock(quantity int) error {
 	if s.Stock < quantity {
-		return ErrInsufficientStock
+		return code.ErrProductInsufficientStock
 	}
 	s.Stock -= quantity
 	return nil

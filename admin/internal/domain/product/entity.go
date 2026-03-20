@@ -4,9 +4,9 @@ package product
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
 
@@ -78,7 +78,7 @@ func NewMoney(amount int64, currency string) Money {
 // Add 金额相加
 func (m Money) Add(other Money) (Money, error) {
 	if m.Currency != other.Currency {
-		return Money{}, ErrCurrencyMismatch
+		return Money{}, code.ErrProductCurrencyMismatch
 	}
 	return NewMoney(m.Amount+other.Amount, m.Currency), nil
 }
@@ -86,10 +86,10 @@ func (m Money) Add(other Money) (Money, error) {
 // Subtract 金额相减
 func (m Money) Subtract(other Money) (Money, error) {
 	if m.Currency != other.Currency {
-		return Money{}, ErrCurrencyMismatch
+		return Money{}, code.ErrProductCurrencyMismatch
 	}
 	if m.Amount < other.Amount {
-		return Money{}, ErrInsufficientAmount
+		return Money{}, code.ErrProductInsufficientAmount
 	}
 	return NewMoney(m.Amount-other.Amount, m.Currency), nil
 }
@@ -121,13 +121,13 @@ func (p *Product) TableName() string {
 // NewProduct 创建新商品
 func NewProduct(id int64, name, description string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
-		return nil, ErrEmptyName
+		return nil, code.ErrProductEmptyName
 	}
 	if price.Amount <= 0 {
-		return nil, ErrInvalidPrice
+		return nil, code.ErrProductInvalidPrice
 	}
 	if id <= 0 {
-		return nil, errors.New("invalid product id")
+		return nil, code.ErrProductInvalidID
 	}
 
 	now := time.Now()
@@ -147,13 +147,13 @@ func NewProduct(id int64, name, description string, price Money, categoryID int6
 // PutOnSale 上架商品
 func (p *Product) PutOnSale() error {
 	if p.Status == StatusDeleted {
-		return ErrProductDeleted
+		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOnSale) {
-		return ErrInvalidStatusTransition
+		return code.ErrProductInvalidStatusTransition
 	}
 	if p.Stock <= 0 {
-		return ErrNoStock
+		return code.ErrProductNoStock
 	}
 	p.Status = StatusOnSale
 	p.UpdatedAt = time.Now()
@@ -163,10 +163,10 @@ func (p *Product) PutOnSale() error {
 // TakeOffSale 下架商品
 func (p *Product) TakeOffSale() error {
 	if p.Status == StatusDeleted {
-		return ErrProductDeleted
+		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOffSale) {
-		return ErrInvalidStatusTransition
+		return code.ErrProductInvalidStatusTransition
 	}
 	p.Status = StatusOffSale
 	p.UpdatedAt = time.Now()
@@ -176,10 +176,10 @@ func (p *Product) TakeOffSale() error {
 // UpdateStock 更新库存
 func (p *Product) UpdateStock(quantity int) error {
 	if p.Status == StatusDeleted {
-		return ErrProductDeleted
+		return code.ErrProductDeleted
 	}
 	if quantity < 0 {
-		return ErrNegativeStock
+		return code.ErrProductNegativeStock
 	}
 	p.Stock = quantity
 	p.UpdatedAt = time.Now()
@@ -189,13 +189,13 @@ func (p *Product) UpdateStock(quantity int) error {
 // DeductStock 扣减库存
 func (p *Product) DeductStock(quantity int) error {
 	if p.Status != StatusOnSale {
-		return ErrProductNotOnSale
+		return code.ErrProductNotOnSale
 	}
 	if quantity <= 0 {
-		return ErrInvalidQuantity
+		return code.ErrProductInvalidQuantity
 	}
 	if p.Stock < quantity {
-		return ErrInsufficientStock
+		return code.ErrProductInsufficientStock
 	}
 	p.Stock -= quantity
 	p.UpdatedAt = time.Now()
@@ -205,10 +205,10 @@ func (p *Product) DeductStock(quantity int) error {
 // UpdatePrice 更新价格
 func (p *Product) UpdatePrice(newPrice Money) error {
 	if p.Status == StatusDeleted {
-		return ErrProductDeleted
+		return code.ErrProductDeleted
 	}
 	if newPrice.Amount <= 0 {
-		return ErrInvalidPrice
+		return code.ErrProductInvalidPrice
 	}
 	p.Price = newPrice
 	p.UpdatedAt = time.Now()
@@ -218,7 +218,7 @@ func (p *Product) UpdatePrice(newPrice Money) error {
 // SoftDelete 软删除
 func (p *Product) SoftDelete() error {
 	if p.Status == StatusDeleted {
-		return ErrProductDeleted
+		return code.ErrProductDeleted
 	}
 	p.Status = StatusDeleted
 	p.UpdatedAt = time.Now()

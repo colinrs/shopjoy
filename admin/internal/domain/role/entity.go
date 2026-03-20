@@ -2,16 +2,9 @@ package role
 
 import (
 	"context"
-	"errors"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrRoleNotFound  = errors.New("role not found")
-	ErrDuplicateRole = errors.New("duplicate role")
-	ErrInvalidRole   = errors.New("invalid role")
 )
 
 type Status int

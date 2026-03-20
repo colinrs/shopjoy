@@ -2,18 +2,11 @@ package tenant
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrTenantNotFound  = errors.New("tenant not found")
-	ErrDuplicateTenant = errors.New("duplicate tenant")
-	ErrInvalidDomain   = errors.New("invalid domain")
-	ErrTenantInactive  = errors.New("tenant is inactive")
 )
 
 type Status int
@@ -71,7 +64,7 @@ func (t *Tenant) Activate() {
 
 func (t *Tenant) Suspend() error {
 	if t.Status == StatusExpired {
-		return errors.New("cannot suspend expired tenant")
+		return code.ErrTenantCannotSuspendExpired
 	}
 	t.Status = StatusSuspended
 	return nil
