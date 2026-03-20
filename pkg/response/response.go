@@ -30,7 +30,7 @@ func ErrHandle(ctx context.Context, err error) (int, any) {
 	default:
 		return code.UnknownErr.GetHTTPCode(), Response[any]{
 			Code:   code.UnknownErr.GetCode(),
-			Msg:    code.UnknownErr.Error(),
+			Msg:    err.Error(),
 			Data:   nil,
 			Errors: code.UnknownErr.GetErrors(),
 		}

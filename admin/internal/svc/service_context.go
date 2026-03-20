@@ -6,6 +6,7 @@ package svc
 import (
 	"time"
 
+	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
@@ -18,11 +19,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config         config.Config
-	DB             *gorm.DB
-	ProductService appProduct.Service
-	UserService    appUser.Service
-	JWTManager     *auth.JWTManager
+	Config           config.Config
+	DB               *gorm.DB
+	ProductService   appProduct.Service
+	UserService      appUser.Service
+	AdminUserService appAdminUser.Service
+	JWTManager       *auth.JWTManager
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -40,13 +42,17 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	userRepo := persistence.NewUserRepository()
 	userService := appUser.NewService(db, userRepo, idGen)
 
+	adminUserRepo := persistence.NewAdminUserRepository()
+	adminUserService := appAdminUser.NewService(adminUserRepo, db, c.JWT.Secret)
+
 	jwtManager := auth.NewJWTManager(c.JWT.Secret, time.Duration(c.JWT.AccessExpiry)*time.Second, time.Duration(c.JWT.RefreshExpiry)*time.Second)
 
 	return &ServiceContext{
-		Config:         c,
-		DB:             db,
-		ProductService: productService,
-		UserService:    userService,
-		JWTManager:     jwtManager,
+		Config:           c,
+		DB:               db,
+		ProductService:   productService,
+		UserService:      userService,
+		AdminUserService: adminUserService,
+		JWTManager:       jwtManager,
 	}
 }

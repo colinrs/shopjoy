@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/colinrs/shopjoy/pkg/response"
 	"github.com/colinrs/shopjoy/shop/internal/config"
 	"github.com/colinrs/shopjoy/shop/internal/handler"
 	"github.com/colinrs/shopjoy/shop/internal/svc"
+	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -25,7 +27,8 @@ func main() {
 	defer server.Stop()
 
 	handler.RegisterHandlers(server, ctx)
-
+	httpx.SetErrorHandlerCtx(response.ErrHandle)
+	httpx.SetOkHandler(response.OKHandle)
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }

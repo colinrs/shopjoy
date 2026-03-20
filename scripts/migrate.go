@@ -16,7 +16,7 @@ type Config struct {
 	MySQL infra.DBConfig
 }
 
-func main() {
+func main1() {
 	flag.Parse()
 
 	var c Config

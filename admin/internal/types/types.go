@@ -3,10 +3,41 @@
 
 package types
 
-type ChangePasswordRequest struct {
+type AdminChangePasswordRequest struct {
 	OldPassword     string `json:"old_password"`
 	NewPassword     string `json:"new_password" validate:"min=6"`
 	ConfirmPassword string `json:"confirm_password"`
+}
+
+type AdminLoginRequest struct {
+	Account  string `json:"account" validate:"required"` // 邮箱/用户名/手机号
+	Password string `json:"password" validate:"required"`
+	IP       string `json:"ip,optional"`
+}
+
+type AdminLoginResponse struct {
+	AccessToken  string        `json:"access_token"`
+	RefreshToken string        `json:"refresh_token"`
+	ExpiresIn    int64         `json:"expires_in"`
+	User         AdminUserInfo `json:"user"`
+}
+
+type AdminUserIDRequest struct {
+	ID int64 `path:"id"`
+}
+
+type AdminUserInfo struct {
+	ID        int64  `json:"id"`
+	TenantID  int64  `json:"tenant_id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Mobile    string `json:"mobile"`
+	RealName  string `json:"real_name"`
+	Avatar    string `json:"avatar"`
+	Type      int    `json:"type"`
+	TypeText  string `json:"type_text"`
+	Status    int    `json:"status"`
+	CreatedAt string `json:"created_at"`
 }
 
 type CreateProductReq struct {
@@ -40,6 +71,22 @@ type GetUserResponse struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type ListAdminUsersRequest struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Keyword  string `form:"keyword,optional"`
+	Type     int    `form:"type,optional"`      // 1=平台超管 2=商家管理员 3=商家子账号
+	Status   int    `form:"status,optional"`    // 1=正常 2=禁用
+	TenantID int64  `form:"tenant_id,optional"` // 平台超管可指定租户
+}
+
+type ListAdminUsersResponse struct {
+	List     []*AdminUserInfo `json:"list"`
+	Total    int64            `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
+}
+
 type ListProductReq struct {
 	Name       string `form:"name,optional"`
 	CategoryID int64  `form:"category_id,optional"`
@@ -71,18 +118,6 @@ type ListUsersResponse struct {
 	PageSize int                `json:"page_size"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
-type LoginResponse struct {
-	AccessToken  string   `json:"access_token"`
-	RefreshToken string   `json:"refresh_token"`
-	ExpiresIn    int64    `json:"expires_in"`
-	User         UserInfo `json:"user"`
-}
-
 type ProductDetailResp struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -101,26 +136,19 @@ type PutOnSaleReq struct {
 	ID int64 `path:"id"`
 }
 
-type RegisterRequest struct {
+type RegisterTenantAdminRequest struct {
 	Email    string `json:"email" validate:"required,email"`
-	Phone    string `json:"phone,optional"`
+	Mobile   string `json:"mobile,optional"`
+	RealName string `json:"real_name" validate:"required"`
 	Password string `json:"password" validate:"required,min=6"`
-	Name     string `json:"name" validate:"required"`
+	TenantID int64  `json:"tenant_id,optional"` // 默认为0，创建平台超管时使用
 }
 
-type RegisterResponse struct {
-	ID        int64  `json:"id"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
-}
-
-type Request struct {
-	Name string `path:"name,options=you|me"`
-}
-
-type Response struct {
-	Message string `json:"message"`
+type RegisterTenantAdminResponse struct {
+	AccessToken  string        `json:"access_token"`
+	RefreshToken string        `json:"refresh_token"`
+	ExpiresIn    int64         `json:"expires_in"`
+	User         AdminUserInfo `json:"user"`
 }
 
 type TakeOffSaleReq struct {
@@ -136,6 +164,14 @@ type UpdateProductReq struct {
 	CategoryID  int64  `json:"category_id"`
 }
 
+type UpdateProfileRequest struct {
+	UserID   int64  `json:"user_id"`
+	RealName string `json:"real_name,optional"`
+	Avatar   string `json:"avatar,optional"`
+	Mobile   string `json:"mobile,optional"`
+	Email    string `json:"email,optional"`
+}
+
 type UpdateStockReq struct {
 	ID       int64 `path:"id"`
 	Quantity int   `json:"quantity"`
@@ -145,11 +181,4 @@ type UpdateUserRequest struct {
 	ID     int64  `path:"id"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar,optional"`
-}
-
-type UserInfo struct {
-	ID     int64  `json:"id"`
-	Email  string `json:"email"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
 }

@@ -37,6 +37,12 @@ const router = createRouter({
           path: 'users',
           name: 'users',
           component: () => import('@/views/users/index.vue'),
+          meta: { title: '顾客管理' }
+        },
+        {
+          path: 'admin-users',
+          name: 'admin-users',
+          component: () => import('@/views/admin-users/index.vue'),
           meta: { title: '用户管理' }
         },
         {

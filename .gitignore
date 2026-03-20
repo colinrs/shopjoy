@@ -42,6 +42,7 @@ bin
 swagger
 vendor
 *.sh
+node_modules
 
 # Worktrees
 .worktrees/

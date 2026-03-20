@@ -1,20 +1,21 @@
 # SHOPJOY PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-03-17
-**Commit:** a9169e7
+**Generated:** 2026-03-18
+**Commit:** Latest
 **Branch:** main
 **Go Version:** 1.24.0
+**Node Version:** 18+
 
 ## OVERVIEW
 
-E-commerce platform with admin management and shop APIs. Built with go-zero microservices framework using DDD (Domain Driven Design) and repository pattern.
+E-commerce platform with admin management and shop APIs. Built with go-zero microservices framework using DDD (Domain Driven Design) and repository pattern. Includes two modern Vue3 frontend applications.
 
 ## STRUCTURE
 
 ```
 ./
-├── admin/              # Admin management API service
-├── shop/               # Shop/e-commerce API service
+├── admin/              # Admin management API service (go-zero)
+├── shop/               # Shop/e-commerce API service (go-zero)
 ├── pkg/                # Shared packages
 │   ├── cache/          # Cache abstraction (Redis, Ristretto)
 │   ├── client/         # Client utilities (etcd)
@@ -27,6 +28,36 @@ E-commerce platform with admin management and shop APIs. Built with go-zero micr
 │   ├── response/       # HTTP response handlers
 │   ├── snowflake/      # ID generation
 │   └── utils/          # General utilities
+├── shop-admin/         # Admin frontend (Vue3 + Element Plus)
+│   ├── src/
+│   │   ├── views/      # Page components
+│   │   │   ├── login/
+│   │   │   ├── dashboard/
+│   │   │   ├── products/
+│   │   │   ├── orders/
+│   │   │   ├── users/
+│   │   │   ├── promotions/
+│   │   │   └── shop/
+│   │   ├── layouts/    # Layout components
+│   │   ├── components/ # Shared components
+│   │   ├── stores/     # Pinia stores
+│   │   ├── api/        # API client
+│   │   └── router/     # Vue Router
+│   └── package.json
+├── joy/                # Shop frontend (Vue3 + Tailwind CSS)
+│   ├── src/
+│   │   ├── views/      # Page components
+│   │   │   ├── home/
+│   │   │   ├── login/
+│   │   │   ├── products/
+│   │   │   ├── cart/
+│   │   │   ├── checkout/
+│   │   │   ├── orders/
+│   │   │   └── user/
+│   │   ├── components/ # Shared components
+│   │   ├── stores/     # Pinia stores
+│   │   └── router/     # Vue Router
+│   └── package.json
 ├── go.mod              # Go module definition
 └── Makefile            # Build automation
 ```
@@ -62,9 +93,60 @@ cd shop && make build        # outputs bin/shop
 cd shop && ./bin/shop -f etc/shop-api.yaml
 ```
 
+### Frontend Development
+
+#### shop-admin (Admin Dashboard)
+```bash
+cd shop-admin
+
+# Install dependencies
+npm install
+
+# Start development server (port 3000)
+npm run dev
+
+# Build for production
+npm run build
+
+# Run linter
+npm run lint
+
+# Format code
+npm run format
+```
+
+**Key Dependencies:**
+- `vue@^3.4.0` - Vue framework
+- `element-plus@^2.5.0` - UI component library
+- `@element-plus/icons-vue@^2.3.0` - Icons
+- `echarts@^6.0.0` - Charts and data visualization
+- `vue-router@^4.2.0` - Routing
+- `pinia@^2.1.0` - State management
+
+#### joy (Shop Frontend)
+```bash
+cd joy
+
+# Install dependencies
+npm install
+
+# Start development server (port 3001)
+npm run dev
+
+# Build for production
+npm run build
+```
+
+**Key Dependencies:**
+- `vue@^3.4.0` - Vue framework
+- `vue-router@^4.2.0` - Routing
+- `pinia@^2.1.0` - State management
+- `@heroicons/vue` - Heroicons icon library
+- `tailwindcss` - CSS framework (via CDN)
+
 ### Testing
 ```bash
-# Run all tests
+# Backend tests
 go test ./...
 
 # Run specific test
@@ -77,6 +159,7 @@ go test -race ./...
 
 ### Linting
 ```bash
+# Backend
 # Install golangci-lint (if needed)
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
@@ -85,6 +168,9 @@ golangci-lint run --timeout=10m
 
 # Run on specific package
 golangci-lint run ./pkg/...
+
+# Frontend (shop-admin)
+cd shop-admin && npm run lint
 ```
 
 ### go-zero Code Generation
@@ -99,6 +185,17 @@ cd admin && make api
 # Or from root to regenerate all
 make api
 ```
+
+**What `make api` does:**
+1. Formats `.api` definition files (`goctl api format`)
+2. Generates Go code from API definitions (`goctl api go`)
+3. Auto-generates Swagger documentation
+
+**Auto-generated files (DO NOT edit manually):**
+- `internal/types/types.go` - Request/response types
+- `internal/handler/*.go` - HTTP handlers
+- `internal/handler/routes.go` - Route registration
+- `swagger/*.json` - Swagger API documentation
 
 **Why:** The Makefile ensures consistent code generation with proper flags and style settings.
 
@@ -125,13 +222,31 @@ goctl api plugin -plugin goctl-swagger="swagger -filename shop.json" -api ./desc
 - `internal/types/` - Request/response types (auto-generated)
 - `etc/*.yaml` - Service configuration files
 
+### Frontend Code Organization
+
+#### shop-admin (Element Plus)
+- `src/views/` - Page components (each folder = one page)
+- `src/layouts/` - Layout components (MainLayout)
+- `src/components/` - Shared reusable components
+- `src/stores/` - Pinia stores (user, app state)
+- `src/api/` - API client functions
+- `src/router/` - Route definitions
+
+#### joy (Tailwind CSS)
+- `src/views/` - Page components
+- `src/components/` - Shared components
+- `src/stores/` - Pinia stores
+- `src/router/` - Route definitions
+
 ### Naming
-- **Files**: `snake_case.go` for handlers, `camelCase.go` for logic
-- **Types**: PascalCase (e.g., `ShopLogic`, `ServiceContext`)
+- **Go Files**: `snake_case.go` for handlers, `camelCase.go` for logic
+- **Vue Files**: `PascalCase.vue` for components, `index.vue` for pages
+- **Go Types**: PascalCase (e.g., `ShopLogic`, `ServiceContext`)
+- **Vue Components**: PascalCase (e.g., `ProductCard.vue`)
 - **Interfaces**: Verb-like with `er` suffix where appropriate
 - **Private**: lowercase or underscore prefix
 
-### Error Handling
+### Error Handling (Go)
 - Use `pkg/code` error definitions
 - Custom `Err` struct with HTTP code, business code, message
 - Silent degradation for cache operations
@@ -145,7 +260,22 @@ return nil, code.ErrParam
 code.NewErr(code.WithMsg("custom message"), code.WithHTTPCode(400))
 ```
 
-### Imports Order
+### Error Handling (Vue)
+- Use try-catch for async operations
+- Display user-friendly error messages
+- Log errors to console in development
+
+```typescript
+// Good
+try {
+  await api.login(form)
+  router.push('/')
+} catch (error: any) {
+  ElMessage.error(error.message || '登录失败')
+}
+```
+
+### Imports Order (Go)
 ```go
 import (
     // Standard library
@@ -161,10 +291,29 @@ import (
 )
 ```
 
-### Context Usage
+### Imports Order (Vue)
+```typescript
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+// Third-party icons
+import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
+// Project internal
+import { useUserStore } from '@/stores/user'
+import { login } from '@/api/user'
+```
+
+### Context Usage (Go)
 - Always pass `context.Context` as first parameter
 - Use `logx.WithContext(ctx)` for logging
 - Extract trace info from context for external calls
+
+### Vue Best Practices
+- Use Composition API with `<script setup>`
+- Use `ref` for reactive state, `computed` for derived state
+- Use Pinia for global state management
+- Use Vue Router for navigation
+- Use component-based architecture
 
 ### API Definition (.api files)
 ```go
@@ -220,6 +369,35 @@ type Response {
 now := time.Now()  // Depends on server timezone
 ```
 
+### Frontend Styling Guidelines
+
+#### shop-admin (Element Plus)
+- Use Element Plus components for consistency
+- Use CSS variables for theming
+- Follow BEM naming convention for custom CSS
+- Use `scoped` styles in Vue components
+
+#### joy (Tailwind CSS)
+- Use Tailwind utility classes
+- Use responsive prefixes (sm:, md:, lg:)
+- Use hover:, focus: states
+- Use custom colors defined in design system
+- Primary: `#059669`, Secondary: `#10B981`, CTA: `#F97316`
+
+### Icon Usage
+- **shop-admin**: Use `@element-plus/icons-vue`
+- **joy**: Use `@heroicons/vue` (outline or solid variants)
+- NEVER use emojis as UI icons
+- Always use consistent icon sizing
+
+```vue
+<!-- shop-admin -->
+<el-icon><ShoppingCart /></el-icon>
+
+<!-- joy -->
+<ShoppingCartIcon class="w-6 h-6" />
+```
+
 ## WHERE TO LOOK
 
 | Task | Location | Notes |
@@ -234,15 +412,29 @@ now := time.Now()  // Depends on server timezone
 | Database | `pkg/infra/db.go` | GORM MySQL setup |
 | Redis | `pkg/infra/redis.go` | go-redis client |
 | HTTP responses | `pkg/response/` | Standard response format |
+| **Frontend: shop-admin** | `shop-admin/src/views/` | Admin page components |
+| **Frontend: joy** | `joy/src/views/` | Shop page components |
+| **Frontend layouts** | `*/src/layouts/` | Layout components |
+| **Frontend stores** | `*/src/stores/` | Pinia state management |
+| **Frontend API** | `*/src/api/` | API client functions |
 
 ## ANTI-PATTERNS
 
+### Go Backend
 - **DO NOT** edit `internal/types/types.go` or `internal/handler/routes.go` - auto-generated
 - **DO NOT** hardcode cache keys - use `cache_key.go` utilities
 - **DO NOT** use cache as primary storage
 - **NEVER** ignore context cancellation in long operations
 - **AVOID** blocking calls without timeout in handlers
 - **NEVER** modify goctl-scaffolded files that have "Safe to edit" comments outside logic blocks
+
+### Frontend
+- **DO NOT** mix Tailwind and Element Plus in the same project
+- **DO NOT** use inline styles - use Tailwind classes or scoped CSS
+- **DO NOT** hardcode colors - use theme variables
+- **AVOID** deeply nested component hierarchies
+- **NEVER** ignore TypeScript errors
+- **AVOID** using `any` type - use proper types/interfaces
 
 ## DDD ARCHITECTURE
 
@@ -309,6 +501,7 @@ Repository Implementation (Infrastructure Layer)
 
 ## FRAMEWORK NOTES
 
+### Backend
 - **go-zero**: Microservices framework with API code generation
 - **goctl**: CLI tool for generating boilerplate from .api files
 - **GORM**: ORM for database operations
@@ -316,10 +509,40 @@ Repository Implementation (Infrastructure Layer)
 - **Ristretto**: In-memory cache library
 - **sonic**: High-performance JSON library (ByteDance)
 
+### Frontend
+- **Vue 3**: Progressive JavaScript framework
+- **Vite**: Next generation frontend tooling
+- **Element Plus**: Vue 3 based component library
+- **Tailwind CSS**: Utility-first CSS framework
+- **Pinia**: Vue Store, intuitive and type-safe
+- **Vue Router**: Official router for Vue.js
+- **Heroicons**: Beautiful hand-crafted SVG icons
+
+## DESIGN SYSTEM
+
+### Colors
+- **Primary**: `#059669` (emerald-600) - Success, primary actions
+- **Secondary**: `#10B981` (emerald-500) - Secondary actions
+- **CTA**: `#F97316` (orange-500) - Call to action, urgency
+- **Background**: `#ECFDF5` (emerald-50) - Light backgrounds
+- **Text**: `#064E3B` (emerald-900) - Primary text
+
+### Typography
+- **shop-admin**: Fira Code / Fira Sans (dashboard, data)
+- **joy**: Rubik / Nunito Sans (ecommerce, clean)
+
+### Common Rules
+- No emoji icons - use SVG icons only
+- cursor-pointer on all clickable elements
+- Hover states with smooth transitions (150-300ms)
+- Light mode: text contrast 4.5:1 minimum
+- Focus states visible for keyboard navigation
+- Responsive: 375px, 768px, 1024px, 1440px
+
 ## CHILD AGENTS
 
 - `pkg/cache/AGENTS.md` - Cache abstraction layer
 
 ---
 
-*Generated by init-deep for agentic coding assistance*
+*Generated for agentic coding assistance*

@@ -1,16 +1,13 @@
-import "product.api"
+syntax = "v1"
+
+import "auth.api"
+import "admin_user.api"
 import "user.api"
+import "product.api"
 
-type Request {
-	Name string `path:"name,options=you|me"`
-}
-
-type Response {
-	Message string `json:"message"`
-}
-
-service admin-api {
-	@handler AdminHandler
-	get /from/:name (Request) returns (Response)
-}
+info (
+	title:   "Admin API"
+	desc:    "管理后台 API 服务"
+	version: "v1"
+)
 

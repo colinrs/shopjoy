@@ -7,34 +7,6 @@ info (
 )
 
 type (
-	RegisterRequest {
-		Email    string `json:"email" validate:"required,email"`
-		Phone    string `json:"phone,optional"`
-		Password string `json:"password" validate:"required,min=6"`
-		Name     string `json:"name" validate:"required"`
-	}
-	RegisterResponse {
-		ID        int64  `json:"id"`
-		Email     string `json:"email"`
-		Name      string `json:"name"`
-		CreatedAt string `json:"created_at"`
-	}
-	LoginRequest {
-		Email    string `json:"email" validate:"required,email"`
-		Password string `json:"password" validate:"required"`
-	}
-	LoginResponse {
-		AccessToken  string   `json:"access_token"`
-		RefreshToken string   `json:"refresh_token"`
-		ExpiresIn    int64    `json:"expires_in"`
-		User         UserInfo `json:"user"`
-	}
-	UserInfo {
-		ID     int64  `json:"id"`
-		Email  string `json:"email"`
-		Name   string `json:"name"`
-		Avatar string `json:"avatar"`
-	}
 	GetUserRequest {
 		ID int64 `path:"id"`
 	}
@@ -64,30 +36,22 @@ type (
 		Name   string `json:"name"`
 		Avatar string `json:"avatar,optional"`
 	}
-	ChangePasswordRequest {
-		OldPassword     string `json:"old_password"`
-		NewPassword     string `json:"new_password" validate:"min=6"`
-		ConfirmPassword string `json:"confirm_password"`
-	}
 )
 
+@server (
+	group: users
+)
 service admin-api {
-	@handler RegisterHandler
-	post /users/register (RegisterRequest) returns (RegisterResponse)
-
-	@handler LoginHandler
-	post /users/login (LoginRequest) returns (LoginResponse)
-
+	@doc "获取用户详情"
 	@handler GetUserHandler
-	get /users/:id (GetUserRequest) returns (GetUserResponse)
+	get /api/v1/users/:id (GetUserRequest) returns (GetUserResponse)
 
+	@doc "获取用户列表"
 	@handler ListUsersHandler
-	get /users (ListUsersRequest) returns (ListUsersResponse)
+	get /api/v1/users (ListUsersRequest) returns (ListUsersResponse)
 
+	@doc "更新用户信息"
 	@handler UpdateUserHandler
-	put /users/:id (UpdateUserRequest) returns (GetUserResponse)
-
-	@handler ChangePasswordHandler
-	put /users/password (ChangePasswordRequest)
+	put /api/v1/users/:id (UpdateUserRequest) returns (GetUserResponse)
 }
 

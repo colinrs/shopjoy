@@ -1,0 +1,50 @@
+syntax = "v1"
+
+import "admin_user.api"
+
+info (
+	title:   "Auth API"
+	desc:    "认证相关接口"
+	version: "v1"
+)
+
+type (
+	AdminLoginRequest {
+		Account  string `json:"account" validate:"required"` // 邮箱/用户名/手机号
+		Password string `json:"password" validate:"required"`
+		IP       string `json:"ip,optional"`
+	}
+	AdminLoginResponse {
+		AccessToken  string        `json:"access_token"`
+		RefreshToken string        `json:"refresh_token"`
+		ExpiresIn    int64         `json:"expires_in"`
+		User         AdminUserInfo `json:"user"`
+	}
+	RegisterTenantAdminRequest {
+		Email    string `json:"email" validate:"required,email"`
+		Mobile   string `json:"mobile,optional"`
+		RealName string `json:"real_name" validate:"required"`
+		Password string `json:"password" validate:"required,min=6"`
+		TenantID int64  `json:"tenant_id,optional"` // 默认为0，创建平台超管时使用
+	}
+	RegisterTenantAdminResponse {
+		AccessToken  string        `json:"access_token"`
+		RefreshToken string        `json:"refresh_token"`
+		ExpiresIn    int64         `json:"expires_in"`
+		User         AdminUserInfo `json:"user"`
+	}
+)
+
+@server (
+	group: auth
+)
+service admin-api {
+	@doc "管理员登录"
+	@handler AdminLoginHandler
+	post /api/v1/auth/login (AdminLoginRequest) returns (AdminLoginResponse)
+
+	@doc "注册租户管理员"
+	@handler RegisterTenantAdminHandler
+	post /api/v1/auth/register (RegisterTenantAdminRequest) returns (RegisterTenantAdminResponse)
+}
+

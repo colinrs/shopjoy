@@ -1,72 +1,194 @@
 <template>
   <div class="dashboard">
-    <el-row :gutter="20">
-      <el-col :span="6">
-        <el-card>
+    <!-- Stats Cards -->
+    <el-row :gutter="20" class="stats-row">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <div class="stat-card orders">
+          <div class="stat-icon">
+            <el-icon><ShoppingCart /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-label">今日订单</p>
+            <p class="stat-value">{{ stats.todayOrders }}</p>
+            <p class="stat-change positive">
+              <el-icon><ArrowUp />+12.5%</el-icon> 较昨日
+            </p>
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <div class="stat-card revenue">
+          <div class="stat-icon">
+            <el-icon><Money /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-label">今日销售额</p>
+            <p class="stat-value">¥{{ formatNumber(stats.todaySales) }}</p>
+            <p class="stat-change positive">
+              <el-icon><ArrowUp />+8.2%</el-icon> 较昨日
+            </p>
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <div class="stat-card products">
+          <div class="stat-icon">
+            <el-icon><Goods /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-label">商品总数</p>
+            <p class="stat-value">{{ stats.totalProducts }}</p>
+            <p class="stat-change">
+              <span class="neutral">持平</span> 较昨日
+            </p>
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <div class="stat-card users">
+          <div class="stat-icon">
+            <el-icon><User /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-label">用户总数</p>
+            <p class="stat-value">{{ stats.totalUsers }}</p>
+            <p class="stat-change positive">
+              <el-icon><ArrowUp />+23</el-icon> 新增用户
+            </p>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
+
+    <!-- Charts Row -->
+    <el-row :gutter="20" class="charts-row">
+      <el-col :xs="24" :lg="16">
+        <el-card class="chart-card">
           <template #header>
-            <span>今日订单</span>
+            <div class="card-header">
+              <span class="card-title">销售趋势</span>
+              <el-radio-group v-model="timeRange" size="small">
+                <el-radio-button label="week">本周</el-radio-button>
+                <el-radio-button label="month">本月</el-radio-button>
+                <el-radio-button label="year">全年</el-radio-button>
+              </el-radio-group>
+            </div>
           </template>
-          <div class="stat-value">{{ stats.todayOrders }}</div>
+          <div ref="salesChart" class="chart-container"></div>
         </el-card>
       </el-col>
-      <el-col :span="6">
-        <el-card>
+      <el-col :xs="24" :lg="8">
+        <el-card class="chart-card">
           <template #header>
-            <span>今日销售额</span>
+            <div class="card-header">
+              <span class="card-title">订单状态分布</span>
+            </div>
           </template>
-          <div class="stat-value">¥{{ stats.todaySales }}</div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card>
-          <template #header>
-            <span>商品总数</span>
-          </template>
-          <div class="stat-value">{{ stats.totalProducts }}</div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card>
-          <template #header>
-            <span>用户总数</span>
-          </template>
-          <div class="stat-value">{{ stats.totalUsers }}</div>
+          <div ref="orderChart" class="chart-container pie-chart"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" style="margin-top: 20px">
-      <el-col :span="12">
-        <el-card>
+    <!-- Tables Row -->
+    <el-row :gutter="20" class="tables-row">
+      <el-col :xs="24" :lg="12">
+        <el-card class="table-card">
           <template #header>
-            <span>最近订单</span>
+            <div class="card-header">
+              <span class="card-title">
+                <el-icon><Bell /></el-icon>
+                待处理订单
+              </span>
+              <el-button type="primary" link>查看全部</el-button>
+            </div>
           </template>
-          <el-table :data="recentOrders" style="width: 100%">
-            <el-table-column prop="order_no" label="订单号" />
-            <el-table-column prop="pay_amount" label="金额">
+          <el-table :data="pendingOrders" stripe style="width: 100%" v-loading="loading">
+            <el-table-column prop="order_no" label="订单号" min-width="120">
               <template #default="{ row }">
-                ¥{{ (row.pay_amount / 100).toFixed(2) }}
+                <span class="order-no">{{ row.order_no }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态">
+            <el-table-column prop="pay_amount" label="金额" width="100">
               <template #default="{ row }">
-                <el-tag :type="getOrderStatusType(row.status)">
+                <span class="amount">¥{{ (row.pay_amount / 100).toFixed(2) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="90">
+              <template #default="{ row }">
+                <el-tag :type="getOrderStatusType(row.status)" size="small">
                   {{ getOrderStatusText(row.status) }}
                 </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" align="center">
+              <template #default>
+                <el-button type="primary" link size="small">处理</el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-card>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :lg="12">
+        <el-card class="table-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">
+                <el-icon><TrendCharts /></el-icon>
+                热销商品 TOP5
+              </span>
+              <el-button type="primary" link>查看全部</el-button>
+            </div>
+          </template>
+          <el-table :data="hotProducts" stripe style="width: 100%" v-loading="loading">
+            <el-table-column type="index" label="排名" width="60" align="center">
+              <template #default="{ $index }">
+                <div class="rank" :class="{ 'top3': $index < 3 }">
+                  {{ $index + 1 }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="name" label="商品名称" min-width="150">
+              <template #default="{ row }">
+                <div class="product-name">
+                  <el-avatar :size="32" :src="row.image" shape="square" class="product-avatar">
+                    <el-icon><Goods /></el-icon>
+                  </el-avatar>
+                  <span>{{ row.name }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="sales" label="销量" width="100" align="right">
+              <template #default="{ row }">
+                <span class="sales-num">{{ row.sales }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- Activity Row -->
+    <el-row :gutter="20" class="activity-row">
+      <el-col :xs="24">
         <el-card>
           <template #header>
-            <span>热销商品</span>
+            <div class="card-header">
+              <span class="card-title">
+                <el-icon><Timer /></el-icon>
+                最近活动
+              </span>
+            </div>
           </template>
-          <el-table :data="hotProducts" style="width: 100%">
-            <el-table-column prop="name" label="商品名称" />
-            <el-table-column prop="sales" label="销量" />
-          </el-table>
+          <el-timeline>
+            <el-timeline-item
+              v-for="(activity, index) in recentActivities"
+              :key="index"
+              :type="activity.type"
+              :timestamp="activity.time"
+            >
+              {{ activity.content }}
+            </el-timeline-item>
+          </el-timeline>
         </el-card>
       </el-col>
     </el-row>
@@ -74,24 +196,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import * as echarts from 'echarts'
+import { 
+  ShoppingCart, Money, Goods, User, ArrowUp, 
+  Bell, TrendCharts, Timer 
+} from '@element-plus/icons-vue'
+
+const timeRange = ref('week')
+const loading = ref(false)
+const salesChart = ref<HTMLElement | null>(null)
+const orderChart = ref<HTMLElement | null>(null)
+let salesChartInstance: echarts.ECharts | null = null
+let orderChartInstance: echarts.ECharts | null = null
 
 const stats = ref({
-  todayOrders: 0,
-  todaySales: 0,
-  totalProducts: 0,
-  totalUsers: 0
+  todayOrders: 128,
+  todaySales: 15860,
+  totalProducts: 486,
+  totalUsers: 3256
 })
 
-const recentOrders = ref([])
-const hotProducts = ref([])
+const pendingOrders = ref([
+  { order_no: 'ORD20240318001', pay_amount: 29900, status: 1 },
+  { order_no: 'ORD20240318002', pay_amount: 15800, status: 2 },
+  { order_no: 'ORD20240318003', pay_amount: 8990, status: 1 },
+  { order_no: 'ORD20240318004', pay_amount: 45600, status: 2 },
+  { order_no: 'ORD20240318005', pay_amount: 12300, status: 1 }
+])
 
-onMounted(() => {
-  loadStats()
-})
+const hotProducts = ref([
+  { name: '无线蓝牙耳机 Pro', sales: 256, image: '' },
+  { name: '智能手表 Series 7', sales: 198, image: '' },
+  { name: '便携充电宝 20000mAh', sales: 167, image: '' },
+  { name: '机械键盘 RGB', sales: 134, image: '' },
+  { name: '4K 高清显示器', sales: 98, image: '' }
+])
 
-const loadStats = () => {
-  // TODO: Load from API
+const recentActivities = ref([
+  { content: '新订单 #ORD20240318010 已创建', time: '10分钟前', type: 'primary' },
+  { content: '用户 张三 完成了支付', time: '30分钟前', type: 'success' },
+  { content: '商品 "无线蓝牙耳机 Pro" 库存不足', time: '1小时前', type: 'warning' },
+  { content: '订单 #ORD20240318005 已发货', time: '2小时前', type: 'success' },
+  { content: '系统备份完成', time: '3小时前', type: 'info' }
+])
+
+const formatNumber = (num: number) => {
+  return num.toLocaleString()
 }
 
 const getOrderStatusType = (status: number) => {
@@ -117,13 +268,323 @@ const getOrderStatusText = (status: number) => {
   }
   return texts[status] || '未知'
 }
+
+const initSalesChart = () => {
+  if (!salesChart.value) return
+  
+  salesChartInstance = echarts.init(salesChart.value)
+  const option = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'cross' }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      axisLine: { lineStyle: { color: '#E5E7EB' } },
+      axisLabel: { color: '#6B7280' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: '#F3F4F6' } },
+      axisLabel: { color: '#6B7280' }
+    },
+    series: [
+      {
+        name: '销售额',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 8,
+        sampling: 'average',
+        itemStyle: { color: '#059669' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(5, 150, 105, 0.3)' },
+            { offset: 1, color: 'rgba(5, 150, 105, 0.01)' }
+          ])
+        },
+        data: [8200, 9320, 9010, 14340, 12900, 15300, 15860]
+      }
+    ]
+  }
+  salesChartInstance.setOption(option)
+}
+
+const initOrderChart = () => {
+  if (!orderChart.value) return
+  
+  orderChartInstance = echarts.init(orderChart.value)
+  const option = {
+    tooltip: {
+      trigger: 'item'
+    },
+    legend: {
+      bottom: '5%',
+      left: 'center'
+    },
+    series: [
+      {
+        name: '订单状态',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false,
+          position: 'center'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: { show: false },
+        data: [
+          { value: 1048, name: '已完成', itemStyle: { color: '#059669' } },
+          { value: 735, name: '待发货', itemStyle: { color: '#F59E0B' } },
+          { value: 580, name: '已发货', itemStyle: { color: '#3B82F6' } },
+          { value: 234, name: '待支付', itemStyle: { color: '#6B7280' } },
+          { value: 148, name: '已取消', itemStyle: { color: '#EF4444' } }
+        ]
+      }
+    ]
+  }
+  orderChartInstance.setOption(option)
+}
+
+const handleResize = () => {
+  salesChartInstance?.resize()
+  orderChartInstance?.resize()
+}
+
+onMounted(() => {
+  initSalesChart()
+  initOrderChart()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  salesChartInstance?.dispose()
+  orderChartInstance?.dispose()
+})
 </script>
 
 <style scoped>
+.dashboard {
+  padding: 0;
+}
+
+/* Stats Cards */
+.stats-row {
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.stat-card.orders .stat-icon {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: white;
+}
+
+.stat-card.revenue .stat-icon {
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  color: white;
+}
+
+.stat-card.products .stat-icon {
+  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+  color: white;
+}
+
+.stat-card.users .stat-icon {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
+  color: white;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 4px 0;
+}
+
 .stat-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #409EFF;
-  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.stat-change {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.stat-change.positive {
+  color: #059669;
+}
+
+.stat-change.negative {
+  color: #EF4444;
+}
+
+.stat-change .neutral {
+  color: #6B7280;
+}
+
+/* Charts */
+.charts-row {
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  height: 400px;
+}
+
+.chart-container {
+  height: 320px;
+  width: 100%;
+}
+
+.pie-chart {
+  height: 280px;
+}
+
+/* Tables */
+.tables-row {
+  margin-bottom: 20px;
+}
+
+.table-card {
+  height: 380px;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Table Styles */
+.order-no {
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  color: #059669;
+}
+
+.amount {
+  font-weight: 600;
+  color: #111827;
+}
+
+.rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #6B7280;
+  margin: 0 auto;
+}
+
+.rank.top3 {
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  color: white;
+}
+
+.product-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-avatar {
+  background: #F3F4F6;
+}
+
+.sales-num {
+  font-weight: 600;
+  color: #059669;
+}
+
+/* Timeline */
+:deep(.el-timeline-item__node) {
+  background-color: #059669;
+}
+
+:deep(.el-timeline-item__tail) {
+  border-left-color: #E5E7EB;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stat-card {
+    margin-bottom: 16px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
 }
 </style>

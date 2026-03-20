@@ -1,0 +1,78 @@
+syntax = "v1"
+
+info (
+	title:   "Admin User API"
+	desc:    "管理员用户管理接口"
+	version: "v1"
+)
+
+type (
+	AdminUserInfo {
+		ID        int64  `json:"id"`
+		TenantID  int64  `json:"tenant_id"`
+		Username  string `json:"username"`
+		Email     string `json:"email"`
+		Mobile    string `json:"mobile"`
+		RealName  string `json:"real_name"`
+		Avatar    string `json:"avatar"`
+		Type      int    `json:"type"`
+		TypeText  string `json:"type_text"`
+		Status    int    `json:"status"`
+		CreatedAt string `json:"created_at"`
+	}
+	ListAdminUsersRequest {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Keyword  string `form:"keyword,optional"`
+		Type     int    `form:"type,optional"` // 1=平台超管 2=商家管理员 3=商家子账号
+		Status   int    `form:"status,optional"` // 1=正常 2=禁用
+		TenantID int64  `form:"tenant_id,optional"` // 平台超管可指定租户
+	}
+	ListAdminUsersResponse {
+		List     []*AdminUserInfo `json:"list"`
+		Total    int64            `json:"total"`
+		Page     int              `json:"page"`
+		PageSize int              `json:"page_size"`
+	}
+	AdminUserIDRequest {
+		ID int64 `path:"id"`
+	}
+	UpdateProfileRequest {
+		UserID   int64  `json:"user_id"`
+		RealName string `json:"real_name,optional"`
+		Avatar   string `json:"avatar,optional"`
+		Mobile   string `json:"mobile,optional"`
+		Email    string `json:"email,optional"`
+	}
+	AdminChangePasswordRequest {
+		OldPassword     string `json:"old_password"`
+		NewPassword     string `json:"new_password" validate:"min=6"`
+		ConfirmPassword string `json:"confirm_password"`
+	}
+)
+
+@server (
+	group: admin_users
+)
+service admin-api {
+	@doc "获取管理员列表"
+	@handler ListAdminUsersHandler
+	get /api/v1/admin-users (ListAdminUsersRequest) returns (ListAdminUsersResponse)
+
+	@doc "禁用管理员"
+	@handler DisableAdminUserHandler
+	post /api/v1/admin-users/:id/disable (AdminUserIDRequest)
+
+	@doc "启用管理员"
+	@handler EnableAdminUserHandler
+	post /api/v1/admin-users/:id/enable (AdminUserIDRequest)
+
+	@doc "更新管理员资料"
+	@handler UpdateAdminProfileHandler
+	put /api/v1/admin-users/profile (UpdateProfileRequest) returns (AdminUserInfo)
+
+	@doc "修改管理员密码"
+	@handler ChangeAdminPasswordHandler
+	put /api/v1/admin-users/password (AdminChangePasswordRequest)
+}
+

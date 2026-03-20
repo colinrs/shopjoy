@@ -1,3 +1,11 @@
+syntax = "v1"
+
+info (
+	title:   "Product API"
+	desc:    "商品管理相关接口"
+	version: "v1"
+)
+
 type (
 	CreateProductReq {
 		Name        string `json:"name"`
@@ -61,6 +69,9 @@ type (
 	}
 )
 
+@server (
+	group: products
+)
 service admin-api {
 	@doc "创建商品"
 	@handler CreateProductHandler
