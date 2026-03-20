@@ -70,7 +70,8 @@ type (
 )
 
 @server (
-	group: products
+	group:      products
+	middleware: AuthMiddleware
 )
 service admin-api {
 	@doc "创建商品"

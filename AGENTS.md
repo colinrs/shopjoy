@@ -196,8 +196,66 @@ make api
 - `internal/handler/*.go` - HTTP handlers
 - `internal/handler/routes.go` - Route registration
 - `swagger/*.json` - Swagger API documentation
+- `internal/middleware/*_middleware.go` - Middleware scaffolds
 
 **Why:** The Makefile ensures consistent code generation with proper flags and style settings.
+
+### Middleware Configuration in API Files
+
+**IMPORTANT: Define middleware in `.api` files, NOT by editing `routes.go`.**
+
+go-zero supports middleware declaration directly in API definition files using the `middleware` keyword in `@server` block:
+
+```go
+// Example: admin/desc/admin_user.api
+@server (
+    group:      admin_users
+    middleware: AuthMiddleware  // Middleware name (must match scaffolded file)
+)
+service admin-api {
+    @doc "获取管理员列表"
+    @handler ListAdminUsersHandler
+    get /api/v1/admin-users (ListAdminUsersRequest) returns (ListAdminUsersResponse)
+}
+```
+
+**Workflow for adding middleware:**
+1. Add `middleware: YourMiddleware` in `@server` block of `.api` file
+2. Run `make api` to generate scaffold
+3. Implement logic in `internal/middleware/your_middleware.go`
+4. Add middleware field to `ServiceContext` in `internal/svc/service_context.go`
+
+**Example - Auth Middleware:**
+```go
+// internal/middleware/auth_middleware.go
+func NewAuthMiddleware(jwtSecret string) rest.Middleware {
+    secret := []byte(jwtSecret)
+    return func(next http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            // Validate JWT, set user context, etc.
+            next(w, r)
+        }
+    }
+}
+
+// internal/svc/service_context.go
+type ServiceContext struct {
+    AuthMiddleware rest.Middleware
+    // ...
+}
+
+func NewServiceContext(c config.Config) *ServiceContext {
+    return &ServiceContext{
+        AuthMiddleware: middleware.NewAuthMiddleware(c.JWT.Secret),
+        // ...
+    }
+}
+```
+
+**Key Points:**
+- Middleware must return `rest.Middleware` (function type)
+- Use `rest.WithMiddlewares()` in generated routes.go (auto-generated)
+- Routes without `middleware:` in `.api` will have no middleware applied
 
 ```bash
 # Install goctl (required for code generation)
@@ -422,6 +480,7 @@ now := time.Now()  // Depends on server timezone
 
 ### Go Backend
 - **DO NOT** edit `internal/types/types.go` or `internal/handler/routes.go` - auto-generated
+- **DO NOT** add middleware by editing `routes.go` - use `.api` files with `middleware:` directive instead
 - **DO NOT** hardcode cache keys - use `cache_key.go` utilities
 - **DO NOT** use cache as primary storage
 - **NEVER** ignore context cancellation in long operations

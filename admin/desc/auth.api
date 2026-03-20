@@ -4,7 +4,7 @@ import "admin_user.api"
 
 info (
 	title:   "Auth API"
-	desc:    "认证相关接口"
+	desc:    "认证相关接口（无需认证）"
 	version: "v1"
 )
 
@@ -35,6 +35,7 @@ type (
 	}
 )
 
+// auth 接口不需要认证中间件
 @server (
 	group: auth
 )

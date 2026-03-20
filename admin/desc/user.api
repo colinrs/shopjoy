@@ -39,7 +39,8 @@ type (
 )
 
 @server (
-	group: users
+	group:      users
+	middleware: AuthMiddleware
 )
 service admin-api {
 	@doc "获取用户详情"
