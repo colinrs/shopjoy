@@ -4,6 +4,162 @@
 **Status:** Draft
 **Scope:** Product management with multi-market support (Shopify Markets pattern)
 
+## Current Codebase Status
+
+### Backend (Go)
+
+**Implemented:**
+| Component | Status | Location |
+|-----------|--------|----------|
+| Market Entity | ✅ Done | `admin/internal/domain/market/entity.go` |
+| Market Repository | ✅ Done | `admin/internal/infrastructure/persistence/market_repository.go` |
+| Market API Handlers | ✅ Done | `admin/internal/handler/markets/` |
+| Market API Definition | ✅ Done | `admin/desc/market.api` |
+| Product Entity | ✅ Done (partial) | `admin/internal/domain/product/entity.go` |
+| Product Repository | ✅ Done (partial) | `admin/internal/infrastructure/persistence/product_repository.go` |
+| Product API Handlers | ✅ Done (basic) | `admin/internal/handler/products/` |
+| Product API Definition | ✅ Done (basic) | `admin/desc/product.api` |
+
+**Missing (to implement):**
+| Component | Description |
+|-----------|-------------|
+| ProductMarket Entity | Market-specific product data |
+| ProductMarket Repository | Persistence layer |
+| ProductMarket API | New endpoints |
+| ProductVariant Entity | Product variants/SKUs |
+| ProductVariant Repository | Persistence layer |
+| ProductVariant API | New endpoints |
+| ProductLocalization Entity | Translations |
+| ProductLocalization Repository | Persistence layer |
+| ProductLocalization API | New endpoints |
+| StockLog Entity | Inventory tracking |
+| StockLog Repository | Persistence layer |
+| StockLog API | New endpoints |
+
+**Existing Product Entity Fields:**
+The `Product` entity already includes compliance fields:
+```go
+// admin/internal/domain/product/entity.go
+type Product struct {
+    // ... existing fields ...
+    HSCode         string          // ✅ Exists
+    COO            string          // ✅ Exists (Country of Origin)
+    Weight         decimal.Decimal // ✅ Exists
+    WeightUnit     string          // ✅ Exists
+    Dimensions     Dimensions      // ✅ Exists
+    DangerousGoods []string        // ✅ Exists
+}
+```
+
+**API Gap:** The `.api` definition does not expose these fields. Need to extend DTOs.
+
+### Frontend (Vue 3)
+
+**Implemented:**
+| Page | Status | Location |
+|------|--------|----------|
+| Login | ✅ Done | `shop-admin/src/views/login/` |
+| Dashboard | ✅ Done (mock) | `shop-admin/src/views/dashboard/` |
+| Products List | ✅ Done (mock) | `shop-admin/src/views/products/` |
+| Orders | ✅ Done (mock) | `shop-admin/src/views/orders/` |
+| Users | ✅ Done (mock) | `shop-admin/src/views/users/` |
+| Admin Users | ✅ Done (mock) | `shop-admin/src/views/admin-users/` |
+| Promotions | ✅ Done (mock) | `shop-admin/src/views/promotions/` |
+| Shop Settings | ✅ Done (mock) | `shop-admin/src/views/shop/` |
+
+**Missing:**
+- Market Management page
+- Product Detail page (with 6 tabs)
+- API integration (currently using mock data)
+
+### API Extension Strategy
+
+**Principle:** Extend existing APIs without breaking changes.
+
+**Product API Changes (`admin/desc/product.api`):**
+
+1. **Extend CreateProductReq:**
+```go
+type CreateProductReq {
+    // Existing fields
+    Name        string `json:"name"`
+    Description string `json:"description,optional"`
+    Price       int64  `json:"price"`
+    Currency    string `json:"currency,optional"`
+    CostPrice   int64  `json:"cost_price,optional"`
+    CategoryID  int64  `json:"category_id"`
+
+    // New fields (all optional for backward compatibility)
+    SKU            string   `json:"sku,optional"`
+    Brand          string   `json:"brand,optional"`
+    Tags           []string `json:"tags,optional"`
+    Images         []string `json:"images,optional"`
+    IsMatrixProduct bool     `json:"is_matrix_product,optional"`
+
+    // Compliance fields
+    HSCode         string  `json:"hs_code,optional"`
+    COO            string  `json:"coo,optional"`           // Country of Origin
+    Weight         string  `json:"weight,optional"`        // decimal as string
+    WeightUnit     string  `json:"weight_unit,optional"`
+    Length         string  `json:"length,optional"`
+    Width          string  `json:"width,optional"`
+    Height         string  `json:"height,optional"`
+    DangerousGoods []string `json:"dangerous_goods,optional"`
+}
+```
+
+2. **Extend ListProductReq (add market filter):**
+```go
+type ListProductReq {
+    // Existing
+    Name       string `form:"name,optional"`
+    CategoryID int64  `form:"category_id,optional"`
+    Status     string `form:"status,optional"`
+    MinPrice   int64  `form:"min_price,optional"`
+    MaxPrice   int64  `form:"max_price,optional"`
+    Page       int    `form:"page,default=1"`
+    PageSize   int    `form:"page_size,default=20"`
+
+    // New
+    MarketID   int64  `form:"market_id,optional"`   // Filter by market
+}
+```
+
+3. **Extend ProductDetailResp:**
+```go
+type ProductDetailResp {
+    // Existing fields ...
+
+    // New fields
+    SKU            string   `json:"sku"`
+    Brand          string   `json:"brand"`
+    Tags           []string `json:"tags"`
+    Images         []string `json:"images"`
+    IsMatrixProduct bool     `json:"is_matrix_product"`
+
+    // Compliance
+    HSCode         string   `json:"hs_code"`
+    COO            string   `json:"coo"`
+    Weight         string   `json:"weight"`
+    WeightUnit     string   `json:"weight_unit"`
+    Length         string   `json:"length"`
+    Width          string   `json:"width"`
+    Height         string   `json:"height"`
+    DangerousGoods []string `json:"dangerous_goods"`
+
+    // Market info (for list view)
+    Markets        []ProductMarketInfo `json:"markets,optional"`
+}
+
+type ProductMarketInfo {
+    MarketID   int64  `json:"market_id"`
+    MarketCode string `json:"market_code"`
+    IsEnabled  bool   `json:"is_enabled"`
+    Price      string `json:"price"`
+    Currency   string `json:"currency"`
+}
+```
+
 ## Overview
 
 Design a cross-border product management system that allows sellers to manage products across multiple markets (US, UK, DE, FR, AU) with per-market pricing, visibility control, and localization support.
@@ -384,51 +540,267 @@ GET    /api/v1/products/:id/inventory/logs    # Stock logs
 ## Implementation Phases
 
 ### Phase 1: Core Infrastructure
-- Market entity and CRUD
-- Product entity updates (compliance fields)
-- ProductMarket entity
-- Basic API endpoints
+
+**Backend:**
+1. Extend `admin/desc/product.api`:
+   - Add compliance fields to CreateProductReq/UpdateProductReq
+   - Add compliance fields to ProductDetailResp
+   - Add market_id filter to ListProductReq
+
+2. Create ProductMarket domain entity (`admin/internal/domain/product/product_market.go`):
+   - Already exists, verify fields match design
+
+3. Create ProductMarket repository (`admin/internal/infrastructure/persistence/product_market_repository.go`):
+   - CRUD operations
+   - FindByProductID, FindByMarketID methods
+
+4. Create ProductMarket API definition (`admin/desc/product_market.api`):
+   - GET `/api/v1/products/:id/markets` - List product's market configs
+   - PUT `/api/v1/products/:id/markets/:market_id` - Update market config
+   - POST `/api/v1/products/:id/push-to-market` - Push to new markets
+   - DELETE `/api/v1/products/:id/markets/:market_id` - Remove from market
+
+5. Implement API handlers
+
+**Frontend:**
+1. Create API service (`shop-admin/src/api/market.ts`):
+   - getMarkets, createMarket, updateMarket, deleteMarket
+
+2. Create Market Management page (`shop-admin/src/views/settings/markets/`):
+   - Market list table
+   - Create/Edit dialog
+   - Tax configuration form
+
+3. Update product API service with compliance fields
+
+**Database:**
+- `product_markets` table already exists in SQL schema
+
+---
 
 ### Phase 2: Product Management
-- Product list with market filter
-- Product detail - Basic Info tab
-- Product detail - Markets tab
-- Push to Market flow
+
+**Backend:**
+1. Update product list handler:
+   - Support market_id filter
+   - Return market visibility info per product
+
+2. Create push-to-market handler:
+   - Batch create ProductMarket records
+   - Validate market exists and is active
+
+**Frontend:**
+1. Update Product List page:
+   - Add market filter bar (button group: 全部 | US | UK | DE | FR | AU)
+   - Add market visibility tags column
+   - Show price in selected market currency
+
+2. Create Product Detail page route (`/products/:id`):
+   - Implement tab navigation (6 tabs)
+   - Tab 1: Basic Info form with compliance fields
+
+3. Implement Markets Tab:
+   - Market enable/disable table
+   - Push to Market dialog
+
+**Push to Market Dialog:**
+- Target market checkboxes
+- Price input per market (manual entry, no auto FX)
+- Option to copy from existing market
+
+---
 
 ### Phase 3: Variants & Pricing
-- Variant management
-- Pricing tab
-- Per-market pricing
+
+**Backend:**
+1. Create ProductVariant entity (`admin/internal/domain/product/variant.go`)
+
+2. Create ProductVariant repository
+
+3. Create Variant API (`admin/desc/variant.api`):
+   - GET `/api/v1/products/:id/variants`
+   - POST `/api/v1/products/:id/variants`
+   - PUT `/api/v1/products/:id/variants/:vid`
+   - DELETE `/api/v1/products/:id/variants/:vid`
+
+4. Update ProductMarket to support variant-level pricing
+
+**Frontend:**
+1. Implement Variants Tab:
+   - Variant options configuration (Size, Color, etc.)
+   - Variants table with SKU, options, stock
+   - Generate variants from options
+
+2. Implement Pricing Tab:
+   - Market selector (button group)
+   - Price table per variant
+   - Compare at price
+   - Copy from market action
+
+---
 
 ### Phase 4: Localization
-- ProductLocalization entity
-- Localization tab
-- Language switching
+
+**Backend:**
+1. Create ProductLocalization entity
+
+2. Create ProductLocalization repository
+
+3. Create Localization API:
+   - GET `/api/v1/products/:id/localizations`
+   - PUT `/api/v1/products/:id/localizations/:lang`
+
+**Frontend:**
+1. Implement Localization Tab:
+   - Language selector (EN | DE | FR)
+   - Translation form (title, SEO, bullets, description)
+   - Copy from English action
+   - Completeness indicator
+
+---
 
 ### Phase 5: Inventory & Batch
-- Inventory management
-- Stock logs
-- Batch operations
+
+**Backend:**
+1. Create StockLog entity
+
+2. Create StockLog repository
+
+3. Create Inventory API:
+   - GET `/api/v1/products/:id/inventory`
+   - POST `/api/v1/products/:id/inventory/adjust`
+   - GET `/api/v1/products/:id/inventory/logs`
+
+4. Create Batch Operations API:
+   - POST `/api/v1/products/batch/push-to-markets`
+   - POST `/api/v1/products/batch/status`
+   - POST `/api/v1/products/batch/compliance`
+
+**Frontend:**
+1. Implement Inventory Tab:
+   - Stock summary
+   - Adjustment form
+   - Movement log table
+
+2. Implement Batch Actions:
+   - Push to Markets dialog (multi-select)
+   - Batch status change
+   - Batch compliance fill
+
+---
 
 ### Phase 6: Dashboard
-- Multi-market sales comparison
-- Compliance warnings
-- Performance by market
+
+**Backend:**
+1. Create Dashboard API:
+   - GET `/api/v1/dashboard/market-stats`
+   - GET `/api/v1/dashboard/compliance-warnings`
+
+**Frontend:**
+1. Update Dashboard page:
+   - Multi-market sales comparison chart
+   - Compliance warnings widget
+   - Top products by market
+
+---
+
+## File Structure (New Files)
+
+### Backend
+```
+admin/
+├── desc/
+│   ├── product.api          # Extended
+│   ├── product_market.api   # New
+│   ├── variant.api          # New
+│   ├── localization.api     # New
+│   └── inventory.api        # New
+├── internal/
+│   ├── domain/
+│   │   └── product/
+│   │       ├── entity.go            # Extended
+│   │       ├── product_market.go    # Exists
+│   │       ├── variant.go           # New
+│   │       └── localization.go      # New
+│   ├── infrastructure/
+│   │   └── persistence/
+│   │       ├── product_repository.go        # Extended
+│   │       ├── product_market_repository.go # Exists
+│   │       ├── variant_repository.go        # New
+│   │       ├── localization_repository.go   # New
+│   │       └── stock_log_repository.go      # New
+│   └── handler/
+│       ├── products/         # Extended
+│       ├── product_markets/  # New
+│       ├── variants/         # New
+│       └── inventory/        # New
+```
+
+### Frontend
+```
+shop-admin/src/
+├── api/
+│   ├── product.ts       # Extended
+│   ├── market.ts        # New
+│   ├── variant.ts       # New
+│   └── inventory.ts     # New
+├── views/
+│   ├── products/
+│   │   ├── index.vue          # Updated
+│   │   └── [id]/
+│   │       └── index.vue      # New (detail page)
+│   └── settings/
+│       └── markets/
+│           └── index.vue      # New
+└── utils/
+    └── types.ts        # Extended with new interfaces
+```
 
 ## Database Migration Required
 
-New tables:
-- `markets`
-- `product_markets`
-- `product_localizations`
-- `product_variants` (if not exists)
-- `stock_logs`
+### Existing Tables (SQL already created in `sql/` directory)
+| Table | Status | SQL File |
+|-------|--------|----------|
+| `markets` | ✅ Created | `sql/market.sql` |
+| `products` | ✅ Created | `sql/product.sql` |
+| `product_markets` | ✅ Created | `sql/product.sql` |
+| `skus` | ✅ Created | `sql/product.sql` |
 
-Modified tables:
-- `products` - Add compliance fields, is_matrix_product
+### New Tables Required
+| Table | Description | Phase |
+|-------|-------------|-------|
+| `product_variants` | Product variants (if different from skus) | Phase 3 |
+| `product_localizations` | Product translations | Phase 4 |
+| `stock_logs` | Inventory movement logs | Phase 5 |
+
+### SQL Files Location
+All SQL files are in: `/sql/` directory
+
+Run order:
+1. `tenant.sql`
+2. `admin_user.sql`
+3. `user.sql`
+4. `role.sql`
+5. `market.sql` ← Market table
+6. `product.sql` ← Products, SKUs, ProductMarkets
+7. `storefront.sql`
+8. `coupon.sql`
+9. `promotion.sql`
+10. `cart.sql`
+11. `order.sql`
+12. `payment.sql`
+13. `fulfillment.sql`
 
 ## Dependencies
 
+### Backend (Go)
 - `github.com/shopspring/decimal` for monetary calculations
 - GORM for database operations
-- Element Plus for admin UI components
+- go-zero framework
+
+### Frontend (Vue 3)
+- Element Plus for UI components
+- Vue Router for navigation
+- Pinia for state management
+- Axios for HTTP requests
+- ECharts for dashboard charts
