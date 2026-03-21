@@ -6,9 +6,9 @@ package product_markets
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -28,7 +28,13 @@ func NewRemoveFromMarketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *RemoveFromMarketLogic) RemoveFromMarket(req *types.RemoveFromMarketReq) error {
-	// todo: add your logic here and delete this line
+	db := l.svcCtx.DB
+	repo := persistence.NewProductMarketRepository()
 
-	return nil
+	pm, err := repo.FindByProductAndMarket(l.ctx, db, req.ProductID, req.MarketID, nil)
+	if err != nil {
+		return err
+	}
+
+	return repo.Delete(l.ctx, db, pm.ID)
 }
