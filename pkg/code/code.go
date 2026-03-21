@@ -145,4 +145,19 @@ var (
 	// ErrCacheNotFound ==================== Cache Module (140xxx) ====================
 	ErrCacheNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 140001, Msg: "not found"}
 	ErrCacheFromSource = &Err{HTTPCode: http.StatusInternalServerError, Code: 140002, Msg: "from source err"}
+
+	// ErrMarketNotFound ==================== Market Module (150xxx) ====================
+	ErrMarketNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 150001, Msg: "market not found"}
+	ErrMarketDuplicate        = &Err{HTTPCode: http.StatusConflict, Code: 150002, Msg: "duplicate market code"}
+	ErrMarketCodeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 150003, Msg: "market code is required"}
+	ErrMarketNameRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 150004, Msg: "market name is required"}
+	ErrMarketCurrencyRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 150005, Msg: "market currency is required"}
+	ErrMarketInactive         = &Err{HTTPCode: http.StatusBadRequest, Code: 150006, Msg: "market is inactive"}
+	ErrMarketAlreadyDefault   = &Err{HTTPCode: http.StatusBadRequest, Code: 150007, Msg: "market is already default"}
+	ErrMarketCannotDelete     = &Err{HTTPCode: http.StatusBadRequest, Code: 150008, Msg: "cannot delete default market"}
+
+	// ErrProductMarketNotFound ==================== ProductMarket Module (160xxx) ====================
+	ErrProductMarketNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 160001, Msg: "product market not found"}
+	ErrProductMarketAlreadyExists = &Err{HTTPCode: http.StatusConflict, Code: 160002, Msg: "product already in market"}
+	ErrProductMarketPriceRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 160003, Msg: "price is required for market"}
 )
