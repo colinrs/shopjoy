@@ -292,10 +292,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
 import { getProductList, pushToMarket, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
+
+const router = useRouter()
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -398,9 +401,7 @@ const handleAdd = () => {
 }
 
 const handleEdit = (row: any) => {
-  isEdit.value = true
-  Object.assign(productForm, { ...row })
-  dialogVisible.value = true
+  router.push(`/products/${row.id}`)
 }
 
 const handleView = (row: any) => {
