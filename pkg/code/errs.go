@@ -1,6 +1,8 @@
 package code
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Err struct {
 	HTTPCode int      `json:"http_code"`
@@ -27,6 +29,11 @@ func (e *Err) GetMsg() string {
 
 func (e *Err) WithErrors(items []*Error) {
 	e.Errors = append(e.Errors, items...)
+}
+
+func (e *Err) SetMsg(msg string) *Err {
+	e.Msg = msg
+	return e
 }
 
 func (e *Err) GetErrors() []*Error {
