@@ -77,10 +77,10 @@
           <template #default="{ row }">
             <div class="product-cell">
               <el-image
-                :src="row.image || defaultImage"
+                :src="row.images?.[0] || defaultImage"
                 fit="cover"
                 class="product-thumb"
-                :preview-src-list="[row.image]"
+                :preview-src-list="row.images"
               >
                 <template #error>
                   <div class="image-placeholder">
@@ -92,8 +92,8 @@
                 <p class="product-name">{{ row.name }}</p>
                 <p class="product-sku">SKU: {{ row.sku || '暂无' }}</p>
                 <div class="product-tags">
-                  <el-tag v-if="row.is_hot" size="small" type="danger" effect="plain">热销</el-tag>
-                  <el-tag v-if="row.is_new" size="small" type="success" effect="plain">新品</el-tag>
+                  <el-tag v-if="row.tags?.includes('hot')" size="small" type="danger" effect="plain">热销</el-tag>
+                  <el-tag v-if="row.tags?.includes('new')" size="small" type="success" effect="plain">新品</el-tag>
                 </div>
               </div>
             </div>
@@ -102,10 +102,7 @@
         <el-table-column label="价格" width="150" align="right">
           <template #default="{ row }">
             <div class="price-cell">
-              <p class="sale-price">¥{{ formatPrice(row.price) }}</p>
-              <p v-if="row.original_price" class="original-price">
-                ¥{{ formatPrice(row.original_price) }}
-              </p>
+              <p class="sale-price">{{ row.currency || 'USD' }}{{ formatPrice(row.price) }}</p>
             </div>
           </template>
         </el-table-column>
@@ -134,7 +131,11 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="category" label="分类" width="120" />
+        <el-table-column label="分类ID" width="100" align="center">
+          <template #default="{ row }">
+            {{ row.category_id || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-switch
@@ -145,7 +146,6 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="sales" label="销量" width="100" align="center" sortable />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
@@ -277,6 +277,7 @@
             :precision="2"
             style="width: 100%"
           />
+          <div class="price-note">Note: The price is in base currency (USD). It will be applied to all selected markets regardless of their local currency.</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -745,6 +746,13 @@ onMounted(() => {
 .no-markets {
   color: #9CA3AF;
   font-size: 12px;
+}
+
+.price-note {
+  font-size: 12px;
+  color: #F59E0B;
+  margin-top: 8px;
+  line-height: 1.4;
 }
 
 /* Pagination */
