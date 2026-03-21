@@ -5,6 +5,7 @@ import "admin_user.api"
 import "user.api"
 import "product.api"
 import "market.api"
+import "product_market.api"
 
 info (
 	title:   "Admin API"

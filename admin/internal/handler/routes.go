@@ -9,6 +9,7 @@ import (
 	admin_users "github.com/colinrs/shopjoy/admin/internal/handler/admin_users"
 	auth "github.com/colinrs/shopjoy/admin/internal/handler/auth"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
+	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -105,6 +106,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/api/v1/markets/:id",
 					Handler: markets.DeleteMarketHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取商品市场配置列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/products/:id/markets",
+					Handler: product_markets.ListProductMarketsHandler(serverCtx),
+				},
+				{
+					// 更新商品市场配置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/products/:id/markets/:market_id",
+					Handler: product_markets.UpdateProductMarketHandler(serverCtx),
+				},
+				{
+					// 从市场移除商品
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/products/:id/markets/:market_id",
+					Handler: product_markets.RemoveFromMarketHandler(serverCtx),
+				},
+				{
+					// 推送商品到市场
+					Method:  http.MethodPost,
+					Path:    "/api/v1/products/:id/push-to-market",
+					Handler: product_markets.PushToMarketHandler(serverCtx),
 				},
 			}...,
 		),
