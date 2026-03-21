@@ -235,9 +235,9 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 		dbQuery = dbQuery.Where("price <= ?", *query.MaxPrice)
 	}
 
-	// Filter by market - join with product_markets table
+	// Filter by market - use subquery to avoid duplicate rows from JOIN
 	if query.MarketID > 0 {
-		dbQuery = dbQuery.Joins("JOIN product_markets pm ON pm.product_id = products.id AND pm.market_id = ?", query.MarketID)
+		dbQuery = dbQuery.Where("id IN (SELECT DISTINCT product_id FROM product_markets WHERE market_id = ?)", query.MarketID)
 	}
 
 	var total int64
