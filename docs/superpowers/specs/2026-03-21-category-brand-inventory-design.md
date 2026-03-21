@@ -90,27 +90,27 @@ Categories are the skeleton structure for merchants to organize products, help b
 
 ```go
 type Category struct {
-    ID          int64          `gorm:"column:id;primaryKey"`
-    TenantID    int64          `gorm:"column:tenant_id;not null;index"`
-    ParentID    int64          `gorm:"column:parent_id;default:0;index"`  // 0 = root level
-    Name        string         `gorm:"column:name;type:varchar(100);not null"`
-    Code        string         `gorm:"column:code;type:varchar(50);uniqueIndex:idx_tenant_code"`
-    Level       int            `gorm:"column:level;not null;default:1"`   // 1, 2, 3... (soft limit: 3)
-    Sort        int            `gorm:"column:sort;default:0"`
-    Icon        string         `gorm:"column:icon;type:varchar(500)"`     // Icon URL
-    Image       string         `gorm:"column:image;type:varchar(500)"`    // Category image URL
+    ID          int64  `gorm:"column:id;primaryKey"`
+    TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+    ParentID    int64  `gorm:"column:parent_id;default:0;index"`  // 0 = root level
+    Name        string `gorm:"column:name;type:varchar(100);not null"`
+    Code        string `gorm:"column:code;type:varchar(50);uniqueIndex:idx_tenant_code"`
+    Level       int    `gorm:"column:level;not null;default:1"`   // 1, 2, 3... (soft limit: 3)
+    Sort        int    `gorm:"column:sort;default:0"`
+    Icon        string `gorm:"column:icon;type:varchar(500)"`     // Icon URL
+    Image       string `gorm:"column:image;type:varchar(500)"`    // Category image URL
 
     // SEO Fields
-    SeoTitle       string      `gorm:"column:seo_title;type:varchar(200)"`
-    SeoDescription string      `gorm:"column:seo_description;type:varchar(500)"`
+    SeoTitle       string `gorm:"column:seo_title;type:varchar(200)"`
+    SeoDescription string `gorm:"column:seo_description;type:varchar(500)"`
 
     // Status
-    Status       int8           `gorm:"column:status;not null;default:1"`  // 1=enabled, 0=disabled
+    Status       int8   `gorm:"column:status;not null;default:1"`  // 1=enabled, 0=disabled
 
-    // Audit
-    CreatedAt    time.Time      `gorm:"column:created_at;not null"`
-    UpdatedAt    time.Time      `gorm:"column:updated_at;not null"`
-    DeletedAt    gorm.DeletedAt `gorm:"column:deleted_at;index"`
+    // Unix timestamp fields (matching existing pattern)
+    CreatedAt    int64  `gorm:"column:created_at;not null"`
+    UpdatedAt    int64  `gorm:"column:updated_at;not null"`
+    DeletedAt    *int64 `gorm:"column:deleted_at;index"`
 }
 ```
 
@@ -118,15 +118,13 @@ type Category struct {
 
 ```go
 type CategoryMarket struct {
-    ID          int64     `gorm:"column:id;primaryKey"`
-    TenantID    int64     `gorm:"column:tenant_id;not null;index"`
-    CategoryID  int64     `gorm:"column:category_id;not null;index"`
-    MarketID    int64     `gorm:"column:market_id;not null;index"`
-    IsVisible   bool      `gorm:"column:is_visible;not null;default:true"`
-    CreatedAt   time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
-
-    // Unique constraint: (tenant_id, category_id, market_id)
+    ID          int64  `gorm:"column:id;primaryKey"`
+    TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+    CategoryID  int64  `gorm:"column:category_id;not null;index"`
+    MarketID    int64  `gorm:"column:market_id;not null;index"`
+    IsVisible   bool   `gorm:"column:is_visible;not null;default:true"`
+    CreatedAt   int64  `gorm:"column:created_at;not null"`
+    UpdatedAt   int64  `gorm:"column:updated_at;not null"`
 }
 ```
 
@@ -253,28 +251,28 @@ Brands enhance product trust, enable brand pages, SEO, and advertising. In cross
 
 ```go
 type Brand struct {
-    ID          int64          `gorm:"column:id;primaryKey"`
-    TenantID    int64          `gorm:"column:tenant_id;not null;index"`
-    Name        string         `gorm:"column:name;type:varchar(100);not null;uniqueIndex:idx_tenant_name"`
-    Logo        string         `gorm:"column:logo;type:varchar(500)"`
-    Description string         `gorm:"column:description;type:text"`
-    Website     string         `gorm:"column:website;type:varchar(500)"`
-    Sort        int            `gorm:"column:sort;default:0"`
+    ID          int64  `gorm:"column:id;primaryKey"`
+    TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+    Name        string `gorm:"column:name;type:varchar(100);not null;uniqueIndex:idx_tenant_name"`
+    Logo        string `gorm:"column:logo;type:varchar(500)"`
+    Description string `gorm:"column:description;type:text"`
+    Website     string `gorm:"column:website;type:varchar(500)"`
+    Sort        int    `gorm:"column:sort;default:0"`
 
     // Brand Page
-    EnablePage  bool           `gorm:"column:enable_page;default:false"`  // Enable brand page
+    EnablePage  bool   `gorm:"column:enable_page;default:false"`  // Enable brand page
 
     // Compliance (Cross-border)
-    TrademarkNumber  string   `gorm:"column:trademark_number;type:varchar(100)"`
-    TrademarkCountry string   `gorm:"column:trademark_country;type:varchar(10)"`  // ISO country code
+    TrademarkNumber  string `gorm:"column:trademark_number;type:varchar(100)"`
+    TrademarkCountry string `gorm:"column:trademark_country;type:varchar(10)"`  // ISO country code
 
     // Status
-    Status      int8           `gorm:"column:status;not null;default:1"`  // 1=enabled, 0=disabled
+    Status      int8   `gorm:"column:status;not null;default:1"`  // 1=enabled, 0=disabled
 
-    // Audit
-    CreatedAt   time.Time      `gorm:"column:created_at;not null"`
-    UpdatedAt   time.Time      `gorm:"column:updated_at;not null"`
-    DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;index"`
+    // Unix timestamp fields (matching existing pattern)
+    CreatedAt   int64  `gorm:"column:created_at;not null"`
+    UpdatedAt   int64  `gorm:"column:updated_at;not null"`
+    DeletedAt   *int64 `gorm:"column:deleted_at;index"`
 }
 ```
 
@@ -282,13 +280,13 @@ type Brand struct {
 
 ```go
 type BrandMarket struct {
-    ID          int64     `gorm:"column:id;primaryKey"`
-    TenantID    int64     `gorm:"column:tenant_id;not null;index"`
-    BrandID     int64     `gorm:"column:brand_id;not null;index"`
-    MarketID    int64     `gorm:"column:market_id;not null;index"`
-    IsVisible   bool      `gorm:"column:is_visible;not null;default:true"`
-    CreatedAt   time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
+    ID          int64  `gorm:"column:id;primaryKey"`
+    TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+    BrandID     int64  `gorm:"column:brand_id;not null;index"`
+    MarketID    int64  `gorm:"column:market_id;not null;index"`
+    IsVisible   bool   `gorm:"column:is_visible;not null;default:true"`
+    CreatedAt   int64  `gorm:"column:created_at;not null"`
+    UpdatedAt   int64  `gorm:"column:updated_at;not null"`
 }
 ```
 
@@ -400,18 +398,18 @@ Inventory management tracks product availability, prevents overselling, and supp
 | Available Stock | Real sellable inventory | Real-time |
 | Locked Stock | Ordered but unpaid/in-transit | Real-time |
 
-#### 3.2.2 Product-Level Inventory
+#### 3.2.2 Product-Level Inventory (Computed View)
+
+**Note:** Product inventory is computed from SKU inventories, not stored separately.
 
 ```go
+// ProductInventory is a read model (no corresponding database table)
+// Total stock = sum of all SKU inventories for the product
 type ProductInventory struct {
-    ID              int64     `gorm:"column:id;primaryKey"`
-    TenantID        int64     `gorm:"column:tenant_id;not null;index"`
-    ProductID       int64     `gorm:"column:product_id;not null;uniqueIndex:idx_product"`
-    AvailableStock  int       `gorm:"column:available_stock;not null;default:0"`
-    LockedStock     int       `gorm:"column:locked_stock;not null;default:0"`
-    TotalStock      int       `gorm:"column:total_stock;not null;default:0"`  // Computed: available + locked
-    CreatedAt       time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt       time.Time `gorm:"column:updated_at;not null"`
+    ProductID       int64 `gorm:"column:product_id"`
+    AvailableStock  int   `gorm:"column:available_stock"`  // SUM(sku.available_stock)
+    LockedStock     int   `gorm:"column:locked_stock"`     // SUM(sku.locked_stock)
+    TotalStock      int   `gorm:"column:total_stock"`      // available + locked
 }
 ```
 
@@ -421,28 +419,30 @@ type ProductInventory struct {
 
 ```go
 // Extend existing SKU entity with inventory fields
+// Note: Uses int64 for timestamps (Unix epoch) to match existing pattern
 type SKUInventory struct {
-    ID              int64     `gorm:"column:id;primaryKey"`
-    TenantID        int64     `gorm:"column:tenant_id;not null;index"`
-    ProductID       int64     `gorm:"column:product_id;not null;index"`
-    Code            string    `gorm:"column:code;not null;uniqueIndex"`  // Existing SKU code
+    ID              int64  `gorm:"column:id;primaryKey"`
+    TenantID        int64  `gorm:"column:tenant_id;not null;index"`
+    ProductID       int64  `gorm:"column:product_id;not null;index"`
+    Code            string `gorm:"column:code;not null;uniqueIndex"`  // Existing SKU code
 
     // Existing price fields
-    PriceAmount     int64     `gorm:"column:price_amount"`
-    PriceCurrency   string    `gorm:"column:price_currency"`
+    PriceAmount     int64  `gorm:"column:price_amount"`
+    PriceCurrency   string `gorm:"column:price_currency"`
 
     // Extended inventory fields (new)
-    AvailableStock  int       `gorm:"column:available_stock;not null;default:0"`
-    LockedStock     int       `gorm:"column:locked_stock;not null;default:0"`
-    SafetyStock     int       `gorm:"column:safety_stock;default:0"`
-    PreSaleEnabled  bool      `gorm:"column:presale_enabled;default:false"`
+    AvailableStock  int    `gorm:"column:available_stock;not null;default:0"`
+    LockedStock     int    `gorm:"column:locked_stock;not null;default:0"`
+    SafetyStock     int    `gorm:"column:safety_stock;default:0"`
+    PreSaleEnabled  bool   `gorm:"column:presale_enabled;default:false"`
 
     // Existing fields
-    Attributes      JSON      `gorm:"column:attributes;type:json"`
-    Status          int8      `gorm:"column:status;not null;default:1"`
+    Attributes      string `gorm:"column:attributes;type:json"`
+    Status          int8   `gorm:"column:status;not null;default:1"`
 
-    CreatedAt       time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt       time.Time `gorm:"column:updated_at;not null"`
+    // Unix timestamp fields (matching existing pattern)
+    CreatedAt       int64  `gorm:"column:created_at;not null"`
+    UpdatedAt       int64  `gorm:"column:updated_at;not null"`
 }
 ```
 
@@ -450,17 +450,17 @@ type SKUInventory struct {
 
 ```go
 type Warehouse struct {
-    ID          int64     `gorm:"column:id;primaryKey"`
-    TenantID    int64     `gorm:"column:tenant_id;not null;index"`
-    Code        string    `gorm:"column:code;type:varchar(50);not null;uniqueIndex:idx_tenant_code"`
-    Name        string    `gorm:"column:name;type:varchar(100);not null"`
-    Country     string    `gorm:"column:country;type:varchar(10)"`  // ISO country code
-    Address     string    `gorm:"column:address;type:varchar(500)"`
-    IsDefault   bool      `gorm:"column:is_default;default:false"`
-    Status      int8      `gorm:"column:status;not null;default:1"`  // 1=active, 0=inactive
-    CreatedAt   time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
-    DeletedAt   *time.Time `gorm:"column:deleted_at"`
+    ID          int64  `gorm:"column:id;primaryKey"`
+    TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+    Code        string `gorm:"column:code;type:varchar(50);not null;uniqueIndex:idx_tenant_code"`
+    Name        string `gorm:"column:name;type:varchar(100);not null"`
+    Country     string `gorm:"column:country;type:varchar(10)"`  // ISO country code
+    Address     string `gorm:"column:address;type:varchar(500)"`
+    IsDefault   bool   `gorm:"column:is_default;default:false"`
+    Status      int8   `gorm:"column:status;not null;default:1"`  // 1=active, 0=inactive
+    CreatedAt   int64  `gorm:"column:created_at;not null"`
+    UpdatedAt   int64  `gorm:"column:updated_at;not null"`
+    DeletedAt   *int64 `gorm:"column:deleted_at"`
 }
 ```
 
@@ -468,42 +468,40 @@ type Warehouse struct {
 
 ```go
 type WarehouseInventory struct {
-    ID              int64     `gorm:"column:id;primaryKey"`
-    TenantID        int64     `gorm:"column:tenant_id;not null;index"`
-    SKU             string    `gorm:"column:sku;not null;index"`
-    WarehouseID     int64     `gorm:"column:warehouse_id;not null;index"`
-    AvailableStock  int       `gorm:"column:available_stock;not null;default:0"`
-    LockedStock     int       `gorm:"column:locked_stock;not null;default:0"`
-    CreatedAt       time.Time `gorm:"column:created_at;not null"`
-    UpdatedAt       time.Time `gorm:"column:updated_at;not null"`
-
-    // Unique constraint: (tenant_id, sku, warehouse_id)
+    ID              int64  `gorm:"column:id;primaryKey"`
+    TenantID        int64  `gorm:"column:tenant_id;not null;index"`
+    SKUCode         string `gorm:"column:sku_code;not null;index"`  // SKU code (matches skus.code)
+    WarehouseID     int64  `gorm:"column:warehouse_id;not null;index"`
+    AvailableStock  int    `gorm:"column:available_stock;not null;default:0"`
+    LockedStock     int    `gorm:"column:locked_stock;not null;default:0"`
+    CreatedAt       int64  `gorm:"column:created_at;not null"`
+    UpdatedAt       int64  `gorm:"column:updated_at;not null"`
 }
 ```
 
-#### 3.2.5 Inventory Log
+#### 3.2.6 Inventory Log
 
 ```go
 type InventoryLog struct {
-    ID              int64     `gorm:"column:id;primaryKey"`
-    TenantID        int64     `gorm:"column:tenant_id;not null;index"`
-    SKU             string    `gorm:"column:sku;not null;index"`
-    ProductID       int64     `gorm:"column:product_id;not null;index"`
-    WarehouseID     int64     `gorm:"column:warehouse_id;default:0"`  // 0 = default/total
+    ID              int64  `gorm:"column:id;primaryKey"`
+    TenantID        int64  `gorm:"column:tenant_id;not null;index"`
+    SKUCode         string `gorm:"column:sku_code;not null;index"`  // SKU code
+    ProductID       int64  `gorm:"column:product_id;not null;index"`
+    WarehouseID     int64  `gorm:"column:warehouse_id;default:0"`  // 0 = default/total
 
     // Change details
-    ChangeType      string    `gorm:"column:change_type;type:varchar(30);not null"`  // manual, order, return, adjustment
-    ChangeQuantity  int       `gorm:"column:change_quantity;not null"`               // Positive = increase, negative = decrease
-    BeforeStock     int       `gorm:"column:before_stock;not null"`
-    AfterStock      int       `gorm:"column:after_stock;not null"`
+    ChangeType      string `gorm:"column:change_type;type:varchar(30);not null"`  // manual, order, return, adjustment
+    ChangeQuantity  int    `gorm:"column:change_quantity;not null"`               // Positive = increase, negative = decrease
+    BeforeStock     int    `gorm:"column:before_stock;not null"`
+    AfterStock      int    `gorm:"column:after_stock;not null"`
 
     // Reference
-    OrderNo         string    `gorm:"column:order_no;type:varchar(50)"`
-    Remark          string    `gorm:"column:remark;type:varchar(500)"`
+    OrderNo         string `gorm:"column:order_no;type:varchar(50)"`
+    Remark          string `gorm:"column:remark;type:varchar(500)"`
 
     // Audit
-    OperatorID      int64     `gorm:"column:operator_id;not null"`
-    CreatedAt       time.Time `gorm:"column:created_at;not null"`
+    OperatorID      int64  `gorm:"column:operator_id;not null"`
+    CreatedAt       int64  `gorm:"column:created_at;not null"`
 }
 ```
 
@@ -884,6 +882,32 @@ type InventoryService interface {
 
 ## 6. Migration Plan
 
+### Phase 0: Pre-Migration Validation
+
+**Before starting migration, run these validation queries:**
+
+```sql
+-- 1. Find products with no market assignment (will have tenant_id = 0)
+SELECT p.id, p.name, p.sku
+FROM products p
+LEFT JOIN product_markets pm ON p.id = pm.product_id
+WHERE pm.id IS NULL;
+
+-- 2. Find products with markets from different tenants (data integrity issue)
+SELECT p.id, p.name, COUNT(DISTINCT m.tenant_id) as tenant_count
+FROM products p
+JOIN product_markets pm ON p.id = pm.product_id
+JOIN markets m ON pm.market_id = m.id
+GROUP BY p.id
+HAVING COUNT(DISTINCT m.tenant_id) > 1;
+
+-- 3. Backup critical tables
+CREATE TABLE products_backup_20260321 AS SELECT * FROM products;
+CREATE TABLE skus_backup_20260321 AS SELECT * FROM skus;
+CREATE TABLE categories_backup_20260321 AS SELECT * FROM categories;
+CREATE TABLE brands_backup_20260321 AS SELECT * FROM brands;
+```
+
 ### Phase 1: Database Schema Updates
 1. Add `tenant_id` to `products` and `skus` tables
 2. Add SEO fields to `categories` table
@@ -891,6 +915,16 @@ type InventoryService interface {
 4. Add `brand_id` to `products` table
 5. Add inventory fields to `skus` table
 6. Create `category_markets`, `brand_markets`, `warehouses`, `warehouse_inventories`, `inventory_logs` tables
+
+**Rollback:**
+```sql
+-- If Phase 1 fails, drop new columns (data safe, columns are new)
+ALTER TABLE products DROP COLUMN tenant_id, DROP COLUMN brand_id;
+ALTER TABLE skus DROP COLUMN tenant_id, DROP COLUMN available_stock, DROP COLUMN locked_stock, DROP COLUMN safety_stock, DROP COLUMN presale_enabled;
+ALTER TABLE categories DROP COLUMN seo_title, DROP COLUMN seo_description;
+ALTER TABLE brands DROP COLUMN enable_page, DROP COLUMN trademark_number, DROP COLUMN trademark_country;
+DROP TABLE IF EXISTS category_markets, brand_markets, warehouses, warehouse_inventories, inventory_logs;
+```
 
 ### Phase 2: Data Migration
 1. Migrate `tenant_id` from markets to products/skus:
@@ -902,6 +936,17 @@ type InventoryService interface {
    - Update products to set `brand_id`
 3. Migrate `skus.stock` to `skus.available_stock`
 4. Migrate `products.stock` to be computed from SKU inventories
+
+**Rollback:**
+```sql
+-- If Phase 2 fails, restore from backup tables
+DROP TABLE products;
+RENAME TABLE products_backup_20260321 TO products;
+DROP TABLE skus;
+RENAME TABLE skus_backup_20260321 TO skus;
+-- Delete newly created brands
+DELETE FROM brands WHERE created_at > '2026-03-21';
+```
 
 ### Phase 3: Backend Implementation
 1. Implement Category domain, repository, service, handlers
