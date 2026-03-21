@@ -224,10 +224,11 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { 
-  ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop, 
-  TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown, 
-  Setting, SwitchButton, Box, CreditCard, Van, Picture 
+import Breadcrumb from '@/components/Breadcrumb.vue'
+import {
+  ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
+  TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
+  Setting, SwitchButton, Box, CreditCard, Van, Picture
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
