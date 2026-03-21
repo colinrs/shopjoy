@@ -88,6 +88,7 @@ type Repository interface {
 	Update(ctx context.Context, db *gorm.DB, market *Market) error
 	Delete(ctx context.Context, db *gorm.DB, id int64) error
 	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Market, error)
+	FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*Market, error)
 	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Market, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Market, error)
 	FindActive(ctx context.Context, db *gorm.DB) ([]*Market, error)

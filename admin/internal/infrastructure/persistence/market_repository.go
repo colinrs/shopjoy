@@ -111,6 +111,24 @@ func (r *marketRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*mark
 	return model.toEntity(), nil
 }
 
+func (r *marketRepo) FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*market.Market, error) {
+	if len(ids) == 0 {
+		return []*market.Market{}, nil
+	}
+
+	var models []marketModel
+	err := db.WithContext(ctx).Where("id IN ?", ids).Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	markets := make([]*market.Market, len(models))
+	for i, m := range models {
+		markets[i] = m.toEntity()
+	}
+	return markets, nil
+}
+
 func (r *marketRepo) FindByCode(ctx context.Context, db *gorm.DB, codeStr string) (*market.Market, error) {
 	var model marketModel
 	err := db.WithContext(ctx).Where("code = ?", codeStr).First(&model).Error

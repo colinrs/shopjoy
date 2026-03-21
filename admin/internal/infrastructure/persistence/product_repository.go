@@ -235,13 +235,18 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 		dbQuery = dbQuery.Where("price <= ?", *query.MaxPrice)
 	}
 
+	// Filter by market - join with product_markets table
+	if query.MarketID > 0 {
+		dbQuery = dbQuery.Joins("JOIN product_markets pm ON pm.product_id = products.id AND pm.market_id = ?", query.MarketID)
+	}
+
 	var total int64
 	if err := dbQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	var models []productModel
-	err := dbQuery.Order("created_at DESC").
+	err := dbQuery.Order("products.created_at DESC").
 		Offset(query.Offset()).
 		Limit(query.Limit()).
 		Find(&models).Error
