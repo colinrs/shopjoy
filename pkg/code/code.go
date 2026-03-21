@@ -160,4 +160,16 @@ var (
 	ErrProductMarketNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 160001, Msg: "product market not found"}
 	ErrProductMarketAlreadyExists = &Err{HTTPCode: http.StatusConflict, Code: 160002, Msg: "product already in market"}
 	ErrProductMarketPriceRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 160003, Msg: "price is required for market"}
+
+	// ErrInventoryInsufficientStock ==================== Inventory Module (170xxx) ====================
+	ErrInventoryInsufficientStock       = &Err{HTTPCode: http.StatusBadRequest, Code: 170001, Msg: "insufficient available stock"}
+	ErrInventoryInsufficientLockedStock = &Err{HTTPCode: http.StatusBadRequest, Code: 170002, Msg: "insufficient locked stock"}
+	ErrInventorySKUNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 170003, Msg: "sku not found"}
+	ErrInventoryWarehouseNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 170004, Msg: "warehouse not found"}
+	ErrInventoryDuplicateWarehouseCode  = &Err{HTTPCode: http.StatusConflict, Code: 170005, Msg: "duplicate warehouse code"}
+
+	// ErrBrandNotFound ==================== Brand Module (180xxx) ====================
+	ErrBrandNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 180001, Msg: "brand not found"}
+	ErrBrandDuplicate   = &Err{HTTPCode: http.StatusConflict, Code: 180002, Msg: "brand name already exists"}
+	ErrBrandHasProducts = &Err{HTTPCode: http.StatusBadRequest, Code: 180003, Msg: "brand has products"}
 )
