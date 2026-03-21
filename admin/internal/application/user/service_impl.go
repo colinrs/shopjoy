@@ -53,7 +53,8 @@ func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*Use
 
 	if req.Birthday != "" {
 		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
-			u.Birthday = &t
+			ut := shared.NewUnixTime(t)
+			u.Birthday = &ut
 		}
 	}
 
@@ -80,7 +81,8 @@ func (s *ServiceImpl) Update(ctx context.Context, req UpdateUserRequest) (*UserR
 
 	if req.Birthday != "" {
 		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
-			u.Birthday = &t
+			ut := shared.NewUnixTime(t)
+			u.Birthday = &ut
 		}
 	}
 

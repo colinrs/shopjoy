@@ -37,9 +37,9 @@ type User struct {
 	Name      string
 	Avatar    string
 	Gender    Gender
-	Birthday  *time.Time
+	Birthday  *shared.UnixTime
 	Status    Status
-	LastLogin *time.Time
+	LastLogin *shared.UnixTime
 	Audit     shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -69,7 +69,7 @@ func (u *User) CanLogin() bool {
 }
 
 func (u *User) UpdateLastLogin() {
-	now := time.Now().UTC()
+	now := shared.NewUnixTime(time.Now().UTC())
 	u.LastLogin = &now
 }
 

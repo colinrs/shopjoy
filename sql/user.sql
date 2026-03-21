@@ -33,15 +33,15 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 INSERT INTO `users` (`id`, `tenant_id`, `email`, `phone`, `password`, `name`, `avatar`, `gender`, `birthday`, `status`, `last_login`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Demo Shop 用户
-(1, 1, 'user1@example.com', '13800000001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '小明', 'https://cdn.example.com/u1.png', 1, UNIX_TIMESTAMP('1990-05-15'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(2, 1, 'user2@example.com', '13800000002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '小红', 'https://cdn.example.com/u2.png', 2, UNIX_TIMESTAMP('1995-08-20'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(3, 1, 'user3@example.com', '13800000003', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '小刚', 'https://cdn.example.com/u3.png', 1, UNIX_TIMESTAMP('1988-03-10'), 1, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(1, 1, 'user1@example.com', '13800000001', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小明', 'https://cdn.example.com/u1.png', 1, UNIX_TIMESTAMP('1990-05-15'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(2, 1, 'user2@example.com', '13800000002', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小红', 'https://cdn.example.com/u2.png', 2, UNIX_TIMESTAMP('1995-08-20'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(3, 1, 'user3@example.com', '13800000003', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小刚', 'https://cdn.example.com/u3.png', 1, UNIX_TIMESTAMP('1988-03-10'), 1, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
 
 -- Test Store 用户
-(4, 2, 'user4@example.com', '13800000004', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '大卫', 'https://cdn.example.com/u4.png', 1, UNIX_TIMESTAMP('1992-11-25'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(5, 2, 'user5@example.com', '13800000005', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '艾米', 'https://cdn.example.com/u5.png', 2, UNIX_TIMESTAMP('1998-01-05'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(4, 2, 'user4@example.com', '13800000004', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '大卫', 'https://cdn.example.com/u4.png', 1, UNIX_TIMESTAMP('1992-11-25'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(5, 2, 'user5@example.com', '13800000005', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '艾米', 'https://cdn.example.com/u5.png', 2, UNIX_TIMESTAMP('1998-01-05'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
 
 -- Enterprise Corp 用户
-(6, 3, 'user6@example.com', '13800000006', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '约翰', 'https://cdn.example.com/u6.png', 1, UNIX_TIMESTAMP('1985-07-12'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(7, 3, 'user7@example.com', '13800000007', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '玛丽', 'https://cdn.example.com/u7.png', 2, UNIX_TIMESTAMP('1993-04-30'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(8, 3, 'user8@example.com', '13800000008', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '汤姆', 'https://cdn.example.com/u8.png', 1, UNIX_TIMESTAMP('1990-09-18'), 2, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0);
+(6, 3, 'user6@example.com', '13800000006', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '约翰', 'https://cdn.example.com/u6.png', 1, UNIX_TIMESTAMP('1985-07-12'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(7, 3, 'user7@example.com', '13800000007', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '玛丽', 'https://cdn.example.com/u7.png', 2, UNIX_TIMESTAMP('1993-04-30'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(8, 3, 'user8@example.com', '13800000008', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '汤姆', 'https://cdn.example.com/u8.png', 1, UNIX_TIMESTAMP('1990-09-18'), 2, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0);

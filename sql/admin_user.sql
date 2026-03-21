@@ -31,21 +31,21 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 
 -- ============================================
 -- 测试数据
--- 密码均为: password123
+-- 密码均为: password123,$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy
 -- ============================================
 
 INSERT INTO `admin_users` (`id`, `tenant_id`, `username`, `email`, `mobile`, `password`, `real_name`, `avatar`, `type`, `status`, `last_login_at`, `last_login_ip`, `created_at`, `updated_at`) VALUES
 -- 平台超级管理员
-(1, 0, 'superadmin', 'superadmin@shopjoy.com', '13600000001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '超级管理员', 'https://cdn.example.com/avatar1.png', 1, 1, NOW(), '127.0.0.1', NOW(), NOW()),
+(1, 0, 'superadmin', 'superadmin@shopjoy.com', '13600000001', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '超级管理员', 'https://cdn.example.com/avatar1.png', 1, 1, NOW(), '127.0.0.1', NOW(), NOW()),
 
 -- Demo Shop 管理员
-(2, 1, 'demo_admin', 'admin@demoshop.com', '13600000002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', 'Demo管理员', 'https://cdn.example.com/avatar2.png', 2, 1, NOW(), '127.0.0.1', NOW(), NOW()),
-(3, 1, 'demo_sub1', 'sub1@demoshop.com', '13600000003', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', 'Demo子账号1', 'https://cdn.example.com/avatar3.png', 3, 1, NULL, '', NOW(), NOW()),
+(2, 1, 'demo_admin', 'admin@demoshop.com', '13600000002', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', 'Demo管理员', 'https://cdn.example.com/avatar2.png', 2, 1, NOW(), '127.0.0.1', NOW(), NOW()),
+(3, 1, 'demo_sub1', 'sub1@demoshop.com', '13600000003', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', 'Demo子账号1', 'https://cdn.example.com/avatar3.png', 3, 1, NULL, '', NOW(), NOW()),
 
 -- Test Store 管理员
-(4, 2, 'test_admin', 'admin@teststore.com', '13600000004', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', 'Test管理员', 'https://cdn.example.com/avatar4.png', 2, 1, NOW(), '192.168.1.100', NOW(), NOW()),
+(4, 2, 'test_admin', 'admin@teststore.com', '13600000004', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', 'Test管理员', 'https://cdn.example.com/avatar4.png', 2, 1, NOW(), '192.168.1.100', NOW(), NOW()),
 
 -- Enterprise Corp 管理员
-(5, 3, 'ent_admin', 'admin@enterprisecorp.com', '13600000005', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '企业管理员', 'https://cdn.example.com/avatar5.png', 2, 1, NOW(), '10.0.0.1', NOW(), NOW()),
-(6, 3, 'ent_sub1', 'sub1@enterprisecorp.com', '13600000006', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '企业子账号1', '', 3, 1, NULL, '', NOW(), NOW()),
-(7, 3, 'ent_sub2', 'sub2@enterprisecorp.com', '13600000007', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt8k0US', '企业子账号2', '', 3, 2, NULL, '', NOW(), NOW());
+(5, 3, 'ent_admin', 'admin@enterprisecorp.com', '13600000005', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '企业管理员', 'https://cdn.example.com/avatar5.png', 2, 1, NOW(), '10.0.0.1', NOW(), NOW()),
+(6, 3, 'ent_sub1', 'sub1@enterprisecorp.com', '13600000006', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '企业子账号1', '', 3, 1, NULL, '', NOW(), NOW()),
+(7, 3, 'ent_sub2', 'sub2@enterprisecorp.com', '13600000007', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '企业子账号2', '', 3, 2, NULL, '', NOW(), NOW());

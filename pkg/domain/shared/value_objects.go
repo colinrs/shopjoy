@@ -3,6 +3,7 @@
 package shared
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 )
@@ -202,4 +203,64 @@ func (t TimeRange) Contains(tm time.Time) bool {
 func (t TimeRange) IsActive() bool {
 	now := time.Now().UTC()
 	return t.Contains(now)
+}
+
+// ==================== Unix时间戳类型 ====================
+
+// UnixTime 存储为Unix时间戳的时间类型
+// 用于数据库中存储为BIGINT的时间字段
+type UnixTime struct {
+	time.Time
+}
+
+// NewUnixTime 从time.Time创建UnixTime
+func NewUnixTime(t time.Time) UnixTime {
+	return UnixTime{Time: t}
+}
+
+// NewUnixTimeFromInt64 从Unix时间戳创建UnixTime
+func NewUnixTimeFromInt64(ts int64) UnixTime {
+	return UnixTime{Time: time.Unix(ts, 0).UTC()}
+}
+
+// Scan 实现sql.Scanner接口，从数据库读取
+func (ut *UnixTime) Scan(value interface{}) error {
+	if value == nil {
+		ut.Time = time.Time{}
+		return nil
+	}
+	switch v := value.(type) {
+	case int64:
+		ut.Time = time.Unix(v, 0).UTC()
+		return nil
+	case float64:
+		ut.Time = time.Unix(int64(v), 0).UTC()
+		return nil
+	default:
+		return fmt.Errorf("cannot scan %T into UnixTime", value)
+	}
+}
+
+// Value 实现driver.Valuer接口，写入数据库
+func (ut UnixTime) Value() (driver.Value, error) {
+	if ut.Time.IsZero() {
+		return nil, nil
+	}
+	return ut.Time.Unix(), nil
+}
+
+// UnixTimePtr 将*UnixTime转为*time.Time的辅助函数
+func UnixTimePtr(t *time.Time) *UnixTime {
+	if t == nil {
+		return nil
+	}
+	return &UnixTime{Time: *t}
+}
+
+// TimePtr 将*UnixTime转为*time.Time的辅助函数
+func (ut *UnixTime) TimePtr() *time.Time {
+	if ut == nil || ut.Time.IsZero() {
+		return nil
+	}
+	return &ut.Time
 }

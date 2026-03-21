@@ -5,8 +5,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func testPassword() {
-	password := "admin123"
+func main() {
+	password := "password123"
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		fmt.Println("Error:", err)
