@@ -56,6 +56,12 @@ const router = createRouter({
           name: 'shop',
           component: () => import('@/views/shop/index.vue'),
           meta: { title: '店铺设置' }
+        },
+        {
+          path: 'settings/markets',
+          name: 'settings-markets',
+          component: () => import('@/views/settings/markets/index.vue'),
+          meta: { title: '市场管理' }
         }
       ]
     }
