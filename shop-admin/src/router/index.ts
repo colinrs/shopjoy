@@ -68,6 +68,24 @@ const router = createRouter({
           name: 'settings-markets',
           component: () => import('@/views/settings/markets/index.vue'),
           meta: { title: '市场管理' }
+        },
+        {
+          path: 'categories',
+          name: 'categories',
+          component: () => import('@/views/categories/index.vue'),
+          meta: { title: '分类管理' }
+        },
+        {
+          path: 'brands',
+          name: 'brands',
+          component: () => import('@/views/brands/index.vue'),
+          meta: { title: '品牌管理' }
+        },
+        {
+          path: 'inventory',
+          name: 'inventory',
+          component: () => import('@/views/inventory/index.vue'),
+          meta: { title: '库存管理' }
         }
       ]
     }

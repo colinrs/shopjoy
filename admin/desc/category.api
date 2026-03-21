@@ -1,0 +1,187 @@
+syntax = "v1"
+
+info (
+	title:   "Category API"
+	desc:    "分类管理相关接口"
+	version: "v1"
+)
+
+type (
+	// Create category request
+	CreateCategoryReq {
+		Name           string `json:"name"`
+		ParentID       int64  `json:"parent_id,optional"`
+		Code           string `json:"code,optional"`
+		Icon           string `json:"icon,optional"`
+		Image          string `json:"image,optional"`
+		SeoTitle       string `json:"seo_title,optional"`
+		SeoDescription string `json:"seo_description,optional"`
+		Sort           int    `json:"sort,optional"`
+	}
+	// Create category response
+	CreateCategoryResp {
+		ID int64 `json:"id"`
+	}
+	// Update category request
+	UpdateCategoryReq {
+		ID             int64  `path:"id"`
+		Name           string `json:"name"`
+		Code           string `json:"code,optional"`
+		Icon           string `json:"icon,optional"`
+		Image          string `json:"image,optional"`
+		SeoTitle       string `json:"seo_title,optional"`
+		SeoDescription string `json:"seo_description,optional"`
+		Sort           int    `json:"sort,optional"`
+	}
+	// Category detail response
+	CategoryDetailResp {
+		ID             int64  `json:"id"`
+		ParentID       int64  `json:"parent_id"`
+		Name           string `json:"name"`
+		Code           string `json:"code"`
+		Level          int    `json:"level"`
+		Sort           int    `json:"sort"`
+		Icon           string `json:"icon"`
+		Image          string `json:"image"`
+		SeoTitle       string `json:"seo_title"`
+		SeoDescription string `json:"seo_description"`
+		Status         int8   `json:"status"`
+		ProductCount   int64  `json:"product_count"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+	}
+	// Category tree response
+	CategoryTreeResp {
+		ID             int64               `json:"id"`
+		ParentID       int64               `json:"parent_id"`
+		Name           string              `json:"name"`
+		Code           string              `json:"code"`
+		Level          int                 `json:"level"`
+		Sort           int                 `json:"sort"`
+		Icon           string              `json:"icon"`
+		Image          string              `json:"image"`
+		SeoTitle       string              `json:"seo_title"`
+		SeoDescription string              `json:"seo_description"`
+		Status         int8                `json:"status"`
+		ProductCount   int64               `json:"product_count"`
+		CreatedAt      string              `json:"created_at"`
+		UpdatedAt      string              `json:"updated_at"`
+		Children       []*CategoryTreeResp `json:"children"`
+	}
+	// Get category request
+	GetCategoryReq {
+		ID int64 `path:"id"`
+	}
+	// List categories request
+	ListCategoryReq {
+		ParentID int64 `form:"parent_id,optional"`
+	}
+	// List categories response
+	ListCategoryResp {
+		List []*CategoryDetailResp `json:"list"`
+	}
+	// Category tree request
+	CategoryTreeReq  {}
+	// Update category status request
+	UpdateCategoryStatusReq {
+		ID     int64 `path:"id"`
+		Status int8  `json:"status"` // 0=disabled, 1=enabled
+	}
+	// Update category sort request
+	UpdateCategorySortReq {
+		Sorts []CategorySortItem `json:"sorts"`
+	}
+	// Category sort item
+	CategorySortItem {
+		ID   int64 `json:"id"`
+		Sort int   `json:"sort"`
+	}
+	// Move category request
+	MoveCategoryReq {
+		ID          int64 `path:"id"`
+		NewParentID int64 `json:"new_parent_id"`
+	}
+	// Get category product count request
+	GetCategoryProductCountReq {
+		ID int64 `path:"id"`
+	}
+	// Get category product count response
+	GetCategoryProductCountResp {
+		Count int64 `json:"count"`
+	}
+	// Set category market visibility request
+	SetCategoryMarketVisibilityReq {
+		CategoryID int64   `path:"id"`
+		MarketIDs  []int64 `json:"market_ids"`
+		Visible    bool    `json:"visible"`
+	}
+	// Get category market visibility request
+	GetCategoryMarketVisibilityReq {
+		CategoryID int64 `path:"id"`
+	}
+	// Category market visibility response
+	CategoryMarketVisibilityResp {
+		CategoryID int64                    `json:"category_id"`
+		Markets    []CategoryMarketItemResp `json:"markets"`
+	}
+	// Category market item response
+	CategoryMarketItemResp {
+		MarketID  int64 `json:"market_id"`
+		IsVisible bool  `json:"is_visible"`
+	}
+)
+
+@server (
+	group:      categories
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建分类"
+	@handler CreateCategoryHandler
+	post /api/v1/categories (CreateCategoryReq) returns (CreateCategoryResp)
+
+	@doc "更新分类"
+	@handler UpdateCategoryHandler
+	put /api/v1/categories/:id (UpdateCategoryReq) returns (CategoryDetailResp)
+
+	@doc "获取分类详情"
+	@handler GetCategoryHandler
+	get /api/v1/categories/:id (GetCategoryReq) returns (CategoryDetailResp)
+
+	@doc "获取分类列表"
+	@handler ListCategoriesHandler
+	get /api/v1/categories (ListCategoryReq) returns (ListCategoryResp)
+
+	@doc "获取分类树"
+	@handler GetCategoryTreeHandler
+	get /api/v1/categories/tree (CategoryTreeReq) returns ([]CategoryTreeResp)
+
+	@doc "更新分类状态"
+	@handler UpdateCategoryStatusHandler
+	put /api/v1/categories/:id/status (UpdateCategoryStatusReq) returns (CategoryDetailResp)
+
+	@doc "删除分类"
+	@handler DeleteCategoryHandler
+	delete /api/v1/categories/:id (GetCategoryReq) returns (CreateCategoryResp)
+
+	@doc "更新分类排序"
+	@handler UpdateCategorySortHandler
+	put /api/v1/categories/sort (UpdateCategorySortReq) returns (CreateCategoryResp)
+
+	@doc "移动分类"
+	@handler MoveCategoryHandler
+	put /api/v1/categories/:id/move (MoveCategoryReq) returns (CategoryDetailResp)
+
+	@doc "获取分类下商品数量"
+	@handler GetCategoryProductCountHandler
+	get /api/v1/categories/:id/product-count (GetCategoryProductCountReq) returns (GetCategoryProductCountResp)
+
+	@doc "设置分类市场可见性"
+	@handler SetCategoryMarketVisibilityHandler
+	put /api/v1/categories/:id/market-visibility (SetCategoryMarketVisibilityReq) returns (CreateCategoryResp)
+
+	@doc "获取分类市场可见性"
+	@handler GetCategoryMarketVisibilityHandler
+	get /api/v1/categories/:id/market-visibility (GetCategoryMarketVisibilityReq) returns (CategoryMarketVisibilityResp)
+}
+

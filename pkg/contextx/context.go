@@ -2,14 +2,17 @@ package contextx
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/colinrs/shopjoy/pkg/code"
 )
 
 type contextKey string
 
 const (
-	userIDKey    contextKey = "user_id"
-	tenantIDKey  contextKey = "tenant_id"
-	userTypeKey  contextKey = "user_type"
+	userIDKey   contextKey = "user_id"
+	tenantIDKey contextKey = "tenant_id"
+	userTypeKey contextKey = "user_type"
 )
 
 // SetUserID 设置用户ID到 context
@@ -50,3 +53,40 @@ func GetCurrentUserID(ctx context.Context) int64 {
 	userID, _ := GetUserID(ctx)
 	return userID
 }
+
+// MustGetTenantID 获取租户ID，如果不存在返回错误
+// 用于需要确保租户ID存在的场景
+func MustGetTenantID(ctx context.Context) (int64, error) {
+	tenantID, ok := GetTenantID(ctx)
+	if !ok || tenantID == 0 {
+		return 0, ErrTenantNotFound
+	}
+	return tenantID, nil
+}
+
+// MustGetUserID 获取用户ID，如果不存在返回错误
+func MustGetUserID(ctx context.Context) (int64, error) {
+	userID, ok := GetUserID(ctx)
+	if !ok || userID == 0 {
+		return 0, ErrUserNotFound
+	}
+	return userID, nil
+}
+
+// GetCurrentUserType 获取当前用户类型，如果不存在返回0
+func GetCurrentUserType(ctx context.Context) int {
+	userType, _ := GetUserType(ctx)
+	return userType
+}
+
+// IsPlatformAdmin 检查当前用户是否为平台管理员
+func IsPlatformAdmin(ctx context.Context) bool {
+	userType, ok := GetUserType(ctx)
+	return ok && userType == 1 // 1 = 平台超管
+}
+
+// Context errors using pkg/code
+var (
+	ErrTenantNotFound = &code.Err{HTTPCode: http.StatusBadRequest, Code: 90001, Msg: "tenant not found in context"}
+	ErrUserNotFound   = &code.Err{HTTPCode: http.StatusBadRequest, Code: 11004, Msg: "user not found in context"}
+)

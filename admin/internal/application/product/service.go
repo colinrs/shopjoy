@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
 )
 

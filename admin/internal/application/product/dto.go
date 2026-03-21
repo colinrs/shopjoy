@@ -94,17 +94,21 @@ func FromDomainProduct(p *product.Product) *ProductResponse {
 }
 
 // ParseStatus 解析状态字符串
-func ParseStatus(s string) product.Status {
+func ParseStatus(s string) *product.Status {
 	switch s {
 	case "draft":
-		return product.StatusDraft
+		status := product.StatusDraft
+		return &status
 	case "on_sale":
-		return product.StatusOnSale
+		status := product.StatusOnSale
+		return &status
 	case "off_sale":
-		return product.StatusOffSale
+		status := product.StatusOffSale
+		return &status
 	case "deleted":
-		return product.StatusDeleted
+		status := product.StatusDeleted
+		return &status
 	default:
-		return product.StatusDraft
+		return nil // 空字符串返回 nil，表示不过滤状态
 	}
 }

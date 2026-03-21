@@ -82,9 +82,34 @@ export const adminErrorCodeMap: Record<number, AdminErrorCodeConfig> = {
   100002: { message: '角色已存在', action: 'toast' },
   100003: { message: '角色无效', action: 'toast' },
 
+  // Market errors (150xxx)
+  150001: { message: '市场不存在', action: 'toast' },
+  150002: { message: '市场编码已存在', action: 'toast' },
+  150003: { message: '市场编码不能为空', action: 'toast' },
+  150004: { message: '市场名称不能为空', action: 'toast' },
+  150005: { message: '市场币种不能为空', action: 'toast' },
+  150006: { message: '市场已停用', action: 'toast' },
+  150007: { message: '该市场已是默认市场', action: 'toast' },
+  150008: { message: '不能删除默认市场', action: 'toast' },
+
+  // ProductMarket errors (160xxx)
+  160001: { message: '商品市场配置不存在', action: 'toast' },
+  160002: { message: '商品已在该市场中', action: 'toast' },
+  160003: { message: '市场价格不能为空', action: 'toast' },
+
+  // Inventory errors (170xxx)
+  170001: { message: '可用库存不足', action: 'toast' },
+  170002: { message: '锁定库存不足', action: 'toast' },
+  170003: { message: 'SKU不存在', action: 'toast' },
+  170004: { message: '仓库不存在', action: 'toast' },
+  170005: { message: '仓库编码已存在', action: 'toast' },
+
+  // Brand errors (180xxx)
+  180001: { message: '品牌不存在', action: 'toast' },
+  180002: { message: '品牌名称已存在', action: 'toast' },
+  180003: { message: '品牌下存在商品，无法删除', action: 'toast' },
+
   // Common errors
-  10003: { message: '参数有误', action: 'toast' },
-  10004: { message: '未知错误', action: 'toast' },
   20001: { message: '数据验证失败', action: 'toast' },
   20002: { message: '数据库错误', action: 'toast' },
   20003: { message: '业务已存在', action: 'toast' },

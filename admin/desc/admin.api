@@ -6,6 +6,9 @@ import "user.api"
 import "product.api"
 import "market.api"
 import "product_market.api"
+import "category.api"
+import "brand.api"
+import "inventory.api"
 
 info (
 	title:   "Admin API"

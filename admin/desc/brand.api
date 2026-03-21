@@ -1,0 +1,154 @@
+syntax = "v1"
+
+info (
+	title:   "Brand API"
+	desc:    "品牌管理相关接口"
+	version: "v1"
+)
+
+type (
+	// Create brand request
+	CreateBrandReq {
+		Name             string `json:"name"`
+		Logo             string `json:"logo,optional"`
+		Description      string `json:"description,optional"`
+		Website          string `json:"website,optional"`
+		TrademarkNumber  string `json:"trademark_number,optional"`
+		TrademarkCountry string `json:"trademark_country,optional"`
+		EnablePage       bool   `json:"enable_page,optional"`
+		Sort             int    `json:"sort,optional"`
+	}
+	// Create brand response
+	CreateBrandResp {
+		ID int64 `json:"id"`
+	}
+	// Update brand request
+	UpdateBrandReq {
+		ID               int64  `path:"id"`
+		Name             string `json:"name"`
+		Logo             string `json:"logo,optional"`
+		Description      string `json:"description,optional"`
+		Website          string `json:"website,optional"`
+		TrademarkNumber  string `json:"trademark_number,optional"`
+		TrademarkCountry string `json:"trademark_country,optional"`
+		EnablePage       bool   `json:"enable_page,optional"`
+		Sort             int    `json:"sort,optional"`
+	}
+	// Brand detail response
+	BrandDetailResp {
+		ID               int64  `json:"id"`
+		Name             string `json:"name"`
+		Logo             string `json:"logo"`
+		Description      string `json:"description"`
+		Website          string `json:"website"`
+		TrademarkNumber  string `json:"trademark_number"`
+		TrademarkCountry string `json:"trademark_country"`
+		EnablePage       bool   `json:"enable_page"`
+		Sort             int    `json:"sort"`
+		Status           int8   `json:"status"`
+		ProductCount     int64  `json:"product_count"`
+		CreatedAt        string `json:"created_at"`
+		UpdatedAt        string `json:"updated_at"`
+	}
+	// Get brand request
+	GetBrandReq {
+		ID int64 `path:"id"`
+	}
+	// List brands request
+	ListBrandReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Name     string `form:"name,optional"`
+		Status   int8   `form:"status,optional"`
+	}
+	// List brands response
+	ListBrandResp {
+		List  []BrandDetailResp `json:"list"`
+		Total int64             `json:"total"`
+	}
+	// Update brand status request
+	UpdateBrandStatusReq {
+		ID     int64 `path:"id"`
+		Status int8  `json:"status"` // 0=disabled, 1=enabled
+	}
+	// Toggle brand page request
+	ToggleBrandPageReq {
+		ID      int64 `path:"id"`
+		Enabled bool  `json:"enabled"`
+	}
+	// Get brand product count request
+	GetBrandProductCountReq {
+		ID int64 `path:"id"`
+	}
+	// Get brand product count response
+	GetBrandProductCountResp {
+		Count int64 `json:"count"`
+	}
+	// Set brand market visibility request
+	SetBrandMarketVisibilityReq {
+		BrandID   int64   `path:"id"`
+		MarketIDs []int64 `json:"market_ids"`
+		Visible   bool    `json:"visible"`
+	}
+	// Get brand market visibility request
+	GetBrandMarketVisibilityReq {
+		BrandID int64 `path:"id"`
+	}
+	// Brand market visibility response
+	BrandMarketVisibilityResp {
+		BrandID int64                 `json:"brand_id"`
+		Markets []BrandMarketItemResp `json:"markets"`
+	}
+	// Brand market item response
+	BrandMarketItemResp {
+		MarketID  int64 `json:"market_id"`
+		IsVisible bool  `json:"is_visible"`
+	}
+)
+
+@server (
+	group:      brands
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建品牌"
+	@handler CreateBrandHandler
+	post /api/v1/brands (CreateBrandReq) returns (CreateBrandResp)
+
+	@doc "更新品牌"
+	@handler UpdateBrandHandler
+	put /api/v1/brands/:id (UpdateBrandReq) returns (BrandDetailResp)
+
+	@doc "获取品牌详情"
+	@handler GetBrandHandler
+	get /api/v1/brands/:id (GetBrandReq) returns (BrandDetailResp)
+
+	@doc "获取品牌列表"
+	@handler ListBrandsHandler
+	get /api/v1/brands (ListBrandReq) returns (ListBrandResp)
+
+	@doc "更新品牌状态"
+	@handler UpdateBrandStatusHandler
+	put /api/v1/brands/:id/status (UpdateBrandStatusReq) returns (BrandDetailResp)
+
+	@doc "删除品牌"
+	@handler DeleteBrandHandler
+	delete /api/v1/brands/:id (GetBrandReq) returns (CreateBrandResp)
+
+	@doc "切换品牌专区"
+	@handler ToggleBrandPageHandler
+	put /api/v1/brands/:id/toggle-page (ToggleBrandPageReq) returns (BrandDetailResp)
+
+	@doc "获取品牌下商品数量"
+	@handler GetBrandProductCountHandler
+	get /api/v1/brands/:id/product-count (GetBrandProductCountReq) returns (GetBrandProductCountResp)
+
+	@doc "设置品牌市场可见性"
+	@handler SetBrandMarketVisibilityHandler
+	put /api/v1/brands/:id/market-visibility (SetBrandMarketVisibilityReq) returns (CreateBrandResp)
+
+	@doc "获取品牌市场可见性"
+	@handler GetBrandMarketVisibilityHandler
+	get /api/v1/brands/:id/market-visibility (GetBrandMarketVisibilityReq) returns (BrandMarketVisibilityResp)
+}
+

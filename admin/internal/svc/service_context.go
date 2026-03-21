@@ -23,21 +23,23 @@ import (
 )
 
 type ServiceContext struct {
-	Config               config.Config
-	DB                   *gorm.DB
-	ProductService       appProduct.Service
-	UserService          appUser.Service
-	AdminUserService     appAdminUser.Service
-	JWTManager           *auth.JWTManager
-	AuthMiddleware       rest.Middleware
-	ProductMarketRepo    product.ProductMarketRepository
-	MarketRepo           market.Repository
-	CategoryRepo         product.CategoryRepository
-	CategoryMarketRepo   product.CategoryMarketRepository
-	BrandRepo            product.BrandRepository
-	BrandMarketRepo      product.BrandMarketRepository
-	WarehouseRepo        product.WarehouseRepository
-	IDGen                snowflake.Snowflake
+	Config                 config.Config
+	DB                     *gorm.DB
+	ProductService         appProduct.Service
+	UserService            appUser.Service
+	AdminUserService       appAdminUser.Service
+	JWTManager             *auth.JWTManager
+	AuthMiddleware         rest.Middleware
+	ProductMarketRepo      product.ProductMarketRepository
+	MarketRepo             market.Repository
+	CategoryRepo           product.CategoryRepository
+	CategoryMarketRepo     product.CategoryMarketRepository
+	BrandRepo              product.BrandRepository
+	BrandMarketRepo        product.BrandMarketRepository
+	WarehouseRepo          product.WarehouseRepository
+	WarehouseInventoryRepo product.WarehouseInventoryRepository
+	InventoryLogRepo       product.InventoryLogRepository
+	IDGen                  snowflake.Snowflake
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -69,22 +71,26 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	brandRepo := persistence.NewBrandRepository()
 	brandMarketRepo := persistence.NewBrandMarketRepository()
 	warehouseRepo := persistence.NewWarehouseRepository()
+	warehouseInventoryRepo := persistence.NewWarehouseInventoryRepository()
+	inventoryLogRepo := persistence.NewInventoryLogRepository()
 
 	return &ServiceContext{
-		Config:             c,
-		DB:                 db,
-		ProductService:     productService,
-		UserService:        userService,
-		AdminUserService:   adminUserService,
-		JWTManager:         jwtManager,
-		AuthMiddleware:     authMiddleware,
-		ProductMarketRepo:  productMarketRepo,
-		MarketRepo:         marketRepo,
-		CategoryRepo:       categoryRepo,
-		CategoryMarketRepo: categoryMarketRepo,
-		BrandRepo:          brandRepo,
-		BrandMarketRepo:    brandMarketRepo,
-		WarehouseRepo:      warehouseRepo,
-		IDGen:              idGen,
+		Config:                 c,
+		DB:                     db,
+		ProductService:         productService,
+		UserService:            userService,
+		AdminUserService:       adminUserService,
+		JWTManager:             jwtManager,
+		AuthMiddleware:         authMiddleware,
+		ProductMarketRepo:      productMarketRepo,
+		MarketRepo:             marketRepo,
+		CategoryRepo:           categoryRepo,
+		CategoryMarketRepo:     categoryMarketRepo,
+		BrandRepo:              brandRepo,
+		BrandMarketRepo:        brandMarketRepo,
+		WarehouseRepo:          warehouseRepo,
+		WarehouseInventoryRepo: warehouseInventoryRepo,
+		InventoryLogRepo:       inventoryLogRepo,
+		IDGen:                  idGen,
 	}
 }

@@ -31,18 +31,21 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filterStatus" placeholder="商品状态" clearable class="filter-select">
+          <el-select v-model="filterStatus" placeholder="商品状态" clearable class="filter-select" @change="handleSearch">
             <el-option label="全部" value="" />
             <el-option label="在售" value="on_sale" />
             <el-option label="下架" value="off_sale" />
             <el-option label="草稿" value="draft" />
           </el-select>
-          <el-select v-model="filterCategory" placeholder="商品分类" clearable class="filter-select">
+          <el-select v-model="filterCategory" placeholder="商品分类" clearable class="filter-select" @change="handleSearch">
             <el-option label="数码电子" value="electronics" />
             <el-option label="服装配饰" value="clothing" />
             <el-option label="家居生活" value="home" />
             <el-option label="运动户外" value="sports" />
           </el-select>
+          <el-button type="primary" @click="handleSearch">
+            <el-icon><Search /></el-icon>查询
+          </el-button>
         </div>
         <div class="filter-right">
           <el-button @click="handleExport">
@@ -295,7 +298,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
-import { getProductList, pushToMarket, type Product, type ListProductsParams } from '@/api/product'
+import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
 
 const router = useRouter()
@@ -432,21 +435,50 @@ const handleDelete = (row: any) => {
   })
 }
 
-const handleStatusChange = (row: any, val: string) => {
+const handleStatusChange = async (row: Product, val: string) => {
   const statusText = val === 'on_sale' ? '上架' : '下架'
-  ElMessage.success(`商品已${statusText}`)
+  try {
+    if (val === 'on_sale') {
+      await putOnSale(row.id)
+    } else {
+      await takeOffSale(row.id)
+    }
+    ElMessage.success(`商品已${statusText}`)
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to update status:', error)
+    ElMessage.error(`商品${statusText}失败`)
+    // Revert the switch
+    row.status = val === 'on_sale' ? 'off_sale' : 'on_sale'
+  }
 }
 
 const handleSelectionChange = (selection: any[]) => {
   selectedProducts.value = selection
 }
 
-const handleBatchOnSale = () => {
-  ElMessage.success(`已批量上架 ${selectedProducts.value.length} 个商品`)
+const handleBatchOnSale = async () => {
+  try {
+    const promises = selectedProducts.value.map(p => putOnSale(p.id))
+    await Promise.all(promises)
+    ElMessage.success(`已批量上架 ${selectedProducts.value.length} 个商品`)
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to batch put on sale:', error)
+    ElMessage.error('批量上架失败')
+  }
 }
 
-const handleBatchOffSale = () => {
-  ElMessage.success(`已批量下架 ${selectedProducts.value.length} 个商品`)
+const handleBatchOffSale = async () => {
+  try {
+    const promises = selectedProducts.value.map(p => takeOffSale(p.id))
+    await Promise.all(promises)
+    ElMessage.success(`已批量下架 ${selectedProducts.value.length} 个商品`)
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to batch take off sale:', error)
+    ElMessage.error('批量下架失败')
+  }
 }
 
 const handleBatchDelete = () => {
@@ -516,15 +548,50 @@ const handleConfirmPushToMarket = async () => {
 
 const handleSave = async () => {
   if (!formRef.value) return
-  
-  await formRef.value.validate((valid: boolean) => {
+
+  await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
       saveLoading.value = true
-      setTimeout(() => {
-        saveLoading.value = false
+      try {
+        const categoryMap: Record<string, number> = {
+          electronics: 1,
+          clothing: 2,
+          home: 3,
+          sports: 4
+        }
+
+        // Price in cents (backend expects int64)
+        const priceInCents = Math.round(productForm.price * 100)
+
+        await createProduct({
+          name: productForm.name,
+          description: productForm.description,
+          price: priceInCents,
+          currency: 'USD',
+          category_id: categoryMap[productForm.category] || 1,
+          sku: productForm.sku,
+          brand: productForm.brand,
+          tags: productForm.tags,
+          images: productForm.images,
+          is_matrix_product: productForm.is_matrix_product,
+          hs_code: productForm.hs_code,
+          coo: productForm.coo,
+          weight: productForm.weight,
+          weight_unit: productForm.weight_unit,
+          length: productForm.length,
+          width: productForm.width,
+          height: productForm.height,
+          dangerous_goods: productForm.dangerous_goods
+        })
         dialogVisible.value = false
-        ElMessage.success(isEdit.value ? '编辑成功' : '添加成功')
-      }, 1000)
+        ElMessage.success('添加成功')
+        loadProducts()
+      } catch (error) {
+        console.error('Failed to create product:', error)
+        ElMessage.error('添加失败')
+      } finally {
+        saveLoading.value = false
+      }
     }
   })
 }
@@ -571,6 +638,16 @@ const loadProducts = async () => {
     }
     if (filterStatus.value) {
       params.status = filterStatus.value
+    }
+    if (filterCategory.value) {
+      // Map category string to ID
+      const categoryMap: Record<string, number> = {
+        electronics: 1,
+        clothing: 2,
+        home: 3,
+        sports: 4
+      }
+      params.category_id = categoryMap[filterCategory.value] || 0
     }
     if (selectedMarket.value) {
       params.market_id = selectedMarket.value

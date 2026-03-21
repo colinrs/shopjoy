@@ -8,10 +8,14 @@ import (
 
 	admin_users "github.com/colinrs/shopjoy/admin/internal/handler/admin_users"
 	auth "github.com/colinrs/shopjoy/admin/internal/handler/auth"
+	brands "github.com/colinrs/shopjoy/admin/internal/handler/brands"
+	categories "github.com/colinrs/shopjoy/admin/internal/handler/categories"
+	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
+	warehouses "github.com/colinrs/shopjoy/admin/internal/handler/warehouses"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -71,6 +75,198 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth.RegisterTenantAdminHandler(serverCtx),
 			},
 		},
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建品牌
+					Method:  http.MethodPost,
+					Path:    "/api/v1/brands",
+					Handler: brands.CreateBrandHandler(serverCtx),
+				},
+				{
+					// 获取品牌列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/brands",
+					Handler: brands.ListBrandsHandler(serverCtx),
+				},
+				{
+					// 更新品牌
+					Method:  http.MethodPut,
+					Path:    "/api/v1/brands/:id",
+					Handler: brands.UpdateBrandHandler(serverCtx),
+				},
+				{
+					// 获取品牌详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/brands/:id",
+					Handler: brands.GetBrandHandler(serverCtx),
+				},
+				{
+					// 删除品牌
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/brands/:id",
+					Handler: brands.DeleteBrandHandler(serverCtx),
+				},
+				{
+					// 设置品牌市场可见性
+					Method:  http.MethodPut,
+					Path:    "/api/v1/brands/:id/market-visibility",
+					Handler: brands.SetBrandMarketVisibilityHandler(serverCtx),
+				},
+				{
+					// 获取品牌市场可见性
+					Method:  http.MethodGet,
+					Path:    "/api/v1/brands/:id/market-visibility",
+					Handler: brands.GetBrandMarketVisibilityHandler(serverCtx),
+				},
+				{
+					// 获取品牌下商品数量
+					Method:  http.MethodGet,
+					Path:    "/api/v1/brands/:id/product-count",
+					Handler: brands.GetBrandProductCountHandler(serverCtx),
+				},
+				{
+					// 更新品牌状态
+					Method:  http.MethodPut,
+					Path:    "/api/v1/brands/:id/status",
+					Handler: brands.UpdateBrandStatusHandler(serverCtx),
+				},
+				{
+					// 切换品牌专区
+					Method:  http.MethodPut,
+					Path:    "/api/v1/brands/:id/toggle-page",
+					Handler: brands.ToggleBrandPageHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建分类
+					Method:  http.MethodPost,
+					Path:    "/api/v1/categories",
+					Handler: categories.CreateCategoryHandler(serverCtx),
+				},
+				{
+					// 获取分类列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/categories",
+					Handler: categories.ListCategoriesHandler(serverCtx),
+				},
+				{
+					// 更新分类
+					Method:  http.MethodPut,
+					Path:    "/api/v1/categories/:id",
+					Handler: categories.UpdateCategoryHandler(serverCtx),
+				},
+				{
+					// 获取分类详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/categories/:id",
+					Handler: categories.GetCategoryHandler(serverCtx),
+				},
+				{
+					// 删除分类
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/categories/:id",
+					Handler: categories.DeleteCategoryHandler(serverCtx),
+				},
+				{
+					// 设置分类市场可见性
+					Method:  http.MethodPut,
+					Path:    "/api/v1/categories/:id/market-visibility",
+					Handler: categories.SetCategoryMarketVisibilityHandler(serverCtx),
+				},
+				{
+					// 获取分类市场可见性
+					Method:  http.MethodGet,
+					Path:    "/api/v1/categories/:id/market-visibility",
+					Handler: categories.GetCategoryMarketVisibilityHandler(serverCtx),
+				},
+				{
+					// 移动分类
+					Method:  http.MethodPut,
+					Path:    "/api/v1/categories/:id/move",
+					Handler: categories.MoveCategoryHandler(serverCtx),
+				},
+				{
+					// 获取分类下商品数量
+					Method:  http.MethodGet,
+					Path:    "/api/v1/categories/:id/product-count",
+					Handler: categories.GetCategoryProductCountHandler(serverCtx),
+				},
+				{
+					// 更新分类状态
+					Method:  http.MethodPut,
+					Path:    "/api/v1/categories/:id/status",
+					Handler: categories.UpdateCategoryStatusHandler(serverCtx),
+				},
+				{
+					// 更新分类排序
+					Method:  http.MethodPut,
+					Path:    "/api/v1/categories/sort",
+					Handler: categories.UpdateCategorySortHandler(serverCtx),
+				},
+				{
+					// 获取分类树
+					Method:  http.MethodGet,
+					Path:    "/api/v1/categories/tree",
+					Handler: categories.GetCategoryTreeHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 调整库存
+					Method:  http.MethodPost,
+					Path:    "/api/v1/inventory/adjust",
+					Handler: inventory.AdjustStockHandler(serverCtx),
+				},
+				{
+					// 获取库存日志
+					Method:  http.MethodGet,
+					Path:    "/api/v1/inventory/logs",
+					Handler: inventory.GetInventoryLogsHandler(serverCtx),
+				},
+				{
+					// 获取低库存SKU列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/inventory/low-stock",
+					Handler: inventory.GetLowStockSKUsHandler(serverCtx),
+				},
+				{
+					// 批量更新安全库存
+					Method:  http.MethodPut,
+					Path:    "/api/v1/inventory/safety-stock",
+					Handler: inventory.BatchUpdateSafetyStockHandler(serverCtx),
+				},
+				{
+					// 获取SKU库存
+					Method:  http.MethodGet,
+					Path:    "/api/v1/inventory/sku/:sku_code",
+					Handler: inventory.GetSKUInventoryHandler(serverCtx),
+				},
+				{
+					// 更新SKU库存
+					Method:  http.MethodPut,
+					Path:    "/api/v1/inventory/stock",
+					Handler: inventory.UpdateSKUStockHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
@@ -214,6 +410,56 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPut,
 					Path:    "/api/v1/users/:id",
 					Handler: users.UpdateUserHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建仓库
+					Method:  http.MethodPost,
+					Path:    "/api/v1/warehouses",
+					Handler: warehouses.CreateWarehouseHandler(serverCtx),
+				},
+				{
+					// 获取仓库列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/warehouses",
+					Handler: warehouses.ListWarehousesHandler(serverCtx),
+				},
+				{
+					// 更新仓库
+					Method:  http.MethodPut,
+					Path:    "/api/v1/warehouses/:id",
+					Handler: warehouses.UpdateWarehouseHandler(serverCtx),
+				},
+				{
+					// 获取仓库详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/warehouses/:id",
+					Handler: warehouses.GetWarehouseHandler(serverCtx),
+				},
+				{
+					// 删除仓库
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/warehouses/:id",
+					Handler: warehouses.DeleteWarehouseHandler(serverCtx),
+				},
+				{
+					// 设置默认仓库
+					Method:  http.MethodPut,
+					Path:    "/api/v1/warehouses/:id/default",
+					Handler: warehouses.SetDefaultWarehouseHandler(serverCtx),
+				},
+				{
+					// 更新仓库状态
+					Method:  http.MethodPut,
+					Path:    "/api/v1/warehouses/:id/status",
+					Handler: warehouses.UpdateWarehouseStatusHandler(serverCtx),
 				},
 			}...,
 		),

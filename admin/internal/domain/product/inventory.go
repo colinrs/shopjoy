@@ -42,8 +42,8 @@ type WarehouseInventory struct {
 	TenantID       shared.TenantID
 	SKUCode        string // SKU代码
 	WarehouseID    int64
-	AvailableStock int // 可用库存
-	LockedStock    int // 锁定库存
+	AvailableStock int              // 可用库存
+	LockedStock    int              // 锁定库存
 	Audit          shared.AuditInfo `gorm:"embedded"`
 }
 

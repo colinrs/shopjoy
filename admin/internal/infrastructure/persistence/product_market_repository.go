@@ -18,19 +18,19 @@ func NewProductMarketRepository() product.ProductMarketRepository {
 }
 
 type productMarketModel struct {
-	ID                  int64          `gorm:"column:id;primaryKey;autoIncrement"`
-	TenantID            int64          `gorm:"column:tenant_id;not null"`
-	ProductID           int64          `gorm:"column:product_id;not null;uniqueIndex:uk_product_variant_market"`
-	VariantID           *int64         `gorm:"column:variant_id;uniqueIndex:uk_product_variant_market"`
-	MarketID            int64          `gorm:"column:market_id;not null;uniqueIndex:uk_product_variant_market"`
-	IsEnabled           bool           `gorm:"column:is_enabled;not null;default:false"`
-	StatusOverride      *int           `gorm:"column:status_override"`
-	Price               string         `gorm:"column:price;type:decimal(19,4);not null"`
-	CompareAtPrice      *string        `gorm:"column:compare_at_price;type:decimal(19,4)"`
-	StockAlertThreshold int            `gorm:"column:stock_alert_threshold;not null;default:0"`
-	PublishedAt         *time.Time     `gorm:"column:published_at"`
-	CreatedAt           time.Time      `gorm:"column:created_at"`
-	UpdatedAt           time.Time      `gorm:"column:updated_at"`
+	ID                  int64      `gorm:"column:id;primaryKey;autoIncrement"`
+	TenantID            int64      `gorm:"column:tenant_id;not null"`
+	ProductID           int64      `gorm:"column:product_id;not null;uniqueIndex:uk_product_variant_market"`
+	VariantID           *int64     `gorm:"column:variant_id;uniqueIndex:uk_product_variant_market"`
+	MarketID            int64      `gorm:"column:market_id;not null;uniqueIndex:uk_product_variant_market"`
+	IsEnabled           bool       `gorm:"column:is_enabled;not null;default:false"`
+	StatusOverride      *int       `gorm:"column:status_override"`
+	Price               string     `gorm:"column:price;type:decimal(19,4);not null"`
+	CompareAtPrice      *string    `gorm:"column:compare_at_price;type:decimal(19,4)"`
+	StockAlertThreshold int        `gorm:"column:stock_alert_threshold;not null;default:0"`
+	PublishedAt         *time.Time `gorm:"column:published_at"`
+	CreatedAt           time.Time  `gorm:"column:created_at"`
+	UpdatedAt           time.Time  `gorm:"column:updated_at"`
 }
 
 func (productMarketModel) TableName() string {

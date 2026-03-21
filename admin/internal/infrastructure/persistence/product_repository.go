@@ -225,7 +225,7 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 	if query.CategoryID > 0 {
 		dbQuery = dbQuery.Where("category_id = ?", query.CategoryID)
 	}
-	if query.Status.IsValid() {
+	if query.Status != nil && query.Status.IsValid() {
 		dbQuery = dbQuery.Where("status = ?", query.Status)
 	}
 	if query.MinPrice != nil {

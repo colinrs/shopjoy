@@ -1,0 +1,217 @@
+syntax = "v1"
+
+info (
+	title:   "Inventory API"
+	desc:    "库存管理相关接口"
+	version: "v1"
+)
+
+type (
+	// Create warehouse request
+	CreateWarehouseReq {
+		Code      string `json:"code"`
+		Name      string `json:"name"`
+		Country   string `json:"country,optional"`
+		Address   string `json:"address,optional"`
+		IsDefault bool   `json:"is_default,optional"`
+	}
+	// Create warehouse response
+	CreateWarehouseResp {
+		ID int64 `json:"id"`
+	}
+	// Update warehouse request
+	UpdateWarehouseReq {
+		ID        int64  `path:"id"`
+		Name      string `json:"name"`
+		Country   string `json:"country,optional"`
+		Address   string `json:"address,optional"`
+		IsDefault bool   `json:"is_default,optional"`
+	}
+	// Warehouse detail response
+	WarehouseDetailResp {
+		ID        int64  `json:"id"`
+		Code      string `json:"code"`
+		Name      string `json:"name"`
+		Country   string `json:"country"`
+		Address   string `json:"address"`
+		IsDefault bool   `json:"is_default"`
+		Status    int8   `json:"status"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Get warehouse request
+	GetWarehouseReq {
+		ID int64 `path:"id"`
+	}
+	// List warehouses request
+	ListWarehouseReq  {}
+	// List warehouses response
+	ListWarehouseResp {
+		List []*WarehouseDetailResp `json:"list"`
+	}
+	// Update warehouse status request
+	UpdateWarehouseStatusReq {
+		ID     int64 `path:"id"`
+		Status int8  `json:"status"` // 0=disabled, 1=enabled
+	}
+	// Set default warehouse request
+	SetDefaultWarehouseReq {
+		ID int64 `path:"id"`
+	}
+	// Update SKU stock request
+	UpdateSKUStockReq {
+		SKUCode        string `json:"sku_code"`
+		WarehouseID    int64  `json:"warehouse_id,optional"` // 0 = all warehouses
+		AvailableStock int    `json:"available_stock"`
+		Remark         string `json:"remark,optional"`
+	}
+	// Adjust stock request (positive = increase, negative = decrease)
+	AdjustStockReq {
+		SKUCode     string `json:"sku_code"`
+		WarehouseID int64  `json:"warehouse_id"`
+		Quantity    int    `json:"quantity"` // positive = increase, negative = decrease
+		Remark      string `json:"remark,optional"`
+	}
+	// Get SKU inventory request
+	GetSKUInventoryReq {
+		SKUCode string `path:"sku_code"`
+	}
+	// SKU inventory response
+	SKUInventoryResp {
+		SKUCode        string                        `json:"sku_code"`
+		ProductID      int64                         `json:"product_id"`
+		TotalStock     int                           `json:"total_stock"`
+		AvailableStock int                           `json:"available_stock"`
+		LockedStock    int                           `json:"locked_stock"`
+		SafetyStock    int                           `json:"safety_stock"`
+		IsLowStock     bool                          `json:"is_low_stock"`
+		Warehouses     []*WarehouseInventoryItemResp `json:"warehouses"`
+	}
+	// Warehouse inventory item response
+	WarehouseInventoryItemResp {
+		WarehouseID    int64  `json:"warehouse_id"`
+		WarehouseName  string `json:"warehouse_name"`
+		AvailableStock int    `json:"available_stock"`
+		LockedStock    int    `json:"locked_stock"`
+	}
+	// Get inventory logs request
+	GetInventoryLogsReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"page_size,default=20"`
+		SKUCode   string `form:"sku_code,optional"`
+		ProductID int64  `form:"product_id,optional"`
+		Type      string `form:"type,optional"` // manual, order, return, adjustment
+	}
+	// Inventory log response
+	InventoryLogResp {
+		ID             int64  `json:"id"`
+		SKUCode        string `json:"sku_code"`
+		ProductID      int64  `json:"product_id"`
+		WarehouseID    int64  `json:"warehouse_id"`
+		ChangeType     string `json:"change_type"`
+		ChangeQuantity int    `json:"change_quantity"`
+		BeforeStock    int    `json:"before_stock"`
+		AfterStock     int    `json:"after_stock"`
+		OrderNo        string `json:"order_no"`
+		Remark         string `json:"remark"`
+		OperatorID     int64  `json:"operator_id"`
+		CreatedAt      string `json:"created_at"`
+	}
+	// List inventory logs response
+	ListInventoryLogsResp {
+		List  []*InventoryLogResp `json:"list"`
+		Total int64               `json:"total"`
+	}
+	// Get low stock SKUs request
+	GetLowStockSKUsReq {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"page_size,default=20"`
+	}
+	// Low stock SKU response
+	LowStockSKUResp {
+		SKUCode        string `json:"sku_code"`
+		ProductID      int64  `json:"product_id"`
+		ProductName    string `json:"product_name"`
+		AvailableStock int    `json:"available_stock"`
+		SafetyStock    int    `json:"safety_stock"`
+	}
+	// List low stock SKUs response
+	ListLowStockSKUsResp {
+		List  []*LowStockSKUResp `json:"list"`
+		Total int64              `json:"total"`
+	}
+	// Batch update safety stock request
+	BatchUpdateSafetyStockReq {
+		Items []SafetyStockItem `json:"items"`
+	}
+	// Safety stock item
+	SafetyStockItem {
+		SKUCode     string `json:"sku_code"`
+		SafetyStock int    `json:"safety_stock"`
+	}
+)
+
+@server (
+	group:      warehouses
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建仓库"
+	@handler CreateWarehouseHandler
+	post /api/v1/warehouses (CreateWarehouseReq) returns (CreateWarehouseResp)
+
+	@doc "更新仓库"
+	@handler UpdateWarehouseHandler
+	put /api/v1/warehouses/:id (UpdateWarehouseReq) returns (WarehouseDetailResp)
+
+	@doc "获取仓库详情"
+	@handler GetWarehouseHandler
+	get /api/v1/warehouses/:id (GetWarehouseReq) returns (WarehouseDetailResp)
+
+	@doc "获取仓库列表"
+	@handler ListWarehousesHandler
+	get /api/v1/warehouses (ListWarehouseReq) returns (ListWarehouseResp)
+
+	@doc "更新仓库状态"
+	@handler UpdateWarehouseStatusHandler
+	put /api/v1/warehouses/:id/status (UpdateWarehouseStatusReq) returns (WarehouseDetailResp)
+
+	@doc "设置默认仓库"
+	@handler SetDefaultWarehouseHandler
+	put /api/v1/warehouses/:id/default (SetDefaultWarehouseReq) returns (WarehouseDetailResp)
+
+	@doc "删除仓库"
+	@handler DeleteWarehouseHandler
+	delete /api/v1/warehouses/:id (GetWarehouseReq) returns (CreateWarehouseResp)
+}
+
+@server (
+	group:      inventory
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "更新SKU库存"
+	@handler UpdateSKUStockHandler
+	put /api/v1/inventory/stock (UpdateSKUStockReq) returns (CreateWarehouseResp)
+
+	@doc "调整库存"
+	@handler AdjustStockHandler
+	post /api/v1/inventory/adjust (AdjustStockReq) returns (CreateWarehouseResp)
+
+	@doc "获取SKU库存"
+	@handler GetSKUInventoryHandler
+	get /api/v1/inventory/sku/:sku_code (GetSKUInventoryReq) returns (SKUInventoryResp)
+
+	@doc "获取库存日志"
+	@handler GetInventoryLogsHandler
+	get /api/v1/inventory/logs (GetInventoryLogsReq) returns (ListInventoryLogsResp)
+
+	@doc "获取低库存SKU列表"
+	@handler GetLowStockSKUsHandler
+	get /api/v1/inventory/low-stock (GetLowStockSKUsReq) returns (ListLowStockSKUsResp)
+
+	@doc "批量更新安全库存"
+	@handler BatchUpdateSafetyStockHandler
+	put /api/v1/inventory/safety-stock (BatchUpdateSafetyStockReq) returns (CreateWarehouseResp)
+}
+

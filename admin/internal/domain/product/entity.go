@@ -110,30 +110,30 @@ type Dimensions struct {
 
 // Product 商品实体
 type Product struct {
-	ID              int64          // 商品ID
-	SKU             string         // SKU代码
-	Name            string         // 商品名称
-	Description     string         // 商品描述
-	Price           Money          `gorm:"embedded"` // 售价
-	CostPrice       Money          `gorm:"embedded"` // 成本价
-	Stock           int            // 库存
-	Status          Status         // 状态
-	CategoryID      int64          // 分类ID
-	Brand           string         // 品牌
-	Tags            []string       `gorm:"type:json"` // 标签
-	Images          []string       `gorm:"type:json"` // 图片列表
-	IsMatrixProduct bool           // 是否有变体
+	ID              int64    // 商品ID
+	SKU             string   // SKU代码
+	Name            string   // 商品名称
+	Description     string   // 商品描述
+	Price           Money    `gorm:"embedded"` // 售价
+	CostPrice       Money    `gorm:"embedded"` // 成本价
+	Stock           int      // 库存
+	Status          Status   // 状态
+	CategoryID      int64    // 分类ID
+	Brand           string   // 品牌
+	Tags            []string `gorm:"type:json"` // 标签
+	Images          []string `gorm:"type:json"` // 图片列表
+	IsMatrixProduct bool     // 是否有变体
 
 	// Compliance fields (cross-border)
 	HSCode         string          // HS编码
 	COO            string          // 原产国
 	Weight         decimal.Decimal // 重量
 	WeightUnit     string          // 重量单位
-	Dimensions     Dimensions      `gorm:"embedded"` // 尺寸
+	Dimensions     Dimensions      `gorm:"embedded"`  // 尺寸
 	DangerousGoods []string        `gorm:"type:json"` // 危险品标识
 
-	CreatedAt       time.Time      // 创建时间
-	UpdatedAt       time.Time      // 更新时间
+	CreatedAt time.Time // 创建时间
+	UpdatedAt time.Time // 更新时间
 }
 
 // TableName 表名
@@ -319,7 +319,7 @@ type Repository interface {
 type Query struct {
 	Name       string
 	CategoryID int64
-	Status     Status
+	Status     *Status // 使用指针，nil 表示不过滤状态
 	MinPrice   *int64
 	MaxPrice   *int64
 	MarketID   int64

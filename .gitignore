@@ -46,3 +46,8 @@ node_modules
 
 # Worktrees
 .worktrees/
+.superpowers/
+.sisyphus/
+docs/plans
+docs/superpowers
+.claude/settings.local.json

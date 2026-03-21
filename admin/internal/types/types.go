@@ -3,6 +3,13 @@
 
 package types
 
+type AdjustStockReq struct {
+	SKUCode     string `json:"sku_code"`
+	WarehouseID int64  `json:"warehouse_id"`
+	Quantity    int    `json:"quantity"` // positive = increase, negative = decrease
+	Remark      string `json:"remark,optional"`
+}
+
 type AdminChangePasswordRequest struct {
 	OldPassword     string `json:"old_password"`
 	NewPassword     string `json:"new_password" validate:"min=6"`
@@ -40,6 +47,119 @@ type AdminUserInfo struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type BatchUpdateSafetyStockReq struct {
+	Items []SafetyStockItem `json:"items"`
+}
+
+type BrandDetailResp struct {
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	Logo             string `json:"logo"`
+	Description      string `json:"description"`
+	Website          string `json:"website"`
+	TrademarkNumber  string `json:"trademark_number"`
+	TrademarkCountry string `json:"trademark_country"`
+	EnablePage       bool   `json:"enable_page"`
+	Sort             int    `json:"sort"`
+	Status           int8   `json:"status"`
+	ProductCount     int64  `json:"product_count"`
+	CreatedAt        string `json:"created_at"`
+	UpdatedAt        string `json:"updated_at"`
+}
+
+type BrandMarketItemResp struct {
+	MarketID  int64 `json:"market_id"`
+	IsVisible bool  `json:"is_visible"`
+}
+
+type BrandMarketVisibilityResp struct {
+	BrandID int64                 `json:"brand_id"`
+	Markets []BrandMarketItemResp `json:"markets"`
+}
+
+type CategoryDetailResp struct {
+	ID             int64  `json:"id"`
+	ParentID       int64  `json:"parent_id"`
+	Name           string `json:"name"`
+	Code           string `json:"code"`
+	Level          int    `json:"level"`
+	Sort           int    `json:"sort"`
+	Icon           string `json:"icon"`
+	Image          string `json:"image"`
+	SeoTitle       string `json:"seo_title"`
+	SeoDescription string `json:"seo_description"`
+	Status         int8   `json:"status"`
+	ProductCount   int64  `json:"product_count"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
+}
+
+type CategoryMarketItemResp struct {
+	MarketID  int64 `json:"market_id"`
+	IsVisible bool  `json:"is_visible"`
+}
+
+type CategoryMarketVisibilityResp struct {
+	CategoryID int64                    `json:"category_id"`
+	Markets    []CategoryMarketItemResp `json:"markets"`
+}
+
+type CategorySortItem struct {
+	ID   int64 `json:"id"`
+	Sort int   `json:"sort"`
+}
+
+type CategoryTreeReq struct {
+}
+
+type CategoryTreeResp struct {
+	ID             int64               `json:"id"`
+	ParentID       int64               `json:"parent_id"`
+	Name           string              `json:"name"`
+	Code           string              `json:"code"`
+	Level          int                 `json:"level"`
+	Sort           int                 `json:"sort"`
+	Icon           string              `json:"icon"`
+	Image          string              `json:"image"`
+	SeoTitle       string              `json:"seo_title"`
+	SeoDescription string              `json:"seo_description"`
+	Status         int8                `json:"status"`
+	ProductCount   int64               `json:"product_count"`
+	CreatedAt      string              `json:"created_at"`
+	UpdatedAt      string              `json:"updated_at"`
+	Children       []*CategoryTreeResp `json:"children"`
+}
+
+type CreateBrandReq struct {
+	Name             string `json:"name"`
+	Logo             string `json:"logo,optional"`
+	Description      string `json:"description,optional"`
+	Website          string `json:"website,optional"`
+	TrademarkNumber  string `json:"trademark_number,optional"`
+	TrademarkCountry string `json:"trademark_country,optional"`
+	EnablePage       bool   `json:"enable_page,optional"`
+	Sort             int    `json:"sort,optional"`
+}
+
+type CreateBrandResp struct {
+	ID int64 `json:"id"`
+}
+
+type CreateCategoryReq struct {
+	Name           string `json:"name"`
+	ParentID       int64  `json:"parent_id,optional"`
+	Code           string `json:"code,optional"`
+	Icon           string `json:"icon,optional"`
+	Image          string `json:"image,optional"`
+	SeoTitle       string `json:"seo_title,optional"`
+	SeoDescription string `json:"seo_description,optional"`
+	Sort           int    `json:"sort,optional"`
+}
+
+type CreateCategoryResp struct {
+	ID int64 `json:"id"`
+}
+
 type CreateMarketReq struct {
 	Code            string    `json:"code"`     // US, UK, DE, FR, AU
 	Name            string    `json:"name"`     // United States
@@ -75,12 +195,73 @@ type CreateProductResp struct {
 	ID int64 `json:"id"`
 }
 
+type CreateWarehouseReq struct {
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	Country   string `json:"country,optional"`
+	Address   string `json:"address,optional"`
+	IsDefault bool   `json:"is_default,optional"`
+}
+
+type CreateWarehouseResp struct {
+	ID int64 `json:"id"`
+}
+
+type GetBrandMarketVisibilityReq struct {
+	BrandID int64 `path:"id"`
+}
+
+type GetBrandProductCountReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetBrandProductCountResp struct {
+	Count int64 `json:"count"`
+}
+
+type GetBrandReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetCategoryMarketVisibilityReq struct {
+	CategoryID int64 `path:"id"`
+}
+
+type GetCategoryProductCountReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetCategoryProductCountResp struct {
+	Count int64 `json:"count"`
+}
+
+type GetCategoryReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetInventoryLogsReq struct {
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"page_size,default=20"`
+	SKUCode   string `form:"sku_code,optional"`
+	ProductID int64  `form:"product_id,optional"`
+	Type      string `form:"type,optional"` // manual, order, return, adjustment
+}
+
+type GetLowStockSKUsReq struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"page_size,default=20"`
+}
+
 type GetMarketReq struct {
 	ID int64 `path:"id"`
 }
 
 type GetProductReq struct {
 	ID int64 `path:"id"`
+}
+
+type GetSKUInventoryReq struct {
+	SKUCode string `path:"sku_code"`
 }
 
 type GetUserRequest struct {
@@ -97,6 +278,25 @@ type GetUserResponse struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type GetWarehouseReq struct {
+	ID int64 `path:"id"`
+}
+
+type InventoryLogResp struct {
+	ID             int64  `json:"id"`
+	SKUCode        string `json:"sku_code"`
+	ProductID      int64  `json:"product_id"`
+	WarehouseID    int64  `json:"warehouse_id"`
+	ChangeType     string `json:"change_type"`
+	ChangeQuantity int    `json:"change_quantity"`
+	BeforeStock    int    `json:"before_stock"`
+	AfterStock     int    `json:"after_stock"`
+	OrderNo        string `json:"order_no"`
+	Remark         string `json:"remark"`
+	OperatorID     int64  `json:"operator_id"`
+	CreatedAt      string `json:"created_at"`
+}
+
 type ListAdminUsersRequest struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"page_size,default=20"`
@@ -111,6 +311,36 @@ type ListAdminUsersResponse struct {
 	Total    int64            `json:"total"`
 	Page     int              `json:"page"`
 	PageSize int              `json:"page_size"`
+}
+
+type ListBrandReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Name     string `form:"name,optional"`
+	Status   int8   `form:"status,optional"`
+}
+
+type ListBrandResp struct {
+	List  []BrandDetailResp `json:"list"`
+	Total int64             `json:"total"`
+}
+
+type ListCategoryReq struct {
+	ParentID int64 `form:"parent_id,optional"`
+}
+
+type ListCategoryResp struct {
+	List []*CategoryDetailResp `json:"list"`
+}
+
+type ListInventoryLogsResp struct {
+	List  []*InventoryLogResp `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type ListLowStockSKUsResp struct {
+	List  []*LowStockSKUResp `json:"list"`
+	Total int64              `json:"total"`
 }
 
 type ListMarketsResp struct {
@@ -158,6 +388,21 @@ type ListUsersResponse struct {
 	PageSize int                `json:"page_size"`
 }
 
+type ListWarehouseReq struct {
+}
+
+type ListWarehouseResp struct {
+	List []*WarehouseDetailResp `json:"list"`
+}
+
+type LowStockSKUResp struct {
+	SKUCode        string `json:"sku_code"`
+	ProductID      int64  `json:"product_id"`
+	ProductName    string `json:"product_name"`
+	AvailableStock int    `json:"available_stock"`
+	SafetyStock    int    `json:"safety_stock"`
+}
+
 type MarketResponse struct {
 	ID              int64     `json:"id"`
 	Code            string    `json:"code"`
@@ -170,6 +415,11 @@ type MarketResponse struct {
 	TaxRules        TaxConfig `json:"tax_rules"`
 	CreatedAt       string    `json:"created_at"`
 	UpdatedAt       string    `json:"updated_at"`
+}
+
+type MoveCategoryReq struct {
+	ID          int64 `path:"id"`
+	NewParentID int64 `json:"new_parent_id"`
 }
 
 type ProductDetailResp struct {
@@ -258,6 +508,38 @@ type RemoveFromMarketReq struct {
 	MarketID  int64 `path:"market_id"`
 }
 
+type SKUInventoryResp struct {
+	SKUCode        string                        `json:"sku_code"`
+	ProductID      int64                         `json:"product_id"`
+	TotalStock     int                           `json:"total_stock"`
+	AvailableStock int                           `json:"available_stock"`
+	LockedStock    int                           `json:"locked_stock"`
+	SafetyStock    int                           `json:"safety_stock"`
+	IsLowStock     bool                          `json:"is_low_stock"`
+	Warehouses     []*WarehouseInventoryItemResp `json:"warehouses"`
+}
+
+type SafetyStockItem struct {
+	SKUCode     string `json:"sku_code"`
+	SafetyStock int    `json:"safety_stock"`
+}
+
+type SetBrandMarketVisibilityReq struct {
+	BrandID   int64   `path:"id"`
+	MarketIDs []int64 `json:"market_ids"`
+	Visible   bool    `json:"visible"`
+}
+
+type SetCategoryMarketVisibilityReq struct {
+	CategoryID int64   `path:"id"`
+	MarketIDs  []int64 `json:"market_ids"`
+	Visible    bool    `json:"visible"`
+}
+
+type SetDefaultWarehouseReq struct {
+	ID int64 `path:"id"`
+}
+
 type TakeOffSaleReq struct {
 	ID int64 `path:"id"`
 }
@@ -267,6 +549,48 @@ type TaxConfig struct {
 	GstRate     string `json:"gst_rate,optional"`
 	IossEnabled bool   `json:"ioss_enabled,optional"`
 	IncludeTax  bool   `json:"include_tax,optional"`
+}
+
+type ToggleBrandPageReq struct {
+	ID      int64 `path:"id"`
+	Enabled bool  `json:"enabled"`
+}
+
+type UpdateBrandReq struct {
+	ID               int64  `path:"id"`
+	Name             string `json:"name"`
+	Logo             string `json:"logo,optional"`
+	Description      string `json:"description,optional"`
+	Website          string `json:"website,optional"`
+	TrademarkNumber  string `json:"trademark_number,optional"`
+	TrademarkCountry string `json:"trademark_country,optional"`
+	EnablePage       bool   `json:"enable_page,optional"`
+	Sort             int    `json:"sort,optional"`
+}
+
+type UpdateBrandStatusReq struct {
+	ID     int64 `path:"id"`
+	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type UpdateCategoryReq struct {
+	ID             int64  `path:"id"`
+	Name           string `json:"name"`
+	Code           string `json:"code,optional"`
+	Icon           string `json:"icon,optional"`
+	Image          string `json:"image,optional"`
+	SeoTitle       string `json:"seo_title,optional"`
+	SeoDescription string `json:"seo_description,optional"`
+	Sort           int    `json:"sort,optional"`
+}
+
+type UpdateCategorySortReq struct {
+	Sorts []CategorySortItem `json:"sorts"`
+}
+
+type UpdateCategoryStatusReq struct {
+	ID     int64 `path:"id"`
+	Status int8  `json:"status"` // 0=disabled, 1=enabled
 }
 
 type UpdateMarketReq struct {
@@ -316,6 +640,13 @@ type UpdateProfileRequest struct {
 	Email    string `json:"email,optional"`
 }
 
+type UpdateSKUStockReq struct {
+	SKUCode        string `json:"sku_code"`
+	WarehouseID    int64  `json:"warehouse_id,optional"` // 0 = all warehouses
+	AvailableStock int    `json:"available_stock"`
+	Remark         string `json:"remark,optional"`
+}
+
 type UpdateStockReq struct {
 	ID       int64 `path:"id"`
 	Quantity int   `json:"quantity"`
@@ -325,4 +656,36 @@ type UpdateUserRequest struct {
 	ID     int64  `path:"id"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar,optional"`
+}
+
+type UpdateWarehouseReq struct {
+	ID        int64  `path:"id"`
+	Name      string `json:"name"`
+	Country   string `json:"country,optional"`
+	Address   string `json:"address,optional"`
+	IsDefault bool   `json:"is_default,optional"`
+}
+
+type UpdateWarehouseStatusReq struct {
+	ID     int64 `path:"id"`
+	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type WarehouseDetailResp struct {
+	ID        int64  `json:"id"`
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	Country   string `json:"country"`
+	Address   string `json:"address"`
+	IsDefault bool   `json:"is_default"`
+	Status    int8   `json:"status"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type WarehouseInventoryItemResp struct {
+	WarehouseID    int64  `json:"warehouse_id"`
+	WarehouseName  string `json:"warehouse_name"`
+	AvailableStock int    `json:"available_stock"`
+	LockedStock    int    `json:"locked_stock"`
 }

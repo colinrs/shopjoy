@@ -36,6 +36,9 @@
           <el-menu-item index="/categories">
             <span>商品分类</span>
           </el-menu-item>
+          <el-menu-item index="/brands">
+            <span>品牌管理</span>
+          </el-menu-item>
           <el-menu-item index="/inventory">
             <span>库存管理</span>
           </el-menu-item>
@@ -372,6 +375,29 @@ const logout = () => {
 
 .sidebar-menu :deep(.el-icon) {
   color: inherit;
+}
+
+/* Sub-menu styles */
+.sidebar-menu :deep(.el-sub-menu .el-menu) {
+  background: transparent;
+}
+
+.sidebar-menu :deep(.el-sub-menu .el-menu-item) {
+  color: rgba(255, 255, 255, 0.6);
+  height: 46px;
+  line-height: 46px;
+  padding-left: 54px !important;
+}
+
+.sidebar-menu :deep(.el-sub-menu .el-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.sidebar-menu :deep(.el-sub-menu .el-menu-item.is-active) {
+  background: linear-gradient(90deg, #059669 0%, transparent 100%);
+  color: #fff;
+  border-left: 3px solid #10B981;
 }
 
 .menu-badge {

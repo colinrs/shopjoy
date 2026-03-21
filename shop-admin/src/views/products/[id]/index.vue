@@ -17,6 +17,23 @@
           </h2>
         </div>
         <div class="header-right">
+          <el-button
+            v-if="product?.status === 'on_sale'"
+            @click="handleTakeOffSale"
+            :loading="statusLoading"
+          >
+            <el-icon><Hide /></el-icon>
+            Take Off Sale
+          </el-button>
+          <el-button
+            v-else-if="product?.status === 'off_sale' || product?.status === 'draft'"
+            type="success"
+            @click="handlePutOnSale"
+            :loading="statusLoading"
+          >
+            <el-icon><View /></el-icon>
+            Put On Sale
+          </el-button>
           <el-button @click="handleSave" type="primary" :loading="saveLoading">
             <el-icon><Check /></el-icon>
             Save Changes
@@ -375,7 +392,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Check, Plus, Picture, Close } from '@element-plus/icons-vue'
+import { ArrowLeft, Check, Plus, Picture, Close, Hide, View } from '@element-plus/icons-vue'
 import {
   getProduct,
   updateProduct,
@@ -383,6 +400,8 @@ import {
   updateProductMarket,
   pushToMarket,
   removeFromMarket,
+  putOnSale,
+  takeOffSale,
   type Product,
   type ProductMarket
 } from '@/api/product'
@@ -396,6 +415,7 @@ const productId = computed(() => Number(route.params.id))
 // State
 const loading = ref(false)
 const saveLoading = ref(false)
+const statusLoading = ref(false)
 const marketsLoading = ref(false)
 const pushToMarketLoading = ref(false)
 const activeTab = ref('basic')
@@ -487,13 +507,13 @@ const loadProduct = async () => {
   try {
     const data = await getProduct(productId.value)
     product.value = data
-    // Populate form
+    // Populate form - convert price from cents to dollars for display
     Object.assign(productForm, {
       name: data.name || '',
       description: data.description || '',
-      price: data.price || 0,
+      price: (data.price || 0) / 100, // Convert from cents to dollars
       currency: data.currency || 'USD',
-      cost_price: data.cost_price || 0,
+      cost_price: (data.cost_price || 0) / 100, // Convert from cents to dollars
       stock: data.stock || 0,
       status: data.status || 'draft',
       category_id: data.category_id || 0,
@@ -542,6 +562,36 @@ const loadMarkets = async () => {
   }
 }
 
+// Put on sale
+const handlePutOnSale = async () => {
+  statusLoading.value = true
+  try {
+    await putOnSale(productId.value)
+    ElMessage.success('Product is now on sale')
+    loadProduct()
+  } catch (error) {
+    console.error('Failed to put on sale:', error)
+    ElMessage.error('Failed to put on sale')
+  } finally {
+    statusLoading.value = false
+  }
+}
+
+// Take off sale
+const handleTakeOffSale = async () => {
+  statusLoading.value = true
+  try {
+    await takeOffSale(productId.value)
+    ElMessage.success('Product is now off sale')
+    loadProduct()
+  } catch (error) {
+    console.error('Failed to take off sale:', error)
+    ElMessage.error('Failed to take off sale')
+  } finally {
+    statusLoading.value = false
+  }
+}
+
 // Save product
 const handleSave = async () => {
   if (!formRef.value) return
@@ -554,7 +604,7 @@ const handleSave = async () => {
           id: productId.value,
           name: productForm.name,
           description: productForm.description,
-          price: productForm.price,
+          price: Math.round(productForm.price * 100), // Convert dollars to cents
           currency: productForm.currency,
           category_id: productForm.category_id,
           sku: productForm.sku,

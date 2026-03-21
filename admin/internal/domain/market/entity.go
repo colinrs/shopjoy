@@ -20,15 +20,15 @@ type TaxConfig struct {
 
 // Market 市场实体
 type Market struct {
-	ID              int64      // 市场ID
-	TenantID        int64      // 租户ID
-	Code            string     // 市场代码: US, UK, DE, FR, AU
-	Name            string     // 市场名称
-	Currency        string     // 货币: USD, GBP, EUR, AUD
-	DefaultLanguage string     // 默认语言
-	Flag            string     // 旗帜图标
-	IsActive        bool       // 是否启用
-	IsDefault       bool       // 是否主市场
+	ID              int64          // 市场ID
+	TenantID        int64          // 租户ID
+	Code            string         // 市场代码: US, UK, DE, FR, AU
+	Name            string         // 市场名称
+	Currency        string         // 货币: USD, GBP, EUR, AUD
+	DefaultLanguage string         // 默认语言
+	Flag            string         // 旗帜图标
+	IsActive        bool           // 是否启用
+	IsDefault       bool           // 是否主市场
 	TaxRules        TaxConfig      `gorm:"type:json"` // 税务配置
 	CreatedAt       time.Time      // 创建时间
 	UpdatedAt       time.Time      // 更新时间

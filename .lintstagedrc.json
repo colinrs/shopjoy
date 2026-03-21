@@ -1,0 +1,15 @@
+# Lint-Staged Configuration
+# Run linting on staged files before commit
+
+{
+  "*.{go}": [
+    "gofmt -l",
+    "go vet"
+  ],
+  "*.{ts,vue}": [
+    "eslint --fix"
+  ],
+  "*.{json,md}": [
+    "prettier --write"
+  ]
+}
