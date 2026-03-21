@@ -23,15 +23,21 @@ import (
 )
 
 type ServiceContext struct {
-	Config              config.Config
-	DB                  *gorm.DB
-	ProductService      appProduct.Service
-	UserService         appUser.Service
-	AdminUserService    appAdminUser.Service
-	JWTManager          *auth.JWTManager
-	AuthMiddleware      rest.Middleware
-	ProductMarketRepo   product.ProductMarketRepository
-	MarketRepo          market.Repository
+	Config               config.Config
+	DB                   *gorm.DB
+	ProductService       appProduct.Service
+	UserService          appUser.Service
+	AdminUserService     appAdminUser.Service
+	JWTManager           *auth.JWTManager
+	AuthMiddleware       rest.Middleware
+	ProductMarketRepo    product.ProductMarketRepository
+	MarketRepo           market.Repository
+	CategoryRepo         product.CategoryRepository
+	CategoryMarketRepo   product.CategoryMarketRepository
+	BrandRepo            product.BrandRepository
+	BrandMarketRepo      product.BrandMarketRepository
+	WarehouseRepo        product.WarehouseRepository
+	IDGen                snowflake.Snowflake
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -58,16 +64,27 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	productMarketRepo := persistence.NewProductMarketRepository()
 	marketRepo := persistence.NewMarketRepository()
+	categoryRepo := persistence.NewCategoryRepository()
+	categoryMarketRepo := persistence.NewCategoryMarketRepository()
+	brandRepo := persistence.NewBrandRepository()
+	brandMarketRepo := persistence.NewBrandMarketRepository()
+	warehouseRepo := persistence.NewWarehouseRepository()
 
 	return &ServiceContext{
-		Config:           c,
-		DB:               db,
-		ProductService:   productService,
-		UserService:      userService,
-		AdminUserService: adminUserService,
-		JWTManager:       jwtManager,
-		AuthMiddleware:   authMiddleware,
-		ProductMarketRepo: productMarketRepo,
-		MarketRepo:        marketRepo,
+		Config:             c,
+		DB:                 db,
+		ProductService:     productService,
+		UserService:        userService,
+		AdminUserService:   adminUserService,
+		JWTManager:         jwtManager,
+		AuthMiddleware:     authMiddleware,
+		ProductMarketRepo:  productMarketRepo,
+		MarketRepo:         marketRepo,
+		CategoryRepo:       categoryRepo,
+		CategoryMarketRepo: categoryMarketRepo,
+		BrandRepo:          brandRepo,
+		BrandMarketRepo:    brandMarketRepo,
+		WarehouseRepo:      warehouseRepo,
+		IDGen:              idGen,
 	}
 }
