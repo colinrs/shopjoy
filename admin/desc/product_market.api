@@ -22,6 +22,9 @@ type (
 		PublishedAt         string `json:"published_at,optional"`
 	}
 	// List product markets
+	ListProductMarketsReq {
+		ProductID int64 `path:"id"`
+	}
 	ListProductMarketsResp {
 		List []*ProductMarketResp `json:"list"`
 	}
@@ -58,7 +61,7 @@ type (
 service admin-api {
 	@doc "获取商品市场配置列表"
 	@handler ListProductMarketsHandler
-	get /api/v1/products/:id/markets returns (ListProductMarketsResp)
+	get /api/v1/products/:id/markets (ListProductMarketsReq) returns (ListProductMarketsResp)
 
 	@doc "更新商品市场配置"
 	@handler UpdateProductMarketHandler

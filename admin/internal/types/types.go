@@ -118,6 +118,10 @@ type ListMarketsResp struct {
 	Total int64             `json:"total"`
 }
 
+type ListProductMarketsReq struct {
+	ProductID int64 `path:"id"`
+}
+
 type ListProductMarketsResp struct {
 	List []*ProductMarketResp `json:"list"`
 }
