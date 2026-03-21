@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/shop/internal/domain/order"
 	"gorm.io/gorm"
@@ -38,7 +39,7 @@ func (r *OrderRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID sh
 	var o order.Order
 	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&o).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, order.ErrOrderNotFound
+		return nil, code.ErrOrderNotFound
 	}
 	if err == nil {
 		var items []order.OrderItem
@@ -52,7 +53,7 @@ func (r *OrderRepository) FindByOrderNo(ctx context.Context, db *gorm.DB, tenant
 	var o order.Order
 	err := db.WithContext(ctx).Where("order_no = ? AND tenant_id = ?", orderNo, tenantID.Int64()).First(&o).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, order.ErrOrderNotFound
+		return nil, code.ErrOrderNotFound
 	}
 	if err == nil {
 		var items []order.OrderItem

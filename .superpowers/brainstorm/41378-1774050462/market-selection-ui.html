@@ -1,0 +1,130 @@
+<h2>Product Markets Tab: Market Selection UI</h2>
+<p class="subtitle">How should sellers enable/disable markets for a product?</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Option A: Card Toggle Grid</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="border: 2px solid #059669; border-radius: 12px; padding: 16px; background: #ecfdf5;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">🇺🇸 United States</span>
+            <span style="background: #059669; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Active</span>
+          </div>
+          <div style="font-size: 12px; color: #065f46;">USD • 1 price set</div>
+        </div>
+        <div style="border: 2px solid #059669; border-radius: 12px; padding: 16px; background: #ecfdf5;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">🇬🇧 United Kingdom</span>
+            <span style="background: #059669; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Active</span>
+          </div>
+          <div style="font-size: 12px; color: #065f46;">GBP • 1 price set</div>
+        </div>
+        <div style="border: 2px solid #fca5a5; border-radius: 12px; padding: 16px; background: #fef2f2;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">🇩🇪 Germany</span>
+            <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Disabled</span>
+          </div>
+          <div style="font-size: 12px; color: #991b1b;">EUR • No price</div>
+        </div>
+        <div style="border: 2px solid #fca5a5; border-radius: 12px; padding: 16px; background: #fef2f2;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">🇫🇷 France</span>
+            <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Disabled</span>
+          </div>
+          <div style="font-size: 12px; color: #991b1b;">EUR • No price</div>
+        </div>
+        <div style="border: 2px solid #fca5a5; border-radius: 12px; padding: 16px; background: #fef2f2;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600;">🇦🇺 Australia</span>
+            <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Disabled</span>
+          </div>
+          <div style="font-size: 12px; color: #991b1b;">AUD • No price</div>
+        </div>
+        <div style="border: 2px dashed #d1d5db; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 13px;">
+          + Add Market
+        </div>
+      </div>
+      <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">Click card to toggle on/off. Configure pricing in Pricing tab.</div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Option B: Table with Inline Actions</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f9fafb;">
+            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Market</th>
+            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #e5e7eb;">Status</th>
+            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #e5e7eb;">Currency</th>
+            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #e5e7eb;">Price Set</th>
+            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #e5e7eb;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 10px;">🇺🇸 United States</td>
+            <td style="padding: 10px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Active</span></td>
+            <td style="padding: 10px; text-align: center;">USD</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px; text-align: center;"><button style="font-size: 11px; color: #ef4444;">Disable</button></td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px;">🇬🇧 United Kingdom</td>
+            <td style="padding: 10px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Active</span></td>
+            <td style="padding: 10px; text-align: center;">GBP</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px; text-align: center;"><button style="font-size: 11px; color: #ef4444;">Disable</button></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px;">🇩🇪 Germany</td>
+            <td style="padding: 10px; text-align: center;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Disabled</span></td>
+            <td style="padding: 10px; text-align: center;">EUR</td>
+            <td style="padding: 10px; text-align: center; color: #ef4444;">✗</td>
+            <td style="padding: 10px; text-align: center;"><button style="font-size: 11px; color: #059669;">Enable</button></td>
+          </tr>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px;">🇫🇷 France</td>
+            <td style="padding: 10px; text-align: center;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Disabled</span></td>
+            <td style="padding: 10px; text-align: center;">EUR</td>
+            <td style="padding: 10px; text-align: center; color: #ef4444;">✗</td>
+            <td style="padding: 10px; text-align: center;"><button style="font-size: 11px; color: #059669;">Enable</button></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px;">🇦🇺 Australia</td>
+            <td style="padding: 10px; text-align: center;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Disabled</span></td>
+            <td style="padding: 10px; text-align: center;">AUD</td>
+            <td style="padding: 10px; text-align: center; color: #ef4444;">✗</td>
+            <td style="padding: 10px; text-align: center;"><button style="font-size: 11px; color: #059669;">Enable</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">Bulk actions: Select multiple → Enable all / Disable all</div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option selected" data-choice="cards" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Card Toggle Grid</h3>
+      <p>Visual cards, click to toggle. Good for quick overview. Markets limited display.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="table" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Table with Actions</h3>
+      <p>Detailed view, bulk selection, more info visible. Scales to many markets.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="both" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid</h3>
+      <p>Cards by default, toggle to table view for bulk operations.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,146 @@
+<h2>确认：Shopify Markets 模式</h2>
+<p class="subtitle">商品全局共享，市场作为差异化维度</p>
+
+<div class="mockup" style="max-width: 900px; margin: 0 auto;">
+  <div class="mockup-header">数据模型：Market 作为维度叠加</div>
+  <div class="mockup-body" style="padding: 16px;">
+    <div style="display: flex; gap: 16px;">
+      <div style="flex: 1; background: #f9fafb; border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 12px;">📦 Product（全局）</div>
+        <div style="font-size: 12px; color: #6b7280; line-height: 1.8;">
+          • id, sku, name<br>
+          • description, images<br>
+          • category, brand, tags<br>
+          • <strong style="color: #059669;">hs_code, coo, weight...</strong>（合规-全局）<br>
+          • status（全局状态）<br>
+          • total_stock（汇总库存）
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; font-size: 20px; color: #9ca3af;">+</div>
+      <div style="flex: 1; background: #ecfdf5; border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; color: #065f46; margin-bottom: 12px;">🌍 ProductMarket（差异）</div>
+        <div style="font-size: 12px; color: #065f46; line-height: 1.8;">
+          • product_id, market_id<br>
+          • <strong>is_enabled</strong>（可见性开关）<br>
+          • <strong>price, compare_at_price</strong>（市场价格）<br>
+          • stock_alert（安全库存预警）<br>
+          • status_override（可覆盖状态）<br>
+          • <em>其他市场专属配置...</em>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; font-size: 20px; color: #9ca3af;">+</div>
+      <div style="flex: 1; background: #fef3c7; border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; color: #92400e; margin-bottom: 12px;">📝 ProductLocalization（本地化）</div>
+        <div style="font-size: 12px; color: #92400e; line-height: 1.8;">
+          • product_id, language_code<br>
+          • title（翻译标题）<br>
+          • description（翻译描述）<br>
+          • bullet_points<br>
+          • seo_title, meta_description<br>
+          • image_alts
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="max-width: 900px; margin: 20px auto 0;">
+  <div class="mockup-header">商品列表页：View as Market</div>
+  <div class="mockup-body" style="padding: 16px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 16px; align-items: center;">
+      <span style="font-size: 12px; color: #6b7280;">View as:</span>
+      <button style="padding: 6px 12px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 500;">全部市场</button>
+      <button style="padding: 6px 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; font-size: 12px;">🇺🇸 US</button>
+      <button style="padding: 6px 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; font-size: 12px;">🇬🇧 UK</button>
+      <button style="padding: 6px 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; font-size: 12px;">🇩🇪 DE</button>
+      <button style="padding: 6px 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; font-size: 12px;">🇫🇷 FR</button>
+      <button style="padding: 6px 12px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; font-size: 12px;">🇦🇺 AU</button>
+    </div>
+    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #f9fafb;">
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">商品信息</th>
+          <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e5e7eb;">市场可见性</th>
+          <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e5e7eb;">价格（US）</th>
+          <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e5e7eb;">库存</th>
+          <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e5e7eb;">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px;"><strong>无线耳机 Pro</strong><br><span style="color: #6b7280; font-size: 11px;">SKU: WEP-001</span></td>
+          <td style="padding: 8px; text-align: center;">
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">US</span>
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">UK</span>
+            <span style="background: #fee2e2; padding: 2px 4px; border-radius: 2px; font-size: 10px;">DE</span>
+            <span style="background: #fee2e2; padding: 2px 4px; border-radius: 2px; font-size: 10px;">FR</span>
+            <span style="background: #fee2e2; padding: 2px 4px; border-radius: 2px; font-size: 10px;">AU</span>
+          </td>
+          <td style="padding: 8px; text-align: right;">$29.99</td>
+          <td style="padding: 8px; text-align: center;">156</td>
+          <td style="padding: 8px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px;">在售</span></td>
+        </tr>
+        <tr style="background: #f9fafb;">
+          <td style="padding: 8px;"><strong>智能手表 S7</strong><br><span style="color: #6b7280; font-size: 11px;">SKU: SW-007</span></td>
+          <td style="padding: 8px; text-align: center;">
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">US</span>
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">UK</span>
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">DE</span>
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">FR</span>
+            <span style="background: #dcfce7; padding: 2px 4px; border-radius: 2px; font-size: 10px;">AU</span>
+          </td>
+          <td style="padding: 8px; text-align: right;">$199.00</td>
+          <td style="padding: 8px; text-align: center;">89</td>
+          <td style="padding: 8px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px;">在售</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">
+      💡 切换市场后，价格列显示该市场货币，状态显示该市场的可见性状态
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="max-width: 900px; margin: 20px auto 0;">
+  <div class="mockup-header">「Push to Market」操作</div>
+  <div class="mockup-body" style="padding: 16px;">
+    <div style="background: #f9fafb; border-radius: 8px; padding: 16px;">
+      <div style="font-weight: 500; margin-bottom: 12px;">将商品推送到新市场</div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div style="flex: 1;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">选择目标市场</div>
+          <div style="display: flex; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox"> 🇩🇪 DE
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox"> 🇫🇷 FR
+            </label>
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">定价方式</div>
+          <select style="padding: 6px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; width: 100%;">
+            <option>基于US价格 +15%</option>
+            <option>基于US价格 +20%</option>
+            <option>手动输入</option>
+          </select>
+        </div>
+        <button style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 12px;">推送到市场</button>
+      </div>
+    </div>
+    <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">
+      💡 推送后创建 ProductMarket 记录，商品在该市场变为可见（草稿状态，需设置价格后上架）
+    </div>
+  </div>
+</div>
+
+<div class="options" style="max-width: 900px; margin: 20px auto 0;">
+  <div class="option selected" data-choice="confirmed" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>确认：Shopify Markets 模式</h3>
+      <p>商品全局共享 + 市场差异化叠加 + View as Market + Push to Market</p>
+    </div>
+  </div>
+</div>

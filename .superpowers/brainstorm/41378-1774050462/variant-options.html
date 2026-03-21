@@ -1,0 +1,147 @@
+<h2>How should product variants be managed?</h2>
+<p class="subtitle">Advanced variants need a clear editing interface. Which approach feels right?</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Option C: Advanced Variants</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; margin-bottom: 12px; color: #374151;">Variant Options</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+          <span style="background: #059669; color: white; padding: 4px 12px; border-radius: 16px; font-size: 12px;">Size</span>
+          <span style="background: #059669; color: white; padding: 4px 12px; border-radius: 16px; font-size: 12px;">Color</span>
+          <span style="background: #059669; color: white; padding: 4px 12px; border-radius: 16px; font-size: 12px;">Material</span>
+          <span style="border: 1px dashed #9ca3af; padding: 4px 12px; border-radius: 16px; font-size: 12px; color: #6b7280;">+ Add Option</span>
+        </div>
+      </div>
+
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background: #f9fafb; padding: 8px 16px; font-weight: 500; font-size: 13px; border-bottom: 1px solid #e5e7eb;">
+          Generated Variants (12 combinations)
+        </div>
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #f9fafb;">
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">SKU</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">Size</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e5e7eb;">Color</th>
+              <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e5e7eb;">US Price</th>
+              <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e5e7eb;">Stock</th>
+              <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e5e7eb;">Markets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 8px; font-family: monospace; color: #6b7280;">TSH-S-BLK</td>
+              <td style="padding: 8px;">S</td>
+              <td style="padding: 8px;"><span style="display: inline-block; width: 12px; height: 12px; background: #111; border-radius: 50%; margin-right: 4px;"></span>Black</td>
+              <td style="padding: 8px; text-align: right;">$29.99</td>
+              <td style="padding: 8px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">156</span></td>
+              <td style="padding: 8px; text-align: center;"><span style="font-size: 10px;">US ✓ UK ✓ DE ✓</span></td>
+            </tr>
+            <tr style="background: #f9fafb;">
+              <td style="padding: 8px; font-family: monospace; color: #6b7280;">TSH-S-WHT</td>
+              <td style="padding: 8px;">S</td>
+              <td style="padding: 8px;"><span style="display: inline-block; width: 12px; height: 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 50%; margin-right: 4px;"></span>White</td>
+              <td style="padding: 8px; text-align: right;">$29.99</td>
+              <td style="padding: 8px; text-align: center;"><span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px;">23</span></td>
+              <td style="padding: 8px; text-align: center;"><span style="font-size: 10px;">US ✓ UK ✓</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-family: monospace; color: #6b7280;">TSH-M-BLK</td>
+              <td style="padding: 8px;">M</td>
+              <td style="padding: 8px;"><span style="display: inline-block; width: 12px; height: 12px; background: #111; border-radius: 50%; margin-right: 4px;"></span>Black</td>
+              <td style="padding: 8px; text-align: right;">$29.99</td>
+              <td style="padding: 8px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">89</span></td>
+              <td style="padding: 8px; text-align: center;"><span style="font-size: 10px;">US ✓ UK ✓ DE ✓ FR ✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="padding: 12px 16px; border-top: 1px solid #e5e7eb; text-align: center;">
+          <span style="color: #6b7280; font-size: 12px;">+ 9 more variants</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px; background: #ecfdf5; border-radius: 8px; font-size: 12px; color: #065f46;">
+        <strong>✓ Shared across all variants:</strong> Title, Images, HS Code, COO, Compliance fields
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Option C: Standalone SKUs</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-weight: 600; color: #374151;">Independent Products</div>
+          <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 11px;">No variant linking</span>
+        </div>
+        <div style="font-size: 12px; color: #6b7280;">Each product has its own complete record</div>
+      </div>
+
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background: #f9fafb; padding: 8px 16px; font-weight: 500; font-size: 13px; border-bottom: 1px solid #e5e7eb;">
+          Product List
+        </div>
+        <div style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="width: 48px; height: 48px; background: #f3f4f6; border-radius: 8px;"></div>
+            <div style="flex: 1;">
+              <div style="font-weight: 500; font-size: 13px;">Classic T-Shirt Black S</div>
+              <div style="font-size: 11px; color: #6b7280;">SKU: TSH-S-BLK • $29.99 • 156 in stock</div>
+            </div>
+            <div style="font-size: 10px; color: #059669;">US ✓ UK ✓ DE ✓</div>
+          </div>
+        </div>
+        <div style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="width: 48px; height: 48px; background: #f3f4f6; border-radius: 8px;"></div>
+            <div style="flex: 1;">
+              <div style="font-weight: 500; font-size: 13px;">Premium Hoodie Navy XL</div>
+              <div style="font-size: 11px; color: #6b7280;">SKU: HDY-XL-NVY • $59.99 • 34 in stock</div>
+            </div>
+            <div style="font-size: 10px; color: #059669;">US ✓ AU ✓</div>
+          </div>
+        </div>
+        <div style="padding: 12px;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="width: 48px; height: 48px; background: #f3f4f6; border-radius: 8px;"></div>
+            <div style="flex: 1;">
+              <div style="font-weight: 500; font-size: 13px;">Gift Card $50</div>
+              <div style="font-size: 11px; color: #6b7280;">SKU: GC-50 • Digital • Unlimited</div>
+            </div>
+            <div style="font-size: 10px; color: #059669;">All Markets</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 12px; color: #92400e;">
+        <strong>⚠ Each product:</strong> Separate title, images, compliance, pricing, inventory
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option selected" data-choice="matrix" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Matrix Variants Only</h3>
+      <p>Size × Color matrix. All variants share base info. Best for apparel, consumer goods.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="standalone" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Standalone SKUs Only</h3>
+      <p>Each product independent. More work but complete flexibility. Best for diverse catalogs.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="both" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Both (Hybrid)</h3>
+      <p>Products can have matrix variants OR be standalone. Maximum flexibility, more complex UI.</p>
+    </div>
+  </div>
+</div>

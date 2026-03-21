@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/shop/internal/domain/payment"
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func (r *PaymentRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID 
 	var p payment.Payment
 	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&p).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, payment.ErrPaymentNotFound
+		return nil, code.ErrPaymentNotFound
 	}
 	return &p, err
 }
@@ -36,7 +37,7 @@ func (r *PaymentRepository) FindByOrderID(ctx context.Context, db *gorm.DB, tena
 	var p payment.Payment
 	err := db.WithContext(ctx).Where("order_id = ? AND tenant_id = ?", orderID, tenantID.Int64()).First(&p).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, payment.ErrPaymentNotFound
+		return nil, code.ErrPaymentNotFound
 	}
 	return &p, err
 }
@@ -45,7 +46,7 @@ func (r *PaymentRepository) FindByTransactionID(ctx context.Context, db *gorm.DB
 	var p payment.Payment
 	err := db.WithContext(ctx).Where("transaction_id = ? AND tenant_id = ?", transactionID, tenantID.Int64()).First(&p).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, payment.ErrPaymentNotFound
+		return nil, code.ErrPaymentNotFound
 	}
 	return &p, err
 }
