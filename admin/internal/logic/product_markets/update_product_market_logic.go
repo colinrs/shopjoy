@@ -43,11 +43,18 @@ func (l *UpdateProductMarketLogic) UpdateProductMarket(req *types.UpdateProductM
 	}
 
 	if req.Price != "" {
-		pm.Price, _ = decimal.NewFromString(req.Price)
+		price, err := decimal.NewFromString(req.Price)
+		if err != nil {
+			return nil, err
+		}
+		pm.Price = price
 	}
 
 	if req.CompareAtPrice != "" {
-		cap, _ := decimal.NewFromString(req.CompareAtPrice)
+		cap, err := decimal.NewFromString(req.CompareAtPrice)
+		if err != nil {
+			return nil, err
+		}
 		pm.CompareAtPrice = &cap
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/shopspring/decimal"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,15 +33,22 @@ func NewPushToMarketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Push
 
 func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *types.PushToMarketResp, err error) {
 	db := l.svcCtx.DB
-	repo := persistence.NewProductMarketRepository()
-	marketRepo := persistence.NewMarketRepository()
 
 	// Get tenant ID from context
 	tenantID := l.ctx.Value("tenant_id")
-	var tid int64
-	if tidVal, ok := tenantID.(int64); ok {
-		tid = tidVal
+	tid, ok := tenantID.(int64)
+	if !ok || tid == 0 {
+		return nil, code.ErrTenantNotFound
 	}
+
+	// Validate product exists
+	productRepo := persistence.NewProductRepository()
+	if _, err := productRepo.FindByID(l.ctx, db, req.ProductID); err != nil {
+		return nil, err
+	}
+
+	repo := persistence.NewProductMarketRepository()
+	marketRepo := persistence.NewMarketRepository()
 
 	var success, failed []int64
 
@@ -62,7 +70,11 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 		// Parse price
 		var price decimal.Decimal
 		if i < len(req.Prices) {
-			price, _ = decimal.NewFromString(req.Prices[i])
+			price, err = decimal.NewFromString(req.Prices[i])
+			if err != nil {
+				failed = append(failed, marketID)
+				continue
+			}
 		}
 
 		// Create ProductMarket
