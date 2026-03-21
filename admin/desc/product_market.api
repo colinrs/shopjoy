@@ -1,0 +1,78 @@
+syntax = "v1"
+
+info (
+	title:   "Product Market API"
+	desc:    "商品市场关联管理接口"
+	version: "v1"
+)
+
+type (
+	// ProductMarket response
+	ProductMarketResp {
+		ID                  int64  `json:"id"`
+		ProductID           int64  `json:"product_id"`
+		MarketID            int64  `json:"market_id"`
+		MarketCode          string `json:"market_code"`
+		MarketName          string `json:"market_name"`
+		IsEnabled           bool   `json:"is_enabled"`
+		Price               string `json:"price"`
+		CompareAtPrice      string `json:"compare_at_price,optional"`
+		Currency            string `json:"currency"`
+		StockAlertThreshold int    `json:"stock_alert_threshold"`
+		PublishedAt         string `json:"published_at,optional"`
+	}
+	// List product markets
+	ListProductMarketsReq {
+		ProductID int64 `path:"id"`
+	}
+	ListProductMarketsResp {
+		List []*ProductMarketResp `json:"list"`
+	}
+	// Update product market
+	UpdateProductMarketReq {
+		ProductID           int64  `path:"id"`
+		MarketID            int64  `path:"market_id"`
+		IsEnabled           *bool  `json:"is_enabled,optional"`
+		Price               string `json:"price,optional"`
+		CompareAtPrice      string `json:"compare_at_price,optional"`
+		StockAlertThreshold int    `json:"stock_alert_threshold,optional"`
+	}
+	// Push to market request
+	PushToMarketReq {
+		ProductID int64    `path:"id"`
+		MarketIDs []int64  `json:"market_ids"`
+		Prices    []string `json:"prices"` // Price per market, same order as market_ids
+	}
+	PushToMarketResp {
+		Success []int64 `json:"success"` // Market IDs successfully added
+		Failed  []int64 `json:"failed"` // Market IDs that failed
+	}
+	// Remove from market
+	RemoveFromMarketReq {
+		ProductID int64 `path:"id"`
+		MarketID  int64 `path:"market_id"`
+	}
+)
+
+@server (
+	group:      product_markets
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取商品市场配置列表"
+	@handler ListProductMarketsHandler
+	get /api/v1/products/:id/markets (ListProductMarketsReq) returns (ListProductMarketsResp)
+
+	@doc "更新商品市场配置"
+	@handler UpdateProductMarketHandler
+	put /api/v1/products/:id/markets/:market_id (UpdateProductMarketReq) returns (ProductMarketResp)
+
+	@doc "推送商品到市场"
+	@handler PushToMarketHandler
+	post /api/v1/products/:id/push-to-market (PushToMarketReq) returns (PushToMarketResp)
+
+	@doc "从市场移除商品"
+	@handler RemoveFromMarketHandler
+	delete /api/v1/products/:id/markets/:market_id (RemoveFromMarketReq)
+}
+

@@ -84,6 +84,9 @@
           <el-menu-item index="/shop">
             <span>基本设置</span>
           </el-menu-item>
+          <el-menu-item index="/settings/markets">
+            <span>市场管理</span>
+          </el-menu-item>
           <el-menu-item index="/appearance">
             <span>外观装修</span>
           </el-menu-item>

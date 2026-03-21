@@ -157,6 +157,24 @@ func (r *productMarketRepo) FindByProductID(ctx context.Context, db *gorm.DB, pr
 	return pms, nil
 }
 
+func (r *productMarketRepo) FindByProductIDs(ctx context.Context, db *gorm.DB, productIDs []int64) ([]*product.ProductMarket, error) {
+	if len(productIDs) == 0 {
+		return []*product.ProductMarket{}, nil
+	}
+
+	var models []productMarketModel
+	err := db.WithContext(ctx).Where("product_id IN ?", productIDs).Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	pms := make([]*product.ProductMarket, len(models))
+	for i, m := range models {
+		pms[i] = m.toEntity()
+	}
+	return pms, nil
+}
+
 func (r *productMarketRepo) FindByMarketID(ctx context.Context, db *gorm.DB, marketID int64, query product.Query) ([]*product.ProductMarket, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&productMarketModel{}).Where("market_id = ?", marketID)
 

@@ -28,6 +28,12 @@ const router = createRouter({
           meta: { title: '商品管理' }
         },
         {
+          path: 'products/:id',
+          name: 'product-detail',
+          component: () => import('@/views/products/[id]/index.vue'),
+          meta: { title: '商品详情' }
+        },
+        {
           path: 'orders',
           name: 'orders',
           component: () => import('@/views/orders/index.vue'),
@@ -56,6 +62,12 @@ const router = createRouter({
           name: 'shop',
           component: () => import('@/views/shop/index.vue'),
           meta: { title: '店铺设置' }
+        },
+        {
+          path: 'settings/markets',
+          name: 'settings-markets',
+          component: () => import('@/views/settings/markets/index.vue'),
+          meta: { title: '市场管理' }
         }
       ]
     }

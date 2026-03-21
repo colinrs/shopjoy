@@ -98,6 +98,7 @@ func (s *service) GetProductList(ctx context.Context, req QueryProductRequest) (
 		Status:     ParseStatus(req.Status),
 		MinPrice:   req.MinPrice,
 		MaxPrice:   req.MaxPrice,
+		MarketID:   req.MarketID,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 	}

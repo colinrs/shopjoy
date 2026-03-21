@@ -322,6 +322,7 @@ type Query struct {
 	Status     Status
 	MinPrice   *int64
 	MaxPrice   *int64
+	MarketID   int64
 	Page       int
 	PageSize   int
 }

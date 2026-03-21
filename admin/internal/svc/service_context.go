@@ -10,6 +10,8 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
+	"github.com/colinrs/shopjoy/admin/internal/domain/market"
+	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	"github.com/colinrs/shopjoy/pkg/auth"
@@ -21,13 +23,15 @@ import (
 )
 
 type ServiceContext struct {
-	Config           config.Config
-	DB               *gorm.DB
-	ProductService   appProduct.Service
-	UserService      appUser.Service
-	AdminUserService appAdminUser.Service
-	JWTManager       *auth.JWTManager
-	AuthMiddleware   rest.Middleware
+	Config              config.Config
+	DB                  *gorm.DB
+	ProductService      appProduct.Service
+	UserService         appUser.Service
+	AdminUserService    appAdminUser.Service
+	JWTManager          *auth.JWTManager
+	AuthMiddleware      rest.Middleware
+	ProductMarketRepo   product.ProductMarketRepository
+	MarketRepo          market.Repository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -52,6 +56,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	authMiddleware := middleware.NewAuthMiddleware(c.JWT.Secret)
 
+	productMarketRepo := persistence.NewProductMarketRepository()
+	marketRepo := persistence.NewMarketRepository()
+
 	return &ServiceContext{
 		Config:           c,
 		DB:               db,
@@ -60,5 +67,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminUserService: adminUserService,
 		JWTManager:       jwtManager,
 		AuthMiddleware:   authMiddleware,
+		ProductMarketRepo: productMarketRepo,
+		MarketRepo:        marketRepo,
 	}
 }

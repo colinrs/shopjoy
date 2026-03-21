@@ -1,5 +1,21 @@
 <template>
   <div class="products-page">
+    <!-- Market Filter Bar -->
+    <el-card class="market-filter-card" shadow="never">
+      <div class="market-filter-bar">
+        <el-radio-group v-model="selectedMarket" @change="handleMarketChange">
+          <el-radio-button value="">All Markets</el-radio-button>
+          <el-radio-button
+            v-for="market in markets"
+            :key="market.id"
+            :value="market.id"
+          >
+            {{ market.code }}
+          </el-radio-button>
+        </el-radio-group>
+      </div>
+    </el-card>
+
     <!-- Search & Filter Bar -->
     <el-card class="filter-card" shadow="never">
       <div class="filter-bar">
@@ -44,6 +60,7 @@
       <span class="selected-count">已选择 {{ selectedProducts.length }} 项</span>
       <el-button size="small" @click="handleBatchOnSale">批量上架</el-button>
       <el-button size="small" @click="handleBatchOffSale">批量下架</el-button>
+      <el-button size="small" type="success" @click="handleBatchPushToMarket">Push to Market</el-button>
       <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
     </div>
 
@@ -60,10 +77,10 @@
           <template #default="{ row }">
             <div class="product-cell">
               <el-image
-                :src="row.image || defaultImage"
+                :src="row.images?.[0] || defaultImage"
                 fit="cover"
                 class="product-thumb"
-                :preview-src-list="[row.image]"
+                :preview-src-list="row.images"
               >
                 <template #error>
                   <div class="image-placeholder">
@@ -75,8 +92,8 @@
                 <p class="product-name">{{ row.name }}</p>
                 <p class="product-sku">SKU: {{ row.sku || '暂无' }}</p>
                 <div class="product-tags">
-                  <el-tag v-if="row.is_hot" size="small" type="danger" effect="plain">热销</el-tag>
-                  <el-tag v-if="row.is_new" size="small" type="success" effect="plain">新品</el-tag>
+                  <el-tag v-if="row.tags?.includes('hot')" size="small" type="danger" effect="plain">热销</el-tag>
+                  <el-tag v-if="row.tags?.includes('new')" size="small" type="success" effect="plain">新品</el-tag>
                 </div>
               </div>
             </div>
@@ -85,10 +102,7 @@
         <el-table-column label="价格" width="150" align="right">
           <template #default="{ row }">
             <div class="price-cell">
-              <p class="sale-price">¥{{ formatPrice(row.price) }}</p>
-              <p v-if="row.original_price" class="original-price">
-                ¥{{ formatPrice(row.original_price) }}
-              </p>
+              <p class="sale-price">{{ row.currency || 'USD' }}{{ formatPrice(row.price) }}</p>
             </div>
           </template>
         </el-table-column>
@@ -99,7 +113,29 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="category" label="分类" width="120" />
+        <el-table-column label="Markets" min-width="150" align="center">
+          <template #default="{ row }">
+            <div class="market-tags">
+              <el-tag
+                v-for="market in row.markets"
+                :key="market.market_id"
+                :type="market.is_enabled ? 'success' : 'info'"
+                size="small"
+                class="market-tag"
+              >
+                {{ market.market_code }}
+              </el-tag>
+              <span v-if="!row.markets || row.markets.length === 0" class="no-markets">
+                No markets
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="分类ID" width="100" align="center">
+          <template #default="{ row }">
+            {{ row.category_id || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-switch
@@ -110,7 +146,6 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="sales" label="销量" width="100" align="center" sortable />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
@@ -214,37 +249,114 @@
         <el-button type="primary" @click="handleSave" :loading="saveLoading">保存</el-button>
       </template>
     </el-dialog>
+
+    <!-- Push to Market Dialog -->
+    <el-dialog
+      v-model="pushToMarketDialogVisible"
+      title="Push to Market"
+      width="500px"
+      destroy-on-close
+    >
+      <el-form :model="pushToMarketForm" label-width="120px" ref="pushToMarketFormRef">
+        <el-form-item label="Markets" prop="markets" required>
+          <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">
+            <el-checkbox
+              v-for="market in availableMarkets"
+              :key="market.id"
+              :value="market.id"
+              :label="market.id"
+            >
+              {{ market.code }} - {{ market.name }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="Price (USD)" prop="price" required>
+          <el-input-number
+            v-model="pushToMarketForm.price"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
+          <div class="price-note">Note: The price is in base currency (USD). It will be applied to all selected markets regardless of their local currency.</div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="pushToMarketDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="handleConfirmPushToMarket" :loading="pushToMarketLoading">
+          Push to Market
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
+import { getProductList, pushToMarket, type Product, type ListProductsParams } from '@/api/product'
+import { getMarkets, type Market } from '@/api/market'
+
+const router = useRouter()
 
 const loading = ref(false)
 const saveLoading = ref(false)
+const pushToMarketLoading = ref(false)
 const dialogVisible = ref(false)
+const pushToMarketDialogVisible = ref(false)
 const isEdit = ref(false)
 const searchQuery = ref('')
 const filterStatus = ref('')
 const filterCategory = ref('')
+const selectedMarket = ref<number | ''>('')
 const currentPage = ref(1)
 const pageSize = ref(20)
-const total = ref(100)
-const selectedProducts = ref<any[]>([])
+const total = ref(0)
+const selectedProducts = ref<Product[]>([])
 const formRef = ref()
+const pushToMarketFormRef = ref()
 const defaultImage = 'https://via.placeholder.com/80'
 
+// Market data
+const markets = ref<Market[]>([])
+const productList = ref<Product[]>([])
+
+// Push to market form
+const pushToMarketForm = reactive({
+  selectedMarkets: [] as number[],
+  price: 0
+})
+
+// Available markets for push to market dialog
+const availableMarkets = computed(() => markets.value.filter(m => m.is_active))
+
 const productForm = reactive({
-  id: null,
+  id: null as number | null,
   name: '',
   price: 0,
   original_price: 0,
   stock: 0,
   category: '',
+  category_id: 0,
   image: '',
-  description: ''
+  images: [] as string[],
+  description: '',
+  sku: '',
+  brand: '',
+  tags: [] as string[],
+  is_matrix_product: false,
+  hs_code: '',
+  coo: '',
+  weight: '',
+  weight_unit: 'kg',
+  length: '',
+  width: '',
+  height: '',
+  dangerous_goods: [] as string[],
+  currency: 'USD',
+  cost_price: 0,
+  status: 'draft'
 })
 
 const formRules = {
@@ -253,79 +365,6 @@ const formRules = {
   stock: [{ required: true, message: '请输入库存数量', trigger: 'blur' }],
   category: [{ required: true, message: '请选择商品分类', trigger: 'change' }]
 }
-
-// Mock data
-const productList = ref([
-  {
-    id: 1,
-    name: '无线蓝牙耳机 Pro',
-    sku: 'BT-2024-001',
-    price: 29900,
-    original_price: 39900,
-    stock: 156,
-    category: '数码电子',
-    status: 'on_sale',
-    sales: 328,
-    is_hot: true,
-    is_new: false,
-    image: ''
-  },
-  {
-    id: 2,
-    name: '智能手表 Series 7',
-    sku: 'SW-2024-002',
-    price: 199900,
-    original_price: 229900,
-    stock: 89,
-    category: '数码电子',
-    status: 'on_sale',
-    sales: 156,
-    is_hot: true,
-    is_new: true,
-    image: ''
-  },
-  {
-    id: 3,
-    name: '便携充电宝 20000mAh',
-    sku: 'PB-2024-003',
-    price: 12900,
-    original_price: 15900,
-    stock: 234,
-    category: '数码电子',
-    status: 'on_sale',
-    sales: 892,
-    is_hot: false,
-    is_new: false,
-    image: ''
-  },
-  {
-    id: 4,
-    name: '机械键盘 RGB 青轴',
-    sku: 'KB-2024-004',
-    price: 45900,
-    original_price: 59900,
-    stock: 12,
-    category: '数码电子',
-    status: 'on_sale',
-    sales: 67,
-    is_hot: false,
-    is_new: true,
-    image: ''
-  },
-  {
-    id: 5,
-    name: '4K 高清显示器 27寸',
-    sku: 'MN-2024-005',
-    price: 159900,
-    stock: 0,
-    category: '数码电子',
-    status: 'off_sale',
-    sales: 23,
-    is_hot: false,
-    is_new: false,
-    image: ''
-  }
-])
 
 const formatPrice = (price: number) => {
   return (price / 100).toFixed(2)
@@ -338,7 +377,8 @@ const getStockType = (stock: number) => {
 }
 
 const handleSearch = () => {
-  ElMessage.info('搜索: ' + searchQuery.value)
+  currentPage.value = 1
+  loadProducts()
 }
 
 const handleExport = () => {
@@ -361,9 +401,7 @@ const handleAdd = () => {
 }
 
 const handleEdit = (row: any) => {
-  isEdit.value = true
-  Object.assign(productForm, { ...row })
-  dialogVisible.value = true
+  router.push(`/products/${row.id}`)
 }
 
 const handleView = (row: any) => {
@@ -421,6 +459,61 @@ const handleBatchDelete = () => {
   })
 }
 
+const handleBatchPushToMarket = () => {
+  if (selectedProducts.value.length === 0) {
+    ElMessage.warning('Please select at least one product')
+    return
+  }
+
+  // Reset form
+  pushToMarketForm.selectedMarkets = []
+  pushToMarketForm.price = 0
+  pushToMarketDialogVisible.value = true
+}
+
+const handleConfirmPushToMarket = async () => {
+  if (pushToMarketForm.selectedMarkets.length === 0) {
+    ElMessage.warning('Please select at least one market')
+    return
+  }
+  if (pushToMarketForm.price <= 0) {
+    ElMessage.warning('Please enter a valid price')
+    return
+  }
+
+  pushToMarketLoading.value = true
+  try {
+    const prices = pushToMarketForm.selectedMarkets.map(() =>
+      pushToMarketForm.price.toFixed(2)
+    )
+
+    let successCount = 0
+    let failCount = 0
+
+    for (const product of selectedProducts.value) {
+      try {
+        const result = await pushToMarket(product.id, {
+          market_ids: pushToMarketForm.selectedMarkets,
+          prices
+        })
+        successCount += result.success?.length || 0
+        failCount += result.failed?.length || 0
+      } catch (error) {
+        failCount += pushToMarketForm.selectedMarkets.length
+      }
+    }
+
+    pushToMarketDialogVisible.value = false
+    ElMessage.success(`Push to market completed. Success: ${successCount}, Failed: ${failCount}`)
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to push to market:', error)
+    ElMessage.error('Failed to push to market')
+  } finally {
+    pushToMarketLoading.value = false
+  }
+}
+
 const handleSave = async () => {
   if (!formRef.value) return
   
@@ -450,16 +543,52 @@ const handleCurrentChange = (val: number) => {
   loadProducts()
 }
 
+const handleMarketChange = () => {
+  currentPage.value = 1
+  loadProducts()
+}
+
+const loadMarkets = async () => {
+  try {
+    const response = await getMarkets()
+    markets.value = response.list || []
+  } catch (error) {
+    console.error('Failed to load markets:', error)
+    ElMessage.error('Failed to load markets')
+  }
+}
+
 const loadProducts = async () => {
   loading.value = true
   try {
-    // TODO: Call API
+    const params: ListProductsParams = {
+      page: currentPage.value,
+      page_size: pageSize.value
+    }
+
+    if (searchQuery.value) {
+      params.name = searchQuery.value
+    }
+    if (filterStatus.value) {
+      params.status = filterStatus.value
+    }
+    if (selectedMarket.value) {
+      params.market_id = selectedMarket.value
+    }
+
+    const response = await getProductList(params)
+    productList.value = response.list || []
+    total.value = response.total || 0
+  } catch (error) {
+    console.error('Failed to load products:', error)
+    ElMessage.error('Failed to load products')
   } finally {
     loading.value = false
   }
 }
 
 onMounted(() => {
+  loadMarkets()
   loadProducts()
 })
 </script>
@@ -467,6 +596,16 @@ onMounted(() => {
 <style scoped>
 .products-page {
   padding: 0;
+}
+
+/* Market Filter Bar */
+.market-filter-card {
+  margin-bottom: 20px;
+}
+
+.market-filter-bar {
+  display: flex;
+  justify-content: flex-start;
 }
 
 /* Filter Bar */
@@ -591,6 +730,30 @@ onMounted(() => {
   color: #9CA3AF;
   text-decoration: line-through;
   margin: 4px 0 0 0;
+}
+
+/* Market Tags */
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.market-tag {
+  font-size: 11px;
+}
+
+.no-markets {
+  color: #9CA3AF;
+  font-size: 12px;
+}
+
+.price-note {
+  font-size: 12px;
+  color: #F59E0B;
+  margin-top: 8px;
+  line-height: 1.4;
 }
 
 /* Pagination */

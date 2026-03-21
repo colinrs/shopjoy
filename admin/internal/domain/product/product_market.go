@@ -92,6 +92,7 @@ type ProductMarketRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, id int64) (*ProductMarket, error)
 	FindByProductAndMarket(ctx context.Context, db *gorm.DB, productID, marketID int64, variantID *int64) (*ProductMarket, error)
 	FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*ProductMarket, error)
+	FindByProductIDs(ctx context.Context, db *gorm.DB, productIDs []int64) ([]*ProductMarket, error)
 	FindByMarketID(ctx context.Context, db *gorm.DB, marketID int64, query Query) ([]*ProductMarket, int64, error)
 	BatchCreate(ctx context.Context, db *gorm.DB, pms []*ProductMarket) error
 }

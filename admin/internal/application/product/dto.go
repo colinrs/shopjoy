@@ -66,6 +66,7 @@ type QueryProductRequest struct {
 	Status     string
 	MinPrice   *int64
 	MaxPrice   *int64
+	MarketID   int64
 	Page       int
 	PageSize   int
 }

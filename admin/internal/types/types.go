@@ -50,12 +50,25 @@ type CreateMarketReq struct {
 }
 
 type CreateProductReq struct {
-	Name        string `json:"name"`
-	Description string `json:"description,optional"`
-	Price       int64  `json:"price"`
-	Currency    string `json:"currency,optional"`
-	CostPrice   int64  `json:"cost_price,optional"`
-	CategoryID  int64  `json:"category_id"`
+	Name            string   `json:"name"`
+	Description     string   `json:"description,optional"`
+	Price           int64    `json:"price"`
+	Currency        string   `json:"currency,optional"`
+	CostPrice       int64    `json:"cost_price,optional"`
+	CategoryID      int64    `json:"category_id"`
+	SKU             string   `json:"sku,optional"`
+	Brand           string   `json:"brand,optional"`
+	Tags            []string `json:"tags,optional"`
+	Images          []string `json:"images,optional"`
+	IsMatrixProduct bool     `json:"is_matrix_product,optional"`
+	HSCode          string   `json:"hs_code,optional"`
+	COO             string   `json:"coo,optional"`
+	Weight          string   `json:"weight,optional"`
+	WeightUnit      string   `json:"weight_unit,optional"`
+	Length          string   `json:"length,optional"`
+	Width           string   `json:"width,optional"`
+	Height          string   `json:"height,optional"`
+	DangerousGoods  []string `json:"dangerous_goods,optional"`
 }
 
 type CreateProductResp struct {
@@ -105,6 +118,14 @@ type ListMarketsResp struct {
 	Total int64             `json:"total"`
 }
 
+type ListProductMarketsReq struct {
+	ProductID int64 `path:"id"`
+}
+
+type ListProductMarketsResp struct {
+	List []*ProductMarketResp `json:"list"`
+}
+
 type ListProductReq struct {
 	Name       string `form:"name,optional"`
 	CategoryID int64  `form:"category_id,optional"`
@@ -113,6 +134,7 @@ type ListProductReq struct {
 	MaxPrice   int64  `form:"max_price,optional"`
 	Page       int    `form:"page,default=1"`
 	PageSize   int    `form:"page_size,default=20"`
+	MarketID   int64  `form:"market_id,optional"`
 }
 
 type ListProductResp struct {
@@ -151,17 +173,65 @@ type MarketResponse struct {
 }
 
 type ProductDetailResp struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int64  `json:"price"`
-	Currency    string `json:"currency"`
-	CostPrice   int64  `json:"cost_price"`
-	Stock       int    `json:"stock"`
-	Status      string `json:"status"`
-	CategoryID  int64  `json:"category_id"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ID              int64               `json:"id"`
+	Name            string              `json:"name"`
+	Description     string              `json:"description"`
+	Price           int64               `json:"price"`
+	Currency        string              `json:"currency"`
+	CostPrice       int64               `json:"cost_price"`
+	Stock           int                 `json:"stock"`
+	Status          string              `json:"status"`
+	CategoryID      int64               `json:"category_id"`
+	CreatedAt       string              `json:"created_at"`
+	UpdatedAt       string              `json:"updated_at"`
+	SKU             string              `json:"sku"`
+	Brand           string              `json:"brand"`
+	Tags            []string            `json:"tags"`
+	Images          []string            `json:"images"`
+	IsMatrixProduct bool                `json:"is_matrix_product"`
+	HSCode          string              `json:"hs_code"`
+	COO             string              `json:"coo"`
+	Weight          string              `json:"weight"`
+	WeightUnit      string              `json:"weight_unit"`
+	Length          string              `json:"length"`
+	Width           string              `json:"width"`
+	Height          string              `json:"height"`
+	DangerousGoods  []string            `json:"dangerous_goods"`
+	Markets         []ProductMarketInfo `json:"markets,optional"`
+}
+
+type ProductMarketInfo struct {
+	MarketID   int64  `json:"market_id"`
+	MarketCode string `json:"market_code"`
+	MarketName string `json:"market_name"`
+	IsEnabled  bool   `json:"is_enabled"`
+	Price      string `json:"price"`
+	Currency   string `json:"currency"`
+}
+
+type ProductMarketResp struct {
+	ID                  int64  `json:"id"`
+	ProductID           int64  `json:"product_id"`
+	MarketID            int64  `json:"market_id"`
+	MarketCode          string `json:"market_code"`
+	MarketName          string `json:"market_name"`
+	IsEnabled           bool   `json:"is_enabled"`
+	Price               string `json:"price"`
+	CompareAtPrice      string `json:"compare_at_price,optional"`
+	Currency            string `json:"currency"`
+	StockAlertThreshold int    `json:"stock_alert_threshold"`
+	PublishedAt         string `json:"published_at,optional"`
+}
+
+type PushToMarketReq struct {
+	ProductID int64    `path:"id"`
+	MarketIDs []int64  `json:"market_ids"`
+	Prices    []string `json:"prices"` // Price per market, same order as market_ids
+}
+
+type PushToMarketResp struct {
+	Success []int64 `json:"success"` // Market IDs successfully added
+	Failed  []int64 `json:"failed"`  // Market IDs that failed
 }
 
 type PutOnSaleReq struct {
@@ -183,6 +253,11 @@ type RegisterTenantAdminResponse struct {
 	User         AdminUserInfo `json:"user"`
 }
 
+type RemoveFromMarketReq struct {
+	ProductID int64 `path:"id"`
+	MarketID  int64 `path:"market_id"`
+}
+
 type TakeOffSaleReq struct {
 	ID int64 `path:"id"`
 }
@@ -195,19 +270,42 @@ type TaxConfig struct {
 }
 
 type UpdateMarketReq struct {
-	ID       int64     `path:"id"`
-	Name     string    `json:"name,optional"`
-	IsActive *bool     `json:"is_active,optional"`
-	TaxRules TaxConfig `json:"tax_rules,optional"`
+	ID        int64     `path:"id"`
+	Name      string    `json:"name,optional"`
+	IsActive  *bool     `json:"is_active,optional"`
+	IsDefault *bool     `json:"is_default,optional"`
+	TaxRules  TaxConfig `json:"tax_rules,optional"`
+}
+
+type UpdateProductMarketReq struct {
+	ProductID           int64  `path:"id"`
+	MarketID            int64  `path:"market_id"`
+	IsEnabled           *bool  `json:"is_enabled,optional"`
+	Price               string `json:"price,optional"`
+	CompareAtPrice      string `json:"compare_at_price,optional"`
+	StockAlertThreshold int    `json:"stock_alert_threshold,optional"`
 }
 
 type UpdateProductReq struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description,optional"`
-	Price       int64  `json:"price"`
-	Currency    string `json:"currency,optional"`
-	CategoryID  int64  `json:"category_id"`
+	ID              int64    `json:"id"`
+	Name            string   `json:"name"`
+	Description     string   `json:"description,optional"`
+	Price           int64    `json:"price"`
+	Currency        string   `json:"currency,optional"`
+	CategoryID      int64    `json:"category_id"`
+	SKU             string   `json:"sku,optional"`
+	Brand           string   `json:"brand,optional"`
+	Tags            []string `json:"tags,optional"`
+	Images          []string `json:"images,optional"`
+	IsMatrixProduct bool     `json:"is_matrix_product,optional"`
+	HSCode          string   `json:"hs_code,optional"`
+	COO             string   `json:"coo,optional"`
+	Weight          string   `json:"weight,optional"`
+	WeightUnit      string   `json:"weight_unit,optional"`
+	Length          string   `json:"length,optional"`
+	Width           string   `json:"width,optional"`
+	Height          string   `json:"height,optional"`
+	DangerousGoods  []string `json:"dangerous_goods,optional"`
 }
 
 type UpdateProfileRequest struct {
