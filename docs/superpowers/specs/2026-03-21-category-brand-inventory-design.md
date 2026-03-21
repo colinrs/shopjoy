@@ -28,11 +28,50 @@ This design extends the existing ShopJoy system. Key existing components:
 | Product.brand | `VARCHAR` string | `BIGINT brand_id` FK | Yes - data migration |
 | Product.stock | Single `INT` field | Separate inventory tables | Yes - data migration |
 | SKU.stock | Single `INT` field | Extended with locked_stock, safety_stock | Yes - schema change |
+| Product.tenant_id | **Missing** (see below) | Add `tenant_id` column | Yes - data migration |
 | Category SEO | Not present | Add `seo_title`, `seo_description` | Yes - schema change |
 | Brand compliance | Not present | Add trademark fields | Yes - schema change |
 | Soft delete | Products use `status = 3` | Categories/Brands use `deleted_at` | No - keep both patterns |
 
-### 0.3 Design Principles
+### 0.3 Tenant Isolation Strategy
+
+**Current State:** The `products` table does NOT have a `tenant_id` column. Tenant isolation is currently achieved indirectly:
+- Products are associated with markets via `product_markets` table
+- Markets have `tenant_id` column
+- Queries filter products through market relationship
+
+**Problem with Current Approach:**
+- Products without market assignment have no tenant isolation
+- Complex queries require JOINs through `product_markets` and `markets`
+- Not consistent with other entities (categories, brands, users all have `tenant_id`)
+
+**Proposed Solution:** Add `tenant_id` directly to `products` and `skus` tables:
+
+```sql
+-- Add tenant_id to products table
+ALTER TABLE `products`
+    ADD COLUMN `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID' AFTER `id`,
+    ADD INDEX `idx_tenant_id` (`tenant_id`);
+
+-- Add tenant_id to skus table
+ALTER TABLE `skus`
+    ADD COLUMN `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID' AFTER `id`,
+    ADD INDEX `idx_tenant_id` (`tenant_id`);
+
+-- Migration: Derive tenant_id from product_markets
+UPDATE products p
+    INNER JOIN product_markets pm ON p.id = pm.product_id
+    INNER JOIN markets m ON pm.market_id = m.id
+    SET p.tenant_id = m.tenant_id
+    WHERE p.tenant_id = 0;
+
+UPDATE skus s
+    INNER JOIN products p ON s.product_id = p.id
+    SET s.tenant_id = p.tenant_id
+    WHERE s.tenant_id = 0;
+```
+
+### 0.4 Design Principles
 
 1. **Extend existing tables** rather than replace where possible
 2. **Backward compatibility** for existing product/brand string field during migration
@@ -846,19 +885,23 @@ type InventoryService interface {
 ## 6. Migration Plan
 
 ### Phase 1: Database Schema Updates
-1. Add SEO fields to `categories` table
-2. Add compliance fields to `brands` table
-3. Add `brand_id` to `products` table
-4. Add inventory fields to `skus` table
-5. Create `category_markets`, `brand_markets`, `warehouses`, `warehouse_inventories`, `inventory_logs` tables
+1. Add `tenant_id` to `products` and `skus` tables
+2. Add SEO fields to `categories` table
+3. Add compliance fields to `brands` table
+4. Add `brand_id` to `products` table
+5. Add inventory fields to `skus` table
+6. Create `category_markets`, `brand_markets`, `warehouses`, `warehouse_inventories`, `inventory_logs` tables
 
 ### Phase 2: Data Migration
-1. Migrate `products.brand` string to `brand_id`:
+1. Migrate `tenant_id` from markets to products/skus:
+   - Update `products.tenant_id` from `product_markets` → `markets.tenant_id`
+   - Update `skus.tenant_id` from `products.tenant_id`
+2. Migrate `products.brand` string to `brand_id`:
    - Extract distinct brand names from products
-   - Create Brand records for each unique brand
+   - Create Brand records for each unique brand (with correct `tenant_id`)
    - Update products to set `brand_id`
-2. Migrate `skus.stock` to `skus.available_stock`
-3. Migrate `products.stock` to be computed from SKU inventories
+3. Migrate `skus.stock` to `skus.available_stock`
+4. Migrate `products.stock` to be computed from SKU inventories
 
 ### Phase 3: Backend Implementation
 1. Implement Category domain, repository, service, handlers
