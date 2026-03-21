@@ -40,6 +40,15 @@ type AdminUserInfo struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type CreateMarketReq struct {
+	Code            string    `json:"code"`     // US, UK, DE, FR, AU
+	Name            string    `json:"name"`     // United States
+	Currency        string    `json:"currency"` // USD, GBP, EUR, AUD
+	DefaultLanguage string    `json:"default_language,optional"`
+	Flag            string    `json:"flag,optional"`
+	TaxRules        TaxConfig `json:"tax_rules,optional"`
+}
+
 type CreateProductReq struct {
 	Name        string `json:"name"`
 	Description string `json:"description,optional"`
@@ -51,6 +60,10 @@ type CreateProductReq struct {
 
 type CreateProductResp struct {
 	ID int64 `json:"id"`
+}
+
+type GetMarketReq struct {
+	ID int64 `path:"id"`
 }
 
 type GetProductReq struct {
@@ -87,6 +100,11 @@ type ListAdminUsersResponse struct {
 	PageSize int              `json:"page_size"`
 }
 
+type ListMarketsResp struct {
+	List  []*MarketResponse `json:"list"`
+	Total int64             `json:"total"`
+}
+
 type ListProductReq struct {
 	Name       string `form:"name,optional"`
 	CategoryID int64  `form:"category_id,optional"`
@@ -116,6 +134,20 @@ type ListUsersResponse struct {
 	Total    int64              `json:"total"`
 	Page     int                `json:"page"`
 	PageSize int                `json:"page_size"`
+}
+
+type MarketResponse struct {
+	ID              int64     `json:"id"`
+	Code            string    `json:"code"`
+	Name            string    `json:"name"`
+	Currency        string    `json:"currency"`
+	DefaultLanguage string    `json:"default_language"`
+	Flag            string    `json:"flag"`
+	IsActive        bool      `json:"is_active"`
+	IsDefault       bool      `json:"is_default"`
+	TaxRules        TaxConfig `json:"tax_rules"`
+	CreatedAt       string    `json:"created_at"`
+	UpdatedAt       string    `json:"updated_at"`
 }
 
 type ProductDetailResp struct {
@@ -153,6 +185,20 @@ type RegisterTenantAdminResponse struct {
 
 type TakeOffSaleReq struct {
 	ID int64 `path:"id"`
+}
+
+type TaxConfig struct {
+	VatRate     string `json:"vat_rate,optional"`
+	GstRate     string `json:"gst_rate,optional"`
+	IossEnabled bool   `json:"ioss_enabled,optional"`
+	IncludeTax  bool   `json:"include_tax,optional"`
+}
+
+type UpdateMarketReq struct {
+	ID       int64     `path:"id"`
+	Name     string    `json:"name,optional"`
+	IsActive *bool     `json:"is_active,optional"`
+	TaxRules TaxConfig `json:"tax_rules,optional"`
 }
 
 type UpdateProductReq struct {

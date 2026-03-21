@@ -1,0 +1,83 @@
+syntax = "v1"
+
+info (
+	title:   "Market API"
+	desc:    "市场管理相关接口"
+	version: "v1"
+)
+
+type (
+	// Tax configuration
+	TaxConfig {
+		VatRate     string `json:"vat_rate,optional"`
+		GstRate     string `json:"gst_rate,optional"`
+		IossEnabled bool   `json:"ioss_enabled,optional"`
+		IncludeTax  bool   `json:"include_tax,optional"`
+	}
+	// Market responses
+	MarketResponse {
+		ID              int64     `json:"id"`
+		Code            string    `json:"code"`
+		Name            string    `json:"name"`
+		Currency        string    `json:"currency"`
+		DefaultLanguage string    `json:"default_language"`
+		Flag            string    `json:"flag"`
+		IsActive        bool      `json:"is_active"`
+		IsDefault       bool      `json:"is_default"`
+		TaxRules        TaxConfig `json:"tax_rules"`
+		CreatedAt       string    `json:"created_at"`
+		UpdatedAt       string    `json:"updated_at"`
+	}
+	// Create market request
+	CreateMarketReq {
+		Code            string    `json:"code"` // US, UK, DE, FR, AU
+		Name            string    `json:"name"` // United States
+		Currency        string    `json:"currency"` // USD, GBP, EUR, AUD
+		DefaultLanguage string    `json:"default_language,optional"`
+		Flag            string    `json:"flag,optional"`
+		TaxRules        TaxConfig `json:"tax_rules,optional"`
+	}
+	// Update market request
+	UpdateMarketReq {
+		ID       int64     `path:"id"`
+		Name     string    `json:"name,optional"`
+		IsActive *bool     `json:"is_active,optional"`
+		TaxRules TaxConfig `json:"tax_rules,optional"`
+	}
+	// Get market request
+	GetMarketReq {
+		ID int64 `path:"id"`
+	}
+	// List markets response
+	ListMarketsResp {
+		List  []*MarketResponse `json:"list"`
+		Total int64             `json:"total"`
+	}
+)
+
+@server (
+	group:      markets
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建市场"
+	@handler CreateMarketHandler
+	post /api/v1/markets (CreateMarketReq) returns (MarketResponse)
+
+	@doc "更新市场"
+	@handler UpdateMarketHandler
+	put /api/v1/markets/:id (UpdateMarketReq) returns (MarketResponse)
+
+	@doc "获取市场详情"
+	@handler GetMarketHandler
+	get /api/v1/markets/:id (GetMarketReq) returns (MarketResponse)
+
+	@doc "获取市场列表"
+	@handler ListMarketsHandler
+	get /api/v1/markets returns (ListMarketsResp)
+
+	@doc "删除市场"
+	@handler DeleteMarketHandler
+	delete /api/v1/markets/:id (GetMarketReq)
+}
+

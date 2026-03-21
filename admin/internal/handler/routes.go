@@ -8,6 +8,7 @@ import (
 
 	admin_users "github.com/colinrs/shopjoy/admin/internal/handler/admin_users"
 	auth "github.com/colinrs/shopjoy/admin/internal/handler/auth"
+	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -69,6 +70,44 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth.RegisterTenantAdminHandler(serverCtx),
 			},
 		},
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建市场
+					Method:  http.MethodPost,
+					Path:    "/api/v1/markets",
+					Handler: markets.CreateMarketHandler(serverCtx),
+				},
+				{
+					// 获取市场列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/markets",
+					Handler: markets.ListMarketsHandler(serverCtx),
+				},
+				{
+					// 更新市场
+					Method:  http.MethodPut,
+					Path:    "/api/v1/markets/:id",
+					Handler: markets.UpdateMarketHandler(serverCtx),
+				},
+				{
+					// 获取市场详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/markets/:id",
+					Handler: markets.GetMarketHandler(serverCtx),
+				},
+				{
+					// 删除市场
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/markets/:id",
+					Handler: markets.DeleteMarketHandler(serverCtx),
+				},
+			}...,
+		),
 	)
 
 	server.AddRoutes(
