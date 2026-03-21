@@ -6,6 +6,39 @@
 
 ---
 
+## 0. Existing System Context
+
+This design extends the existing ShopJoy system. Key existing components:
+
+### 0.1 Existing Tables (Already Implemented)
+
+| Table | Description | Key Fields |
+|-------|-------------|------------|
+| `categories` | Category tree | `id`, `tenant_id`, `parent_id`, `name`, `code`, `level`, `sort`, `status` |
+| `brands` | Brand info | `id`, `tenant_id`, `name`, `logo`, `description`, `website`, `status` |
+| `products` | Product entity | `id`, `sku`, `name`, `price`, `stock`, `status`, `category_id`, `brand` (string) |
+| `skus` | SKU variants | `id`, `product_id`, `code`, `price_amount`, `stock`, `attributes`, `status` |
+| `markets` | Market config | `id`, `tenant_id`, `code`, `name`, `currency`, `is_active` |
+| `product_markets` | Product-market relation | `id`, `product_id`, `market_id`, `is_enabled`, `price` |
+
+### 0.2 Key Differences from Current Implementation
+
+| Area | Current | Proposed | Migration Required |
+|------|---------|----------|-------------------|
+| Product.brand | `VARCHAR` string | `BIGINT brand_id` FK | Yes - data migration |
+| Product.stock | Single `INT` field | Separate inventory tables | Yes - data migration |
+| SKU.stock | Single `INT` field | Extended with locked_stock, safety_stock | Yes - schema change |
+| Category SEO | Not present | Add `seo_title`, `seo_description` | Yes - schema change |
+| Brand compliance | Not present | Add trademark fields | Yes - schema change |
+| Soft delete | Products use `status = 3` | Categories/Brands use `deleted_at` | No - keep both patterns |
+
+### 0.3 Design Principles
+
+1. **Extend existing tables** rather than replace where possible
+2. **Backward compatibility** for existing product/brand string field during migration
+3. **Tenant isolation** enforced at repository layer (existing pattern)
+4. **Unix timestamp storage** for time fields (existing pattern: BIGINT)
+
 ## 1. Category Management
 
 ### 1.1 Core Business Positioning
@@ -128,45 +161,44 @@ When a category becomes non-leaf (new children added):
 | PUT | `/api/v1/categories/:id/market-visibility` | Update market visibility |
 | GET | `/api/v1/categories/:id/market-visibility` | Get market visibility settings |
 
-### 1.5 Database Schema
+### 1.5 Database Schema Changes
+
+**Note:** `categories` table already exists. Use ALTER statements to add new fields.
 
 ```sql
-CREATE TABLE categories (
-    id              BIGINT          PRIMARY KEY,
-    tenant_id       BIGINT          NOT NULL,
-    parent_id       BIGINT          NOT NULL DEFAULT 0,
-    name            VARCHAR(100)    NOT NULL,
-    code            VARCHAR(50),
-    level           INT             NOT NULL DEFAULT 1,
-    sort            INT             NOT NULL DEFAULT 0,
-    icon            VARCHAR(500),
-    image           VARCHAR(500),
-    seo_title       VARCHAR(200),
-    seo_description VARCHAR(500),
-    status          TINYINT         NOT NULL DEFAULT 1,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP       NULL,
+-- Add SEO fields to existing categories table
+ALTER TABLE `categories`
+    ADD COLUMN `seo_title` VARCHAR(200) DEFAULT '' COMMENT 'SEO标题' AFTER `image`,
+    ADD COLUMN `seo_description` VARCHAR(500) DEFAULT '' COMMENT 'SEO描述' AFTER `seo_title`;
 
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_parent_id (parent_id),
-    UNIQUE INDEX idx_tenant_code (tenant_id, code)
-);
-
-CREATE TABLE category_markets (
-    id              BIGINT      PRIMARY KEY,
-    tenant_id       BIGINT      NOT NULL,
-    category_id     BIGINT      NOT NULL,
-    market_id       BIGINT      NOT NULL,
-    is_visible      BOOLEAN     NOT NULL DEFAULT TRUE,
-    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_category_id (category_id),
-    UNIQUE INDEX idx_tenant_category_market (tenant_id, category_id, market_id)
-);
+-- Create new table for category market visibility
+CREATE TABLE IF NOT EXISTS `category_markets` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `category_id` BIGINT NOT NULL,
+    `market_id` BIGINT NOT NULL,
+    `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_category_id` (`category_id`),
+    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类市场可见性';
 ```
+
+### 1.6 Market Entity Reference
+
+**Market** is already defined in `sql/market.sql`. Key fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | BIGINT | Primary key |
+| tenant_id | BIGINT | Tenant ID |
+| code | VARCHAR(10) | Market code (US, UK, DE, FR, AU, CN) |
+| name | VARCHAR(100) | Market name |
+| currency | VARCHAR(10) | Currency (USD, GBP, EUR, CNY) |
+| is_active | TINYINT | Active status |
 
 ---
 
@@ -270,47 +302,47 @@ type BrandMarket struct {
 | GET | `/api/v1/brands/:id/market-visibility` | Get market visibility settings |
 | PUT | `/api/v1/brands/:id/toggle-page` | Toggle brand page |
 
-### 2.5 Database Schema
+### 2.5 Database Schema Changes
+
+**Note:** `brands` table already exists. Use ALTER statements to add new fields.
 
 ```sql
-CREATE TABLE brands (
-    id                  BIGINT          PRIMARY KEY,
-    tenant_id           BIGINT          NOT NULL,
-    name                VARCHAR(100)    NOT NULL,
-    logo                VARCHAR(500),
-    description         TEXT,
-    website             VARCHAR(500),
-    sort                INT             NOT NULL DEFAULT 0,
-    enable_page         BOOLEAN         NOT NULL DEFAULT FALSE,
-    trademark_number    VARCHAR(100),
-    trademark_country   VARCHAR(10),
-    status              TINYINT         NOT NULL DEFAULT 1,
-    created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at          TIMESTAMP       NULL,
+-- Add compliance and brand page fields to existing brands table
+ALTER TABLE `brands`
+    ADD COLUMN `enable_page` TINYINT NOT NULL DEFAULT 0 COMMENT '是否启用品牌专区' AFTER `sort`,
+    ADD COLUMN `trademark_number` VARCHAR(100) DEFAULT '' COMMENT '商标号' AFTER `enable_page`,
+    ADD COLUMN `trademark_country` VARCHAR(10) DEFAULT '' COMMENT '商标注册国家' AFTER `trademark_number`;
 
-    INDEX idx_tenant_id (tenant_id),
-    UNIQUE INDEX idx_tenant_name (tenant_id, name)
-);
+-- Create new table for brand market visibility
+CREATE TABLE IF NOT EXISTS `brand_markets` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `brand_id` BIGINT NOT NULL,
+    `market_id` BIGINT NOT NULL,
+    `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_brand_id` (`brand_id`),
+    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌市场可见性';
 
-CREATE TABLE brand_markets (
-    id              BIGINT      PRIMARY KEY,
-    tenant_id       BIGINT      NOT NULL,
-    brand_id        BIGINT      NOT NULL,
-    market_id       BIGINT      NOT NULL,
-    is_visible      BOOLEAN     NOT NULL DEFAULT TRUE,
-    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_brand_id (brand_id),
-    UNIQUE INDEX idx_tenant_brand_market (tenant_id, brand_id, market_id)
-);
-
--- Add brand_id to products table
-ALTER TABLE products ADD COLUMN brand_id BIGINT NULL;
-ALTER TABLE products ADD INDEX idx_brand_id (brand_id);
+-- Add brand_id to products table (migrate from brand string)
+ALTER TABLE `products`
+    ADD COLUMN `brand_id` BIGINT NULL COMMENT '品牌ID' AFTER `brand`,
+    ADD INDEX `idx_brand_id` (`brand_id`);
 ```
+
+### 2.6 Brand Migration Strategy
+
+**Migrating `brand` string field to `brand_id` FK:**
+
+1. **Phase 1 - Schema**: Add `brand_id` column (nullable)
+2. **Phase 2 - Data Migration**:
+   - For each distinct `brand` value in products, create Brand record
+   - Update products to set `brand_id` from newly created brands
+3. **Phase 3 - Cleanup**: Remove `brand` string column (after verification)
 
 ---
 
@@ -346,28 +378,54 @@ type ProductInventory struct {
 
 #### 3.2.3 SKU-Level Inventory
 
+**Note:** `skus` table already exists. Extend with inventory fields.
+
 ```go
+// Extend existing SKU entity with inventory fields
 type SKUInventory struct {
     ID              int64     `gorm:"column:id;primaryKey"`
     TenantID        int64     `gorm:"column:tenant_id;not null;index"`
-    SKU             string    `gorm:"column:sku;not null;uniqueIndex:idx_tenant_sku"`
     ProductID       int64     `gorm:"column:product_id;not null;index"`
+    Code            string    `gorm:"column:code;not null;uniqueIndex"`  // Existing SKU code
+
+    // Existing price fields
+    PriceAmount     int64     `gorm:"column:price_amount"`
+    PriceCurrency   string    `gorm:"column:price_currency"`
+
+    // Extended inventory fields (new)
     AvailableStock  int       `gorm:"column:available_stock;not null;default:0"`
     LockedStock     int       `gorm:"column:locked_stock;not null;default:0"`
-    TotalStock      int       `gorm:"column:total_stock;not null;default:0"`
-
-    // Safety stock threshold
     SafetyStock     int       `gorm:"column:safety_stock;default:0"`
-
-    // Pre-sale mode
     PreSaleEnabled  bool      `gorm:"column:presale_enabled;default:false"`
+
+    // Existing fields
+    Attributes      JSON      `gorm:"column:attributes;type:json"`
+    Status          int8      `gorm:"column:status;not null;default:1"`
 
     CreatedAt       time.Time `gorm:"column:created_at;not null"`
     UpdatedAt       time.Time `gorm:"column:updated_at;not null"`
 }
 ```
 
-#### 3.2.4 Warehouse-Level Inventory
+#### 3.2.4 Warehouse Entity
+
+```go
+type Warehouse struct {
+    ID          int64     `gorm:"column:id;primaryKey"`
+    TenantID    int64     `gorm:"column:tenant_id;not null;index"`
+    Code        string    `gorm:"column:code;type:varchar(50);not null;uniqueIndex:idx_tenant_code"`
+    Name        string    `gorm:"column:name;type:varchar(100);not null"`
+    Country     string    `gorm:"column:country;type:varchar(10)"`  // ISO country code
+    Address     string    `gorm:"column:address;type:varchar(500)"`
+    IsDefault   bool      `gorm:"column:is_default;default:false"`
+    Status      int8      `gorm:"column:status;not null;default:1"`  // 1=active, 0=inactive
+    CreatedAt   time.Time `gorm:"column:created_at;not null"`
+    UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
+    DeletedAt   *time.Time `gorm:"column:deleted_at"`
+}
+```
+
+#### 3.2.5 Warehouse-Level Inventory
 
 ```go
 type WarehouseInventory struct {
@@ -486,82 +544,172 @@ type InventoryConfig struct {
 | GET | `/api/v1/warehouses/:id/inventory` | Get warehouse inventory |
 | PUT | `/api/v1/warehouses/:id/inventory` | Set warehouse inventory |
 
-### 3.5 Database Schema
+### 3.5 Database Schema Changes
+
+**Note:** `skus` table already exists. Use ALTER statements to extend inventory fields.
 
 ```sql
--- Product-level inventory (computed from SKU inventory)
-CREATE TABLE product_inventories (
-    id              BIGINT      PRIMARY KEY,
-    tenant_id       BIGINT      NOT NULL,
-    product_id      BIGINT      NOT NULL,
-    available_stock INT         NOT NULL DEFAULT 0,
-    locked_stock    INT         NOT NULL DEFAULT 0,
-    total_stock     INT         NOT NULL DEFAULT 0,
-    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- Add inventory fields to existing skus table
+ALTER TABLE `skus`
+    ADD COLUMN `available_stock` INT NOT NULL DEFAULT 0 COMMENT '可用库存' AFTER `stock`,
+    ADD COLUMN `locked_stock` INT NOT NULL DEFAULT 0 COMMENT '锁定库存' AFTER `available_stock`,
+    ADD COLUMN `safety_stock` INT NOT NULL DEFAULT 0 COMMENT '安全库存阈值' AFTER `locked_stock`,
+    ADD COLUMN `presale_enabled` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启预售' AFTER `safety_stock`;
 
-    INDEX idx_tenant_id (tenant_id),
-    UNIQUE INDEX idx_product_id (product_id)
-);
+-- Migrate existing stock to available_stock
+UPDATE `skus` SET `available_stock` = `stock` WHERE `available_stock` = 0;
 
--- SKU-level inventory
-CREATE TABLE sku_inventories (
-    id               BIGINT      PRIMARY KEY,
-    tenant_id        BIGINT      NOT NULL,
-    sku              VARCHAR(100) NOT NULL,
-    product_id       BIGINT      NOT NULL,
-    available_stock  INT         NOT NULL DEFAULT 0,
-    locked_stock     INT         NOT NULL DEFAULT 0,
-    total_stock      INT         NOT NULL DEFAULT 0,
-    safety_stock     INT         NOT NULL DEFAULT 0,
-    presale_enabled  BOOLEAN     NOT NULL DEFAULT FALSE,
-    created_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- Create warehouses table
+CREATE TABLE IF NOT EXISTS `warehouses` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `code` VARCHAR(50) NOT NULL COMMENT '仓库代码',
+    `name` VARCHAR(100) NOT NULL COMMENT '仓库名称',
+    `country` VARCHAR(10) DEFAULT '' COMMENT '所在国家',
+    `address` VARCHAR(500) DEFAULT '' COMMENT '详细地址',
+    `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否默认仓库',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    `deleted_at` BIGINT DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    UNIQUE KEY `idx_tenant_code` (`tenant_id`, `code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库表';
 
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_product_id (product_id),
-    UNIQUE INDEX idx_tenant_sku (tenant_id, sku)
-);
+-- Create warehouse-level inventory table
+CREATE TABLE IF NOT EXISTS `warehouse_inventories` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `sku_code` VARCHAR(100) NOT NULL COMMENT 'SKU代码',
+    `warehouse_id` BIGINT NOT NULL,
+    `available_stock` INT NOT NULL DEFAULT 0,
+    `locked_stock` INT NOT NULL DEFAULT 0,
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_sku_code` (`sku_code`),
+    KEY `idx_warehouse_id` (`warehouse_id`),
+    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT '仓库库存表';
 
--- Warehouse-level inventory
-CREATE TABLE warehouse_inventories (
-    id              BIGINT      PRIMARY KEY,
-    tenant_id       BIGINT      NOT NULL,
-    sku             VARCHAR(100) NOT NULL,
-    warehouse_id    BIGINT      NOT NULL,
-    available_stock INT         NOT NULL DEFAULT 0,
-    locked_stock    INT         NOT NULL DEFAULT 0,
-    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_sku (sku),
-    INDEX idx_warehouse_id (warehouse_id),
-    UNIQUE INDEX idx_tenant_sku_warehouse (tenant_id, sku, warehouse_id)
-);
-
--- Inventory change log
-CREATE TABLE inventory_logs (
-    id              BIGINT          PRIMARY KEY,
-    tenant_id       BIGINT          NOT NULL,
-    sku             VARCHAR(100)    NOT NULL,
-    product_id      BIGINT          NOT NULL,
-    warehouse_id    BIGINT          NOT NULL DEFAULT 0,
-    change_type     VARCHAR(30)     NOT NULL,  -- manual, order, return, adjustment
-    change_quantity INT             NOT NULL,
-    before_stock    INT             NOT NULL,
-    after_stock     INT             NOT NULL,
-    order_no        VARCHAR(50),
-    remark          VARCHAR(500),
-    operator_id     BIGINT          NOT NULL,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_sku (sku),
-    INDEX idx_product_id (product_id),
-    INDEX idx_created_at (created_at)
-);
+-- Create inventory change log table
+CREATE TABLE IF NOT EXISTS `inventory_logs` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `sku_code` VARCHAR(100) NOT NULL,
+    `product_id` BIGINT NOT NULL,
+    `warehouse_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0=汇总',
+    `change_type` VARCHAR(30) NOT NULL COMMENT 'manual, order, return, adjustment',
+    `change_quantity` INT NOT NULL COMMENT '正数增加，负数减少',
+    `before_stock` INT NOT NULL,
+    `after_stock` INT NOT NULL,
+    `order_no` VARCHAR(50) DEFAULT '',
+    `remark` VARCHAR(500) DEFAULT '',
+    `operator_id` BIGINT NOT NULL,
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_sku_code` (`sku_code`),
+    KEY `idx_product_id` (`product_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存变更日志';
 ```
+
+### 3.6 Concurrency Control
+
+**Preventing overselling in high-concurrency scenarios:**
+
+#### 3.6.1 Database-Level Locking
+
+```go
+// LockStock with row-level locking (FOR UPDATE)
+func (r *inventoryRepo) LockStock(ctx context.Context, db *gorm.DB, skuCode string, quantity int, orderNo string) error {
+    return db.Transaction(func(tx *gorm.DB) error {
+        // SELECT ... FOR UPDATE to acquire row lock
+        var sku SKUInventory
+        if err := tx.Set("gorm:query_option", "FOR UPDATE").
+            Where("code = ? AND tenant_id = ?", skuCode, tenantID).
+            First(&sku).Error; err != nil {
+            return err
+        }
+
+        if sku.AvailableStock < quantity {
+            return ErrInsufficientStock
+        }
+
+        // Update within transaction
+        return tx.Model(&SKUInventory{}).
+            Where("code = ?", skuCode).
+            Updates(map[string]interface{}{
+                "available_stock": gorm.Expr("available_stock - ?", quantity),
+                "locked_stock":    gorm.Expr("locked_stock + ?", quantity),
+                "updated_at":      time.Now().Unix(),
+            }).Error
+    })
+}
+```
+
+#### 3.6.2 Optimistic Locking Alternative
+
+```go
+// Using version field for optimistic locking
+type SKUInventory struct {
+    // ... other fields
+    Version     int       `gorm:"column:version;not null;default:0"`
+}
+
+func (r *inventoryRepo) LockStock(ctx context.Context, db *gorm.DB, skuCode string, quantity int, version int) error {
+    result := db.Model(&SKUInventory{}).
+        Where("code = ? AND version = ?", skuCode, version).
+        Updates(map[string]interface{}{
+            "available_stock": gorm.Expr("available_stock - ?", quantity),
+            "locked_stock":    gorm.Expr("locked_stock + ?", quantity),
+            "version":         gorm.Expr("version + 1"),
+            "updated_at":      time.Now().Unix(),
+        })
+
+    if result.RowsAffected == 0 {
+        return ErrConcurrentModification // Retry needed
+    }
+    return nil
+}
+```
+
+#### 3.6.3 Redis Distributed Lock (Optional)
+
+For extremely high concurrency, use Redis distributed lock before database operations:
+
+```go
+func (s *inventoryService) LockStock(ctx context.Context, skuCode string, quantity int) error {
+    lockKey := fmt.Sprintf("inventory:lock:%s", skuCode)
+
+    // Acquire distributed lock
+    if !s.redis.SetNX(ctx, lockKey, "1", 5*time.Second) {
+        return ErrLockConflict
+    }
+    defer s.redis.Del(ctx, lockKey)
+
+    // Proceed with database operation
+    return s.repo.LockStock(ctx, s.db, skuCode, quantity)
+}
+```
+
+### 3.7 Inventory Configuration Storage
+
+**Tenant-level inventory settings stored in `tenant_settings` table:**
+
+```go
+type InventorySettings struct {
+    LockTiming          string `json:"lock_timing"`           // "on_order" or "on_payment"
+    LogRetentionDays    int    `json:"log_retention_days"`    // Default: 90
+    LowStockNotifyTime  string `json:"low_stock_notify_time"` // Default: "09:00"
+    EnableLowStockAlert bool   `json:"enable_low_stock_alert"` // Default: true
+}
+```
+
+Stored as JSON in existing `tenant_settings` table under key `inventory`.
 
 ---
 
@@ -697,35 +845,212 @@ type InventoryService interface {
 
 ## 6. Migration Plan
 
-### Phase 1: Database Schema
-1. Create new tables: `categories`, `category_markets`, `brands`, `brand_markets`, inventory tables
-2. Add `brand_id` to `products` table
-3. Update `category_id` foreign key constraints
+### Phase 1: Database Schema Updates
+1. Add SEO fields to `categories` table
+2. Add compliance fields to `brands` table
+3. Add `brand_id` to `products` table
+4. Add inventory fields to `skus` table
+5. Create `category_markets`, `brand_markets`, `warehouses`, `warehouse_inventories`, `inventory_logs` tables
 
-### Phase 2: Backend Implementation
+### Phase 2: Data Migration
+1. Migrate `products.brand` string to `brand_id`:
+   - Extract distinct brand names from products
+   - Create Brand records for each unique brand
+   - Update products to set `brand_id`
+2. Migrate `skus.stock` to `skus.available_stock`
+3. Migrate `products.stock` to be computed from SKU inventories
+
+### Phase 3: Backend Implementation
 1. Implement Category domain, repository, service, handlers
 2. Implement Brand domain, repository, service, handlers
 3. Implement Inventory domain, repository, service, handlers
 4. Update Product service to integrate category and brand
+5. Add inventory operations to order flow
 
-### Phase 3: Frontend Implementation
+### Phase 4: Frontend Implementation
 1. Category management pages (list, tree, edit)
 2. Brand management pages (list, edit)
 3. Inventory management tab in product detail
 4. Category/Brand selectors in product edit form
 
-### Phase 4: Integration
+### Phase 5: Integration
 1. Connect frontend to backend APIs
 2. Implement inventory deduction in order flow
-3. Implement low stock notifications
+3. Implement low stock notifications (asynq task)
 
 ---
 
-## 7. Open Questions
+## 7. API Request/Response DTOs
 
-| # | Question | Status |
-|---|----------|--------|
-| 1 | Should category code be auto-generated or manual? | TBD |
-| 2 | Max inventory log retention period default? | Suggest: 90 days |
-| 3 | Low stock notification delivery time? | Suggest: Daily at 9:00 AM |
-| 4 | Pre-sale mode auto-disable after restock? | Suggest: Manual only |
+### 7.1 Category APIs
+
+```go
+// CreateCategoryRequest 创建分类请求
+type CreateCategoryRequest struct {
+    Name           string `json:"name,optional"`                // 分类名称
+    ParentID       int64  `json:"parent_id,optional"`           // 父分类ID
+    Code           string `json:"code,optional"`                // 分类代码
+    Icon           string `json:"icon,optional"`                // 图标URL
+    Image          string `json:"image,optional"`               // 图片URL
+    SeoTitle       string `json:"seo_title,optional"`           // SEO标题
+    SeoDescription string `json:"seo_description,optional"`     // SEO描述
+    Sort           int    `json:"sort,optional"`                // 排序
+}
+
+// CategoryResponse 分类响应
+type CategoryResponse struct {
+    ID             int64  `json:"id"`
+    ParentID       int64  `json:"parent_id"`
+    Name           string `json:"name"`
+    Code           string `json:"code"`
+    Level          int    `json:"level"`
+    Sort           int    `json:"sort"`
+    Icon           string `json:"icon"`
+    Image          string `json:"image"`
+    SeoTitle       string `json:"seo_title"`
+    SeoDescription string `json:"seo_description"`
+    Status         int8   `json:"status"`
+    ProductCount   int64  `json:"product_count"`
+    CreatedAt      string `json:"created_at"`
+    UpdatedAt      string `json:"updated_at"`
+}
+
+// CategoryTreeResponse 分类树响应
+type CategoryTreeResponse struct {
+    CategoryResponse
+    Children []*CategoryTreeResponse `json:"children"`
+}
+```
+
+### 7.2 Brand APIs
+
+```go
+// CreateBrandRequest 创建品牌请求
+type CreateBrandRequest struct {
+    Name             string `json:"name"`                          // 品牌名称
+    Logo             string `json:"logo,optional"`                 // Logo URL
+    Description      string `json:"description,optional"`          // 描述
+    Website          string `json:"website,optional"`              // 官网
+    TrademarkNumber  string `json:"trademark_number,optional"`     // 商标号
+    TrademarkCountry string `json:"trademark_country,optional"`    // 商标注册国家
+    EnablePage       bool   `json:"enable_page,optional"`          // 启用品牌专区
+    Sort             int    `json:"sort,optional"`                 // 排序
+}
+
+// BrandResponse 品牌响应
+type BrandResponse struct {
+    ID               int64  `json:"id"`
+    Name             string `json:"name"`
+    Logo             string `json:"logo"`
+    Description      string `json:"description"`
+    Website          string `json:"website"`
+    TrademarkNumber  string `json:"trademark_number"`
+    TrademarkCountry string `json:"trademark_country"`
+    EnablePage       bool   `json:"enable_page"`
+    Sort             int    `json:"sort"`
+    Status           int8   `json:"status"`
+    ProductCount     int64  `json:"product_count"`
+    CreatedAt        string `json:"created_at"`
+    UpdatedAt        string `json:"updated_at"`
+}
+```
+
+### 7.3 Inventory APIs
+
+```go
+// UpdateStockRequest 更新库存请求
+type UpdateStockRequest struct {
+    AvailableStock int    `json:"available_stock"`    // 可用库存
+    Remark         string `json:"remark,optional"`    // 备注
+}
+
+// AdjustStockRequest 库存调整请求
+type AdjustStockRequest struct {
+    Quantity int    `json:"quantity"`         // 调整数量（正数增加，负数减少）
+    Remark   string `json:"remark,optional"`  // 备注
+}
+
+// SKUInventoryResponse SKU库存响应
+type SKUInventoryResponse struct {
+    SKUCode         string `json:"sku_code"`
+    ProductID       int64  `json:"product_id"`
+    ProductName     string `json:"product_name"`
+    AvailableStock  int    `json:"available_stock"`
+    LockedStock     int    `json:"locked_stock"`
+    TotalStock      int    `json:"total_stock"`
+    SafetyStock     int    `json:"safety_stock"`
+    PreSaleEnabled  bool   `json:"presale_enabled"`
+    Attributes      string `json:"attributes"`
+    Status          int8   `json:"status"`
+}
+
+// InventoryLogResponse 库存日志响应
+type InventoryLogResponse struct {
+    ID             int64  `json:"id"`
+    SKUCode        string `json:"sku_code"`
+    ChangeType     string `json:"change_type"`
+    ChangeQuantity int    `json:"change_quantity"`
+    BeforeStock    int    `json:"before_stock"`
+    AfterStock     int    `json:"after_stock"`
+    OrderNo        string `json:"order_no"`
+    Remark         string `json:"remark"`
+    OperatorName   string `json:"operator_name"`
+    CreatedAt      string `json:"created_at"`
+}
+```
+
+---
+
+## 8. Low Stock Notification Integration
+
+### 8.1 Asynq Task Definition
+
+```go
+const TaskLowStockAlert = "inventory:low_stock_alert"
+
+type LowStockAlertPayload struct {
+    TenantID int64
+}
+
+func (s *inventoryService) CheckAndNotifyLowStock(ctx context.Context, tenantID int64) error {
+    // 1. Get all SKUs where available_stock < safety_stock
+    lowStockSKUs, err := s.repo.GetLowStockSKUs(ctx, tenantID)
+    if err != nil {
+        return err
+    }
+
+    if len(lowStockSKUs) == 0 {
+        return nil
+    }
+
+    // 2. Get tenant settings for notification
+    settings, err := s.settingsService.GetInventorySettings(ctx, tenantID)
+    if err != nil {
+        return err
+    }
+
+    // 3. Send notification (in-app + email)
+    return s.notifyService.SendLowStockAlert(ctx, tenantID, lowStockSKUs, settings)
+}
+```
+
+### 8.2 Scheduled Task
+
+```go
+// Register in main.go
+scheduler := asynq.NewScheduler(...)
+scheduler.Register("0 9 * * *", asynq.NewTask(TaskLowStockAlert, payload))
+// Runs daily at 9:00 AM tenant local time
+```
+
+---
+
+## 9. Resolved Questions
+
+| # | Question | Resolution |
+|---|----------|------------|
+| 1 | Category code auto-generation | Manual entry, optional field. Auto-generate from name if empty. |
+| 2 | Inventory log retention | Default 90 days, configurable in tenant settings. |
+| 3 | Low stock notification time | Default 09:00, configurable in tenant settings. |
+| 4 | Pre-sale mode auto-disable | Manual only. Merchant must disable after restock. |
+| 5 | Soft delete pattern | Products use status=deleted (existing), Categories/Brands use deleted_at (new). |
