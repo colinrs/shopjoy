@@ -2,11 +2,14 @@ package persistence
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -17,17 +20,30 @@ func NewProductRepository() product.Repository {
 }
 
 type productModel struct {
-	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	Name        string `gorm:"column:name;size:200;not null;index"`
-	Description string `gorm:"column:description;type:text"`
-	Price       int64  `gorm:"column:price;not null"`
-	CostPrice   int64  `gorm:"column:cost_price"`
-	Currency    string `gorm:"column:currency;size:10;default:'CNY'"`
-	Stock       int    `gorm:"column:stock;default:0"`
-	Status      int    `gorm:"column:status;default:0;index"`
-	CategoryID  int64  `gorm:"column:category_id;index"`
-	CreatedAt   int64  `gorm:"column:created_at"`
-	UpdatedAt   int64  `gorm:"column:updated_at"`
+	ID              int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
+	SKU             string `gorm:"column:sku;size:64;uniqueIndex"`
+	Name            string `gorm:"column:name;size:200;not null;index"`
+	Description     string `gorm:"column:description;type:text"`
+	Price           int64  `gorm:"column:price;not null"`
+	CostPrice       int64  `gorm:"column:cost_price"`
+	Currency        string `gorm:"column:currency;size:10;default:'CNY'"`
+	Stock           int    `gorm:"column:stock;default:0"`
+	Status          int    `gorm:"column:status;default:0;index"`
+	CategoryID      int64  `gorm:"column:category_id;index"`
+	Brand           string `gorm:"column:brand;size:64"`
+	Tags            string `gorm:"column:tags;type:json"`
+	Images          string `gorm:"column:images;type:json"`
+	IsMatrixProduct bool   `gorm:"column:is_matrix_product;default:false"`
+	HSCode          string `gorm:"column:hs_code;size:20"`
+	COO             string `gorm:"column:coo;size:10"`
+	Weight          string `gorm:"column:weight;type:decimal(10,2)"`
+	WeightUnit      string `gorm:"column:weight_unit;size:10;default:'g'"`
+	Length          string `gorm:"column:length;type:decimal(10,2)"`
+	Width           string `gorm:"column:width;type:decimal(10,2)"`
+	Height          string `gorm:"column:height;type:decimal(10,2)"`
+	DangerousGoods  string `gorm:"column:dangerous_goods;type:json"`
+	CreatedAt       int64  `gorm:"column:created_at"`
+	UpdatedAt       int64  `gorm:"column:updated_at"`
 }
 
 func (productModel) TableName() string {
@@ -35,29 +51,85 @@ func (productModel) TableName() string {
 }
 
 func (m *productModel) toEntity() *product.Product {
+	// Parse JSON arrays
+	var tags, images, dangerousGoods []string
+	if m.Tags != "" {
+		json.Unmarshal([]byte(m.Tags), &tags)
+	}
+	if m.Images != "" {
+		json.Unmarshal([]byte(m.Images), &images)
+	}
+	if m.DangerousGoods != "" {
+		json.Unmarshal([]byte(m.DangerousGoods), &dangerousGoods)
+	}
+
+	// Parse decimals
+	weight, _ := decimal.NewFromString(m.Weight)
+	length, _ := decimal.NewFromString(m.Length)
+	width, _ := decimal.NewFromString(m.Width)
+	height, _ := decimal.NewFromString(m.Height)
+
 	return &product.Product{
-		ID:          m.ID,
-		Name:        m.Name,
-		Description: m.Description,
-		Price:       product.NewMoney(m.Price, m.Currency),
-		CostPrice:   product.NewMoney(m.CostPrice, m.Currency),
-		Stock:       m.Stock,
-		Status:      product.Status(m.Status),
-		CategoryID:  m.CategoryID,
+		ID:              m.ID,
+		SKU:             m.SKU,
+		Name:            m.Name,
+		Description:     m.Description,
+		Price:           product.NewMoney(m.Price, m.Currency),
+		CostPrice:       product.NewMoney(m.CostPrice, m.Currency),
+		Stock:           m.Stock,
+		Status:          product.Status(m.Status),
+		CategoryID:      m.CategoryID,
+		Brand:           m.Brand,
+		Tags:            tags,
+		Images:          images,
+		IsMatrixProduct: m.IsMatrixProduct,
+		HSCode:          m.HSCode,
+		COO:             m.COO,
+		Weight:          weight,
+		WeightUnit:      m.WeightUnit,
+		Dimensions: product.Dimensions{
+			Length: length,
+			Width:  width,
+			Height: height,
+			Unit:   "cm",
+		},
+		DangerousGoods: dangerousGoods,
+		CreatedAt:      time.Unix(m.CreatedAt, 0),
+		UpdatedAt:      time.Unix(m.UpdatedAt, 0),
 	}
 }
 
 func fromEntity(p *product.Product) *productModel {
+	// Serialize JSON arrays
+	tagsJSON, _ := json.Marshal(p.Tags)
+	imagesJSON, _ := json.Marshal(p.Images)
+	dangerousGoodsJSON, _ := json.Marshal(p.DangerousGoods)
+
 	return &productModel{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price.Amount,
-		CostPrice:   p.CostPrice.Amount,
-		Currency:    p.Price.Currency,
-		Stock:       p.Stock,
-		Status:      int(p.Status),
-		CategoryID:  p.CategoryID,
+		ID:              p.ID,
+		SKU:             p.SKU,
+		Name:            p.Name,
+		Description:     p.Description,
+		Price:           p.Price.Amount,
+		CostPrice:       p.CostPrice.Amount,
+		Currency:        p.Price.Currency,
+		Stock:           p.Stock,
+		Status:          int(p.Status),
+		CategoryID:      p.CategoryID,
+		Brand:           p.Brand,
+		Tags:            string(tagsJSON),
+		Images:          string(imagesJSON),
+		IsMatrixProduct: p.IsMatrixProduct,
+		HSCode:          p.HSCode,
+		COO:             p.COO,
+		Weight:          p.Weight.String(),
+		WeightUnit:      p.WeightUnit,
+		Length:          p.Dimensions.Length.String(),
+		Width:           p.Dimensions.Width.String(),
+		Height:          p.Dimensions.Height.String(),
+		DangerousGoods:  string(dangerousGoodsJSON),
+		CreatedAt:       p.CreatedAt.Unix(),
+		UpdatedAt:       p.UpdatedAt.Unix(),
 	}
 }
 
@@ -71,15 +143,28 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 	return db.WithContext(ctx).
 		Where("id = ? AND status != ?", p.ID, product.StatusDeleted).
 		Updates(map[string]interface{}{
-			"name":        model.Name,
-			"description": model.Description,
-			"price":       model.Price,
-			"cost_price":  model.CostPrice,
-			"currency":    model.Currency,
-			"stock":       model.Stock,
-			"status":      model.Status,
-			"category_id": model.CategoryID,
-			"updated_at":  model.UpdatedAt,
+			"sku":               model.SKU,
+			"name":              model.Name,
+			"description":       model.Description,
+			"price":             model.Price,
+			"cost_price":        model.CostPrice,
+			"currency":          model.Currency,
+			"stock":             model.Stock,
+			"status":            model.Status,
+			"category_id":       model.CategoryID,
+			"brand":             model.Brand,
+			"tags":              model.Tags,
+			"images":            model.Images,
+			"is_matrix_product": model.IsMatrixProduct,
+			"hs_code":           model.HSCode,
+			"coo":               model.COO,
+			"weight":            model.Weight,
+			"weight_unit":       model.WeightUnit,
+			"length":            model.Length,
+			"width":             model.Width,
+			"height":            model.Height,
+			"dangerous_goods":   model.DangerousGoods,
+			"updated_at":        model.UpdatedAt,
 		}).Error
 }
 
