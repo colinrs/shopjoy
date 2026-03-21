@@ -397,7 +397,7 @@ const handleSetDefault = async (row: Market) => {
     // Update the market to be default
     await updateMarket({
       id: row.id,
-      name: row.name
+      is_default: true
     })
 
     ElMessage.success('主市场设置成功')

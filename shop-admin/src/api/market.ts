@@ -42,6 +42,7 @@ export interface UpdateMarketRequest {
   id: number
   name?: string
   is_active?: boolean
+  is_default?: boolean
   tax_rules?: {
     vat_rate?: string
     gst_rate?: string

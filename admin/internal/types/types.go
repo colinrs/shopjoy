@@ -270,10 +270,11 @@ type TaxConfig struct {
 }
 
 type UpdateMarketReq struct {
-	ID       int64     `path:"id"`
-	Name     string    `json:"name,optional"`
-	IsActive *bool     `json:"is_active,optional"`
-	TaxRules TaxConfig `json:"tax_rules,optional"`
+	ID        int64     `path:"id"`
+	Name      string    `json:"name,optional"`
+	IsActive  *bool     `json:"is_active,optional"`
+	IsDefault *bool     `json:"is_default,optional"`
+	TaxRules  TaxConfig `json:"tax_rules,optional"`
 }
 
 type UpdateProductMarketReq struct {
