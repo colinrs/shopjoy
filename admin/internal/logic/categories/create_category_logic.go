@@ -52,6 +52,10 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 			return nil, code.ErrCategoryNotFound
 		}
 		level = parent.Level + 1
+		// Validate max level (max 3 levels)
+		if level > 3 {
+			return nil, code.ErrCategoryMaxLevelExceeded
+		}
 	}
 
 	// Generate ID

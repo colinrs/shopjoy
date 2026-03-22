@@ -45,9 +45,9 @@ func (s Status) IsValid() bool {
 // CanTransitionTo 检查状态是否可以转换到目标状态
 func (s Status) CanTransitionTo(target Status) bool {
 	transitions := map[Status][]Status{
-		StatusDraft:   {StatusOnSale, StatusDeleted},
-		StatusOnSale:  {StatusOffSale, StatusDeleted},
-		StatusOffSale: {StatusOnSale, StatusDeleted},
+		StatusDraft:   {StatusOnSale, StatusOffSale},
+		StatusOnSale:  {StatusOffSale},
+		StatusOffSale: {StatusOnSale},
 	}
 
 	allowed, ok := transitions[s]
@@ -134,8 +134,9 @@ type Product struct {
 	Dimensions     Dimensions      `gorm:"embedded"`  // 尺寸
 	DangerousGoods []string        `gorm:"type:json"` // 危险品标识
 
-	CreatedAt time.Time // 创建时间
-	UpdatedAt time.Time // 更新时间
+	DeletedAt *int64     // 软删除时间
+	CreatedAt time.Time  // 创建时间
+	UpdatedAt time.Time  // 更新时间
 }
 
 // TableName 表名
@@ -220,7 +221,7 @@ func (p *Product) IsDangerousGoods() bool {
 
 // PutOnSale 上架商品
 func (p *Product) PutOnSale() error {
-	if p.Status == StatusDeleted {
+	if p.DeletedAt != nil {
 		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOnSale) {
@@ -236,7 +237,7 @@ func (p *Product) PutOnSale() error {
 
 // TakeOffSale 下架商品
 func (p *Product) TakeOffSale() error {
-	if p.Status == StatusDeleted {
+	if p.DeletedAt != nil {
 		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOffSale) {
@@ -249,7 +250,7 @@ func (p *Product) TakeOffSale() error {
 
 // UpdateStock 更新库存
 func (p *Product) UpdateStock(quantity int) error {
-	if p.Status == StatusDeleted {
+	if p.DeletedAt != nil {
 		return code.ErrProductDeleted
 	}
 	if quantity < 0 {
@@ -278,7 +279,7 @@ func (p *Product) DeductStock(quantity int) error {
 
 // UpdatePrice 更新价格
 func (p *Product) UpdatePrice(newPrice Money) error {
-	if p.Status == StatusDeleted {
+	if p.DeletedAt != nil {
 		return code.ErrProductDeleted
 	}
 	if newPrice.Amount <= 0 {
@@ -291,12 +292,18 @@ func (p *Product) UpdatePrice(newPrice Money) error {
 
 // SoftDelete 软删除
 func (p *Product) SoftDelete() error {
-	if p.Status == StatusDeleted {
+	if p.DeletedAt != nil {
 		return code.ErrProductDeleted
 	}
-	p.Status = StatusDeleted
+	now := time.Now().Unix()
+	p.DeletedAt = &now
 	p.UpdatedAt = time.Now()
 	return nil
+}
+
+// IsDeleted 检查是否已删除
+func (p *Product) IsDeleted() bool {
+	return p.DeletedAt != nil
 }
 
 // IsOnSale 是否在售

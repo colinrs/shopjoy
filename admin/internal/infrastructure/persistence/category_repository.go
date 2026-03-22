@@ -101,7 +101,7 @@ func (r *categoryRepo) Create(ctx context.Context, db *gorm.DB, c *product.Categ
 func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Category) error {
 	model := fromCategoryEntity(c)
 	return db.WithContext(ctx).Model(&categoryModel{}).
-		Where("id = ? AND tenant_id = ?", c.ID, c.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", c.ID, c.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":            model.Name,
 			"code":            model.Code,
@@ -211,22 +211,75 @@ func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, newParentID int64) error {
+	// Get current category to calculate level delta
+	var current categoryModel
+	if err := db.WithContext(ctx).
+		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		First(&current).Error; err != nil {
+		return err
+	}
+
 	// Calculate new level
-	var parentLevel int = 0
+	var newLevel int = 1
 	if newParentID > 0 {
 		var parent categoryModel
 		if err := db.WithContext(ctx).
-			Where("id = ? AND tenant_id = ?", newParentID, tenantID.Int64()).
+			Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", newParentID, tenantID.Int64()).
 			First(&parent).Error; err != nil {
 			return err
 		}
-		parentLevel = parent.Level
+		newLevel = parent.Level + 1
 	}
 
-	return db.WithContext(ctx).Model(&categoryModel{}).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
-		Updates(map[string]interface{}{
-			"parent_id": newParentID,
-			"level":     parentLevel + 1,
-		}).Error
+	// Calculate level delta
+	levelDelta := newLevel - current.Level
+
+	// Update in transaction
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Update the category itself
+		if err := tx.Model(&categoryModel{}).
+			Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+			Updates(map[string]interface{}{
+				"parent_id": newParentID,
+				"level":     newLevel,
+			}).Error; err != nil {
+			return err
+		}
+
+		// If level changed, update all descendants
+		if levelDelta != 0 {
+			if err := r.updateDescendantLevels(tx, tenantID, id, levelDelta); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+// updateDescendantLevels recursively updates levels of all descendants
+func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB, tenantID shared.TenantID, parentID int64, levelDelta int) error {
+	// Get direct children
+	var children []categoryModel
+	if err := tx.Where("parent_id = ? AND tenant_id = ? AND deleted_at IS NULL", parentID, tenantID.Int64()).
+		Find(&children).Error; err != nil {
+		return err
+	}
+
+	for _, child := range children {
+		// Update this child's level
+		newLevel := child.Level + levelDelta
+		if err := tx.Model(&categoryModel{}).
+			Where("id = ? AND tenant_id = ?", child.ID, tenantID.Int64()).
+			Update("level", newLevel).Error; err != nil {
+			return err
+		}
+
+		// Recursively update descendants
+		if err := r.updateDescendantLevels(tx, tenantID, child.ID, levelDelta); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

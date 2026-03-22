@@ -40,6 +40,7 @@ type User struct {
 	Birthday  *shared.UnixTime
 	Status    Status
 	LastLogin *shared.UnixTime
+	DeletedAt *int64
 	Audit     shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -74,7 +75,7 @@ func (u *User) UpdateLastLogin() {
 }
 
 func (u *User) Suspend() error {
-	if u.Status == StatusDeleted {
+	if u.DeletedAt != nil {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusSuspended
@@ -82,7 +83,7 @@ func (u *User) Suspend() error {
 }
 
 func (u *User) Activate() error {
-	if u.Status == StatusDeleted {
+	if u.DeletedAt != nil {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusActive
@@ -90,13 +91,22 @@ func (u *User) Activate() error {
 }
 
 func (u *User) SoftDelete() error {
-	u.Status = StatusDeleted
+	if u.DeletedAt != nil {
+		return code.ErrUserAlreadyDeleted
+	}
+	now := time.Now().Unix()
+	u.DeletedAt = &now
 	return nil
+}
+
+func (u *User) IsDeleted() bool {
+	return u.DeletedAt != nil
 }
 
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, user *User) error
 	Update(ctx context.Context, db *gorm.DB, user *User) error
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*User, error)
 	FindByEmail(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, email string) (*User, error)
 	FindByPhone(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, phone string) (*User, error)

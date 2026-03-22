@@ -201,7 +201,6 @@ func (s *ServiceImpl) Delete(ctx context.Context, tenantID shared.TenantID, id i
 		return err
 	}
 
-	u.Audit.Update(0)
 	return s.userRepo.Update(ctx, s.db, u)
 }
 

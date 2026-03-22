@@ -44,6 +44,7 @@ type productModel struct {
 	Width           string `gorm:"column:width;type:decimal(10,2)"`
 	Height          string `gorm:"column:height;type:decimal(10,2)"`
 	DangerousGoods  string `gorm:"column:dangerous_goods;type:json"`
+	DeletedAt       *int64 `gorm:"column:deleted_at;index"`
 	CreatedAt       int64  `gorm:"column:created_at"`
 	UpdatedAt       int64  `gorm:"column:updated_at"`
 }
@@ -146,7 +147,7 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 	model := fromEntity(p)
 	return db.WithContext(ctx).
 		Model(&productModel{}).
-		Where("id = ? AND tenant_id = ? AND status != ?", p.ID, p.TenantID.Int64(), product.StatusDeleted).
+		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", p.ID, p.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"sku":               model.SKU,
 			"name":              model.Name,
@@ -174,12 +175,13 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 }
 
 func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	query := db.WithContext(ctx).Model(&productModel{}).Where("id = ?", id)
+	query := db.WithContext(ctx).Model(&productModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// 平台管理员 (tenantID == 0) 可删除所有租户数据
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	result := query.Update("status", product.StatusDeleted)
+	now := time.Now().Unix()
+	result := query.Update("deleted_at", now)
 
 	if result.Error != nil {
 		return result.Error
@@ -191,7 +193,7 @@ func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.T
 }
 
 func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.Product, error) {
-	query := db.WithContext(ctx)
+	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// 平台管理员 (tenantID == 0) 可访问所有租户数据
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -212,7 +214,7 @@ func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB, tenantID share
 		return []*product.Product{}, nil
 	}
 
-	query := db.WithContext(ctx)
+	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// 平台管理员 (tenantID == 0) 可访问所有租户数据
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -236,7 +238,7 @@ func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB, tenantID share
 func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Query) ([]*product.Product, int64, error) {
 	query.Validate()
 
-	dbQuery := db.WithContext(ctx).Model(&productModel{})
+	dbQuery := db.WithContext(ctx).Model(&productModel{}).Where("deleted_at IS NULL")
 
 	// 租户过滤：平台管理员 (TenantID == 0) 可访问所有租户数据
 	if query.TenantID != 0 {
@@ -287,7 +289,7 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 
 func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, delta int) error {
 	query := db.WithContext(ctx).Model(&productModel{}).
-		Where("id = ? AND status = ?", id, product.StatusOnSale)
+		Where("id = ? AND status = ? AND deleted_at IS NULL", id, product.StatusOnSale)
 	// 租户过滤：平台管理员 (tenantID == 0) 可操作所有租户数据
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -306,7 +308,7 @@ func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, tenantID sha
 
 func (r *productRepo) Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (bool, error) {
 	query := db.WithContext(ctx).Model(&productModel{}).
-		Where("id = ? AND status != ?", id, product.StatusDeleted)
+		Where("id = ? AND deleted_at IS NULL", id)
 	// 租户过滤：平台管理员 (tenantID == 0) 可访问所有租户数据
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())

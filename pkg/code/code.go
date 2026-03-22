@@ -63,11 +63,12 @@ var (
 	ErrProductInvalidID               = &Err{HTTPCode: http.StatusBadRequest, Code: 30013, Msg: "invalid product id"}
 
 	//  ErrCategoryNotFound Category errors (30xxx - 31xxx)
-	ErrCategoryNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 30101, Msg: "category not found"}
-	ErrCategoryDuplicate   = &Err{HTTPCode: http.StatusConflict, Code: 30102, Msg: "duplicate category"}
-	ErrCategoryInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 30103, Msg: "invalid category"}
-	ErrCategoryHasChildren = &Err{HTTPCode: http.StatusBadRequest, Code: 30104, Msg: "category has children"}
-	ErrCategoryHasProducts = &Err{HTTPCode: http.StatusBadRequest, Code: 30105, Msg: "category has products"}
+	ErrCategoryNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 30101, Msg: "category not found"}
+	ErrCategoryDuplicate        = &Err{HTTPCode: http.StatusConflict, Code: 30102, Msg: "duplicate category"}
+	ErrCategoryInvalid          = &Err{HTTPCode: http.StatusBadRequest, Code: 30103, Msg: "invalid category"}
+	ErrCategoryHasChildren      = &Err{HTTPCode: http.StatusBadRequest, Code: 30104, Msg: "category has children"}
+	ErrCategoryHasProducts      = &Err{HTTPCode: http.StatusBadRequest, Code: 30105, Msg: "category has products"}
+	ErrCategoryMaxLevelExceeded = &Err{HTTPCode: http.StatusBadRequest, Code: 30106, Msg: "category level cannot exceed 3"}
 
 	// ErrOrderNotFound ==================== Order Module (40xxx) ====================
 	ErrOrderNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 40001, Msg: "order not found"}

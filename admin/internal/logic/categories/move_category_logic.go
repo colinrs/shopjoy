@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -38,8 +39,13 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 		return nil, code.ErrCategoryNotFound
 	}
 
-	// Find new parent
+	// Calculate new level
+	newLevel := 1
 	if req.NewParentID > 0 {
+		// Cannot move to self
+		if req.NewParentID == req.ID {
+			return nil, code.ErrCategoryInvalid
+		}
 		newParent, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.NewParentID)
 		if err != nil {
 			return nil, err
@@ -47,6 +53,22 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 		if newParent == nil {
 			return nil, code.ErrCategoryNotFound
 		}
+		newLevel = newParent.Level + 1
+	}
+
+	// Validate new level doesn't exceed max (3 levels)
+	// Also need to check if category has children - they would go even deeper
+	children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	if err != nil {
+		return nil, err
+	}
+	maxChildDepth := 0
+	if len(children) > 0 {
+		maxChildDepth = l.getMaxChildDepth(children, 1)
+	}
+	// New level + max child depth should not exceed 3
+	if newLevel+maxChildDepth > 3 {
+		return nil, code.ErrCategoryMaxLevelExceeded
 	}
 
 	// Move category
@@ -79,4 +101,19 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),
 	}, nil
+}
+
+// getMaxChildDepth recursively calculates the maximum depth of child categories
+func (l *MoveCategoryLogic) getMaxChildDepth(categories []*product.Category, currentDepth int) int {
+	maxDepth := currentDepth
+	for _, cat := range categories {
+		children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, cat.TenantID, cat.ID)
+		if err == nil && len(children) > 0 {
+			childDepth := l.getMaxChildDepth(children, currentDepth+1)
+			if childDepth > maxDepth {
+				maxDepth = childDepth
+			}
+		}
+	}
+	return maxDepth
 }
