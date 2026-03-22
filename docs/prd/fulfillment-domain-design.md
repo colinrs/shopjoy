@@ -718,7 +718,7 @@ func calculateFulfillmentStatus(shipments []*Shipment) FulfillmentStatus {
 | All shipments cancelled | `pending` (reset to allow new shipments) |
 | Mix of delivered + failed | `partial_shipped` (some succeeded) |
 | Mix of delivered + cancelled | `partial_shipped` (delivered count > 0) |
-| Mix of shipped + failed | `shipped` (all active are shipped/in_transit) |
+| Mix of shipped + failed | `pending` (failed shipments need resolution) |
 
 ---
 
@@ -774,6 +774,15 @@ Example: `REF20260322001`
 | updated_by | BIGINT | Updater ID |
 | deleted_at | BIGINT | Soft delete timestamp |
 
+**Indexes:**
+- PRIMARY KEY (`id`)
+- UNIQUE INDEX `uk_shipment_no` (`tenant_id`, `shipment_no`)
+- INDEX `idx_tenant_id` (`tenant_id`)
+- INDEX `idx_order_id` (`order_id`)
+- INDEX `idx_tracking_no` (`tracking_no`)
+- INDEX `idx_status` (`status`)
+- INDEX `idx_deleted_at` (`deleted_at`)
+
 ### 12.2 shipment_items
 
 | Column | Type | Description |
@@ -817,6 +826,15 @@ Example: `REF20260322001`
 | created_by | BIGINT | Creator ID |
 | updated_by | BIGINT | Updater ID |
 | deleted_at | BIGINT | Soft delete timestamp |
+
+**Indexes:**
+- PRIMARY KEY (`id`)
+- UNIQUE INDEX `uk_refund_no` (`tenant_id`, `refund_no`)
+- INDEX `idx_tenant_id` (`tenant_id`)
+- INDEX `idx_order_id` (`order_id`)
+- INDEX `idx_user_id` (`user_id`)
+- INDEX `idx_status` (`status`)
+- INDEX `idx_deleted_at` (`deleted_at`)
 
 ### 12.4 orders (extensions)
 
