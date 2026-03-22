@@ -12,3 +12,5 @@ UPDATE promotions SET currency = 'CNY', scope_type = 'STOREWIDE' WHERE currency 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_promotions_priority ON promotions(priority);
 CREATE INDEX IF NOT EXISTS idx_promotions_deleted_at ON promotions(deleted_at);
+-- Composite index for active promotions query (status + currency + time range)
+CREATE INDEX IF NOT EXISTS idx_promotions_active ON promotions(status, currency, start_at, end_at);

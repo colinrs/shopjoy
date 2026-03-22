@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -15,6 +16,9 @@ type CreatePromotionRequest struct {
 	Name        string
 	Description string
 	Type        pkgpromotion.Type
+	Priority    int
+	Currency    string
+	Scope       pkgpromotion.PromotionScope
 	StartAt     time.Time
 	EndAt       time.Time
 	Rules       []CreatePromotionRuleRequest
@@ -107,6 +111,26 @@ func NewPromotionApp(db *gorm.DB, promotionRepo pkgpromotion.Repository, idGen s
 }
 
 func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.TenantID, req CreatePromotionRequest) (*PromotionResponse, error) {
+	// Input validation
+	if req.Name == "" {
+		return nil, code.ErrPromotionNameRequired
+	}
+	if req.Currency == "" {
+		return nil, code.ErrPromotionCurrencyRequired
+	}
+	if req.StartAt.IsZero() || req.EndAt.IsZero() {
+		return nil, code.ErrPromotionTimeRequired
+	}
+	if req.StartAt.After(req.EndAt) {
+		return nil, code.ErrPromotionInvalidTimeRange
+	}
+	if !req.Type.IsValid() {
+		return nil, code.ErrPromotionTypeInvalid
+	}
+	if !req.Scope.Type.IsValid() {
+		return nil, code.ErrPromotionScopeInvalid
+	}
+
 	var result *pkgpromotion.Promotion
 
 	err := a.db.Transaction(func(tx *gorm.DB) error {
@@ -122,8 +146,11 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.Tena
 			Description: req.Description,
 			Type:        req.Type,
 			Status:      pkgpromotion.StatusPending,
+			Priority:    req.Priority,
 			StartAt:     req.StartAt.UTC(),
 			EndAt:       req.EndAt.UTC(),
+			Scope:       req.Scope,
+			Currency:    req.Currency,
 			Audit:       shared.NewAuditInfo(0),
 			Rules:       make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
 		}
@@ -191,6 +218,12 @@ func (a *promotionApp) GetPromotion(ctx context.Context, tenantID shared.TenantI
 	if err != nil {
 		return nil, err
 	}
+	// Load promotion rules
+	rules, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	p.Rules = rules
 	return toPromotionResponse(p), nil
 }
 

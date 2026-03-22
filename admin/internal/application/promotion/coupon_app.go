@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	pkgcoupon "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -156,6 +157,23 @@ func NewCouponApp(
 }
 
 func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, req CreateCouponRequest) (*CouponResponse, error) {
+	// Input validation
+	if req.Name == "" {
+		return nil, code.ErrCouponNameRequired
+	}
+	if !req.Type.IsValid() {
+		return nil, code.ErrCouponTypeInvalid
+	}
+	if req.Value <= 0 {
+		return nil, code.ErrCouponValueRequired
+	}
+	if req.StartAt.IsZero() || req.EndAt.IsZero() {
+		return nil, code.ErrCouponTimeRequired
+	}
+	if req.StartAt.After(req.EndAt) {
+		return nil, code.ErrCouponInvalidTimeRange
+	}
+
 	id, err := a.idGen.NextID(ctx)
 	if err != nil {
 		return nil, err
@@ -342,10 +360,8 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 			return err
 		}
 
-		// Update coupon usage count
-		c.UsedCount++
-		c.Audit.Update(0)
-		if err := a.couponRepo.Update(ctx, tx, c); err != nil {
+		// Atomically increment coupon usage count (avoid race condition)
+		if err := a.couponRepo.IncrementUsage(ctx, tx, tenantID, c.ID); err != nil {
 			return err
 		}
 

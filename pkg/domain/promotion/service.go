@@ -109,13 +109,17 @@ func (s *CalculationService) CalculateDiscount(
 		return promotions[i].ID < promotions[j].ID
 	})
 
-	// Load rules for each promotion
+	// Batch load rules for all promotions (avoid N+1 query)
+	promotionIDs := make([]int64, len(promotions))
+	for i, p := range promotions {
+		promotionIDs[i] = p.ID
+	}
+	rulesByPromotion, err := s.promotionRepo.FindRulesByPromotionIDs(ctx, db, promotionIDs)
+	if err != nil {
+		return nil, err
+	}
 	for i := range promotions {
-		rules, err := s.promotionRepo.FindRulesByPromotionID(ctx, db, promotions[i].ID)
-		if err != nil {
-			return nil, err
-		}
-		promotions[i].Rules = rules
+		promotions[i].Rules = rulesByPromotion[promotions[i].ID]
 	}
 
 	// Apply promotions

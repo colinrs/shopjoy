@@ -310,6 +310,7 @@ type Repository interface {
 	FindActiveByCurrency(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, currency string) ([]*Promotion, error)
 	CreateRules(ctx context.Context, db *gorm.DB, rules []PromotionRule) error
 	FindRulesByPromotionID(ctx context.Context, db *gorm.DB, promotionID int64) ([]PromotionRule, error)
+	FindRulesByPromotionIDs(ctx context.Context, db *gorm.DB, promotionIDs []int64) (map[int64][]PromotionRule, error)
 	UpdateRule(ctx context.Context, db *gorm.DB, rule *PromotionRule) error
 	DeleteRule(ctx context.Context, db *gorm.DB, id int64) error
 }

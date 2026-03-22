@@ -107,6 +107,10 @@ var (
 	ErrCouponScopeInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 70010, Msg: "invalid coupon scope"}
 	ErrCouponTypeInvalid      = &Err{HTTPCode: http.StatusBadRequest, Code: 70011, Msg: "invalid coupon type"}
 	ErrCouponCannotDelete     = &Err{HTTPCode: http.StatusBadRequest, Code: 70012, Msg: "cannot delete active coupon"}
+	ErrCouponNameRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 70013, Msg: "coupon name is required"}
+	ErrCouponValueRequired    = &Err{HTTPCode: http.StatusBadRequest, Code: 70014, Msg: "coupon value must be positive"}
+	ErrCouponTimeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 70015, Msg: "coupon start time and end time are required"}
+	ErrCouponInvalidTimeRange = &Err{HTTPCode: http.StatusBadRequest, Code: 70016, Msg: "coupon start time must be before end time"}
 
 	// UserCoupon errors (70xxx - 701xx)
 	ErrUserCouponNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 70101, Msg: "user coupon not found"}
@@ -127,6 +131,10 @@ var (
 	ErrPromotionCannotDelete     = &Err{HTTPCode: http.StatusBadRequest, Code: 80009, Msg: "cannot delete active promotion"}
 	ErrPromotionScopeInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 80010, Msg: "invalid promotion scope"}
 	ErrPromotionTypeInvalid      = &Err{HTTPCode: http.StatusBadRequest, Code: 80011, Msg: "invalid promotion type"}
+	ErrPromotionNameRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 80012, Msg: "promotion name is required"}
+	ErrPromotionCurrencyRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 80013, Msg: "promotion currency is required"}
+	ErrPromotionTimeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 80014, Msg: "promotion start time and end time are required"}
+	ErrPromotionInvalidTimeRange = &Err{HTTPCode: http.StatusBadRequest, Code: 80015, Msg: "promotion start time must be before end time"}
 
 	// ErrTenantNotFound ==================== Tenant Module (90xxx) ====================
 	ErrTenantNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 90001, Msg: "tenant not found"}
