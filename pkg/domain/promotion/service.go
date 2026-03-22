@@ -120,7 +120,7 @@ func (s *CalculationService) CalculateDiscount(
 
 	// Apply promotions
 	for _, promo := range promotions {
-		applied := s.applyPromotion(promo, req.CartItems, req.Currency)
+		applied := s.applyPromotion(promo, req.CartItems)
 		if applied != nil {
 			result.AppliedPromotions = append(result.AppliedPromotions, *applied)
 			result.PromotionDiscount += applied.DiscountAmount
@@ -149,7 +149,6 @@ func (s *CalculationService) CalculateDiscount(
 func (s *CalculationService) applyPromotion(
 	promo *Promotion,
 	items []CartItem,
-	currency string,
 ) *AppliedPromotion {
 	var matchedAmount int64
 	var matchedQuantity int

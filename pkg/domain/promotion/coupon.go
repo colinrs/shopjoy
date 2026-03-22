@@ -1,11 +1,9 @@
 package promotion
 
 import (
-	"context"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"gorm.io/gorm"
 )
 
 // ==================== Coupon Type ====================
@@ -191,23 +189,4 @@ type CouponQuery struct {
 	Code     string
 	Status   *CouponStatus
 	Type     *CouponType
-}
-
-// ==================== Repository Interfaces ====================
-
-type CouponRepository interface {
-	Create(ctx context.Context, db *gorm.DB, coupon *Coupon) error
-	Update(ctx context.Context, db *gorm.DB, coupon *Coupon) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Coupon, error)
-	FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*Coupon, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query CouponQuery) ([]*Coupon, int64, error)
-}
-
-type UserCouponRepository interface {
-	Create(ctx context.Context, db *gorm.DB, userCoupon *UserCoupon) error
-	Update(ctx context.Context, db *gorm.DB, userCoupon *UserCoupon) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*UserCoupon, error)
-	FindByUserAndCoupon(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID, couponID int64) (*UserCoupon, error)
-	CountUsageByUser(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID, couponID int64) (int, error)
 }
