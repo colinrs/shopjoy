@@ -1,0 +1,138 @@
+package fulfillment_orders
+
+import (
+	"context"
+	"time"
+
+	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
+	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type ListFulfillmentOrdersLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewListFulfillmentOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListFulfillmentOrdersLogic {
+	return ListFulfillmentOrdersLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *ListFulfillmentOrdersLogic) ListFulfillmentOrders(req *types.ListFulfillmentOrdersReq) (resp *types.ListFulfillmentOrdersResp, err error) {
+	// Get tenantID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// Platform admin can access all data
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	// Build query request
+	queryReq := appfulfillment.QueryOrderRequest{
+		Page:              req.Page,
+		PageSize:          req.PageSize,
+		OrderNo:           req.OrderNo,
+		UserID:            req.UserID,
+		UserName:          req.UserName,
+		Status:            req.Status,
+		FulfillmentStatus: req.FulfillmentStatus,
+		RefundStatus:      req.RefundStatus,
+	}
+
+	// Parse time range
+	if req.StartTime != "" {
+		startTime, err := time.Parse(time.RFC3339, req.StartTime)
+		if err == nil {
+			queryReq.StartTime = startTime
+		}
+	}
+	if req.EndTime != "" {
+		endTime, err := time.Parse(time.RFC3339, req.EndTime)
+		if err == nil {
+			queryReq.EndTime = endTime
+		}
+	}
+
+	// List orders
+	listResp, err := l.svcCtx.OrderFulfillmentApp.ListOrders(l.ctx, shared.TenantID(tenantID), queryReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	resp = &types.ListFulfillmentOrdersResp{
+		List:     make([]*types.OrderFulfillmentDetailResp, len(listResp.List)),
+		Total:    listResp.Total,
+		Page:     listResp.Page,
+		PageSize: listResp.PageSize,
+	}
+
+	for i, o := range listResp.List {
+		resp.List[i] = toOrderFulfillmentDetailResp(o)
+	}
+
+	return resp, nil
+}
+
+// toOrderFulfillmentDetailResp converts OrderFulfillmentDetail to types.OrderFulfillmentDetailResp
+func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *types.OrderFulfillmentDetailResp {
+	items := make([]*types.OrderFulfillmentItemResp, len(o.Items))
+	for i, item := range o.Items {
+		items[i] = &types.OrderFulfillmentItemResp{
+			OrderItemID: item.OrderItemID,
+			ProductID:   item.ProductID,
+			SKUID:       item.SKUID,
+			ProductName: item.ProductName,
+			SKUName:     item.SKUName,
+			Image:       item.Image,
+			Quantity:    item.Quantity,
+			ShippedQty:  item.ShippedQty,
+			PendingQty:  item.PendingQty,
+			UnitPrice:   formatAmount(item.UnitPrice),
+			Currency:    item.Currency,
+		}
+	}
+
+	shipments := make([]*types.ShipmentDetailResp, len(o.Shipments))
+	for i, s := range o.Shipments {
+		shipments[i] = toShipmentDetailResp(s)
+	}
+
+	var refund *types.RefundDetailResp
+	if o.Refund != nil {
+		refund = toRefundDetailResp(o.Refund)
+	}
+
+	return &types.OrderFulfillmentDetailResp{
+		OrderID:           o.OrderID,
+		OrderNo:           o.OrderNo,
+		Status:            o.Status,
+		FulfillmentStatus: o.FulfillmentStatus,
+		FulfillmentText:   o.FulfillmentText,
+		RefundStatus:      o.RefundStatus,
+		RefundText:        o.RefundText,
+		TotalAmount:       formatAmount(o.TotalAmount),
+		Currency:          o.Currency,
+		UserID:            o.UserID,
+		UserName:          o.UserName,
+		UserPhone:         o.UserPhone,
+		ShippingAddress:   o.ShippingAddress,
+		Items:             items,
+		Shipments:         shipments,
+		Refund:            refund,
+		PaidAt:            formatTimeToRFC3339(o.PaidAt),
+		ShippedAt:         formatTimeToRFC3339(o.ShippedAt),
+		DeliveredAt:       formatTimeToRFC3339(o.DeliveredAt),
+		CreatedAt:         o.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:         o.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+}

@@ -10,6 +10,7 @@ import "category.api"
 import "brand.api"
 import "inventory.api"
 import "promotion.api"
+import "fulfillment.api"
 
 info (
 	title:   "Admin API"

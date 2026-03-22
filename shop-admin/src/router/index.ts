@@ -92,6 +92,37 @@ const router = createRouter({
           name: 'inventory',
           component: () => import('@/views/inventory/index.vue'),
           meta: { title: '库存管理' }
+        },
+        // Fulfillment Module Routes
+        {
+          path: 'fulfillment/shipments',
+          name: 'shipments',
+          component: () => import('@/views/fulfillment/shipments/index.vue'),
+          meta: { title: '发货管理' }
+        },
+        {
+          path: 'fulfillment/shipments/:id',
+          name: 'shipment-detail',
+          component: () => import('@/views/fulfillment/shipments/[id]/index.vue'),
+          meta: { title: '发货详情' }
+        },
+        {
+          path: 'fulfillment/refunds',
+          name: 'refunds',
+          component: () => import('@/views/fulfillment/refunds/index.vue'),
+          meta: { title: '退款管理' }
+        },
+        {
+          path: 'fulfillment/refunds/:id',
+          name: 'refund-detail',
+          component: () => import('@/views/fulfillment/refunds/[id]/index.vue'),
+          meta: { title: '退款详情' }
+        },
+        {
+          path: 'fulfillment/statistics',
+          name: 'fulfillment-statistics',
+          component: () => import('@/views/fulfillment/statistics/index.vue'),
+          meta: { title: '售后统计' }
         }
       ]
     }

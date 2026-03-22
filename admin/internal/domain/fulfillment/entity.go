@@ -2,6 +2,7 @@ package fulfillment
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -9,130 +10,636 @@ import (
 	"gorm.io/gorm"
 )
 
+// ==================== Enums ====================
+
+// ShipmentStatus 发货单状态
 type ShipmentStatus int
 
 const (
-	ShipmentStatusPending ShipmentStatus = iota
-	ShipmentStatusShipped
-	ShipmentStatusInTransit
-	ShipmentStatusDelivered
-	ShipmentStatusFailed
+	ShipmentStatusPending ShipmentStatus = iota // 待发货
+	ShipmentStatusShipped                       // 已发货
+	ShipmentStatusInTransit                     // 运输中
+	ShipmentStatusDelivered                     // 已送达
+	ShipmentStatusFailed                        // 发货失败
+	ShipmentStatusCancelled                     // 已取消
 )
 
+func (s ShipmentStatus) String() string {
+	switch s {
+	case ShipmentStatusPending:
+		return "pending"
+	case ShipmentStatusShipped:
+		return "shipped"
+	case ShipmentStatusInTransit:
+		return "in_transit"
+	case ShipmentStatusDelivered:
+		return "delivered"
+	case ShipmentStatusFailed:
+		return "failed"
+	case ShipmentStatusCancelled:
+		return "cancelled"
+	default:
+		return "unknown"
+	}
+}
+
+func (s ShipmentStatus) IsValid() bool {
+	return s >= ShipmentStatusPending && s <= ShipmentStatusCancelled
+}
+
+// RefundStatus 退款状态
+type RefundStatus int
+
+const (
+	RefundStatusPending RefundStatus = iota // 待处理
+	RefundStatusApproved                    // 已批准
+	RefundStatusRejected                    // 已拒绝
+	RefundStatusCompleted                   // 已完成
+	RefundStatusCancelled                   // 已取消
+)
+
+func (s RefundStatus) String() string {
+	switch s {
+	case RefundStatusPending:
+		return "pending"
+	case RefundStatusApproved:
+		return "approved"
+	case RefundStatusRejected:
+		return "rejected"
+	case RefundStatusCompleted:
+		return "completed"
+	case RefundStatusCancelled:
+		return "cancelled"
+	default:
+		return "unknown"
+	}
+}
+
+func (s RefundStatus) IsValid() bool {
+	return s >= RefundStatusPending && s <= RefundStatusCancelled
+}
+
+// RefundType 退款类型
+type RefundType int
+
+const (
+	RefundTypeFull RefundType = iota + 1 // 全额退款
+	RefundTypePartial                    // 部分退款 (Phase 2)
+)
+
+func (t RefundType) String() string {
+	switch t {
+	case RefundTypeFull:
+		return "full_refund"
+	case RefundTypePartial:
+		return "partial_refund"
+	default:
+		return "unknown"
+	}
+}
+
+// FulfillmentStatus 订单履约状态
+type FulfillmentStatus int
+
+const (
+	FulfillmentStatusPending FulfillmentStatus = iota // 待发货
+	FulfillmentStatusPartialShipped                   // 部分发货
+	FulfillmentStatusShipped                          // 已发货
+	FulfillmentStatusDelivered                        // 已送达
+)
+
+func (s FulfillmentStatus) String() string {
+	switch s {
+	case FulfillmentStatusPending:
+		return "pending"
+	case FulfillmentStatusPartialShipped:
+		return "partial_shipped"
+	case FulfillmentStatusShipped:
+		return "shipped"
+	case FulfillmentStatusDelivered:
+		return "delivered"
+	default:
+		return "unknown"
+	}
+}
+
+func (s FulfillmentStatus) IsValid() bool {
+	return s >= FulfillmentStatusPending && s <= FulfillmentStatusDelivered
+}
+
+// ==================== Carrier (物流公司) ====================
+
+// Carrier 物流公司
+type Carrier struct {
+	ID         int64 `gorm:"column:id;primaryKey"`
+	Code       string
+	Name       string
+	TrackingURL string
+	IsActive   bool
+	Sort       int
+	CreatedAt  time.Time
+}
+
+func (c *Carrier) TableName() string {
+	return "carriers"
+}
+
+func (c *Carrier) GetTrackingURL(trackingNo string) string {
+	if c.TrackingURL == "" || trackingNo == "" {
+		return ""
+	}
+	return fmt.Sprintf(c.TrackingURL, trackingNo)
+}
+
+// PredefinedCarrierCodes 预定义物流公司代码
+const (
+	CarrierCodeSF   = "SF"   // 顺丰
+	CarrierCodeYT   = "YT"   // 圆通
+	CarrierCodeZT   = "ZT"   // 中通
+	CarrierCodeST   = "ST"   // 申通
+	CarrierCodeYD   = "YD"   // 韵达
+	CarrierCodeEMS  = "EMS"  // EMS
+	CarrierCodeJD   = "JD"   // 京东物流
+	CarrierCodeOther = "OTHER" // 其他
+)
+
+// DefaultCarriers 默认物流公司列表
+var DefaultCarriers = []Carrier{
+	{Code: CarrierCodeSF, Name: "顺丰速运", TrackingURL: "https://www.sf-express.com/track?id=%s", IsActive: true, Sort: 1},
+	{Code: CarrierCodeYT, Name: "圆通速递", TrackingURL: "https://www.yto.net.cn/query.html?id=%s", IsActive: true, Sort: 2},
+	{Code: CarrierCodeZT, Name: "中通快递", TrackingURL: "https://www.zto.com/track?id=%s", IsActive: true, Sort: 3},
+	{Code: CarrierCodeST, Name: "申通快递", TrackingURL: "https://www.sto.cn/track?id=%s", IsActive: true, Sort: 4},
+	{Code: CarrierCodeYD, Name: "韵达快递", TrackingURL: "https://www.yundaex.com/track?id=%s", IsActive: true, Sort: 5},
+	{Code: CarrierCodeEMS, Name: "EMS", TrackingURL: "https://www.ems.com.cn/track?id=%s", IsActive: true, Sort: 6},
+	{Code: CarrierCodeJD, Name: "京东物流", TrackingURL: "https://www.jdl.com/track?id=%s", IsActive: true, Sort: 7},
+	{Code: CarrierCodeOther, Name: "其他", TrackingURL: "", IsActive: true, Sort: 99},
+}
+
+// ==================== RefundReason (退款原因) ====================
+
+// RefundReason 退款原因
+type RefundReason struct {
+	ID        int64 `gorm:"column:id;primaryKey"`
+	Code      string
+	Name      string
+	Sort      int
+	IsActive  bool
+	CreatedAt time.Time
+}
+
+func (r *RefundReason) TableName() string {
+	return "refund_reasons"
+}
+
+// Predefined refund reason codes
+const (
+	RefundReasonDefective      = "DEFECTIVE"       // 产品有缺陷
+	RefundReasonWrongItem      = "WRONG_ITEM"      // 发错货
+	RefundReasonNotAsDescribed = "NOT_AS_DESCRIBED" // 与描述不符
+	RefundReasonDamaged        = "DAMAGED"         // 运输损坏
+	RefundReasonNotNeeded      = "NO_LONGER_NEEDED" // 不再需要
+	RefundReasonLateDelivery   = "LATE_DELIVERY"   // 配送太慢
+	RefundReasonOther          = "OTHER"           // 其他
+)
+
+// DefaultRefundReasons 默认退款原因列表
+var DefaultRefundReasons = []RefundReason{
+	{Code: RefundReasonDefective, Name: "产品有缺陷", Sort: 1, IsActive: true},
+	{Code: RefundReasonWrongItem, Name: "发错货", Sort: 2, IsActive: true},
+	{Code: RefundReasonNotAsDescribed, Name: "与描述不符", Sort: 3, IsActive: true},
+	{Code: RefundReasonDamaged, Name: "运输损坏", Sort: 4, IsActive: true},
+	{Code: RefundReasonNotNeeded, Name: "不再需要", Sort: 5, IsActive: true},
+	{Code: RefundReasonLateDelivery, Name: "配送太慢", Sort: 6, IsActive: true},
+	{Code: RefundReasonOther, Name: "其他", Sort: 99, IsActive: true},
+}
+
+// ==================== Shipment (发货单) ====================
+
+// Shipment 发货单
 type Shipment struct {
-	ID          int64
-	TenantID    shared.TenantID
-	OrderID     string
-	Status      ShipmentStatus
-	Carrier     string
-	TrackingNo  string
-	Items       []ShipmentItem
-	Weight      float64
-	Cost        shared.Money `gorm:"embedded"`
-	ShippedAt   *time.Time
-	DeliveredAt *time.Time
-	Audit       shared.AuditInfo `gorm:"embedded"`
+	ID             int64            `gorm:"column:id;primaryKey"`
+	TenantID       shared.TenantID  `gorm:"column:tenant_id;not null;index"`
+	OrderID        string           `gorm:"column:order_id;not null;index"`
+	ShipmentNo     string           `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
+	Status         ShipmentStatus   `gorm:"column:status;not null;default:0;index"`
+	Carrier        string           `gorm:"column:carrier;not null;default:''"`
+	CarrierCode    string           `gorm:"column:carrier_code;not null;default:''"`
+	TrackingNo     string           `gorm:"column:tracking_no;not null;default:'';index"`
+	ShippingCost   int64            `gorm:"column:shipping_cost;not null;default:0"` // 运费（分）
+	ShippingCurrency string         `gorm:"column:shipping_currency;not null;default:'CNY'"`
+	Weight         float64          `gorm:"column:weight;not null;default:0"` // 重量（kg）
+	ShippedAt      *time.Time       `gorm:"column:shipped_at"`
+	DeliveredAt    *time.Time       `gorm:"column:delivered_at"`
+	Remark         string           `gorm:"column:remark;not null;default:''"`
+	Items          []ShipmentItem   `gorm:"foreignKey:ShipmentID"`
+	Audit          shared.AuditInfo `gorm:"embedded"`
+	DeletedAt      gorm.DeletedAt   `gorm:"column:deleted_at;index"`
 }
 
 func (s *Shipment) TableName() string {
 	return "shipments"
 }
 
-func (s *Shipment) Ship(carrier, trackingNo string) error {
+// NewShipment 创建发货单
+func NewShipment(tenantID shared.TenantID, orderID string, items []ShipmentItem, createdBy int64) *Shipment {
+	now := time.Now().UTC()
+	return &Shipment{
+		TenantID:         tenantID,
+		OrderID:          orderID,
+		Status:           ShipmentStatusPending,
+		ShippingCurrency: "CNY",
+		Items:            items,
+		Audit: shared.AuditInfo{
+			CreatedAt: now,
+			UpdatedAt: now,
+			CreatedBy: createdBy,
+			UpdatedBy: createdBy,
+		},
+	}
+}
+
+// Ship 发货
+func (s *Shipment) Ship(carrier, carrierCode, trackingNo string, updatedBy int64) error {
 	if s.Status != ShipmentStatusPending {
 		return code.ErrShipmentAlreadyShipped
 	}
-	if carrier == "" || trackingNo == "" {
-		return code.ErrShipmentInvalidTracking
+	if carrier == "" {
+		return code.ErrShipmentCarrierRequired
 	}
+	if trackingNo == "" {
+		return code.ErrShipmentTrackingRequired
+	}
+
 	s.Carrier = carrier
+	s.CarrierCode = carrierCode
 	s.TrackingNo = trackingNo
 	now := time.Now().UTC()
 	s.ShippedAt = &now
 	s.Status = ShipmentStatusShipped
+	s.Audit.Update(updatedBy)
 	return nil
 }
 
-func (s *Shipment) Deliver() {
+// MarkInTransit 标记为运输中
+func (s *Shipment) MarkInTransit(updatedBy int64) error {
+	if s.Status != ShipmentStatusShipped {
+		return code.ErrShipmentInvalidStatusTransition
+	}
+	s.Status = ShipmentStatusInTransit
+	s.Audit.Update(updatedBy)
+	return nil
+}
+
+// MarkDelivered 标记为已送达
+func (s *Shipment) MarkDelivered(updatedBy int64) error {
+	if s.Status != ShipmentStatusShipped && s.Status != ShipmentStatusInTransit {
+		return code.ErrShipmentInvalidStatusTransition
+	}
 	now := time.Now().UTC()
 	s.DeliveredAt = &now
 	s.Status = ShipmentStatusDelivered
+	s.Audit.Update(updatedBy)
+	return nil
 }
 
+// MarkFailed 标记为发货失败
+func (s *Shipment) MarkFailed(reason string, updatedBy int64) error {
+	if s.Status == ShipmentStatusDelivered || s.Status == ShipmentStatusCancelled {
+		return code.ErrShipmentInvalidStatusTransition
+	}
+	s.Status = ShipmentStatusFailed
+	s.Remark = reason
+	s.Audit.Update(updatedBy)
+	return nil
+}
+
+// Cancel 取消发货
+func (s *Shipment) Cancel(reason string, updatedBy int64) error {
+	if s.Status == ShipmentStatusDelivered {
+		return code.ErrShipmentCannotCancelDelivered
+	}
+	s.Status = ShipmentStatusCancelled
+	s.Remark = reason
+	s.Audit.Update(updatedBy)
+	return nil
+}
+
+// SetShippingCost 设置运费
+func (s *Shipment) SetShippingCost(cost int64, currency string) {
+	s.ShippingCost = cost
+	if currency != "" {
+		s.ShippingCurrency = currency
+	}
+}
+
+// SetWeight 设置重量
+func (s *Shipment) SetWeight(weight float64) {
+	s.Weight = weight
+}
+
+// GenerateShipmentNo 生成发货单号
+func GenerateShipmentNo(tenantID shared.TenantID, sequence int) string {
+	// Format: SHP{YYYYMMDD}{sequence:06d}
+	dateStr := time.Now().UTC().Format("20060102")
+	return fmt.Sprintf("SHP%s%06d", dateStr, sequence)
+}
+
+// IsShipped 是否已发货
+func (s *Shipment) IsShipped() bool {
+	return s.Status == ShipmentStatusShipped ||
+		s.Status == ShipmentStatusInTransit ||
+		s.Status == ShipmentStatusDelivered
+}
+
+// IsDelivered 是否已送达
+func (s *Shipment) IsDelivered() bool {
+	return s.Status == ShipmentStatusDelivered
+}
+
+// CanShip 是否可以发货
+func (s *Shipment) CanShip() bool {
+	return s.Status == ShipmentStatusPending
+}
+
+// ==================== ShipmentItem (发货单明细) ====================
+
+// ShipmentItem 发货单明细
 type ShipmentItem struct {
-	ID          int64
-	ShipmentID  int64
-	OrderItemID int64
-	ProductID   int64
-	SKUId       int64
-	Quantity    int
+	ID           int64           `gorm:"column:id;primaryKey"`
+	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
+	ShipmentID   int64           `gorm:"column:shipment_id;not null;index"`
+	OrderItemID  int64           `gorm:"column:order_item_id;not null;index"`
+	ProductID    int64           `gorm:"column:product_id;not null;index"`
+	SKUID        int64           `gorm:"column:sku_id;not null;index"`
+	ProductName  string          `gorm:"column:product_name;not null;default:''"` // 商品名称快照
+	SKUName      string          `gorm:"column:sku_name;not null;default:''"`     // SKU名称快照
+	Image        string          `gorm:"column:image;not null;default:''"`        // 商品图片快照
+	Quantity     int             `gorm:"column:quantity;not null;default:1"`
+	CreatedAt    time.Time       `gorm:"column:created_at;not null"`
 }
 
 func (si *ShipmentItem) TableName() string {
 	return "shipment_items"
 }
 
-type RefundStatus int
+// NewShipmentItem 创建发货单明细
+func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int64,
+	productName, skuName, image string, quantity int) *ShipmentItem {
+	return &ShipmentItem{
+		TenantID:    tenantID,
+		OrderItemID: orderItemID,
+		ProductID:   productID,
+		SKUID:       skuID,
+		ProductName: productName,
+		SKUName:     skuName,
+		Image:       image,
+		Quantity:    quantity,
+		CreatedAt:   time.Now().UTC(),
+	}
+}
 
-const (
-	RefundStatusPending RefundStatus = iota
-	RefundStatusApproved
-	RefundStatusRejected
-	RefundStatusCompleted
-)
+// ==================== Refund (退款单) ====================
 
+// Refund 退款单
 type Refund struct {
-	ID          int64
-	TenantID    shared.TenantID
-	OrderID     string
-	UserID      int64
-	Status      RefundStatus
-	Reason      string
-	Description string
-	Images      []string
-	Amount      shared.Money `gorm:"embedded"`
-	ApprovedAt  *time.Time
-	CompletedAt *time.Time
-	Audit       shared.AuditInfo `gorm:"embedded"`
+	ID           int64              `gorm:"column:id;primaryKey"`
+	TenantID     shared.TenantID    `gorm:"column:tenant_id;not null;index"`
+	OrderID      string             `gorm:"column:order_id;not null;index"`
+	RefundNo     string             `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
+	UserID       int64              `gorm:"column:user_id;not null;index"`
+	Type         RefundType         `gorm:"column:type;not null;default:1"`
+	Status       RefundStatus       `gorm:"column:status;not null;default:0;index"`
+	ReasonType   string             `gorm:"column:reason_type;not null;default:''"`
+	Reason       string             `gorm:"column:reason;not null;default:''"`
+	Description  string             `gorm:"column:description"`
+	Images       string             `gorm:"column:images;type:json"` // JSON array of image URLs
+	Amount       int64              `gorm:"column:amount;not null;default:0"`       // 退款金额（分）
+	Currency     string             `gorm:"column:currency;not null;default:'CNY'"`
+	RejectReason string             `gorm:"column:reject_reason;not null;default:''"`
+	ApprovedAt   *time.Time         `gorm:"column:approved_at"`
+	ApprovedBy   int64              `gorm:"column:approved_by;not null;default:0"`
+	CompletedAt  *time.Time         `gorm:"column:completed_at"`
+	Audit        shared.AuditInfo   `gorm:"embedded"`
+	DeletedAt    gorm.DeletedAt     `gorm:"column:deleted_at;index"`
 }
 
 func (r *Refund) TableName() string {
 	return "refunds"
 }
 
-func (r *Refund) Approve() {
+// NewRefund 创建退款申请
+func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
+	reasonType, reason, description string, images []string, amount int64, currency string) *Refund {
 	now := time.Now().UTC()
-	r.ApprovedAt = &now
+	return &Refund{
+		TenantID:    tenantID,
+		OrderID:     orderID,
+		UserID:      userID,
+		Type:        RefundTypeFull,
+		Status:      RefundStatusPending,
+		ReasonType:  reasonType,
+		Reason:      reason,
+		Description: description,
+		Amount:      amount,
+		Currency:    currency,
+		Audit: shared.AuditInfo{
+			CreatedAt: now,
+			UpdatedAt: now,
+			CreatedBy: userID,
+			UpdatedBy: userID,
+		},
+	}
+}
+
+// Approve 批准退款
+func (r *Refund) Approve(approvedBy int64) error {
+	if r.Status != RefundStatusPending {
+		return code.ErrRefundInvalidStatus
+	}
+	now := time.Now().UTC()
 	r.Status = RefundStatusApproved
+	r.ApprovedAt = &now
+	r.ApprovedBy = approvedBy
+	r.Audit.Update(approvedBy)
+	return nil
 }
 
-func (r *Refund) Reject() {
+// Reject 拒绝退款
+func (r *Refund) Reject(rejectReason string, updatedBy int64) error {
+	if r.Status != RefundStatusPending {
+		return code.ErrRefundInvalidStatus
+	}
 	r.Status = RefundStatusRejected
+	r.RejectReason = rejectReason
+	r.Audit.Update(updatedBy)
+	return nil
 }
 
-func (r *Refund) Complete() {
+// Complete 完成退款
+func (r *Refund) Complete(updatedBy int64) error {
+	if r.Status != RefundStatusApproved {
+		return code.ErrRefundInvalidStatus
+	}
 	now := time.Now().UTC()
-	r.CompletedAt = &now
 	r.Status = RefundStatusCompleted
+	r.CompletedAt = &now
+	r.Audit.Update(updatedBy)
+	return nil
 }
 
+// Cancel 取消退款申请
+func (r *Refund) Cancel(updatedBy int64) error {
+	if r.Status != RefundStatusPending {
+		return code.ErrRefundCannotCancel
+	}
+	r.Status = RefundStatusCancelled
+	r.Audit.Update(updatedBy)
+	return nil
+}
+
+// GenerateRefundNo 生成退款单号
+func GenerateRefundNo(tenantID shared.TenantID, sequence int) string {
+	// Format: REF{YYYYMMDD}{sequence:06d}
+	dateStr := time.Now().UTC().Format("20060102")
+	return fmt.Sprintf("REF%s%06d", dateStr, sequence)
+}
+
+// IsPending 是否待处理
+func (r *Refund) IsPending() bool {
+	return r.Status == RefundStatusPending
+}
+
+// IsApproved 是否已批准
+func (r *Refund) IsApproved() bool {
+	return r.Status == RefundStatusApproved
+}
+
+// IsCompleted 是否已完成
+func (r *Refund) IsCompleted() bool {
+	return r.Status == RefundStatusCompleted
+}
+
+// IsRejected 是否已拒绝
+func (r *Refund) IsRejected() bool {
+	return r.Status == RefundStatusRejected
+}
+
+// CanCancel 是否可以取消
+func (r *Refund) CanCancel() bool {
+	return r.Status == RefundStatusPending
+}
+
+// ==================== Query Types ====================
+
+// ShipmentQuery 发货单查询参数
+type ShipmentQuery struct {
+	shared.PageQuery
+	OrderID    string
+	Status     ShipmentStatus
+	CarrierCode string
+	TrackingNo string
+	StartTime  time.Time
+	EndTime    time.Time
+}
+
+// RefundQuery 退款查询参数
+type RefundQuery struct {
+	shared.PageQuery
+	OrderID    string
+	UserID     int64
+	Status     RefundStatus
+	ReasonType string
+	StartTime  time.Time
+	EndTime    time.Time
+}
+
+// FulfillmentSummary 履约统计摘要
+type FulfillmentSummary struct {
+	PendingShipment  int64 `json:"pending_shipment"`  // 待发货订单数
+	PartialShipped   int64 `json:"partial_shipped"`   // 部分发货订单数
+	Shipped          int64 `json:"shipped"`           // 已发货订单数
+	Delivered        int64 `json:"delivered"`         // 已送达订单数
+	PendingRefund    int64 `json:"pending_refund"`    // 待处理退款数
+}
+
+// RefundStatistics 退款统计
+type RefundStatistics struct {
+	TotalRefunds      int64   `json:"total_refunds"`       // 总退款数
+	TotalRefundAmount int64   `json:"total_refund_amount"` // 总退款金额
+	RefundRate        float64 `json:"refund_rate"`         // 退款率
+	TopReasons        []RefundReasonCount `json:"top_reasons"` // 热门退款原因
+	TopProducts       []ProductRefundCount `json:"top_products"` // 高退款率商品
+}
+
+// RefundReasonCount 退款原因统计
+type RefundReasonCount struct {
+	ReasonType string `json:"reason_type"`
+	ReasonName string `json:"reason_name"`
+	Count      int64  `json:"count"`
+	Percentage float64 `json:"percentage"`
+}
+
+// ProductRefundCount 商品退款统计
+type ProductRefundCount struct {
+	ProductID   int64   `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	RefundCount int64   `json:"refund_count"`
+	RefundRate  float64 `json:"refund_rate"`
+}
+
+// ==================== Repository Interfaces ====================
+
+// ShipmentRepository 发货单仓储接口
 type ShipmentRepository interface {
 	Create(ctx context.Context, db *gorm.DB, shipment *Shipment) error
 	Update(ctx context.Context, db *gorm.DB, shipment *Shipment) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Shipment, error)
-	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*Shipment, error)
+	FindByShipmentNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentNo string) (*Shipment, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*Shipment, error)
 	FindByTrackingNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, trackingNo string) (*Shipment, error)
+	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query ShipmentQuery) ([]*Shipment, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, status ShipmentStatus) (int64, error)
 }
 
+// ShipmentItemRepository 发货单明细仓储接口
+type ShipmentItemRepository interface {
+	BatchCreate(ctx context.Context, db *gorm.DB, items []ShipmentItem) error
+	FindByShipmentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentID int64) ([]ShipmentItem, error)
+	FindByOrderItemID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderItemID int64) ([]ShipmentItem, error)
+	DeleteByShipmentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentID int64) error
+}
+
+// RefundRepository 退款单仓储接口
 type RefundRepository interface {
 	Create(ctx context.Context, db *gorm.DB, refund *Refund) error
 	Update(ctx context.Context, db *gorm.DB, refund *Refund) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Refund, error)
+	FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, refundNo string) (*Refund, error)
 	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*Refund, error)
-	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query Query) ([]*Refund, int64, error)
+	FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*Refund, error)
+	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query RefundQuery) ([]*Refund, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query RefundQuery) ([]*Refund, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, status RefundStatus) (int64, error)
 }
 
-type Query struct {
-	shared.PageQuery
-	Status RefundStatus
+// CarrierRepository 物流公司仓储接口
+type CarrierRepository interface {
+	Create(ctx context.Context, db *gorm.DB, carrier *Carrier) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Carrier, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Carrier, error)
+	FindAll(ctx context.Context, db *gorm.DB) ([]*Carrier, error)
+	FindActive(ctx context.Context, db *gorm.DB) ([]*Carrier, error)
+	Update(ctx context.Context, db *gorm.DB, carrier *Carrier) error
+}
+
+// RefundReasonRepository 退款原因仓储接口
+type RefundReasonRepository interface {
+	Create(ctx context.Context, db *gorm.DB, reason *RefundReason) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*RefundReason, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*RefundReason, error)
+	FindAll(ctx context.Context, db *gorm.DB) ([]*RefundReason, error)
+	FindActive(ctx context.Context, db *gorm.DB) ([]*RefundReason, error)
+	Update(ctx context.Context, db *gorm.DB, reason *RefundReason) error
 }

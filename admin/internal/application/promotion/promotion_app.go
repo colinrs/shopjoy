@@ -197,7 +197,7 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, tenantID shared.Tena
 
 	// Only allow update if promotion is not active
 	if p.Status == pkgpromotion.StatusActive {
-		return nil, ErrPromotionIsActive
+		return nil, code.ErrPromotionCannotDelete
 	}
 
 	p.Name = req.Name
@@ -270,7 +270,7 @@ func (a *promotionApp) DeletePromotion(ctx context.Context, tenantID shared.Tena
 
 	// Only allow delete if promotion is not active
 	if p.Status == pkgpromotion.StatusActive {
-		return ErrPromotionIsActive
+		return code.ErrPromotionCannotDelete
 	}
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
@@ -291,7 +291,7 @@ func (a *promotionApp) ActivatePromotion(ctx context.Context, tenantID shared.Te
 	// Validate time range
 	now := time.Now().UTC()
 	if now.After(p.EndAt) {
-		return ErrPromotionAlreadyEnded
+		return code.ErrPromotionExpired
 	}
 
 	// Update status

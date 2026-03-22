@@ -53,8 +53,15 @@
             <span>全部订单</span>
             <el-badge :value="pendingOrders" v-if="pendingOrders > 0" class="menu-badge" />
           </el-menu-item>
-          <el-menu-item index="/returns">
-            <span>退换货</span>
+          <el-menu-item index="/fulfillment/shipments">
+            <span>发货管理</span>
+          </el-menu-item>
+          <el-menu-item index="/fulfillment/refunds">
+            <span>退款管理</span>
+            <el-badge :value="pendingRefunds" v-if="pendingRefunds > 0" class="menu-badge" type="warning" />
+          </el-menu-item>
+          <el-menu-item index="/fulfillment/statistics">
+            <span>售后统计</span>
           </el-menu-item>
         </el-sub-menu>
         
@@ -251,6 +258,7 @@ const searchQuery = ref('')
 const notificationVisible = ref(false)
 const hasNewData = ref(true)
 const pendingOrders = ref(5)
+const pendingRefunds = ref(8)
 const isDarkMode = ref(false)
 
 const notifications = ref([

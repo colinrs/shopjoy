@@ -218,7 +218,7 @@ func (a *couponApp) UpdateCoupon(ctx context.Context, tenantID shared.TenantID, 
 
 	// Only allow update if coupon is not active
 	if c.Status == pkgcoupon.CouponStatusActive {
-		return nil, ErrCouponIsActive
+		return nil, code.ErrCouponCannotDelete
 	}
 
 	c.Name = req.Name
@@ -289,7 +289,7 @@ func (a *couponApp) DeleteCoupon(ctx context.Context, tenantID shared.TenantID, 
 
 	// Only allow delete if coupon is not active
 	if c.Status == pkgcoupon.CouponStatusActive {
-		return ErrCouponIsActive
+		return code.ErrCouponCannotDelete
 	}
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
@@ -327,12 +327,12 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 
 	// Check if coupon is active
 	if !c.IsActive() {
-		return nil, ErrCouponNotActive
+		return nil, code.ErrCouponNotActive
 	}
 
 	// Check usage limit
 	if c.TotalCount > 0 && c.UsedCount >= c.TotalCount {
-		return nil, ErrCouponUsedUp
+		return nil, code.ErrCouponUserLimitReached
 	}
 
 	var userCouponID int64

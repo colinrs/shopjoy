@@ -1,0 +1,456 @@
+syntax = "v1"
+
+info (
+	title:   "Fulfillment API"
+	desc:    "订单履约管理相关接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Shipment Types =====================
+	// Shipment item for create request
+	ShipmentItemReq {
+		OrderItemID int64 `json:"order_item_id"`
+		Quantity    int   `json:"quantity"`
+	}
+	// Create shipment request
+	CreateShipmentReq {
+		OrderID      string            `json:"order_id"`
+		CarrierCode  string            `json:"carrier_code"`
+		CarrierName  string            `json:"carrier_name,optional"` // For custom carrier
+		TrackingNo   string            `json:"tracking_no"`
+		ShippingCost string            `json:"shipping_cost,optional"` // Using string for decimal precision
+		Currency     string            `json:"currency,optional"`
+		Weight       string            `json:"weight,optional"` // Weight in kg
+		Remark       string            `json:"remark,optional"`
+		Items        []ShipmentItemReq `json:"items,optional"` // Empty means all items
+	}
+	// Create shipment response
+	CreateShipmentResp {
+		ID         int64  `json:"id"`
+		ShipmentNo string `json:"shipment_no"`
+	}
+	// Batch shipment item
+	BatchShipmentItemReq {
+		OrderID    string `json:"order_id"`
+		TrackingNo string `json:"tracking_no"`
+	}
+	// Batch create shipments request
+	BatchCreateShipmentsReq {
+		CarrierCode string                 `json:"carrier_code"`
+		CarrierName string                 `json:"carrier_name,optional"`
+		Shipments   []BatchShipmentItemReq `json:"shipments"`
+	}
+	// Batch create shipments response
+	BatchCreateShipmentsResp {
+		Total   int                       `json:"total"`
+		Success int                       `json:"success"`
+		Failed  int                       `json:"failed"`
+		Results []BatchShipmentResultResp `json:"results"`
+	}
+	// Batch shipment result
+	BatchShipmentResultResp {
+		OrderID    string `json:"order_id"`
+		ShipmentID int64  `json:"shipment_id,optional"`
+		ShipmentNo string `json:"shipment_no,optional"`
+		Success    bool   `json:"success"`
+		Error      string `json:"error,optional"`
+	}
+	// Update shipment request
+	UpdateShipmentReq {
+		ID           int64  `path:"id"`
+		CarrierCode  string `json:"carrier_code,optional"`
+		CarrierName  string `json:"carrier_name,optional"`
+		TrackingNo   string `json:"tracking_no,optional"`
+		ShippingCost string `json:"shipping_cost,optional"`
+		Currency     string `json:"currency,optional"`
+		Weight       string `json:"weight,optional"`
+		Remark       string `json:"remark,optional"`
+	}
+	// Update shipment status request
+	UpdateShipmentStatusReq {
+		ID     int64 `path:"id"`
+		Status int8  `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+	}
+	// Shipment item response
+	ShipmentItemResp {
+		ID          int64  `json:"id"`
+		ShipmentID  int64  `json:"shipment_id"`
+		OrderItemID int64  `json:"order_item_id"`
+		ProductID   int64  `json:"product_id"`
+		SKUID       int64  `json:"sku_id"`
+		ProductName string `json:"product_name"`
+		SKUName     string `json:"sku_name"`
+		Image       string `json:"image"`
+		Quantity    int    `json:"quantity"`
+	}
+	// Shipment detail response
+	ShipmentDetailResp {
+		ID            int64               `json:"id"`
+		ShipmentNo    string              `json:"shipment_no"`
+		OrderID       string              `json:"order_id"`
+		Status        int8                `json:"status"`
+		StatusText    string              `json:"status_text"`
+		Carrier       string              `json:"carrier"`
+		CarrierCode   string              `json:"carrier_code"`
+		TrackingNo    string              `json:"tracking_no"`
+		TrackingURL   string              `json:"tracking_url,optional"`
+		ShippingCost  string              `json:"shipping_cost"`
+		Currency      string              `json:"currency"`
+		Weight        string              `json:"weight"`
+		ShippedAt     string              `json:"shipped_at,optional"`
+		DeliveredAt   string              `json:"delivered_at,optional"`
+		Remark        string              `json:"remark"`
+		Items         []*ShipmentItemResp `json:"items"`
+		CreatedAt     string              `json:"created_at"`
+		UpdatedAt     string              `json:"updated_at"`
+		CreatedBy     int64               `json:"created_by"`
+		CreatedByName string              `json:"created_by_name,optional"`
+	}
+	// Get shipment request
+	GetShipmentReq {
+		ID int64 `path:"id"`
+	}
+	// List shipments request
+	ListShipmentsReq {
+		Page              int    `form:"page,default=1"`
+		PageSize          int    `form:"page_size,default=20"`
+		ShipmentNo        string `form:"shipment_no,optional"`
+		OrderID           string `form:"order_id,optional"`
+		TrackingNo        string `form:"tracking_no,optional"`
+		Status            int8   `form:"status,optional"`
+		CarrierCode       string `form:"carrier_code,optional"`
+		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+		StartTime         string `form:"start_time,optional"` // RFC3339
+		EndTime           string `form:"end_time,optional"` // RFC3339
+	}
+	// List shipments response
+	ListShipmentsResp {
+		List     []*ShipmentDetailResp `json:"list"`
+		Total    int64                 `json:"total"`
+		Page     int                   `json:"page"`
+		PageSize int                   `json:"page_size"`
+	}
+	// Get order shipments request
+	GetOrderShipmentsReq {
+		OrderID string `path:"order_id"`
+	}
+	// List order shipments response
+	ListOrderShipmentsResp {
+		List []*ShipmentDetailResp `json:"list"`
+	}
+	// Carrier response
+	CarrierResp {
+		ID          int64  `json:"id"`
+		Code        string `json:"code"`
+		Name        string `json:"name"`
+		TrackingURL string `json:"tracking_url"`
+		IsActive    bool   `json:"is_active"`
+		Sort        int    `json:"sort"`
+	}
+	// List carriers response
+	ListCarriersResp {
+		List []*CarrierResp `json:"list"`
+	}
+	// ===================== Refund Types =====================
+	// Refund detail response
+	RefundDetailResp {
+		ID             int64    `json:"id"`
+		RefundNo       string   `json:"refund_no"`
+		OrderID        string   `json:"order_id"`
+		UserID         int64    `json:"user_id"`
+		UserName       string   `json:"user_name,optional"`
+		Type           int8     `json:"type"` // 1=full_refund, 2=partial_refund
+		TypeText       string   `json:"type_text"`
+		Status         int8     `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+		StatusText     string   `json:"status_text"`
+		ReasonType     string   `json:"reason_type"`
+		Reason         string   `json:"reason"`
+		Description    string   `json:"description,optional"`
+		Images         []string `json:"images,optional"`
+		Amount         string   `json:"amount"`
+		Currency       string   `json:"currency"`
+		RejectReason   string   `json:"reject_reason,optional"`
+		ApprovedAt     string   `json:"approved_at,optional"`
+		ApprovedBy     int64    `json:"approved_by,optional"`
+		ApprovedByName string   `json:"approved_by_name,optional"`
+		CompletedAt    string   `json:"completed_at,optional"`
+		CreatedAt      string   `json:"created_at"`
+		UpdatedAt      string   `json:"updated_at"`
+		// Order info
+		OrderNo     string `json:"order_no,optional"`
+		OrderAmount string `json:"order_amount,optional"`
+	}
+	// Get refund request
+	GetRefundReq {
+		ID int64 `path:"id"`
+	}
+	// List refunds request
+	ListRefundsReq {
+		Page       int    `form:"page,default=1"`
+		PageSize   int    `form:"page_size,default=20"`
+		RefundNo   string `form:"refund_no,optional"`
+		OrderID    string `form:"order_id,optional"`
+		UserID     int64  `form:"user_id,optional"`
+		Status     int8   `form:"status,optional"`
+		ReasonType string `form:"reason_type,optional"`
+		StartTime  string `form:"start_time,optional"` // RFC3339
+		EndTime    string `form:"end_time,optional"` // RFC3339
+	}
+	// List refunds response
+	ListRefundsResp {
+		List     []*RefundDetailResp `json:"list"`
+		Total    int64               `json:"total"`
+		Page     int                 `json:"page"`
+		PageSize int                 `json:"page_size"`
+	}
+	// Approve refund request
+	ApproveRefundReq {
+		ID int64 `path:"id"`
+	}
+	// Reject refund request
+	RejectRefundReq {
+		ID           int64  `path:"id"`
+		RejectReason string `json:"reject_reason"`
+	}
+	// Refund reason response
+	RefundReasonResp {
+		ID       int64  `json:"id"`
+		Code     string `json:"code"`
+		Name     string `json:"name"`
+		Sort     int    `json:"sort"`
+		IsActive bool   `json:"is_active"`
+	}
+	// List refund reasons request
+	ListRefundReasonsReq  {}
+	// List refund reasons response
+	ListRefundReasonsResp {
+		List []*RefundReasonResp `json:"list"`
+	}
+	// Refund statistics request
+	GetRefundStatisticsReq {
+		StartTime string `form:"start_time,optional"` // RFC3339
+		EndTime   string `form:"end_time,optional"` // RFC3339
+		Period    string `form:"period,default=30d"` // 7d, 30d, 90d
+	}
+	// Refund statistics response
+	RefundStatisticsResp {
+		TotalRefunds    int64                `json:"total_refunds"`
+		TotalAmount     string               `json:"total_amount"`
+		Currency        string               `json:"currency"`
+		RefundRate      string               `json:"refund_rate"` // Percentage
+		PendingCount    int64                `json:"pending_count"`
+		ApprovedCount   int64                `json:"approved_count"`
+		RejectedCount   int64                `json:"rejected_count"`
+		CompletedCount  int64                `json:"completed_count"`
+		ReasonBreakdown []RefundReasonStats  `json:"reason_breakdown"`
+		DailyTrend      []RefundDailyStats   `json:"daily_trend,optional"`
+		TopProducts     []RefundProductStats `json:"top_products,optional"`
+	}
+	// Refund reason statistics
+	RefundReasonStats {
+		ReasonType string `json:"reason_type"`
+		ReasonName string `json:"reason_name"`
+		Count      int64  `json:"count"`
+		Percentage string `json:"percentage"`
+	}
+	// Refund daily statistics
+	RefundDailyStats {
+		Date   string `json:"date"`
+		Count  int64  `json:"count"`
+		Amount string `json:"amount"`
+	}
+	// Refund product statistics
+	RefundProductStats {
+		ProductID   int64  `json:"product_id"`
+		ProductName string `json:"product_name"`
+		RefundCount int64  `json:"refund_count"`
+		RefundRate  string `json:"refund_rate"`
+	}
+	// ===================== Order Fulfillment Types =====================
+	// Order item for fulfillment
+	OrderFulfillmentItemResp {
+		OrderItemID int64  `json:"order_item_id"`
+		ProductID   int64  `json:"product_id"`
+		SKUID       int64  `json:"sku_id"`
+		ProductName string `json:"product_name"`
+		SKUName     string `json:"sku_name"`
+		Image       string `json:"image"`
+		Quantity    int    `json:"quantity"`
+		ShippedQty  int    `json:"shipped_qty"`
+		PendingQty  int    `json:"pending_qty"`
+		UnitPrice   string `json:"unit_price"`
+		Currency    string `json:"currency"`
+	}
+	// Order fulfillment detail response
+	OrderFulfillmentDetailResp {
+		OrderID           string                      `json:"order_id"`
+		OrderNo           string                      `json:"order_no"`
+		Status            string                      `json:"status"`
+		FulfillmentStatus int8                        `json:"fulfillment_status"`
+		FulfillmentText   string                      `json:"fulfillment_text"`
+		RefundStatus      int8                        `json:"refund_status"`
+		RefundText        string                      `json:"refund_text"`
+		TotalAmount       string                      `json:"total_amount"`
+		Currency          string                      `json:"currency"`
+		UserID            int64                       `json:"user_id"`
+		UserName          string                      `json:"user_name,optional"`
+		UserPhone         string                      `json:"user_phone,optional"`
+		ShippingAddress   string                      `json:"shipping_address,optional"`
+		Items             []*OrderFulfillmentItemResp `json:"items"`
+		Shipments         []*ShipmentDetailResp       `json:"shipments,optional"`
+		Refund            *RefundDetailResp           `json:"refund,optional"`
+		PaidAt            string                      `json:"paid_at,optional"`
+		ShippedAt         string                      `json:"shipped_at,optional"`
+		DeliveredAt       string                      `json:"delivered_at,optional"`
+		CreatedAt         string                      `json:"created_at"`
+		UpdatedAt         string                      `json:"updated_at"`
+	}
+	// Get order fulfillment detail request
+	GetOrderFulfillmentReq {
+		ID int64 `path:"id"`
+	}
+	// List fulfillment orders request
+	ListFulfillmentOrdersReq {
+		Page              int    `form:"page,default=1"`
+		PageSize          int    `form:"page_size,default=20"`
+		OrderNo           string `form:"order_no,optional"`
+		UserID            int64  `form:"user_id,optional"`
+		UserName          string `form:"user_name,optional"`
+		Status            string `form:"status,optional"`
+		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+		RefundStatus      int8   `form:"refund_status,optional"`
+		StartTime         string `form:"start_time,optional"` // RFC3339
+		EndTime           string `form:"end_time,optional"` // RFC3339
+	}
+	// List fulfillment orders response
+	ListFulfillmentOrdersResp {
+		List     []*OrderFulfillmentDetailResp `json:"list"`
+		Total    int64                         `json:"total"`
+		Page     int                           `json:"page"`
+		PageSize int                           `json:"page_size"`
+	}
+	// Ship order request (create shipment from order)
+	ShipOrderReq {
+		ID           int64             `path:"id"`
+		CarrierCode  string            `json:"carrier_code"`
+		CarrierName  string            `json:"carrier_name,optional"`
+		TrackingNo   string            `json:"tracking_no"`
+		ShippingCost string            `json:"shipping_cost,optional"`
+		Currency     string            `json:"currency,optional"`
+		Weight       string            `json:"weight,optional"`
+		Remark       string            `json:"remark,optional"`
+		Items        []ShipmentItemReq `json:"items,optional"` // Empty means all items
+	}
+	// Ship order response
+	ShipOrderResp {
+		ShipmentID int64  `json:"shipment_id"`
+		ShipmentNo string `json:"shipment_no"`
+	}
+	// Fulfillment summary request
+	GetFulfillmentSummaryReq  {}
+	// Fulfillment summary response
+	FulfillmentSummaryResp {
+		PendingShipment int64 `json:"pending_shipment"`
+		PartialShipped  int64 `json:"partial_shipped"`
+		Shipped         int64 `json:"shipped"`
+		Delivered       int64 `json:"delivered"`
+		PendingRefund   int64 `json:"pending_refund"`
+		Refunding       int64 `json:"refunding"`
+		TotalOrders     int64 `json:"total_orders"`
+	}
+)
+
+// ===================== Shipment API =====================
+@server (
+	group:      shipments
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建发货单"
+	@handler CreateShipmentHandler
+	post /api/v1/shipments (CreateShipmentReq) returns (CreateShipmentResp)
+
+	@doc "批量创建发货单"
+	@handler BatchCreateShipmentsHandler
+	post /api/v1/shipments/batch (BatchCreateShipmentsReq) returns (BatchCreateShipmentsResp)
+
+	@doc "发货单列表"
+	@handler ListShipmentsHandler
+	get /api/v1/shipments (ListShipmentsReq) returns (ListShipmentsResp)
+
+	@doc "发货单详情"
+	@handler GetShipmentHandler
+	get /api/v1/shipments/:id (GetShipmentReq) returns (ShipmentDetailResp)
+
+	@doc "更新发货单"
+	@handler UpdateShipmentHandler
+	put /api/v1/shipments/:id (UpdateShipmentReq) returns (ShipmentDetailResp)
+
+	@doc "更新发货单状态"
+	@handler UpdateShipmentStatusHandler
+	put /api/v1/shipments/:id/status (UpdateShipmentStatusReq) returns (ShipmentDetailResp)
+
+	@doc "获取订单的发货单列表"
+	@handler GetOrderShipmentsHandler
+	get /api/v1/orders/:order_id/shipments (GetOrderShipmentsReq) returns (ListOrderShipmentsResp)
+
+	@doc "物流公司列表"
+	@handler ListCarriersHandler
+	get /api/v1/carriers (ListCarriersResp) returns (ListCarriersResp)
+}
+
+// ===================== Refund API =====================
+@server (
+	group:      refunds
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "退款列表"
+	@handler ListRefundsHandler
+	get /api/v1/refunds (ListRefundsReq) returns (ListRefundsResp)
+
+	@doc "退款详情"
+	@handler GetRefundHandler
+	get /api/v1/refunds/:id (GetRefundReq) returns (RefundDetailResp)
+
+	@doc "批准退款"
+	@handler ApproveRefundHandler
+	put /api/v1/refunds/:id/approve (ApproveRefundReq) returns (RefundDetailResp)
+
+	@doc "拒绝退款"
+	@handler RejectRefundHandler
+	put /api/v1/refunds/:id/reject (RejectRefundReq) returns (RefundDetailResp)
+
+	@doc "退款原因列表"
+	@handler ListRefundReasonsHandler
+	get /api/v1/refund-reasons (ListRefundReasonsReq) returns (ListRefundReasonsResp)
+
+	@doc "退款统计"
+	@handler GetRefundStatisticsHandler
+	get /api/v1/refunds/statistics (GetRefundStatisticsReq) returns (RefundStatisticsResp)
+}
+
+// ===================== Order Fulfillment API =====================
+@server (
+	group:      fulfillment_orders
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "订单列表（含履约状态筛选）"
+	@handler ListFulfillmentOrdersHandler
+	get /api/v1/orders (ListFulfillmentOrdersReq) returns (ListFulfillmentOrdersResp)
+
+	@doc "订单详情（含履约信息）"
+	@handler GetOrderFulfillmentHandler
+	get /api/v1/orders/:id (GetOrderFulfillmentReq) returns (OrderFulfillmentDetailResp)
+
+	@doc "订单发货（创建发货单）"
+	@handler ShipOrderHandler
+	put /api/v1/orders/:id/ship (ShipOrderReq) returns (ShipOrderResp)
+
+	@doc "履约摘要统计"
+	@handler GetFulfillmentSummaryHandler
+	get /api/v1/orders/fulfillment-summary (GetFulfillmentSummaryReq) returns (FulfillmentSummaryResp)
+}
+

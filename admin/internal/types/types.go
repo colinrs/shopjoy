@@ -55,6 +55,36 @@ type AdminUserInfo struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type ApproveRefundReq struct {
+	ID int64 `path:"id"`
+}
+
+type BatchCreateShipmentsReq struct {
+	CarrierCode string                 `json:"carrier_code"`
+	CarrierName string                 `json:"carrier_name,optional"`
+	Shipments   []BatchShipmentItemReq `json:"shipments"`
+}
+
+type BatchCreateShipmentsResp struct {
+	Total   int                       `json:"total"`
+	Success int                       `json:"success"`
+	Failed  int                       `json:"failed"`
+	Results []BatchShipmentResultResp `json:"results"`
+}
+
+type BatchShipmentItemReq struct {
+	OrderID    string `json:"order_id"`
+	TrackingNo string `json:"tracking_no"`
+}
+
+type BatchShipmentResultResp struct {
+	OrderID    string `json:"order_id"`
+	ShipmentID int64  `json:"shipment_id,optional"`
+	ShipmentNo string `json:"shipment_no,optional"`
+	Success    bool   `json:"success"`
+	Error      string `json:"error,optional"`
+}
+
 type BatchUpdateSafetyStockReq struct {
 	Items []SafetyStockItem `json:"items"`
 }
@@ -83,6 +113,15 @@ type BrandMarketItemResp struct {
 type BrandMarketVisibilityResp struct {
 	BrandID int64                 `json:"brand_id"`
 	Markets []BrandMarketItemResp `json:"markets"`
+}
+
+type CarrierResp struct {
+	ID          int64  `json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	TrackingURL string `json:"tracking_url"`
+	IsActive    bool   `json:"is_active"`
+	Sort        int    `json:"sort"`
 }
 
 type CategoryDetailResp struct {
@@ -308,6 +347,23 @@ type CreateSKUResp struct {
 	ID int64 `json:"id"`
 }
 
+type CreateShipmentReq struct {
+	OrderID      string            `json:"order_id"`
+	CarrierCode  string            `json:"carrier_code"`
+	CarrierName  string            `json:"carrier_name,optional"` // For custom carrier
+	TrackingNo   string            `json:"tracking_no"`
+	ShippingCost string            `json:"shipping_cost,optional"` // Using string for decimal precision
+	Currency     string            `json:"currency,optional"`
+	Weight       string            `json:"weight,optional"` // Weight in kg
+	Remark       string            `json:"remark,optional"`
+	Items        []ShipmentItemReq `json:"items,optional"` // Empty means all items
+}
+
+type CreateShipmentResp struct {
+	ID         int64  `json:"id"`
+	ShipmentNo string `json:"shipment_no"`
+}
+
 type CreateWarehouseReq struct {
 	Code      string `json:"code"`
 	Name      string `json:"name"`
@@ -338,6 +394,16 @@ type DeletePromotionRuleReq struct {
 
 type DeleteUserRequest struct {
 	ID int64 `path:"id"`
+}
+
+type FulfillmentSummaryResp struct {
+	PendingShipment int64 `json:"pending_shipment"`
+	PartialShipped  int64 `json:"partial_shipped"`
+	Shipped         int64 `json:"shipped"`
+	Delivered       int64 `json:"delivered"`
+	PendingRefund   int64 `json:"pending_refund"`
+	Refunding       int64 `json:"refunding"`
+	TotalOrders     int64 `json:"total_orders"`
 }
 
 type GenerateCouponCodesReq struct {
@@ -394,6 +460,9 @@ type GetCouponUsageReq struct {
 	PageSize int   `form:"page_size,default=20"`
 }
 
+type GetFulfillmentSummaryReq struct {
+}
+
 type GetInventoryLogsReq struct {
 	Page      int    `form:"page,default=1"`
 	PageSize  int    `form:"page_size,default=20"`
@@ -409,6 +478,14 @@ type GetLowStockSKUsReq struct {
 
 type GetMarketReq struct {
 	ID int64 `path:"id"`
+}
+
+type GetOrderFulfillmentReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetOrderShipmentsReq struct {
+	OrderID string `path:"order_id"`
 }
 
 type GetProductLocalizationReq struct {
@@ -427,11 +504,25 @@ type GetPromotionRulesReq struct {
 	PromotionID int64 `path:"id"`
 }
 
+type GetRefundReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetRefundStatisticsReq struct {
+	StartTime string `form:"start_time,optional"` // RFC3339
+	EndTime   string `form:"end_time,optional"`   // RFC3339
+	Period    string `form:"period,default=30d"`  // 7d, 30d, 90d
+}
+
 type GetSKUInventoryReq struct {
 	SKUCode string `path:"sku_code"`
 }
 
 type GetSKUReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetShipmentReq struct {
 	ID int64 `path:"id"`
 }
 
@@ -506,6 +597,10 @@ type ListBrandResp struct {
 	Total int64             `json:"total"`
 }
 
+type ListCarriersResp struct {
+	List []*CarrierResp `json:"list"`
+}
+
 type ListCategoryReq struct {
 	ParentID int64 `form:"parent_id,optional"`
 }
@@ -537,6 +632,26 @@ type ListCouponsResp struct {
 	PageSize int                 `json:"page_size"`
 }
 
+type ListFulfillmentOrdersReq struct {
+	Page              int    `form:"page,default=1"`
+	PageSize          int    `form:"page_size,default=20"`
+	OrderNo           string `form:"order_no,optional"`
+	UserID            int64  `form:"user_id,optional"`
+	UserName          string `form:"user_name,optional"`
+	Status            string `form:"status,optional"`
+	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+	RefundStatus      int8   `form:"refund_status,optional"`
+	StartTime         string `form:"start_time,optional"` // RFC3339
+	EndTime           string `form:"end_time,optional"`   // RFC3339
+}
+
+type ListFulfillmentOrdersResp struct {
+	List     []*OrderFulfillmentDetailResp `json:"list"`
+	Total    int64                         `json:"total"`
+	Page     int                           `json:"page"`
+	PageSize int                           `json:"page_size"`
+}
+
 type ListInventoryLogsResp struct {
 	List  []*InventoryLogResp `json:"list"`
 	Total int64               `json:"total"`
@@ -550,6 +665,10 @@ type ListLowStockSKUsResp struct {
 type ListMarketsResp struct {
 	List  []*MarketResponse `json:"list"`
 	Total int64             `json:"total"`
+}
+
+type ListOrderShipmentsResp struct {
+	List []*ShipmentDetailResp `json:"list"`
 }
 
 type ListProductLocalizationsReq struct {
@@ -608,6 +727,32 @@ type ListPromotionsResp struct {
 	PageSize int                    `json:"page_size"`
 }
 
+type ListRefundReasonsReq struct {
+}
+
+type ListRefundReasonsResp struct {
+	List []*RefundReasonResp `json:"list"`
+}
+
+type ListRefundsReq struct {
+	Page       int    `form:"page,default=1"`
+	PageSize   int    `form:"page_size,default=20"`
+	RefundNo   string `form:"refund_no,optional"`
+	OrderID    string `form:"order_id,optional"`
+	UserID     int64  `form:"user_id,optional"`
+	Status     int8   `form:"status,optional"`
+	ReasonType string `form:"reason_type,optional"`
+	StartTime  string `form:"start_time,optional"` // RFC3339
+	EndTime    string `form:"end_time,optional"`   // RFC3339
+}
+
+type ListRefundsResp struct {
+	List     []*RefundDetailResp `json:"list"`
+	Total    int64               `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
+}
+
 type ListSKUsByProductReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -615,6 +760,26 @@ type ListSKUsByProductReq struct {
 type ListSKUsResp struct {
 	List  []*SKUDetailResp `json:"list"`
 	Total int64            `json:"total"`
+}
+
+type ListShipmentsReq struct {
+	Page              int    `form:"page,default=1"`
+	PageSize          int    `form:"page_size,default=20"`
+	ShipmentNo        string `form:"shipment_no,optional"`
+	OrderID           string `form:"order_id,optional"`
+	TrackingNo        string `form:"tracking_no,optional"`
+	Status            int8   `form:"status,optional"`
+	CarrierCode       string `form:"carrier_code,optional"`
+	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+	StartTime         string `form:"start_time,optional"` // RFC3339
+	EndTime           string `form:"end_time,optional"`   // RFC3339
+}
+
+type ListShipmentsResp struct {
+	List     []*ShipmentDetailResp `json:"list"`
+	Total    int64                 `json:"total"`
+	Page     int                   `json:"page"`
+	PageSize int                   `json:"page_size"`
 }
 
 type ListUserCouponsReq struct {
@@ -679,6 +844,44 @@ type MarketResponse struct {
 type MoveCategoryReq struct {
 	ID          int64 `path:"id"`
 	NewParentID int64 `json:"new_parent_id"`
+}
+
+type OrderFulfillmentDetailResp struct {
+	OrderID           string                      `json:"order_id"`
+	OrderNo           string                      `json:"order_no"`
+	Status            string                      `json:"status"`
+	FulfillmentStatus int8                        `json:"fulfillment_status"`
+	FulfillmentText   string                      `json:"fulfillment_text"`
+	RefundStatus      int8                        `json:"refund_status"`
+	RefundText        string                      `json:"refund_text"`
+	TotalAmount       string                      `json:"total_amount"`
+	Currency          string                      `json:"currency"`
+	UserID            int64                       `json:"user_id"`
+	UserName          string                      `json:"user_name,optional"`
+	UserPhone         string                      `json:"user_phone,optional"`
+	ShippingAddress   string                      `json:"shipping_address,optional"`
+	Items             []*OrderFulfillmentItemResp `json:"items"`
+	Shipments         []*ShipmentDetailResp       `json:"shipments,optional"`
+	Refund            *RefundDetailResp           `json:"refund,optional"`
+	PaidAt            string                      `json:"paid_at,optional"`
+	ShippedAt         string                      `json:"shipped_at,optional"`
+	DeliveredAt       string                      `json:"delivered_at,optional"`
+	CreatedAt         string                      `json:"created_at"`
+	UpdatedAt         string                      `json:"updated_at"`
+}
+
+type OrderFulfillmentItemResp struct {
+	OrderItemID int64  `json:"order_item_id"`
+	ProductID   int64  `json:"product_id"`
+	SKUID       int64  `json:"sku_id"`
+	ProductName string `json:"product_name"`
+	SKUName     string `json:"sku_name"`
+	Image       string `json:"image"`
+	Quantity    int    `json:"quantity"`
+	ShippedQty  int    `json:"shipped_qty"`
+	PendingQty  int    `json:"pending_qty"`
+	UnitPrice   string `json:"unit_price"`
+	Currency    string `json:"currency"`
 }
 
 type ProductDetailResp struct {
@@ -802,6 +1005,75 @@ type PutOnSaleReq struct {
 	ID int64 `path:"id"`
 }
 
+type RefundDailyStats struct {
+	Date   string `json:"date"`
+	Count  int64  `json:"count"`
+	Amount string `json:"amount"`
+}
+
+type RefundDetailResp struct {
+	ID             int64    `json:"id"`
+	RefundNo       string   `json:"refund_no"`
+	OrderID        string   `json:"order_id"`
+	UserID         int64    `json:"user_id"`
+	UserName       string   `json:"user_name,optional"`
+	Type           int8     `json:"type"` // 1=full_refund, 2=partial_refund
+	TypeText       string   `json:"type_text"`
+	Status         int8     `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+	StatusText     string   `json:"status_text"`
+	ReasonType     string   `json:"reason_type"`
+	Reason         string   `json:"reason"`
+	Description    string   `json:"description,optional"`
+	Images         []string `json:"images,optional"`
+	Amount         string   `json:"amount"`
+	Currency       string   `json:"currency"`
+	RejectReason   string   `json:"reject_reason,optional"`
+	ApprovedAt     string   `json:"approved_at,optional"`
+	ApprovedBy     int64    `json:"approved_by,optional"`
+	ApprovedByName string   `json:"approved_by_name,optional"`
+	CompletedAt    string   `json:"completed_at,optional"`
+	CreatedAt      string   `json:"created_at"`
+	UpdatedAt      string   `json:"updated_at"`
+	OrderNo        string   `json:"order_no,optional"`
+	OrderAmount    string   `json:"order_amount,optional"`
+}
+
+type RefundProductStats struct {
+	ProductID   int64  `json:"product_id"`
+	ProductName string `json:"product_name"`
+	RefundCount int64  `json:"refund_count"`
+	RefundRate  string `json:"refund_rate"`
+}
+
+type RefundReasonResp struct {
+	ID       int64  `json:"id"`
+	Code     string `json:"code"`
+	Name     string `json:"name"`
+	Sort     int    `json:"sort"`
+	IsActive bool   `json:"is_active"`
+}
+
+type RefundReasonStats struct {
+	ReasonType string `json:"reason_type"`
+	ReasonName string `json:"reason_name"`
+	Count      int64  `json:"count"`
+	Percentage string `json:"percentage"`
+}
+
+type RefundStatisticsResp struct {
+	TotalRefunds    int64                `json:"total_refunds"`
+	TotalAmount     string               `json:"total_amount"`
+	Currency        string               `json:"currency"`
+	RefundRate      string               `json:"refund_rate"` // Percentage
+	PendingCount    int64                `json:"pending_count"`
+	ApprovedCount   int64                `json:"approved_count"`
+	RejectedCount   int64                `json:"rejected_count"`
+	CompletedCount  int64                `json:"completed_count"`
+	ReasonBreakdown []RefundReasonStats  `json:"reason_breakdown"`
+	DailyTrend      []RefundDailyStats   `json:"daily_trend,optional"`
+	TopProducts     []RefundProductStats `json:"top_products,optional"`
+}
+
 type RegisterTenantAdminRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Mobile   string `json:"mobile,optional"`
@@ -815,6 +1087,11 @@ type RegisterTenantAdminResponse struct {
 	RefreshToken string        `json:"refresh_token"`
 	ExpiresIn    int64         `json:"expires_in"`
 	User         AdminUserInfo `json:"user"`
+}
+
+type RejectRefundReq struct {
+	ID           int64  `path:"id"`
+	RejectReason string `json:"reject_reason"`
 }
 
 type RemoveFromMarketReq struct {
@@ -878,6 +1155,63 @@ type SetCategoryMarketVisibilityReq struct {
 
 type SetDefaultWarehouseReq struct {
 	ID int64 `path:"id"`
+}
+
+type ShipOrderReq struct {
+	ID           int64             `path:"id"`
+	CarrierCode  string            `json:"carrier_code"`
+	CarrierName  string            `json:"carrier_name,optional"`
+	TrackingNo   string            `json:"tracking_no"`
+	ShippingCost string            `json:"shipping_cost,optional"`
+	Currency     string            `json:"currency,optional"`
+	Weight       string            `json:"weight,optional"`
+	Remark       string            `json:"remark,optional"`
+	Items        []ShipmentItemReq `json:"items,optional"` // Empty means all items
+}
+
+type ShipOrderResp struct {
+	ShipmentID int64  `json:"shipment_id"`
+	ShipmentNo string `json:"shipment_no"`
+}
+
+type ShipmentDetailResp struct {
+	ID            int64               `json:"id"`
+	ShipmentNo    string              `json:"shipment_no"`
+	OrderID       string              `json:"order_id"`
+	Status        int8                `json:"status"`
+	StatusText    string              `json:"status_text"`
+	Carrier       string              `json:"carrier"`
+	CarrierCode   string              `json:"carrier_code"`
+	TrackingNo    string              `json:"tracking_no"`
+	TrackingURL   string              `json:"tracking_url,optional"`
+	ShippingCost  string              `json:"shipping_cost"`
+	Currency      string              `json:"currency"`
+	Weight        string              `json:"weight"`
+	ShippedAt     string              `json:"shipped_at,optional"`
+	DeliveredAt   string              `json:"delivered_at,optional"`
+	Remark        string              `json:"remark"`
+	Items         []*ShipmentItemResp `json:"items"`
+	CreatedAt     string              `json:"created_at"`
+	UpdatedAt     string              `json:"updated_at"`
+	CreatedBy     int64               `json:"created_by"`
+	CreatedByName string              `json:"created_by_name,optional"`
+}
+
+type ShipmentItemReq struct {
+	OrderItemID int64 `json:"order_item_id"`
+	Quantity    int   `json:"quantity"`
+}
+
+type ShipmentItemResp struct {
+	ID          int64  `json:"id"`
+	ShipmentID  int64  `json:"shipment_id"`
+	OrderItemID int64  `json:"order_item_id"`
+	ProductID   int64  `json:"product_id"`
+	SKUID       int64  `json:"sku_id"`
+	ProductName string `json:"product_name"`
+	SKUName     string `json:"sku_name"`
+	Image       string `json:"image"`
+	Quantity    int    `json:"quantity"`
 }
 
 type SuspendUserRequest struct {
@@ -1053,6 +1387,22 @@ type UpdateSKUStockReq struct {
 	WarehouseID    int64  `json:"warehouse_id,optional"` // 0 = all warehouses
 	AvailableStock int    `json:"available_stock"`
 	Remark         string `json:"remark,optional"`
+}
+
+type UpdateShipmentReq struct {
+	ID           int64  `path:"id"`
+	CarrierCode  string `json:"carrier_code,optional"`
+	CarrierName  string `json:"carrier_name,optional"`
+	TrackingNo   string `json:"tracking_no,optional"`
+	ShippingCost string `json:"shipping_cost,optional"`
+	Currency     string `json:"currency,optional"`
+	Weight       string `json:"weight,optional"`
+	Remark       string `json:"remark,optional"`
+}
+
+type UpdateShipmentStatusReq struct {
+	ID     int64 `path:"id"`
+	Status int8  `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
 }
 
 type UpdateStockReq struct {

@@ -11,11 +11,14 @@ import (
 	brands "github.com/colinrs/shopjoy/admin/internal/handler/brands"
 	categories "github.com/colinrs/shopjoy/admin/internal/handler/categories"
 	coupons "github.com/colinrs/shopjoy/admin/internal/handler/coupons"
+	fulfillment_orders "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_orders"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
+	refunds "github.com/colinrs/shopjoy/admin/internal/handler/refunds"
+	shipments "github.com/colinrs/shopjoy/admin/internal/handler/shipments"
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	warehouses "github.com/colinrs/shopjoy/admin/internal/handler/warehouses"
@@ -273,6 +276,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/coupons/generate",
 					Handler: coupons.GenerateCouponCodesHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 订单列表（含履约状态筛选）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders",
+					Handler: fulfillment_orders.ListFulfillmentOrdersHandler(serverCtx),
+				},
+				{
+					// 订单详情（含履约信息）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders/:id",
+					Handler: fulfillment_orders.GetOrderFulfillmentHandler(serverCtx),
+				},
+				{
+					// 订单发货（创建发货单）
+					Method:  http.MethodPut,
+					Path:    "/api/v1/orders/:id/ship",
+					Handler: fulfillment_orders.ShipOrderHandler(serverCtx),
+				},
+				{
+					// 履约摘要统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders/fulfillment-summary",
+					Handler: fulfillment_orders.GetFulfillmentSummaryHandler(serverCtx),
 				},
 			}...,
 		),
@@ -571,6 +606,106 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/promotions/:id/rules",
 					Handler: promotions.CreatePromotionRulesHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 退款原因列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/refund-reasons",
+					Handler: refunds.ListRefundReasonsHandler(serverCtx),
+				},
+				{
+					// 退款列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/refunds",
+					Handler: refunds.ListRefundsHandler(serverCtx),
+				},
+				{
+					// 退款详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/refunds/:id",
+					Handler: refunds.GetRefundHandler(serverCtx),
+				},
+				{
+					// 批准退款
+					Method:  http.MethodPut,
+					Path:    "/api/v1/refunds/:id/approve",
+					Handler: refunds.ApproveRefundHandler(serverCtx),
+				},
+				{
+					// 拒绝退款
+					Method:  http.MethodPut,
+					Path:    "/api/v1/refunds/:id/reject",
+					Handler: refunds.RejectRefundHandler(serverCtx),
+				},
+				{
+					// 退款统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/refunds/statistics",
+					Handler: refunds.GetRefundStatisticsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 物流公司列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/carriers",
+					Handler: shipments.ListCarriersHandler(serverCtx),
+				},
+				{
+					// 获取订单的发货单列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders/:order_id/shipments",
+					Handler: shipments.GetOrderShipmentsHandler(serverCtx),
+				},
+				{
+					// 创建发货单
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipments",
+					Handler: shipments.CreateShipmentHandler(serverCtx),
+				},
+				{
+					// 发货单列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipments",
+					Handler: shipments.ListShipmentsHandler(serverCtx),
+				},
+				{
+					// 发货单详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipments/:id",
+					Handler: shipments.GetShipmentHandler(serverCtx),
+				},
+				{
+					// 更新发货单
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipments/:id",
+					Handler: shipments.UpdateShipmentHandler(serverCtx),
+				},
+				{
+					// 更新发货单状态
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipments/:id/status",
+					Handler: shipments.UpdateShipmentStatusHandler(serverCtx),
+				},
+				{
+					// 批量创建发货单
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipments/batch",
+					Handler: shipments.BatchCreateShipmentsHandler(serverCtx),
 				},
 			}...,
 		),

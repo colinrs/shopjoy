@@ -111,6 +111,7 @@ var (
 	ErrCouponValueRequired    = &Err{HTTPCode: http.StatusBadRequest, Code: 70014, Msg: "coupon value must be positive"}
 	ErrCouponTimeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 70015, Msg: "coupon start time and end time are required"}
 	ErrCouponInvalidTimeRange = &Err{HTTPCode: http.StatusBadRequest, Code: 70016, Msg: "coupon start time must be before end time"}
+	ErrCouponNotActive        = &Err{HTTPCode: http.StatusBadRequest, Code: 70017, Msg: "coupon is not active"}
 
 	// UserCoupon errors (70xxx - 701xx)
 	ErrUserCouponNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 70101, Msg: "user coupon not found"}
@@ -156,9 +157,42 @@ var (
 	ErrShopInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
 
 	// ErrShipmentNotFound ==================== Fulfillment Module (120xxx) ====================
-	ErrShipmentNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 120001, Msg: "shipment not found"}
-	ErrShipmentInvalidTracking = &Err{HTTPCode: http.StatusBadRequest, Code: 120002, Msg: "invalid tracking number"}
-	ErrShipmentAlreadyShipped  = &Err{HTTPCode: http.StatusBadRequest, Code: 120003, Msg: "order already shipped"}
+	ErrShipmentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120001, Msg: "shipment not found"}
+	ErrShipmentInvalidTracking       = &Err{HTTPCode: http.StatusBadRequest, Code: 120002, Msg: "invalid tracking number"}
+	ErrShipmentAlreadyShipped        = &Err{HTTPCode: http.StatusBadRequest, Code: 120003, Msg: "order already shipped"}
+	ErrShipmentCarrierRequired       = &Err{HTTPCode: http.StatusBadRequest, Code: 120004, Msg: "carrier is required"}
+	ErrShipmentTrackingRequired      = &Err{HTTPCode: http.StatusBadRequest, Code: 120005, Msg: "tracking number is required"}
+	ErrShipmentInvalidStatusTransition = &Err{HTTPCode: http.StatusBadRequest, Code: 120006, Msg: "invalid shipment status transition"}
+	ErrShipmentCannotCancelDelivered = &Err{HTTPCode: http.StatusBadRequest, Code: 120007, Msg: "cannot cancel delivered shipment"}
+	ErrShipmentItemNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 120008, Msg: "shipment item not found"}
+	ErrShipmentOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 120009, Msg: "order not found"}
+	ErrShipmentOrderCannotShip       = &Err{HTTPCode: http.StatusBadRequest, Code: 120010, Msg: "order cannot be shipped"}
+	ErrShipmentDuplicateTracking     = &Err{HTTPCode: http.StatusConflict, Code: 120011, Msg: "tracking number already exists"}
+	ErrShipmentItemsRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 120012, Msg: "shipment items are required"}
+	ErrShipmentItemQuantityExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 120013, Msg: "shipment item quantity exceeded order quantity"}
+	ErrShipmentInvalidItems         = &Err{HTTPCode: http.StatusBadRequest, Code: 120014, Msg: "invalid shipment items"}
+
+	// Refund errors (1201xx)
+	ErrRefundNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120101, Msg: "refund not found"}
+	ErrRefundInvalidStatus         = &Err{HTTPCode: http.StatusBadRequest, Code: 120102, Msg: "invalid refund status"}
+	ErrRefundCannotCancel          = &Err{HTTPCode: http.StatusBadRequest, Code: 120103, Msg: "cannot cancel refund in current status"}
+	ErrRefundAlreadyPending        = &Err{HTTPCode: http.StatusConflict, Code: 120104, Msg: "order already has pending refund"}
+	ErrRefundOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 120105, Msg: "order not found"}
+	ErrRefundOrderCannotRefund     = &Err{HTTPCode: http.StatusBadRequest, Code: 120106, Msg: "order cannot be refunded"}
+	ErrRefundTimeExpired           = &Err{HTTPCode: http.StatusBadRequest, Code: 120107, Msg: "refund period has expired"}
+	ErrRefundReasonRequired        = &Err{HTTPCode: http.StatusBadRequest, Code: 120108, Msg: "refund reason is required"}
+	ErrRefundRejectReasonRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 120109, Msg: "reject reason is required"}
+	ErrRefundAmountExceeded        = &Err{HTTPCode: http.StatusBadRequest, Code: 120110, Msg: "refund amount exceeds order amount"}
+	ErrRefundOrderNotPaid          = &Err{HTTPCode: http.StatusBadRequest, Code: 120111, Msg: "order is not paid"}
+
+	// Carrier errors (1202xx)
+	ErrCarrierNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 120201, Msg: "carrier not found"}
+	ErrCarrierDuplicate  = &Err{HTTPCode: http.StatusConflict, Code: 120202, Msg: "carrier code already exists"}
+	ErrCarrierInactive   = &Err{HTTPCode: http.StatusBadRequest, Code: 120203, Msg: "carrier is inactive"}
+
+	// RefundReason errors (1203xx)
+	ErrRefundReasonNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 120301, Msg: "refund reason not found"}
+	ErrRefundReasonDuplicate = &Err{HTTPCode: http.StatusConflict, Code: 120302, Msg: "refund reason code already exists"}
 
 	// ErrSharedCurrencyMismatch ==================== Shared Module (200xxx) ====================
 	ErrSharedCurrencyMismatch   = &Err{HTTPCode: http.StatusBadRequest, Code: 200001, Msg: "currency mismatch"}

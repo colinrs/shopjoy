@@ -7,6 +7,7 @@ import (
 	"time"
 
 	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
+	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
@@ -33,6 +34,11 @@ type ServiceContext struct {
 	AdminUserService       appAdminUser.Service
 	PromotionApp           apppromotion.PromotionApp
 	CouponApp              apppromotion.CouponApp
+	ShipmentApp            appfulfillment.ShipmentApp
+	CarrierApp             appfulfillment.CarrierApp
+	OrderFulfillmentApp    appfulfillment.OrderFulfillmentApp
+	RefundApp              appfulfillment.RefundApp
+	RefundReasonApp        appfulfillment.RefundReasonApp
 	JWTManager             *auth.JWTManager
 	AuthMiddleware         rest.Middleware
 	ProductRepo            product.Repository
@@ -98,6 +104,21 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	promotionApp := apppromotion.NewPromotionApp(db, promotionRepo, idGen)
 	couponApp := apppromotion.NewCouponApp(db, couponRepo, userCouponRepo, idGen)
 
+	// Fulfillment repositories
+	shipmentRepo := persistence.NewShipmentRepository()
+	shipmentItemRepo := persistence.NewShipmentItemRepository()
+	carrierRepo := persistence.NewCarrierRepository()
+	refundRepo := persistence.NewRefundRepository()
+	refundReasonRepo := persistence.NewRefundReasonRepository()
+
+	// Fulfillment application services
+	shipmentApp := appfulfillment.NewShipmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, idGen)
+	carrierApp := appfulfillment.NewCarrierApp(db, carrierRepo)
+	// Use NopOrderValidator until order service integration is complete
+	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, idGen, &appfulfillment.NopOrderValidator{})
+	refundApp := appfulfillment.NewRefundApp(db, refundRepo, refundReasonRepo, idGen)
+	refundReasonApp := appfulfillment.NewRefundReasonApp(db, refundReasonRepo)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
@@ -106,6 +127,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminUserService:       adminUserService,
 		PromotionApp:           promotionApp,
 		CouponApp:              couponApp,
+		ShipmentApp:            shipmentApp,
+		CarrierApp:             carrierApp,
+		OrderFulfillmentApp:    orderFulfillmentApp,
+		RefundApp:              refundApp,
+		RefundReasonApp:        refundReasonApp,
 		JWTManager:             jwtManager,
 		AuthMiddleware:         authMiddleware,
 		ProductRepo:            productRepo,
