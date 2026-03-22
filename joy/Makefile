@@ -1,21 +1,24 @@
 # Joy Shop Frontend Makefile
 # 商城前端构建脚本
 
-.PHONY: help install dev build preview clean lint format check node_modules
+.PHONY: help install dev build preview clean lint format check node_modules test-e2e test-e2e-ui test-e2e-report
 
 # 默认目标
 help:
 	@echo "Joy Shop Frontend - Available Commands:"
 	@echo ""
-	@echo "  make install    - 安装项目依赖 (npm install)"
-	@echo "  make dev        - 启动开发服务器 (localhost:3001)"
-	@echo "  make build      - 构建生产环境代码"
-	@echo "  make preview    - 预览生产构建"
-	@echo "  make clean      - 清理 node_modules 和构建产物"
-	@echo "  make lint       - 运行 ESLint 检查"
-	@echo "  make format     - 运行 Prettier 格式化代码"
-	@echo "  make check      - 运行类型检查 (vue-tsc)"
-	@echo "  make update     - 更新依赖到最新版本"
+	@echo "  make install        - 安装项目依赖 (npm install)"
+	@echo "  make dev            - 启动开发服务器 (localhost:3001)"
+	@echo "  make build          - 构建生产环境代码"
+	@echo "  make preview        - 预览生产构建"
+	@echo "  make clean          - 清理 node_modules 和构建产物"
+	@echo "  make lint           - 运行 ESLint 检查"
+	@echo "  make format         - 运行 Prettier 格式化代码"
+	@echo "  make check          - 运行类型检查 (vue-tsc)"
+	@echo "  make update         - 更新依赖到最新版本"
+	@echo "  make test-e2e       - 运行 E2E 测试"
+	@echo "  make test-e2e-ui    - 运行 E2E 测试 (UI 模式)"
+	@echo "  make test-e2e-report- 打开 E2E 测试报告"
 	@echo ""
 
 # 安装依赖
@@ -81,3 +84,18 @@ analyze: node_modules
 # 运行所有检查
 test-all: lint check build
 	@echo "✅ 所有检查通过"
+
+# E2E 测试
+test-e2e: node_modules
+	@echo "🧪 运行 E2E 测试..."
+	npx playwright test --project=chromium
+
+# E2E 测试 (UI 模式)
+test-e2e-ui: node_modules
+	@echo "🧪 运行 E2E 测试 (UI 模式)..."
+	npx playwright test --ui
+
+# 打开 E2E 测试报告
+test-e2e-report:
+	@echo "📊 打开 E2E 测试报告..."
+	npx playwright show-report
