@@ -1,0 +1,1615 @@
+openapi: 3.0.3
+info:
+  title: ShopJoy Admin API
+  description: |
+    Multi-tenant e-commerce SaaS platform API for managing products,
+    categories, brands, markets, and inventory.
+
+    ## Authentication
+    All endpoints require JWT Bearer token authentication except `/api/v1/auth/login`.
+
+    ## Multi-tenancy
+    All data is isolated by tenant. The tenant ID is extracted from the JWT token.
+
+    ## Pagination
+    List endpoints support pagination with `page` and `page_size` parameters.
+  version: 1.0.0
+  contact:
+    name: ShopJoy Team
+    email: support@shopjoy.com
+
+servers:
+  - url: https://api.shopjoy.com
+    description: Production
+  - url: http://localhost:8888
+    description: Development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Products
+    description: Product management
+  - name: SKUs
+    description: Product variant management
+  - name: Categories
+    description: Category hierarchy management
+  - name: Brands
+    description: Brand management
+  - name: Markets
+    description: Multi-market configuration
+  - name: Inventory
+    description: Stock and warehouse management
+  - name: Warehouses
+    description: Warehouse location management
+
+paths:
+  # ========== Auth ==========
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: User login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ========== Products ==========
+  /api/v1/products:
+    get:
+      tags: [Products]
+      summary: List products
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: category_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, on_sale, off_sale]
+        - name: min_price
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: max_price
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: market_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+    post:
+      tags: [Products]
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '200':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProductResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product details
+      parameters:
+        - $ref: '#/components/parameters/ProductPathParam'
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Products]
+      summary: Update product
+      parameters:
+        - $ref: '#/components/parameters/ProductPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+
+  /api/v1/products/{id}/on-sale:
+    post:
+      tags: [Products]
+      summary: Put product on sale
+      parameters:
+        - $ref: '#/components/parameters/ProductPathParam'
+      responses:
+        '200':
+          description: Product on sale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+
+  /api/v1/products/{id}/off-sale:
+    post:
+      tags: [Products]
+      summary: Take product off sale
+      parameters:
+        - $ref: '#/components/parameters/ProductPathParam'
+      responses:
+        '200':
+          description: Product off sale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+
+  /api/v1/products/{id}/stock:
+    put:
+      tags: [Products]
+      summary: Update product stock
+      parameters:
+        - $ref: '#/components/parameters/ProductPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity:
+                  type: integer
+                  description: New stock quantity
+      responses:
+        '200':
+          description: Stock updated
+
+  # ========== SKUs ==========
+  /api/v1/skus:
+    post:
+      tags: [SKUs]
+      summary: Create SKU
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSKURequest'
+      responses:
+        '200':
+          description: SKU created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSKUResponse'
+
+  /api/v1/skus/{id}:
+    get:
+      tags: [SKUs]
+      summary: Get SKU details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: SKU details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SKUDetail'
+    put:
+      tags: [SKUs]
+      summary: Update SKU
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSKURequest'
+      responses:
+        '200':
+          description: SKU updated
+    delete:
+      tags: [SKUs]
+      summary: Delete SKU
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: SKU deleted
+
+  /api/v1/products/{product_id}/skus:
+    get:
+      tags: [SKUs]
+      summary: List SKUs by product
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: SKU list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SKUListResponse'
+
+  # ========== Categories ==========
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      summary: List categories
+      parameters:
+        - name: parent_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+    post:
+      tags: [Categories]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '200':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCategoryResponse'
+
+  /api/v1/categories/tree:
+    get:
+      tags: [Categories]
+      summary: Get category tree
+      responses:
+        '200':
+          description: Category tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryTree'
+
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Get category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetail'
+    put:
+      tags: [Categories]
+      summary: Update category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated
+    delete:
+      tags: [Categories]
+      summary: Delete category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Category deleted
+
+  # ========== Brands ==========
+  /api/v1/brands:
+    get:
+      tags: [Brands]
+      summary: List brands
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Brand list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandListResponse'
+    post:
+      tags: [Brands]
+      summary: Create brand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrandRequest'
+      responses:
+        '200':
+          description: Brand created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBrandResponse'
+
+  /api/v1/brands/{id}:
+    get:
+      tags: [Brands]
+      summary: Get brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Brand details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandDetail'
+    put:
+      tags: [Brands]
+      summary: Update brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBrandRequest'
+      responses:
+        '200':
+          description: Brand updated
+    delete:
+      tags: [Brands]
+      summary: Delete brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Brand deleted
+
+  # ========== Markets ==========
+  /api/v1/markets:
+    get:
+      tags: [Markets]
+      summary: List markets
+      responses:
+        '200':
+          description: Market list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketListResponse'
+    post:
+      tags: [Markets]
+      summary: Create market
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMarketRequest'
+      responses:
+        '200':
+          description: Market created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketResponse'
+
+  /api/v1/markets/{id}:
+    get:
+      tags: [Markets]
+      summary: Get market
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Market details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketResponse'
+    put:
+      tags: [Markets]
+      summary: Update market
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMarketRequest'
+      responses:
+        '200':
+          description: Market updated
+    delete:
+      tags: [Markets]
+      summary: Delete market
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Market deleted
+
+  # ========== Warehouses ==========
+  /api/v1/warehouses:
+    get:
+      tags: [Warehouses]
+      summary: List warehouses
+      responses:
+        '200':
+          description: Warehouse list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseListResponse'
+    post:
+      tags: [Warehouses]
+      summary: Create warehouse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWarehouseRequest'
+      responses:
+        '200':
+          description: Warehouse created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWarehouseResponse'
+
+  /api/v1/warehouses/{id}:
+    get:
+      tags: [Warehouses]
+      summary: Get warehouse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseDetail'
+    put:
+      tags: [Warehouses]
+      summary: Update warehouse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWarehouseRequest'
+      responses:
+        '200':
+          description: Warehouse updated
+    delete:
+      tags: [Warehouses]
+      summary: Delete warehouse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse deleted
+
+  # ========== Inventory ==========
+  /api/v1/inventory/sku/{sku_code}:
+    get:
+      tags: [Inventory]
+      summary: Get SKU inventory
+      parameters:
+        - name: sku_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SKU inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SKUInventory'
+
+  /api/v1/inventory/stock:
+    put:
+      tags: [Inventory]
+      summary: Update SKU stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStockRequest'
+      responses:
+        '200':
+          description: Stock updated
+
+  /api/v1/inventory/adjust:
+    post:
+      tags: [Inventory]
+      summary: Adjust stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjustStockRequest'
+      responses:
+        '200':
+          description: Stock adjusted
+
+  /api/v1/inventory/logs:
+    get:
+      tags: [Inventory]
+      summary: Get inventory logs
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: sku_code
+          in: query
+          schema:
+            type: string
+        - name: product_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [manual, order, return, adjustment]
+      responses:
+        '200':
+          description: Inventory logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLogListResponse'
+
+  /api/v1/inventory/low-stock:
+    get:
+      tags: [Inventory]
+      summary: Get low stock SKUs
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Low stock SKUs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LowStockSKUListResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    PageSizeParam:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+    ProductPathParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ========== Common ==========
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        msg:
+          type: string
+
+    # ========== Auth ==========
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expire:
+          type: string
+          format: date-time
+
+    # ========== Product ==========
+    CreateProductRequest:
+      type: object
+      required: [name, price, category_id]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+          description: Price in cents
+        currency:
+          type: string
+          default: CNY
+        cost_price:
+          type: integer
+          format: int64
+        category_id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        brand:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        is_matrix_product:
+          type: boolean
+        hs_code:
+          type: string
+        coo:
+          type: string
+        weight:
+          type: string
+        weight_unit:
+          type: string
+        length:
+          type: string
+        width:
+          type: string
+        height:
+          type: string
+        dangerous_goods:
+          type: array
+          items:
+            type: string
+
+    CreateProductResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    UpdateProductRequest:
+      type: object
+      required: [id, name, price, category_id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        category_id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        brand:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        cost_price:
+          type: integer
+          format: int64
+        stock:
+          type: integer
+        status:
+          type: string
+          enum: [draft, on_sale, off_sale]
+        category_id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        brand:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        is_matrix_product:
+          type: boolean
+        hs_code:
+          type: string
+        coo:
+          type: string
+        weight:
+          type: string
+        weight_unit:
+          type: string
+        length:
+          type: string
+        width:
+          type: string
+        height:
+          type: string
+        dangerous_goods:
+          type: array
+          items:
+            type: string
+        markets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductMarketInfo'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProductMarketInfo:
+      type: object
+      properties:
+        market_id:
+          type: integer
+          format: int64
+        market_code:
+          type: string
+        market_name:
+          type: string
+        is_enabled:
+          type: boolean
+        price:
+          type: string
+        currency:
+          type: string
+
+    ProductListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetail'
+        total:
+          type: integer
+          format: int64
+        page:
+          type: integer
+        page_size:
+          type: integer
+
+    # ========== SKU ==========
+    CreateSKURequest:
+      type: object
+      required: [product_id, code, price]
+      properties:
+        product_id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        stock:
+          type: integer
+        safety_stock:
+          type: integer
+        pre_sale_enabled:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+
+    CreateSKUResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    UpdateSKURequest:
+      type: object
+      properties:
+        code:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        stock:
+          type: integer
+        safety_stock:
+          type: integer
+        pre_sale_enabled:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+
+    SKUDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        product_id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        stock:
+          type: integer
+        available_stock:
+          type: integer
+        locked_stock:
+          type: integer
+        safety_stock:
+          type: integer
+        pre_sale_enabled:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+        is_low_stock:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SKUListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SKUDetail'
+        total:
+          type: integer
+          format: int64
+
+    # ========== Category ==========
+    CreateCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        parent_id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        icon:
+          type: string
+        image:
+          type: string
+        seo_title:
+          type: string
+        seo_description:
+          type: string
+        sort:
+          type: integer
+
+    CreateCategoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    UpdateCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        icon:
+          type: string
+        image:
+          type: string
+        seo_title:
+          type: string
+        seo_description:
+          type: string
+        sort:
+          type: integer
+
+    CategoryDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        parent_id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        code:
+          type: string
+        level:
+          type: integer
+        sort:
+          type: integer
+        icon:
+          type: string
+        image:
+          type: string
+        seo_title:
+          type: string
+        seo_description:
+          type: string
+        status:
+          type: integer
+        product_count:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CategoryTree:
+      allOf:
+        - $ref: '#/components/schemas/CategoryDetail'
+        - type: object
+          properties:
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/CategoryTree'
+
+    CategoryListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryDetail'
+
+    # ========== Brand ==========
+    CreateBrandRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        logo:
+          type: string
+        description:
+          type: string
+        website:
+          type: string
+        trademark_number:
+          type: string
+        trademark_country:
+          type: string
+        enable_page:
+          type: boolean
+        sort:
+          type: integer
+
+    CreateBrandResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    UpdateBrandRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        logo:
+          type: string
+        description:
+          type: string
+        website:
+          type: string
+        trademark_number:
+          type: string
+        trademark_country:
+          type: string
+        enable_page:
+          type: boolean
+        sort:
+          type: integer
+
+    BrandDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        logo:
+          type: string
+        description:
+          type: string
+        website:
+          type: string
+        trademark_number:
+          type: string
+        trademark_country:
+          type: string
+        enable_page:
+          type: boolean
+        sort:
+          type: integer
+        status:
+          type: integer
+        product_count:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BrandListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrandDetail'
+        total:
+          type: integer
+          format: int64
+
+    # ========== Market ==========
+    TaxConfig:
+      type: object
+      properties:
+        vat_rate:
+          type: string
+        gst_rate:
+          type: string
+        ioss_enabled:
+          type: boolean
+        include_tax:
+          type: boolean
+
+    CreateMarketRequest:
+      type: object
+      required: [code, name, currency]
+      properties:
+        code:
+          type: string
+          enum: [CN, US, UK, DE, FR, AU]
+        name:
+          type: string
+        currency:
+          type: string
+          enum: [CNY, USD, GBP, EUR, AUD]
+        default_language:
+          type: string
+        flag:
+          type: string
+        tax_rules:
+          $ref: '#/components/schemas/TaxConfig'
+
+    UpdateMarketRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        is_active:
+          type: boolean
+        is_default:
+          type: boolean
+        tax_rules:
+          $ref: '#/components/schemas/TaxConfig'
+
+    MarketResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        name:
+          type: string
+        currency:
+          type: string
+        default_language:
+          type: string
+        flag:
+          type: string
+        is_active:
+          type: boolean
+        is_default:
+          type: boolean
+        tax_rules:
+          $ref: '#/components/schemas/TaxConfig'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MarketListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketResponse'
+        total:
+          type: integer
+          format: int64
+
+    # ========== Warehouse ==========
+    CreateWarehouseRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        country:
+          type: string
+        address:
+          type: string
+        is_default:
+          type: boolean
+
+    CreateWarehouseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+
+    UpdateWarehouseRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        address:
+          type: string
+        is_default:
+          type: boolean
+
+    WarehouseDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        name:
+          type: string
+        country:
+          type: string
+        address:
+          type: string
+        is_default:
+          type: boolean
+        status:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    WarehouseListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarehouseDetail'
+
+    # ========== Inventory ==========
+    UpdateStockRequest:
+      type: object
+      required: [sku_code, available_stock]
+      properties:
+        sku_code:
+          type: string
+        warehouse_id:
+          type: integer
+          format: int64
+        available_stock:
+          type: integer
+        remark:
+          type: string
+
+    AdjustStockRequest:
+      type: object
+      required: [sku_code, warehouse_id, quantity]
+      properties:
+        sku_code:
+          type: string
+        warehouse_id:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          description: Positive to increase, negative to decrease
+        remark:
+          type: string
+
+    SKUInventory:
+      type: object
+      properties:
+        sku_code:
+          type: string
+        product_id:
+          type: integer
+          format: int64
+        total_stock:
+          type: integer
+        available_stock:
+          type: integer
+        locked_stock:
+          type: integer
+        safety_stock:
+          type: integer
+        is_low_stock:
+          type: boolean
+        warehouses:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarehouseInventoryItem'
+
+    WarehouseInventoryItem:
+      type: object
+      properties:
+        warehouse_id:
+          type: integer
+          format: int64
+        warehouse_name:
+          type: string
+        available_stock:
+          type: integer
+        locked_stock:
+          type: integer
+
+    InventoryLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        sku_code:
+          type: string
+        product_id:
+          type: integer
+          format: int64
+        warehouse_id:
+          type: integer
+          format: int64
+        change_type:
+          type: string
+          enum: [manual, order, return, adjustment]
+        change_quantity:
+          type: integer
+        before_stock:
+          type: integer
+        after_stock:
+          type: integer
+        order_no:
+          type: string
+        remark:
+          type: string
+        operator_id:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+
+    InventoryLogListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryLog'
+        total:
+          type: integer
+          format: int64
+
+    LowStockSKU:
+      type: object
+      properties:
+        sku_code:
+          type: string
+        product_id:
+          type: integer
+          format: int64
+        product_name:
+          type: string
+        available_stock:
+          type: integer
+        safety_stock:
+          type: integer
+
+    LowStockSKUListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/LowStockSKU'
+        total:
+          type: integer
+          format: int64
