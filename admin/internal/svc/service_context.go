@@ -30,6 +30,7 @@ type ServiceContext struct {
 	AdminUserService       appAdminUser.Service
 	JWTManager             *auth.JWTManager
 	AuthMiddleware         rest.Middleware
+	ProductRepo            product.Repository
 	ProductMarketRepo      product.ProductMarketRepository
 	MarketRepo             market.Repository
 	CategoryRepo           product.CategoryRepository
@@ -86,6 +87,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminUserService:       adminUserService,
 		JWTManager:             jwtManager,
 		AuthMiddleware:         authMiddleware,
+		ProductRepo:            productRepo,
 		ProductMarketRepo:      productMarketRepo,
 		MarketRepo:             marketRepo,
 		CategoryRepo:           categoryRepo,

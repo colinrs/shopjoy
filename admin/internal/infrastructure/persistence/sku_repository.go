@@ -222,3 +222,43 @@ func (r *skuRepo) FindList(ctx context.Context, db *gorm.DB, query product.SKUQu
 	}
 	return skus, total, nil
 }
+
+// FindLowStock finds SKUs where available_stock < safety_stock AND safety_stock > 0
+func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*product.SKU, int64, error) {
+	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
+		Where("safety_stock > 0 AND available_stock < safety_stock").
+		Where("status = ?", shared.StatusEnabled)
+
+	// Tenant filter: platform admin (tenantID == 0) can access all tenant data
+	if tenantID != 0 {
+		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
+	}
+
+	var total int64
+	if err := dbQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var models []skuModel
+	err := dbQuery.Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&models).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	skus := make([]*product.SKU, len(models))
+	for i, m := range models {
+		skus[i] = m.toEntity()
+	}
+	return skus, total, nil
+}

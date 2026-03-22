@@ -280,6 +280,7 @@ type SKURepository interface {
 	FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*SKU, error)
 	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*SKU, error)
 	FindList(ctx context.Context, db *gorm.DB, query SKUQuery) ([]*SKU, int64, error)
+	FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*SKU, int64, error)
 }
 
 // SKUQuery for SKU search

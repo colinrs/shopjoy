@@ -27,38 +27,55 @@ func NewGetLowStockSKUsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 func (l *GetLowStockSKUsLogic) GetLowStockSKUs(req *types.GetLowStockSKUsReq) (resp *types.ListLowStockSKUsResp, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	// Get low stock SKUs
-	skus, err := l.svcCtx.WarehouseInventoryRepo.FindBySKU(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), "")
+	// Find low stock SKUs using SafetyStock threshold
+	skus, total, err := l.svcCtx.SKURepo.FindLowStock(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter and build response
-	list := make([]*types.LowStockSKUResp, 0)
+	if len(skus) == 0 {
+		return &types.ListLowStockSKUsResp{
+			List:  []*types.LowStockSKUResp{},
+			Total: 0,
+		}, nil
+	}
+
+	// Collect product IDs
+	productIDs := make([]int64, 0, len(skus))
+	productIDSet := make(map[int64]struct{})
 	for _, sku := range skus {
-		// Check if low stock (would need safety_stock from SKU table)
-		// For now, just return all SKUs with stock < 10 as example
-		if sku.AvailableStock < 10 {
-			list = append(list, &types.LowStockSKUResp{
-				SKUCode:        sku.SKUCode,
-				ProductID:      0,  // Would need to fetch from SKU
-				ProductName:    "", // Would need to fetch from product
-				AvailableStock: sku.AvailableStock,
-				SafetyStock:    10, // Default safety stock
-			})
+		if _, exists := productIDSet[sku.ProductID]; !exists {
+			productIDs = append(productIDs, sku.ProductID)
+			productIDSet[sku.ProductID] = struct{}{}
 		}
 	}
 
-	// Apply pagination
-	total := int64(len(list))
-	start := (req.Page - 1) * req.PageSize
-	end := start + req.PageSize
-	if start > len(list) {
-		list = []*types.LowStockSKUResp{}
-	} else if end > len(list) {
-		list = list[start:]
-	} else {
-		list = list[start:end]
+	// Fetch products for names
+	products, err := l.svcCtx.ProductRepo.FindByIDs(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), productIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build product name map
+	productNames := make(map[int64]string)
+	for _, p := range products {
+		productNames[p.ID] = p.Name
+	}
+
+	// Build response
+	list := make([]*types.LowStockSKUResp, 0, len(skus))
+	for _, sku := range skus {
+		productName := productNames[sku.ProductID]
+		if productName == "" {
+			productName = "Unknown Product"
+		}
+		list = append(list, &types.LowStockSKUResp{
+			SKUCode:        sku.Code,
+			ProductID:      sku.ProductID,
+			ProductName:    productName,
+			AvailableStock: sku.AvailableStock,
+			SafetyStock:    sku.SafetyStock,
+		})
 	}
 
 	return &types.ListLowStockSKUsResp{
