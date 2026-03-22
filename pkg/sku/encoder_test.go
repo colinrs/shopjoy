@@ -26,9 +26,33 @@ func TestEncodeBase62(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			result := EncodeBase62(tt.input, tt.length)
+			result, err := EncodeBase62(tt.input, tt.length)
+			if err != nil {
+				t.Fatalf("EncodeBase62(%d, %d) returned error: %v", tt.input, tt.length, err)
+			}
 			if result != tt.expected {
 				t.Errorf("EncodeBase62(%d, %d) = %q, want %q", tt.input, tt.length, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestEncodeBase62Overflow(t *testing.T) {
+	// Test that encoding values too large for length returns error
+	tests := []struct {
+		input  int64
+		length int
+	}{
+		{14776336, 4}, // Max 4-digit is 14776335
+		{238328, 3},   // Max 3-digit is 238327
+		{-1, 4},       // Negative value
+	}
+
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			_, err := EncodeBase62(tt.input, tt.length)
+			if err == nil {
+				t.Errorf("EncodeBase62(%d, %d) should return error for overflow", tt.input, tt.length)
 			}
 		})
 	}
@@ -55,7 +79,10 @@ func TestDecodeBase62(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			result := DecodeBase62(tt.input)
+			result, err := DecodeBase62(tt.input)
+			if err != nil {
+				t.Fatalf("DecodeBase62(%q) returned error: %v", tt.input, err)
+			}
 			if result != tt.expected {
 				t.Errorf("DecodeBase62(%q) = %d, want %d", tt.input, result, tt.expected)
 			}
@@ -63,10 +90,34 @@ func TestDecodeBase62(t *testing.T) {
 	}
 }
 
+func TestDecodeBase62InvalidChars(t *testing.T) {
+	tests := []string{
+		"ABC-123", // Contains hyphen
+		"ABC_123", // Contains underscore
+		"ABC 123", // Contains space
+		"中文",     // Contains non-ASCII
+	}
+
+	for _, tt := range tests {
+		t.Run(tt, func(t *testing.T) {
+			_, err := DecodeBase62(tt)
+			if err == nil {
+				t.Errorf("DecodeBase62(%q) should return error for invalid chars", tt)
+			}
+		})
+	}
+}
+
 func TestEncodeDecodeRoundTrip(t *testing.T) {
 	for i := int64(0); i < 10000; i++ {
-		encoded := EncodeBase62(i, 4)
-		decoded := DecodeBase62(encoded)
+		encoded, err := EncodeBase62(i, 4)
+		if err != nil {
+			t.Fatalf("EncodeBase62(%d, 4) returned error: %v", i, err)
+		}
+		decoded, err := DecodeBase62(encoded)
+		if err != nil {
+			t.Fatalf("DecodeBase62(%q) returned error: %v", encoded, err)
+		}
 		if decoded != i {
 			t.Errorf("Round trip failed: %d -> %q -> %d", i, encoded, decoded)
 		}

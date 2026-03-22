@@ -74,7 +74,10 @@ func TestParser_ExtractTenantID(t *testing.T) {
 			if idx := strings.LastIndex(tt.code, "-"); idx >= 0 {
 				compactCode = tt.code[idx+1:]
 			}
-			expected := DecodeBase62(compactCode[:TenantIDLength])
+			expected, err := DecodeBase62(compactCode[:TenantIDLength])
+			if err != nil {
+				t.Fatalf("DecodeBase62 failed: %v", err)
+			}
 
 			tenantID, err := parser.ExtractTenantID(tt.code)
 			if err != nil {

@@ -37,10 +37,16 @@ func (p *parser) Parse(skuCode string) (*SKUInfo, error) {
 	}
 
 	// Decode tenant ID (first 4 chars)
-	tenantID := DecodeBase62(compactCode[:TenantIDLength])
+	tenantID, err := DecodeBase62(compactCode[:TenantIDLength])
+	if err != nil {
+		return nil, code.ErrSKUParseFailed
+	}
 
 	// Decode timestamp (next 3 chars)
-	hourOffset := DecodeBase62(compactCode[TenantIDLength : TenantIDLength+TimestampLength])
+	hourOffset, err := DecodeBase62(compactCode[TenantIDLength : TenantIDLength+TimestampLength])
+	if err != nil {
+		return nil, code.ErrSKUParseFailed
+	}
 	createdAt := p.config.Epoch.Add(time.Duration(hourOffset) * time.Hour)
 
 	// Extract random sequence (last 3 chars)
@@ -88,5 +94,5 @@ func (p *parser) ExtractTenantID(skuCode string) (int64, error) {
 	}
 
 	// Decode tenant ID (first 4 chars)
-	return DecodeBase62(compactCode[:TenantIDLength]), nil
+	return DecodeBase62(compactCode[:TenantIDLength])
 }

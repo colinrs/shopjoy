@@ -80,7 +80,10 @@ func TestGenerator_GenerateTenantIDEncoding(t *testing.T) {
 	}
 
 	tenantIDPart := compactCode[:TenantIDLength]
-	decodedTenantID := DecodeBase62(tenantIDPart)
+	decodedTenantID, err := DecodeBase62(tenantIDPart)
+	if err != nil {
+		t.Fatalf("DecodeBase62 failed: %v", err)
+	}
 
 	if decodedTenantID != 12345 {
 		t.Errorf("Expected tenant ID 12345, got %d", decodedTenantID)
@@ -139,5 +142,40 @@ func TestGenerator_GenerateTotalLengthLimit(t *testing.T) {
 	// Total: 8 + 1 + 8 + 1 + 10 = 28
 	if len(code) > MaxTotalLength {
 		t.Errorf("Code length %d exceeds max %d: %s", len(code), MaxTotalLength, code)
+	}
+}
+
+func TestGenerator_GenerateMaxTenantID(t *testing.T) {
+	cfg := DefaultConfig()
+	gen := NewGenerator(cfg)
+
+	// Test max valid tenant ID (14776335 = zzzz in Base62)
+	code, err := gen.Generate(14776335, "", "")
+	if err != nil {
+		t.Fatalf("Generate failed for max tenant ID: %v", err)
+	}
+
+	// Verify tenant ID can be decoded
+	compactCode := code
+	if idx := strings.LastIndex(code, "-"); idx >= 0 {
+		compactCode = code[idx+1:]
+	}
+	decodedTenantID, err := DecodeBase62(compactCode[:TenantIDLength])
+	if err != nil {
+		t.Fatalf("DecodeBase62 failed: %v", err)
+	}
+	if decodedTenantID != 14776335 {
+		t.Errorf("Expected tenant ID 14776335, got %d", decodedTenantID)
+	}
+}
+
+func TestGenerator_GenerateOverflowTenantID(t *testing.T) {
+	cfg := DefaultConfig()
+	gen := NewGenerator(cfg)
+
+	// Test tenant ID that exceeds 4-char capacity
+	_, err := gen.Generate(14776336, "", "") // Max is 14776335
+	if err == nil {
+		t.Error("Expected error for tenant ID exceeding capacity")
 	}
 }
