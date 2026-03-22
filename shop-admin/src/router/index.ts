@@ -58,6 +58,12 @@ const router = createRouter({
           meta: { title: '促销管理' }
         },
         {
+          path: 'promotions/:id',
+          name: 'promotion-detail',
+          component: () => import('@/views/promotions/[id]/index.vue'),
+          meta: { title: '促销详情' }
+        },
+        {
           path: 'shop',
           name: 'shop',
           component: () => import('@/views/shop/index.vue'),
