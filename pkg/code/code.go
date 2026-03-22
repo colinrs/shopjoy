@@ -173,4 +173,12 @@ var (
 	ErrBrandNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 180001, Msg: "brand not found"}
 	ErrBrandDuplicate   = &Err{HTTPCode: http.StatusConflict, Code: 180002, Msg: "brand name already exists"}
 	ErrBrandHasProducts = &Err{HTTPCode: http.StatusBadRequest, Code: 180003, Msg: "brand has products"}
+
+	// ErrSKUPrefixInvalid ==================== SKU Module (190xxx) ====================
+	ErrSKUPrefixInvalid          = &Err{HTTPCode: http.StatusBadRequest, Code: 190001, Msg: "SKU前缀格式无效"}
+	ErrSKUPrefixTooLong          = &Err{HTTPCode: http.StatusBadRequest, Code: 190002, Msg: "SKU前缀长度超过限制"}
+	ErrSKUGenerateFailed         = &Err{HTTPCode: http.StatusInternalServerError, Code: 190003, Msg: "SKU生成失败"}
+	ErrSKUParseFailed            = &Err{HTTPCode: http.StatusBadRequest, Code: 190004, Msg: "SKU编码解析失败"}
+	ErrSKUCodeTooLong            = &Err{HTTPCode: http.StatusBadRequest, Code: 190005, Msg: "SKU编码长度超过限制"}
+	ErrSKUPrefixStartsWithNumber = &Err{HTTPCode: http.StatusBadRequest, Code: 190006, Msg: "SKU前缀不能以数字开头"}
 )

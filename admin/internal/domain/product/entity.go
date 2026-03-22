@@ -122,6 +122,7 @@ type Product struct {
 	Status          Status   // 状态
 	CategoryID      int64    // 分类ID
 	Brand           string   // 品牌
+	SKUPrefix       string   // SKU前缀
 	Tags            []string `gorm:"type:json"` // 标签
 	Images          []string `gorm:"type:json"` // 图片列表
 	IsMatrixProduct bool     // 是否有变体

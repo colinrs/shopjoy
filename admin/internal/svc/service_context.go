@@ -16,6 +16,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	"github.com/colinrs/shopjoy/pkg/auth"
 	"github.com/colinrs/shopjoy/pkg/infra"
+	"github.com/colinrs/shopjoy/pkg/sku"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
@@ -42,6 +43,7 @@ type ServiceContext struct {
 	InventoryLogRepo       product.InventoryLogRepository
 	SKURepo                   product.SKURepository
 	ProductLocalizationRepo   product.ProductLocalizationRepository
+	SKUGenerator              sku.Generator
 	IDGen                     snowflake.Snowflake
 }
 
@@ -78,6 +80,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	inventoryLogRepo := persistence.NewInventoryLogRepository()
 	skuRepo := persistence.NewSKURepository()
 	productLocalizationRepo := persistence.NewProductLocalizationRepository()
+	skuGenerator := sku.NewGenerator(sku.DefaultConfig())
 
 	return &ServiceContext{
 		Config:                 c,
@@ -99,6 +102,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		InventoryLogRepo:       inventoryLogRepo,
 		SKURepo:                skuRepo,
 		ProductLocalizationRepo: productLocalizationRepo,
+		SKUGenerator:           skuGenerator,
 		IDGen:                  idGen,
 	}
 }

@@ -43,12 +43,32 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		currency = "USD"
 	}
 
+	// Determine SKU code: user-provided or auto-generated
+	var skuCode string
+	if req.Code != "" {
+		// User provided code - use as-is for backward compatibility
+		skuCode = req.Code
+	} else {
+		// Auto-generate SKU code
+		// TODO: Fetch tenant and product SKU prefix from database
+		// For now, use empty prefixes
+		skuCode, err = l.svcCtx.SKUGenerator.GenerateWithRetry(
+			tenantID,
+			"", // tenant.SKUPrefix - to be fetched
+			"", // product.SKUPrefix - to be fetched
+			3,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// Create SKU entity
 	sku := &product.SKU{
 		ID:             id,
 		TenantID:       shared.TenantID(tenantID),
 		ProductID:      req.ProductID,
-		Code:           req.Code,
+		Code:           skuCode,
 		Price:          shared.Money{Amount: req.Price, Currency: currency},
 		Stock:          req.Stock,
 		AvailableStock: req.Stock,
