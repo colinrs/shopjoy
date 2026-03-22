@@ -726,8 +726,9 @@ pkg/domain/promotion/
 ├── coupon.go           # Coupon, UserCoupon, PromotionUsage
 ├── repository.go       # Repository interfaces
 ├── service.go          # CalculationService
-├── scope.go            # Scope matching functions
-└── errors.go           # Domain errors
+└── scope.go            # Scope matching functions
+
+pkg/code/code.go        # 新增错误定义 (ErrPromotionXxx, ErrCouponXxx)
 
 admin/internal/infra/persistence/
 ├── promotion_repo_impl.go
@@ -824,25 +825,61 @@ admin/internal/domain/coupon/entity.go     → MOVE to pkg/domain/promotion/
 
 ## Error Handling
 
-### Domain Errors
+### Error Definitions
+
+错误定义应添加到 `pkg/code/code.go`，遵循项目现有的错误定义模式：
+
+**Promotion Module (80xxx)** - 扩展现有定义：
 
 ```go
+// 已存在的错误 (pkg/code/code.go)
 var (
-    ErrPromotionNotFound      = errors.New("promotion not found")
-    ErrPromotionExpired       = errors.New("promotion has expired")
-    ErrPromotionNotActive     = errors.New("promotion is not active")
-    ErrPromotionCurrencyMismatch = errors.New("promotion currency mismatch")
+    ErrPromotionNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 80001, Msg: "promotion not found"}
+    ErrPromotionInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 80002, Msg: "invalid promotion"}
+    ErrPromotionExpired     = &Err{HTTPCode: http.StatusBadRequest, Code: 80003, Msg: "promotion expired"}
+    ErrPromotionNotStarted  = &Err{HTTPCode: http.StatusBadRequest, Code: 80004, Msg: "promotion not started"}
+)
 
-    ErrCouponNotFound         = errors.New("coupon not found")
-    ErrCouponExpired          = errors.New("coupon has expired")
-    ErrCouponDepleted         = errors.New("coupon usage limit reached")
-    ErrCouponUserLimitReached = errors.New("user coupon limit reached")
-    ErrCouponMinAmountNotMet  = errors.New("minimum spend not met")
-    ErrCouponCurrencyMismatch = errors.New("coupon currency mismatch")
+// 需要新增的错误
+var (
+    ErrPromotionNotActive       = &Err{HTTPCode: http.StatusBadRequest, Code: 80005, Msg: "promotion is not active"}
+    ErrPromotionCurrencyMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 80006, Msg: "promotion currency mismatch"}
+    ErrPromotionRuleNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 80007, Msg: "promotion rule not found"}
+    ErrPromotionRuleInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 80008, Msg: "invalid promotion rule"}
+    ErrPromotionCannotDelete    = &Err{HTTPCode: http.StatusBadRequest, Code: 80009, Msg: "cannot delete active promotion"}
+    ErrPromotionScopeInvalid    = &Err{HTTPCode: http.StatusBadRequest, Code: 80010, Msg: "invalid promotion scope"}
+    ErrPromotionTypeInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 80011, Msg: "invalid promotion type"}
+)
+```
 
-    ErrInvalidScopeType       = errors.New("invalid scope type")
-    ErrInvalidPromotionType   = errors.New("invalid promotion type")
-    ErrInvalidCouponType      = errors.New("invalid coupon type")
+**Coupon Module (70xxx)** - 扩展现有定义：
+
+```go
+// 已存在的错误 (pkg/code/code.go)
+var (
+    ErrCouponNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 70001, Msg: "coupon not found"}
+    ErrCouponExpired        = &Err{HTTPCode: http.StatusBadRequest, Code: 70002, Msg: "coupon expired"}
+    ErrCouponUsedUp         = &Err{HTTPCode: http.StatusBadRequest, Code: 70003, Msg: "coupon used up"}
+    ErrCouponNotStarted     = &Err{HTTPCode: http.StatusBadRequest, Code: 70004, Msg: "coupon not started"}
+    ErrCouponAlreadyUsed    = &Err{HTTPCode: http.StatusBadRequest, Code: 70005, Msg: "coupon already used"}
+    ErrCouponInvalidCode    = &Err{HTTPCode: http.StatusBadRequest, Code: 70006, Msg: "invalid coupon code"}
+    ErrCouponAmountBelowMin = &Err{HTTPCode: http.StatusBadRequest, Code: 70007, Msg: "cart amount below minimum"}
+)
+
+// 需要新增的错误
+var (
+    ErrCouponUserLimitReached   = &Err{HTTPCode: http.StatusBadRequest, Code: 70008, Msg: "user coupon usage limit reached"}
+    ErrCouponCurrencyMismatch   = &Err{HTTPCode: http.StatusBadRequest, Code: 70009, Msg: "coupon currency mismatch"}
+    ErrCouponScopeInvalid       = &Err{HTTPCode: http.StatusBadRequest, Code: 70010, Msg: "invalid coupon scope"}
+    ErrCouponTypeInvalid        = &Err{HTTPCode: http.StatusBadRequest, Code: 70011, Msg: "invalid coupon type"}
+    ErrCouponCannotDelete       = &Err{HTTPCode: http.StatusBadRequest, Code: 70012, Msg: "cannot delete active coupon"}
+)
+
+// UserCoupon errors (70xxx - 701xx)
+var (
+    ErrUserCouponNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 70101, Msg: "user coupon not found"}
+    ErrUserCouponExpired    = &Err{HTTPCode: http.StatusBadRequest, Code: 70102, Msg: "user coupon expired"}
+    ErrUserCouponAlreadyUsed = &Err{HTTPCode: http.StatusBadRequest, Code: 70103, Msg: "user coupon already used"}
 )
 ```
 
