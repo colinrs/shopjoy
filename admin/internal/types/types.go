@@ -3,6 +3,10 @@
 
 package types
 
+type ActivatePromotionReq struct {
+	ID int64 `path:"id"`
+}
+
 type ActivateUserRequest struct {
 	ID int64 `path:"id"`
 }
@@ -134,6 +138,37 @@ type CategoryTreeResp struct {
 	Children       []*CategoryTreeResp `json:"children"`
 }
 
+type CouponDetailResp struct {
+	ID             int64  `json:"id"`
+	Code           string `json:"code"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Type           string `json:"type"`
+	DiscountValue  string `json:"discount_value"`
+	MinOrderAmount string `json:"min_order_amount"`
+	MaxDiscount    string `json:"max_discount"`
+	StartTime      string `json:"start_time"`
+	EndTime        string `json:"end_time"`
+	UsageLimit     int    `json:"usage_limit"`
+	UsedCount      int    `json:"used_count"`
+	PerUserLimit   int    `json:"per_user_limit"`
+	ProductIDs     string `json:"product_ids"`
+	CategoryIDs    string `json:"category_ids"`
+	MarketIDs      string `json:"market_ids"`
+	Status         string `json:"status"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
+}
+
+type CouponUsageResp struct {
+	ID             int64  `json:"id"`
+	CouponID       int64  `json:"coupon_id"`
+	UserID         int64  `json:"user_id"`
+	OrderID        int64  `json:"order_id"`
+	DiscountAmount string `json:"discount_amount"`
+	UsedAt         string `json:"used_at"`
+}
+
 type CreateBrandReq struct {
 	Name             string `json:"name"`
 	Logo             string `json:"logo,optional"`
@@ -161,6 +196,27 @@ type CreateCategoryReq struct {
 }
 
 type CreateCategoryResp struct {
+	ID int64 `json:"id"`
+}
+
+type CreateCouponReq struct {
+	Code           string `json:"code"`
+	Name           string `json:"name"`
+	Description    string `json:"description,optional"`
+	Type           string `json:"type"`           // fixed_amount, percentage, free_shipping
+	DiscountValue  string `json:"discount_value"` // Using string for decimal precision
+	MinOrderAmount string `json:"min_order_amount,optional"`
+	MaxDiscount    string `json:"max_discount,optional"`
+	StartTime      string `json:"start_time"` // RFC3339
+	EndTime        string `json:"end_time"`   // RFC3339
+	UsageLimit     int    `json:"usage_limit,optional"`
+	PerUserLimit   int    `json:"per_user_limit,optional"`
+	ProductIDs     string `json:"product_ids,optional"`  // JSON array as string
+	CategoryIDs    string `json:"category_ids,optional"` // JSON array as string
+	MarketIDs      string `json:"market_ids,optional"`   // JSON array as string
+}
+
+type CreateCouponResp struct {
 	ID int64 `json:"id"`
 }
 
@@ -206,6 +262,37 @@ type CreateProductResp struct {
 	ID int64 `json:"id"`
 }
 
+type CreatePromotionReq struct {
+	Name           string   `json:"name"`
+	Description    string   `json:"description,optional"`
+	Type           string   `json:"type"`                      // discount, coupon, flash_sale, bundle
+	StartTime      string   `json:"start_time"`                // RFC3339
+	EndTime        string   `json:"end_time"`                  // RFC3339
+	DiscountType   string   `json:"discount_type,optional"`    // percentage, fixed_amount, buy_x_get_y
+	DiscountValue  string   `json:"discount_value,optional"`   // Using string for decimal precision
+	MinOrderAmount string   `json:"min_order_amount,optional"` // Using string for decimal precision
+	MaxDiscount    string   `json:"max_discount,optional"`     // Using string for decimal precision
+	UsageLimit     int      `json:"usage_limit,optional"`
+	PerUserLimit   int      `json:"per_user_limit,optional"`
+	ProductIDs     []int64  `json:"product_ids,optional"`
+	CategoryIDs    []int64  `json:"category_ids,optional"`
+	MarketIDs      []int64  `json:"market_ids,optional"`
+	Tags           []string `json:"tags,optional"`
+}
+
+type CreatePromotionResp struct {
+	ID int64 `json:"id"`
+}
+
+type CreatePromotionRulesReq struct {
+	PromotionID int64              `path:"id"`
+	Rules       []PromotionRuleReq `json:"rules"`
+}
+
+type CreatePromotionRulesResp struct {
+	IDs []int64 `json:"ids"`
+}
+
 type CreateSKUReq struct {
 	ProductID      int64             `json:"product_id"`
 	Code           string            `json:"code"`
@@ -233,8 +320,36 @@ type CreateWarehouseResp struct {
 	ID int64 `json:"id"`
 }
 
+type DeactivatePromotionReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteCouponReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeletePromotionReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeletePromotionRuleReq struct {
+	ID int64 `path:"id"`
+}
+
 type DeleteUserRequest struct {
 	ID int64 `path:"id"`
+}
+
+type GenerateCouponCodesReq struct {
+	Prefix       string `json:"prefix,optional"`
+	Quantity     int    `json:"quantity"`
+	Length       int    `json:"length,default=8"`
+	CouponConfig string `json:"coupon_config"` // JSON config for the coupon
+}
+
+type GenerateCouponCodesResp struct {
+	Codes []string `json:"codes"`
+	Count int      `json:"count"`
 }
 
 type GetBrandMarketVisibilityReq struct {
@@ -269,6 +384,16 @@ type GetCategoryReq struct {
 	ID int64 `path:"id"`
 }
 
+type GetCouponReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetCouponUsageReq struct {
+	ID       int64 `path:"id"`
+	Page     int   `form:"page,default=1"`
+	PageSize int   `form:"page_size,default=20"`
+}
+
 type GetInventoryLogsReq struct {
 	Page      int    `form:"page,default=1"`
 	PageSize  int    `form:"page_size,default=20"`
@@ -292,6 +417,14 @@ type GetProductLocalizationReq struct {
 
 type GetProductReq struct {
 	ID int64 `path:"id"`
+}
+
+type GetPromotionReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetPromotionRulesReq struct {
+	PromotionID int64 `path:"id"`
 }
 
 type GetSKUInventoryReq struct {
@@ -336,6 +469,15 @@ type InventoryLogResp struct {
 	CreatedAt      string `json:"created_at"`
 }
 
+type IssueUserCouponReq struct {
+	UserID   int64 `json:"user_id"`
+	CouponID int64 `json:"coupon_id"`
+}
+
+type IssueUserCouponResp struct {
+	ID int64 `json:"id"`
+}
+
 type ListAdminUsersRequest struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"page_size,default=20"`
@@ -370,6 +512,29 @@ type ListCategoryReq struct {
 
 type ListCategoryResp struct {
 	List []*CategoryDetailResp `json:"list"`
+}
+
+type ListCouponUsageResp struct {
+	List     []*CouponUsageResp `json:"list"`
+	Total    int64              `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"page_size"`
+}
+
+type ListCouponsReq struct {
+	Code     string `form:"code,optional"`
+	Name     string `form:"name,optional"`
+	Type     string `form:"type,optional"`
+	Status   string `form:"status,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+}
+
+type ListCouponsResp struct {
+	List     []*CouponDetailResp `json:"list"`
+	Total    int64               `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 }
 
 type ListInventoryLogsResp struct {
@@ -422,6 +587,27 @@ type ListProductResp struct {
 	PageSize int                  `json:"page_size"`
 }
 
+type ListPromotionRulesResp struct {
+	List  []*PromotionRuleResp `json:"list"`
+	Total int64                `json:"total"`
+}
+
+type ListPromotionsReq struct {
+	Name     string `form:"name,optional"`
+	Type     string `form:"type,optional"`
+	Status   string `form:"status,optional"`
+	MarketID int64  `form:"market_id,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+}
+
+type ListPromotionsResp struct {
+	List     []*PromotionDetailResp `json:"list"`
+	Total    int64                  `json:"total"`
+	Page     int                    `json:"page"`
+	PageSize int                    `json:"page_size"`
+}
+
 type ListSKUsByProductReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -429,6 +615,21 @@ type ListSKUsByProductReq struct {
 type ListSKUsResp struct {
 	List  []*SKUDetailResp `json:"list"`
 	Total int64            `json:"total"`
+}
+
+type ListUserCouponsReq struct {
+	UserID   int64  `form:"user_id,optional"`
+	CouponID int64  `form:"coupon_id,optional"`
+	Status   string `form:"status,optional"` // available, used, expired
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+}
+
+type ListUserCouponsResp struct {
+	List     []*UserCouponDetailResp `json:"list"`
+	Total    int64                   `json:"total"`
+	Page     int                     `json:"page"`
+	PageSize int                     `json:"page_size"`
 }
 
 type ListUsersRequest struct {
@@ -539,6 +740,51 @@ type ProductMarketResp struct {
 	Currency            string `json:"currency"`
 	StockAlertThreshold int    `json:"stock_alert_threshold"`
 	PublishedAt         string `json:"published_at,optional"`
+}
+
+type PromotionDetailResp struct {
+	ID             int64    `json:"id"`
+	Name           string   `json:"name"`
+	Description    string   `json:"description"`
+	Type           string   `json:"type"`
+	Status         string   `json:"status"` // draft, active, inactive, expired
+	StartTime      string   `json:"start_time"`
+	EndTime        string   `json:"end_time"`
+	DiscountType   string   `json:"discount_type"`
+	DiscountValue  string   `json:"discount_value"`
+	MinOrderAmount string   `json:"min_order_amount"`
+	MaxDiscount    string   `json:"max_discount"`
+	UsageLimit     int      `json:"usage_limit"`
+	UsedCount      int      `json:"used_count"`
+	PerUserLimit   int      `json:"per_user_limit"`
+	ProductIDs     []int64  `json:"product_ids"`
+	CategoryIDs    []int64  `json:"category_ids"`
+	MarketIDs      []int64  `json:"market_ids"`
+	Tags           []string `json:"tags"`
+	CreatedAt      string   `json:"created_at"`
+	UpdatedAt      string   `json:"updated_at"`
+}
+
+type PromotionRuleReq struct {
+	RuleType      string `json:"rule_type"` // product, category, amount, quantity, user_group, market
+	Operator      string `json:"operator"`  // eq, ne, gt, gte, lt, lte, in, not_in, contains
+	Value         string `json:"value"`
+	DiscountType  string `json:"discount_type,optional"` // percentage, fixed_amount
+	DiscountValue string `json:"discount_value,optional"`
+	Priority      int    `json:"priority,optional"`
+}
+
+type PromotionRuleResp struct {
+	ID            int64  `json:"id"`
+	PromotionID   int64  `json:"promotion_id"`
+	RuleType      string `json:"rule_type"`
+	Operator      string `json:"operator"`
+	Value         string `json:"value"`
+	DiscountType  string `json:"discount_type"`
+	DiscountValue string `json:"discount_value"`
+	Priority      int    `json:"priority"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 type PushToMarketReq struct {
@@ -691,6 +937,24 @@ type UpdateCategoryStatusReq struct {
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
 }
 
+type UpdateCouponReq struct {
+	ID             int64  `path:"id"`
+	Code           string `json:"code"`
+	Name           string `json:"name"`
+	Description    string `json:"description,optional"`
+	Type           string `json:"type"`
+	DiscountValue  string `json:"discount_value"`
+	MinOrderAmount string `json:"min_order_amount,optional"`
+	MaxDiscount    string `json:"max_discount,optional"`
+	StartTime      string `json:"start_time"`
+	EndTime        string `json:"end_time"`
+	UsageLimit     int    `json:"usage_limit,optional"`
+	PerUserLimit   int    `json:"per_user_limit,optional"`
+	ProductIDs     string `json:"product_ids,optional"`
+	CategoryIDs    string `json:"category_ids,optional"`
+	MarketIDs      string `json:"market_ids,optional"`
+}
+
 type UpdateMarketReq struct {
 	ID        int64     `path:"id"`
 	Name      string    `json:"name,optional"`
@@ -744,6 +1008,35 @@ type UpdateProfileRequest struct {
 	Email    string `json:"email,optional"`
 }
 
+type UpdatePromotionReq struct {
+	ID             int64    `path:"id"`
+	Name           string   `json:"name"`
+	Description    string   `json:"description,optional"`
+	Type           string   `json:"type"`
+	StartTime      string   `json:"start_time"`
+	EndTime        string   `json:"end_time"`
+	DiscountType   string   `json:"discount_type,optional"`
+	DiscountValue  string   `json:"discount_value,optional"`
+	MinOrderAmount string   `json:"min_order_amount,optional"`
+	MaxDiscount    string   `json:"max_discount,optional"`
+	UsageLimit     int      `json:"usage_limit,optional"`
+	PerUserLimit   int      `json:"per_user_limit,optional"`
+	ProductIDs     []int64  `json:"product_ids,optional"`
+	CategoryIDs    []int64  `json:"category_ids,optional"`
+	MarketIDs      []int64  `json:"market_ids,optional"`
+	Tags           []string `json:"tags,optional"`
+}
+
+type UpdatePromotionRuleReq struct {
+	ID            int64  `path:"id"`
+	RuleType      string `json:"rule_type"`
+	Operator      string `json:"operator"`
+	Value         string `json:"value"`
+	DiscountType  string `json:"discount_type,optional"`
+	DiscountValue string `json:"discount_value,optional"`
+	Priority      int    `json:"priority,optional"`
+}
+
 type UpdateSKUReq struct {
 	ID             int64             `path:"id"`
 	Code           string            `json:"code,optional"`
@@ -784,6 +1077,24 @@ type UpdateWarehouseReq struct {
 type UpdateWarehouseStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type UserCouponDetailResp struct {
+	ID             int64  `json:"id"`
+	UserID         int64  `json:"user_id"`
+	CouponID       int64  `json:"coupon_id"`
+	CouponCode     string `json:"coupon_code"`
+	CouponName     string `json:"coupon_name"`
+	DiscountType   string `json:"discount_type"`
+	DiscountValue  string `json:"discount_value"`
+	MinOrderAmount string `json:"min_order_amount"`
+	MaxDiscount    string `json:"max_discount"`
+	StartTime      string `json:"start_time"`
+	EndTime        string `json:"end_time"`
+	Status         string `json:"status"`
+	UsedAt         string `json:"used_at,optional"`
+	OrderID        int64  `json:"order_id,optional"`
+	CreatedAt      string `json:"created_at"`
 }
 
 type UserStatsRequest struct {

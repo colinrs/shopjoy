@@ -9,6 +9,7 @@ import "product_market.api"
 import "category.api"
 import "brand.api"
 import "inventory.api"
+import "promotion.api"
 
 info (
 	title:   "Admin API"

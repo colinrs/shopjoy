@@ -1,0 +1,389 @@
+syntax = "v1"
+
+info (
+	title:   "Promotion API"
+	desc:    "促销与优惠券管理相关接口"
+	version: "v1"
+)
+
+type (
+	// Promotion types
+	CreatePromotionReq {
+		Name           string   `json:"name"`
+		Description    string   `json:"description,optional"`
+		Type           string   `json:"type"` // discount, coupon, flash_sale, bundle
+		StartTime      string   `json:"start_time"` // RFC3339
+		EndTime        string   `json:"end_time"` // RFC3339
+		DiscountType   string   `json:"discount_type,optional"` // percentage, fixed_amount, buy_x_get_y
+		DiscountValue  string   `json:"discount_value,optional"` // Using string for decimal precision
+		MinOrderAmount string   `json:"min_order_amount,optional"` // Using string for decimal precision
+		MaxDiscount    string   `json:"max_discount,optional"` // Using string for decimal precision
+		UsageLimit     int      `json:"usage_limit,optional"`
+		PerUserLimit   int      `json:"per_user_limit,optional"`
+		ProductIDs     []int64  `json:"product_ids,optional"`
+		CategoryIDs    []int64  `json:"category_ids,optional"`
+		MarketIDs      []int64  `json:"market_ids,optional"`
+		Tags           []string `json:"tags,optional"`
+	}
+	CreatePromotionResp {
+		ID int64 `json:"id"`
+	}
+	UpdatePromotionReq {
+		ID             int64    `path:"id"`
+		Name           string   `json:"name"`
+		Description    string   `json:"description,optional"`
+		Type           string   `json:"type"`
+		StartTime      string   `json:"start_time"`
+		EndTime        string   `json:"end_time"`
+		DiscountType   string   `json:"discount_type,optional"`
+		DiscountValue  string   `json:"discount_value,optional"`
+		MinOrderAmount string   `json:"min_order_amount,optional"`
+		MaxDiscount    string   `json:"max_discount,optional"`
+		UsageLimit     int      `json:"usage_limit,optional"`
+		PerUserLimit   int      `json:"per_user_limit,optional"`
+		ProductIDs     []int64  `json:"product_ids,optional"`
+		CategoryIDs    []int64  `json:"category_ids,optional"`
+		MarketIDs      []int64  `json:"market_ids,optional"`
+		Tags           []string `json:"tags,optional"`
+	}
+	GetPromotionReq {
+		ID int64 `path:"id"`
+	}
+	PromotionDetailResp {
+		ID             int64    `json:"id"`
+		Name           string   `json:"name"`
+		Description    string   `json:"description"`
+		Type           string   `json:"type"`
+		Status         string   `json:"status"` // draft, active, inactive, expired
+		StartTime      string   `json:"start_time"`
+		EndTime        string   `json:"end_time"`
+		DiscountType   string   `json:"discount_type"`
+		DiscountValue  string   `json:"discount_value"`
+		MinOrderAmount string   `json:"min_order_amount"`
+		MaxDiscount    string   `json:"max_discount"`
+		UsageLimit     int      `json:"usage_limit"`
+		UsedCount      int      `json:"used_count"`
+		PerUserLimit   int      `json:"per_user_limit"`
+		ProductIDs     []int64  `json:"product_ids"`
+		CategoryIDs    []int64  `json:"category_ids"`
+		MarketIDs      []int64  `json:"market_ids"`
+		Tags           []string `json:"tags"`
+		CreatedAt      string   `json:"created_at"`
+		UpdatedAt      string   `json:"updated_at"`
+	}
+	ListPromotionsReq {
+		Name     string `form:"name,optional"`
+		Type     string `form:"type,optional"`
+		Status   string `form:"status,optional"`
+		MarketID int64  `form:"market_id,optional"`
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+	}
+	ListPromotionsResp {
+		List     []*PromotionDetailResp `json:"list"`
+		Total    int64                  `json:"total"`
+		Page     int                    `json:"page"`
+		PageSize int                    `json:"page_size"`
+	}
+	DeletePromotionReq {
+		ID int64 `path:"id"`
+	}
+	ActivatePromotionReq {
+		ID int64 `path:"id"`
+	}
+	DeactivatePromotionReq {
+		ID int64 `path:"id"`
+	}
+	// Promotion Rule types
+	PromotionRuleReq {
+		RuleType      string `json:"rule_type"` // product, category, amount, quantity, user_group, market
+		Operator      string `json:"operator"` // eq, ne, gt, gte, lt, lte, in, not_in, contains
+		Value         string `json:"value"`
+		DiscountType  string `json:"discount_type,optional"` // percentage, fixed_amount
+		DiscountValue string `json:"discount_value,optional"`
+		Priority      int    `json:"priority,optional"`
+	}
+	CreatePromotionRulesReq {
+		PromotionID int64              `path:"id"`
+		Rules       []PromotionRuleReq `json:"rules"`
+	}
+	CreatePromotionRulesResp {
+		IDs []int64 `json:"ids"`
+	}
+	GetPromotionRulesReq {
+		PromotionID int64 `path:"id"`
+	}
+	PromotionRuleResp {
+		ID            int64  `json:"id"`
+		PromotionID   int64  `json:"promotion_id"`
+		RuleType      string `json:"rule_type"`
+		Operator      string `json:"operator"`
+		Value         string `json:"value"`
+		DiscountType  string `json:"discount_type"`
+		DiscountValue string `json:"discount_value"`
+		Priority      int    `json:"priority"`
+		CreatedAt     string `json:"created_at"`
+		UpdatedAt     string `json:"updated_at"`
+	}
+	ListPromotionRulesResp {
+		List  []*PromotionRuleResp `json:"list"`
+		Total int64                `json:"total"`
+	}
+	UpdatePromotionRuleReq {
+		ID            int64  `path:"id"`
+		RuleType      string `json:"rule_type"`
+		Operator      string `json:"operator"`
+		Value         string `json:"value"`
+		DiscountType  string `json:"discount_type,optional"`
+		DiscountValue string `json:"discount_value,optional"`
+		Priority      int    `json:"priority,optional"`
+	}
+	DeletePromotionRuleReq {
+		ID int64 `path:"id"`
+	}
+	// Coupon types
+	CreateCouponReq {
+		Code           string `json:"code"`
+		Name           string `json:"name"`
+		Description    string `json:"description,optional"`
+		Type           string `json:"type"` // fixed_amount, percentage, free_shipping
+		DiscountValue  string `json:"discount_value"` // Using string for decimal precision
+		MinOrderAmount string `json:"min_order_amount,optional"`
+		MaxDiscount    string `json:"max_discount,optional"`
+		StartTime      string `json:"start_time"` // RFC3339
+		EndTime        string `json:"end_time"` // RFC3339
+		UsageLimit     int    `json:"usage_limit,optional"`
+		PerUserLimit   int    `json:"per_user_limit,optional"`
+		ProductIDs     string `json:"product_ids,optional"` // JSON array as string
+		CategoryIDs    string `json:"category_ids,optional"` // JSON array as string
+		MarketIDs      string `json:"market_ids,optional"` // JSON array as string
+	}
+	CreateCouponResp {
+		ID int64 `json:"id"`
+	}
+	UpdateCouponReq {
+		ID             int64  `path:"id"`
+		Code           string `json:"code"`
+		Name           string `json:"name"`
+		Description    string `json:"description,optional"`
+		Type           string `json:"type"`
+		DiscountValue  string `json:"discount_value"`
+		MinOrderAmount string `json:"min_order_amount,optional"`
+		MaxDiscount    string `json:"max_discount,optional"`
+		StartTime      string `json:"start_time"`
+		EndTime        string `json:"end_time"`
+		UsageLimit     int    `json:"usage_limit,optional"`
+		PerUserLimit   int    `json:"per_user_limit,optional"`
+		ProductIDs     string `json:"product_ids,optional"`
+		CategoryIDs    string `json:"category_ids,optional"`
+		MarketIDs      string `json:"market_ids,optional"`
+	}
+	GetCouponReq {
+		ID int64 `path:"id"`
+	}
+	CouponDetailResp {
+		ID             int64  `json:"id"`
+		Code           string `json:"code"`
+		Name           string `json:"name"`
+		Description    string `json:"description"`
+		Type           string `json:"type"`
+		DiscountValue  string `json:"discount_value"`
+		MinOrderAmount string `json:"min_order_amount"`
+		MaxDiscount    string `json:"max_discount"`
+		StartTime      string `json:"start_time"`
+		EndTime        string `json:"end_time"`
+		UsageLimit     int    `json:"usage_limit"`
+		UsedCount      int    `json:"used_count"`
+		PerUserLimit   int    `json:"per_user_limit"`
+		ProductIDs     string `json:"product_ids"`
+		CategoryIDs    string `json:"category_ids"`
+		MarketIDs      string `json:"market_ids"`
+		Status         string `json:"status"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+	}
+	ListCouponsReq {
+		Code     string `form:"code,optional"`
+		Name     string `form:"name,optional"`
+		Type     string `form:"type,optional"`
+		Status   string `form:"status,optional"`
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+	}
+	ListCouponsResp {
+		List     []*CouponDetailResp `json:"list"`
+		Total    int64               `json:"total"`
+		Page     int                 `json:"page"`
+		PageSize int                 `json:"page_size"`
+	}
+	DeleteCouponReq {
+		ID int64 `path:"id"`
+	}
+	GenerateCouponCodesReq {
+		Prefix       string `json:"prefix,optional"`
+		Quantity     int    `json:"quantity"`
+		Length       int    `json:"length,default=8"`
+		CouponConfig string `json:"coupon_config"` // JSON config for the coupon
+	}
+	GenerateCouponCodesResp {
+		Codes []string `json:"codes"`
+		Count int      `json:"count"`
+	}
+	GetCouponUsageReq {
+		ID       int64 `path:"id"`
+		Page     int   `form:"page,default=1"`
+		PageSize int   `form:"page_size,default=20"`
+	}
+	CouponUsageResp {
+		ID             int64  `json:"id"`
+		CouponID       int64  `json:"coupon_id"`
+		UserID         int64  `json:"user_id"`
+		OrderID        int64  `json:"order_id"`
+		DiscountAmount string `json:"discount_amount"`
+		UsedAt         string `json:"used_at"`
+	}
+	ListCouponUsageResp {
+		List     []*CouponUsageResp `json:"list"`
+		Total    int64              `json:"total"`
+		Page     int                `json:"page"`
+		PageSize int                `json:"page_size"`
+	}
+	// User Coupon types
+	IssueUserCouponReq {
+		UserID   int64 `json:"user_id"`
+		CouponID int64 `json:"coupon_id"`
+	}
+	IssueUserCouponResp {
+		ID int64 `json:"id"`
+	}
+	ListUserCouponsReq {
+		UserID   int64  `form:"user_id,optional"`
+		CouponID int64  `form:"coupon_id,optional"`
+		Status   string `form:"status,optional"` // available, used, expired
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+	}
+	UserCouponDetailResp {
+		ID             int64  `json:"id"`
+		UserID         int64  `json:"user_id"`
+		CouponID       int64  `json:"coupon_id"`
+		CouponCode     string `json:"coupon_code"`
+		CouponName     string `json:"coupon_name"`
+		DiscountType   string `json:"discount_type"`
+		DiscountValue  string `json:"discount_value"`
+		MinOrderAmount string `json:"min_order_amount"`
+		MaxDiscount    string `json:"max_discount"`
+		StartTime      string `json:"start_time"`
+		EndTime        string `json:"end_time"`
+		Status         string `json:"status"`
+		UsedAt         string `json:"used_at,optional"`
+		OrderID        int64  `json:"order_id,optional"`
+		CreatedAt      string `json:"created_at"`
+	}
+	ListUserCouponsResp {
+		List     []*UserCouponDetailResp `json:"list"`
+		Total    int64                   `json:"total"`
+		Page     int                     `json:"page"`
+		PageSize int                     `json:"page_size"`
+	}
+)
+
+@server (
+	group:      promotions
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建促销活动"
+	@handler CreatePromotionHandler
+	post /api/v1/promotions (CreatePromotionReq) returns (CreatePromotionResp)
+
+	@doc "更新促销活动"
+	@handler UpdatePromotionHandler
+	put /api/v1/promotions/:id (UpdatePromotionReq) returns (PromotionDetailResp)
+
+	@doc "获取促销活动详情"
+	@handler GetPromotionHandler
+	get /api/v1/promotions/:id (GetPromotionReq) returns (PromotionDetailResp)
+
+	@doc "获取促销活动列表"
+	@handler ListPromotionsHandler
+	get /api/v1/promotions (ListPromotionsReq) returns (ListPromotionsResp)
+
+	@doc "删除促销活动"
+	@handler DeletePromotionHandler
+	delete /api/v1/promotions/:id (DeletePromotionReq) returns (CreatePromotionResp)
+
+	@doc "激活促销活动"
+	@handler ActivatePromotionHandler
+	post /api/v1/promotions/:id/activate (ActivatePromotionReq) returns (PromotionDetailResp)
+
+	@doc "停用促销活动"
+	@handler DeactivatePromotionHandler
+	post /api/v1/promotions/:id/deactivate (DeactivatePromotionReq) returns (PromotionDetailResp)
+
+	// Promotion Rules
+	@doc "获取促销规则列表"
+	@handler GetPromotionRulesHandler
+	get /api/v1/promotions/:id/rules (GetPromotionRulesReq) returns (ListPromotionRulesResp)
+
+	@doc "添加促销规则"
+	@handler CreatePromotionRulesHandler
+	post /api/v1/promotions/:id/rules (CreatePromotionRulesReq) returns (CreatePromotionRulesResp)
+
+	@doc "更新促销规则"
+	@handler UpdatePromotionRuleHandler
+	put /api/v1/promotion-rules/:id (UpdatePromotionRuleReq) returns (PromotionRuleResp)
+
+	@doc "删除促销规则"
+	@handler DeletePromotionRuleHandler
+	delete /api/v1/promotion-rules/:id (DeletePromotionRuleReq) returns (CreatePromotionResp)
+}
+
+@server (
+	group:      coupons
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建优惠券"
+	@handler CreateCouponHandler
+	post /api/v1/coupons (CreateCouponReq) returns (CreateCouponResp)
+
+	@doc "更新优惠券"
+	@handler UpdateCouponHandler
+	put /api/v1/coupons/:id (UpdateCouponReq) returns (CouponDetailResp)
+
+	@doc "获取优惠券详情"
+	@handler GetCouponHandler
+	get /api/v1/coupons/:id (GetCouponReq) returns (CouponDetailResp)
+
+	@doc "获取优惠券列表"
+	@handler ListCouponsHandler
+	get /api/v1/coupons (ListCouponsReq) returns (ListCouponsResp)
+
+	@doc "删除优惠券"
+	@handler DeleteCouponHandler
+	delete /api/v1/coupons/:id (DeleteCouponReq) returns (CreateCouponResp)
+
+	@doc "批量生成优惠券码"
+	@handler GenerateCouponCodesHandler
+	post /api/v1/coupons/generate (GenerateCouponCodesReq) returns (GenerateCouponCodesResp)
+
+	@doc "获取优惠券使用记录"
+	@handler GetCouponUsageHandler
+	get /api/v1/coupons/:id/usage (GetCouponUsageReq) returns (ListCouponUsageResp)
+}
+
+@server (
+	group:      user_coupons
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "发放优惠券给用户"
+	@handler IssueUserCouponHandler
+	post /api/v1/user-coupons (IssueUserCouponReq) returns (IssueUserCouponResp)
+
+	@doc "获取用户优惠券列表"
+	@handler ListUserCouponsHandler
+	get /api/v1/user-coupons (ListUserCouponsReq) returns (ListUserCouponsResp)
+}
+

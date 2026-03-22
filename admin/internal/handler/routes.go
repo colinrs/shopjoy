@@ -10,10 +10,13 @@ import (
 	auth "github.com/colinrs/shopjoy/admin/internal/handler/auth"
 	brands "github.com/colinrs/shopjoy/admin/internal/handler/brands"
 	categories "github.com/colinrs/shopjoy/admin/internal/handler/categories"
+	coupons "github.com/colinrs/shopjoy/admin/internal/handler/coupons"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
+	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
+	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	warehouses "github.com/colinrs/shopjoy/admin/internal/handler/warehouses"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -220,6 +223,56 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/categories/tree",
 					Handler: categories.GetCategoryTreeHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建优惠券
+					Method:  http.MethodPost,
+					Path:    "/api/v1/coupons",
+					Handler: coupons.CreateCouponHandler(serverCtx),
+				},
+				{
+					// 获取优惠券列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/coupons",
+					Handler: coupons.ListCouponsHandler(serverCtx),
+				},
+				{
+					// 更新优惠券
+					Method:  http.MethodPut,
+					Path:    "/api/v1/coupons/:id",
+					Handler: coupons.UpdateCouponHandler(serverCtx),
+				},
+				{
+					// 获取优惠券详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/coupons/:id",
+					Handler: coupons.GetCouponHandler(serverCtx),
+				},
+				{
+					// 删除优惠券
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/coupons/:id",
+					Handler: coupons.DeleteCouponHandler(serverCtx),
+				},
+				{
+					// 获取优惠券使用记录
+					Method:  http.MethodGet,
+					Path:    "/api/v1/coupons/:id/usage",
+					Handler: coupons.GetCouponUsageHandler(serverCtx),
+				},
+				{
+					// 批量生成优惠券码
+					Method:  http.MethodPost,
+					Path:    "/api/v1/coupons/generate",
+					Handler: coupons.GenerateCouponCodesHandler(serverCtx),
 				},
 			}...,
 		),
@@ -444,6 +497,100 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/api/v1/skus/:id",
 					Handler: products.DeleteSKUHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 更新促销规则
+					Method:  http.MethodPut,
+					Path:    "/api/v1/promotion-rules/:id",
+					Handler: promotions.UpdatePromotionRuleHandler(serverCtx),
+				},
+				{
+					// 删除促销规则
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/promotion-rules/:id",
+					Handler: promotions.DeletePromotionRuleHandler(serverCtx),
+				},
+				{
+					// 创建促销活动
+					Method:  http.MethodPost,
+					Path:    "/api/v1/promotions",
+					Handler: promotions.CreatePromotionHandler(serverCtx),
+				},
+				{
+					// 获取促销活动列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/promotions",
+					Handler: promotions.ListPromotionsHandler(serverCtx),
+				},
+				{
+					// 更新促销活动
+					Method:  http.MethodPut,
+					Path:    "/api/v1/promotions/:id",
+					Handler: promotions.UpdatePromotionHandler(serverCtx),
+				},
+				{
+					// 获取促销活动详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/promotions/:id",
+					Handler: promotions.GetPromotionHandler(serverCtx),
+				},
+				{
+					// 删除促销活动
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/promotions/:id",
+					Handler: promotions.DeletePromotionHandler(serverCtx),
+				},
+				{
+					// 激活促销活动
+					Method:  http.MethodPost,
+					Path:    "/api/v1/promotions/:id/activate",
+					Handler: promotions.ActivatePromotionHandler(serverCtx),
+				},
+				{
+					// 停用促销活动
+					Method:  http.MethodPost,
+					Path:    "/api/v1/promotions/:id/deactivate",
+					Handler: promotions.DeactivatePromotionHandler(serverCtx),
+				},
+				{
+					// 获取促销规则列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/promotions/:id/rules",
+					Handler: promotions.GetPromotionRulesHandler(serverCtx),
+				},
+				{
+					// 添加促销规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/promotions/:id/rules",
+					Handler: promotions.CreatePromotionRulesHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 发放优惠券给用户
+					Method:  http.MethodPost,
+					Path:    "/api/v1/user-coupons",
+					Handler: user_coupons.IssueUserCouponHandler(serverCtx),
+				},
+				{
+					// 获取用户优惠券列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/user-coupons",
+					Handler: user_coupons.ListUserCouponsHandler(serverCtx),
 				},
 			}...,
 		),
