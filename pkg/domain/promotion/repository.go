@@ -15,7 +15,7 @@ type CouponRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Coupon, error)
 	FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*Coupon, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query CouponQuery) ([]*Coupon, int64, error)
-	IncrementUsage(ctx context.Context, db *gorm.DB, id int64) error
+	IncrementUsage(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
 }
 
 // UserCouponRepository defines the interface for user coupon persistence
@@ -24,7 +24,7 @@ type UserCouponRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*UserCoupon, error)
 	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, status *UserCouponStatus) ([]*UserCoupon, error)
 	FindByUserAndCoupon(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) ([]*UserCoupon, error)
-	MarkUsed(ctx context.Context, db *gorm.DB, id int64, orderID string) error
+	MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID string) error
 	CountUsageByUser(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) (int, error)
 }
 

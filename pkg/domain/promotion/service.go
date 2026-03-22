@@ -130,7 +130,10 @@ func (s *CalculationService) CalculateDiscount(
 	// Apply coupon if provided
 	if req.CouponCode != "" {
 		appliedCoupon, err := s.applyCoupon(ctx, db, req)
-		if err == nil && appliedCoupon != nil {
+		if err != nil {
+			return nil, err
+		}
+		if appliedCoupon != nil {
 			result.AppliedCoupon = appliedCoupon
 			result.CouponDiscount = appliedCoupon.DiscountAmount
 		}
