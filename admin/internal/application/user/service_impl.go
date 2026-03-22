@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	crand "crypto/rand"
 	"time"
 
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
@@ -188,6 +189,73 @@ func (s *ServiceImpl) Activate(ctx context.Context, tenantID shared.TenantID, id
 
 	u.Audit.Update(0)
 	return s.userRepo.Update(ctx, s.db, u)
+}
+
+func (s *ServiceImpl) Delete(ctx context.Context, tenantID shared.TenantID, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return err
+	}
+
+	if err := u.SoftDelete(); err != nil {
+		return err
+	}
+
+	u.Audit.Update(0)
+	return s.userRepo.Update(ctx, s.db, u)
+}
+
+func (s *ServiceImpl) ResetPassword(ctx context.Context, tenantID shared.TenantID, id int64) (string, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return "", err
+	}
+
+	// Generate temporary password
+	tempPassword := generateTempPassword()
+	if err := u.SetPassword(tempPassword); err != nil {
+		return "", err
+	}
+
+	u.Audit.Update(0)
+	if err := s.userRepo.Update(ctx, s.db, u); err != nil {
+		return "", err
+	}
+
+	return tempPassword, nil
+}
+
+func (s *ServiceImpl) GetStats(ctx context.Context, tenantID shared.TenantID) (*UserStatsResponse, error) {
+	stats, err := s.userRepo.GetStats(ctx, s.db, tenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserStatsResponse{
+		Total:     stats.Total,
+		Active:    stats.Active,
+		Suspended: stats.Suspended,
+		NewToday:  stats.NewToday,
+	}, nil
+}
+
+func generateTempPassword() string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const charsetLen = byte(len(charset))
+	b := make([]byte, 12)
+
+	// Use crypto/rand for secure random generation - no fallback to weak random
+	randomBytes := make([]byte, 12)
+	if _, err := crand.Read(randomBytes); err != nil {
+		// crypto/rand failure is critical - log and panic
+		// This should never happen on a properly configured system
+		panic("failed to generate secure temporary password: " + err.Error())
+	}
+
+	for i, rb := range randomBytes {
+		b[i] = charset[rb%charsetLen]
+	}
+	return string(b)
 }
 
 func toUserResponse(u *domain.User) *UserResponse {

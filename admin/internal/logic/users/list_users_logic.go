@@ -4,6 +4,7 @@ import (
 	"context"
 
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
+	domainUser "github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -37,8 +38,9 @@ func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.Lis
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name:  req.Name,
-		Email: req.Email,
+		Name:   req.Name,
+		Email:  req.Email,
+		Status: domainUser.Status(req.Status),
 	}
 
 	listResp, err := l.svcCtx.UserService.List(l.ctx, tenantID, queryReq)
@@ -56,6 +58,7 @@ func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.Lis
 			Avatar:    u.Avatar,
 			Status:    u.Status,
 			CreatedAt: u.CreatedAt,
+			LastLogin: u.LastLogin,
 		}
 	}
 

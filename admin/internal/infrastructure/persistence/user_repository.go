@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -66,6 +67,9 @@ func (r *UserRepository) FindList(ctx context.Context, db *gorm.DB, tenantID sha
 	if query.Phone != "" {
 		dbQuery = dbQuery.Where("phone = ?", query.Phone)
 	}
+	if query.Status != 0 {
+		dbQuery = dbQuery.Where("status = ?", query.Status)
+	}
 
 	if err := dbQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -81,4 +85,39 @@ func (r *UserRepository) Exists(ctx context.Context, db *gorm.DB, tenantID share
 		Where("tenant_id = ? AND (email = ? OR phone = ?)", tenantID.Int64(), email, phone).
 		Count(&count).Error
 	return count > 0, err
+}
+
+func (r *UserRepository) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*user.Stats, error) {
+	stats := &user.Stats{}
+
+	// Total users (excluding deleted)
+	if err := db.WithContext(ctx).Model(&user.User{}).
+		Where("tenant_id = ? AND status != ?", tenantID.Int64(), user.StatusDeleted).
+		Count(&stats.Total).Error; err != nil {
+		return nil, err
+	}
+
+	// Active users
+	if err := db.WithContext(ctx).Model(&user.User{}).
+		Where("tenant_id = ? AND status = ?", tenantID.Int64(), user.StatusActive).
+		Count(&stats.Active).Error; err != nil {
+		return nil, err
+	}
+
+	// Suspended users
+	if err := db.WithContext(ctx).Model(&user.User{}).
+		Where("tenant_id = ? AND status = ?", tenantID.Int64(), user.StatusSuspended).
+		Count(&stats.Suspended).Error; err != nil {
+		return nil, err
+	}
+
+	// New users today
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	if err := db.WithContext(ctx).Model(&user.User{}).
+		Where("tenant_id = ? AND created_at >= ?", tenantID.Int64(), today).
+		Count(&stats.NewToday).Error; err != nil {
+		return nil, err
+	}
+
+	return stats, nil
 }

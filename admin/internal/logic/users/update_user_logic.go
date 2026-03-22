@@ -52,5 +52,6 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.
 		Avatar:    userResp.Avatar,
 		Status:    userResp.Status,
 		CreatedAt: userResp.CreatedAt,
+		LastLogin: userResp.LastLogin,
 	}, nil
 }

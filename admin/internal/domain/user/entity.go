@@ -102,6 +102,7 @@ type Repository interface {
 	FindByPhone(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, phone string) (*User, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query Query) ([]*User, int64, error)
 	Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, email, phone string) (bool, error)
+	GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*Stats, error)
 }
 
 type Query struct {
@@ -110,4 +111,11 @@ type Query struct {
 	Email  string
 	Phone  string
 	Status Status
+}
+
+type Stats struct {
+	Total     int64
+	Active    int64
+	Suspended int64
+	NewToday  int64
 }

@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/colinrs/shopjoy/admin/internal/domain/user"
+	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
@@ -15,7 +15,7 @@ type CreateUserRequest struct {
 	Password string
 	Name     string
 	Avatar   string
-	Gender   user.Gender
+	Gender   domain.Gender
 	Birthday string
 }
 
@@ -24,7 +24,7 @@ type UpdateUserRequest struct {
 	TenantID shared.TenantID
 	Name     string
 	Avatar   string
-	Gender   user.Gender
+	Gender   domain.Gender
 	Birthday string
 }
 
@@ -62,7 +62,14 @@ type QueryRequest struct {
 	Name   string
 	Email  string
 	Phone  string
-	Status user.Status
+	Status domain.Status
+}
+
+type UserStatsResponse struct {
+	Total     int64
+	Active    int64
+	Suspended int64
+	NewToday  int64
 }
 
 // Service 用户应用服务接口
@@ -75,4 +82,7 @@ type Service interface {
 	List(ctx context.Context, tenantID shared.TenantID, req QueryRequest) (*UserListResponse, error)
 	Suspend(ctx context.Context, tenantID shared.TenantID, id int64) error
 	Activate(ctx context.Context, tenantID shared.TenantID, id int64) error
+	Delete(ctx context.Context, tenantID shared.TenantID, id int64) error
+	ResetPassword(ctx context.Context, tenantID shared.TenantID, id int64) (string, error)
+	GetStats(ctx context.Context, tenantID shared.TenantID) (*UserStatsResponse, error)
 }

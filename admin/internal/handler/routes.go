@@ -471,6 +471,36 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/v1/users/:id",
 					Handler: users.UpdateUserHandler(serverCtx),
 				},
+				{
+					// 删除用户
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/users/:id",
+					Handler: users.DeleteUserHandler(serverCtx),
+				},
+				{
+					// 启用用户
+					Method:  http.MethodPost,
+					Path:    "/api/v1/users/:id/activate",
+					Handler: users.ActivateUserHandler(serverCtx),
+				},
+				{
+					// 重置用户密码
+					Method:  http.MethodPost,
+					Path:    "/api/v1/users/:id/reset-password",
+					Handler: users.ResetPasswordHandler(serverCtx),
+				},
+				{
+					// 禁用用户
+					Method:  http.MethodPost,
+					Path:    "/api/v1/users/:id/suspend",
+					Handler: users.SuspendUserHandler(serverCtx),
+				},
+				{
+					// 获取用户统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/stats",
+					Handler: users.GetUserStatsHandler(serverCtx),
+				},
 			}...,
 		),
 	)

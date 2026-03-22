@@ -3,6 +3,10 @@
 
 package types
 
+type ActivateUserRequest struct {
+	ID int64 `path:"id"`
+}
+
 type AdjustStockReq struct {
 	SKUCode     string `json:"sku_code"`
 	WarehouseID int64  `json:"warehouse_id"`
@@ -229,6 +233,10 @@ type CreateWarehouseResp struct {
 	ID int64 `json:"id"`
 }
 
+type DeleteUserRequest struct {
+	ID int64 `path:"id"`
+}
+
 type GetBrandMarketVisibilityReq struct {
 	BrandID int64 `path:"id"`
 }
@@ -306,6 +314,7 @@ type GetUserResponse struct {
 	Avatar    string `json:"avatar"`
 	Status    int    `json:"status"`
 	CreatedAt string `json:"created_at"`
+	LastLogin string `json:"last_login,optional"`
 }
 
 type GetWarehouseReq struct {
@@ -427,6 +436,7 @@ type ListUsersRequest struct {
 	PageSize int    `form:"page_size,default=20"`
 	Name     string `form:"name,optional"`
 	Email    string `form:"email,optional"`
+	Status   int    `form:"status,optional"`
 }
 
 type ListUsersResponse struct {
@@ -566,6 +576,14 @@ type RemoveFromMarketReq struct {
 	MarketID  int64 `path:"market_id"`
 }
 
+type ResetPasswordRequest struct {
+	ID int64 `path:"id"`
+}
+
+type ResetPasswordResponse struct {
+	TemporaryPassword string `json:"temporary_password"`
+}
+
 type SKUDetailResp struct {
 	ID             int64             `json:"id"`
 	ProductID      int64             `json:"product_id"`
@@ -613,6 +631,10 @@ type SetCategoryMarketVisibilityReq struct {
 }
 
 type SetDefaultWarehouseReq struct {
+	ID int64 `path:"id"`
+}
+
+type SuspendUserRequest struct {
 	ID int64 `path:"id"`
 }
 
@@ -762,6 +784,16 @@ type UpdateWarehouseReq struct {
 type UpdateWarehouseStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type UserStatsRequest struct {
+}
+
+type UserStatsResponse struct {
+	Total     int64 `json:"total"`
+	Active    int64 `json:"active"`
+	Suspended int64 `json:"suspended"`
+	NewToday  int64 `json:"new_today"`
 }
 
 type WarehouseDetailResp struct {
