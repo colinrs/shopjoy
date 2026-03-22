@@ -101,11 +101,32 @@ var (
 	ErrCouponInvalidCode    = &Err{HTTPCode: http.StatusBadRequest, Code: 70006, Msg: "invalid coupon code"}
 	ErrCouponAmountBelowMin = &Err{HTTPCode: http.StatusBadRequest, Code: 70007, Msg: "cart amount below minimum"}
 
+	// Coupon additional errors
+	ErrCouponUserLimitReached = &Err{HTTPCode: http.StatusBadRequest, Code: 70008, Msg: "user coupon usage limit reached"}
+	ErrCouponCurrencyMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 70009, Msg: "coupon currency mismatch"}
+	ErrCouponScopeInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 70010, Msg: "invalid coupon scope"}
+	ErrCouponTypeInvalid      = &Err{HTTPCode: http.StatusBadRequest, Code: 70011, Msg: "invalid coupon type"}
+	ErrCouponCannotDelete     = &Err{HTTPCode: http.StatusBadRequest, Code: 70012, Msg: "cannot delete active coupon"}
+
+	// UserCoupon errors (70xxx - 701xx)
+	ErrUserCouponNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 70101, Msg: "user coupon not found"}
+	ErrUserCouponExpired     = &Err{HTTPCode: http.StatusBadRequest, Code: 70102, Msg: "user coupon expired"}
+	ErrUserCouponAlreadyUsed = &Err{HTTPCode: http.StatusBadRequest, Code: 70103, Msg: "user coupon already used"}
+
 	// ErrPromotionNotFound ==================== Promotion Module (80xxx) ====================
 	ErrPromotionNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 80001, Msg: "promotion not found"}
 	ErrPromotionInvalid    = &Err{HTTPCode: http.StatusBadRequest, Code: 80002, Msg: "invalid promotion"}
 	ErrPromotionExpired    = &Err{HTTPCode: http.StatusBadRequest, Code: 80003, Msg: "promotion expired"}
 	ErrPromotionNotStarted = &Err{HTTPCode: http.StatusBadRequest, Code: 80004, Msg: "promotion not started"}
+
+	// Promotion additional errors
+	ErrPromotionNotActive        = &Err{HTTPCode: http.StatusBadRequest, Code: 80005, Msg: "promotion is not active"}
+	ErrPromotionCurrencyMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 80006, Msg: "promotion currency mismatch"}
+	ErrPromotionRuleNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 80007, Msg: "promotion rule not found"}
+	ErrPromotionRuleInvalid      = &Err{HTTPCode: http.StatusBadRequest, Code: 80008, Msg: "invalid promotion rule"}
+	ErrPromotionCannotDelete     = &Err{HTTPCode: http.StatusBadRequest, Code: 80009, Msg: "cannot delete active promotion"}
+	ErrPromotionScopeInvalid     = &Err{HTTPCode: http.StatusBadRequest, Code: 80010, Msg: "invalid promotion scope"}
+	ErrPromotionTypeInvalid      = &Err{HTTPCode: http.StatusBadRequest, Code: 80011, Msg: "invalid promotion type"}
 
 	// ErrTenantNotFound ==================== Tenant Module (90xxx) ====================
 	ErrTenantNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 90001, Msg: "tenant not found"}
