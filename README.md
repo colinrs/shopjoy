@@ -94,27 +94,41 @@ shopjoy/
 
 ### 2. 商品管理 (Catalog)
 - SPU + SKU 管理
-- 分类、品牌管理
+- 分类、品牌管理 (支持三级分类)
 - 库存管理 (Redis 预占)
 - 商品状态机 (草稿→上架→下架)
+- 商品多语言 (支持 en/zh-CN/ja/de/fr 等)
+- 商品合规信息 (HS Code、原产地、危险品声明)
 
-### 3. 订单系统 (Sales & Order)
+### 3. 多市场销售 (Multi-Market)
+- 市场配置 (CN/US/UK/DE/FR/AU)
+- 多币种定价
+- 税务规则配置 (VAT/GST/IOSS)
+- 分类/品牌市场可见性控制
+
+### 4. 库存管理 (Inventory)
+- 多仓库管理
+- 库存预占/确认扣减
+- 安全库存预警
+- 库存变动日志
+
+### 5. 订单系统 (Sales & Order)
 - 购物车 (游客/登录用户)
 - 订单创建与状态机
 - 订单超时自动关闭
 - 订单售后
 
-### 4. 支付系统 (Payment)
+### 6. 支付系统 (Payment)
 - 多渠道支付 (支付宝/微信)
 - 支付回调处理
 - 退款管理
 
-### 5. 促销系统 (Promotion)
+### 7. 促销系统 (Promotion)
 - 优惠券管理
 - 促销活动 (秒杀/满减/折扣)
 - 促销规则引擎
 
-### 6. 店铺管理 (Storefront)
+### 8. 店铺管理 (Storefront)
 - 店铺配置
 - 主题切换
 - 页面装修
@@ -253,9 +267,24 @@ npm run build
 
 ## 文档
 
+### 核心文档
 - [架构设计文档](docs/ARCHITECTURE.md) - DDD 战略设计、分层架构
-- [API 文档](docs/API.md) - 接口定义和使用说明
-- [产品需求文档](docs/prd/prd-1.md) - 功能需求详细说明
+- [API 参考文档](docs/api-reference.md) - 完整 API 接口定义
+- [API 简要文档](docs/API.md) - 接口快速入门
+- [数据库设计](docs/database-schema.md) - 表结构设计说明
+- [错误码参考](docs/ERROR_CODES.md) - 错误码定义与处理
+
+### 开发指南
+- [开发者指南](docs/developer-guide.md) - 开发环境搭建与工作流
+- [新手上路](docs/guides/ONBOARDING.md) - 开发者入门指南
+- [代码文档](docs/code-documentation.md) - 核心代码说明
+
+### 用户指南
+- [用户操作手册](docs/user-guide.md) - 管理后台使用教程
+
+### 规划文档
+- [业务开发计划](docs/plans/2026-03-18-business-development.md) - 功能开发路线图
+- [产品需求文档](docs/prd/) - 功能需求详细说明
 - [前端开发指南](AGENTS.md) - 前端开发规范和最佳实践
 
 ## 开发指南
@@ -292,32 +321,61 @@ cd shop-admin && npm run format
 
 ## 数据库表结构
 
+### 核心业务表
 | 表名 | 说明 |
 |------|------|
 | tenants | 租户表 |
 | users | 用户表 |
 | roles | 角色表 |
 | user_roles | 用户角色关联 |
-| products | 商品表 |
-| skus | SKU 表 |
-| categories | 分类表 |
+
+### 商品相关表
+| 表名 | 说明 |
+|------|------|
+| products | 商品表 (SPU) |
+| skus | SKU 表 (商品规格) |
+| product_localizations | 商品多语言表 |
+| product_markets | 商品市场关联表 |
+| categories | 分类表 (支持三级树形结构) |
+| category_markets | 分类市场可见性表 |
 | brands | 品牌表 |
+| brand_markets | 品牌市场可见性表 |
+
+### 市场与库存表
+| 表名 | 说明 |
+|------|------|
+| markets | 市场/区域表 (CN/US/UK/DE/FR/AU) |
+| warehouses | 仓库表 |
+| warehouse_inventories | 仓库库存表 |
+| inventory_logs | 库存变动日志表 |
+
+### 订单与支付表
+| 表名 | 说明 |
+|------|------|
 | orders | 订单表 |
 | order_items | 订单商品表 |
 | carts | 购物车表 |
 | cart_items | 购物车商品表 |
 | payments | 支付表 |
+
+### 促销表
+| 表名 | 说明 |
+|------|------|
 | coupons | 优惠券表 |
 | user_coupons | 用户优惠券表 |
+
+### 店铺表
+| 表名 | 说明 |
+|------|------|
 | shops | 店铺表 |
 | themes | 主题表 |
 
 ## API 接口
 
 ### 认证接口
-- `POST /users/register` - 用户注册
-- `POST /users/login` - 用户登录
-- `PUT /users/password` - 修改密码
+- `POST /api/v1/auth/login` - 用户登录
+- `POST /api/v1/auth/register` - 用户注册
+- `PUT /api/v1/users/password` - 修改密码
 
 ### 商品接口
 - `GET /api/v1/products` - 商品列表
@@ -326,6 +384,51 @@ cd shop-admin && npm run format
 - `PUT /api/v1/products/:id` - 更新商品
 - `POST /api/v1/products/:id/on-sale` - 上架
 - `POST /api/v1/products/:id/off-sale` - 下架
+- `PUT /api/v1/products/:id/stock` - 更新库存
+
+### SKU 接口
+- `GET /api/v1/skus/:id` - SKU 详情
+- `POST /api/v1/skus` - 创建 SKU
+- `PUT /api/v1/skus/:id` - 更新 SKU
+- `DELETE /api/v1/skus/:id` - 删除 SKU
+- `GET /api/v1/products/:product_id/skus` - 商品 SKU 列表
+
+### 商品多语言接口
+- `POST /api/v1/product-localizations` - 创建多语言内容
+- `GET /api/v1/product-localizations/:id` - 获取多语言内容
+- `GET /api/v1/products/:product_id/localizations` - 商品多语言列表
+- `PUT /api/v1/product-localizations/:id` - 更新多语言内容
+- `DELETE /api/v1/product-localizations/:id` - 删除多语言内容
+
+### 分类接口
+- `GET /api/v1/categories` - 分类列表
+- `GET /api/v1/categories/tree` - 分类树
+- `POST /api/v1/categories` - 创建分类
+- `PUT /api/v1/categories/:id` - 更新分类
+- `DELETE /api/v1/categories/:id` - 删除分类
+- `PUT /api/v1/categories/:id/move` - 移动分类
+- `PUT /api/v1/categories/sort` - 排序分类
+
+### 品牌接口
+- `GET /api/v1/brands` - 品牌列表
+- `POST /api/v1/brands` - 创建品牌
+- `PUT /api/v1/brands/:id` - 更新品牌
+- `DELETE /api/v1/brands/:id` - 删除品牌
+
+### 市场接口
+- `GET /api/v1/markets` - 市场列表
+- `POST /api/v1/markets` - 创建市场
+- `PUT /api/v1/markets/:id` - 更新市场
+- `DELETE /api/v1/markets/:id` - 删除市场
+
+### 库存接口
+- `GET /api/v1/warehouses` - 仓库列表
+- `POST /api/v1/warehouses` - 创建仓库
+- `PUT /api/v1/inventory/stock` - 更新库存
+- `POST /api/v1/inventory/adjust` - 库存调整
+- `GET /api/v1/inventory/sku/:sku_code` - SKU 库存详情
+- `GET /api/v1/inventory/logs` - 库存日志
+- `GET /api/v1/inventory/low-stock` - 低库存预警
 
 ### 订单接口
 - `GET /api/v1/orders` - 订单列表
@@ -339,7 +442,7 @@ cd shop-admin && npm run format
 - `PUT /api/v1/cart/items/:id` - 更新数量
 - `DELETE /api/v1/cart/items/:id` - 删除商品
 
-完整 API 文档请查看 [docs/API.md](docs/API.md)
+完整 API 文档请查看 [docs/api-reference.md](docs/api-reference.md)
 
 ## 架构特点
 
@@ -356,13 +459,14 @@ cd shop-admin && npm run format
 └─────────────────────────────────────┘
 ```
 
-### 6 大限界上下文
+### 7 大限界上下文
 1. **Identity & Access** - 身份认证与权限
 2. **Catalog** - 商品目录
 3. **Sales & Order** - 销售订单
 4. **Promotion** - 促销活动
 5. **Storefront** - 店铺前台
 6. **Payment** - 支付
+7. **Fulfillment** - 履约
 
 ## 设计资源
 
