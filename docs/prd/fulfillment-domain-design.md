@@ -144,17 +144,19 @@ Refund (Aggregate Root)
     │  cancelled  │        │        │   shipped   │
     └─────────────┘        │        └──────┬──────┘
                            │               │
-                           │               ▼
-                           │        ┌─────────────┐
-                           │        │  in_transit │
-                           │        └──────┬──────┘
-                           │               │
                            │       ┌───────┴───────┐
                            │       │               │
                            │       ▼               ▼
                            │ ┌─────────────┐ ┌─────────────┐
-                           │ │  delivered  │ │   failed    │
-                           │ └─────────────┘ └─────────────┘
+                           │ │   failed    │ │  in_transit │
+                           │ └─────────────┘ └──────┬──────┘
+                           │                        │
+                           │                ┌───────┴───────┐
+                           │                │               │
+                           │                ▼               ▼
+                           │         ┌─────────────┐ ┌─────────────┐
+                           │         │  delivered  │ │   failed    │
+                           │         └─────────────┘ └─────────────┘
 ```
 
 **Transitions:**
@@ -164,38 +166,32 @@ Refund (Aggregate Root)
 | pending | shipped | `Ship()` | Carrier and TrackingNo provided |
 | pending | cancelled | `Cancel()` | Status is pending |
 | shipped | in_transit | `MarkInTransit()` | Status is shipped |
+| shipped | failed | `MarkFailed()` | Status is shipped (carrier reports failure before in-transit) |
 | in_transit | delivered | `MarkDelivered()` | Status is in_transit |
-| in_transit | failed | `MarkFailed()` | Status is in_transit or shipped |
+| in_transit | failed | `MarkFailed()` | Status is in_transit |
 
 ### 3.2 Refund State Machine
 
 ```
-    ┌─────────────┐
-    │   pending   │
-    └──────┬──────┘
-           │
-   ┌───────┼───────┐
-   │       │       │
-   ▼       │       ▼
-┌──────────┴──┐  ┌─────────────┐
-│  rejected   │  │  cancelled  │
-└─────────────┘  └─────────────┘
-
-           │
-           ▼
-    ┌─────────────┐
-    │  approved   │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐
-    │ processing  │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐
-    │  completed  │
-    └─────────────┘
+                    ┌─────────────┐
+                    │   pending   │
+                    └──────┬──────┘
+           ┌───────────────┼───────────────┐
+           │               │               │
+           ▼               ▼               ▼
+    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+    │  rejected   │ │  cancelled  │ │  approved   │
+    └─────────────┘ └─────────────┘ └──────┬──────┘
+                                           │
+                                           ▼
+                                    ┌─────────────┐
+                                    │ processing  │
+                                    └──────┬──────┘
+                                           │
+                                           ▼
+                                    ┌─────────────┐
+                                    │  completed  │
+                                    └─────────────┘
 ```
 
 **Transitions:**
@@ -309,6 +305,15 @@ type RefundRejected struct {
     RejectedBy   int64
     RejectReason string
 }
+
+// Emitted when buyer cancels refund application
+type RefundCancelled struct {
+    TenantID    shared.TenantID
+    RefundID    int64
+    OrderID     string
+    CancelledBy int64
+    CancelledAt time.Time
+}
 ```
 
 ---
@@ -363,6 +368,53 @@ const (
 )
 ```
 
+### 5.3 Enums
+
+```go
+// ShipmentStatus defines the state of a shipment
+type ShipmentStatus int
+
+const (
+    ShipmentStatusPending ShipmentStatus = iota
+    ShipmentStatusShipped
+    ShipmentStatusInTransit
+    ShipmentStatusDelivered
+    ShipmentStatusFailed
+    ShipmentStatusCancelled
+)
+
+// RefundStatus defines the state of a refund
+type RefundStatus int
+
+const (
+    RefundStatusPending RefundStatus = iota
+    RefundStatusApproved
+    RefundStatusRejected
+    RefundStatusProcessing
+    RefundStatusCompleted
+    RefundStatusCancelled
+)
+
+// RefundType defines the type of refund
+type RefundType int
+
+const (
+    RefundTypeFull RefundType = iota + 1
+    // RefundTypePartial reserved for Phase 2
+)
+
+// FulfillmentStatus defines the derived fulfillment state of an order
+// This enum is owned by the Fulfillment domain but stored on Order as a read model
+type FulfillmentStatus int
+
+const (
+    FulfillmentStatusPending FulfillmentStatus = iota
+    FulfillmentStatusPartialShipped
+    FulfillmentStatusShipped
+    FulfillmentStatusDelivered
+)
+```
+
 ---
 
 ## 6. Entities
@@ -384,8 +436,10 @@ type Shipment struct {
     Cost        shared.Money
     ShippedAt   *time.Time
     DeliveredAt *time.Time
+    DeliveredBy int64              // User who marked as delivered
     Remark      string
     Audit       shared.AuditInfo
+    Version     int                // For optimistic locking
     events      []shared.DomainEvent
 }
 
@@ -449,6 +503,7 @@ type Refund struct {
     ApprovedBy   int64
     CompletedAt  *time.Time
     Audit        shared.AuditInfo
+    Version      int                // For optimistic locking
     events       []shared.DomainEvent
 }
 
@@ -576,6 +631,7 @@ type RefundQuery struct {
 | `RefundProcessing` | Notify buyer "refund in progress" |
 | `RefundCompleted` | Update Order status to "refunded"; release inventory; notify buyer |
 | `RefundRejected` | Notify buyer with rejection reason; revert Order status |
+| `RefundCancelled` | Revert Order status to previous state |
 
 ---
 
@@ -589,25 +645,60 @@ func calculateFulfillmentStatus(shipments []*Shipment) FulfillmentStatus {
         return FulfillmentStatusPending
     }
 
-    allDelivered := true
-    allShipped := true
+    deliveredCount := 0
+    shippedCount := 0
+    failedCount := 0
+    cancelledCount := 0
+    pendingCount := 0
 
     for _, s := range shipments {
-        if s.Status != ShipmentStatusDelivered {
-            allDelivered = false
-        }
-        if s.Status == ShipmentStatusPending {
-            allShipped = false
+        switch s.Status {
+        case ShipmentStatusDelivered:
+            deliveredCount++
+        case ShipmentStatusInTransit, ShipmentStatusShipped:
+            shippedCount++
+        case ShipmentStatusFailed:
+            failedCount++
+        case ShipmentStatusCancelled:
+            cancelledCount++
+        case ShipmentStatusPending:
+            pendingCount++
         }
     }
 
-    if allDelivered {
+    // All delivered
+    if deliveredCount == len(shipments) {
         return FulfillmentStatusDelivered
     }
-    if allShipped {
+
+    // All cancelled - no active shipments, treat as pending
+    if cancelledCount == len(shipments) {
+        return FulfillmentStatusPending
+    }
+
+    // Count active shipments (non-cancelled)
+    activeCount := len(shipments) - cancelledCount
+
+    // If any delivered, consider partial/full shipped
+    if deliveredCount > 0 {
+        if deliveredCount == activeCount {
+            return FulfillmentStatusDelivered
+        }
+        return FulfillmentStatusPartialShipped
+    }
+
+    // Check if all active shipments are shipped
+    if pendingCount == 0 && shippedCount == activeCount {
         return FulfillmentStatusShipped
     }
-    return FulfillmentStatusPartialShipped
+
+    // Some pending, some shipped
+    if pendingCount > 0 && shippedCount > 0 {
+        return FulfillmentStatusPartialShipped
+    }
+
+    // All pending or mix of pending/cancelled
+    return FulfillmentStatusPending
 }
 ```
 
@@ -615,10 +706,19 @@ func calculateFulfillmentStatus(shipments []*Shipment) FulfillmentStatus {
 
 | Status | Meaning |
 |--------|---------|
-| `pending` | No shipments created |
-| `partial_shipped` | Some shipments shipped, some pending |
-| `shipped` | All shipments shipped (none delivered yet) |
-| `delivered` | All shipments delivered |
+| `pending` | No shipments created, or all shipments cancelled |
+| `partial_shipped` | Some shipments shipped/in_transit/delivered, some pending/cancelled |
+| `shipped` | All active shipments are shipped or in transit (none delivered yet) |
+| `delivered` | All active shipments delivered |
+
+**Edge Cases:**
+
+| Scenario | Result |
+|----------|--------|
+| All shipments cancelled | `pending` (reset to allow new shipments) |
+| Mix of delivered + failed | `partial_shipped` (some succeeded) |
+| Mix of delivered + cancelled | `partial_shipped` (delivered count > 0) |
+| Mix of shipped + failed | `shipped` (all active are shipped/in_transit) |
 
 ---
 
@@ -665,7 +765,9 @@ Example: `REF20260322001`
 | cost_currency | VARCHAR(10) | Currency code |
 | shipped_at | BIGINT | Shipment timestamp |
 | delivered_at | BIGINT | Delivery timestamp |
+| delivered_by | BIGINT | User who marked as delivered |
 | remark | VARCHAR(500) | Remarks |
+| version | INT | Version for optimistic locking |
 | created_at | BIGINT | Creation timestamp |
 | updated_at | BIGINT | Update timestamp |
 | created_by | BIGINT | Creator ID |
@@ -709,6 +811,7 @@ Example: `REF20260322001`
 | approved_at | BIGINT | Approval timestamp |
 | approved_by | BIGINT | Approver ID |
 | completed_at | BIGINT | Completion timestamp |
+| version | INT | Version for optimistic locking |
 | created_at | BIGINT | Creation timestamp |
 | updated_at | BIGINT | Update timestamp |
 | created_by | BIGINT | Creator ID |
