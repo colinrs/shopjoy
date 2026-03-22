@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/colinrs/shopjoy/admin/internal/domain/coupon"
+	pkgcoupon "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
@@ -16,7 +16,7 @@ type CreateCouponRequest struct {
 	Name         string
 	Code         string
 	Description  string
-	Type         coupon.Type
+	Type         pkgcoupon.CouponType
 	Value        int64
 	MinAmount    int64
 	MaxDiscount  int64
@@ -70,8 +70,8 @@ type CouponListResponse struct {
 // QueryCouponRequest 查询优惠券请求
 type QueryCouponRequest struct {
 	Name     string
-	Status   coupon.Status
-	Type     coupon.Type
+	Status   pkgcoupon.CouponStatus
+	Type     pkgcoupon.CouponType
 	Page     int
 	PageSize int
 }
@@ -130,21 +130,21 @@ type CouponApp interface {
 	DeleteCoupon(ctx context.Context, tenantID shared.TenantID, id int64) error
 	GenerateCouponCodes(ctx context.Context, tenantID shared.TenantID, req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error)
 	IssueCouponToUser(ctx context.Context, tenantID shared.TenantID, req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error)
-	ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status coupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error)
+	ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error)
 }
 
 type couponApp struct {
 	db               *gorm.DB
-	couponRepo       coupon.CouponRepository
-	userCouponRepo   coupon.UserCouponRepository
+	couponRepo       pkgcoupon.CouponRepository
+	userCouponRepo   pkgcoupon.UserCouponRepository
 	idGen            snowflake.Snowflake
 }
 
 // NewCouponApp 创建优惠券应用服务
 func NewCouponApp(
 	db *gorm.DB,
-	couponRepo coupon.CouponRepository,
-	userCouponRepo coupon.UserCouponRepository,
+	couponRepo pkgcoupon.CouponRepository,
+	userCouponRepo pkgcoupon.UserCouponRepository,
 	idGen snowflake.Snowflake,
 ) CouponApp {
 	return &couponApp{
@@ -161,7 +161,7 @@ func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, 
 		return nil, err
 	}
 
-	c := &coupon.Coupon{
+	c := &pkgcoupon.Coupon{
 		ID:           id,
 		TenantID:     tenantID,
 		Name:         req.Name,
@@ -174,7 +174,7 @@ func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, 
 		TotalCount:   req.TotalCount,
 		UsedCount:    0,
 		PerUserLimit: req.PerUserLimit,
-		Status:       coupon.StatusInactive,
+		Status:       pkgcoupon.CouponStatusInactive,
 		StartAt:      req.StartAt.UTC(),
 		EndAt:        req.EndAt.UTC(),
 		Audit:        shared.NewAuditInfo(0),
@@ -199,7 +199,7 @@ func (a *couponApp) UpdateCoupon(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Only allow update if coupon is not active
-	if c.Status == coupon.StatusActive {
+	if c.Status == pkgcoupon.CouponStatusActive {
 		return nil, ErrCouponIsActive
 	}
 
@@ -229,14 +229,18 @@ func (a *couponApp) GetCoupon(ctx context.Context, tenantID shared.TenantID, id 
 }
 
 func (a *couponApp) ListCoupons(ctx context.Context, tenantID shared.TenantID, req QueryCouponRequest) (*CouponListResponse, error) {
-	query := coupon.Query{
+	query := pkgcoupon.CouponQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name:   req.Name,
-		Status: req.Status,
-		Type:   req.Type,
+		Name: req.Name,
+	}
+	if req.Status != 0 {
+		query.Status = &req.Status
+	}
+	if req.Type != 0 {
+		query.Type = &req.Type
 	}
 	query.PageQuery.Validate()
 
@@ -266,13 +270,13 @@ func (a *couponApp) DeleteCoupon(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Only allow delete if coupon is not active
-	if c.Status == coupon.StatusActive {
+	if c.Status == pkgcoupon.CouponStatusActive {
 		return ErrCouponIsActive
 	}
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// Soft delete coupon
-		if err := a.couponRepo.Update(ctx, tx, c); err != nil {
+		if err := a.couponRepo.Delete(ctx, tx, tenantID, id); err != nil {
 			return err
 		}
 		return nil
@@ -324,12 +328,12 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 		userCouponID = id
 
 		// Create user coupon
-		userCoupon := &coupon.UserCoupon{
+		userCoupon := &pkgcoupon.UserCoupon{
 			ID:         id,
 			TenantID:   tenantID,
 			UserID:     req.UserID,
 			CouponID:   c.ID,
-			Status:     coupon.UserCouponStatusUnused,
+			Status:     pkgcoupon.UserCouponStatusUnused,
 			ReceivedAt: time.Now().UTC(),
 			ExpireAt:   c.EndAt,
 		}
@@ -359,8 +363,13 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 	}, nil
 }
 
-func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status coupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error) {
-	userCoupons, err := a.userCouponRepo.FindByUserID(ctx, a.db, tenantID, userID, status)
+func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error) {
+	var statusPtr *pkgcoupon.UserCouponStatus
+	if status != 0 {
+		statusPtr = &status
+	}
+
+	userCoupons, err := a.userCouponRepo.FindByUserID(ctx, a.db, tenantID, userID, statusPtr)
 	if err != nil {
 		return nil, err
 	}
@@ -416,7 +425,7 @@ func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantI
 }
 
 // toCouponResponse 转换为响应DTO
-func toCouponResponse(c *coupon.Coupon) *CouponResponse {
+func toCouponResponse(c *pkgcoupon.Coupon) *CouponResponse {
 	return &CouponResponse{
 		ID:           c.ID,
 		Name:         c.Name,

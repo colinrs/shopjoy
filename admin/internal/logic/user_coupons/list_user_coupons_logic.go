@@ -5,6 +5,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,38 @@ func NewListUserCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Li
 }
 
 func (l *ListUserCouponsLogic) ListUserCoupons(req *types.ListUserCouponsReq) (resp *types.ListUserCouponsResp, err error) {
-	// todo: add your logic here and delete this line
+	// Get tenantID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	return
+	// Platform admin can access all data
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	// Map status string to domain type
+	status := mapUserCouponStatus(req.Status)
+
+	listResp, err := l.svcCtx.CouponApp.ListUserCoupons(
+		l.ctx,
+		shared.TenantID(tenantID),
+		req.UserID,
+		status,
+		req.Page,
+		req.PageSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]*types.UserCouponDetailResp, len(listResp.List))
+	for i, uc := range listResp.List {
+		list[i] = convertUserCouponToDetailResp(uc)
+	}
+
+	return &types.ListUserCouponsResp{
+		List:     list,
+		Total:    listResp.Total,
+		Page:     listResp.Page,
+		PageSize: listResp.PageSize,
+	}, nil
 }

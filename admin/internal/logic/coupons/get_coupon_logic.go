@@ -5,6 +5,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,18 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetCoupo
 }
 
 func (l *GetCouponLogic) GetCoupon(req *types.GetCouponReq) (resp *types.CouponDetailResp, err error) {
-	// todo: add your logic here and delete this line
+	// Get tenantID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	return
+	// Platform admin can access all data
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	couponResp, err := l.svcCtx.CouponApp.GetCoupon(l.ctx, shared.TenantID(tenantID), req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertCouponToDetailResp(couponResp), nil
 }

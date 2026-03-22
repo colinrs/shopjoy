@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/colinrs/shopjoy/admin/internal/domain/promotion"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
@@ -14,7 +14,7 @@ import (
 type CreatePromotionRequest struct {
 	Name        string
 	Description string
-	Type        promotion.Type
+	Type        pkgpromotion.Type
 	StartAt     time.Time
 	EndAt       time.Time
 	Rules       []CreatePromotionRuleRequest
@@ -22,9 +22,9 @@ type CreatePromotionRequest struct {
 
 // CreatePromotionRuleRequest 创建促销规则请求
 type CreatePromotionRuleRequest struct {
-	ConditionType  promotion.ConditionType
+	ConditionType  pkgpromotion.ConditionType
 	ConditionValue int64
-	ActionType     promotion.ActionType
+	ActionType     pkgpromotion.ActionType
 	ActionValue    int64
 	MaxDiscount    int64
 }
@@ -40,16 +40,16 @@ type UpdatePromotionRequest struct {
 
 // PromotionResponse 促销响应
 type PromotionResponse struct {
-	ID          int64                   `json:"id"`
-	Name        string                  `json:"name"`
-	Description string                  `json:"description"`
-	Type        int                     `json:"type"`
-	Status      int                     `json:"status"`
-	StartAt     string                  `json:"start_at"`
-	EndAt       string                  `json:"end_at"`
+	ID          int64                    `json:"id"`
+	Name        string                   `json:"name"`
+	Description string                   `json:"description"`
+	Type        int                      `json:"type"`
+	Status      int                      `json:"status"`
+	StartAt     string                   `json:"start_at"`
+	EndAt       string                   `json:"end_at"`
 	Rules       []*PromotionRuleResponse `json:"rules"`
-	CreatedAt   string                  `json:"created_at"`
-	UpdatedAt   string                  `json:"updated_at"`
+	CreatedAt   string                   `json:"created_at"`
+	UpdatedAt   string                   `json:"updated_at"`
 }
 
 // PromotionRuleResponse 促销规则响应
@@ -74,8 +74,8 @@ type PromotionListResponse struct {
 // QueryPromotionRequest 查询促销请求
 type QueryPromotionRequest struct {
 	Name     string
-	Status   promotion.Status
-	Type     promotion.Type
+	Status   pkgpromotion.Status
+	Type     pkgpromotion.Type
 	Page     int
 	PageSize int
 }
@@ -92,13 +92,13 @@ type PromotionApp interface {
 }
 
 type promotionApp struct {
-	db             *gorm.DB
-	promotionRepo  promotion.Repository
-	idGen          snowflake.Snowflake
+	db            *gorm.DB
+	promotionRepo pkgpromotion.Repository
+	idGen         snowflake.Snowflake
 }
 
 // NewPromotionApp 创建促销应用服务
-func NewPromotionApp(db *gorm.DB, promotionRepo promotion.Repository, idGen snowflake.Snowflake) PromotionApp {
+func NewPromotionApp(db *gorm.DB, promotionRepo pkgpromotion.Repository, idGen snowflake.Snowflake) PromotionApp {
 	return &promotionApp{
 		db:            db,
 		promotionRepo: promotionRepo,
@@ -107,7 +107,7 @@ func NewPromotionApp(db *gorm.DB, promotionRepo promotion.Repository, idGen snow
 }
 
 func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.TenantID, req CreatePromotionRequest) (*PromotionResponse, error) {
-	var result *promotion.Promotion
+	var result *pkgpromotion.Promotion
 
 	err := a.db.Transaction(func(tx *gorm.DB) error {
 		id, err := a.idGen.NextID(ctx)
@@ -115,17 +115,17 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.Tena
 			return err
 		}
 
-		p := &promotion.Promotion{
+		p := &pkgpromotion.Promotion{
 			ID:          id,
 			TenantID:    tenantID,
 			Name:        req.Name,
 			Description: req.Description,
 			Type:        req.Type,
-			Status:      promotion.StatusPending,
+			Status:      pkgpromotion.StatusPending,
 			StartAt:     req.StartAt.UTC(),
 			EndAt:       req.EndAt.UTC(),
 			Audit:       shared.NewAuditInfo(0),
-			Rules:       make([]promotion.PromotionRule, 0, len(req.Rules)),
+			Rules:       make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
 		}
 
 		// Create rules
@@ -135,14 +135,14 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.Tena
 				return err
 			}
 
-			rule := promotion.PromotionRule{
+			rule := pkgpromotion.PromotionRule{
 				ID:             ruleID,
 				PromotionID:    id,
 				ConditionType:  ruleReq.ConditionType,
 				ConditionValue: ruleReq.ConditionValue,
 				ActionType:     ruleReq.ActionType,
 				ActionValue:    ruleReq.ActionValue,
-				MaxDiscount:    shared.NewMoney(ruleReq.MaxDiscount, "CNY"),
+				MaxDiscount:    ruleReq.MaxDiscount,
 			}
 			p.Rules = append(p.Rules, rule)
 		}
@@ -169,7 +169,7 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, tenantID shared.Tena
 	}
 
 	// Only allow update if promotion is not active
-	if p.Status == promotion.StatusActive {
+	if p.Status == pkgpromotion.StatusActive {
 		return nil, ErrPromotionIsActive
 	}
 
@@ -195,14 +195,18 @@ func (a *promotionApp) GetPromotion(ctx context.Context, tenantID shared.TenantI
 }
 
 func (a *promotionApp) ListPromotions(ctx context.Context, tenantID shared.TenantID, req QueryPromotionRequest) (*PromotionListResponse, error) {
-	query := promotion.Query{
+	query := pkgpromotion.Query{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name:   req.Name,
-		Status: req.Status,
-		Type:   req.Type,
+		Name: req.Name,
+	}
+	if req.Status != 0 {
+		query.Status = &req.Status
+	}
+	if req.Type != 0 {
+		query.Type = &req.Type
 	}
 	query.PageQuery.Validate()
 
@@ -232,13 +236,13 @@ func (a *promotionApp) DeletePromotion(ctx context.Context, tenantID shared.Tena
 	}
 
 	// Only allow delete if promotion is not active
-	if p.Status == promotion.StatusActive {
+	if p.Status == pkgpromotion.StatusActive {
 		return ErrPromotionIsActive
 	}
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// Delete promotion (soft delete)
-		if err := a.promotionRepo.Update(ctx, tx, p); err != nil {
+		if err := a.promotionRepo.Delete(ctx, tx, tenantID, id); err != nil {
 			return err
 		}
 		return nil
@@ -258,7 +262,7 @@ func (a *promotionApp) ActivatePromotion(ctx context.Context, tenantID shared.Te
 	}
 
 	// Update status
-	p.Status = promotion.StatusActive
+	p.Status = pkgpromotion.StatusActive
 	p.Audit.Update(0)
 
 	return a.promotionRepo.Update(ctx, a.db, p)
@@ -271,14 +275,14 @@ func (a *promotionApp) DeactivatePromotion(ctx context.Context, tenantID shared.
 	}
 
 	// Update status
-	p.Status = promotion.StatusPaused
+	p.Status = pkgpromotion.StatusPaused
 	p.Audit.Update(0)
 
 	return a.promotionRepo.Update(ctx, a.db, p)
 }
 
 // toPromotionResponse 转换为响应DTO
-func toPromotionResponse(p *promotion.Promotion) *PromotionResponse {
+func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 	rules := make([]*PromotionRuleResponse, 0, len(p.Rules))
 	for _, r := range p.Rules {
 		rules = append(rules, &PromotionRuleResponse{
@@ -288,7 +292,7 @@ func toPromotionResponse(p *promotion.Promotion) *PromotionResponse {
 			ConditionValue: r.ConditionValue,
 			ActionType:     int(r.ActionType),
 			ActionValue:    r.ActionValue,
-			MaxDiscount:    r.MaxDiscount.Amount,
+			MaxDiscount:    r.MaxDiscount,
 		})
 	}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
+	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
@@ -14,6 +15,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/auth"
 	"github.com/colinrs/shopjoy/pkg/infra"
 	"github.com/colinrs/shopjoy/pkg/sku"
@@ -29,6 +31,8 @@ type ServiceContext struct {
 	ProductService         appProduct.Service
 	UserService            appUser.Service
 	AdminUserService       appAdminUser.Service
+	PromotionApp           apppromotion.PromotionApp
+	CouponApp              apppromotion.CouponApp
 	JWTManager             *auth.JWTManager
 	AuthMiddleware         rest.Middleware
 	ProductRepo            product.Repository
@@ -45,6 +49,9 @@ type ServiceContext struct {
 	ProductLocalizationRepo   product.ProductLocalizationRepository
 	SKUGenerator              sku.Generator
 	IDGen                     snowflake.Snowflake
+	PromotionRepo             pkgpromotion.Repository
+	CouponRepo                pkgpromotion.CouponRepository
+	UserCouponRepo            pkgpromotion.UserCouponRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -82,12 +89,23 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	productLocalizationRepo := persistence.NewProductLocalizationRepository()
 	skuGenerator := sku.NewGenerator(sku.DefaultConfig())
 
+	// Promotion and Coupon repositories
+	promotionRepo := persistence.NewPromotionRepository()
+	couponRepo := persistence.NewCouponRepository()
+	userCouponRepo := persistence.NewUserCouponRepository()
+
+	// Promotion and Coupon application services
+	promotionApp := apppromotion.NewPromotionApp(db, promotionRepo, idGen)
+	couponApp := apppromotion.NewCouponApp(db, couponRepo, userCouponRepo, idGen)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
 		ProductService:         productService,
 		UserService:            userService,
 		AdminUserService:       adminUserService,
+		PromotionApp:           promotionApp,
+		CouponApp:              couponApp,
 		JWTManager:             jwtManager,
 		AuthMiddleware:         authMiddleware,
 		ProductRepo:            productRepo,
@@ -104,5 +122,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ProductLocalizationRepo: productLocalizationRepo,
 		SKUGenerator:           skuGenerator,
 		IDGen:                  idGen,
+		PromotionRepo:          promotionRepo,
+		CouponRepo:             couponRepo,
+		UserCouponRepo:         userCouponRepo,
 	}
 }
