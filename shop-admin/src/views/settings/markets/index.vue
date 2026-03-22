@@ -474,6 +474,8 @@ onMounted(() => {
 /* Header Card */
 .header-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .header-bar {
@@ -490,7 +492,7 @@ onMounted(() => {
   margin: 0 0 8px 0;
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
 }
 
 .page-desc {
@@ -507,6 +509,13 @@ onMounted(() => {
 /* Table Card */
 .table-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 /* Market Cell */
@@ -527,8 +536,8 @@ onMounted(() => {
 }
 
 .market-name {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
   font-size: 14px;
 }
@@ -551,8 +560,9 @@ onMounted(() => {
 
 .tax-config span {
   padding: 2px 8px;
-  background: #F3F4F6;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 6px;
+  color: #6366F1;
 }
 
 /* Form Hint */
@@ -562,12 +572,56 @@ onMounted(() => {
   color: #9CA3AF;
 }
 
+/* Tags */
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+:deep(.el-tag--primary) {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #6366F1;
+}
+
+/* Switch */
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #10B981;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
 /* Pagination */
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
 }
 

@@ -419,8 +419,18 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.user-tabs :deep(.el-tabs__item.is-active) {
+  color: #6366F1;
+}
+
+.user-tabs :deep(.el-tabs__active-bar) {
+  background-color: #6366F1;
+}
+
 .filter-card {
   margin-bottom: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .filter-bar {
@@ -441,8 +451,16 @@ onMounted(() => {
   width: 260px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 .filter-select {
   width: 140px;
+}
+
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
 .filter-right {
@@ -452,6 +470,13 @@ onMounted(() => {
 
 .table-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 .user-cell {
@@ -461,7 +486,7 @@ onMounted(() => {
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
   font-weight: 600;
   flex-shrink: 0;
@@ -473,8 +498,8 @@ onMounted(() => {
 }
 
 .user-name {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
 }
 
@@ -495,8 +520,9 @@ onMounted(() => {
 
 .total-spent {
   font-size: 16px;
-  font-weight: 600;
-  color: #EF4444;
+  font-weight: 700;
+  color: #10B981;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 .time-text {
@@ -505,11 +531,61 @@ onMounted(() => {
   font-family: 'Fira Code', monospace;
 }
 
+/* Tags */
+:deep(.el-tag--danger) {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+}
+
+:deep(.el-tag--warning) {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+/* Switch */
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #10B981;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+/* Descriptions */
+:deep(.el-descriptions) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
 }
 

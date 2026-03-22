@@ -563,6 +563,13 @@ onMounted(() => {
 
 .alert-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.alert-card :deep(.el-card__header) {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border-bottom: none;
 }
 
 .card-header {
@@ -572,24 +579,40 @@ onMounted(() => {
 }
 
 .card-header .el-icon {
-  color: #f59e0b;
+  color: #F59E0B;
 }
 
 .main-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .filter-bar {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-bar :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
+.filter-bar :deep(.el-select .el-input__wrapper) {
+  border-radius: 12px;
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
 }
 
@@ -597,17 +620,83 @@ onMounted(() => {
   max-width: 600px;
 }
 
+.adjust-form :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 .form-tip {
   margin-left: 12px;
-  color: #909399;
+  color: #6B7280;
   font-size: 12px;
 }
 
 .text-success {
   color: #10B981;
+  font-weight: 600;
 }
 
 .text-danger {
   color: #EF4444;
+  font-weight: 600;
+}
+
+/* Tags */
+:deep(.el-tag--danger) {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+}
+
+:deep(.el-tag--warning) {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+/* Switch */
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #10B981;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+/* Tabs */
+:deep(.el-tabs__item.is-active) {
+  color: #6366F1;
+  font-weight: 600;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #6366F1;
 }
 </style>

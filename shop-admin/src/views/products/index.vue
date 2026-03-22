@@ -69,7 +69,12 @@
 
     <!-- Products Table -->
     <el-card class="table-card" shadow="never">
+      <!-- Skeleton loading -->
+      <TableSkeleton v-if="loading && productList.length === 0" :rows="10" :columns="7" />
+
+      <!-- Actual table -->
       <el-table
+        v-else
         :data="productList"
         v-loading="loading"
         @selection-change="handleSelectionChange"
@@ -300,6 +305,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
 import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
+import { TableSkeleton } from '@/components/skeleton'
 
 const router = useRouter()
 
@@ -678,6 +684,8 @@ onMounted(() => {
 /* Market Filter Bar */
 .market-filter-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .market-filter-bar {
@@ -685,9 +693,25 @@ onMounted(() => {
   justify-content: flex-start;
 }
 
+.market-filter-bar :deep(.el-radio-button__inner) {
+  border-radius: 10px !important;
+  border: 1px solid #E5E7EB;
+  padding: 8px 18px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.market-filter-bar :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+  border-color: #6366F1;
+  box-shadow: 0 4px 10px -2px rgba(99, 102, 241, 0.3);
+}
+
 /* Filter Bar */
 .filter-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .filter-bar {
@@ -708,8 +732,22 @@ onMounted(() => {
   width: 280px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.search-input :deep(.el-input__wrapper:focus-within) {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
 .filter-select {
   width: 140px;
+}
+
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
 .filter-right {
@@ -722,21 +760,29 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: #ECFDF5;
-  border-radius: 8px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 12px;
   margin-bottom: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 .selected-count {
   font-size: 14px;
-  color: #059669;
-  font-weight: 500;
+  color: #6366F1;
+  font-weight: 600;
 }
 
 /* Table Card */
 .table-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 /* Product Cell */
@@ -749,10 +795,15 @@ onMounted(() => {
 .product-thumb {
   width: 80px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
   border: 1px solid #E5E7EB;
+  transition: transform 0.2s ease;
+}
+
+.product-thumb:hover {
+  transform: scale(1.05);
 }
 
 .image-placeholder {
@@ -761,8 +812,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #9CA3AF;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
+  color: #6366F1;
 }
 
 .product-details {
@@ -771,8 +822,8 @@ onMounted(() => {
 }
 
 .product-name {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
   font-size: 14px;
   line-height: 1.4;
@@ -797,9 +848,10 @@ onMounted(() => {
 
 .sale-price {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #EF4444;
   margin: 0;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 .original-price {
@@ -819,6 +871,7 @@ onMounted(() => {
 
 .market-tag {
   font-size: 11px;
+  border-radius: 6px;
 }
 
 .no-markets {
@@ -838,29 +891,55 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
+}
+
+/* Dialog Styling */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
 }
 
 /* Upload */
 .avatar-uploader {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
+  border: 2px dashed #E5E7EB;
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
+  transition: all 0.2s ease;
   width: 178px;
   height: 178px;
+  background: #F9FAFB;
 }
 
 .avatar-uploader:hover {
-  border-color: var(--el-color-primary);
+  border-color: #6366F1;
+  background: #F5F3FF;
 }
 
 .avatar-uploader-icon {
   font-size: 28px;
-  color: #8c939d;
+  color: #9CA3AF;
   width: 178px;
   height: 178px;
   text-align: center;
@@ -873,6 +952,31 @@ onMounted(() => {
   width: 178px;
   height: 178px;
   display: block;
+  object-fit: cover;
+}
+
+/* Switch */
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #10B981;
+}
+
+/* Tags */
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--warning) {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+:deep(.el-tag--danger) {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
 }
 
 /* Responsive */
@@ -881,24 +985,30 @@ onMounted(() => {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-left {
     flex-direction: column;
   }
-  
+
   .search-input,
   .filter-select {
     width: 100%;
   }
-  
+
   .product-cell {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .product-thumb {
     width: 60px;
     height: 60px;
+  }
+
+  .market-filter-card,
+  .filter-card,
+  .table-card {
+    border-radius: 14px;
   }
 }
 </style>

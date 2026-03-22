@@ -426,17 +426,27 @@ onMounted(() => {
 
 .stat-item {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.12);
 }
 
 .stat-number {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #059669;
-  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 6px 0;
   font-family: 'Fira Sans', sans-serif;
 }
 
@@ -449,6 +459,8 @@ onMounted(() => {
 /* Filter Bar */
 .filter-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .filter-bar {
@@ -469,12 +481,25 @@ onMounted(() => {
   width: 220px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
 .filter-select {
   width: 140px;
 }
 
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 .date-picker {
   width: 260px;
+}
+
+.date-picker :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
 .filter-right {
@@ -485,19 +510,26 @@ onMounted(() => {
 /* Table */
 .table-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 /* Order Detail Expand */
 .order-detail {
   padding: 20px;
-  background: #F9FAFB;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
+  border-radius: 12px;
 }
 
 .order-detail h4 {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0 0 12px 0;
 }
 
@@ -511,7 +543,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
 }
 
 .order-item:last-child {
@@ -521,7 +553,7 @@ onMounted(() => {
 .item-image {
   width: 60px;
   height: 60px;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -532,8 +564,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #E5E7EB;
-  color: #9CA3AF;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
+  color: #6366F1;
 }
 
 .item-info {
@@ -542,7 +574,7 @@ onMounted(() => {
 
 .item-name {
   font-weight: 500;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
 }
 
@@ -562,7 +594,7 @@ onMounted(() => {
 .order-no {
   font-family: 'Fira Code', monospace;
   font-size: 13px;
-  color: #059669;
+  color: #6366F1;
   font-weight: 500;
 }
 
@@ -576,9 +608,14 @@ onMounted(() => {
 .goods-thumb {
   width: 50px;
   height: 50px;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid #E5E7EB;
+  transition: transform 0.2s ease;
+}
+
+.goods-thumb:hover {
+  transform: scale(1.05);
 }
 
 .thumb-placeholder {
@@ -587,8 +624,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #9CA3AF;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
+  color: #6366F1;
 }
 
 .more-goods {
@@ -597,11 +634,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 10px;
   font-size: 12px;
-  color: #6B7280;
-  font-weight: 500;
+  color: #6366F1;
+  font-weight: 600;
 }
 
 /* Buyer Info */
@@ -611,7 +648,7 @@ onMounted(() => {
 
 .buyer-name {
   font-weight: 500;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0;
 }
 
@@ -619,6 +656,7 @@ onMounted(() => {
   font-size: 12px;
   color: #6B7280;
   margin: 4px 0 0 0;
+  font-family: 'Fira Code', monospace;
 }
 
 /* Amount Cell */
@@ -628,9 +666,10 @@ onMounted(() => {
 
 .total-amount {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #EF4444;
   margin: 0;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 .item-count {
@@ -651,8 +690,59 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
+}
+
+/* Tags */
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--warning) {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+:deep(.el-tag--danger) {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+:deep(.el-tag--primary) {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #6366F1;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
 }
 
 /* Responsive */
@@ -661,19 +751,33 @@ onMounted(() => {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-left {
     flex-direction: column;
   }
-  
+
   .search-input,
   .filter-select,
   .date-picker {
     width: 100%;
   }
-  
+
   .goods-preview {
     flex-wrap: wrap;
+  }
+
+  .stat-item {
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .filter-card,
+  .table-card {
+    border-radius: 14px;
   }
 }
 </style>

@@ -271,7 +271,7 @@ const getOrderStatusText = (status: number) => {
 
 const initSalesChart = () => {
   if (!salesChart.value) return
-  
+
   salesChartInstance = echarts.init(salesChart.value)
   const option = {
     tooltip: {
@@ -306,11 +306,11 @@ const initSalesChart = () => {
         symbol: 'circle',
         symbolSize: 8,
         sampling: 'average',
-        itemStyle: { color: '#059669' },
+        itemStyle: { color: '#6366F1' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(5, 150, 105, 0.3)' },
-            { offset: 1, color: 'rgba(5, 150, 105, 0.01)' }
+            { offset: 0, color: 'rgba(99, 102, 241, 0.25)' },
+            { offset: 1, color: 'rgba(99, 102, 241, 0.01)' }
           ])
         },
         data: [8200, 9320, 9010, 14340, 12900, 15300, 15860]
@@ -322,7 +322,7 @@ const initSalesChart = () => {
 
 const initOrderChart = () => {
   if (!orderChart.value) return
-  
+
   orderChartInstance = echarts.init(orderChart.value)
   const option = {
     tooltip: {
@@ -356,9 +356,9 @@ const initOrderChart = () => {
         },
         labelLine: { show: false },
         data: [
-          { value: 1048, name: '已完成', itemStyle: { color: '#059669' } },
+          { value: 1048, name: '已完成', itemStyle: { color: '#10B981' } },
           { value: 735, name: '待发货', itemStyle: { color: '#F59E0B' } },
-          { value: 580, name: '已发货', itemStyle: { color: '#3B82F6' } },
+          { value: 580, name: '已发货', itemStyle: { color: '#6366F1' } },
           { value: 234, name: '待支付', itemStyle: { color: '#6B7280' } },
           { value: 148, name: '已取消', itemStyle: { color: '#EF4444' } }
         ]
@@ -398,48 +398,54 @@ onUnmounted(() => {
 
 .stat-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.15);
 }
 
 .stat-icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .stat-card.orders .stat-icon {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
+  box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.3);
 }
 
 .stat-card.revenue .stat-icon {
   background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
   color: white;
+  box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.3);
 }
 
 .stat-card.products .stat-icon {
   background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
   color: white;
+  box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.3);
 }
 
 .stat-card.users .stat-icon {
   background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
   color: white;
+  box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.3);
 }
 
 .stat-info {
@@ -450,14 +456,16 @@ onUnmounted(() => {
   font-size: 14px;
   color: #6B7280;
   margin: 0 0 4px 0;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 4px 0;
+  color: #1E1B4B;
+  margin: 0 0 6px 0;
   font-family: 'Fira Sans', sans-serif;
+  letter-spacing: -0.5px;
 }
 
 .stat-change {
@@ -469,7 +477,7 @@ onUnmounted(() => {
 }
 
 .stat-change.positive {
-  color: #059669;
+  color: #10B981;
 }
 
 .stat-change.negative {
@@ -487,6 +495,13 @@ onUnmounted(() => {
 
 .chart-card {
   height: 400px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+.chart-card :deep(.el-card__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
 }
 
 .chart-container {
@@ -505,6 +520,13 @@ onUnmounted(() => {
 
 .table-card {
   height: 380px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+.table-card :deep(.el-card__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
 }
 
 /* Card Header */
@@ -517,40 +539,47 @@ onUnmounted(() => {
 .card-title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.card-title .el-icon {
+  color: var(--color-primary);
 }
 
 /* Table Styles */
 .order-no {
   font-family: 'Fira Code', monospace;
   font-size: 13px;
-  color: #059669;
+  color: #6366F1;
+  font-weight: 500;
 }
 
 .amount {
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
 }
 
 .rank {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
-  background: #F3F4F6;
+  border-radius: 8px;
+  background: #F5F3FF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   color: #6B7280;
   margin: 0 auto;
+  font-size: 13px;
 }
 
 .rank.top3 {
   background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
   color: white;
+  box-shadow: 0 4px 8px -2px rgba(245, 158, 11, 0.3);
 }
 
 .product-name {
@@ -560,31 +589,75 @@ onUnmounted(() => {
 }
 
 .product-avatar {
-  background: #F3F4F6;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 8px;
+}
+
+.product-avatar .el-icon {
+  color: #6366F1;
 }
 
 .sales-num {
   font-weight: 600;
-  color: #059669;
+  color: #10B981;
+  font-family: 'Fira Code', monospace;
 }
 
 /* Timeline */
 :deep(.el-timeline-item__node) {
-  background-color: #059669;
+  background-color: #6366F1;
 }
 
 :deep(.el-timeline-item__tail) {
   border-left-color: #E5E7EB;
 }
 
+:deep(.el-timeline-item__timestamp) {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+}
+
+/* Radio Button Group */
+:deep(.el-radio-button__inner) {
+  border-radius: 8px !important;
+  border: 1px solid #E5E7EB;
+  padding: 6px 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+  border-color: #6366F1;
+  box-shadow: 0 4px 8px -2px rgba(99, 102, 241, 0.3);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .stat-card {
     margin-bottom: 16px;
+    border-radius: 14px;
   }
-  
+
   .stat-value {
     font-size: 24px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    border-radius: 12px;
+  }
+
+  .chart-card,
+  .table-card {
+    border-radius: 14px;
   }
 }
 </style>

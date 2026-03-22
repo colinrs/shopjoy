@@ -148,7 +148,7 @@ const handleLogin = async () => {
 .login-container {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #059669 0%, #10B981 50%, #059669 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 50%, #6366F1 100%);
 }
 
 .login-wrapper {
@@ -157,16 +157,16 @@ const handleLogin = async () => {
   max-width: 1200px;
   margin: auto;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.35);
   min-height: 600px;
 }
 
 /* Left Side - Branding */
 .login-branding {
   flex: 1;
-  background: linear-gradient(135deg, #059669 0%, #064E3B 100%);
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%);
   padding: 60px;
   display: flex;
   flex-direction: column;
@@ -190,6 +190,7 @@ const handleLogin = async () => {
   font-weight: 700;
   margin: 0;
   font-family: 'Fira Sans', sans-serif;
+  letter-spacing: -0.5px;
 }
 
 .tagline {
@@ -215,7 +216,7 @@ const handleLogin = async () => {
 .feature-item .el-icon {
   background: rgba(255, 255, 255, 0.2);
   padding: 8px;
-  border-radius: 50%;
+  border-radius: 10px;
 }
 
 .branding-footer {
@@ -230,7 +231,7 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   padding: 60px;
-  background: #fafafa;
+  background: #F5F3FF;
 }
 
 .form-container {
@@ -241,7 +242,7 @@ const handleLogin = async () => {
 .form-title {
   font-size: 32px;
   font-weight: 700;
-  color: #064E3B;
+  color: #1E1B4B;
   margin: 0 0 8px 0;
   font-family: 'Fira Sans', sans-serif;
 }
@@ -253,8 +254,13 @@ const handleLogin = async () => {
 }
 
 .login-form :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.login-form :deep(.el-input__wrapper:focus-within) {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .login-form :deep(.el-input__inner) {
@@ -274,18 +280,18 @@ const handleLogin = async () => {
 }
 
 .forgot-link {
-  color: #059669;
+  color: #6366F1;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
 }
 
 .forgot-link:hover {
-  color: #047857;
+  color: #4338CA;
 }
 
 .terms-link {
-  color: #059669;
+  color: #6366F1;
   text-decoration: none;
 }
 
@@ -298,15 +304,19 @@ const handleLogin = async () => {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   border: none;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px -10px rgba(5, 150, 105, 0.5);
+  box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.5);
+}
+
+.login-btn:active {
+  transform: translateY(0);
 }
 
 /* Responsive */
@@ -315,24 +325,25 @@ const handleLogin = async () => {
     padding: 20px;
     background: #fff;
   }
-  
+
   .login-wrapper {
     flex-direction: column;
     border-radius: 0;
     box-shadow: none;
   }
-  
+
   .login-branding {
     padding: 40px 30px;
     min-height: auto;
   }
-  
+
   .features {
     display: none;
   }
-  
+
   .login-form-section {
     padding: 40px 30px;
+    background: #fff;
   }
 }
 </style>

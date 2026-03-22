@@ -381,6 +381,8 @@ onMounted(() => {
 
 .filter-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .filter-bar {
@@ -401,8 +403,16 @@ onMounted(() => {
   width: 280px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 .filter-select {
   width: 140px;
+}
+
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
 .filter-right {
@@ -412,6 +422,13 @@ onMounted(() => {
 
 .table-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Table row hover */
+:deep(.el-table__row:hover > td) {
+  background-color: #F5F3FF !important;
 }
 
 .brand-cell {
@@ -424,18 +441,23 @@ onMounted(() => {
 .brand-logo-placeholder {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
   border: 1px solid #E5E7EB;
+  transition: transform 0.2s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
 }
 
 .brand-logo-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #9CA3AF;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  color: #6366F1;
 }
 
 .image-placeholder {
@@ -444,8 +466,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #9CA3AF;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  color: #6366F1;
 }
 
 .brand-details {
@@ -454,8 +476,8 @@ onMounted(() => {
 }
 
 .brand-name {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
   font-size: 14px;
 }
@@ -464,13 +486,58 @@ onMounted(() => {
   font-size: 12px;
   color: #6B7280;
   margin: 0;
+  font-family: 'Fira Code', monospace;
 }
 
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
   margin-top: 20px;
+}
+
+/* Tags */
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+/* Switch */
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #10B981;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    width: 100%;
+  }
 }
 </style>

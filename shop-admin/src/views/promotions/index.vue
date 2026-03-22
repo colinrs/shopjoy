@@ -498,12 +498,19 @@ const handleCreateFlashSale = () => {
 
 .stat-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.12);
 }
 
 .stat-icon {
@@ -518,7 +525,7 @@ const handleCreateFlashSale = () => {
 }
 
 .stat-icon.active {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
 }
 
@@ -539,7 +546,7 @@ const handleCreateFlashSale = () => {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
   font-family: 'Fira Sans', sans-serif;
 }
@@ -553,6 +560,18 @@ const handleCreateFlashSale = () => {
 /* Tabs Card */
 .tabs-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Tabs */
+:deep(.el-tabs__item.is-active) {
+  color: #6366F1;
+  font-weight: 600;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #6366F1;
 }
 
 .tab-header {
@@ -574,8 +593,16 @@ const handleCreateFlashSale = () => {
   width: 220px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 .filter-select {
   width: 140px;
+}
+
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
 /* Coupon Cell */
@@ -588,16 +615,16 @@ const handleCreateFlashSale = () => {
 .coupon-icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #6B7280;
+  background: #F5F3FF;
+  color: #6366F1;
 }
 
 .coupon-icon.fixed {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
 }
 
@@ -612,8 +639,8 @@ const handleCreateFlashSale = () => {
 }
 
 .coupon-name {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
 }
 
@@ -674,11 +701,14 @@ const handleCreateFlashSale = () => {
 }
 
 .promotion-card {
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .promotion-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.15);
 }
 
 .promo-header {
@@ -695,12 +725,12 @@ const handleCreateFlashSale = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
-  color: #6B7280;
+  background: #F5F3FF;
+  color: #6366F1;
 }
 
 .promo-icon.seasonal {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
 }
 
@@ -712,7 +742,7 @@ const handleCreateFlashSale = () => {
 .promo-name {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0 0 8px 0;
 }
 
@@ -741,7 +771,51 @@ const handleCreateFlashSale = () => {
   display: flex;
   gap: 16px;
   padding-top: 16px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #F3F4F6;
+}
+
+/* Tags */
+:deep(.el-tag--success) {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+:deep(.el-tag--warning) {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+:deep(.el-tag--info) {
+  background-color: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #6B7280;
+}
+
+/* Dialog */
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #1E1B4B;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #F3F4F6;
+  padding: 16px 20px;
+}
+
+/* Progress */
+:deep(.el-progress-bar__inner) {
+  background: linear-gradient(90deg, #6366F1 0%, #818CF8 100%);
 }
 
 /* Responsive */

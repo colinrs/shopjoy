@@ -148,6 +148,15 @@
           </div>
           
           <!-- Quick Actions -->
+          <el-tooltip :content="isDarkMode ? '切换到浅色模式' : '切换到深色模式'" placement="bottom">
+            <el-button text @click="toggleTheme" class="theme-toggle-btn">
+              <el-icon size="18">
+                <Sunny v-if="isDarkMode" />
+                <Moon v-else />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
+
           <el-tooltip content="全屏" placement="bottom">
             <el-button text :icon="FullScreen" @click="toggleFullscreen" />
           </el-tooltip>
@@ -223,7 +232,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
@@ -231,7 +240,7 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 import {
   ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
   TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
-  Setting, SwitchButton, Box, CreditCard, Van, Picture
+  Setting, SwitchButton, Box, CreditCard, Van, Picture, Moon, Sunny
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -242,6 +251,7 @@ const searchQuery = ref('')
 const notificationVisible = ref(false)
 const hasNewData = ref(true)
 const pendingOrders = ref(5)
+const isDarkMode = ref(false)
 
 const notifications = ref([
   {
@@ -290,6 +300,25 @@ const toggleFullscreen = () => {
   }
 }
 
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    document.documentElement.removeAttribute('data-theme')
+    localStorage.setItem('theme', 'light')
+  }
+}
+
+const initTheme = () => {
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme === 'dark') {
+    isDarkMode.value = true
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }
+}
+
 const showNotifications = () => {
   notificationVisible.value = true
 }
@@ -307,6 +336,10 @@ const logout = () => {
   router.push('/login')
   ElMessage.success('退出登录成功')
 }
+
+onMounted(() => {
+  initTheme()
+})
 </script>
 
 <style scoped>
@@ -317,15 +350,15 @@ const logout = () => {
 
 /* Sidebar */
 .sidebar {
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(180deg, #1E1B4B 0%, #312E81 100%);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo-section {
   padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .logo {
@@ -338,7 +371,8 @@ const logout = () => {
   color: #fff;
   font-size: 20px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 .version {
@@ -346,6 +380,7 @@ const logout = () => {
   font-size: 11px;
   margin-top: 4px;
   margin-left: 40px;
+  font-family: 'Fira Code', monospace;
 }
 
 .sidebar-menu {
@@ -359,18 +394,24 @@ const logout = () => {
   color: rgba(255, 255, 255, 0.7);
   height: 50px;
   line-height: 50px;
+  margin: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover),
 .sidebar-menu :deep(.el-sub-menu__title:hover) {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, #059669 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.8) 0%, rgba(99, 102, 241, 0.2) 100%);
   color: #fff;
-  border-left: 3px solid #10B981;
+  border-left: 3px solid #A5B4FC;
+  border-radius: 0 8px 8px 0;
+  margin-left: 0;
+  padding-left: 17px;
 }
 
 .sidebar-menu :deep(.el-icon) {
@@ -395,9 +436,9 @@ const logout = () => {
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item.is-active) {
-  background: linear-gradient(90deg, #059669 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.6) 0%, transparent 100%);
   color: #fff;
-  border-left: 3px solid #10B981;
+  border-left: 3px solid #A5B4FC;
 }
 
 .menu-badge {
@@ -407,13 +448,13 @@ const logout = () => {
 /* Sidebar Footer */
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .storage-info {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 14px;
 }
 
 .storage-header {
@@ -434,12 +475,18 @@ const logout = () => {
 /* Header */
 .header {
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   height: 64px;
+}
+
+/* Dark mode header */
+[data-theme="dark"] .header {
+  background: var(--color-bg-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .header-left {
@@ -450,6 +497,24 @@ const logout = () => {
 
 .collapse-btn {
   font-size: 18px;
+  color: var(--color-text-secondary);
+  transition: color 0.2s;
+}
+
+.collapse-btn:hover {
+  color: var(--color-primary);
+}
+
+.theme-toggle-btn {
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  color: var(--color-warning);
 }
 
 .header-right {
@@ -463,16 +528,23 @@ const logout = () => {
 }
 
 .search-input {
-  width: 240px;
+  width: 260px;
 }
 
 .search-input :deep(.el-input__wrapper) {
-  border-radius: 20px;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.search-input :deep(.el-input__wrapper:focus-within) {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .notification-badge :deep(.el-badge__content) {
   top: 8px;
   right: 8px;
+  background-color: var(--color-primary);
 }
 
 /* User Dropdown */
@@ -485,17 +557,21 @@ const logout = () => {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-  transition: background 0.2s;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
 }
 
 .user-info:hover {
-  background: #F3F4F6;
+  background: #F5F3FF;
+}
+
+[data-theme="dark"] .user-info:hover {
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
   color: white;
   font-weight: 600;
 }
@@ -503,13 +579,17 @@ const logout = () => {
 .user-meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .user-name {
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: #1E1B4B;
+}
+
+[data-theme="dark"] .user-name {
+  color: var(--color-text-primary);
 }
 
 .user-role {
@@ -519,9 +599,13 @@ const logout = () => {
 
 /* Main Content */
 .main-content {
-  background: #F3F4F6;
+  background: #F5F3FF;
   padding: 20px;
   overflow-y: auto;
+}
+
+[data-theme="dark"] .main-content {
+  background: var(--color-bg-base);
 }
 
 /* Notification Drawer */
@@ -533,24 +617,36 @@ const logout = () => {
   display: flex;
   gap: 16px;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 12px;
   background: #F9FAFB;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .notification-item {
+  background: var(--color-bg-elevated);
 }
 
 .notification-item.unread {
-  background: #ECFDF5;
+  background: #EEF2FF;
+  border-left: 3px solid var(--color-primary);
+}
+
+[data-theme="dark"] .notification-item.unread {
+  background: rgba(99, 102, 241, 0.15);
+  border-left: 3px solid var(--color-primary-light);
 }
 
 .notification-item:hover {
   transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .notice-icon {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -558,8 +654,13 @@ const logout = () => {
 }
 
 .notice-icon.order {
-  background: #DBEAFE;
-  color: #3B82F6;
+  background: #EEF2FF;
+  color: #6366F1;
+}
+
+[data-theme="dark"] .notice-icon.order {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--color-primary-light);
 }
 
 .notice-icon.warning {
@@ -567,14 +668,29 @@ const logout = () => {
   color: #F59E0B;
 }
 
+[data-theme="dark"] .notice-icon.warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-warning);
+}
+
 .notice-icon.success {
   background: #D1FAE5;
-  color: #059669;
+  color: #10B981;
+}
+
+[data-theme="dark"] .notice-icon.success {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--color-cta);
 }
 
 .notice-icon.info {
-  background: #E5E7EB;
+  background: #F3F4F6;
   color: #6B7280;
+}
+
+[data-theme="dark"] .notice-icon.info {
+  background: rgba(107, 114, 128, 0.2);
+  color: var(--color-text-muted);
 }
 
 .notice-content {
@@ -584,8 +700,12 @@ const logout = () => {
 .notice-title {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: #1E1B4B;
   margin: 0 0 4px 0;
+}
+
+[data-theme="dark"] .notice-title {
+  color: var(--color-text-primary);
 }
 
 .notice-desc {
@@ -595,9 +715,14 @@ const logout = () => {
   line-height: 1.4;
 }
 
+[data-theme="dark"] .notice-desc {
+  color: var(--color-text-secondary);
+}
+
 .notice-time {
   font-size: 12px;
   color: #9CA3AF;
+  font-family: 'Fira Code', monospace;
 }
 
 /* Transitions */
@@ -619,15 +744,15 @@ const logout = () => {
     z-index: 1000;
     height: 100vh;
   }
-  
+
   .sidebar.is-open {
     left: 0;
   }
-  
+
   .header-search {
     display: none;
   }
-  
+
   .user-meta {
     display: none;
   }
