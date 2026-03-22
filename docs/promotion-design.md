@@ -115,6 +115,13 @@ const (
     PromotionStatusInactive
     PromotionStatusEnded
 )
+
+// Status Transitions:
+// DRAFT → ACTIVE (manual activation, validates rules exist and time range is valid)
+// ACTIVE → INACTIVE (manual deactivation)
+// ACTIVE → ENDED (automatic when end_at passed)
+// INACTIVE → ACTIVE (manual reactivation)
+// Any status → DELETED (soft delete, only if not currently applying to orders)
 ```
 
 #### PromotionScope (Value Object)
@@ -143,9 +150,9 @@ type PromotionRule struct {
     ID             int64
     PromotionID    int64
     ConditionType  ConditionType   // MIN_AMOUNT, MIN_QUANTITY
-    ConditionValue int64           // Threshold value (cents)
+    ConditionValue int64           // Threshold value (cents for amount, count for quantity)
     ActionType     ActionType      // FIXED_AMOUNT, PERCENTAGE
-    ActionValue    int64           // Discount value (cents or basis points)
+    ActionValue    int64           // Discount value: cents for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
     MaxDiscount    int64           // Cap for percentage discounts (cents)
     Currency       string          // ISO 4217
     SortOrder      int             // Order for tiered rules
@@ -220,7 +227,7 @@ type UserCoupon struct {
     UsedAt     *time.Time        // When coupon was used
     OrderID    string            // Order ID when used
     ReceivedAt time.Time         // When issued to user
-    ExpireAt   time.Time         // Expiration timestamp
+    ExpireAt   time.Time         // User-specific expiration (takes precedence over Coupon.end_at)
 }
 
 type UserCouponStatus int
@@ -230,6 +237,16 @@ const (
     UserCouponStatusUsed
     UserCouponStatusExpired
 )
+
+// Expiration Precedence:
+// 1. UserCoupon.expire_at (if set) - user-specific expiration
+// 2. Coupon.end_at - parent coupon's end time
+// The earlier of the two is used for validation.
+
+// Soft-delete Behavior:
+// When a Coupon is soft-deleted (deleted_at set), users who already have
+// UserCoupon records can still use them until expiration. New UserCoupons
+// cannot be issued for soft-deleted coupons.
 ```
 
 #### PromotionUsage (Entity)
@@ -347,10 +364,12 @@ func (s *CalculationService) CalculateDiscount(
 │                                                                 │
 │  4. PROMOTION DISCOUNT CALCULATION                              │
 │     For each promotion (in priority order):                     │
+│     - Calculate scope-matched total (items matching scope)      │
+│     - Check threshold against scope-matched total               │
 │     - For tiered rules: find highest applicable tier            │
 │     - Calculate discount based on action_type                   │
-│       - FIXED_AMOUNT: use action_value directly                 │
-│       - PERCENTAGE: line_total * (action_value / 10000)         │
+│       - FIXED_AMOUNT: use action_value directly (cents)         │
+│       - PERCENTAGE: matched_total * (action_value / 10000)      │
 │     - Apply max_discount cap if set                             │
 │     - Record applied promotion                                  │
 │                                                                 │
@@ -374,11 +393,35 @@ func (s *CalculationService) CalculateDiscount(
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### Threshold Evaluation Scope
+
+When a promotion has a scoped target (products, categories, brands), the threshold condition (MIN_AMOUNT, MIN_QUANTITY) is evaluated against **only the scope-matched items**, not the entire cart.
+
+**Example:**
+- Promotion scope: "Electronics" category
+- Condition: MIN_AMOUNT $100
+- Cart: $80 electronics + $50 clothing = $130 total
+- Threshold check: $80 (electronics only) → Does NOT meet $100 threshold
+- Result: Promotion not applied
+
+### Multiple Promotion Application Rules
+
+| Scenario | Behavior | Example |
+|----------|----------|---------|
+| Same exact scope | Only highest priority applies | Two promotions both targeting product #123 → Higher priority wins |
+| Non-overlapping scopes | Both apply | "Electronics 10% off" + "Clothing $5 off" → Both apply to respective items |
+| Overlapping scopes | Higher priority wins for overlapping items | Product in both scopes → Higher priority promotion applies |
+| Storewide + Scoped | Higher priority wins | Storewide promo (priority 5) vs Electronics promo (priority 10) → Electronics uses priority 10 |
+
+**Stacking Order:**
+1. Automatic promotions (sorted by priority DESC)
+2. Coupon (applied last, always stacks with promotions)
+
 ### Conflict Resolution Rules
 
 | Rule | Description |
 |------|-------------|
-| Priority-based | Higher priority promotion wins for same scope |
+| Priority-based | Higher priority promotion wins for overlapping scope |
 | Same priority | Earlier created (lower ID) wins |
 | Promotion + Coupon | Both apply (coupon stacks after promotion) |
 | Currency mismatch | Skip promotion/coupon with different currency |
