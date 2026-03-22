@@ -344,6 +344,30 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 创建商品本地化
+					Method:  http.MethodPost,
+					Path:    "/api/v1/product-localizations",
+					Handler: products.CreateProductLocalizationHandler(serverCtx),
+				},
+				{
+					// 更新商品本地化
+					Method:  http.MethodPut,
+					Path:    "/api/v1/product-localizations/:id",
+					Handler: products.UpdateProductLocalizationHandler(serverCtx),
+				},
+				{
+					// 获取商品本地化详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/product-localizations/:id",
+					Handler: products.GetProductLocalizationHandler(serverCtx),
+				},
+				{
+					// 删除商品本地化
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/product-localizations/:id",
+					Handler: products.DeleteProductLocalizationHandler(serverCtx),
+				},
+				{
 					// 创建商品
 					Method:  http.MethodPost,
 					Path:    "/api/v1/products",
@@ -384,6 +408,42 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPut,
 					Path:    "/api/v1/products/:id/stock",
 					Handler: products.UpdateStockHandler(serverCtx),
+				},
+				{
+					// 获取商品本地化列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/products/:product_id/localizations",
+					Handler: products.ListProductLocalizationsByProductHandler(serverCtx),
+				},
+				{
+					// 获取商品SKU列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/products/:product_id/skus",
+					Handler: products.ListSKUsByProductHandler(serverCtx),
+				},
+				{
+					// 创建SKU变体
+					Method:  http.MethodPost,
+					Path:    "/api/v1/skus",
+					Handler: products.CreateSKUHandler(serverCtx),
+				},
+				{
+					// 更新SKU变体
+					Method:  http.MethodPut,
+					Path:    "/api/v1/skus/:id",
+					Handler: products.UpdateSKUHandler(serverCtx),
+				},
+				{
+					// 获取SKU详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/skus/:id",
+					Handler: products.GetSKUHandler(serverCtx),
+				},
+				{
+					// 删除SKU变体
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/skus/:id",
+					Handler: products.DeleteSKUHandler(serverCtx),
 				},
 			}...,
 		),

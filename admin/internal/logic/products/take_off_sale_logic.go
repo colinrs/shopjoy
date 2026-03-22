@@ -5,6 +5,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,15 @@ func NewTakeOffSaleLogic(ctx context.Context, svcCtx *svc.ServiceContext) TakeOf
 }
 
 func (l *TakeOffSaleLogic) TakeOffSale(req *types.TakeOffSaleReq) (resp *types.ProductDetailResp, err error) {
-	productResp, err := l.svcCtx.ProductService.TakeOffSale(l.ctx, req.ID)
+	// 从 context 获取 tenantID
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// 平台管理员设置 tenantID = 0 以访问所有数据
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	productResp, err := l.svcCtx.ProductService.TakeOffSale(l.ctx, shared.TenantID(tenantID), req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,8 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,6 +27,14 @@ func NewUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upda
 }
 
 func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *types.ProductDetailResp, err error) {
+	// 从 context 获取 tenantID
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// 平台管理员设置 tenantID = 0 以访问所有数据
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
 	updateReq := appProduct.UpdateProductRequest{
 		ID:          req.ID,
 		Name:        req.Name,
@@ -34,7 +44,7 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 		CategoryID:  req.CategoryID,
 	}
 
-	productResp, err := l.svcCtx.ProductService.UpdateProduct(l.ctx, updateReq)
+	productResp, err := l.svcCtx.ProductService.UpdateProduct(l.ctx, shared.TenantID(tenantID), updateReq)
 	if err != nil {
 		return nil, err
 	}

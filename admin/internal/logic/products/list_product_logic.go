@@ -7,6 +7,8 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,6 +28,14 @@ func NewListProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPr
 }
 
 func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.ListProductResp, err error) {
+	// 从 context 获取 tenantID
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// 平台管理员设置 tenantID = 0 以访问所有数据
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
 	queryReq := appProduct.QueryProductRequest{
 		Name:       req.Name,
 		CategoryID: req.CategoryID,
@@ -44,7 +54,7 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 		queryReq.MaxPrice = &maxPrice
 	}
 
-	listResp, err := l.svcCtx.ProductService.GetProductList(l.ctx, queryReq)
+	listResp, err := l.svcCtx.ProductService.GetProductList(l.ctx, shared.TenantID(tenantID), queryReq)
 	if err != nil {
 		return nil, err
 	}

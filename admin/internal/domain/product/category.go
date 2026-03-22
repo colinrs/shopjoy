@@ -270,3 +270,23 @@ type BrandMarketRepository interface {
 	DeleteByBrand(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, brandID int64) error
 	BatchCreate(ctx context.Context, db *gorm.DB, items []*BrandMarket) error
 }
+
+// SKURepository interface for variant management
+type SKURepository interface {
+	Create(ctx context.Context, db *gorm.DB, sku *SKU) error
+	Update(ctx context.Context, db *gorm.DB, sku *SKU) error
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*SKU, error)
+	FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*SKU, error)
+	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*SKU, error)
+	FindList(ctx context.Context, db *gorm.DB, query SKUQuery) ([]*SKU, int64, error)
+}
+
+// SKUQuery for SKU search
+type SKUQuery struct {
+	shared.PageQuery
+	TenantID  shared.TenantID
+	ProductID int64
+	Code      string
+	Status    shared.Status
+}

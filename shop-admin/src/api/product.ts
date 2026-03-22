@@ -229,3 +229,130 @@ export function removeFromMarket(productId: number, marketId: number) {
     method: 'delete'
   })
 }
+
+// SKU (Variant) API functions
+
+export interface SKU {
+  id: number
+  product_id: number
+  code: string
+  price: number
+  currency: string
+  stock: number
+  available_stock: number
+  locked_stock: number
+  safety_stock: number
+  pre_sale_enabled: boolean
+  attributes: Record<string, string>
+  status: string
+  is_low_stock: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateSKURequest {
+  product_id: number
+  code: string
+  price: number
+  currency?: string
+  stock?: number
+  safety_stock?: number
+  pre_sale_enabled?: boolean
+  attributes?: Record<string, string>
+}
+
+export interface UpdateSKURequest {
+  id: number
+  code?: string
+  price?: number
+  currency?: string
+  stock?: number
+  safety_stock?: number
+  pre_sale_enabled?: boolean
+  attributes?: Record<string, string>
+}
+
+export function getSKUsByProduct(productId: number) {
+  return request<{ list: SKU[]; total: number }>({
+    url: `/api/v1/products/${productId}/skus`,
+    method: 'get'
+  })
+}
+
+export function createSKU(data: CreateSKURequest) {
+  return request<{ id: number }>({
+    url: '/api/v1/skus',
+    method: 'post',
+    data
+  })
+}
+
+export function updateSKU(data: UpdateSKURequest) {
+  return request<SKU>({
+    url: `/api/v1/skus/${data.id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteSKU(id: number) {
+  return request<{ id: number }>({
+    url: `/api/v1/skus/${id}`,
+    method: 'delete'
+  })
+}
+
+// Product Localization API functions
+
+export interface ProductLocalization {
+  id: number
+  product_id: number
+  language_code: string
+  name: string
+  description: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateProductLocalizationRequest {
+  product_id: number
+  language_code: string
+  name?: string
+  description?: string
+}
+
+export interface UpdateProductLocalizationRequest {
+  id: number
+  name?: string
+  description?: string
+}
+
+export function getProductLocalizations(productId: number) {
+  return request<{ list: ProductLocalization[]; total: number }>({
+    url: `/api/v1/products/${productId}/localizations`,
+    method: 'get'
+  })
+}
+
+export function createProductLocalization(data: CreateProductLocalizationRequest) {
+  return request<{ id: number }>({
+    url: '/api/v1/product-localizations',
+    method: 'post',
+    data
+  })
+}
+
+export function updateProductLocalization(data: UpdateProductLocalizationRequest) {
+  return request<ProductLocalization>({
+    url: `/api/v1/product-localizations/${data.id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteProductLocalization(id: number) {
+  return request<{ id: number }>({
+    url: `/api/v1/product-localizations/${id}`,
+    method: 'delete'
+  })
+}

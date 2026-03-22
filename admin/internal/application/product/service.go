@@ -5,20 +5,21 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
 )
 
 type Service interface {
-	CreateProduct(ctx context.Context, req CreateProductRequest) (*ProductResponse, error)
-	UpdateProduct(ctx context.Context, req UpdateProductRequest) (*ProductResponse, error)
-	DeleteProduct(ctx context.Context, id int64) error
-	GetProduct(ctx context.Context, id int64) (*ProductResponse, error)
-	GetProductList(ctx context.Context, req QueryProductRequest) (*ProductListResponse, error)
-	PutOnSale(ctx context.Context, id int64) (*ProductResponse, error)
-	TakeOffSale(ctx context.Context, id int64) (*ProductResponse, error)
-	UpdateStock(ctx context.Context, req UpdateStockRequest) error
-	DeductStock(ctx context.Context, req DeductStockRequest) error
+	CreateProduct(ctx context.Context, tenantID shared.TenantID, req CreateProductRequest) (*ProductResponse, error)
+	UpdateProduct(ctx context.Context, tenantID shared.TenantID, req UpdateProductRequest) (*ProductResponse, error)
+	DeleteProduct(ctx context.Context, tenantID shared.TenantID, id int64) error
+	GetProduct(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error)
+	GetProductList(ctx context.Context, tenantID shared.TenantID, req QueryProductRequest) (*ProductListResponse, error)
+	PutOnSale(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error)
+	TakeOffSale(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error)
+	UpdateStock(ctx context.Context, tenantID shared.TenantID, req UpdateStockRequest) error
+	DeductStock(ctx context.Context, tenantID shared.TenantID, req DeductStockRequest) error
 }
 
 type service struct {
@@ -35,14 +36,14 @@ func NewService(db *gorm.DB, repo product.Repository, idGen snowflake.Snowflake)
 	}
 }
 
-func (s *service) CreateProduct(ctx context.Context, req CreateProductRequest) (*ProductResponse, error) {
+func (s *service) CreateProduct(ctx context.Context, tenantID shared.TenantID, req CreateProductRequest) (*ProductResponse, error) {
 	id, err := s.idGen.NextID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	price := ToDomainMoney(req.Price, req.Currency)
-	p, err := product.NewProduct(id, req.Name, req.Description, price, req.CategoryID)
+	p, err := product.NewProduct(id, tenantID, req.Name, req.Description, price, req.CategoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +57,8 @@ func (s *service) CreateProduct(ctx context.Context, req CreateProductRequest) (
 	return FromDomainProduct(p), nil
 }
 
-func (s *service) UpdateProduct(ctx context.Context, req UpdateProductRequest) (*ProductResponse, error) {
-	p, err := s.productRepo.FindByID(ctx, s.db, req.ID)
+func (s *service) UpdateProduct(ctx context.Context, tenantID shared.TenantID, req UpdateProductRequest) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, tenantID, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -79,20 +80,21 @@ func (s *service) UpdateProduct(ctx context.Context, req UpdateProductRequest) (
 	return FromDomainProduct(p), nil
 }
 
-func (s *service) DeleteProduct(ctx context.Context, id int64) error {
-	return s.productRepo.Delete(ctx, s.db, id)
+func (s *service) DeleteProduct(ctx context.Context, tenantID shared.TenantID, id int64) error {
+	return s.productRepo.Delete(ctx, s.db, tenantID, id)
 }
 
-func (s *service) GetProduct(ctx context.Context, id int64) (*ProductResponse, error) {
-	p, err := s.productRepo.FindByID(ctx, s.db, id)
+func (s *service) GetProduct(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, tenantID, id)
 	if err != nil {
 		return nil, err
 	}
 	return FromDomainProduct(p), nil
 }
 
-func (s *service) GetProductList(ctx context.Context, req QueryProductRequest) (*ProductListResponse, error) {
+func (s *service) GetProductList(ctx context.Context, tenantID shared.TenantID, req QueryProductRequest) (*ProductListResponse, error) {
 	query := product.Query{
+		TenantID:   tenantID,
 		Name:       req.Name,
 		CategoryID: req.CategoryID,
 		Status:     ParseStatus(req.Status),
@@ -122,8 +124,8 @@ func (s *service) GetProductList(ctx context.Context, req QueryProductRequest) (
 	return resp, nil
 }
 
-func (s *service) PutOnSale(ctx context.Context, id int64) (*ProductResponse, error) {
-	p, err := s.productRepo.FindByID(ctx, s.db, id)
+func (s *service) PutOnSale(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, tenantID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +141,8 @@ func (s *service) PutOnSale(ctx context.Context, id int64) (*ProductResponse, er
 	return FromDomainProduct(p), nil
 }
 
-func (s *service) TakeOffSale(ctx context.Context, id int64) (*ProductResponse, error) {
-	p, err := s.productRepo.FindByID(ctx, s.db, id)
+func (s *service) TakeOffSale(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error) {
+	p, err := s.productRepo.FindByID(ctx, s.db, tenantID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -156,8 +158,8 @@ func (s *service) TakeOffSale(ctx context.Context, id int64) (*ProductResponse, 
 	return FromDomainProduct(p), nil
 }
 
-func (s *service) UpdateStock(ctx context.Context, req UpdateStockRequest) error {
-	p, err := s.productRepo.FindByID(ctx, s.db, req.ID)
+func (s *service) UpdateStock(ctx context.Context, tenantID shared.TenantID, req UpdateStockRequest) error {
+	p, err := s.productRepo.FindByID(ctx, s.db, tenantID, req.ID)
 	if err != nil {
 		return err
 	}
@@ -169,12 +171,12 @@ func (s *service) UpdateStock(ctx context.Context, req UpdateStockRequest) error
 	return s.productRepo.Update(ctx, s.db, p)
 }
 
-func (s *service) DeductStock(ctx context.Context, req DeductStockRequest) error {
-	return s.productRepo.UpdateStock(ctx, s.db, req.ID, -req.Quantity)
+func (s *service) DeductStock(ctx context.Context, tenantID shared.TenantID, req DeductStockRequest) error {
+	return s.productRepo.UpdateStock(ctx, s.db, tenantID, req.ID, -req.Quantity)
 }
 
 // CreateProductWithTx 创建商品（带事务示例）
-func (s *service) CreateProductWithTx(ctx context.Context, req CreateProductRequest) (*ProductResponse, error) {
+func (s *service) CreateProductWithTx(ctx context.Context, tenantID shared.TenantID, req CreateProductRequest) (*ProductResponse, error) {
 	var result *product.Product
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
@@ -184,7 +186,7 @@ func (s *service) CreateProductWithTx(ctx context.Context, req CreateProductRequ
 		}
 
 		price := ToDomainMoney(req.Price, req.Currency)
-		p, err := product.NewProduct(id, req.Name, req.Description, price, req.CategoryID)
+		p, err := product.NewProduct(id, tenantID, req.Name, req.Description, price, req.CategoryID)
 		if err != nil {
 			return err
 		}

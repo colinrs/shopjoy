@@ -169,6 +169,13 @@ type CreateMarketReq struct {
 	TaxRules        TaxConfig `json:"tax_rules,optional"`
 }
 
+type CreateProductLocalizationReq struct {
+	ProductID    int64  `json:"product_id"`
+	LanguageCode string `json:"language_code"`
+	Name         string `json:"name,optional"`
+	Description  string `json:"description,optional"`
+}
+
 type CreateProductReq struct {
 	Name            string   `json:"name"`
 	Description     string   `json:"description,optional"`
@@ -192,6 +199,21 @@ type CreateProductReq struct {
 }
 
 type CreateProductResp struct {
+	ID int64 `json:"id"`
+}
+
+type CreateSKUReq struct {
+	ProductID      int64             `json:"product_id"`
+	Code           string            `json:"code"`
+	Price          int64             `json:"price"`
+	Currency       string            `json:"currency,optional"`
+	Stock          int               `json:"stock,optional"`
+	SafetyStock    int               `json:"safety_stock,optional"`
+	PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
+	Attributes     map[string]string `json:"attributes,optional"`
+}
+
+type CreateSKUResp struct {
 	ID int64 `json:"id"`
 }
 
@@ -256,12 +278,20 @@ type GetMarketReq struct {
 	ID int64 `path:"id"`
 }
 
+type GetProductLocalizationReq struct {
+	ID int64 `path:"id"`
+}
+
 type GetProductReq struct {
 	ID int64 `path:"id"`
 }
 
 type GetSKUInventoryReq struct {
 	SKUCode string `path:"sku_code"`
+}
+
+type GetSKUReq struct {
+	ID int64 `path:"id"`
 }
 
 type GetUserRequest struct {
@@ -348,6 +378,15 @@ type ListMarketsResp struct {
 	Total int64             `json:"total"`
 }
 
+type ListProductLocalizationsReq struct {
+	ProductID int64 `path:"product_id"`
+}
+
+type ListProductLocalizationsResp struct {
+	List  []*ProductLocalizationResp `json:"list"`
+	Total int64                      `json:"total"`
+}
+
 type ListProductMarketsReq struct {
 	ProductID int64 `path:"id"`
 }
@@ -372,6 +411,15 @@ type ListProductResp struct {
 	Total    int64                `json:"total"`
 	Page     int                  `json:"page"`
 	PageSize int                  `json:"page_size"`
+}
+
+type ListSKUsByProductReq struct {
+	ProductID int64 `path:"product_id"`
+}
+
+type ListSKUsResp struct {
+	List  []*SKUDetailResp `json:"list"`
+	Total int64            `json:"total"`
 }
 
 type ListUsersRequest struct {
@@ -450,6 +498,16 @@ type ProductDetailResp struct {
 	Markets         []ProductMarketInfo `json:"markets,optional"`
 }
 
+type ProductLocalizationResp struct {
+	ID           int64  `json:"id"`
+	ProductID    int64  `json:"product_id"`
+	LanguageCode string `json:"language_code"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+}
+
 type ProductMarketInfo struct {
 	MarketID   int64  `json:"market_id"`
 	MarketCode string `json:"market_code"`
@@ -506,6 +564,24 @@ type RegisterTenantAdminResponse struct {
 type RemoveFromMarketReq struct {
 	ProductID int64 `path:"id"`
 	MarketID  int64 `path:"market_id"`
+}
+
+type SKUDetailResp struct {
+	ID             int64             `json:"id"`
+	ProductID      int64             `json:"product_id"`
+	Code           string            `json:"code"`
+	Price          int64             `json:"price"`
+	Currency       string            `json:"currency"`
+	Stock          int               `json:"stock"`
+	AvailableStock int               `json:"available_stock"`
+	LockedStock    int               `json:"locked_stock"`
+	SafetyStock    int               `json:"safety_stock"`
+	PreSaleEnabled bool              `json:"pre_sale_enabled"`
+	Attributes     map[string]string `json:"attributes"`
+	Status         string            `json:"status"`
+	IsLowStock     bool              `json:"is_low_stock"`
+	CreatedAt      string            `json:"created_at"`
+	UpdatedAt      string            `json:"updated_at"`
 }
 
 type SKUInventoryResp struct {
@@ -601,6 +677,12 @@ type UpdateMarketReq struct {
 	TaxRules  TaxConfig `json:"tax_rules,optional"`
 }
 
+type UpdateProductLocalizationReq struct {
+	ID          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+}
+
 type UpdateProductMarketReq struct {
 	ProductID           int64  `path:"id"`
 	MarketID            int64  `path:"market_id"`
@@ -638,6 +720,17 @@ type UpdateProfileRequest struct {
 	Avatar   string `json:"avatar,optional"`
 	Mobile   string `json:"mobile,optional"`
 	Email    string `json:"email,optional"`
+}
+
+type UpdateSKUReq struct {
+	ID             int64             `path:"id"`
+	Code           string            `json:"code,optional"`
+	Price          int64             `json:"price,optional"`
+	Currency       string            `json:"currency,optional"`
+	Stock          int               `json:"stock,optional"`
+	SafetyStock    int               `json:"safety_stock,optional"`
+	PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
+	Attributes     map[string]string `json:"attributes,optional"`
 }
 
 type UpdateSKUStockReq struct {

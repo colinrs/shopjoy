@@ -6,6 +6,8 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,6 +27,12 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Crea
 }
 
 func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *types.CreateProductResp, err error) {
+	// 从 context 获取 tenantID
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// 平台管理员创建商品时需要指定 tenantID（暂不允许，或后续可扩展）
+	// 目前平台管理员创建的商品归属于自身租户（tenantID = 0 表示平台）
+
 	createReq := appProduct.CreateProductRequest{
 		Name:        req.Name,
 		Description: req.Description,
@@ -34,7 +42,7 @@ func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *t
 		CategoryID:  req.CategoryID,
 	}
 
-	productResp, err := l.svcCtx.ProductService.CreateProduct(l.ctx, createReq)
+	productResp, err := l.svcCtx.ProductService.CreateProduct(l.ctx, shared.TenantID(tenantID), createReq)
 	if err != nil {
 		return nil, err
 	}

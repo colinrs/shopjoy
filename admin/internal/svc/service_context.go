@@ -39,7 +39,9 @@ type ServiceContext struct {
 	WarehouseRepo          product.WarehouseRepository
 	WarehouseInventoryRepo product.WarehouseInventoryRepository
 	InventoryLogRepo       product.InventoryLogRepository
-	IDGen                  snowflake.Snowflake
+	SKURepo                   product.SKURepository
+	ProductLocalizationRepo   product.ProductLocalizationRepository
+	IDGen                     snowflake.Snowflake
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -73,6 +75,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	warehouseRepo := persistence.NewWarehouseRepository()
 	warehouseInventoryRepo := persistence.NewWarehouseInventoryRepository()
 	inventoryLogRepo := persistence.NewInventoryLogRepository()
+	skuRepo := persistence.NewSKURepository()
+	productLocalizationRepo := persistence.NewProductLocalizationRepository()
 
 	return &ServiceContext{
 		Config:                 c,
@@ -91,6 +95,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		WarehouseRepo:          warehouseRepo,
 		WarehouseInventoryRepo: warehouseInventoryRepo,
 		InventoryLogRepo:       inventoryLogRepo,
+		SKURepo:                skuRepo,
+		ProductLocalizationRepo: productLocalizationRepo,
 		IDGen:                  idGen,
 	}
 }

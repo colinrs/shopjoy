@@ -124,6 +124,88 @@ type (
 		ID       int64 `path:"id"`
 		Quantity int   `json:"quantity"`
 	}
+	// SKU (Variant) types
+	CreateSKUReq {
+		ProductID      int64             `json:"product_id"`
+		Code           string            `json:"code"`
+		Price          int64             `json:"price"`
+		Currency       string            `json:"currency,optional"`
+		Stock          int               `json:"stock,optional"`
+		SafetyStock    int               `json:"safety_stock,optional"`
+		PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
+		Attributes     map[string]string `json:"attributes,optional"`
+	}
+	CreateSKUResp {
+		ID int64 `json:"id"`
+	}
+	UpdateSKUReq {
+		ID             int64             `path:"id"`
+		Code           string            `json:"code,optional"`
+		Price          int64             `json:"price,optional"`
+		Currency       string            `json:"currency,optional"`
+		Stock          int               `json:"stock,optional"`
+		SafetyStock    int               `json:"safety_stock,optional"`
+		PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
+		Attributes     map[string]string `json:"attributes,optional"`
+	}
+	GetSKUReq {
+		ID int64 `path:"id"`
+	}
+	SKUDetailResp {
+		ID             int64             `json:"id"`
+		ProductID      int64             `json:"product_id"`
+		Code           string            `json:"code"`
+		Price          int64             `json:"price"`
+		Currency       string            `json:"currency"`
+		Stock          int               `json:"stock"`
+		AvailableStock int               `json:"available_stock"`
+		LockedStock    int               `json:"locked_stock"`
+		SafetyStock    int               `json:"safety_stock"`
+		PreSaleEnabled bool              `json:"pre_sale_enabled"`
+		Attributes     map[string]string `json:"attributes"`
+		Status         string            `json:"status"`
+		IsLowStock     bool              `json:"is_low_stock"`
+		CreatedAt      string            `json:"created_at"`
+		UpdatedAt      string            `json:"updated_at"`
+	}
+	ListSKUsByProductReq {
+		ProductID int64 `path:"product_id"`
+	}
+	ListSKUsResp {
+		List  []*SKUDetailResp `json:"list"`
+		Total int64            `json:"total"`
+	}
+	// Product Localization types
+	CreateProductLocalizationReq {
+		ProductID    int64  `json:"product_id"`
+		LanguageCode string `json:"language_code"`
+		Name         string `json:"name,optional"`
+		Description  string `json:"description,optional"`
+	}
+	UpdateProductLocalizationReq {
+		ID          int64  `path:"id"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+	}
+	GetProductLocalizationReq {
+		ID int64 `path:"id"`
+	}
+	ProductLocalizationResp {
+		ID           int64  `json:"id"`
+		ProductID    int64  `json:"product_id"`
+		LanguageCode string `json:"language_code"`
+		Name         string `json:"name"`
+		Description  string `json:"description"`
+		CreatedAt    string `json:"created_at"`
+		UpdatedAt    string `json:"updated_at"`
+	}
+	ListProductLocalizationsReq {
+		ProductID int64 `path:"product_id"`
+	}
+	ListProductLocalizationsResp {
+		List  []*ProductLocalizationResp `json:"list"`
+		Total int64                      `json:"total"`
+	}
 )
 
 @server (
@@ -158,5 +240,47 @@ service admin-api {
 	@doc "更新库存"
 	@handler UpdateStockHandler
 	put /api/v1/products/:id/stock (UpdateStockReq) returns (ProductDetailResp)
+
+	// SKU (Variant) endpoints
+	@doc "创建SKU变体"
+	@handler CreateSKUHandler
+	post /api/v1/skus (CreateSKUReq) returns (CreateSKUResp)
+
+	@doc "更新SKU变体"
+	@handler UpdateSKUHandler
+	put /api/v1/skus/:id (UpdateSKUReq) returns (SKUDetailResp)
+
+	@doc "获取SKU详情"
+	@handler GetSKUHandler
+	get /api/v1/skus/:id (GetSKUReq) returns (SKUDetailResp)
+
+	@doc "获取商品SKU列表"
+	@handler ListSKUsByProductHandler
+	get /api/v1/products/:product_id/skus (ListSKUsByProductReq) returns (ListSKUsResp)
+
+	@doc "删除SKU变体"
+	@handler DeleteSKUHandler
+	delete /api/v1/skus/:id (GetSKUReq) returns (CreateSKUResp)
+
+	// Product Localization endpoints
+	@doc "创建商品本地化"
+	@handler CreateProductLocalizationHandler
+	post /api/v1/product-localizations (CreateProductLocalizationReq) returns (CreateProductResp)
+
+	@doc "更新商品本地化"
+	@handler UpdateProductLocalizationHandler
+	put /api/v1/product-localizations/:id (UpdateProductLocalizationReq) returns (ProductLocalizationResp)
+
+	@doc "获取商品本地化详情"
+	@handler GetProductLocalizationHandler
+	get /api/v1/product-localizations/:id (GetProductLocalizationReq) returns (ProductLocalizationResp)
+
+	@doc "获取商品本地化列表"
+	@handler ListProductLocalizationsByProductHandler
+	get /api/v1/products/:product_id/localizations (ListProductLocalizationsReq) returns (ListProductLocalizationsResp)
+
+	@doc "删除商品本地化"
+	@handler DeleteProductLocalizationHandler
+	delete /api/v1/product-localizations/:id (GetProductLocalizationReq) returns (CreateProductResp)
 }
 

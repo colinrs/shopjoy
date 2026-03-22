@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
@@ -110,9 +111,10 @@ type Dimensions struct {
 
 // Product 商品实体
 type Product struct {
-	ID              int64    // 商品ID
-	SKU             string   // SKU代码
-	Name            string   // 商品名称
+	ID              int64           // 商品ID
+	TenantID        shared.TenantID // 租户ID
+	SKU             string          // SKU代码
+	Name            string          // 商品名称
 	Description     string   // 商品描述
 	Price           Money    `gorm:"embedded"` // 售价
 	CostPrice       Money    `gorm:"embedded"` // 成本价
@@ -142,7 +144,7 @@ func (p *Product) TableName() string {
 }
 
 // NewProduct 创建新商品
-func NewProduct(id int64, name, description string, price Money, categoryID int64) (*Product, error) {
+func NewProduct(id int64, tenantID shared.TenantID, name, description string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
@@ -156,6 +158,7 @@ func NewProduct(id int64, name, description string, price Money, categoryID int6
 	now := time.Now()
 	return &Product{
 		ID:          id,
+		TenantID:    tenantID,
 		Name:        name,
 		Description: description,
 		Price:       price,
@@ -168,7 +171,7 @@ func NewProduct(id int64, name, description string, price Money, categoryID int6
 }
 
 // NewProductWithCompliance 创建带合规信息的商品
-func NewProductWithCompliance(id int64, name, description, sku string, price Money, categoryID int64) (*Product, error) {
+func NewProductWithCompliance(id int64, tenantID shared.TenantID, name, description, sku string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
@@ -182,6 +185,7 @@ func NewProductWithCompliance(id int64, name, description, sku string, price Mon
 	now := time.Now()
 	return &Product{
 		ID:          id,
+		TenantID:    tenantID,
 		SKU:         sku,
 		Name:        name,
 		Description: description,
@@ -307,16 +311,17 @@ type DBProvider interface {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, product *Product) error
 	Update(ctx context.Context, db *gorm.DB, product *Product) error
-	Delete(ctx context.Context, db *gorm.DB, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Product, error)
-	FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*Product, error)
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Product, error)
+	FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*Product, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Product, int64, error)
-	UpdateStock(ctx context.Context, db *gorm.DB, id int64, delta int) error
-	Exists(ctx context.Context, db *gorm.DB, id int64) (bool, error)
+	UpdateStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, delta int) error
+	Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (bool, error)
 }
 
 // Query 查询条件（值对象）
 type Query struct {
+	TenantID   shared.TenantID
 	Name       string
 	CategoryID int64
 	Status     *Status // 使用指针，nil 表示不过滤状态
