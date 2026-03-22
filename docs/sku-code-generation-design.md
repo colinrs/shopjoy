@@ -319,7 +319,7 @@ type Config struct {
     Epoch                  time.Time // 默认: 2024-01-01 00:00:00 UTC
     MaxTenantPrefixLength  int       // 默认: 8
     MaxProductPrefixLength int       // 默认: 8
-    MaxTotalLength         int       // 默认: 32
+    MaxTotalLength         int       // 默认: 28
     TenantIDLength         int       // 默认: 4
     TimestampLength        int       // 默认: 3
     RandomLength           int       // 默认: 3
