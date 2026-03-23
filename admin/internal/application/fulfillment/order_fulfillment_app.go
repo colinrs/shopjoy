@@ -151,6 +151,8 @@ type FulfillmentSummary struct {
 	PendingRefund   int64
 	Refunding       int64
 	TotalOrders     int64
+	TodayOrders     int64
+	TodayGMV        int64
 }
 
 // OrderFulfillmentApp 订单履约应用服务接口
@@ -159,6 +161,10 @@ type OrderFulfillmentApp interface {
 	GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderFulfillmentDetail, error)
 	ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID string, req ShipOrderRequest) (*ShipmentResponse, error)
 	GetFulfillmentSummary(ctx context.Context, tenantID shared.TenantID) (*FulfillmentSummary, error)
+	// New methods
+	UpdateOrderRemark(ctx context.Context, tenantID shared.TenantID, orderID int64, remark string) error
+	AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount int64, reason string) (*fulfillment.AdjustPriceResponse, error)
+	ExportOrders(ctx context.Context, tenantID shared.TenantID, req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error)
 }
 
 // ShipOrderRequest 发货请求
@@ -179,6 +185,8 @@ type orderFulfillmentApp struct {
 	shipmentItemRepo fulfillment.ShipmentItemRepository
 	carrierRepo      fulfillment.CarrierRepository
 	refundRepo       fulfillment.RefundRepository
+	orderRepo        fulfillment.OrderRepository
+	orderItemRepo    fulfillment.OrderItemRepository
 	idGen            snowflake.Snowflake
 	orderValidator   OrderValidator
 }
@@ -190,6 +198,8 @@ func NewOrderFulfillmentApp(
 	shipmentItemRepo fulfillment.ShipmentItemRepository,
 	carrierRepo fulfillment.CarrierRepository,
 	refundRepo fulfillment.RefundRepository,
+	orderRepo fulfillment.OrderRepository,
+	orderItemRepo fulfillment.OrderItemRepository,
 	idGen snowflake.Snowflake,
 	orderValidator OrderValidator,
 ) OrderFulfillmentApp {
@@ -199,6 +209,8 @@ func NewOrderFulfillmentApp(
 		shipmentItemRepo: shipmentItemRepo,
 		carrierRepo:      carrierRepo,
 		refundRepo:       refundRepo,
+		orderRepo:        orderRepo,
+		orderItemRepo:    orderItemRepo,
 		idGen:            idGen,
 		orderValidator:   orderValidator,
 	}
@@ -392,6 +404,10 @@ func (a *orderFulfillmentApp) GetFulfillmentSummary(ctx context.Context, tenantI
 	pendingRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db, tenantID, fulfillment.RefundStatusPending)
 	approvedRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db, tenantID, fulfillment.RefundStatusApproved)
 
+	// Get today's stats
+	todayOrders, _ := a.orderRepo.CountTodayOrders(ctx, a.db, tenantID)
+	todayGMV, _ := a.orderRepo.SumTodayGMV(ctx, a.db, tenantID)
+
 	return &FulfillmentSummary{
 		PendingShipment: pendingCount,
 		PartialShipped:  0, // Would need order-level data
@@ -400,7 +416,95 @@ func (a *orderFulfillmentApp) GetFulfillmentSummary(ctx context.Context, tenantI
 		PendingRefund:   pendingRefundCount,
 		Refunding:       approvedRefundCount,
 		TotalOrders:     pendingCount + shippedCount + inTransitCount + deliveredCount,
+		TodayOrders:     todayOrders,
+		TodayGMV:        todayGMV,
 	}, nil
+}
+
+// UpdateOrderRemark updates the merchant remark for an order
+func (a *orderFulfillmentApp) UpdateOrderRemark(ctx context.Context, tenantID shared.TenantID, orderID int64, remark string) error {
+	return a.orderRepo.UpdateRemark(ctx, a.db, tenantID, orderID, remark)
+}
+
+// AdjustOrderPrice adjusts the price of an order
+func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount int64, reason string) (*fulfillment.AdjustPriceResponse, error) {
+	// Get order
+	order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, orderID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Adjust price (uses optimistic lock internally)
+	err = order.AdjustPrice(adjustAmount, reason, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update with version check
+	err = a.orderRepo.UpdateWithVersion(ctx, a.db, order)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fulfillment.AdjustPriceResponse{
+		OrderID:        order.ID,
+		OriginalAmount: order.OriginalAmount,
+		AdjustAmount:   order.AdjustAmount,
+		NewPayAmount:   order.PayAmount,
+		AdjustReason:   order.AdjustReason,
+		AdjustedAt:     order.AdjustedAt.Format(time.RFC3339),
+	}, nil
+}
+
+// ExportOrders exports orders to CSV
+func (a *orderFulfillmentApp) ExportOrders(ctx context.Context, tenantID shared.TenantID, req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error) {
+	// Build query
+	query := fulfillment.OrderQuery{
+		PageQuery: shared.PageQuery{
+			Page:     1,
+			PageSize: 10001, // Check if exceeds limit
+		},
+		OrderNo:           req.OrderNo,
+		UserID:            req.UserID,
+		Status:            fulfillment.OrderStatus(req.Status),
+		FulfillmentStatus: fulfillment.OrderFulfillmentStatus(req.FulfillmentStatus),
+		RefundStatus:      fulfillment.OrderRefundStatus(req.RefundStatus),
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
+	}
+
+	// Get orders for export
+	orders, err := a.orderRepo.FindForExport(ctx, a.db, tenantID, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if len(orders) > 10000 {
+		return nil, 0, code.ErrOrderExportLimitExceed
+	}
+
+	// Convert to export rows
+	rows := make([]*fulfillment.OrderExportRow, len(orders))
+	for i, o := range orders {
+		rows[i] = &fulfillment.OrderExportRow{
+			OrderNo:          o.OrderNo,
+			Status:           o.Status.Text(),
+			FulfillmentStatus: o.FulfillmentStatus.Text(),
+			RefundStatus:     o.RefundStatus.Text(),
+			TotalAmount:      o.TotalAmount,
+			DiscountAmount:   o.DiscountAmount,
+			ShippingFee:      o.ShippingFee,
+			PayAmount:        o.PayAmount,
+			ReceiverName:     o.ReceiverName,
+			ReceiverPhone:    o.ReceiverPhone,
+			ReceiverAddress:  o.ReceiverAddress,
+			PaymentMethod:    o.PaymentMethod,
+			CreatedAt:        o.Audit.CreatedAt,
+			PaidAt:           o.PaidAt,
+		}
+	}
+
+	return rows, int64(len(rows)), nil
 }
 
 // toRefundResponse converts refund entity to response

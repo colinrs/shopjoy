@@ -12,6 +12,7 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
+	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
@@ -58,6 +59,8 @@ type ServiceContext struct {
 	PromotionRepo             pkgpromotion.Repository
 	CouponRepo                pkgpromotion.CouponRepository
 	UserCouponRepo            pkgpromotion.UserCouponRepository
+	OrderRepo                 fulfillment.OrderRepository
+	OrderItemRepo             fulfillment.OrderItemRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -110,12 +113,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	carrierRepo := persistence.NewCarrierRepository()
 	refundRepo := persistence.NewRefundRepository()
 	refundReasonRepo := persistence.NewRefundReasonRepository()
+	orderRepo := persistence.NewOrderRepository()
+	orderItemRepo := persistence.NewOrderItemRepository()
 
 	// Fulfillment application services
 	shipmentApp := appfulfillment.NewShipmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, idGen)
 	carrierApp := appfulfillment.NewCarrierApp(db, carrierRepo)
 	// Use NopOrderValidator until order service integration is complete
-	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, idGen, &appfulfillment.NopOrderValidator{})
+	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, orderRepo, orderItemRepo, idGen, &appfulfillment.NopOrderValidator{})
 	refundApp := appfulfillment.NewRefundApp(db, refundRepo, refundReasonRepo, idGen)
 	refundReasonApp := appfulfillment.NewRefundReasonApp(db, refundReasonRepo)
 
@@ -151,5 +156,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PromotionRepo:          promotionRepo,
 		CouponRepo:             couponRepo,
 		UserCouponRepo:         userCouponRepo,
+		OrderRepo:              orderRepo,
+		OrderItemRepo:          orderItemRepo,
 	}
 }

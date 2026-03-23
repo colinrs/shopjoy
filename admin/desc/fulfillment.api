@@ -351,13 +351,52 @@ type (
 	GetFulfillmentSummaryReq  {}
 	// Fulfillment summary response
 	FulfillmentSummaryResp {
-		PendingShipment int64 `json:"pending_shipment"`
-		PartialShipped  int64 `json:"partial_shipped"`
-		Shipped         int64 `json:"shipped"`
-		Delivered       int64 `json:"delivered"`
-		PendingRefund   int64 `json:"pending_refund"`
-		Refunding       int64 `json:"refunding"`
-		TotalOrders     int64 `json:"total_orders"`
+		PendingShipment int64  `json:"pending_shipment"`
+		PartialShipped  int64  `json:"partial_shipped"`
+		Shipped         int64  `json:"shipped"`
+		Delivered       int64  `json:"delivered"`
+		PendingRefund   int64  `json:"pending_refund"`
+		Refunding       int64  `json:"refunding"`
+		TotalOrders     int64  `json:"total_orders"`
+		TodayOrders     int64  `json:"today_orders"`
+		TodayGMV        string `json:"today_gmv"`
+	}
+	// ===================== Order Remark Types =====================
+	// Update order remark request
+	UpdateOrderRemarkReq {
+		ID     int64  `path:"id"`
+		Remark string `json:"remark"` // Max 500 characters
+	}
+	// Update order remark response
+	UpdateOrderRemarkResp {
+		OrderID int64 `json:"order_id"`
+	}
+	// ===================== Order Price Adjustment Types =====================
+	// Adjust order price request
+	AdjustOrderPriceReq {
+		ID           int64  `path:"id"`
+		AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in cents)
+		Reason       string `json:"reason"` // Required, max 200 characters
+	}
+	// Adjust order price response
+	AdjustOrderPriceResp {
+		OrderID        int64  `json:"order_id"`
+		OriginalAmount string `json:"original_amount"`
+		AdjustAmount   string `json:"adjust_amount"`
+		NewPayAmount   string `json:"new_pay_amount"`
+		AdjustReason   string `json:"adjust_reason"`
+		AdjustedAt     string `json:"adjusted_at"`
+	}
+	// ===================== Order Export Types =====================
+	// Export orders request
+	ExportOrdersReq {
+		OrderNo           string `form:"order_no,optional"`
+		UserID            int64  `form:"user_id,optional"`
+		Status            string `form:"status,optional"`
+		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+		RefundStatus      int8   `form:"refund_status,optional"`
+		StartTime         string `form:"start_time,optional"` // RFC3339
+		EndTime           string `form:"end_time,optional"` // RFC3339
 	}
 )
 
@@ -452,5 +491,17 @@ service admin-api {
 	@doc "履约摘要统计"
 	@handler GetFulfillmentSummaryHandler
 	get /api/v1/orders/fulfillment-summary (GetFulfillmentSummaryReq) returns (FulfillmentSummaryResp)
+
+	@doc "更新订单备注"
+	@handler UpdateOrderRemarkHandler
+	put /api/v1/orders/:id/remark (UpdateOrderRemarkReq) returns (UpdateOrderRemarkResp)
+
+	@doc "订单改价"
+	@handler AdjustOrderPriceHandler
+	put /api/v1/orders/:id/adjust-price (AdjustOrderPriceReq) returns (AdjustOrderPriceResp)
+
+	@doc "导出订单"
+	@handler ExportOrdersHandler
+	get /api/v1/orders/export (ExportOrdersReq)
 }
 

@@ -298,10 +298,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: fulfillment_orders.GetOrderFulfillmentHandler(serverCtx),
 				},
 				{
+					// 订单改价
+					Method:  http.MethodPut,
+					Path:    "/api/v1/orders/:id/adjust-price",
+					Handler: fulfillment_orders.AdjustOrderPriceHandler(serverCtx),
+				},
+				{
+					// 更新订单备注
+					Method:  http.MethodPut,
+					Path:    "/api/v1/orders/:id/remark",
+					Handler: fulfillment_orders.UpdateOrderRemarkHandler(serverCtx),
+				},
+				{
 					// 订单发货（创建发货单）
 					Method:  http.MethodPut,
 					Path:    "/api/v1/orders/:id/ship",
 					Handler: fulfillment_orders.ShipOrderHandler(serverCtx),
+				},
+				{
+					// 导出订单
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders/export",
+					Handler: fulfillment_orders.ExportOrdersHandler(serverCtx),
 				},
 				{
 					// 履约摘要统计

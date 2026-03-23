@@ -39,12 +39,15 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
 
+	// Parse shipping cost
+	shippingCost, _ := parseMoneyToInt64(req.ShippingCost)
+
 	// Build ship order request
 	shipReq := appfulfillment.ShipOrderRequest{
 		CarrierCode:  req.CarrierCode,
 		CarrierName:  req.CarrierName,
 		TrackingNo:   req.TrackingNo,
-		ShippingCost: parseMoneyToInt64(req.ShippingCost),
+		ShippingCost: shippingCost,
 		Currency:     req.Currency,
 		Remark:       req.Remark,
 	}
@@ -78,16 +81,6 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 		ShipmentID: shipmentResp.ID,
 		ShipmentNo: shipmentResp.ShipmentNo,
 	}, nil
-}
-
-// parseMoneyToInt64 parses a money string to int64 (cents)
-func parseMoneyToInt64(s string) int64 {
-	if s == "" {
-		return 0
-	}
-	var v int64
-	_, _ = fmt.Sscanf(s, "%d", &v)
-	return v
 }
 
 // parseFloat parses a string to float64

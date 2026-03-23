@@ -48,5 +48,7 @@ func (l *GetFulfillmentSummaryLogic) GetFulfillmentSummary(req *types.GetFulfill
 		PendingRefund:   summary.PendingRefund,
 		Refunding:       summary.Refunding,
 		TotalOrders:     summary.TotalOrders,
+		TodayOrders:     summary.TodayOrders,
+		TodayGMV:        formatMoney(summary.TodayGMV),
 	}, nil
 }

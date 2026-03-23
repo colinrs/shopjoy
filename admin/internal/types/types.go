@@ -11,6 +11,21 @@ type ActivateUserRequest struct {
 	ID int64 `path:"id"`
 }
 
+type AdjustOrderPriceReq struct {
+	ID           int64  `path:"id"`
+	AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in cents)
+	Reason       string `json:"reason"`        // Required, max 200 characters
+}
+
+type AdjustOrderPriceResp struct {
+	OrderID        int64  `json:"order_id"`
+	OriginalAmount string `json:"original_amount"`
+	AdjustAmount   string `json:"adjust_amount"`
+	NewPayAmount   string `json:"new_pay_amount"`
+	AdjustReason   string `json:"adjust_reason"`
+	AdjustedAt     string `json:"adjusted_at"`
+}
+
 type AdjustStockReq struct {
 	SKUCode     string `json:"sku_code"`
 	WarehouseID int64  `json:"warehouse_id"`
@@ -396,14 +411,26 @@ type DeleteUserRequest struct {
 	ID int64 `path:"id"`
 }
 
+type ExportOrdersReq struct {
+	OrderNo           string `form:"order_no,optional"`
+	UserID            int64  `form:"user_id,optional"`
+	Status            string `form:"status,optional"`
+	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+	RefundStatus      int8   `form:"refund_status,optional"`
+	StartTime         string `form:"start_time,optional"` // RFC3339
+	EndTime           string `form:"end_time,optional"`   // RFC3339
+}
+
 type FulfillmentSummaryResp struct {
-	PendingShipment int64 `json:"pending_shipment"`
-	PartialShipped  int64 `json:"partial_shipped"`
-	Shipped         int64 `json:"shipped"`
-	Delivered       int64 `json:"delivered"`
-	PendingRefund   int64 `json:"pending_refund"`
-	Refunding       int64 `json:"refunding"`
-	TotalOrders     int64 `json:"total_orders"`
+	PendingShipment int64  `json:"pending_shipment"`
+	PartialShipped  int64  `json:"partial_shipped"`
+	Shipped         int64  `json:"shipped"`
+	Delivered       int64  `json:"delivered"`
+	PendingRefund   int64  `json:"pending_refund"`
+	Refunding       int64  `json:"refunding"`
+	TotalOrders     int64  `json:"total_orders"`
+	TodayOrders     int64  `json:"today_orders"`
+	TodayGMV        string `json:"today_gmv"`
 }
 
 type GenerateCouponCodesReq struct {
@@ -1295,6 +1322,15 @@ type UpdateMarketReq struct {
 	IsActive  *bool     `json:"is_active,optional"`
 	IsDefault *bool     `json:"is_default,optional"`
 	TaxRules  TaxConfig `json:"tax_rules,optional"`
+}
+
+type UpdateOrderRemarkReq struct {
+	ID     int64  `path:"id"`
+	Remark string `json:"remark"` // Max 500 characters
+}
+
+type UpdateOrderRemarkResp struct {
+	OrderID int64 `json:"order_id"`
 }
 
 type UpdateProductLocalizationReq struct {

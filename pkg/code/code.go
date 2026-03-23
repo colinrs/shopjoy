@@ -79,6 +79,12 @@ var (
 	ErrOrderInsufficientStock = &Err{HTTPCode: http.StatusBadRequest, Code: 40006, Msg: "insufficient stock"}
 	ErrOrderInvalidAmount     = &Err{HTTPCode: http.StatusBadRequest, Code: 40007, Msg: "invalid amount"}
 	ErrOrderCartEmpty         = &Err{HTTPCode: http.StatusBadRequest, Code: 40008, Msg: "cart is empty"}
+	// Order adjustment errors
+	ErrOrderCannotAdjustPrice    = &Err{HTTPCode: http.StatusBadRequest, Code: 40009, Msg: "当前状态无法改价"}
+	ErrOrderAdjustAmountExceed   = &Err{HTTPCode: http.StatusBadRequest, Code: 40010, Msg: "改价金额超出限制"}
+	ErrOrderExportLimitExceed    = &Err{HTTPCode: http.StatusBadRequest, Code: 40011, Msg: "导出数量超出限制"}
+	ErrOrderAdjustReasonRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 40012, Msg: "改价原因不能为空"}
+	ErrOrderVersionConflict      = &Err{HTTPCode: http.StatusConflict, Code: 40013, Msg: "订单已被修改，请刷新后重试"}
 
 	// ErrPaymentNotFound ==================== Payment Module (50xxx) ====================
 	ErrPaymentNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}

@@ -3,11 +3,36 @@ package fulfillment_orders
 import (
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 )
+
+// parseMoneyToInt64 parses a money string to int64 (cents)
+func parseMoneyToInt64(s string) (int64, error) {
+	if s == "" {
+		return 0, nil
+	}
+	var v int64
+	_, err := fmt.Sscanf(s, "%d", &v)
+	return v, err
+}
+
+// formatMoney formats cents to money string
+func formatMoney(cents int64) string {
+	return fmt.Sprintf("%d", cents)
+}
+
+// truncateString truncates a string to maxChars characters (UTF-8 safe)
+func truncateString(s string, maxChars int) string {
+	if utf8.RuneCountInString(s) <= maxChars {
+		return s
+	}
+	runes := []rune(s)
+	return string(runes[:maxChars])
+}
 
 // formatAmount formats amount in cents to string
 func formatAmount(amount int64) string {
