@@ -18,6 +18,7 @@ import (
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
 	refunds "github.com/colinrs/shopjoy/admin/internal/handler/refunds"
+	reviews "github.com/colinrs/shopjoy/admin/internal/handler/reviews"
 	shipments "github.com/colinrs/shopjoy/admin/internal/handler/shipments"
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
@@ -668,6 +669,98 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/refunds/statistics",
 					Handler: refunds.GetRefundStatisticsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取评价列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/reviews",
+					Handler: reviews.ListReviewsHandler(serverCtx),
+				},
+				{
+					// 获取评价详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/reviews/:id",
+					Handler: reviews.GetReviewHandler(serverCtx),
+				},
+				{
+					// 删除评价
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/reviews/:id",
+					Handler: reviews.DeleteReviewHandler(serverCtx),
+				},
+				{
+					// 批准评价
+					Method:  http.MethodPut,
+					Path:    "/api/v1/reviews/:id/approve",
+					Handler: reviews.ApproveReviewHandler(serverCtx),
+				},
+				{
+					// 设置精选
+					Method:  http.MethodPut,
+					Path:    "/api/v1/reviews/:id/featured",
+					Handler: reviews.ToggleFeaturedHandler(serverCtx),
+				},
+				{
+					// 隐藏评价
+					Method:  http.MethodPut,
+					Path:    "/api/v1/reviews/:id/hide",
+					Handler: reviews.HideReviewHandler(serverCtx),
+				},
+				{
+					// 创建回复
+					Method:  http.MethodPost,
+					Path:    "/api/v1/reviews/:id/reply",
+					Handler: reviews.CreateReplyHandler(serverCtx),
+				},
+				{
+					// 更新回复
+					Method:  http.MethodPut,
+					Path:    "/api/v1/reviews/:id/reply",
+					Handler: reviews.UpdateReplyHandler(serverCtx),
+				},
+				{
+					// 删除回复
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/reviews/:id/reply",
+					Handler: reviews.DeleteReplyHandler(serverCtx),
+				},
+				{
+					// 显示评价
+					Method:  http.MethodPut,
+					Path:    "/api/v1/reviews/:id/show",
+					Handler: reviews.ShowReviewHandler(serverCtx),
+				},
+				{
+					// 批量批准
+					Method:  http.MethodPost,
+					Path:    "/api/v1/reviews/batch-approve",
+					Handler: reviews.BatchApproveHandler(serverCtx),
+				},
+				{
+					// 批量隐藏
+					Method:  http.MethodPost,
+					Path:    "/api/v1/reviews/batch-hide",
+					Handler: reviews.BatchHideHandler(serverCtx),
+				},
+				{
+					// 获取商品评价统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/reviews/product/:product_id/stats",
+					Handler: reviews.GetProductStatsHandler(serverCtx),
+				},
+				{
+					// 获取评价统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/reviews/stats",
+					Handler: reviews.GetReviewStatsHandler(serverCtx),
 				},
 			}...,
 		),

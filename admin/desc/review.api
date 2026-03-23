@@ -1,0 +1,279 @@
+syntax = "v1"
+
+info (
+	title:   "Review API"
+	desc:    "评价管理相关接口"
+	version: "v1"
+)
+
+type (
+	// List Reviews
+	ListReviewsReq {
+		ProductID int64  `form:"product_id,optional"`
+		Status    string `form:"status,optional"`
+		RatingMin int    `form:"rating_min,optional"`
+		RatingMax int    `form:"rating_max,optional"`
+		HasImage  bool   `form:"has_image,optional"`
+		Keyword   string `form:"keyword,optional"`
+		StartTime string `form:"start_time,optional"`
+		EndTime   string `form:"end_time,optional"`
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"page_size,default=20"`
+	}
+	ReviewListItem {
+		ID            int64    `json:"id"`
+		OrderID       int64    `json:"order_id"`
+		ProductID     int64    `json:"product_id"`
+		ProductName   string   `json:"product_name"`
+		SKUCode       string   `json:"sku_code"`
+		UserName      string   `json:"user_name"`
+		IsAnonymous   bool     `json:"is_anonymous"`
+		IsVerified    bool     `json:"is_verified"`
+		QualityRating int      `json:"quality_rating"`
+		ValueRating   int      `json:"value_rating"`
+		OverallRating string   `json:"overall_rating"`
+		Content       string   `json:"content"`
+		Images        []string `json:"images"`
+		Status        string   `json:"status"`
+		IsFeatured    bool     `json:"is_featured"`
+		HelpfulCount  int      `json:"helpful_count"`
+		HasReply      bool     `json:"has_reply"`
+		CreatedAt     string   `json:"created_at"`
+	}
+	ListReviewsResp {
+		List     []*ReviewListItem `json:"list"`
+		Total    int64             `json:"total"`
+		Page     int               `json:"page"`
+		PageSize int               `json:"page_size"`
+	}
+	// Get Review Detail
+	GetReviewReq {
+		ID int64 `path:"id"`
+	}
+	ReviewDetailResp {
+		ID            int64            `json:"id"`
+		TenantID      int64            `json:"tenant_id"`
+		OrderID       int64            `json:"order_id"`
+		ProductID     int64            `json:"product_id"`
+		ProductName   string           `json:"product_name"`
+		SKUCode       string           `json:"sku_code"`
+		UserID        int64            `json:"user_id"`
+		UserName      string           `json:"user_name"`
+		IsAnonymous   bool             `json:"is_anonymous"`
+		IsVerified    bool             `json:"is_verified"`
+		QualityRating int              `json:"quality_rating"`
+		ValueRating   int              `json:"value_rating"`
+		OverallRating string           `json:"overall_rating"`
+		Content       string           `json:"content"`
+		Images        []string         `json:"images"`
+		Status        string           `json:"status"`
+		IsFeatured    bool             `json:"is_featured"`
+		HelpfulCount  int              `json:"helpful_count"`
+		CreatedAt     string           `json:"created_at"`
+		UpdatedAt     string           `json:"updated_at"`
+		Reply         *ReviewReplyResp `json:"reply,optional"`
+	}
+	ReviewReplyResp {
+		ID        int64  `json:"id"`
+		Content   string `json:"content"`
+		AdminName string `json:"admin_name"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Approve Review
+	ApproveReviewReq {
+		ID int64 `path:"id"`
+	}
+	ApproveReviewResp {
+		ID        int64  `json:"id"`
+		Status    string `json:"status"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Hide Review
+	HideReviewReq {
+		ID     int64  `path:"id"`
+		Reason string `json:"reason,optional"`
+	}
+	HideReviewResp {
+		ID        int64  `json:"id"`
+		Status    string `json:"status"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Show Review
+	ShowReviewReq {
+		ID int64 `path:"id"`
+	}
+	ShowReviewResp {
+		ID        int64  `json:"id"`
+		Status    string `json:"status"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Delete Review
+	DeleteReviewReq {
+		ID int64 `path:"id"`
+	}
+	DeleteReviewResp {
+		ID        int64  `json:"id"`
+		Status    string `json:"status"`
+		DeletedAt string `json:"deleted_at"`
+	}
+	// Toggle Featured
+	ToggleFeaturedReq {
+		ID         int64 `path:"id"`
+		IsFeatured bool  `json:"is_featured"`
+	}
+	ToggleFeaturedResp {
+		ID         int64  `json:"id"`
+		IsFeatured bool   `json:"is_featured"`
+		UpdatedAt  string `json:"updated_at"`
+	}
+	// Create Reply
+	CreateReplyReq {
+		ID      int64  `path:"id"`
+		Content string `json:"content"`
+	}
+	CreateReplyResp {
+		ID        int64  `json:"id"`
+		ReviewID  int64  `json:"review_id"`
+		Content   string `json:"content"`
+		AdminID   int64  `json:"admin_id"`
+		AdminName string `json:"admin_name"`
+		CreatedAt string `json:"created_at"`
+	}
+	// Update Reply
+	UpdateReplyReq {
+		ID      int64  `path:"id"`
+		Content string `json:"content"`
+	}
+	UpdateReplyResp {
+		ID        int64  `json:"id"`
+		ReviewID  int64  `json:"review_id"`
+		Content   string `json:"content"`
+		AdminID   int64  `json:"admin_id"`
+		AdminName string `json:"admin_name"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	// Delete Reply
+	DeleteReplyReq {
+		ID int64 `path:"id"`
+	}
+	DeleteReplyResp {
+		Success bool `json:"success"`
+	}
+	// Batch Approve
+	BatchApproveReq {
+		IDs []int64 `json:"ids"`
+	}
+	BatchApproveResp {
+		SuccessCount int      `json:"success_count"`
+		FailedCount  int      `json:"failed_count"`
+		Errors       []string `json:"errors"`
+	}
+	// Batch Hide
+	BatchHideReq {
+		IDs    []int64 `json:"ids"`
+		Reason string  `json:"reason,optional"`
+	}
+	BatchHideResp {
+		SuccessCount int      `json:"success_count"`
+		FailedCount  int      `json:"failed_count"`
+		Errors       []string `json:"errors"`
+	}
+	// Review Statistics
+	ReviewStatsResp {
+		TotalReviews     int64   `json:"total_reviews"`
+		PendingReviews   int64   `json:"pending_reviews"`
+		ApprovedReviews  int64   `json:"approved_reviews"`
+		HiddenReviews    int64   `json:"hidden_reviews"`
+		AverageRating    string  `json:"average_rating"`
+		QualityAvgRating string  `json:"quality_avg_rating"`
+		ValueAvgRating   string  `json:"value_avg_rating"`
+		FiveStarCount    int64   `json:"five_star_count"`
+		FourStarCount    int64   `json:"four_star_count"`
+		ThreeStarCount   int64   `json:"three_star_count"`
+		TwoStarCount     int64   `json:"two_star_count"`
+		OneStarCount     int64   `json:"one_star_count"`
+		WithImageCount   int64   `json:"with_image_count"`
+		ReplyRate        float64 `json:"reply_rate"`
+		FeaturedCount    int64   `json:"featured_count"`
+	}
+	// Product Statistics
+	ProductStatsReq {
+		ProductID int64 `path:"product_id"`
+	}
+	ProductStatsResp {
+		ProductID          int64          `json:"product_id"`
+		TotalReviews       int            `json:"total_reviews"`
+		AverageRating      string         `json:"average_rating"`
+		QualityAvgRating   string         `json:"quality_avg_rating"`
+		ValueAvgRating     string         `json:"value_avg_rating"`
+		RatingDistribution map[string]int `json:"rating_distribution"`
+		WithImageCount     int            `json:"with_image_count"`
+		ReplyCount         int            `json:"reply_count"`
+		ReplyRate          float64        `json:"reply_rate"`
+	}
+)
+
+@server (
+	group:      reviews
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取评价列表"
+	@handler ListReviewsHandler
+	get /api/v1/reviews (ListReviewsReq) returns (ListReviewsResp)
+
+	@doc "获取评价详情"
+	@handler GetReviewHandler
+	get /api/v1/reviews/:id (GetReviewReq) returns (ReviewDetailResp)
+
+	@doc "批准评价"
+	@handler ApproveReviewHandler
+	put /api/v1/reviews/:id/approve (ApproveReviewReq) returns (ApproveReviewResp)
+
+	@doc "隐藏评价"
+	@handler HideReviewHandler
+	put /api/v1/reviews/:id/hide (HideReviewReq) returns (HideReviewResp)
+
+	@doc "显示评价"
+	@handler ShowReviewHandler
+	put /api/v1/reviews/:id/show (ShowReviewReq) returns (ShowReviewResp)
+
+	@doc "删除评价"
+	@handler DeleteReviewHandler
+	delete /api/v1/reviews/:id (DeleteReviewReq) returns (DeleteReviewResp)
+
+	@doc "设置精选"
+	@handler ToggleFeaturedHandler
+	put /api/v1/reviews/:id/featured (ToggleFeaturedReq) returns (ToggleFeaturedResp)
+
+	@doc "创建回复"
+	@handler CreateReplyHandler
+	post /api/v1/reviews/:id/reply (CreateReplyReq) returns (CreateReplyResp)
+
+	@doc "更新回复"
+	@handler UpdateReplyHandler
+	put /api/v1/reviews/:id/reply (UpdateReplyReq) returns (UpdateReplyResp)
+
+	@doc "删除回复"
+	@handler DeleteReplyHandler
+	delete /api/v1/reviews/:id/reply (DeleteReplyReq) returns (DeleteReplyResp)
+
+	@doc "批量批准"
+	@handler BatchApproveHandler
+	post /api/v1/reviews/batch-approve (BatchApproveReq) returns (BatchApproveResp)
+
+	@doc "批量隐藏"
+	@handler BatchHideHandler
+	post /api/v1/reviews/batch-hide (BatchHideReq) returns (BatchHideResp)
+
+	@doc "获取评价统计"
+	@handler GetReviewStatsHandler
+	get /api/v1/reviews/stats (ReviewStatsResp) returns (ReviewStatsResp)
+
+	@doc "获取商品评价统计"
+	@handler GetProductStatsHandler
+	get /api/v1/reviews/product/:product_id/stats (ProductStatsReq) returns (ProductStatsResp)
+}
+

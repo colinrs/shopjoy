@@ -74,6 +74,26 @@ type ApproveRefundReq struct {
 	ID int64 `path:"id"`
 }
 
+type ApproveReviewReq struct {
+	ID int64 `path:"id"`
+}
+
+type ApproveReviewResp struct {
+	ID        int64  `json:"id"`
+	Status    string `json:"status"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type BatchApproveReq struct {
+	IDs []int64 `json:"ids"`
+}
+
+type BatchApproveResp struct {
+	SuccessCount int      `json:"success_count"`
+	FailedCount  int      `json:"failed_count"`
+	Errors       []string `json:"errors"`
+}
+
 type BatchCreateShipmentsReq struct {
 	CarrierCode string                 `json:"carrier_code"`
 	CarrierName string                 `json:"carrier_name,optional"`
@@ -85,6 +105,17 @@ type BatchCreateShipmentsResp struct {
 	Success int                       `json:"success"`
 	Failed  int                       `json:"failed"`
 	Results []BatchShipmentResultResp `json:"results"`
+}
+
+type BatchHideReq struct {
+	IDs    []int64 `json:"ids"`
+	Reason string  `json:"reason,optional"`
+}
+
+type BatchHideResp struct {
+	SuccessCount int      `json:"success_count"`
+	FailedCount  int      `json:"failed_count"`
+	Errors       []string `json:"errors"`
 }
 
 type BatchShipmentItemReq struct {
@@ -347,6 +378,20 @@ type CreatePromotionRulesResp struct {
 	IDs []int64 `json:"ids"`
 }
 
+type CreateReplyReq struct {
+	ID      int64  `path:"id"`
+	Content string `json:"content"`
+}
+
+type CreateReplyResp struct {
+	ID        int64  `json:"id"`
+	ReviewID  int64  `json:"review_id"`
+	Content   string `json:"content"`
+	AdminID   int64  `json:"admin_id"`
+	AdminName string `json:"admin_name"`
+	CreatedAt string `json:"created_at"`
+}
+
 type CreateSKUReq struct {
 	ProductID      int64             `json:"product_id"`
 	Code           string            `json:"code"`
@@ -405,6 +450,24 @@ type DeletePromotionReq struct {
 
 type DeletePromotionRuleReq struct {
 	ID int64 `path:"id"`
+}
+
+type DeleteReplyReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteReplyResp struct {
+	Success bool `json:"success"`
+}
+
+type DeleteReviewReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteReviewResp struct {
+	ID        int64  `json:"id"`
+	Status    string `json:"status"`
+	DeletedAt string `json:"deleted_at"`
 }
 
 type DeleteUserRequest struct {
@@ -541,6 +604,10 @@ type GetRefundStatisticsReq struct {
 	Period    string `form:"period,default=30d"`  // 7d, 30d, 90d
 }
 
+type GetReviewReq struct {
+	ID int64 `path:"id"`
+}
+
 type GetSKUInventoryReq struct {
 	SKUCode string `path:"sku_code"`
 }
@@ -570,6 +637,17 @@ type GetUserResponse struct {
 
 type GetWarehouseReq struct {
 	ID int64 `path:"id"`
+}
+
+type HideReviewReq struct {
+	ID     int64  `path:"id"`
+	Reason string `json:"reason,optional"`
+}
+
+type HideReviewResp struct {
+	ID        int64  `json:"id"`
+	Status    string `json:"status"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type InventoryLogResp struct {
@@ -780,6 +858,26 @@ type ListRefundsResp struct {
 	PageSize int                 `json:"page_size"`
 }
 
+type ListReviewsReq struct {
+	ProductID int64  `form:"product_id,optional"`
+	Status    string `form:"status,optional"`
+	RatingMin int    `form:"rating_min,optional"`
+	RatingMax int    `form:"rating_max,optional"`
+	HasImage  bool   `form:"has_image,optional"`
+	Keyword   string `form:"keyword,optional"`
+	StartTime string `form:"start_time,optional"`
+	EndTime   string `form:"end_time,optional"`
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"page_size,default=20"`
+}
+
+type ListReviewsResp struct {
+	List     []*ReviewListItem `json:"list"`
+	Total    int64             `json:"total"`
+	Page     int               `json:"page"`
+	PageSize int               `json:"page_size"`
+}
+
 type ListSKUsByProductReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -972,6 +1070,22 @@ type ProductMarketResp struct {
 	PublishedAt         string `json:"published_at,optional"`
 }
 
+type ProductStatsReq struct {
+	ProductID int64 `path:"product_id"`
+}
+
+type ProductStatsResp struct {
+	ProductID          int64          `json:"product_id"`
+	TotalReviews       int            `json:"total_reviews"`
+	AverageRating      string         `json:"average_rating"`
+	QualityAvgRating   string         `json:"quality_avg_rating"`
+	ValueAvgRating     string         `json:"value_avg_rating"`
+	RatingDistribution map[string]int `json:"rating_distribution"`
+	WithImageCount     int            `json:"with_image_count"`
+	ReplyCount         int            `json:"reply_count"`
+	ReplyRate          float64        `json:"reply_rate"`
+}
+
 type PromotionDetailResp struct {
 	ID             int64    `json:"id"`
 	Name           string   `json:"name"`
@@ -1134,6 +1248,77 @@ type ResetPasswordResponse struct {
 	TemporaryPassword string `json:"temporary_password"`
 }
 
+type ReviewDetailResp struct {
+	ID            int64            `json:"id"`
+	TenantID      int64            `json:"tenant_id"`
+	OrderID       int64            `json:"order_id"`
+	ProductID     int64            `json:"product_id"`
+	ProductName   string           `json:"product_name"`
+	SKUCode       string           `json:"sku_code"`
+	UserID        int64            `json:"user_id"`
+	UserName      string           `json:"user_name"`
+	IsAnonymous   bool             `json:"is_anonymous"`
+	IsVerified    bool             `json:"is_verified"`
+	QualityRating int              `json:"quality_rating"`
+	ValueRating   int              `json:"value_rating"`
+	OverallRating string           `json:"overall_rating"`
+	Content       string           `json:"content"`
+	Images        []string         `json:"images"`
+	Status        string           `json:"status"`
+	IsFeatured    bool             `json:"is_featured"`
+	HelpfulCount  int              `json:"helpful_count"`
+	CreatedAt     string           `json:"created_at"`
+	UpdatedAt     string           `json:"updated_at"`
+	Reply         *ReviewReplyResp `json:"reply,optional"`
+}
+
+type ReviewListItem struct {
+	ID            int64    `json:"id"`
+	OrderID       int64    `json:"order_id"`
+	ProductID     int64    `json:"product_id"`
+	ProductName   string   `json:"product_name"`
+	SKUCode       string   `json:"sku_code"`
+	UserName      string   `json:"user_name"`
+	IsAnonymous   bool     `json:"is_anonymous"`
+	IsVerified    bool     `json:"is_verified"`
+	QualityRating int      `json:"quality_rating"`
+	ValueRating   int      `json:"value_rating"`
+	OverallRating string   `json:"overall_rating"`
+	Content       string   `json:"content"`
+	Images        []string `json:"images"`
+	Status        string   `json:"status"`
+	IsFeatured    bool     `json:"is_featured"`
+	HelpfulCount  int      `json:"helpful_count"`
+	HasReply      bool     `json:"has_reply"`
+	CreatedAt     string   `json:"created_at"`
+}
+
+type ReviewReplyResp struct {
+	ID        int64  `json:"id"`
+	Content   string `json:"content"`
+	AdminName string `json:"admin_name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type ReviewStatsResp struct {
+	TotalReviews     int64   `json:"total_reviews"`
+	PendingReviews   int64   `json:"pending_reviews"`
+	ApprovedReviews  int64   `json:"approved_reviews"`
+	HiddenReviews    int64   `json:"hidden_reviews"`
+	AverageRating    string  `json:"average_rating"`
+	QualityAvgRating string  `json:"quality_avg_rating"`
+	ValueAvgRating   string  `json:"value_avg_rating"`
+	FiveStarCount    int64   `json:"five_star_count"`
+	FourStarCount    int64   `json:"four_star_count"`
+	ThreeStarCount   int64   `json:"three_star_count"`
+	TwoStarCount     int64   `json:"two_star_count"`
+	OneStarCount     int64   `json:"one_star_count"`
+	WithImageCount   int64   `json:"with_image_count"`
+	ReplyRate        float64 `json:"reply_rate"`
+	FeaturedCount    int64   `json:"featured_count"`
+}
+
 type SKUDetailResp struct {
 	ID             int64             `json:"id"`
 	ProductID      int64             `json:"product_id"`
@@ -1241,6 +1426,16 @@ type ShipmentItemResp struct {
 	Quantity    int    `json:"quantity"`
 }
 
+type ShowReviewReq struct {
+	ID int64 `path:"id"`
+}
+
+type ShowReviewResp struct {
+	ID        int64  `json:"id"`
+	Status    string `json:"status"`
+	UpdatedAt string `json:"updated_at"`
+}
+
 type SuspendUserRequest struct {
 	ID int64 `path:"id"`
 }
@@ -1259,6 +1454,17 @@ type TaxConfig struct {
 type ToggleBrandPageReq struct {
 	ID      int64 `path:"id"`
 	Enabled bool  `json:"enabled"`
+}
+
+type ToggleFeaturedReq struct {
+	ID         int64 `path:"id"`
+	IsFeatured bool  `json:"is_featured"`
+}
+
+type ToggleFeaturedResp struct {
+	ID         int64  `json:"id"`
+	IsFeatured bool   `json:"is_featured"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type UpdateBrandReq struct {
@@ -1405,6 +1611,21 @@ type UpdatePromotionRuleReq struct {
 	DiscountType  string `json:"discount_type,optional"`
 	DiscountValue string `json:"discount_value,optional"`
 	Priority      int    `json:"priority,optional"`
+}
+
+type UpdateReplyReq struct {
+	ID      int64  `path:"id"`
+	Content string `json:"content"`
+}
+
+type UpdateReplyResp struct {
+	ID        int64  `json:"id"`
+	ReviewID  int64  `json:"review_id"`
+	Content   string `json:"content"`
+	AdminID   int64  `json:"admin_id"`
+	AdminName string `json:"admin_name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type UpdateSKUReq struct {
