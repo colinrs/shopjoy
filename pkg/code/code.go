@@ -250,4 +250,22 @@ var (
 	ErrSKUParseFailed            = &Err{HTTPCode: http.StatusBadRequest, Code: 190004, Msg: "SKU编码解析失败"}
 	ErrSKUCodeTooLong            = &Err{HTTPCode: http.StatusBadRequest, Code: 190005, Msg: "SKU编码长度超过限制"}
 	ErrSKUPrefixStartsWithNumber = &Err{HTTPCode: http.StatusBadRequest, Code: 190006, Msg: "SKU前缀不能以数字开头"}
+
+	// ErrReviewNotFound ==================== Review Module (210xxx) ====================
+	ErrReviewNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 210001, Msg: "review not found"}
+	ErrReviewAlreadyReplied      = &Err{HTTPCode: http.StatusBadRequest, Code: 210002, Msg: "review already has reply"}
+	ErrReviewCannotReplyHidden   = &Err{HTTPCode: http.StatusBadRequest, Code: 210003, Msg: "cannot reply to hidden review"}
+	ErrReviewInvalidStatus       = &Err{HTTPCode: http.StatusBadRequest, Code: 210004, Msg: "invalid review status"}
+	ErrReviewContentTooLong      = &Err{HTTPCode: http.StatusBadRequest, Code: 210005, Msg: "review content exceeds limit"}
+	ErrReplyContentTooLong       = &Err{HTTPCode: http.StatusBadRequest, Code: 210006, Msg: "reply content exceeds limit"}
+	ErrReplyNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 210007, Msg: "reply not found"}
+	ErrReviewCannotApprove       = &Err{HTTPCode: http.StatusBadRequest, Code: 210008, Msg: "cannot approve review in current status"}
+	ErrReviewCannotHide          = &Err{HTTPCode: http.StatusBadRequest, Code: 210009, Msg: "cannot hide review in current status"}
+	ErrReviewCannotShow          = &Err{HTTPCode: http.StatusBadRequest, Code: 210010, Msg: "cannot show review in current status"}
+	ErrReviewCannotFeature       = &Err{HTTPCode: http.StatusBadRequest, Code: 210011, Msg: "can only feature approved reviews"}
+	ErrReviewAlreadyDeleted      = &Err{HTTPCode: http.StatusBadRequest, Code: 210012, Msg: "review already deleted"}
+	ErrReviewReplyEmpty          = &Err{HTTPCode: http.StatusBadRequest, Code: 210013, Msg: "reply content cannot be empty"}
+	ErrReviewInvalidRating       = &Err{HTTPCode: http.StatusBadRequest, Code: 210014, Msg: "rating must be between 1 and 5"}
+	ErrReviewBatchEmpty          = &Err{HTTPCode: http.StatusBadRequest, Code: 210015, Msg: "batch operation requires at least one review id"}
+	ErrReviewBatchLimitExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 210016, Msg: "batch operation limited to 100 reviews"}
 )
