@@ -84,6 +84,11 @@ type ApproveReviewResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
+type AssignRolesRequest struct {
+	ID      int64   `path:"id"`
+	RoleIDs []int64 `json:"role_ids"`
+}
+
 type BatchApproveReq struct {
 	IDs []int64 `json:"ids"`
 }
@@ -260,6 +265,18 @@ type CouponUsageResp struct {
 	OrderID        int64  `json:"order_id"`
 	DiscountAmount string `json:"discount_amount"`
 	UsedAt         string `json:"used_at"`
+}
+
+type CreateAdminUserRequest struct {
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Password string  `json:"password" validate:"min=6"`
+	Mobile   string  `json:"mobile,optional"`
+	RealName string  `json:"real_name,optional"`
+	Avatar   string  `json:"avatar,optional"`
+	Type     int     `json:"type"`               // 1=平台超管 2=商家管理员 3=商家子账号
+	TenantID int64   `json:"tenant_id,optional"` // 平台超管可指定租户
+	RoleIDs  []int64 `json:"role_ids,optional"`
 }
 
 type CreateBrandReq struct {
@@ -1378,6 +1395,10 @@ type RemoveFromMarketReq struct {
 	MarketID  int64 `path:"market_id"`
 }
 
+type ResetAdminPasswordResponse struct {
+	TemporaryPassword string `json:"temporary_password"`
+}
+
 type ResetPasswordRequest struct {
 	ID int64 `path:"id"`
 }
@@ -1631,6 +1652,14 @@ type TransactionStats struct {
 	Success int64 `json:"success"`
 	Pending int64 `json:"pending"`
 	Failed  int64 `json:"failed"`
+}
+
+type UpdateAdminUserRequest struct {
+	ID       int64  `path:"id"`
+	RealName string `json:"real_name,optional"`
+	Avatar   string `json:"avatar,optional"`
+	Mobile   string `json:"mobile,optional"`
+	Email    string `json:"email,optional"`
 }
 
 type UpdateBrandReq struct {

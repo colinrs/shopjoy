@@ -49,6 +49,35 @@ type (
 		NewPassword     string `json:"new_password" validate:"min=6"`
 		ConfirmPassword string `json:"confirm_password"`
 	}
+	// Create Admin User
+	CreateAdminUserRequest {
+		Username string  `json:"username"`
+		Email    string  `json:"email"`
+		Password string  `json:"password" validate:"min=6"`
+		Mobile   string  `json:"mobile,optional"`
+		RealName string  `json:"real_name,optional"`
+		Avatar   string  `json:"avatar,optional"`
+		Type     int     `json:"type"` // 1=平台超管 2=商家管理员 3=商家子账号
+		TenantID int64   `json:"tenant_id,optional"` // 平台超管可指定租户
+		RoleIDs  []int64 `json:"role_ids,optional"`
+	}
+	// Update Admin User
+	UpdateAdminUserRequest {
+		ID       int64  `path:"id"`
+		RealName string `json:"real_name,optional"`
+		Avatar   string `json:"avatar,optional"`
+		Mobile   string `json:"mobile,optional"`
+		Email    string `json:"email,optional"`
+	}
+	// Assign Roles
+	AssignRolesRequest {
+		ID      int64   `path:"id"`
+		RoleIDs []int64 `json:"role_ids"`
+	}
+	// Reset Password Response
+	ResetAdminPasswordResponse {
+		TemporaryPassword string `json:"temporary_password"`
+	}
 )
 
 @server (
@@ -59,6 +88,30 @@ service admin-api {
 	@doc "获取管理员列表"
 	@handler ListAdminUsersHandler
 	get /api/v1/admin-users (ListAdminUsersRequest) returns (ListAdminUsersResponse)
+
+	@doc "创建管理员"
+	@handler CreateAdminUserHandler
+	post /api/v1/admin-users (CreateAdminUserRequest) returns (AdminUserInfo)
+
+	@doc "获取管理员详情"
+	@handler GetAdminUserHandler
+	get /api/v1/admin-users/:id (AdminUserIDRequest) returns (AdminUserInfo)
+
+	@doc "更新管理员"
+	@handler UpdateAdminUserHandler
+	put /api/v1/admin-users/:id (UpdateAdminUserRequest) returns (AdminUserInfo)
+
+	@doc "删除管理员"
+	@handler DeleteAdminUserHandler
+	delete /api/v1/admin-users/:id (AdminUserIDRequest)
+
+	@doc "重置管理员密码"
+	@handler ResetAdminPasswordHandler
+	post /api/v1/admin-users/:id/reset-password (AdminUserIDRequest) returns (ResetAdminPasswordResponse)
+
+	@doc "分配角色"
+	@handler AssignRolesHandler
+	put /api/v1/admin-users/:id/roles (AssignRolesRequest)
 
 	@doc "禁用管理员"
 	@handler DisableAdminUserHandler

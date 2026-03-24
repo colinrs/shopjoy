@@ -34,6 +34,18 @@ type Repository interface {
 
 	// Exists 检查邮箱或手机号是否已存在
 	Exists(ctx context.Context, db *gorm.DB, email, mobile string) (bool, error)
+
+	// UpdatePassword 更新密码
+	UpdatePassword(ctx context.Context, db *gorm.DB, id int64, hashedPassword string) error
+
+	// ExistsByUsername 检查用户名是否已存在
+	ExistsByUsername(ctx context.Context, db *gorm.DB, tenantID int64, username string) (bool, error)
+
+	// ExistsByEmail 检查邮箱是否已存在（在租户范围内）
+	ExistsByEmail(ctx context.Context, db *gorm.DB, tenantID int64, email string) (bool, error)
+
+	// CountMainAccount 统计租户主账号数量
+	CountMainAccount(ctx context.Context, db *gorm.DB, tenantID int64) (int64, error)
 }
 
 // Query 查询条件

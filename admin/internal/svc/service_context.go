@@ -87,7 +87,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	userService := appUser.NewService(db, userRepo, addressRepo, idGen)
 
 	adminUserRepo := persistence.NewAdminUserRepository()
-	adminUserService := appAdminUser.NewService(adminUserRepo, db, c.JWT.Secret)
+	roleRepo := persistence.NewRoleRepository()
+	adminUserService := appAdminUser.NewService(adminUserRepo, roleRepo, db, c.JWT.Secret)
 
 	jwtManager := auth.NewJWTManager(c.JWT.Secret, time.Duration(c.JWT.AccessExpiry)*time.Second, time.Duration(c.JWT.RefreshExpiry)*time.Second)
 

@@ -42,6 +42,30 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: admin_users.ListAdminUsersHandler(serverCtx),
 				},
 				{
+					// 创建管理员
+					Method:  http.MethodPost,
+					Path:    "/api/v1/admin-users",
+					Handler: admin_users.CreateAdminUserHandler(serverCtx),
+				},
+				{
+					// 获取管理员详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/admin-users/:id",
+					Handler: admin_users.GetAdminUserHandler(serverCtx),
+				},
+				{
+					// 更新管理员
+					Method:  http.MethodPut,
+					Path:    "/api/v1/admin-users/:id",
+					Handler: admin_users.UpdateAdminUserHandler(serverCtx),
+				},
+				{
+					// 删除管理员
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/admin-users/:id",
+					Handler: admin_users.DeleteAdminUserHandler(serverCtx),
+				},
+				{
 					// 禁用管理员
 					Method:  http.MethodPost,
 					Path:    "/api/v1/admin-users/:id/disable",
@@ -52,6 +76,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/admin-users/:id/enable",
 					Handler: admin_users.EnableAdminUserHandler(serverCtx),
+				},
+				{
+					// 重置管理员密码
+					Method:  http.MethodPost,
+					Path:    "/api/v1/admin-users/:id/reset-password",
+					Handler: admin_users.ResetAdminPasswordHandler(serverCtx),
+				},
+				{
+					// 分配角色
+					Method:  http.MethodPut,
+					Path:    "/api/v1/admin-users/:id/roles",
+					Handler: admin_users.AssignRolesHandler(serverCtx),
 				},
 				{
 					// 修改管理员密码

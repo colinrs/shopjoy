@@ -2,10 +2,14 @@ package adminuser
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
+	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
@@ -17,14 +21,16 @@ const (
 
 type service struct {
 	repo      adminuser.Repository
+	roleRepo  role.Repository
 	db        *gorm.DB
 	jwtSecret []byte
 }
 
 // NewService 创建管理员应用服务
-func NewService(repo adminuser.Repository, db *gorm.DB, jwtSecret string) Service {
+func NewService(repo adminuser.Repository, roleRepo role.Repository, db *gorm.DB, jwtSecret string) Service {
 	return &service{
 		repo:      repo,
+		roleRepo:  roleRepo,
 		db:        db,
 		jwtSecret: []byte(jwtSecret),
 	}
@@ -260,6 +266,222 @@ func (s *service) Enable(ctx context.Context, operatorID, targetID int64) error 
 	}
 
 	return s.repo.Update(ctx, s.db, target)
+}
+
+// Create 创建管理员
+func (s *service) Create(ctx context.Context, operatorID int64, req CreateAdminUserRequest) (*AdminUserResponse, error) {
+	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 确定目标租户ID
+	targetTenantID := req.TenantID
+	if !operator.IsSuperAdmin() {
+		// 非平台超管只能在自己租户创建用户
+		targetTenantID = operator.TenantID
+	}
+
+	// BR-010: 用户名在租户内唯一
+	if req.Username != "" {
+		exists, err := s.repo.ExistsByUsername(ctx, s.db, targetTenantID, req.Username)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, code.ErrAdminUsernameExists
+		}
+	}
+
+	// BR-011: 邮箱在租户内唯一
+	if req.Email != "" {
+		exists, err := s.repo.ExistsByEmail(ctx, s.db, targetTenantID, req.Email)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, code.ErrAdminEmailExists
+		}
+	}
+
+	// BR-012: 每个租户只能有一个主账号 (Type=2)
+	if adminuser.Type(req.Type) == adminuser.TypeTenantAdmin && targetTenantID > 0 {
+		count, err := s.repo.CountMainAccount(ctx, s.db, targetTenantID)
+		if err != nil {
+			return nil, err
+		}
+		if count > 0 {
+			return nil, code.ErrAdminMainAccountExists
+		}
+	}
+
+	// 创建用户
+	user := &adminuser.AdminUser{
+		TenantID: targetTenantID,
+		Username: req.Username,
+		Email:    req.Email,
+		Mobile:   req.Mobile,
+		RealName: req.RealName,
+		Avatar:   req.Avatar,
+		Type:     adminuser.Type(req.Type),
+		Status:   adminuser.StatusActive,
+	}
+
+	if err := user.SetPassword(req.Password); err != nil {
+		return nil, err
+	}
+
+	// 事务：创建用户 + 分配角色
+	err = s.db.Transaction(func(tx *gorm.DB) error {
+		if err := s.repo.Create(ctx, tx, user); err != nil {
+			return err
+		}
+
+		// 分配角色
+		if len(req.RoleIDs) > 0 {
+			if err := s.roleRepo.AssignToUser(ctx, tx, shared.TenantID(targetTenantID), user.ID, req.RoleIDs); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.toResponse(user), nil
+}
+
+// Update 更新管理员
+func (s *service) Update(ctx context.Context, operatorID int64, req UpdateAdminUserRequest) (*AdminUserResponse, error) {
+	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
+	if err != nil {
+		return nil, err
+	}
+
+	target, err := s.repo.FindByID(ctx, s.db, req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 权限检查
+	if !operator.CanManageTenant(target.TenantID) {
+		return nil, code.ErrAdminPermissionDenied
+	}
+
+	// 更新资料
+	target.UpdateProfile(req.RealName, req.Avatar, req.Mobile)
+
+	// 更新邮箱（如果提供且不同）
+	if req.Email != "" && req.Email != target.Email {
+		// BR-011: 邮箱在租户内唯一
+		exists, err := s.repo.ExistsByEmail(ctx, s.db, target.TenantID, req.Email)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, code.ErrAdminEmailExists
+		}
+		target.Email = req.Email
+	}
+
+	if err := s.repo.Update(ctx, s.db, target); err != nil {
+		return nil, err
+	}
+
+	return s.toResponse(target), nil
+}
+
+// Delete 删除管理员
+func (s *service) Delete(ctx context.Context, operatorID, targetID int64) error {
+	// BR-013: 不能删除自己
+	if operatorID == targetID {
+		return code.ErrAdminCannotDeleteSelf
+	}
+
+	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
+	if err != nil {
+		return err
+	}
+
+	target, err := s.repo.FindByID(ctx, s.db, targetID)
+	if err != nil {
+		return err
+	}
+
+	// 权限检查
+	if !operator.CanManageTenant(target.TenantID) {
+		return code.ErrAdminPermissionDenied
+	}
+
+	return s.repo.Delete(ctx, s.db, targetID)
+}
+
+// AssignRoles 分配角色
+func (s *service) AssignRoles(ctx context.Context, operatorID int64, req AssignRolesRequest) error {
+	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
+	if err != nil {
+		return err
+	}
+
+	target, err := s.repo.FindByID(ctx, s.db, req.AdminUserID)
+	if err != nil {
+		return err
+	}
+
+	// 权限检查
+	if !operator.CanManageTenant(target.TenantID) {
+		return code.ErrAdminPermissionDenied
+	}
+
+	return s.roleRepo.AssignToUser(ctx, s.db, shared.TenantID(target.TenantID), req.AdminUserID, req.RoleIDs)
+}
+
+// ResetPassword 重置密码
+func (s *service) ResetPassword(ctx context.Context, operatorID, targetID int64) (*ResetPasswordResponse, error) {
+	operator, err := s.repo.FindByID(ctx, s.db, operatorID)
+	if err != nil {
+		return nil, err
+	}
+
+	target, err := s.repo.FindByID(ctx, s.db, targetID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 权限检查
+	if !operator.CanManageTenant(target.TenantID) {
+		return nil, code.ErrAdminPermissionDenied
+	}
+
+	// 生成随机临时密码（12位）
+	tempPassword, err := generateRandomPassword(12)
+	if err != nil {
+		return nil, err
+	}
+
+	// 设置新密码
+	if err := target.SetPassword(tempPassword); err != nil {
+		return nil, err
+	}
+
+	if err := s.repo.Update(ctx, s.db, target); err != nil {
+		return nil, err
+	}
+
+	return &ResetPasswordResponse{
+		TemporaryPassword: tempPassword,
+	}, nil
+}
+
+// generateRandomPassword 生成随机密码
+func generateRandomPassword(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes)[:length], nil
 }
 
 // 生成登录响应
