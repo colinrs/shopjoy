@@ -961,6 +961,7 @@ export const adminUserApi = {
 
 | Type | Value | Description |
 |------|-------|-------------|
+| TypeSuperAdmin | 1 | 平台超级管理员（TenantID=0） |
 | MerchantAdmin | 2 | 商家主账号 |
 | MerchantSubAccount | 3 | 商家子账号 |
 
