@@ -87,11 +87,26 @@ var (
 	ErrOrderVersionConflict      = &Err{HTTPCode: http.StatusConflict, Code: 40013, Msg: "订单已被修改，请刷新后重试"}
 
 	// ErrPaymentNotFound ==================== Payment Module (50xxx) ====================
-	ErrPaymentNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}
-	ErrPaymentInvalidAmount = &Err{HTTPCode: http.StatusBadRequest, Code: 50002, Msg: "invalid payment amount"}
-	ErrPaymentFailed        = &Err{HTTPCode: http.StatusPaymentRequired, Code: 50003, Msg: "payment failed"}
-	ErrPaymentAlreadyPaid   = &Err{HTTPCode: http.StatusBadRequest, Code: 50004, Msg: "payment already completed"}
-	ErrPaymentExpired       = &Err{HTTPCode: http.StatusBadRequest, Code: 50005, Msg: "payment expired"}
+	ErrPaymentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}
+	ErrPaymentInvalidAmount         = &Err{HTTPCode: http.StatusBadRequest, Code: 50002, Msg: "invalid payment amount"}
+	ErrPaymentFailed                = &Err{HTTPCode: http.StatusPaymentRequired, Code: 50003, Msg: "payment failed"}
+	ErrPaymentAlreadyPaid           = &Err{HTTPCode: http.StatusBadRequest, Code: 50004, Msg: "payment already completed"}
+	ErrPaymentExpired               = &Err{HTTPCode: http.StatusBadRequest, Code: 50005, Msg: "payment expired"}
+	ErrPaymentOrderNotPaid          = &Err{HTTPCode: http.StatusBadRequest, Code: 50006, Msg: "order not paid, cannot refund"}
+	ErrPaymentRefundAmountExceeded = &Err{HTTPCode: http.StatusBadRequest, Code: 50007, Msg: "refund amount exceeds refundable"}
+	ErrPaymentRefundReasonRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 50008, Msg: "refund reason is required"}
+	ErrChannelRefundFailed          = &Err{HTTPCode: http.StatusInternalServerError, Code: 50009, Msg: "channel refund failed"}
+	ErrPaymentOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 50010, Msg: "order not found"}
+	ErrPaymentOrderAlreadyRefunded  = &Err{HTTPCode: http.StatusBadRequest, Code: 50011, Msg: "order already fully refunded"}
+	ErrTransactionNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 50012, Msg: "transaction not found"}
+	ErrPaymentChannelUnavailable     = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 50013, Msg: "payment channel unavailable"}
+	ErrRefundNotSupported           = &Err{HTTPCode: http.StatusBadRequest, Code: 50014, Msg: "refund not supported for this channel"}
+	ErrCurrencyNotSupported         = &Err{HTTPCode: http.StatusBadRequest, Code: 50015, Msg: "currency not supported by channel"}
+	ErrPaymentRefundNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 50016, Msg: "payment refund not found"}
+	ErrPaymentRequiresAction        = &Err{HTTPCode: http.StatusAccepted, Code: 50017, Msg: "payment requires additional action"}
+	ErrRefundCurrencyMismatch       = &Err{HTTPCode: http.StatusBadRequest, Code: 50018, Msg: "refund currency must match payment currency"}
+	ErrIdempotencyKeyConflict        = &Err{HTTPCode: http.StatusConflict, Code: 50019, Msg: "duplicate idempotency key"}
+	ErrDisputeCreated                = &Err{HTTPCode: http.StatusConflict, Code: 50020, Msg: "dispute created for this charge"}
 
 	// ErrCartItemNotFound ==================== Cart Module (60xxx) ====================
 	ErrCartItemNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 60001, Msg: "cart item not found"}
