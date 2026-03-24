@@ -37,6 +37,13 @@ var (
 	ErrAdminPasswordMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 10010, Msg: "passwords do not match"}
 	ErrAdminPermissionDenied = &Err{HTTPCode: http.StatusForbidden, Code: 10011, Msg: "permission denied"}
 
+	// Admin additional errors
+	ErrAdminCannotDisableSelf = &Err{HTTPCode: http.StatusForbidden, Code: 10012, Msg: "cannot disable yourself"}
+	ErrAdminInvalidType       = &Err{HTTPCode: http.StatusBadRequest, Code: 10013, Msg: "invalid admin type"}
+	ErrAdminUsernameExists    = &Err{HTTPCode: http.StatusBadRequest, Code: 10014, Msg: "username already exists"}
+	ErrAdminEmailExists       = &Err{HTTPCode: http.StatusBadRequest, Code: 10015, Msg: "email already exists"}
+	ErrAdminMainAccountExists = &Err{HTTPCode: http.StatusBadRequest, Code: 10016, Msg: "tenant already has a main account"}
+
 	// ErrUserInvalidEmail ==================== User Module (11xxx) ====================
 	ErrUserInvalidEmail     = &Err{HTTPCode: http.StatusBadRequest, Code: 11001, Msg: "invalid email format"}
 	ErrUserInvalidPhone     = &Err{HTTPCode: http.StatusBadRequest, Code: 11002, Msg: "invalid phone format"}
@@ -46,6 +53,12 @@ var (
 	ErrUserWrongPassword    = &Err{HTTPCode: http.StatusUnauthorized, Code: 11006, Msg: "wrong password"}
 	ErrUserAlreadyDeleted   = &Err{HTTPCode: http.StatusBadRequest, Code: 11007, Msg: "user already deleted"}
 	ErrUserPasswordMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 11008, Msg: "passwords do not match"}
+
+	// User additional errors
+	ErrUserSuspended         = &Err{HTTPCode: http.StatusBadRequest, Code: 11009, Msg: "user already suspended"}
+	ErrUserCannotSuspendSelf = &Err{HTTPCode: http.StatusForbidden, Code: 11010, Msg: "cannot suspend yourself"}
+	ErrUserCannotDeleteSelf  = &Err{HTTPCode: http.StatusForbidden, Code: 11011, Msg: "cannot delete yourself"}
+	ErrAddressNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 11012, Msg: "address not found"}
 
 	// ErrProductEmptyName ==================== Product Module (30xxx) ====================
 	ErrProductEmptyName               = &Err{HTTPCode: http.StatusBadRequest, Code: 30001, Msg: "商品名称不能为空"}
