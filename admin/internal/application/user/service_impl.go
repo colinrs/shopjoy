@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	crand "crypto/rand"
+	"fmt"
 	"time"
 
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
@@ -13,16 +14,18 @@ import (
 )
 
 type ServiceImpl struct {
-	db       *gorm.DB
-	userRepo domain.Repository
-	idGen    snowflake.Snowflake
+	db          *gorm.DB
+	userRepo    domain.Repository
+	addressRepo domain.AddressRepository
+	idGen       snowflake.Snowflake
 }
 
-func NewService(db *gorm.DB, userRepo domain.Repository, idGen snowflake.Snowflake) Service {
+func NewService(db *gorm.DB, userRepo domain.Repository, addressRepo domain.AddressRepository, idGen snowflake.Snowflake) Service {
 	return &ServiceImpl{
-		db:       db,
-		userRepo: userRepo,
-		idGen:    idGen,
+		db:          db,
+		userRepo:    userRepo,
+		addressRepo: addressRepo,
+		idGen:       idGen,
 	}
 }
 
@@ -279,4 +282,215 @@ func toUserResponse(u *domain.User) *UserResponse {
 	}
 
 	return resp
+}
+
+// GetDetail returns detailed user information
+func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, id int64) (*UserDetailResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return toUserDetailResponse(u), nil
+}
+
+// ExtendedList returns a list of users with extended information
+func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID, req EnhancedQueryRequest) (*ExtendedListResponse, error) {
+	query := domain.Query{
+		PageQuery: req.PageQuery,
+		Name:      req.Keyword,
+		Email:     req.Keyword,
+		Phone:     req.Keyword,
+		Status:    req.Status,
+	}
+	query.PageQuery.Validate()
+
+	users, total, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &ExtendedListResponse{
+		List:     make([]*ExtendedUserResponse, len(users)),
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}
+
+	for i, u := range users {
+		resp.List[i] = toExtendedUserResponse(u)
+	}
+
+	return resp, nil
+}
+
+// GetAddresses returns all addresses for a user
+func (s *ServiceImpl) GetAddresses(ctx context.Context, tenantID shared.TenantID, userID int64) (*AddressListResponse, error) {
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, tenantID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &AddressListResponse{
+		List:  make([]*AddressResponse, len(addresses)),
+		Total: int64(len(addresses)),
+	}
+
+	for i, addr := range addresses {
+		resp.List[i] = toAddressResponse(addr)
+	}
+
+	return resp, nil
+}
+
+// SuspendWithReason suspends a user with a specific reason
+func (s *ServiceImpl) SuspendWithReason(ctx context.Context, req SuspendUserRequest) error {
+	return s.Suspend(ctx, req.TenantID, req.UserID)
+}
+
+// ActivateUser activates a user
+func (s *ServiceImpl) ActivateUser(ctx context.Context, tenantID shared.TenantID, userID int64) error {
+	return s.Activate(ctx, tenantID, userID)
+}
+
+// DeleteUser deletes a user
+func (s *ServiceImpl) DeleteUser(ctx context.Context, tenantID shared.TenantID, userID int64) error {
+	return s.Delete(ctx, tenantID, userID)
+}
+
+// GetUserStats returns user statistics
+func (s *ServiceImpl) GetUserStats(ctx context.Context, tenantID shared.TenantID) (*UserStats, error) {
+	stats, err := s.userRepo.GetStats(ctx, s.db, tenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserStats{
+		TotalUsers:     stats.Total,
+		ActiveUsers:    stats.Active,
+		SuspendedUsers: stats.Suspended,
+		NewUsersToday:  stats.NewToday,
+	}, nil
+}
+
+// ExportUsers exports users to a file (placeholder implementation)
+func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID, req EnhancedQueryRequest) ([]byte, error) {
+	// Get all users matching the criteria
+	query := domain.Query{
+		PageQuery: shared.PageQuery{Page: 1, PageSize: 10000}, // Large page size for export
+		Name:      req.Keyword,
+		Email:     req.Keyword,
+		Phone:     req.Keyword,
+		Status:    req.Status,
+	}
+
+	users, _, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate CSV content
+	var csvContent string
+	csvContent = "ID,Email,Phone,Name,Status,CreatedAt\n"
+	for _, u := range users {
+		statusText := "active"
+		if u.Status == domain.StatusSuspended {
+			statusText = "suspended"
+		} else if u.Status == domain.StatusInactive {
+			statusText = "inactive"
+		}
+		csvContent += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
+			u.ID, u.Email, u.Phone, u.Name, statusText, u.Audit.CreatedAt.Format("2006-01-02 15:04:05"))
+	}
+
+	return []byte(csvContent), nil
+}
+
+func toUserDetailResponse(u *domain.User) *UserDetailResponse {
+	resp := &UserDetailResponse{
+		ID:        u.ID,
+		TenantID:  u.TenantID.Int64(),
+		Email:     u.Email,
+		Phone:     u.Phone,
+		Name:      u.Name,
+		Avatar:    u.Avatar,
+		Gender:    int(u.Gender),
+		GenderText: getGenderText(u.Gender),
+		Status:    int(u.Status),
+		StatusText: getStatusText(u.Status),
+		CreatedAt: u.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: u.Audit.UpdatedAt.Format(time.RFC3339),
+	}
+
+	if u.Birthday != nil {
+		resp.Birthday = u.Birthday.Format("2006-01-02")
+	}
+
+	if u.LastLogin != nil {
+		resp.LastLogin = u.LastLogin.Format(time.RFC3339)
+	}
+
+	return resp
+}
+
+func toExtendedUserResponse(u *domain.User) *ExtendedUserResponse {
+	resp := &ExtendedUserResponse{
+		ID:         u.ID,
+		TenantID:   u.TenantID.Int64(),
+		Email:      u.Email,
+		Phone:      u.Phone,
+		Name:       u.Name,
+		Avatar:     u.Avatar,
+		Status:     int(u.Status),
+		StatusText: getStatusText(u.Status),
+		CreatedAt:  u.Audit.CreatedAt.Format(time.RFC3339),
+	}
+
+	if u.LastLogin != nil {
+		resp.LastLogin = u.LastLogin.Format(time.RFC3339)
+	}
+
+	return resp
+}
+
+func toAddressResponse(addr *domain.UserAddress) *AddressResponse {
+	return &AddressResponse{
+		ID:         addr.ID,
+		Name:       addr.Name,
+		Phone:      addr.Phone,
+		Country:    addr.Country,
+		Province:   addr.Province,
+		City:       addr.City,
+		District:   addr.District,
+		Address:    addr.Address,
+		PostalCode: addr.PostalCode,
+		IsDefault:  addr.IsDefault,
+		CreatedAt:  addr.CreatedAt.Format(time.RFC3339),
+	}
+}
+
+func getGenderText(gender domain.Gender) string {
+	switch gender {
+	case domain.GenderMale:
+		return "男"
+	case domain.GenderFemale:
+		return "女"
+	case domain.GenderOther:
+		return "其他"
+	default:
+		return "未知"
+	}
+}
+
+func getStatusText(status domain.Status) string {
+	switch status {
+	case domain.StatusActive:
+		return "正常"
+	case domain.StatusSuspended:
+		return "已冻结"
+	case domain.StatusInactive:
+		return "未激活"
+	default:
+		return "未知"
+	}
 }

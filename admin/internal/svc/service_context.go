@@ -83,7 +83,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	productService := appProduct.NewService(db, productRepo, idGen)
 
 	userRepo := persistence.NewUserRepository()
-	userService := appUser.NewService(db, userRepo, idGen)
+	addressRepo := persistence.NewUserAddressRepository()
+	userService := appUser.NewService(db, userRepo, addressRepo, idGen)
 
 	adminUserRepo := persistence.NewAdminUserRepository()
 	adminUserService := appAdminUser.NewService(adminUserRepo, db, c.JWT.Secret)
