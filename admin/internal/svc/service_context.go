@@ -8,6 +8,7 @@ import (
 
 	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
+	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
@@ -35,6 +36,7 @@ type ServiceContext struct {
 	ProductService         appProduct.Service
 	UserService            appUser.Service
 	AdminUserService       appAdminUser.Service
+	PaymentService         appPayment.Service
 	PromotionApp           apppromotion.PromotionApp
 	CouponApp              apppromotion.CouponApp
 	ShipmentApp            appfulfillment.ShipmentApp
@@ -136,12 +138,22 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// Review service
 	reviewService := appReview.NewService(db, reviewRepo, replyRepo, idGen)
 
+	// Payment repositories
+	paymentRepo := persistence.NewPaymentRepository()
+	paymentRefundRepo := persistence.NewPaymentRefundRepository()
+	paymentTransactionRepo := persistence.NewPaymentTransactionRepository()
+	webhookEventRepo := persistence.NewWebhookEventRepository()
+
+	// Payment service
+	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, idGen)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
 		ProductService:         productService,
 		UserService:            userService,
 		AdminUserService:       adminUserService,
+		PaymentService:         paymentService,
 		PromotionApp:           promotionApp,
 		CouponApp:              couponApp,
 		ShipmentApp:            shipmentApp,

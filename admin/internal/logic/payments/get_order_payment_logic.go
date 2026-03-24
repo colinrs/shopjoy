@@ -5,6 +5,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,51 @@ func NewGetOrderPaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetOrderPaymentLogic) GetOrderPayment(req *types.GetOrderPaymentReq) (resp *types.OrderPaymentResp, err error) {
-	// todo: add your logic here and delete this line
+	// Get tenant ID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	if tenantID == 0 {
+		tenantID = 0
+	}
 
-	return
+	// Get order payment from service
+	payment, err := l.svcCtx.PaymentService.GetOrderPayment(l.ctx, shared.TenantID(tenantID), req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert refunds
+	refunds := make([]*types.PaymentRefundResp, len(payment.Refunds))
+	for i, refund := range payment.Refunds {
+		refunds[i] = &types.PaymentRefundResp{
+			ID:              refund.ID,
+			RefundNo:        refund.RefundNo,
+			ChannelRefundID: refund.ChannelRefundID,
+			Amount:          refund.Amount,
+			Currency:        refund.Currency,
+			Status:          refund.Status,
+			StatusText:      refund.StatusText,
+			ReasonType:      refund.ReasonType,
+			Reason:          refund.Reason,
+			RefundedAt:      refund.RefundedAt,
+			CreatedAt:       refund.CreatedAt,
+		}
+	}
+
+	return &types.OrderPaymentResp{
+		PaymentID:         payment.PaymentID,
+		PaymentNo:         payment.PaymentNo,
+		PaymentMethod:     payment.PaymentMethod,
+		PaymentMethodText: payment.PaymentMethodText,
+		ChannelIntentID:   payment.ChannelIntentID,
+		ChannelPaymentID:  payment.ChannelPaymentID,
+		Amount:            payment.Amount,
+		Currency:          payment.Currency,
+		TransactionFee:    payment.TransactionFee,
+		FeeCurrency:       payment.FeeCurrency,
+		Status:            payment.Status,
+		StatusText:        payment.StatusText,
+		PaidAt:            payment.PaidAt,
+		RefundedAmount:    payment.RefundedAmount,
+		Refunds:           refunds,
+	}, nil
 }
