@@ -60,6 +60,91 @@ type (
 		Suspended int64 `json:"suspended"`
 		NewToday  int64 `json:"new_today"`
 	}
+	ListUsersEnhancedRequest {
+		Page          int    `form:"page,default=1"`
+		PageSize      int    `form:"page_size,default=20"`
+		Keyword       string `form:"keyword,optional"`
+		Status        int    `form:"status,optional"`
+		RegisterStart string `form:"register_start,optional"`
+		RegisterEnd   string `form:"register_end,optional"`
+	}
+	ExtendedUserResponse {
+		ID            int64  `json:"id"`
+		TenantID      int64  `json:"tenant_id"`
+		Email         string `json:"email"`
+		Phone         string `json:"phone"`
+		Name          string `json:"name"`
+		Avatar        string `json:"avatar"`
+		Status        int    `json:"status"`
+		StatusText    string `json:"status_text"`
+		PointsBalance int64  `json:"points_balance"`
+		OrderCount    int64  `json:"order_count"`
+		TotalSpent    string `json:"total_spent"`
+		LastLogin     string `json:"last_login"`
+		CreatedAt     string `json:"created_at"`
+	}
+	ListUsersEnhancedResponse {
+		List     []*ExtendedUserResponse `json:"list"`
+		Total    int64                   `json:"total"`
+		Page     int                     `json:"page"`
+		PageSize int                     `json:"page_size"`
+	}
+	UserDetailResponse {
+		ID            int64  `json:"id"`
+		TenantID      int64  `json:"tenant_id"`
+		Email         string `json:"email"`
+		Phone         string `json:"phone"`
+		Name          string `json:"name"`
+		Avatar        string `json:"avatar"`
+		Gender        int    `json:"gender"`
+		GenderText    string `json:"gender_text"`
+		Birthday      string `json:"birthday"`
+		Status        int    `json:"status"`
+		StatusText    string `json:"status_text"`
+		PointsBalance int64  `json:"points_balance"`
+		PointsFrozen  int64  `json:"points_frozen"`
+		TotalEarned   int64  `json:"total_earned"`
+		TotalRedeemed int64  `json:"total_redeemed"`
+		OrderCount    int64  `json:"order_count"`
+		TotalSpent    string `json:"total_spent"`
+		ReviewCount   int64  `json:"review_count"`
+		LastLogin     string `json:"last_login"`
+		CreatedAt     string `json:"created_at"`
+		UpdatedAt     string `json:"updated_at"`
+	}
+	UserAddressResponse {
+		ID         int64  `json:"id"`
+		Name       string `json:"name"`
+		Phone      string `json:"phone"`
+		Country    string `json:"country"`
+		Province   string `json:"province"`
+		City       string `json:"city"`
+		District   string `json:"district"`
+		Address    string `json:"address"`
+		PostalCode string `json:"postal_code"`
+		IsDefault  bool   `json:"is_default"`
+		CreatedAt  string `json:"created_at"`
+	}
+	UserAddressListResponse {
+		List  []*UserAddressResponse `json:"list"`
+		Total int64                  `json:"total"`
+	}
+	SuspendUserWithReasonRequest {
+		ID     int64  `path:"id"`
+		Reason string `json:"reason"`
+	}
+	ExportUsersRequest {
+		Keyword       string `form:"keyword,optional"`
+		Status        int    `form:"status,optional"`
+		RegisterStart string `form:"register_start,optional"`
+		RegisterEnd   string `form:"register_end,optional"`
+	}
+	UserStatsEnhancedResponse {
+		TotalUsers     int64 `json:"total_users"`
+		ActiveUsers    int64 `json:"active_users"`
+		SuspendedUsers int64 `json:"suspended_users"`
+		NewUsersToday  int64 `json:"new_users_today"`
+	}
 )
 
 @server (
@@ -98,5 +183,29 @@ service admin-api {
 	@doc "获取用户统计"
 	@handler GetUserStatsHandler
 	get /api/v1/users/stats (UserStatsRequest) returns (UserStatsResponse)
+
+	@doc "获取用户详情（含聚合数据）"
+	@handler GetUserDetailHandler
+	get /api/v1/users/:id/detail (GetUserRequest) returns (UserDetailResponse)
+
+	@doc "获取用户地址列表"
+	@handler GetUserAddressesHandler
+	get /api/v1/users/:id/addresses (GetUserRequest) returns (UserAddressListResponse)
+
+	@doc "冻结用户（带原因）"
+	@handler SuspendUserWithReasonHandler
+	post /api/v1/users/:id/suspend-reason (SuspendUserWithReasonRequest) returns (GetUserResponse)
+
+	@doc "获取用户统计（增强版）"
+	@handler GetUserStatsEnhancedHandler
+	get /api/v1/users/stats/enhanced (UserStatsRequest) returns (UserStatsEnhancedResponse)
+
+	@doc "导出用户列表"
+	@handler ExportUsersHandler
+	get /api/v1/users/export (ExportUsersRequest)
+
+	@doc "获取增强版用户列表"
+	@handler ListUsersEnhancedHandler
+	get /api/v1/users/enhanced (ListUsersEnhancedRequest) returns (ListUsersEnhancedResponse)
 }
 

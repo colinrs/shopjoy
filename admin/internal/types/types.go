@@ -492,6 +492,29 @@ type ExportOrdersReq struct {
 	EndTime           string `form:"end_time,optional"`   // RFC3339
 }
 
+type ExportUsersRequest struct {
+	Keyword       string `form:"keyword,optional"`
+	Status        int    `form:"status,optional"`
+	RegisterStart string `form:"register_start,optional"`
+	RegisterEnd   string `form:"register_end,optional"`
+}
+
+type ExtendedUserResponse struct {
+	ID            int64  `json:"id"`
+	TenantID      int64  `json:"tenant_id"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Name          string `json:"name"`
+	Avatar        string `json:"avatar"`
+	Status        int    `json:"status"`
+	StatusText    string `json:"status_text"`
+	PointsBalance int64  `json:"points_balance"`
+	OrderCount    int64  `json:"order_count"`
+	TotalSpent    string `json:"total_spent"`
+	LastLogin     string `json:"last_login"`
+	CreatedAt     string `json:"created_at"`
+}
+
 type FulfillmentSummaryResp struct {
 	PendingShipment int64  `json:"pending_shipment"`
 	PartialShipped  int64  `json:"partial_shipped"`
@@ -974,6 +997,22 @@ type ListUserCouponsReq struct {
 
 type ListUserCouponsResp struct {
 	List     []*UserCouponDetailResp `json:"list"`
+	Total    int64                   `json:"total"`
+	Page     int                     `json:"page"`
+	PageSize int                     `json:"page_size"`
+}
+
+type ListUsersEnhancedRequest struct {
+	Page          int    `form:"page,default=1"`
+	PageSize      int    `form:"page_size,default=20"`
+	Keyword       string `form:"keyword,optional"`
+	Status        int    `form:"status,optional"`
+	RegisterStart string `form:"register_start,optional"`
+	RegisterEnd   string `form:"register_end,optional"`
+}
+
+type ListUsersEnhancedResponse struct {
+	List     []*ExtendedUserResponse `json:"list"`
 	Total    int64                   `json:"total"`
 	Page     int                     `json:"page"`
 	PageSize int                     `json:"page_size"`
@@ -1539,6 +1578,11 @@ type SuspendUserRequest struct {
 	ID int64 `path:"id"`
 }
 
+type SuspendUserWithReasonRequest struct {
+	ID     int64  `path:"id"`
+	Reason string `json:"reason"`
+}
+
 type TakeOffSaleReq struct {
 	ID int64 `path:"id"`
 }
@@ -1808,6 +1852,25 @@ type UpdateWarehouseStatusReq struct {
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
 }
 
+type UserAddressListResponse struct {
+	List  []*UserAddressResponse `json:"list"`
+	Total int64                  `json:"total"`
+}
+
+type UserAddressResponse struct {
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	Country    string `json:"country"`
+	Province   string `json:"province"`
+	City       string `json:"city"`
+	District   string `json:"district"`
+	Address    string `json:"address"`
+	PostalCode string `json:"postal_code"`
+	IsDefault  bool   `json:"is_default"`
+	CreatedAt  string `json:"created_at"`
+}
+
 type UserCouponDetailResp struct {
 	ID             int64  `json:"id"`
 	UserID         int64  `json:"user_id"`
@@ -1824,6 +1887,37 @@ type UserCouponDetailResp struct {
 	UsedAt         string `json:"used_at,optional"`
 	OrderID        int64  `json:"order_id,optional"`
 	CreatedAt      string `json:"created_at"`
+}
+
+type UserDetailResponse struct {
+	ID            int64  `json:"id"`
+	TenantID      int64  `json:"tenant_id"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Name          string `json:"name"`
+	Avatar        string `json:"avatar"`
+	Gender        int    `json:"gender"`
+	GenderText    string `json:"gender_text"`
+	Birthday      string `json:"birthday"`
+	Status        int    `json:"status"`
+	StatusText    string `json:"status_text"`
+	PointsBalance int64  `json:"points_balance"`
+	PointsFrozen  int64  `json:"points_frozen"`
+	TotalEarned   int64  `json:"total_earned"`
+	TotalRedeemed int64  `json:"total_redeemed"`
+	OrderCount    int64  `json:"order_count"`
+	TotalSpent    string `json:"total_spent"`
+	ReviewCount   int64  `json:"review_count"`
+	LastLogin     string `json:"last_login"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+}
+
+type UserStatsEnhancedResponse struct {
+	TotalUsers     int64 `json:"total_users"`
+	ActiveUsers    int64 `json:"active_users"`
+	SuspendedUsers int64 `json:"suspended_users"`
+	NewUsersToday  int64 `json:"new_users_today"`
 }
 
 type UserStatsRequest struct {

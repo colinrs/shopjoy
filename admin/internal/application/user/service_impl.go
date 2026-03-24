@@ -284,14 +284,57 @@ func toUserResponse(u *domain.User) *UserResponse {
 	return resp
 }
 
-// GetDetail returns detailed user information
+// GetDetail returns detailed user information with points and order statistics
 func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, id int64) (*UserDetailResponse, error) {
 	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return toUserDetailResponse(u), nil
+	resp := toUserDetailResponse(u)
+
+	// Query points account data
+	type PointsAccountData struct {
+		Balance      int64 `gorm:"column:balance"`
+		Frozen       int64 `gorm:"column:frozen_balance"`
+		TotalEarned  int64 `gorm:"column:total_earned"`
+		TotalRedeemed int64 `gorm:"column:total_redeemed"`
+	}
+	var pointsAccount PointsAccountData
+	s.db.WithContext(ctx).
+		Table("points_accounts").
+		Select("balance, frozen_balance, total_earned, total_redeemed").
+		Where("user_id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		First(&pointsAccount)
+	resp.PointsBalance = pointsAccount.Balance
+	resp.PointsFrozen = pointsAccount.Frozen
+	resp.TotalEarned = pointsAccount.TotalEarned
+	resp.TotalRedeemed = pointsAccount.TotalRedeemed
+
+	// Query order statistics
+	type OrderStatsData struct {
+		Count      int64 `gorm:"column:count"`
+		TotalSpent int64 `gorm:"column:total_spent"`
+	}
+	var orderStats OrderStatsData
+	s.db.WithContext(ctx).
+		Table("orders").
+		Select("COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent").
+		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Scan(&orderStats)
+	resp.OrderCount = orderStats.Count
+	// Convert cents to yuan string with 2 decimal places
+	resp.TotalSpent = formatAmountFromCents(orderStats.TotalSpent)
+
+	// Query review count
+	var reviewCount int64
+	s.db.WithContext(ctx).
+		Table("reviews").
+		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Count(&reviewCount)
+	resp.ReviewCount = reviewCount
+
+	return resp, nil
 }
 
 // ExtendedList returns a list of users with extended information
@@ -317,8 +360,69 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID
 		PageSize: req.PageSize,
 	}
 
+	// Collect user IDs for batch queries
+	userIDs := make([]int64, len(users))
+	for i, u := range users {
+		userIDs[i] = u.ID
+	}
+
+	// Batch query points accounts
+	pointsMap := make(map[int64]struct {
+		Balance int64
+	})
+	if len(userIDs) > 0 {
+		type PointsData struct {
+			UserID  int64 `gorm:"column:user_id"`
+			Balance int64 `gorm:"column:balance"`
+		}
+		var pointsData []PointsData
+		s.db.WithContext(ctx).
+			Table("points_accounts").
+			Select("user_id, balance").
+			Where("user_id IN ? AND tenant_id = ?", userIDs, tenantID.Int64()).
+			Find(&pointsData)
+		for _, pd := range pointsData {
+			pointsMap[pd.UserID] = struct{ Balance int64 }{Balance: pd.Balance}
+		}
+	}
+
+	// Batch query order statistics
+	orderStatsMap := make(map[int64]struct {
+		Count      int64
+		TotalSpent int64
+	})
+	if len(userIDs) > 0 {
+		type OrderData struct {
+			UserID     int64 `gorm:"column:user_id"`
+			Count      int64 `gorm:"column:count"`
+			TotalSpent int64 `gorm:"column:total_spent"`
+		}
+		var orderData []OrderData
+		s.db.WithContext(ctx).
+			Table("orders").
+			Select("user_id, COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent").
+			Where("user_id IN ? AND tenant_id = ? AND deleted_at IS NULL", userIDs, tenantID.Int64()).
+			Group("user_id").
+			Find(&orderData)
+		for _, od := range orderData {
+			orderStatsMap[od.UserID] = struct {
+				Count      int64
+				TotalSpent int64
+			}{Count: od.Count, TotalSpent: od.TotalSpent}
+		}
+	}
+
 	for i, u := range users {
 		resp.List[i] = toExtendedUserResponse(u)
+		// Populate points balance
+		if pd, ok := pointsMap[u.ID]; ok {
+			resp.List[i].PointsBalance = pd.Balance
+		}
+		// Populate order statistics
+		if od, ok := orderStatsMap[u.ID]; ok {
+			resp.List[i].OrderCount = od.Count
+			resp.List[i].TotalSpent = formatAmountFromCents(od.TotalSpent)
+		}
 	}
 
 	return resp, nil
@@ -493,4 +597,17 @@ func getStatusText(status domain.Status) string {
 	default:
 		return "未知"
 	}
+}
+
+// formatAmountFromCents converts amount in cents to yuan string with 2 decimal places
+func formatAmountFromCents(cents int64) string {
+	yuan := cents / 100
+	remainCents := cents % 100
+	if remainCents < 0 {
+		remainCents = -remainCents
+	}
+	if cents < 0 && yuan == 0 {
+		return fmt.Sprintf("-%d.%02d", yuan, remainCents)
+	}
+	return fmt.Sprintf("%d.%02d", yuan, remainCents)
 }

@@ -917,6 +917,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: users.ActivateUserHandler(serverCtx),
 				},
 				{
+					// 获取用户地址列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/:id/addresses",
+					Handler: users.GetUserAddressesHandler(serverCtx),
+				},
+				{
+					// 获取用户详情（含聚合数据）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/:id/detail",
+					Handler: users.GetUserDetailHandler(serverCtx),
+				},
+				{
 					// 重置用户密码
 					Method:  http.MethodPost,
 					Path:    "/api/v1/users/:id/reset-password",
@@ -929,10 +941,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: users.SuspendUserHandler(serverCtx),
 				},
 				{
+					// 冻结用户（带原因）
+					Method:  http.MethodPost,
+					Path:    "/api/v1/users/:id/suspend-reason",
+					Handler: users.SuspendUserWithReasonHandler(serverCtx),
+				},
+				{
+					// 获取增强版用户列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/enhanced",
+					Handler: users.ListUsersEnhancedHandler(serverCtx),
+				},
+				{
+					// 导出用户列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/export",
+					Handler: users.ExportUsersHandler(serverCtx),
+				},
+				{
 					// 获取用户统计
 					Method:  http.MethodGet,
 					Path:    "/api/v1/users/stats",
 					Handler: users.GetUserStatsHandler(serverCtx),
+				},
+				{
+					// 获取用户统计（增强版）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/stats/enhanced",
+					Handler: users.GetUserStatsEnhancedHandler(serverCtx),
 				},
 			}...,
 		),

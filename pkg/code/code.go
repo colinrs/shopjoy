@@ -55,10 +55,11 @@ var (
 	ErrUserPasswordMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 11008, Msg: "passwords do not match"}
 
 	// User additional errors
-	ErrUserSuspended         = &Err{HTTPCode: http.StatusBadRequest, Code: 11009, Msg: "user already suspended"}
-	ErrUserCannotSuspendSelf = &Err{HTTPCode: http.StatusForbidden, Code: 11010, Msg: "cannot suspend yourself"}
-	ErrUserCannotDeleteSelf  = &Err{HTTPCode: http.StatusForbidden, Code: 11011, Msg: "cannot delete yourself"}
-	ErrAddressNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 11012, Msg: "address not found"}
+	ErrUserSuspended          = &Err{HTTPCode: http.StatusBadRequest, Code: 11009, Msg: "user already suspended"}
+	ErrUserCannotSuspendSelf  = &Err{HTTPCode: http.StatusForbidden, Code: 11010, Msg: "cannot suspend yourself"}
+	ErrUserCannotDeleteSelf   = &Err{HTTPCode: http.StatusForbidden, Code: 11011, Msg: "cannot delete yourself"}
+	ErrAddressNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 11012, Msg: "address not found"}
+	ErrUserExportLimitExceed  = &Err{HTTPCode: http.StatusBadRequest, Code: 11013, Msg: "export limit exceeded, maximum 10000 records"}
 
 	// ErrProductEmptyName ==================== Product Module (30xxx) ====================
 	ErrProductEmptyName               = &Err{HTTPCode: http.StatusBadRequest, Code: 30001, Msg: "商品名称不能为空"}
