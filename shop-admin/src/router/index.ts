@@ -136,6 +136,49 @@ const router = createRouter({
           name: 'payments',
           component: () => import('@/views/payments/index.vue'),
           meta: { title: '支付管理' }
+        },
+        // Points Module Routes
+        {
+          path: 'points/dashboard',
+          name: 'points-dashboard',
+          component: () => import('@/views/points/dashboard/index.vue'),
+          meta: { title: '积分概览' }
+        },
+        {
+          path: 'points/earn-rules',
+          name: 'points-earn-rules',
+          component: () => import('@/views/points/earn-rules/index.vue'),
+          meta: { title: '获取规则' }
+        },
+        {
+          path: 'points/redeem-rules',
+          name: 'points-redeem-rules',
+          component: () => import('@/views/points/redeem-rules/index.vue'),
+          meta: { title: '兑换规则' }
+        },
+        {
+          path: 'points/accounts',
+          name: 'points-accounts',
+          component: () => import('@/views/points/accounts/index.vue'),
+          meta: { title: '积分账户' }
+        },
+        {
+          path: 'points/accounts/:id',
+          name: 'points-account-detail',
+          component: () => import('@/views/points/accounts/[id].vue'),
+          meta: { title: '账户详情' }
+        },
+        {
+          path: 'points/transactions',
+          name: 'points-transactions',
+          component: () => import('@/views/points/transactions/index.vue'),
+          meta: { title: '交易记录' }
+        },
+        {
+          path: 'points/redemptions',
+          name: 'points-redemptions',
+          component: () => import('@/views/points/redemptions/index.vue'),
+          meta: { title: '兑换记录' }
         }
       ]
     }
