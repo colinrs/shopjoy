@@ -504,10 +504,24 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID,
 			statusText = "inactive"
 		}
 		csvContent += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
-			u.ID, u.Email, u.Phone, u.Name, statusText, u.Audit.CreatedAt.Format("2006-01-02 15:04:05"))
+			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Audit.CreatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	return []byte(csvContent), nil
+}
+
+// sanitizeCSVField sanitizes a CSV field to prevent CSV injection attacks.
+// If the field starts with formula characters (=, +, -, @, \t), it prefixes with a single quote.
+func sanitizeCSVField(field string) string {
+	if len(field) == 0 {
+		return field
+	}
+	firstChar := field[0]
+	// Characters that could trigger formula execution in Excel
+	if firstChar == '=' || firstChar == '+' || firstChar == '-' || firstChar == '@' || firstChar == '\t' {
+		return "'" + field
+	}
+	return field
 }
 
 func toUserDetailResponse(u *domain.User) *UserDetailResponse {

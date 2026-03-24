@@ -7,6 +7,7 @@ import (
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/tenant"
 
@@ -30,7 +31,7 @@ func NewListUsersEnhancedLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *ListUsersEnhancedLogic) ListUsersEnhanced(req *types.ListUsersEnhancedRequest) (resp *types.ListUsersEnhancedResponse, err error) {
 	tenantID, ok := tenant.FromContext(l.ctx)
 	if !ok {
-		tenantID = shared.TenantID(1) // 默认租户
+		return nil, code.ErrTenantInvalidID
 	}
 
 	queryReq := appUser.EnhancedQueryRequest{

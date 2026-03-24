@@ -5,7 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,7 +28,7 @@ func NewGetUserStatsEnhancedLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *GetUserStatsEnhancedLogic) GetUserStatsEnhanced(req *types.UserStatsRequest) (resp *types.UserStatsEnhancedResponse, err error) {
 	tenantID, ok := tenant.FromContext(l.ctx)
 	if !ok {
-		tenantID = shared.TenantID(1) // 默认租户
+		return nil, code.ErrTenantInvalidID
 	}
 
 	stats, err := l.svcCtx.UserService.GetUserStats(l.ctx, tenantID)

@@ -37,13 +37,13 @@ func NewExportUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext, w http
 func (l *ExportUsersLogic) ExportUsers(req *types.ExportUsersRequest) error {
 	tenantID, ok := tenant.FromContext(l.ctx)
 	if !ok {
-		tenantID = shared.TenantID(1) // 默认租户
+		return code.ErrTenantInvalidID
 	}
 
 	queryReq := appUser.EnhancedQueryRequest{
 		PageQuery: shared.PageQuery{
 			Page:     1,
-			PageSize: 10001, // Check if exceeds limit
+			PageSize: 10001, // Fetch one more to check if limit exceeded
 		},
 		Keyword:       req.Keyword,
 		Status:        domain.Status(req.Status),
@@ -55,10 +55,6 @@ func (l *ExportUsersLogic) ExportUsers(req *types.ExportUsersRequest) error {
 	data, err := l.svcCtx.UserService.ExportUsers(l.ctx, tenantID, queryReq)
 	if err != nil {
 		return err
-	}
-
-	if len(data) > 10000 {
-		return code.ErrUserExportLimitExceed
 	}
 
 	// Set response headers for CSV download

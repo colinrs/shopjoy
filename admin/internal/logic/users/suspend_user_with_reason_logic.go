@@ -6,7 +6,7 @@ import (
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,7 +29,7 @@ func NewSuspendUserWithReasonLogic(ctx context.Context, svcCtx *svc.ServiceConte
 func (l *SuspendUserWithReasonLogic) SuspendUserWithReason(req *types.SuspendUserWithReasonRequest) (resp *types.GetUserResponse, err error) {
 	tenantID, ok := tenant.FromContext(l.ctx)
 	if !ok {
-		tenantID = shared.TenantID(1) // 默认租户
+		return nil, code.ErrTenantInvalidID
 	}
 
 	suspendReq := appUser.SuspendUserRequest{
