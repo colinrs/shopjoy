@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -47,6 +48,10 @@ func (s PaymentStatus) String() string {
 	}
 }
 
+func (s PaymentStatus) IsValid() bool {
+	return s >= PaymentStatusPending && s <= PaymentStatusRequiresAction
+}
+
 // TransactionStatus 交易状态
 type TransactionStatus int
 
@@ -69,6 +74,10 @@ func (s TransactionStatus) String() string {
 	}
 }
 
+func (s TransactionStatus) IsValid() bool {
+	return s >= TransactionStatusPending && s <= TransactionStatusFailed
+}
+
 // PaymentRefundStatus 退款状态
 type PaymentRefundStatus int
 
@@ -89,6 +98,10 @@ func (s PaymentRefundStatus) String() string {
 	default:
 		return "unknown"
 	}
+}
+
+func (s PaymentRefundStatus) IsValid() bool {
+	return s >= PaymentRefundStatusPending && s <= PaymentRefundStatusFailed
 }
 
 // PaymentMethod 支付方式
@@ -158,6 +171,9 @@ func NewPayment(tenantID shared.TenantID, orderID int64, method PaymentMethod, a
 
 // MarkSuccess 标记支付成功
 func (p *Payment) MarkSuccess(channelPaymentID string, fee int64, feeCurrency string) error {
+	if p.Status != PaymentStatusPending && p.Status != PaymentStatusProcessing {
+		return code.ErrPaymentAlreadyPaid
+	}
 	now := time.Now().UTC()
 	p.Status = PaymentStatusSuccess
 	p.ChannelPaymentID = channelPaymentID
@@ -170,6 +186,9 @@ func (p *Payment) MarkSuccess(channelPaymentID string, fee int64, feeCurrency st
 
 // MarkFailed 标记支付失败
 func (p *Payment) MarkFailed(reason string) error {
+	if p.Status != PaymentStatusPending && p.Status != PaymentStatusProcessing {
+		return code.ErrPaymentAlreadyPaid
+	}
 	now := time.Now().UTC()
 	p.Status = PaymentStatusFailed
 	p.FailedAt = &now
@@ -180,6 +199,9 @@ func (p *Payment) MarkFailed(reason string) error {
 
 // MarkRefunded 标记已退款
 func (p *Payment) MarkRefunded(partial bool) error {
+	if p.Status != PaymentStatusSuccess && p.Status != PaymentStatusPartiallyRefunded {
+		return code.ErrPaymentOrderNotPaid
+	}
 	now := time.Now().UTC()
 	if partial {
 		p.Status = PaymentStatusPartiallyRefunded
