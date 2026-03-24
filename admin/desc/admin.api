@@ -12,6 +12,7 @@ import "inventory.api"
 import "promotion.api"
 import "fulfillment.api"
 import "review.api"
+import "payment.api"
 
 info (
 	title:   "Admin API"

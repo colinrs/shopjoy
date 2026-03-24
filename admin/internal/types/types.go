@@ -223,6 +223,14 @@ type CategoryTreeResp struct {
 	Children       []*CategoryTreeResp `json:"children"`
 }
 
+type ChannelDistributionResp struct {
+	Name    string `json:"name"`
+	Percent string `json:"percent"`
+	Amount  string `json:"amount"`
+	Count   int64  `json:"count"`
+	Color   string `json:"color"`
+}
+
 type CouponDetailResp struct {
 	ID             int64  `json:"id"`
 	Code           string `json:"code"`
@@ -574,8 +582,16 @@ type GetOrderFulfillmentReq struct {
 	ID int64 `path:"id"`
 }
 
+type GetOrderPaymentReq struct {
+	ID int64 `path:"id"` // Order ID
+}
+
 type GetOrderShipmentsReq struct {
 	OrderID string `path:"order_id"`
+}
+
+type GetPaymentStatsReq struct {
+	Period string `form:"period,default=7d"` // 7d, 30d, 90d
 }
 
 type GetProductLocalizationReq struct {
@@ -620,6 +636,10 @@ type GetShipmentReq struct {
 	ID int64 `path:"id"`
 }
 
+type GetTransactionReq struct {
+	ID int64 `path:"id"`
+}
+
 type GetUserRequest struct {
 	ID int64 `path:"id"`
 }
@@ -648,6 +668,24 @@ type HideReviewResp struct {
 	ID        int64  `json:"id"`
 	Status    string `json:"status"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+type InitiateRefundReq struct {
+	ID             int64  `path:"id"` // Order ID
+	IdempotencyKey string `json:"idempotency_key"`
+	Amount         string `json:"amount"` // Refund amount in currency units
+	ReasonType     string `json:"reason_type"`
+	Reason         string `json:"reason,optional"`
+}
+
+type InitiateRefundResp struct {
+	RefundID        int64  `json:"refund_id"`
+	RefundNo        string `json:"refund_no"`
+	Amount          string `json:"amount"`
+	Currency        string `json:"currency"`
+	Status          int8   `json:"status"`
+	StatusText      string `json:"status_text"`
+	ChannelRefundID string `json:"channel_refund_id,optional"`
 }
 
 type InventoryLogResp struct {
@@ -907,6 +945,25 @@ type ListShipmentsResp struct {
 	PageSize int                   `json:"page_size"`
 }
 
+type ListTransactionsReq struct {
+	Page          int    `form:"page,default=1"`
+	PageSize      int    `form:"page_size,default=20"`
+	OrderNo       string `form:"order_no,optional"`
+	TransactionID string `form:"transaction_id,optional"`
+	PaymentMethod string `form:"payment_method,optional"`
+	Status        int8   `form:"status,optional"` // 0=pending, 1=succeeded, 2=failed
+	StartTime     string `form:"start_time,optional"`
+	EndTime       string `form:"end_time,optional"`
+}
+
+type ListTransactionsResp struct {
+	List     []*TransactionResp `json:"list"`
+	Total    int64              `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"page_size"`
+	Stats    TransactionStats   `json:"stats"`
+}
+
 type ListUserCouponsReq struct {
 	UserID   int64  `form:"user_id,optional"`
 	CouponID int64  `form:"coupon_id,optional"`
@@ -1007,6 +1064,48 @@ type OrderFulfillmentItemResp struct {
 	PendingQty  int    `json:"pending_qty"`
 	UnitPrice   string `json:"unit_price"`
 	Currency    string `json:"currency"`
+}
+
+type OrderPaymentResp struct {
+	PaymentID         int64                `json:"payment_id"`
+	PaymentNo         string               `json:"payment_no"`
+	PaymentMethod     string               `json:"payment_method"`
+	PaymentMethodText string               `json:"payment_method_text"`
+	ChannelIntentID   string               `json:"channel_intent_id"`
+	ChannelPaymentID  string               `json:"channel_payment_id"`
+	Amount            string               `json:"amount"`
+	Currency          string               `json:"currency"`
+	TransactionFee    string               `json:"transaction_fee"`
+	FeeCurrency       string               `json:"fee_currency"`
+	Status            int8                 `json:"status"`
+	StatusText        string               `json:"status_text"`
+	PaidAt            string               `json:"paid_at,optional"`
+	RefundedAmount    string               `json:"refunded_amount"`
+	Refunds           []*PaymentRefundResp `json:"refunds"`
+}
+
+type PaymentRefundResp struct {
+	ID              int64  `json:"id"`
+	RefundNo        string `json:"refund_no"`
+	ChannelRefundID string `json:"channel_refund_id"`
+	Amount          string `json:"amount"`
+	Currency        string `json:"currency"`
+	Status          int8   `json:"status"`
+	StatusText      string `json:"status_text"`
+	ReasonType      string `json:"reason_type"`
+	Reason          string `json:"reason"`
+	RefundedAt      string `json:"refunded_at,optional"`
+	CreatedAt       string `json:"created_at"`
+}
+
+type PaymentStatsResp struct {
+	TodayReceived       string                    `json:"today_received"`
+	TodayGrowth         string                    `json:"today_growth"`
+	PeriodReceived      string                    `json:"period_received"`
+	RefundAmount        string                    `json:"refund_amount"`
+	RefundRate          string                    `json:"refund_rate"`
+	Currency            string                    `json:"currency"`
+	ChannelDistribution []ChannelDistributionResp `json:"channel_distribution"`
 }
 
 type ProductDetailResp struct {
@@ -1465,6 +1564,29 @@ type ToggleFeaturedResp struct {
 	ID         int64  `json:"id"`
 	IsFeatured bool   `json:"is_featured"`
 	UpdatedAt  string `json:"updated_at"`
+}
+
+type TransactionResp struct {
+	ID                   int64  `json:"id"`
+	TransactionID        string `json:"transaction_id"`
+	OrderID              string `json:"order_id"`
+	OrderNo              string `json:"order_no"`
+	PaymentMethod        string `json:"payment_method"`
+	PaymentMethodText    string `json:"payment_method_text"`
+	ChannelTransactionID string `json:"channel_transaction_id"`
+	Amount               string `json:"amount"`
+	Currency             string `json:"currency"`
+	TransactionFee       string `json:"transaction_fee"`
+	Status               int8   `json:"status"`
+	StatusText           string `json:"status_text"`
+	CreatedAt            string `json:"created_at"`
+	PaidAt               string `json:"paid_at,optional"`
+}
+
+type TransactionStats struct {
+	Success int64 `json:"success"`
+	Pending int64 `json:"pending"`
+	Failed  int64 `json:"failed"`
 }
 
 type UpdateBrandReq struct {

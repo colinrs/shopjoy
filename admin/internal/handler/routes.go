@@ -14,6 +14,7 @@ import (
 	fulfillment_orders "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_orders"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
+	payments "github.com/colinrs/shopjoy/admin/internal/handler/payments"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
@@ -23,6 +24,7 @@ import (
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	warehouses "github.com/colinrs/shopjoy/admin/internal/handler/warehouses"
+	webhooks "github.com/colinrs/shopjoy/admin/internal/handler/webhooks"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -409,6 +411,44 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/api/v1/markets/:id",
 					Handler: markets.DeleteMarketHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 订单支付信息
+					Method:  http.MethodGet,
+					Path:    "/api/v1/orders/:id/payment",
+					Handler: payments.GetOrderPaymentHandler(serverCtx),
+				},
+				{
+					// 发起退款
+					Method:  http.MethodPost,
+					Path:    "/api/v1/orders/:id/refund",
+					Handler: payments.InitiateRefundHandler(serverCtx),
+				},
+				{
+					// 支付统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/payments/stats",
+					Handler: payments.GetPaymentStatsHandler(serverCtx),
+				},
+				{
+					// 支付流水列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/payments/transactions",
+					Handler: payments.ListTransactionsHandler(serverCtx),
+				},
+				{
+					// 支付流水详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/payments/transactions/:id",
+					Handler: payments.GetTransactionHandler(serverCtx),
 				},
 			}...,
 		),
@@ -946,5 +986,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// Stripe Webhook回调
+				Method:  http.MethodPost,
+				Path:    "/api/v1/webhooks/stripe",
+				Handler: webhooks.StripeWebhookHandler(serverCtx),
+			},
+		},
 	)
 }
