@@ -226,7 +226,7 @@ ShopJoy 平台当前用户管理存在以下痛点：
 
 ### Architecture
 
-用户管理模块采用 DDD 架构：
+用户管理模块采用 DDD 架构，**复用现有 AdminUser 实体支持三种用户类型**：
 
 ```
 admin/internal/
@@ -234,11 +234,11 @@ admin/internal/
 │   ├── user/           # C端用户领域
 │   │   ├── entity.go
 │   │   ├── repository.go
-│   │   └── address_entity.go
-│   ├── admin_user/     # 商家管理员领域
-│   │   ├── entity.go
+│   │   └── address_entity.go  # 新增
+│   ├── adminuser/      # 管理员领域（现有，扩展）
+│   │   ├── entity.go   # 复用：Type=1 平台超管, Type=2 商家主账号, Type=3 商家子账号
 │   │   └── repository.go
-│   └── platform_admin/ # 平台超管领域
+│   └── role/           # 角色领域（现有）
 │       ├── entity.go
 │       └── repository.go
 ├── application/
@@ -248,20 +248,52 @@ admin/internal/
     └── users/
 ```
 
+**重要架构决策**：
+
+现有 `admin_users` 表已支持三种管理员类型（见 `admin/internal/domain/adminuser/entity.go`）：
+- `TypeSuperAdmin (1)` + `TenantID == 0`：平台超级管理员
+- `TypeTenantAdmin (2)` + `TenantID > 0`：商家主账号
+- `TypeTenantSub (3)` + `TenantID > 0`：商家子账号
+
+**因此不再创建独立的 `platform_admins` 表**，通过现有实体区分用户类型。
+
+### 现有 API 增强说明
+
+本 PRD 是对现有 API 的**增强**，而非完全重新设计：
+
+| API 文件 | 现有状态 | PRD 增强 |
+|----------|----------|----------|
+| `admin/desc/user.api` | 已有基础 CRUD | 增加 `/addresses`, `/export`, 搜索增强 |
+| `admin/desc/admin_user.api` | 已有列表、禁用/启用 | 增加创建、删除、角色分配、密码重置 |
+| `admin/internal/domain/user/entity.go` | 已有 User 实体 | 无需修改 |
+| `admin/internal/domain/adminuser/entity.go` | 已支持三种类型 | 无需修改 |
+
+**新增内容**：
+1. `user_addresses` 表及相关实体
+2. 用户详情聚合 API（积分、订单、评论等）
+3. 管理员创建/删除/角色分配 API
+4. 前端完整页面
+
 ### Database Design
 
-#### platform_admins 表
+#### admin_users 表（现有，扩展）
+
+**说明**：该表已存在，支持三种管理员类型。平台超级管理员使用 `Type=1` 和 `TenantID=0`。
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
 | id | BIGINT | NO | AUTO_INCREMENT | 主键 |
-| username | VARCHAR(50) | NO | | 用户名 |
-| email | VARCHAR(100) | NO | | 邮箱 |
+| tenant_id | BIGINT | NO | 0 | 租户ID（平台超管为0） |
+| username | VARCHAR(64) | NO | | 用户名 |
+| email | VARCHAR(128) | NO | | 邮箱 |
 | password | VARCHAR(255) | NO | | 密码哈希 |
-| real_name | VARCHAR(100) | NO | '' | 真实姓名 |
-| avatar | VARCHAR(500) | NO | '' | 头像URL |
-| status | TINYINT | NO | 1 | 1=启用 2=禁用 |
-| last_login | TIMESTAMP | YES | NULL | 最后登录时间（UTC） |
+| mobile | VARCHAR(20) | NO | '' | 手机号 |
+| real_name | VARCHAR(32) | NO | '' | 真实姓名 |
+| avatar | VARCHAR(255) | NO | '' | 头像URL |
+| type | TINYINT | NO | 1 | 1=平台超管 2=商家主账号 3=商家子账号 |
+| status | TINYINT | NO | 1 | 1=启用 2=禁用 3=已删除 |
+| last_login_at | TIMESTAMP | YES | NULL | 最后登录时间（UTC） |
+| last_login_ip | VARCHAR(45) | NO | '' | 最后登录IP |
 | deleted_at | TIMESTAMP | YES | NULL | 删除时间（UTC） |
 | created_at | TIMESTAMP | NO | CURRENT_TIMESTAMP | 创建时间（UTC） |
 | updated_at | TIMESTAMP | NO | CURRENT_TIMESTAMP | 更新时间（UTC） |
@@ -269,34 +301,15 @@ admin/internal/
 **Indexes:**
 - `uk_username` UNIQUE (username)
 - `uk_email` UNIQUE (email)
-
-#### admin_users 表（扩展现有）
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| id | BIGINT | NO | AUTO_INCREMENT | 主键 |
-| tenant_id | BIGINT | NO | | 租户ID |
-| username | VARCHAR(50) | NO | | 用户名 |
-| email | VARCHAR(100) | NO | | 邮箱 |
-| password | VARCHAR(255) | NO | | 密码哈希 |
-| mobile | VARCHAR(20) | NO | '' | 手机号 |
-| real_name | VARCHAR(100) | NO | '' | 真实姓名 |
-| avatar | VARCHAR(500) | NO | '' | 头像URL |
-| type | TINYINT | NO | 2 | 2=商家主账号 3=商家子账号 |
-| status | TINYINT | NO | 1 | 1=启用 2=禁用 |
-| last_login | TIMESTAMP | YES | NULL | 最后登录时间（UTC） |
-| deleted_at | TIMESTAMP | YES | NULL | 删除时间（UTC） |
-| created_by | BIGINT | NO | 0 | 创建人ID |
-| created_at | TIMESTAMP | NO | CURRENT_TIMESTAMP | 创建时间（UTC） |
-| updated_at | TIMESTAMP | NO | CURRENT_TIMESTAMP | 更新时间（UTC） |
-
-**Indexes:**
-- `uk_tenant_username` UNIQUE (tenant_id, username)
-- `uk_tenant_email` UNIQUE (tenant_id, email)
+- `uk_mobile` UNIQUE (mobile)
 - `idx_tenant_id` (tenant_id)
+- `idx_type` (type)
 - `idx_status` (status)
+- `idx_deleted_at` (deleted_at)
 
-#### users 表（扩展现有）
+#### users 表（现有，扩展）
+
+**说明**：该表已存在，用于C端用户（买家）。
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
@@ -379,16 +392,20 @@ admin/internal/
 
 ### 平台超管 API
 
+**说明**：平台超管复用 `/api/v1/admin-users` API，通过 `type=1` 和 `tenant_id=0` 区分。
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | /api/v1/platform-admins | 获取超管列表 |
-| POST | /api/v1/platform-admins | 创建超管 |
-| GET | /api/v1/platform-admins/:id | 获取超管详情 |
-| PUT | /api/v1/platform-admins/:id | 更新超管信息 |
-| DELETE | /api/v1/platform-admins/:id | 删除超管 |
-| POST | /api/v1/platform-admins/:id/enable | 启用超管 |
-| POST | /api/v1/platform-admins/:id/disable | 禁用超管 |
-| POST | /api/v1/platform-admins/:id/reset-password | 重置密码 |
+| GET | /api/v1/admin-users?type=1 | 获取超管列表 |
+| POST | /api/v1/admin-users | 创建超管（type=1, tenant_id=0） |
+| GET | /api/v1/admin-users/:id | 获取超管详情 |
+| PUT | /api/v1/admin-users/:id | 更新超管信息 |
+| DELETE | /api/v1/admin-users/:id | 删除超管 |
+| POST | /api/v1/admin-users/:id/enable | 启用超管 |
+| POST | /api/v1/admin-users/:id/disable | 禁用超管 |
+| POST | /api/v1/admin-users/:id/reset-password | 重置密码 |
+
+**权限控制**：仅 `type=1`（平台超管）可管理其他平台超管账号。
 
 ### API 示例
 
@@ -454,6 +471,93 @@ GET /api/v1/users?page=1&page_size=20&keyword=zhang&status=1
 }
 ```
 
+**计算字段数据源说明**：
+
+| 字段 | 数据源 | 计算方式 |
+|------|--------|----------|
+| points_balance | points_accounts 表 | 实时查询 |
+| points_frozen | points_accounts 表 | 实时查询 |
+| total_earned | points_accounts 表 | 实时查询 |
+| total_redeemed | points_accounts 表 | 实时查询 |
+| order_count | orders 表 | COUNT 聚合 |
+| total_spent | orders 表 | SUM(paid_amount) |
+| review_count | reviews 表 | COUNT 聚合 |
+
+#### POST /api/v1/users/:id/suspend - 冻结用户
+
+**Request:**
+```json
+{
+  "reason": "违规操作，多次恶意下单"
+}
+```
+
+**Response:**
+```json
+{
+  "id": 10001,
+  "status": 2,
+  "status_text": "冻结",
+  "updated_at": "2026-03-24T12:00:00Z"
+}
+```
+
+#### PUT /api/v1/admin-users/:id/roles - 分配角色
+
+**Request:**
+```json
+{
+  "role_ids": [2, 3]
+}
+```
+
+**Response:**
+```json
+{
+  "id": 26,
+  "roles": [
+    {"id": 2, "name": "运营", "code": "operator"},
+    {"id": 3, "name": "客服", "code": "customer_service"}
+  ],
+  "updated_at": "2026-03-24T12:00:00Z"
+}
+```
+
+#### GET /api/v1/users/:id/addresses - 用户地址列表
+
+**Response:**
+```json
+{
+  "list": [
+    {
+      "id": 1,
+      "name": "张三",
+      "phone": "13812345678",
+      "country": "CN",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "南山区",
+      "address": "科技园路100号",
+      "postal_code": "518000",
+      "is_default": true,
+      "created_at": "2025-06-10T08:00:00Z"
+    }
+  ],
+  "total": 2
+}
+```
+
+#### GET /api/v1/users/export - 导出用户
+
+**Request:**
+```http
+GET /api/v1/users/export?status=1&registered_start=2025-01-01&registered_end=2025-12-31
+```
+
+**Response:** CSV 文件下载
+
+**导出限制**：最大 10,000 条记录
+
 #### POST /api/v1/admin-users - 创建管理员
 
 **Request:**
@@ -482,6 +586,67 @@ GET /api/v1/users?page=1&page_size=20&keyword=zhang&status=1
 }
 ```
 
+**说明**：`tenant_id` 字段仅平台超管可指定，商家管理员创建时自动使用当前租户。
+
+---
+
+## Entity Definitions
+
+### UserAddress Entity (新增)
+
+```go
+// admin/internal/domain/user/address_entity.go
+package user
+
+import (
+    "time"
+    "github.com/colinrs/shopjoy/pkg/domain/shared"
+)
+
+type UserAddress struct {
+    ID          int64            `gorm:"column:id;primaryKey"`
+    TenantID    shared.TenantID  `gorm:"column:tenant_id;not null;index"`
+    UserID      int64            `gorm:"column:user_id;not null;index"`
+    Name        string           `gorm:"column:name;not null;size:100"`
+    Phone       string           `gorm:"column:phone;not null;size:20"`
+    Country     string           `gorm:"column:country;size:50"`
+    Province    string           `gorm:"column:province;size:100"`
+    City        string           `gorm:"column:city;size:100"`
+    District    string           `gorm:"column:district;size:100"`
+    Address     string           `gorm:"column:address;not null;size:255"`
+    PostalCode  string           `gorm:"column:postal_code;size:20"`
+    IsDefault   bool             `gorm:"column:is_default;default:false"`
+    DeletedAt   *time.Time       `gorm:"column:deleted_at"`
+    CreatedAt   time.Time        `gorm:"column:created_at;not null"`
+    UpdatedAt   time.Time        `gorm:"column:updated_at;not null"`
+}
+
+func (a *UserAddress) TableName() string {
+    return "user_addresses"
+}
+
+func (a *UserAddress) SetAsDefault() {
+    a.IsDefault = true
+}
+
+func (a *UserAddress) UnsetDefault() {
+    a.IsDefault = false
+}
+```
+
+### UserAddress Repository Interface
+
+```go
+type AddressRepository interface {
+    Create(ctx context.Context, db *gorm.DB, address *UserAddress) error
+    Update(ctx context.Context, db *gorm.DB, address *UserAddress) error
+    Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+    FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*UserAddress, error)
+    FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]*UserAddress, error)
+    SetDefault(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID, addressID int64) error
+}
+```
+
 ---
 
 ## Business Rules
@@ -501,46 +666,45 @@ GET /api/v1/users?page=1&page_size=20&keyword=zhang&status=1
 | Rule ID | Rule | Description |
 |---------|------|-------------|
 | BR-010 | 用户名唯一 | 同一租户下管理员用户名唯一 |
-| BR-010 | 邮箱唯一 | 同一租户下管理员邮箱唯一 |
-| BR-011 | 主账号限制 | 每个租户只能有一个主账号 |
-| BR-012 | 自我操作限制 | 管理员不能禁用/删除自己 |
-| BR-013 | 重置密码 | 重置密码生成临时密码，首次登录强制修改 |
+| BR-011 | 邮箱唯一 | 同一租户下管理员邮箱唯一 |
+| BR-012 | 主账号限制 | 每个租户只能有一个主账号 |
+| BR-013 | 自我操作限制 | 管理员不能禁用/删除自己 |
+| BR-014 | 重置密码 | 重置密码生成临时密码，首次登录强制修改 |
 
 ---
 
 ## Error Codes
 
-用户管理模块使用 11xxx 错误码范围（User 模块）：
+用户管理模块使用现有错误码，新增错误码在未使用的范围内定义：
 
-| Constant | HTTP Status | Code | Message |
-|----------|-------------|------|---------|
-| ErrUserNotFound | 404 | 11001 | user not found |
-| ErrUserAlreadyExists | 400 | 11002 | user already exists |
-| ErrUserSuspended | 400 | 11003 | user is suspended |
-| ErrUserAlreadyDeleted | 400 | 11004 | user already deleted |
-| ErrUserPasswordTooWeak | 400 | 11005 | password too weak |
-| ErrUserCannotSuspendSelf | 400 | 11006 | cannot suspend yourself |
-| ErrUserCannotDeleteSelf | 400 | 11007 | cannot delete yourself |
-| ErrAddressNotFound | 404 | 11010 | address not found |
+### 用户模块 (使用现有 11xxx)
 
-管理员模块使用 10xxx 错误码范围（Admin User 模块）：
+| Constant | HTTP Status | Code | Message | Status |
+|----------|-------------|------|---------|--------|
+| ErrUserNotFound | 404 | 11004 | user not found | 现有 |
+| ErrUserDuplicateUser | 409 | 11005 | duplicate user | 现有 |
+| ErrUserPasswordTooWeak | 400 | 11003 | password too weak | 现有 |
+| ErrUserAlreadyDeleted | 400 | 11007 | user already deleted | 现有 |
+| ErrUserSuspended | 400 | 11009 | user is suspended | **新增** |
+| ErrUserCannotSuspendSelf | 400 | 11010 | cannot suspend yourself | **新增** |
+| ErrUserCannotDeleteSelf | 400 | 11011 | cannot delete yourself | **新增** |
+| ErrAddressNotFound | 404 | 11012 | address not found | **新增** |
 
-| Constant | HTTP Status | Code | Message |
-|----------|-------------|------|---------|
-| ErrAdminUserNotFound | 404 | 10001 | admin user not found |
-| ErrAdminUsernameExists | 400 | 10002 | username already exists |
-| ErrAdminEmailExists | 400 | 10003 | email already exists |
-| ErrAdminCannotDisableSelf | 400 | 10004 | cannot disable yourself |
-| ErrAdminCannotDeleteSelf | 400 | 10005 | cannot delete yourself |
-| ErrAdminInvalidType | 400 | 10006 | invalid admin type |
+### 管理员模块 (使用现有 10xxx)
 
-平台超管模块使用 130xxx 错误码范围（Auth 模块扩展）：
+| Constant | HTTP Status | Code | Message | Status |
+|----------|-------------|------|---------|--------|
+| ErrAdminUserNotFound | 404 | 10004 | admin user not found | 现有 |
+| ErrAdminDuplicateUser | 409 | 10005 | duplicate admin user | 现有 |
+| ErrAdminPasswordTooWeak | 400 | 10003 | password too weak | 现有 |
+| ErrAdminCannotDeleteSelf | 400 | 10007 | cannot delete yourself | 现有 |
+| ErrAdminAlreadyDeleted | 400 | 10008 | user already deleted | 现有 |
+| ErrAdminCannotDisableSelf | 400 | 10012 | cannot disable yourself | **新增** |
+| ErrAdminInvalidType | 400 | 10013 | invalid admin type | **新增** |
 
-| Constant | HTTP Status | Code | Message |
-|----------|-------------|------|---------|
-| ErrPlatformAdminNotFound | 404 | 130001 | platform admin not found |
-| ErrPlatformAdminExists | 400 | 130002 | platform admin already exists |
-| ErrPlatformAdminCannotDisableSelf | 400 | 130003 | cannot disable yourself |
+### 平台超管模块 (使用现有 10xxx，复用 AdminUser)
+
+平台超管复用 AdminUser 实体，使用 Type=1 和 TenantID=0 标识，无需独立错误码。
 
 ---
 
@@ -658,20 +822,21 @@ shop-admin/src/views/
 │       ├── UserReviewHistory.vue   # 评论记录Tab
 │       └── UserOperationLog.vue    # 操作日志Tab
 │
-├── admin-users/                    # 商家管理员管理
-│   ├── index.vue                   # 管理员列表
-│   ├── [id].vue                    # 管理员详情/编辑
-│   └── components/
-│       ├── AdminUserForm.vue       # 新增/编辑表单
-│       ├── AdminUserFilter.vue     # 筛选组件
-│       └── RoleAssignDialog.vue    # 角色分配弹窗
-│
-└── platform-admins/                # 平台超管管理
-    ├── index.vue                   # 超管列表
-    ├── [id].vue                    # 超管详情/编辑
+└── admin-users/                    # 管理员管理（商家 + 平台）
+    ├── index.vue                   # 管理员列表（支持类型筛选）
+    ├── [id].vue                    # 管理员详情/编辑
     └── components/
-        └── PlatformAdminForm.vue   # 新增/编辑表单
+        ├── AdminUserForm.vue       # 新增/编辑表单
+        ├── AdminUserFilter.vue     # 筛选组件（含类型筛选）
+        └── RoleAssignDialog.vue    # 角色分配弹窗
 ```
+
+**说明**：平台超管和商家管理员共用 `admin-users` 页面，通过类型筛选区分：
+- 平台超管：`type=1`
+- 商家主账号：`type=2`
+- 商家子账号：`type=3`
+
+平台超管登录时，可看到全部三种类型；商家管理员登录时，仅看到本租户的 `type=2,3`。
 
 ### API 模块
 
@@ -701,19 +866,43 @@ export const adminUserApi = {
   resetPassword: (id: number) => request.post(`/api/v1/admin-users/${id}/reset-password`),
   assignRoles: (id: number, roleIds: number[]) => request.put(`/api/v1/admin-users/${id}/roles`, { role_ids: roleIds }),
 }
-
-// src/api/platformAdmin.ts
-export const platformAdminApi = {
-  list: (params: ListPlatformAdminsRequest) => request.get('/api/v1/platform-admins', { params }),
-  get: (id: number) => request.get(`/api/v1/platform-admins/${id}`),
-  create: (data: CreatePlatformAdminRequest) => request.post('/api/v1/platform-admins', data),
-  update: (id: number, data: UpdatePlatformAdminRequest) => request.put(`/api/v1/platform-admins/${id}`, data),
-  delete: (id: number) => request.delete(`/api/v1/platform-admins/${id}`),
-  enable: (id: number) => request.post(`/api/v1/platform-admins/${id}/enable`),
-  disable: (id: number) => request.post(`/api/v1/platform-admins/${id}/disable`),
-  resetPassword: (id: number) => request.post(`/api/v1/platform-admins/${id}/reset-password`),
-}
 ```
+
+---
+
+## Specifications
+
+### 搜索行为
+
+| 字段 | 搜索方式 | 说明 |
+|------|----------|------|
+| keyword | 模糊搜索 | 同时匹配 email、phone、name |
+| email | 精确匹配 | 完整邮箱地址 |
+| phone | 精确匹配 | 完整手机号 |
+| status | 精确匹配 | 状态值筛选 |
+
+### 排序规则
+
+| 列表 | 默认排序 | 支持排序字段 |
+|------|----------|--------------|
+| 用户列表 | created_at DESC | created_at, last_login, points_balance |
+| 管理员列表 | created_at DESC | created_at, last_login_at, status |
+
+### 导出限制
+
+| 参数 | 限制 |
+|------|------|
+| 最大记录数 | 10,000 条 |
+| 时间范围 | 最大 1 年 |
+| 格式 | CSV (UTF-8 with BOM) |
+
+### 密码规则
+
+| 规则 | 要求 |
+|------|------|
+| 最小长度 | 6 位 |
+| 字符要求 | 无强制要求 |
+| 重置密码 | 生成随机 12 位密码，首次登录强制修改 |
 
 ---
 
@@ -723,28 +912,27 @@ export const platformAdminApi = {
 
 | Task | Duration | Description |
 |------|----------|-------------|
-| Database migration | 0.5 day | Create/modify tables: platform_admins, user_addresses |
-| Domain entities | 1 day | Implement entities for PlatformAdmin, UserAddress |
-| Repositories | 1 day | Implement GORM repositories |
-| Business logic | 1.5 days | Implement logic for users, admin-users, platform-admins |
+| Database migration | 0.5 day | Create user_addresses table; extend admin_users API |
+| Domain entities | 1 day | Implement UserAddress entity; extend User repository |
+| Repositories | 1 day | Implement AddressRepository; extend existing repositories |
+| Business logic | 1.5 days | Implement logic for user addresses, user details aggregation |
 | Unit tests | 0.5 day | Unit tests for business logic |
 
 ### Phase 2: API Development (Week 2)
 
 | Task | Duration | Description |
 |------|----------|-------------|
-| API definitions | 0.5 day | Create/extend .api files |
-| Handlers | 1.5 days | Implement HTTP handlers |
+| API definitions | 0.5 day | Extend user.api, admin_user.api |
+| Handlers | 1.5 days | Implement HTTP handlers for new endpoints |
 | Integration tests | 0.5 day | API integration tests |
 
 ### Phase 3: Frontend Development (Week 2-3)
 
 | Task | Duration | Description |
 |------|----------|-------------|
-| API clients | 0.5 day | Create API TypeScript modules |
+| API clients | 0.5 day | Create/extend API TypeScript modules |
 | C端用户页面 | 2 days | 用户列表、详情、筛选组件 |
-| 商家管理员页面 | 1 day | 管理员列表、表单、角色分配 |
-| 平台超管页面 | 0.5 day | 超管列表、表单 |
+| 管理员页面 | 1.5 days | 管理员列表（含类型筛选）、表单、角色分配 |
 | Router & menu | 0.5 day | 添加路由和菜单项 |
 
 ### Phase 4: Testing & Polish (Week 3)
