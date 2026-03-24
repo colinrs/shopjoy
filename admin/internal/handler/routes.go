@@ -14,15 +14,19 @@ import (
 	fulfillment_orders "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_orders"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
+	pages "github.com/colinrs/shopjoy/admin/internal/handler/pages"
 	payments "github.com/colinrs/shopjoy/admin/internal/handler/payments"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
 	refunds "github.com/colinrs/shopjoy/admin/internal/handler/refunds"
 	reviews "github.com/colinrs/shopjoy/admin/internal/handler/reviews"
+	seo "github.com/colinrs/shopjoy/admin/internal/handler/seo"
 	shipments "github.com/colinrs/shopjoy/admin/internal/handler/shipments"
+	themes "github.com/colinrs/shopjoy/admin/internal/handler/themes"
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
+	versions "github.com/colinrs/shopjoy/admin/internal/handler/versions"
 	warehouses "github.com/colinrs/shopjoy/admin/internal/handler/warehouses"
 	webhooks "github.com/colinrs/shopjoy/admin/internal/handler/webhooks"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -457,6 +461,68 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 更新区块
+					Method:  http.MethodPut,
+					Path:    "/api/v1/decorations/:id",
+					Handler: pages.UpdateDecorationHandler(serverCtx),
+				},
+				{
+					// 删除区块
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/decorations/:id",
+					Handler: pages.DeleteDecorationHandler(serverCtx),
+				},
+				{
+					// 获取页面列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/pages",
+					Handler: pages.ListPagesHandler(serverCtx),
+				},
+				{
+					// 获取页面详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/pages/:id",
+					Handler: pages.GetPageHandler(serverCtx),
+				},
+				{
+					// 调整区块顺序
+					Method:  http.MethodPut,
+					Path:    "/api/v1/pages/:id/blocks/reorder",
+					Handler: pages.ReorderBlocksHandler(serverCtx),
+				},
+				{
+					// 添加区块
+					Method:  http.MethodPost,
+					Path:    "/api/v1/pages/:id/decorations",
+					Handler: pages.AddDecorationHandler(serverCtx),
+				},
+				{
+					// 保存草稿
+					Method:  http.MethodPut,
+					Path:    "/api/v1/pages/:id/draft",
+					Handler: pages.SaveDraftHandler(serverCtx),
+				},
+				{
+					// 发布页面
+					Method:  http.MethodPut,
+					Path:    "/api/v1/pages/:id/publish",
+					Handler: pages.PublishPageHandler(serverCtx),
+				},
+				{
+					// 取消发布
+					Method:  http.MethodPut,
+					Path:    "/api/v1/pages/:id/unpublish",
+					Handler: pages.UnpublishPageHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
 					// 订单支付信息
 					Method:  http.MethodGet,
 					Path:    "/api/v1/orders/:id/payment",
@@ -847,6 +913,44 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 获取全局SEO配置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/seo/global",
+					Handler: seo.GetGlobalSEOHandler(serverCtx),
+				},
+				{
+					// 更新全局SEO
+					Method:  http.MethodPut,
+					Path:    "/api/v1/seo/global",
+					Handler: seo.UpdateGlobalSEOHandler(serverCtx),
+				},
+				{
+					// 获取页面SEO配置列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/seo/pages",
+					Handler: seo.ListPageSEOHandler(serverCtx),
+				},
+				{
+					// 获取页面SEO配置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/seo/pages/:page_type",
+					Handler: seo.GetPageSEOHandler(serverCtx),
+				},
+				{
+					// 更新页面SEO
+					Method:  http.MethodPut,
+					Path:    "/api/v1/seo/pages/:page_type",
+					Handler: seo.UpdatePageSEOHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
 					// 物流公司列表
 					Method:  http.MethodGet,
 					Path:    "/api/v1/carriers",
@@ -893,6 +997,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/shipments/batch",
 					Handler: shipments.BatchCreateShipmentsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取主题列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/themes",
+					Handler: themes.ListThemesHandler(serverCtx),
+				},
+				{
+					// 更新主题配置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/themes/config",
+					Handler: themes.UpdateThemeConfigHandler(serverCtx),
+				},
+				{
+					// 获取当前主题
+					Method:  http.MethodGet,
+					Path:    "/api/v1/themes/current",
+					Handler: themes.GetCurrentThemeHandler(serverCtx),
+				},
+				{
+					// 切换主题
+					Method:  http.MethodPut,
+					Path:    "/api/v1/themes/switch",
+					Handler: themes.SwitchThemeHandler(serverCtx),
 				},
 			}...,
 		),
@@ -1005,6 +1141,32 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/users/stats/enhanced",
 					Handler: users.GetUserStatsEnhancedHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 恢复版本
+					Method:  http.MethodPut,
+					Path:    "/api/v1/pages/:id/restore",
+					Handler: versions.RestoreVersionHandler(serverCtx),
+				},
+				{
+					// 获取版本历史
+					Method:  http.MethodGet,
+					Path:    "/api/v1/pages/:id/versions",
+					Handler: versions.ListVersionsHandler(serverCtx),
+				},
+				{
+					// 获取版本详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/pages/:id/versions/:version",
+					Handler: versions.GetVersionHandler(serverCtx),
 				},
 			}...,
 		),

@@ -191,6 +191,37 @@ var (
 	ErrShopNotFound = &Err{HTTPCode: http.StatusNotFound, Code: 110001, Msg: "shop not found"}
 	ErrShopInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
 
+	// Theme errors (110101-110199)
+	ErrThemeNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 110101, Msg: "theme not found"}
+	ErrThemeAlreadyActive  = &Err{HTTPCode: http.StatusBadRequest, Code: 110102, Msg: "theme is already active"}
+	ErrThemeConfigInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110103, Msg: "invalid theme configuration"}
+	ErrThemePresetOnly     = &Err{HTTPCode: http.StatusBadRequest, Code: 110104, Msg: "preset theme cannot be modified"}
+
+	// Page errors (110201-110299)
+	ErrPageNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 110201, Msg: "page not found"}
+	ErrPageSlugDuplicate   = &Err{HTTPCode: http.StatusBadRequest, Code: 110202, Msg: "page slug already exists"}
+	ErrPagePublishFailed   = &Err{HTTPCode: http.StatusInternalServerError, Code: 110203, Msg: "failed to publish page"}
+	ErrPageAlreadyPublished = &Err{HTTPCode: http.StatusBadRequest, Code: 110204, Msg: "page is already published"}
+	ErrPageNotPublished    = &Err{HTTPCode: http.StatusBadRequest, Code: 110205, Msg: "page is not published"}
+
+	// Decoration errors (110301-110399)
+	ErrDecorationNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 110301, Msg: "decoration block not found"}
+	ErrInvalidBlockType    = &Err{HTTPCode: http.StatusBadRequest, Code: 110302, Msg: "invalid block type"}
+	ErrInvalidBlockConfig  = &Err{HTTPCode: http.StatusBadRequest, Code: 110303, Msg: "invalid block configuration"}
+	ErrBlockLimitExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 110304, Msg: "block limit exceeded"}
+	ErrDecorationPageMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 110305, Msg: "decoration does not belong to this page"}
+
+	// Version errors (110401-110499)
+	ErrVersionNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 110401, Msg: "version not found"}
+	ErrVersionRestoreFailed = &Err{HTTPCode: http.StatusInternalServerError, Code: 110402, Msg: "failed to restore version"}
+	ErrVersionCannotRestore = &Err{HTTPCode: http.StatusBadRequest, Code: 110403, Msg: "cannot restore to the same version"}
+
+	// SEO errors (110501-110599)
+	ErrSEOConfigNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 110501, Msg: "SEO config not found"}
+	ErrSEOPageTypeInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110502, Msg: "invalid SEO page type"}
+	ErrSEOTitleTooLong     = &Err{HTTPCode: http.StatusBadRequest, Code: 110503, Msg: "SEO title exceeds maximum length"}
+	ErrSEODescriptionTooLong = &Err{HTTPCode: http.StatusBadRequest, Code: 110504, Msg: "SEO description exceeds maximum length"}
+
 	// ErrShipmentNotFound ==================== Fulfillment Module (120xxx) ====================
 	ErrShipmentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120001, Msg: "shipment not found"}
 	ErrShipmentInvalidTracking       = &Err{HTTPCode: http.StatusBadRequest, Code: 120002, Msg: "invalid tracking number"}

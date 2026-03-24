@@ -8,19 +8,21 @@ import (
 )
 
 type Shop struct {
-	ID           int64
-	TenantID     shared.TenantID
-	Name         string
-	Description  string
-	Logo         string
-	Banner       string
-	ContactPhone string
-	ContactEmail string
-	Address      string
-	SocialLinks  map[string]string
-	SEO          SEOConfig
-	Status       shared.Status
-	Audit        shared.AuditInfo `gorm:"embedded"`
+	ID              int64
+	TenantID        shared.TenantID
+	Name            string
+	Description     string
+	Logo            string
+	Banner          string
+	ContactPhone    string
+	ContactEmail    string
+	Address         string
+	SocialLinks     map[string]string
+	SEO             SEOConfig
+	Status          shared.Status
+	CurrentThemeID  *int64
+	ThemeConfig     *ThemeConfig
+	Audit           shared.AuditInfo `gorm:"embedded"`
 }
 
 func (s *Shop) TableName() string {
@@ -34,15 +36,19 @@ type SEOConfig struct {
 }
 
 type Theme struct {
-	ID          int64
-	TenantID    shared.TenantID
-	Name        string
-	Code        string
-	Description string
-	Thumbnail   string
-	Config      ThemeConfig
-	IsActive    bool
-	IsCustom    bool
+	ID            int64
+	TenantID      shared.TenantID
+	Name          string
+	Code          string
+	Description   string
+	Thumbnail     string
+	PreviewImage  string
+	Config        ThemeConfig
+	ConfigSchema  ThemeConfigSchema
+	DefaultConfig ThemeConfig
+	IsActive      bool
+	IsCustom      bool
+	IsPreset      bool
 }
 
 func (t *Theme) TableName() string {
@@ -50,24 +56,44 @@ func (t *Theme) TableName() string {
 }
 
 type ThemeConfig struct {
-	Colors     map[string]string
-	Fonts      map[string]string
-	Layout     string
-	CustomCSS  string
-	Components map[string]interface{}
+	Colors     map[string]string      `json:"colors"`
+	Fonts      map[string]string      `json:"fonts"`
+	Layout     string                 `json:"layout"`
+	CustomCSS  string                 `json:"custom_css"`
+	Components map[string]interface{} `json:"components"`
+}
+
+type ThemeConfigSchema struct {
+	Fields []ThemeConfigField `json:"fields"`
+}
+
+type ThemeConfigField struct {
+	Key     string      `json:"key"`
+	Label   string      `json:"label"`
+	Type    string      `json:"type"` // color, select, text
+	Options []SelectOpt `json:"options,omitempty"`
+	Default string      `json:"default"`
+}
+
+type SelectOpt struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
 }
 
 type Page struct {
-	ID       int64
-	TenantID shared.TenantID
-	Name     string
-	Slug     string
-	Type     PageType
-	Content  string
-	SEO      SEOConfig
-	Status   shared.Status
-	Sort     int
-	Audit    shared.AuditInfo `gorm:"embedded"`
+	ID          int64
+	TenantID    shared.TenantID
+	Name        string
+	Slug        string
+	Type        PageType
+	Content     string
+	SEO         SEOConfig
+	Status      shared.Status
+	Sort        int
+	IsPublished bool
+	PublishedAt *int64
+	Version     int
+	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
 type PageType int
@@ -81,6 +107,65 @@ const (
 
 func (p *Page) TableName() string {
 	return "pages"
+}
+
+// Decoration represents a decoration block on a page
+type Decoration struct {
+	ID          int64
+	TenantID    shared.TenantID
+	PageID      int64
+	BlockType   string      // banner, product_grid, rich_text, image_carousel, etc.
+	BlockConfig BlockConfig // JSON configuration
+	SortOrder   int
+	IsActive    bool
+	CreatedAt   int64
+	UpdatedAt   int64
+}
+
+func (d *Decoration) TableName() string {
+	return "decorations"
+}
+
+// BlockConfig represents the configuration of a decoration block
+type BlockConfig map[string]interface{}
+
+// PageVersion represents a snapshot of page decoration at a point in time
+type PageVersion struct {
+	ID        int64
+	TenantID  shared.TenantID
+	PageID    int64
+	Version   int
+	Blocks    []BlockSnapshot // JSON snapshot of blocks
+	CreatedBy int64
+	CreatedAt int64
+}
+
+func (v *PageVersion) TableName() string {
+	return "page_versions"
+}
+
+// BlockSnapshot represents a snapshot of a decoration block for versioning
+type BlockSnapshot struct {
+	BlockType   string                 `json:"block_type"`
+	BlockConfig map[string]interface{} `json:"block_config"`
+	SortOrder   int                    `json:"sort_order"`
+}
+
+// SEOConfigEntity represents SEO configuration for a page type
+type SEOConfigEntity struct {
+	ID          int64
+	TenantID    shared.TenantID
+	PageType    string // global, home, category, product, custom
+	PageID      *int64 // NULL for global/page type defaults
+	Title       string
+	Description string
+	Keywords    string
+	CreatedAt   int64
+	UpdatedAt   int64
+}
+
+func (s *SEOConfigEntity) TableName() string {
+	return "seo_configs"
 }
 
 type Navigation struct {
@@ -111,6 +196,14 @@ func (ni *NavItem) TableName() string {
 	return "nav_items"
 }
 
+// BlockOrder represents the sort order for reordering blocks
+type BlockOrder struct {
+	ID        int64
+	SortOrder int
+}
+
+// Repository interfaces
+
 type ShopRepository interface {
 	FindByTenantID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*Shop, error)
 	Save(ctx context.Context, db *gorm.DB, shop *Shop) error
@@ -122,6 +215,7 @@ type ThemeRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Theme, error)
 	FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*Theme, error)
 	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*Theme, error)
+	FindPresets(ctx context.Context, db *gorm.DB) ([]*Theme, error)
 	SetActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
 }
 
@@ -133,6 +227,30 @@ type PageRepository interface {
 	FindBySlug(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, slug string) (*Page, error)
 	FindByType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType PageType) (*Page, error)
 	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*Page, error)
+}
+
+type DecorationRepository interface {
+	Create(ctx context.Context, db *gorm.DB, d *Decoration) error
+	Update(ctx context.Context, db *gorm.DB, d *Decoration) error
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Decoration, error)
+	FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) ([]*Decoration, error)
+	Reorder(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orders []BlockOrder) error
+	DeleteByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) error
+}
+
+type PageVersionRepository interface {
+	Create(ctx context.Context, db *gorm.DB, v *PageVersion) error
+	FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, limit int) ([]*PageVersion, error)
+	FindByVersion(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, version int) (*PageVersion, error)
+	DeleteOldest(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, keepCount int) error
+}
+
+type SEOConfigRepository interface {
+	Save(ctx context.Context, db *gorm.DB, config *SEOConfigEntity) error
+	FindByPageType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) (*SEOConfigEntity, error)
+	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*SEOConfigEntity, error)
+	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) error
 }
 
 type NavigationRepository interface {

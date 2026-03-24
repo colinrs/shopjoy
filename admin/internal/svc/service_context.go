@@ -12,6 +12,7 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
+	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
@@ -68,6 +69,12 @@ type ServiceContext struct {
 	ReviewService             appReview.Service
 	ReviewRepo                review.Repository
 	ReplyRepo                 review.ReplyRepository
+	// Storefront services
+	ThemeService      appStorefront.ThemeService
+	PageService       appStorefront.PageService
+	DecorationService appStorefront.DecorationService
+	VersionService    appStorefront.VersionService
+	SEOService        appStorefront.SEOService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -149,6 +156,21 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// Payment service
 	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, idGen)
 
+	// Storefront repositories
+	themeRepo := persistence.NewThemeRepository()
+	pageRepo := persistence.NewPageRepository()
+	decorationRepo := persistence.NewDecorationRepository()
+	pageVersionRepo := persistence.NewPageVersionRepository()
+	seoConfigRepo := persistence.NewSEOConfigRepository()
+	shopRepo := persistence.NewShopRepository()
+
+	// Storefront services
+	themeService := appStorefront.NewThemeService(db, themeRepo, shopRepo)
+	pageService := appStorefront.NewPageService(db, pageRepo, decorationRepo, pageVersionRepo, idGen)
+	decorationService := appStorefront.NewDecorationService(db, decorationRepo, idGen)
+	versionService := appStorefront.NewVersionService(db, pageVersionRepo, decorationRepo, idGen)
+	seoService := appStorefront.NewSEOService(db, seoConfigRepo)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
@@ -187,5 +209,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ReviewService:          reviewService,
 		ReviewRepo:             reviewRepo,
 		ReplyRepo:              replyRepo,
+		// Storefront services
+		ThemeService:      themeService,
+		PageService:       pageService,
+		DecorationService: decorationService,
+		VersionService:    versionService,
+		SEOService:        seoService,
 	}
 }

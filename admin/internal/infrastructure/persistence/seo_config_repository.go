@@ -1,0 +1,152 @@
+package persistence
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"gorm.io/gorm"
+)
+
+type seoConfigRepo struct{}
+
+func NewSEOConfigRepository() storefront.SEOConfigRepository {
+	return &seoConfigRepo{}
+}
+
+type seoConfigModel struct {
+	ID          int64  `gorm:"column:id;primaryKey"`
+	TenantID    int64  `gorm:"column:tenant_id;not null;uniqueIndex:idx_tenant_page_type"`
+	PageType    string `gorm:"column:page_type;type:varchar(30);not null;uniqueIndex:idx_tenant_page_type;index"`
+	PageID      *int64 `gorm:"column:page_id;uniqueIndex:idx_tenant_page_type"`
+	Title       string `gorm:"column:title;type:varchar(200);not null;default:''"`
+	Description string `gorm:"column:description;type:text;not null"`
+	Keywords    string `gorm:"column:keywords;type:varchar(500);not null;default:''"`
+	CreatedAt   int64  `gorm:"column:created_at;not null"`
+	UpdatedAt   int64  `gorm:"column:updated_at;not null"`
+}
+
+func (seoConfigModel) TableName() string {
+	return "seo_configs"
+}
+
+func (m *seoConfigModel) toEntity() *storefront.SEOConfigEntity {
+	return &storefront.SEOConfigEntity{
+		ID:          m.ID,
+		TenantID:    shared.TenantID(m.TenantID),
+		PageType:    m.PageType,
+		PageID:      m.PageID,
+		Title:       m.Title,
+		Description: m.Description,
+		Keywords:    m.Keywords,
+		CreatedAt:   m.CreatedAt,
+		UpdatedAt:   m.UpdatedAt,
+	}
+}
+
+func fromSEOConfigEntity(s *storefront.SEOConfigEntity) *seoConfigModel {
+	now := time.Now().Unix()
+	createdAt := now
+	updatedAt := now
+	if s.CreatedAt > 0 {
+		createdAt = s.CreatedAt
+	}
+	if s.UpdatedAt > 0 {
+		updatedAt = s.UpdatedAt
+	}
+	return &seoConfigModel{
+		ID:          s.ID,
+		TenantID:    s.TenantID.Int64(),
+		PageType:    s.PageType,
+		PageID:      s.PageID,
+		Title:       s.Title,
+		Description: s.Description,
+		Keywords:    s.Keywords,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+	}
+}
+
+func (r *seoConfigRepo) Save(ctx context.Context, db *gorm.DB, config *storefront.SEOConfigEntity) error {
+	model := fromSEOConfigEntity(config)
+
+	// Check if exists
+	var existing seoConfigModel
+	err := db.WithContext(ctx).
+		Where("tenant_id = ? AND page_type = ? AND (page_id = ? OR (page_id IS NULL AND ? IS NULL))",
+			model.TenantID, model.PageType, model.PageID, model.PageID).
+		First(&existing).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Create new
+			return db.WithContext(ctx).Create(model).Error
+		}
+		return err
+	}
+
+	// Update existing
+	config.ID = existing.ID
+	model.ID = existing.ID
+	return db.WithContext(ctx).Model(&seoConfigModel{}).
+		Where("id = ?", existing.ID).
+		Updates(map[string]interface{}{
+			"title":       model.Title,
+			"description": model.Description,
+			"keywords":    model.Keywords,
+			"updated_at":  model.UpdatedAt,
+		}).Error
+}
+
+func (r *seoConfigRepo) FindByPageType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) (*storefront.SEOConfigEntity, error) {
+	var model seoConfigModel
+	query := db.WithContext(ctx).
+		Where("tenant_id = ? AND page_type = ?", tenantID.Int64(), pageType)
+
+	if pageID != nil {
+		query = query.Where("page_id = ?", *pageID)
+	} else {
+		query = query.Where("page_id IS NULL")
+	}
+
+	err := query.First(&model).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return model.toEntity(), nil
+}
+
+func (r *seoConfigRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*storefront.SEOConfigEntity, error) {
+	var models []seoConfigModel
+	err := db.WithContext(ctx).
+		Where("tenant_id = ?", tenantID.Int64()).
+		Order("page_type ASC, page_id ASC").
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	configs := make([]*storefront.SEOConfigEntity, len(models))
+	for i, m := range models {
+		configs[i] = m.toEntity()
+	}
+	return configs, nil
+}
+
+func (r *seoConfigRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) error {
+	query := db.WithContext(ctx).
+		Where("tenant_id = ? AND page_type = ?", tenantID.Int64(), pageType)
+
+	if pageID != nil {
+		query = query.Where("page_id = ?", *pageID)
+	} else {
+		query = query.Where("page_id IS NULL")
+	}
+
+	return query.Delete(&seoConfigModel{}).Error
+}

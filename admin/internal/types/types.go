@@ -11,6 +11,20 @@ type ActivateUserRequest struct {
 	ID int64 `path:"id"`
 }
 
+type AddDecorationRequest struct {
+	PageID      int64  `path:"id"`
+	BlockType   string `json:"block_type"`
+	BlockConfig string `json:"block_config"` // JSON string
+	SortOrder   int    `json:"sort_order,optional"`
+}
+
+type AddDecorationResponse struct {
+	ID          int64  `json:"id"`
+	BlockType   string `json:"block_type"`
+	BlockConfig string `json:"block_config"` // JSON string
+	SortOrder   int    `json:"sort_order"`
+}
+
 type AdjustOrderPriceReq struct {
 	ID           int64  `path:"id"`
 	AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in cents)
@@ -138,6 +152,11 @@ type BatchShipmentResultResp struct {
 
 type BatchUpdateSafetyStockReq struct {
 	Items []SafetyStockItem `json:"items"`
+}
+
+type BlockOrderItem struct {
+	ID        int64 `json:"id"`
+	SortOrder int   `json:"sort_order"`
 }
 
 type BrandDetailResp struct {
@@ -461,11 +480,33 @@ type CreateWarehouseResp struct {
 	ID int64 `json:"id"`
 }
 
+type CurrentThemeResponse struct {
+	Theme  *ThemeItem     `json:"theme"`
+	Config ThemeConfigDTO `json:"config"`
+}
+
 type DeactivatePromotionReq struct {
 	ID int64 `path:"id"`
 }
 
+type DecorationDTO struct {
+	ID          int64  `json:"id"`
+	BlockType   string `json:"block_type"`
+	BlockConfig string `json:"block_config"` // JSON string
+	SortOrder   int    `json:"sort_order"`
+}
+
+type DecorationInput struct {
+	BlockType   string `json:"block_type"`
+	BlockConfig string `json:"block_config"` // JSON string
+	SortOrder   int    `json:"sort_order,optional"`
+}
+
 type DeleteCouponReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteDecorationRequest struct {
 	ID int64 `path:"id"`
 }
 
@@ -630,6 +671,14 @@ type GetOrderShipmentsReq struct {
 	OrderID string `path:"order_id"`
 }
 
+type GetPageRequest struct {
+	ID int64 `path:"id"`
+}
+
+type GetPageSEORequest struct {
+	PageType string `path:"page_type"`
+}
+
 type GetPaymentStatsReq struct {
 	Period string `form:"period,default=7d"` // 7d, 30d, 90d
 }
@@ -695,8 +744,17 @@ type GetUserResponse struct {
 	LastLogin string `json:"last_login,optional"`
 }
 
+type GetVersionRequest struct {
+	PageID  int64 `path:"id"`
+	Version int   `path:"version"`
+}
+
 type GetWarehouseReq struct {
 	ID int64 `path:"id"`
+}
+
+type GlobalSEOConfigResponse struct {
+	SEOConfigDTO
 }
 
 type HideReviewReq struct {
@@ -854,6 +912,14 @@ type ListOrderShipmentsResp struct {
 	List []*ShipmentDetailResp `json:"list"`
 }
 
+type ListPageSEOConfigsResponse struct {
+	Configs []*PageSEOConfigResponse `json:"configs"`
+}
+
+type ListPagesResponse struct {
+	Pages []*PageListItem `json:"pages"`
+}
+
 type ListProductLocalizationsReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -985,6 +1051,10 @@ type ListShipmentsResp struct {
 	PageSize int                   `json:"page_size"`
 }
 
+type ListThemesResponse struct {
+	Themes []*ThemeItem `json:"themes"`
+}
+
 type ListTransactionsReq struct {
 	Page          int    `form:"page,default=1"`
 	PageSize      int    `form:"page_size,default=20"`
@@ -1048,6 +1118,14 @@ type ListUsersResponse struct {
 	Total    int64              `json:"total"`
 	Page     int                `json:"page"`
 	PageSize int                `json:"page_size"`
+}
+
+type ListVersionsRequest struct {
+	PageID int64 `path:"id"`
+}
+
+type ListVersionsResponse struct {
+	Versions []*VersionListItem `json:"versions"`
 }
 
 type ListWarehouseReq struct {
@@ -1138,6 +1216,26 @@ type OrderPaymentResp struct {
 	PaidAt            string               `json:"paid_at,optional"`
 	RefundedAmount    string               `json:"refunded_amount"`
 	Refunds           []*PaymentRefundResp `json:"refunds"`
+}
+
+type PageDetailResponse struct {
+	Page        *PageListItem    `json:"page"`
+	Decorations []*DecorationDTO `json:"decorations"`
+}
+
+type PageListItem struct {
+	ID          int64  `json:"id"`
+	PageType    string `json:"page_type"`
+	Name        string `json:"name"`
+	Slug        string `json:"slug"`
+	IsPublished bool   `json:"is_published"`
+	Version     int    `json:"version"`
+}
+
+type PageSEOConfigResponse struct {
+	PageType string `json:"page_type"`
+	PageID   *int64 `json:"page_id,omitempty"`
+	SEOConfigDTO
 }
 
 type PaymentRefundResp struct {
@@ -1286,6 +1384,10 @@ type PromotionRuleResp struct {
 	UpdatedAt     string `json:"updated_at"`
 }
 
+type PublishPageRequest struct {
+	ID int64 `path:"id"`
+}
+
 type PushToMarketReq struct {
 	ProductID int64    `path:"id"`
 	MarketIDs []int64  `json:"market_ids"`
@@ -1395,6 +1497,11 @@ type RemoveFromMarketReq struct {
 	MarketID  int64 `path:"market_id"`
 }
 
+type ReorderBlocksRequest struct {
+	PageID      int64            `path:"id"`
+	BlockOrders []BlockOrderItem `json:"block_orders"`
+}
+
 type ResetAdminPasswordResponse struct {
 	TemporaryPassword string `json:"temporary_password"`
 }
@@ -1405,6 +1512,11 @@ type ResetPasswordRequest struct {
 
 type ResetPasswordResponse struct {
 	TemporaryPassword string `json:"temporary_password"`
+}
+
+type RestoreVersionRequest struct {
+	PageID  int64 `path:"id"`
+	Version int   `json:"version"`
 }
 
 type ReviewDetailResp struct {
@@ -1478,6 +1590,12 @@ type ReviewStatsResp struct {
 	FeaturedCount    int64   `json:"featured_count"`
 }
 
+type SEOConfigDTO struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Keywords    string `json:"keywords"`
+}
+
 type SKUDetailResp struct {
 	ID             int64             `json:"id"`
 	ProductID      int64             `json:"product_id"`
@@ -1510,6 +1628,11 @@ type SKUInventoryResp struct {
 type SafetyStockItem struct {
 	SKUCode     string `json:"sku_code"`
 	SafetyStock int    `json:"safety_stock"`
+}
+
+type SaveDraftRequest struct {
+	ID     int64              `path:"id"`
+	Blocks []*DecorationInput `json:"blocks"`
 }
 
 type SetBrandMarketVisibilityReq struct {
@@ -1604,6 +1727,10 @@ type SuspendUserWithReasonRequest struct {
 	Reason string `json:"reason"`
 }
 
+type SwitchThemeRequest struct {
+	ThemeID int64 `json:"theme_id"`
+}
+
 type TakeOffSaleReq struct {
 	ID int64 `path:"id"`
 }
@@ -1613,6 +1740,24 @@ type TaxConfig struct {
 	GstRate     string `json:"gst_rate,optional"`
 	IossEnabled bool   `json:"ioss_enabled,optional"`
 	IncludeTax  bool   `json:"include_tax,optional"`
+}
+
+type ThemeConfigDTO struct {
+	PrimaryColor   string `json:"primary_color"`
+	SecondaryColor string `json:"secondary_color"`
+	FontFamily     string `json:"font_family"`
+	ButtonStyle    string `json:"button_style"`
+}
+
+type ThemeItem struct {
+	ID           int64  `json:"id"`
+	Code         string `json:"code"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	PreviewImage string `json:"preview_image"`
+	Thumbnail    string `json:"thumbnail"`
+	IsPreset     bool   `json:"is_preset"`
+	IsCurrent    bool   `json:"is_current"`
 }
 
 type ToggleBrandPageReq struct {
@@ -1652,6 +1797,10 @@ type TransactionStats struct {
 	Success int64 `json:"success"`
 	Pending int64 `json:"pending"`
 	Failed  int64 `json:"failed"`
+}
+
+type UnpublishPageRequest struct {
+	ID int64 `path:"id"`
 }
 
 type UpdateAdminUserRequest struct {
@@ -1717,6 +1866,11 @@ type UpdateCouponReq struct {
 	MarketIDs      string `json:"market_ids,optional"`
 }
 
+type UpdateDecorationRequest struct {
+	ID          int64  `path:"id"`
+	BlockConfig string `json:"block_config"` // JSON string
+}
+
 type UpdateMarketReq struct {
 	ID        int64     `path:"id"`
 	Name      string    `json:"name,optional"`
@@ -1732,6 +1886,13 @@ type UpdateOrderRemarkReq struct {
 
 type UpdateOrderRemarkResp struct {
 	OrderID int64 `json:"order_id"`
+}
+
+type UpdatePageSEORequest struct {
+	PageType    string `path:"page_type"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Keywords    string `json:"keywords"`
 }
 
 type UpdateProductLocalizationReq struct {
@@ -1823,6 +1984,12 @@ type UpdateReplyResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
+type UpdateSEOConfigRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Keywords    string `json:"keywords"`
+}
+
 type UpdateSKUReq struct {
 	ID             int64             `path:"id"`
 	Code           string            `json:"code,optional"`
@@ -1860,6 +2027,10 @@ type UpdateShipmentStatusReq struct {
 type UpdateStockReq struct {
 	ID       int64 `path:"id"`
 	Quantity int   `json:"quantity"`
+}
+
+type UpdateThemeConfigRequest struct {
+	Config ThemeConfigDTO `json:"config"`
 }
 
 type UpdateUserRequest struct {
@@ -1957,6 +2128,18 @@ type UserStatsResponse struct {
 	Active    int64 `json:"active"`
 	Suspended int64 `json:"suspended"`
 	NewToday  int64 `json:"new_today"`
+}
+
+type VersionDetailResponse struct {
+	Version *VersionListItem `json:"version"`
+	Blocks  []*DecorationDTO `json:"blocks"`
+}
+
+type VersionListItem struct {
+	ID        int64 `json:"id"`
+	Version   int   `json:"version"`
+	CreatedBy int64 `json:"created_by"`
+	CreatedAt int64 `json:"created_at"`
 }
 
 type WarehouseDetailResp struct {

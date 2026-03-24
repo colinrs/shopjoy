@@ -1,0 +1,282 @@
+syntax = "v1"
+
+info (
+	title:   "Storefront Decoration API"
+	desc:    "Storefront decoration management API for theme, page, decoration, version, and SEO management"
+	version: "v1"
+)
+
+// ==================== Theme APIs ====================
+type (
+	ThemeItem {
+		ID           int64  `json:"id"`
+		Code         string `json:"code"`
+		Name         string `json:"name"`
+		Description  string `json:"description"`
+		PreviewImage string `json:"preview_image"`
+		Thumbnail    string `json:"thumbnail"`
+		IsPreset     bool   `json:"is_preset"`
+		IsCurrent    bool   `json:"is_current"`
+	}
+	ListThemesResponse {
+		Themes []*ThemeItem `json:"themes"`
+	}
+	CurrentThemeResponse {
+		Theme  *ThemeItem     `json:"theme"`
+		Config ThemeConfigDTO `json:"config"`
+	}
+	ThemeConfigDTO {
+		PrimaryColor   string `json:"primary_color"`
+		SecondaryColor string `json:"secondary_color"`
+		FontFamily     string `json:"font_family"`
+		ButtonStyle    string `json:"button_style"`
+	}
+	SwitchThemeRequest {
+		ThemeID int64 `json:"theme_id"`
+	}
+	UpdateThemeConfigRequest {
+		Config ThemeConfigDTO `json:"config"`
+	}
+)
+
+// ==================== Page APIs ====================
+type (
+	PageListItem {
+		ID          int64  `json:"id"`
+		PageType    string `json:"page_type"`
+		Name        string `json:"name"`
+		Slug        string `json:"slug"`
+		IsPublished bool   `json:"is_published"`
+		Version     int    `json:"version"`
+	}
+	ListPagesResponse {
+		Pages []*PageListItem `json:"pages"`
+	}
+	GetPageRequest {
+		ID int64 `path:"id"`
+	}
+	PageDetailResponse {
+		Page        *PageListItem    `json:"page"`
+		Decorations []*DecorationDTO `json:"decorations"`
+	}
+	DecorationDTO {
+		ID          int64  `json:"id"`
+		BlockType   string `json:"block_type"`
+		BlockConfig string `json:"block_config"` // JSON string
+		SortOrder   int    `json:"sort_order"`
+	}
+	SaveDraftRequest {
+		ID     int64              `path:"id"`
+		Blocks []*DecorationInput `json:"blocks"`
+	}
+	DecorationInput {
+		BlockType   string `json:"block_type"`
+		BlockConfig string `json:"block_config"` // JSON string
+		SortOrder   int    `json:"sort_order,optional"`
+	}
+	PublishPageRequest {
+		ID int64 `path:"id"`
+	}
+	UnpublishPageRequest {
+		ID int64 `path:"id"`
+	}
+	AddDecorationRequest {
+		PageID      int64  `path:"id"`
+		BlockType   string `json:"block_type"`
+		BlockConfig string `json:"block_config"` // JSON string
+		SortOrder   int    `json:"sort_order,optional"`
+	}
+	AddDecorationResponse {
+		ID          int64  `json:"id"`
+		BlockType   string `json:"block_type"`
+		BlockConfig string `json:"block_config"` // JSON string
+		SortOrder   int    `json:"sort_order"`
+	}
+	UpdateDecorationRequest {
+		ID          int64  `path:"id"`
+		BlockConfig string `json:"block_config"` // JSON string
+	}
+	DeleteDecorationRequest {
+		ID int64 `path:"id"`
+	}
+	ReorderBlocksRequest {
+		PageID      int64            `path:"id"`
+		BlockOrders []BlockOrderItem `json:"block_orders"`
+	}
+	BlockOrderItem {
+		ID        int64 `json:"id"`
+		SortOrder int   `json:"sort_order"`
+	}
+)
+
+// ==================== Version APIs ====================
+type (
+	ListVersionsRequest {
+		PageID int64 `path:"id"`
+	}
+	VersionListItem {
+		ID        int64 `json:"id"`
+		Version   int   `json:"version"`
+		CreatedBy int64 `json:"created_by"`
+		CreatedAt int64 `json:"created_at"`
+	}
+	ListVersionsResponse {
+		Versions []*VersionListItem `json:"versions"`
+	}
+	GetVersionRequest {
+		PageID  int64 `path:"id"`
+		Version int   `path:"version"`
+	}
+	VersionDetailResponse {
+		Version *VersionListItem `json:"version"`
+		Blocks  []*DecorationDTO `json:"blocks"`
+	}
+	RestoreVersionRequest {
+		PageID  int64 `path:"id"`
+		Version int   `json:"version"`
+	}
+)
+
+// ==================== SEO APIs ====================
+type (
+	SEOConfigDTO {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Keywords    string `json:"keywords"`
+	}
+	GlobalSEOConfigResponse {
+		SEOConfigDTO
+	}
+	GetPageSEORequest {
+		PageType string `path:"page_type"`
+	}
+	PageSEOConfigResponse {
+		PageType string `json:"page_type"`
+		PageID   *int64 `json:"page_id,omitempty"`
+		SEOConfigDTO
+	}
+	UpdatePageSEORequest {
+		PageType    string `path:"page_type"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Keywords    string `json:"keywords"`
+	}
+	UpdateSEOConfigRequest {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Keywords    string `json:"keywords"`
+	}
+	ListPageSEOConfigsResponse {
+		Configs []*PageSEOConfigResponse `json:"configs"`
+	}
+)
+
+// ==================== Route Definitions ====================
+@server (
+	group:      themes
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取主题列表"
+	@handler ListThemesHandler
+	get /api/v1/themes returns (ListThemesResponse)
+
+	@doc "获取当前主题"
+	@handler GetCurrentThemeHandler
+	get /api/v1/themes/current returns (CurrentThemeResponse)
+
+	@doc "切换主题"
+	@handler SwitchThemeHandler
+	put /api/v1/themes/switch (SwitchThemeRequest)
+
+	@doc "更新主题配置"
+	@handler UpdateThemeConfigHandler
+	put /api/v1/themes/config (UpdateThemeConfigRequest)
+}
+
+@server (
+	group:      pages
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取页面列表"
+	@handler ListPagesHandler
+	get /api/v1/pages returns (ListPagesResponse)
+
+	@doc "获取页面详情"
+	@handler GetPageHandler
+	get /api/v1/pages/:id (GetPageRequest) returns (PageDetailResponse)
+
+	@doc "保存草稿"
+	@handler SaveDraftHandler
+	put /api/v1/pages/:id/draft (SaveDraftRequest)
+
+	@doc "发布页面"
+	@handler PublishPageHandler
+	put /api/v1/pages/:id/publish (PublishPageRequest)
+
+	@doc "取消发布"
+	@handler UnpublishPageHandler
+	put /api/v1/pages/:id/unpublish (UnpublishPageRequest)
+
+	@doc "添加区块"
+	@handler AddDecorationHandler
+	post /api/v1/pages/:id/decorations (AddDecorationRequest) returns (AddDecorationResponse)
+
+	@doc "更新区块"
+	@handler UpdateDecorationHandler
+	put /api/v1/decorations/:id (UpdateDecorationRequest)
+
+	@doc "删除区块"
+	@handler DeleteDecorationHandler
+	delete /api/v1/decorations/:id (DeleteDecorationRequest)
+
+	@doc "调整区块顺序"
+	@handler ReorderBlocksHandler
+	put /api/v1/pages/:id/blocks/reorder (ReorderBlocksRequest)
+}
+
+@server (
+	group:      versions
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取版本历史"
+	@handler ListVersionsHandler
+	get /api/v1/pages/:id/versions (ListVersionsRequest) returns (ListVersionsResponse)
+
+	@doc "获取版本详情"
+	@handler GetVersionHandler
+	get /api/v1/pages/:id/versions/:version (GetVersionRequest) returns (VersionDetailResponse)
+
+	@doc "恢复版本"
+	@handler RestoreVersionHandler
+	put /api/v1/pages/:id/restore (RestoreVersionRequest)
+}
+
+@server (
+	group:      seo
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取全局SEO配置"
+	@handler GetGlobalSEOHandler
+	get /api/v1/seo/global returns (GlobalSEOConfigResponse)
+
+	@doc "更新全局SEO"
+	@handler UpdateGlobalSEOHandler
+	put /api/v1/seo/global (UpdateSEOConfigRequest)
+
+	@doc "获取页面SEO配置列表"
+	@handler ListPageSEOHandler
+	get /api/v1/seo/pages returns (ListPageSEOConfigsResponse)
+
+	@doc "获取页面SEO配置"
+	@handler GetPageSEOHandler
+	get /api/v1/seo/pages/:page_type (GetPageSEORequest) returns (PageSEOConfigResponse)
+
+	@doc "更新页面SEO"
+	@handler UpdatePageSEOHandler
+	put /api/v1/seo/pages/:page_type (UpdatePageSEORequest)
+}
+
