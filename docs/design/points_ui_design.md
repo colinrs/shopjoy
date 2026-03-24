@@ -1,0 +1,649 @@
+# Points System UI Design Document
+
+## Document Information
+
+| Item | Value |
+|------|-------|
+| Document Title | Points System UI Design |
+| Version | 1.0.0 |
+| Created | 2026-03-24 |
+| Project | ShopJoy Shop-Admin |
+
+---
+
+## Design System
+
+### Color Palette
+
+Following existing shop-admin design patterns:
+
+| Color Name | Hex Code | Usage |
+|------------|----------|-------|
+| Primary (Indigo) | #6366F1 | Primary buttons, active states, icons |
+| Primary Light | #818CF8 | Hover states, gradients |
+| Success (Green) | #10B981 | Success states, earned points |
+| Warning (Amber) | #F59E0B | Warning states, pending |
+| Danger (Red) | #EF4444 | Danger states, deducted points |
+| Text Primary | #1E1B4B | Headings, important text |
+| Text Secondary | #6B7280 | Body text, labels |
+| Text Muted | #9CA3AF | Hints, timestamps |
+| Background | #F9FAFB | Card backgrounds |
+| Border | rgba(99, 102, 241, 0.06) | Card borders |
+
+### Typography
+
+| Element | Font | Size | Weight |
+|---------|------|------|--------|
+| Page Title | Fira Sans | 24px | 700 |
+| Card Title | System | 16px | 600 |
+| Stat Value | Fira Sans | 28px | 700 |
+| Body Text | System | 14px | 400 |
+| Label | System | 13px | 500 |
+| Caption | System | 12px | 400 |
+| Mono (codes) | Fira Code | 13px | 500 |
+
+### Spacing
+
+- Card padding: 20-24px
+- Grid gutter: 16-20px
+- Table cell padding: 12px 16px
+- Border radius: 16px (cards), 12px (buttons), 8px (tags)
+
+---
+
+## Page Designs
+
+### 1. Points Dashboard (`/points/dashboard`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Points Dashboard                                               │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐            │
+│  │ 📊 Issued│  │ 🎁 Redeemed│ │ ⭐ Active │  │ 👥 Users │            │
+│  │ 125,000  │  │  45,000   │  │  80,000  │  │  1,250  │            │
+│  │ Total    │  │ Total     │  │ Balance  │  │ Active  │            │
+│  └─────────┘  └─────────┘  └─────────┘  └─────────┘            │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ Points Trend                                              │ │
+│  │ [Daily ▼]  [Last 30 Days]                                 │ │
+│  │ ┌─────────────────────────────────────────────────────────┐│ │
+│  │ │          📈 Earned (green) vs Redeemed (blue)          ││ │
+│  │ │                    [ECharts Line Chart]                 ││ │
+│  │ └─────────────────────────────────────────────────────────┘│ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│  ┌──────────────────────┐  ┌──────────────────────┐            │
+│  │ Top Users by Points  │  │ Expiring Soon        │            │
+│  │ ┌──────────────────┐ │  │ ┌──────────────────┐ │            │
+│  │ │ # User  Balance  │ │  │ │ Date   Points   │ │            │
+│  │ │ 1 U123  5,000    │ │  │ │ Apr 15  12,500  │ │            │
+│  │ │ 2 U456  3,500    │ │  │ │ Apr 20  8,000   │ │            │
+│  │ │ ...              │ │  │ │ ...             │ │            │
+│  │ └──────────────────┘ │  │ └──────────────────┘ │            │
+│  └──────────────────────┘  └──────────────────────┘            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Components:**
+- Stats cards with gradient icons
+- ECharts line chart for trends
+- Two-column layout for tables
+
+**Stats Cards Data:**
+```typescript
+interface PointsStats {
+  total_issued: number      // Total points ever issued
+  total_redeemed: number    // Total points redeemed
+  active_balance: number    // Current outstanding balance
+  active_users: number      // Users with positive balance
+}
+```
+
+---
+
+### 2. Earn Rules List (`/points/earn-rules`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Earn Rules                                   [+ Create Rule]  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐                                      │
+│  │ 📋 Total │  │ ✅ Active│                                      │
+│  │    8     │  │    5    │                                      │
+│  └─────────┘  └─────────┘                                      │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ [🔍 Search...    ] [Status ▼] [Scenario ▼] [Type ▼]       │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ Name          │Scenario│Calc Type│Condition│Status│Actions│ │
+│  ├───────────────┼────────┼─────────┼─────────┼──────┼───────┤ │
+│  │ 🎁 Order Pts  │Order   │Tiered   │None     │🟢Active│Edit..│ │
+│  │   1pt/$1..   │Payment │         │         │       │       │ │
+│  ├───────────────┼────────┼─────────┼─────────┼──────┼───────┤ │
+│  │ 📝 Sign-in    │Sign-in │Fixed    │None     │🟢Active│Edit..│ │
+│  │   5 pts/day  │        │         │         │       │       │ │
+│  └───────────────┴────────┴─────────┴─────────┴──────┴───────┘ │
+│                                                                 │
+│  [< Prev]  1  2  3  [Next>]                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Table Columns:**
+
+| Column | Width | Content |
+|--------|-------|---------|
+| Name | 250px | Icon + Name + Description preview |
+| Scenario | 120px | Tag (ORDER_PAYMENT, SIGN_IN, etc.) |
+| Calculation Type | 120px | Tag (Fixed/Ratio/Tiered) |
+| Condition | 120px | Tag (None/New User/etc.) |
+| Status | 100px | Status tag |
+| Actions | 180px | Edit, Activate/Deactivate, Delete |
+
+**Earn Rule Scenarios (Chinese labels):**
+
+| Code | Label | Color |
+|------|-------|-------|
+| ORDER_PAYMENT | 订单支付 | primary |
+| SIGN_IN | 每日签到 | success |
+| PRODUCT_REVIEW | 商品评价 | warning |
+| FIRST_ORDER | 首单奖励 | danger |
+
+---
+
+### 3. Redeem Rules List (`/points/redeem-rules`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Redeem Rules                                 [+ Create Rule]  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                         │
+│  │ 📋 Total │  │ ✅ Active│  │ 🔄 Redeemed│                         │
+│  │    10    │  │    6    │  │  2,500  │                         │
+│  └─────────┘  └─────────┘  └─────────┘                         │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ [🔍 Search...    ] [Status ▼]                              │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ Name        │Coupon    │Points│Stock   │Status│Actions    │ │
+│  ├─────────────┼──────────┼──────┼────────┼──────┼───────────┤ │
+│  │ 🎫 $10 Off  │SAVE10    │ 500  │450/500 │🟢Active│Edit..    │ │
+│  │   $10 coupon│          │      │        │      │           │ │
+│  └─────────────┴──────────┴──────┴────────┴──────┴───────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Table Columns:**
+
+| Column | Width | Content |
+|--------|-------|---------|
+| Name | 200px | Icon + Name + Description |
+| Coupon | 150px | Linked coupon name/code |
+| Points Required | 100px | Points number |
+| Stock | 150px | Progress bar + used/total |
+| Status | 100px | Status tag |
+| Actions | 180px | Edit, Activate/Deactivate, Delete |
+
+---
+
+### 4. User Accounts List (`/points/accounts`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Points Accounts                                                │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                         │
+│  │ 👥 Total │  │ ⭐ Balance│  │ ✅ Active│                         │
+│  │  1,500   │  │ 80,000  │  │  1,250  │                         │
+│  └─────────┘  └─────────┘  └─────────┘                         │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ [🔍 Search user by ID, email...    ]                       │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ User ID  │Email        │Balance│Frozen│Earned│Redeemed    │ │
+│  ├──────────┼─────────────┼───────┼──────┼──────┼────────────┤ │
+│  │ 12345    │user@a.com   │ 5,000 │  0   │10,000│ 5,000      │ │
+│  │ 12346    │user@b.com   │ 3,500 │  0   │ 8,000│ 4,500      │ │
+│  └──────────┴─────────────┴───────┴──────┴──────┴────────────┘ │
+│  [Click row to view details]                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Table Columns:**
+
+| Column | Width | Content |
+|--------|-------|---------|
+| User ID | 100px | Numeric ID (clickable) |
+| Email | 200px | User email |
+| Balance | 120px | Current available points |
+| Frozen | 100px | Frozen points |
+| Total Earned | 120px | Historical total |
+| Total Redeemed | 120px | Historical total |
+
+---
+
+### 5. Account Detail (`/points/accounts/:id`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ← Back to Accounts    User #12345                              │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ Account Summary                           [Adjust Points]  │ │
+│  │ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │ │
+│  │ │ ⭐ 5,000│ │ ❄️ 0    │ │ 📈 10,000│ │ 📉 5,000│          │ │
+│  │ │ Balance │ │ Frozen  │ │ Earned  │ │ Redeemed│          │ │
+│  │ └─────────┘ └─────────┘ └─────────┘ └─────────┘          │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ Transaction History                                        │ │
+│  │ [Type ▼] [Date Range ▼]                                   │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ ID │Type    │Points│Balance │Description      │Time       │ │
+│  ├────┼────────┼──────┼────────┼─────────────────┼───────────┤ │
+│  │ 101│🟢Earn  │+150  │ 5,000  │Order #12345     │2026-03-24 │ │
+│  │ 100│🔵Redeem│-500  │ 4,850  │Coupon SAVE10    │2026-03-23 │ │
+│  └────┴────────┴──────┴────────┴─────────────────┴───────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Transaction Types with Colors:**
+
+| Type | Icon | Color |
+|------|------|-------|
+| EARN | 🟢 | Green (#10B981) |
+| REDEEM | 🔵 | Blue (#3B82F6) |
+| ADJUST | 🟡 | Amber (#F59E0B) |
+| EXPIRE | 🔴 | Red (#EF4444) |
+| FREEZE | ❄️ | Gray (#6B7280) |
+
+---
+
+### 6. Transactions List (`/points/transactions`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Transaction History                          [Export CSV]      │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ [User ID...] [Type ▼] [Date Range ▼]                      │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ ID    │User    │Type   │Points│After │Reference│Time      │ │
+│  ├───────┼────────┼───────┼──────┼──────┼─────────┼──────────┤ │
+│  │ 10001 │U12345  │🟢Earn │+150  │5,000 │Order    │2026-03-24│ │
+│  │ 10002 │U12346  │🔵Redeem│-500 │4,850 │Coupon   │2026-03-24│ │
+│  └───────┴────────┴───────┴──────┴──────┴─────────┴──────────┘ │
+│                                                                 │
+│  [< Prev]  1  2  3  [Next>]                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 7. Redemptions List (`/points/redemptions`)
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Redemption Records                                             │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ [Status ▼] [Date Range ▼]                                 │ │
+│  ├───────────────────────────────────────────────────────────┤ │
+│  │ ID  │User   │Coupon     │Points│Status   │Time           │ │
+│  ├─────┼───────┼───────────┼──────┼─────────┼───────────────┤ │
+│  │ 101 │U12345 │$10 Coupon │ 500  │✅Completed│2026-03-24   │ │
+│  │ 102 │U12346 │$20 Coupon │ 1000 │⏳Pending │2026-03-24   │ │
+│  └─────┴───────┴───────────┴──────┴─────────┴───────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Component Specifications
+
+### TieredConfig.vue
+
+**Purpose:** Configure tiered points calculation rules
+
+**Props:**
+```typescript
+interface TieredConfigProps {
+  modelValue: TierConfig[]  // v-model binding
+  disabled?: boolean
+}
+
+interface TierConfig {
+  threshold: number | null  // null for last tier (unlimited)
+  ratio: number             // Points per currency unit
+}
+```
+
+**Layout:**
+```
+┌───────────────────────────────────────────────────────────────┐
+│ Tiered Configuration                                          │
+├───────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────────────────────────┐  │
+│ │ Threshold      │ Ratio (pts/$1)     │                   │  │
+│ ├────────────────┼────────────────────┼──────────────────┤  │
+│ │ [$100    ] ▲▼ │ [1.0     ]         │ [Remove]          │  │
+│ │ [$500    ] ▲▼ │ [1.5     ]         │ [Remove]          │  │
+│ │ (Last tier)    │ [2.0     ]         │ [Remove]          │  │
+│ └────────────────┴────────────────────┴──────────────────┘  │
+│ [+ Add Tier]                                                  │
+│                                                               │
+│ Preview:                                                      │
+│ Order $200 → (100 × 1.0) + (100 × 1.5) = 250 pts            │
+│ Order $600 → (100 × 1.0) + (400 × 1.5) + (100 × 2.0) = 900 pts│
+└───────────────────────────────────────────────────────────────┘
+```
+
+**Events:**
+- `update:modelValue` - Emitted when tiers change
+- `validate` - Returns validation result
+
+---
+
+### ManualAdjustDialog.vue
+
+**Purpose:** Manual points adjustment by admin
+
+**Props:**
+```typescript
+interface ManualAdjustDialogProps {
+  visible: boolean
+  account: PointsAccount
+  loading?: boolean
+}
+```
+
+**Layout:**
+```
+┌─────────────────────────────────────────────┐
+│ Adjust Points                        [✕]    │
+├─────────────────────────────────────────────┤
+│ Current Balance: 5,000 pts                  │
+│                                             │
+│ Adjustment Type:                            │
+│ ○ Add Points    ● Deduct Points             │
+│                                             │
+│ Points Amount:                              │
+│ ┌───────────────────────────────────────┐  │
+│ │ 100                                   │  │
+│ └───────────────────────────────────────┘  │
+│                                             │
+│ Reason (Required):                          │
+│ ┌───────────────────────────────────────┐  │
+│ │ Compensation for delayed order #12345  │  │
+│ │                                       │  │
+│ └───────────────────────────────────────┘  │
+│                                             │
+│ Preview: Balance after: 4,900 pts           │
+├─────────────────────────────────────────────┤
+│                    [Cancel]  [Confirm]      │
+└─────────────────────────────────────────────┘
+```
+
+**Events:**
+- `update:visible` - Dialog visibility
+- `submit` - Emitted with `{ adjustmentType, points, reason }`
+
+---
+
+### PointsStatsCard.vue
+
+**Purpose:** Reusable stats card for points metrics
+
+**Props:**
+```typescript
+interface PointsStatsCardProps {
+  title: string
+  value: number | string
+  icon: Component
+  iconColor?: 'primary' | 'success' | 'warning' | 'danger'
+  trend?: {
+    value: number
+    label: string
+  }
+}
+```
+
+**Styles:**
+```css
+.stat-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.12);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.primary {
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+  color: white;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1E1B4B;
+  font-family: 'Fira Sans', sans-serif;
+}
+```
+
+---
+
+## File Structure
+
+```
+src/views/points/
+├── dashboard/
+│   └── index.vue                    # Points dashboard
+├── earn-rules/
+│   ├── index.vue                    # Earn rules list
+│   └── components/
+│       ├── EarnRuleForm.vue         # Create/Edit form
+│       └── TieredConfig.vue         # Tiered configuration
+├── redeem-rules/
+│   ├── index.vue                    # Redeem rules list
+│   └── components/
+│       ├── RedeemRuleForm.vue       # Create/Edit form
+│       └── CouponSelector.vue       # Coupon selector
+├── accounts/
+│   ├── index.vue                    # Accounts list
+│   └── [id].vue                     # Account detail
+├── transactions/
+│   └── index.vue                    # Transactions list
+├── redemptions/
+│   └── index.vue                    # Redemptions list
+└── components/
+    ├── PointsStatsCard.vue          # Stats card
+    ├── ManualAdjustDialog.vue       # Adjust dialog
+    └── TransactionTable.vue         # Transaction table
+```
+
+---
+
+## API Types
+
+```typescript
+// Points Account
+interface PointsAccount {
+  id: number
+  user_id: number
+  balance: number
+  frozen_balance: number
+  total_earned: number
+  total_redeemed: number
+  total_expired: number
+  created_at: string
+  updated_at: string
+}
+
+// Earn Rule
+interface EarnRule {
+  id: number
+  name: string
+  description: string
+  scenario: 'ORDER_PAYMENT' | 'SIGN_IN' | 'PRODUCT_REVIEW' | 'FIRST_ORDER'
+  calculation_type: 'FIXED' | 'RATIO' | 'TIERED'
+  fixed_points: number
+  ratio: number
+  tiers: TierConfig[] | null
+  condition_type: 'NONE' | 'NEW_USER' | 'FIRST_ORDER' | 'SPECIFIC_PRODUCTS' | 'MIN_AMOUNT'
+  condition_value: object | null
+  expiration_months: number
+  status: 'draft' | 'active' | 'inactive'
+  priority: number
+  start_at: string | null
+  end_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Redeem Rule
+interface RedeemRule {
+  id: number
+  name: string
+  description: string
+  coupon_id: number
+  coupon_name: string
+  points_required: number
+  total_stock: number
+  used_stock: number
+  per_user_limit: number
+  status: 'inactive' | 'active'
+  start_at: string | null
+  end_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Transaction
+interface PointsTransaction {
+  id: number
+  user_id: number
+  account_id: number
+  points: number              // Positive = earn, negative = deduct
+  balance_after: number
+  type: 'EARN' | 'REDEEM' | 'ADJUST' | 'EXPIRE' | 'FREEZE' | 'UNFREEZE'
+  reference_type: string
+  reference_id: string
+  description: string
+  expires_at: string | null
+  created_at: string
+}
+
+// Redemption Record
+interface PointsRedemption {
+  id: number
+  user_id: number
+  redeem_rule_id: number
+  coupon_id: number
+  coupon_name: string
+  user_coupon_id: number | null
+  points_used: number
+  status: 'pending' | 'completed' | 'cancelled'
+  created_at: string
+  completed_at: string | null
+}
+```
+
+---
+
+## Responsive Design
+
+### Breakpoints
+
+| Breakpoint | Width | Behavior |
+|------------|-------|----------|
+| xs | < 576px | Single column, stacked stats |
+| sm | ≥ 576px | 2-column stats |
+| md | ≥ 768px | Side-by-side filters |
+| lg | ≥ 992px | Full layout with sidebar |
+| xl | ≥ 1200px | Expanded tables |
+
+### Mobile Adaptations
+
+- Stats cards: Full width, stacked vertically
+- Tables: Horizontal scroll with fixed first column
+- Filters: Full width, stacked
+- Dialogs: Full screen on mobile
+- Chart: Responsive resize
+
+---
+
+## User Flows
+
+### Create Earn Rule Flow
+
+```
+Navigate to Earn Rules → Click "Create Rule" → Fill Form
+    ↓
+Select Scenario → Select Calculation Type
+    ↓
+If Tiered → Configure Tiers → Preview Calculation
+    ↓
+Set Condition → Set Expiration → Set Time Range
+    ↓
+Save as Draft or Activate → Success Toast → List Updated
+```
+
+### Manual Points Adjustment Flow
+
+```
+Navigate to Accounts → Search User → Click User Row
+    ↓
+View Account Detail → Click "Adjust Points"
+    ↓
+Select Add/Deduct → Enter Points → Enter Reason
+    ↓
+Preview Balance Change → Confirm
+    ↓
+Success Toast → Transaction Record Created → Balance Updated
+```
+
+---
+
+## Accessibility
+
+- All interactive elements have focus states
+- Color contrast ratio ≥ 4.5:1 for text
+- Icons have aria-labels
+- Tables have proper th/td structure
+- Forms have associated labels
+- Error messages are announced to screen readers
