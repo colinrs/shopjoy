@@ -129,6 +129,13 @@ const router = createRouter({
           name: 'reviews',
           component: () => import('@/views/reviews/index.vue'),
           meta: { title: '评价管理' }
+        },
+        // Payment Module Routes
+        {
+          path: 'payments',
+          name: 'payments',
+          component: () => import('@/views/payments/index.vue'),
+          meta: { title: '支付管理' }
         }
       ]
     }
