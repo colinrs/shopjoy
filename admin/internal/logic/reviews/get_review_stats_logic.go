@@ -2,9 +2,12 @@ package reviews
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +27,38 @@ func NewGetReviewStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetReviewStatsLogic) GetReviewStats(req *types.ReviewStatsResp) (resp *types.ReviewStatsResp, err error) {
-	// todo: add your logic here and delete this line
+	// Get tenantID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	return
+	// Platform admin can access all data
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	stats, err := l.svcCtx.ReviewService.GetStats(l.ctx, shared.TenantID(tenantID))
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.ReviewStatsResp{
+		TotalReviews:     stats.TotalReviews,
+		PendingReviews:   stats.PendingReviews,
+		ApprovedReviews:  stats.ApprovedReviews,
+		HiddenReviews:    stats.HiddenReviews,
+		AverageRating:    formatRating(stats.AverageRating),
+		QualityAvgRating: formatRating(stats.QualityAvgRating),
+		ValueAvgRating:   formatRating(stats.ValueAvgRating),
+		FiveStarCount:    stats.FiveStarCount,
+		FourStarCount:    stats.FourStarCount,
+		ThreeStarCount:   stats.ThreeStarCount,
+		TwoStarCount:     stats.TwoStarCount,
+		OneStarCount:     stats.OneStarCount,
+		WithImageCount:   stats.WithImageCount,
+		ReplyRate:        stats.ReplyRate,
+		FeaturedCount:    stats.FeaturedCount,
+	}, nil
+}
+
+func formatRating(r float64) string {
+	return fmt.Sprintf("%.2f", r)
 }

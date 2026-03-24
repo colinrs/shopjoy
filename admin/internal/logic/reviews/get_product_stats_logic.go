@@ -2,9 +2,12 @@ package reviews
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +27,40 @@ func NewGetProductStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp *types.ProductStatsResp, err error) {
-	// todo: add your logic here and delete this line
+	// Get tenantID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	return
+	// Platform admin can access all data
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
+	stats, err := l.svcCtx.ReviewService.GetProductStats(l.ctx, shared.TenantID(tenantID), req.ProductID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build rating distribution map
+	ratingDistribution := make(map[string]int)
+	ratingDistribution["1"] = stats.Rating1Count
+	ratingDistribution["2"] = stats.Rating2Count
+	ratingDistribution["3"] = stats.Rating3Count
+	ratingDistribution["4"] = stats.Rating4Count
+	ratingDistribution["5"] = stats.Rating5Count
+
+	return &types.ProductStatsResp{
+		ProductID:          stats.ProductID,
+		TotalReviews:       stats.TotalReviews,
+		AverageRating:      formatProductRating(stats.AverageRating),
+		QualityAvgRating:   formatProductRating(stats.QualityAvgRating),
+		ValueAvgRating:     formatProductRating(stats.ValueAvgRating),
+		RatingDistribution: ratingDistribution,
+		WithImageCount:     stats.WithImageCount,
+		ReplyCount:         0, // TODO: Calculate from replies
+		ReplyRate:          0, // TODO: Calculate reply rate
+	}, nil
+}
+
+func formatProductRating(r float64) string {
+	return fmt.Sprintf("%.2f", r)
 }

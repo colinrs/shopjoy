@@ -71,7 +71,15 @@
             <span>顾客管理</span>
           </template>
         </el-menu-item>
-        
+
+        <el-menu-item index="/reviews">
+          <el-icon><ChatDotRound /></el-icon>
+          <template #title>
+            <span>评价管理</span>
+            <el-badge :value="pendingReviews" v-if="pendingReviews > 0" class="menu-badge" type="warning" />
+          </template>
+        </el-menu-item>
+
         <el-menu-item index="/admin-users">
           <el-icon><UserFilled /></el-icon>
           <template #title>
@@ -247,7 +255,7 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 import {
   ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
   TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
-  Setting, SwitchButton, Box, CreditCard, Van, Picture, Moon, Sunny
+  Setting, SwitchButton, Box, CreditCard, Van, Picture, Moon, Sunny, ChatDotRound
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -259,6 +267,7 @@ const notificationVisible = ref(false)
 const hasNewData = ref(true)
 const pendingOrders = ref(5)
 const pendingRefunds = ref(8)
+const pendingReviews = ref(12)
 const isDarkMode = ref(false)
 
 const notifications = ref([

@@ -123,6 +123,12 @@ const router = createRouter({
           name: 'fulfillment-statistics',
           component: () => import('@/views/fulfillment/statistics/index.vue'),
           meta: { title: '售后统计' }
+        },
+        {
+          path: 'reviews',
+          name: 'reviews',
+          component: () => import('@/views/reviews/index.vue'),
+          meta: { title: '评价管理' }
         }
       ]
     }

@@ -185,6 +185,10 @@ func (s *service) DeleteReview(ctx context.Context, tenantID shared.TenantID, id
 		return err
 	}
 
+	if err := rev.SoftDelete(); err != nil {
+		return err
+	}
+
 	return s.reviewRepo.Delete(ctx, s.db, tenantID, rev.ID)
 }
 

@@ -10,11 +10,13 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
+	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
@@ -61,6 +63,9 @@ type ServiceContext struct {
 	UserCouponRepo            pkgpromotion.UserCouponRepository
 	OrderRepo                 fulfillment.OrderRepository
 	OrderItemRepo             fulfillment.OrderItemRepository
+	ReviewService             appReview.Service
+	ReviewRepo                review.Repository
+	ReplyRepo                 review.ReplyRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -124,6 +129,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	refundApp := appfulfillment.NewRefundApp(db, refundRepo, refundReasonRepo, idGen)
 	refundReasonApp := appfulfillment.NewRefundReasonApp(db, refundReasonRepo)
 
+	// Review repositories
+	reviewRepo := persistence.NewReviewRepository()
+	replyRepo := persistence.NewReplyRepository()
+
+	// Review service
+	reviewService := appReview.NewService(db, reviewRepo, replyRepo, idGen)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
@@ -158,5 +170,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserCouponRepo:         userCouponRepo,
 		OrderRepo:              orderRepo,
 		OrderItemRepo:          orderItemRepo,
+		ReviewService:          reviewService,
+		ReviewRepo:             reviewRepo,
+		ReplyRepo:              replyRepo,
 	}
 }
