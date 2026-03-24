@@ -376,8 +376,22 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	)
 	refund.ID = refundID
 
+	// Start database transaction for refund creation, update, and payment status update
+	tx := s.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// Ensure transaction is rolled back on error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	// Save refund
-	if err := s.refundRepo.Create(ctx, s.db, refund); err != nil {
+	if err := s.refundRepo.Create(ctx, tx, refund); err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -385,14 +399,21 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	// For now, mark as succeeded directly
 	channelRefundID := "re_stub_" + refund.RefundNo
 	refund.MarkSucceeded(channelRefundID, 0)
-	if err := s.refundRepo.Update(ctx, s.db, refund); err != nil {
+	if err := s.refundRepo.Update(ctx, tx, refund); err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
 	// Update payment status
 	isPartial := amount < refundableAmount
 	paymentEntity.MarkRefunded(isPartial)
-	if err := s.paymentRepo.Update(ctx, s.db, paymentEntity); err != nil {
+	if err := s.paymentRepo.Update(ctx, tx, paymentEntity); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
 		return nil, err
 	}
 
@@ -542,6 +563,7 @@ func formatPercentage(value float64) string {
 
 // parseMoneyString parses a money string to cents (int64)
 // Supports formats: "99.99 USD", "99.99", "100" (cents)
+// Uses integer-based parsing to avoid floating-point precision errors
 func parseMoneyString(s string) (int64, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -557,11 +579,37 @@ func parseMoneyString(s string) (int64, error) {
 		return strconv.ParseInt(amountStr, 10, 64)
 	}
 
-	// Parse decimal amount and convert to cents
-	amount, err := strconv.ParseFloat(amountStr, 64)
+	// Parse decimal amount using integer math to avoid precision loss
+	// Format: "dollars.cents" where cents is up to 2 decimal places
+	decimalParts := strings.Split(amountStr, ".")
+	if len(decimalParts) != 2 {
+		return 0, strconv.ErrSyntax
+	}
+
+	// Parse dollars part
+	dollars, err := strconv.ParseInt(decimalParts[0], 10, 64)
 	if err != nil {
 		return 0, err
 	}
 
-	return int64(amount * 100), nil
+	// Parse cents part (handle 1 or 2 decimal places)
+	centsStr := decimalParts[1]
+	if len(centsStr) > 2 {
+		centsStr = centsStr[:2] // Truncate to 2 decimal places
+	}
+	cents, err := strconv.ParseInt(centsStr, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// Adjust for single digit cents (e.g., "9.9" means 9 dollars and 90 cents)
+	if len(decimalParts[1]) == 1 {
+		cents *= 10
+	}
+
+	// Calculate total cents, handling negative amounts
+	if dollars >= 0 {
+		return dollars*100 + cents, nil
+	}
+	return dollars*100 - cents, nil
 }
