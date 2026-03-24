@@ -2,6 +2,7 @@ package payment
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -556,9 +557,9 @@ func formatTimeToString(t *time.Time) string {
 
 func formatPercentage(value float64) string {
 	if value >= 0 {
-		return shared.NewMoney(int64(value*100), "").String()
+		return fmt.Sprintf("+%.1f%%", value)
 	}
-	return "-" + shared.NewMoney(int64(-value*100), "").String()
+	return fmt.Sprintf("%.1f%%", value)
 }
 
 // parseMoneyString parses a money string to cents (int64)
