@@ -34,7 +34,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索用户名/邮箱"
+            placeholder="搜索用户名/邮箱/手机号"
             class="search-input"
             clearable
             @clear="handleSearch"
@@ -51,6 +51,9 @@
           </el-select>
         </div>
         <div class="filter-right">
+          <el-button @click="handleExport" :loading="exportLoading">
+            <el-icon><Download /></el-icon>导出
+          </el-button>
           <el-button type="primary" @click="handleRefresh">
             <el-icon><Refresh /></el-icon>刷新
           </el-button>
@@ -60,7 +63,7 @@
 
     <!-- Users Table -->
     <el-card class="table-card" shadow="never">
-      <el-table :data="userList" v-loading="loading" stripe>
+      <el-table :data="userList" v-loading="loading" stripe @row-click="handleRowClick">
         <el-table-column label="用户信息" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
@@ -95,22 +98,20 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button type="primary" link size="small" @click.stop="handleEdit(row)">
               编辑
             </el-button>
-            <el-button type="primary" link size="small" @click="handleDetail(row)">
+            <el-button type="primary" link size="small" @click.stop="handleDetail(row)">
               详情
             </el-button>
-            <el-dropdown trigger="click">
+            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
                 更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="handleResetPassword(row)">重置密码</el-dropdown-item>
-                  <el-dropdown-item divided type="danger" @click="handleDelete(row)">
-                    删除账号
-                  </el-dropdown-item>
+                  <el-dropdown-item command="resetPassword">重置密码</el-dropdown-item>
+                  <el-dropdown-item divided command="delete" style="color: #EF4444;">删除账号</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -172,8 +173,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, ArrowDown } from '@element-plus/icons-vue'
+import { Search, Refresh, ArrowDown, Download } from '@element-plus/icons-vue'
 import {
   getUserList,
   getUserStats,
@@ -182,12 +184,15 @@ import {
   activateUser,
   deleteUser,
   resetUserPassword,
+  exportUsers,
   type User,
   type UserStats
 } from '@/api/user'
 
+const router = useRouter()
 const loading = ref(false)
 const editLoading = ref(false)
+const exportLoading = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref(0)
 const currentPage = ref(1)
@@ -219,7 +224,7 @@ const loadUsers = async () => {
     const res = await getUserList({
       page: currentPage.value,
       page_size: pageSize.value,
-      name: searchQuery.value || undefined,
+      keyword: searchQuery.value || undefined,
       status: statusFilter.value || undefined
     })
     userList.value = res.list || []
@@ -278,8 +283,45 @@ const confirmEdit = async () => {
 }
 
 const handleDetail = (row: User) => {
-  currentUser.value = row
-  detailDialogVisible.value = true
+  router.push(`/users/${row.id}`)
+}
+
+const handleRowClick = (row: User) => {
+  router.push(`/users/${row.id}`)
+}
+
+const handleExport = async () => {
+  exportLoading.value = true
+  try {
+    const blob = await exportUsers({
+      page: 1,
+      page_size: 10000,
+      keyword: searchQuery.value || undefined,
+      status: statusFilter.value || undefined
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `users_${new Date().toISOString().split('T')[0]}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('Failed to export users:', error)
+    ElMessage.error('导出失败')
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+const handleCommand = (command: string, row: User) => {
+  if (command === 'resetPassword') {
+    handleResetPassword(row)
+  } else if (command === 'delete') {
+    handleDelete(row)
+  }
 }
 
 const handleStatusChange = async (row: User, val: boolean) => {
@@ -456,6 +498,10 @@ onMounted(() => {
 }
 
 /* Table row hover */
+:deep(.el-table__row) {
+  cursor: pointer;
+}
+
 :deep(.el-table__row:hover > td) {
   background-color: #F5F3FF !important;
 }

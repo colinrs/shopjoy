@@ -1,5 +1,29 @@
 import request from '@/utils/request'
 
+// Admin User interface
+export interface AdminUser {
+  id: number
+  email: string
+  mobile: string
+  real_name: string
+  avatar: string
+  type: number
+  type_text: string
+  status: number
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminUserDetail extends AdminUser {
+  roles: AdminRole[]
+}
+
+export interface AdminRole {
+  id: number
+  name: string
+  code: string
+}
+
 // Auth APIs
 export function adminLogin(data: {
   account: string
@@ -28,18 +52,88 @@ export function registerTenantAdmin(data: {
 }
 
 // Admin User APIs
-export function getAdminUsers(params: {
+export interface GetAdminUsersParams {
   page: number
   page_size: number
   keyword?: string
   type?: number
   status?: number
   tenant_id?: number
-}) {
-  return request({
+}
+
+export function getAdminUsers(params: GetAdminUsersParams) {
+  return request<{ list: AdminUser[]; total: number; page: number; page_size: number }>({
     url: '/api/v1/admin-users',
     method: 'get',
     params
+  })
+}
+
+export function getAdminUserDetail(id: number) {
+  return request<AdminUserDetail>({
+    url: `/api/v1/admin-users/${id}`,
+    method: 'get'
+  })
+}
+
+export interface CreateAdminUserParams {
+  email: string
+  mobile?: string
+  real_name: string
+  password: string
+  type: number
+  tenant_id?: number
+}
+
+export function createAdminUser(data: CreateAdminUserParams) {
+  return request<AdminUser>({
+    url: '/api/v1/admin-users',
+    method: 'post',
+    data
+  })
+}
+
+export interface UpdateAdminUserParams {
+  email?: string
+  mobile?: string
+  real_name?: string
+  avatar?: string
+}
+
+export function updateAdminUser(id: number, data: UpdateAdminUserParams) {
+  return request<AdminUser>({
+    url: `/api/v1/admin-users/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteAdminUser(id: number) {
+  return request({
+    url: `/api/v1/admin-users/${id}`,
+    method: 'delete'
+  })
+}
+
+export function resetAdminPassword(id: number) {
+  return request<{ temporary_password: string }>({
+    url: `/api/v1/admin-users/${id}/reset-password`,
+    method: 'post'
+  })
+}
+
+export function assignRoles(id: number, roleIds: number[]) {
+  return request({
+    url: `/api/v1/admin-users/${id}/roles`,
+    method: 'put',
+    data: { role_ids: roleIds }
+  })
+}
+
+export function getAvailableRoles() {
+  return request<AdminRole[]>({
+    url: '/api/v1/roles',
+    method: 'get'
   })
 }
 

@@ -25,6 +25,7 @@
             clearable
             class="filter-select"
             v-if="activeTab === 'admin' && isPlatformAdmin"
+            @change="handleSearch"
           >
             <el-option label="全部" :value="0" />
             <el-option label="商家管理员" :value="2" />
@@ -36,6 +37,7 @@
             clearable
             class="filter-select"
             v-if="activeTab === 'admin'"
+            @change="handleSearch"
           >
             <el-option label="全部" :value="0" />
             <el-option label="正常" :value="1" />
@@ -51,7 +53,7 @@
     </el-card>
 
     <el-card class="table-card" shadow="never">
-      <el-table :data="tableData" v-loading="loading" stripe>
+      <el-table :data="tableData" v-loading="loading" stripe @row-click="handleRowClick">
         <el-table-column label="用户信息" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
@@ -104,17 +106,37 @@
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right" v-if="activeTab === 'admin'">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleView(row)">
+            <el-button type="primary" link size="small" @click.stop="handleView(row)">
+              详情
+            </el-button>
+            <el-button type="primary" link size="small" @click.stop="handleAssignRoles(row)">
+              角色
+            </el-button>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
+              <el-button type="primary" link size="small">
+                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="resetPassword">重置密码</el-dropdown-item>
+                  <el-dropdown-item command="delete" style="color: #EF4444;">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" fixed="right" v-if="activeTab === 'customer'">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click.stop="handleViewCustomer(row)">
               详情
             </el-button>
             <el-button
               type="primary"
               link
               size="small"
-              @click="handleEdit(row)"
-              v-if="activeTab === 'customer'"
+              @click.stop="handleEditCustomer(row)"
             >
               编辑
             </el-button>
@@ -154,6 +176,12 @@
         <el-form-item label="初始密码" prop="password">
           <el-input v-model="formData.password" type="password" placeholder="请输入初始密码" show-password />
         </el-form-item>
+        <el-form-item label="用户类型" prop="type">
+          <el-select v-model="formData.type" placeholder="请选择用户类型" style="width: 100%">
+            <el-option label="商家管理员" :value="2" />
+            <el-option label="商家子账号" :value="3" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="租户ID" prop="tenant_id" v-if="isPlatformAdmin">
           <el-input-number v-model="formData.tenant_id" :min="0" placeholder="创建商家管理员时使用" style="width: 100%" />
         </el-form-item>
@@ -185,22 +213,38 @@
         <el-button @click="detailVisible = false">关闭</el-button>
       </template>
     </el-dialog>
+
+    <!-- Role Assign Dialog -->
+    <RoleAssignDialog
+      v-model:visible="roleDialogVisible"
+      :admin-user="currentAdminUser"
+      @assigned="loadData"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
+import { Search, Plus, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import AdminUserForm from './components/AdminUserForm.vue'
+import RoleAssignDialog from './components/RoleAssignDialog.vue'
 import {
   getAdminUsers,
   disableAdminUser,
   enableAdminUser,
-  registerTenantAdmin,
-  getCustomerList
+  createAdminUser,
+  deleteAdminUser,
+  resetAdminPassword,
+  getCustomerList,
+  type AdminUser,
+  type AdminUserDetail,
+  type CreateAdminUserParams
 } from '@/api/admin-user'
 
+const router = useRouter()
 const userStore = useUserStore()
 
 const isPlatformAdmin = computed(() => userStore.userInfo?.type === 1)
@@ -217,16 +261,19 @@ const tableData = ref<any[]>([])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
+const roleDialogVisible = ref(false)
 const submitLoading = ref(false)
 const currentRow = ref<any>(null)
+const currentAdminUser = ref<AdminUserDetail | null>(null)
 const formRef = ref()
 
-const formData = reactive({
+const formData = reactive<CreateAdminUserParams>({
   email: '',
   mobile: '',
   real_name: '',
   password: '',
-  tenant_id: undefined as number | undefined
+  type: 2,
+  tenant_id: undefined
 })
 
 const formRules = {
@@ -238,7 +285,8 @@ const formRules = {
   password: [
     { required: true, message: '请输入初始密码', trigger: 'blur' },
     { min: 6, message: '密码至少6位', trigger: 'blur' }
-  ]
+  ],
+  type: [{ required: true, message: '请选择用户类型', trigger: 'change' }]
 }
 
 const dialogTitle = computed(() => '新增管理员')
@@ -273,41 +321,98 @@ const handleAdd = () => {
     mobile: '',
     real_name: '',
     password: '',
+    type: 2,
     tenant_id: undefined
   })
   dialogVisible.value = true
 }
 
-const handleView = (row: any) => {
-  currentRow.value = row
-  detailVisible.value = true
+const handleView = (row: AdminUser) => {
+  router.push(`/admin-users/${row.id}`)
+}
+
+const handleViewCustomer = (row: any) => {
+  router.push(`/users/${row.id}`)
+}
+
+const handleRowClick = (row: any) => {
+  if (activeTab.value === 'admin') {
+    router.push(`/admin-users/${row.id}`)
+  } else {
+    router.push(`/users/${row.id}`)
+  }
 }
 
 const handleEdit = (row: any) => {
   ElMessage.info('编辑顾客: ' + row.name)
 }
 
+const handleEditCustomer = (row: any) => {
+  router.push(`/users/${row.id}`)
+}
+
+const handleAssignRoles = (row: AdminUser) => {
+  currentAdminUser.value = {
+    ...row,
+    roles: []
+  } as AdminUserDetail
+  roleDialogVisible.value = true
+}
+
+const handleCommand = (command: string, row: AdminUser) => {
+  if (command === 'resetPassword') {
+    handleResetPassword(row)
+  } else if (command === 'delete') {
+    handleDelete(row)
+  }
+}
+
+const handleResetPassword = async (row: AdminUser) => {
+  try {
+    await ElMessageBox.confirm(`确认重置用户 "${row.real_name || row.email}" 的密码?`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const res = await resetAdminPassword(row.id)
+    ElMessage.success(`密码重置成功，临时密码: ${res.temporary_password}`)
+  } catch {
+    // User cancelled
+  }
+}
+
+const handleDelete = async (row: AdminUser) => {
+  try {
+    await ElMessageBox.confirm(`确认删除用户 "${row.real_name || row.email}"? 此操作不可恢复！`, '警告', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'danger'
+    })
+    await deleteAdminUser(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch {
+    // User cancelled
+  }
+}
+
 const handleSubmit = async () => {
   if (!formRef.value) return
 
-  await formRef.value.validate((valid: boolean) => {
+  await formRef.value.validate(async (valid: boolean) => {
     if (valid) {
       submitLoading.value = true
-      registerTenantAdmin({
-        email: formData.email,
-        mobile: formData.mobile || undefined,
-        real_name: formData.real_name,
-        password: formData.password,
-        tenant_id: formData.tenant_id
-      })
-        .then(() => {
-          ElMessage.success('新增成功')
-          dialogVisible.value = false
-          loadData()
-        })
-        .finally(() => {
-          submitLoading.value = false
-        })
+      try {
+        await createAdminUser(formData)
+        ElMessage.success('新增成功')
+        dialogVisible.value = false
+        loadData()
+      } catch (error) {
+        console.error('Failed to create:', error)
+        ElMessage.error('新增失败')
+      } finally {
+        submitLoading.value = false
+      }
     }
   })
 }
@@ -475,6 +580,10 @@ onMounted(() => {
 }
 
 /* Table row hover */
+:deep(.el-table__row) {
+  cursor: pointer;
+}
+
 :deep(.el-table__row:hover > td) {
   background-color: #F5F3FF !important;
 }

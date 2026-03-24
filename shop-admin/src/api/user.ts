@@ -12,6 +12,37 @@ export interface User {
   last_login: string
 }
 
+// Extended user with points and order stats
+export interface ExtendedUser extends User {
+  points_balance: number
+  total_orders: number
+  total_spent: string
+  is_vip: boolean
+}
+
+// User detail with full information
+export interface UserDetail extends ExtendedUser {
+  frozen_points: number
+  total_earned_points: number
+  total_redeemed_points: number
+  last_order_at: string
+  default_address: UserAddress | null
+}
+
+// User address
+export interface UserAddress {
+  id: number
+  user_id: number
+  recipient_name: string
+  phone: string
+  province: string
+  city: string
+  district: string
+  detail_address: string
+  is_default: boolean
+  created_at: string
+}
+
 export interface UserStats {
   total: number
   active: number
@@ -25,10 +56,18 @@ export interface ListUsersParams {
   name?: string
   email?: string
   status?: number
+  keyword?: string
 }
 
 export interface ListUsersResponse {
   list: User[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface ListExtendedUsersResponse {
+  list: ExtendedUser[]
   total: number
   page: number
   page_size: number
@@ -41,6 +80,11 @@ export interface UpdateUserParams {
 
 export interface ResetPasswordResponse {
   temporary_password: string
+}
+
+export interface ListUserAddressesResponse {
+  list: UserAddress[]
+  total: number
 }
 
 // Get user info
@@ -106,5 +150,50 @@ export function getUserStats() {
   return request<UserStats>({
     url: '/api/v1/users/stats',
     method: 'get'
+  })
+}
+
+// Get user detail with full information
+export function getUserDetail(id: number) {
+  return request<UserDetail>({
+    url: `/api/v1/users/${id}/detail`,
+    method: 'get'
+  })
+}
+
+// Get user addresses
+export function getUserAddresses(id: number, params?: { page?: number; page_size?: number }) {
+  return request<ListUserAddressesResponse>({
+    url: `/api/v1/users/${id}/addresses`,
+    method: 'get',
+    params
+  })
+}
+
+// Suspend user with reason
+export function suspendUserWithReason(id: number, reason: string) {
+  return request<User>({
+    url: `/api/v1/users/${id}/suspend`,
+    method: 'post',
+    data: { reason }
+  })
+}
+
+// Export users to file
+export function exportUsers(params: ListUsersParams) {
+  return request<Blob>({
+    url: '/api/v1/users/export',
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+}
+
+// Get enhanced user list with stats
+export function getUserListEnhanced(params: ListUsersParams) {
+  return request<ListExtendedUsersResponse>({
+    url: '/api/v1/users/enhanced',
+    method: 'get',
+    params
   })
 }
