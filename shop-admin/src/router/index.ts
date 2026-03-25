@@ -191,6 +191,31 @@ const router = createRouter({
           name: 'points-redemptions',
           component: () => import('@/views/points/redemptions/index.vue'),
           meta: { title: '兑换记录' }
+        },
+        // Storefront Module Routes
+        {
+          path: 'storefront/themes',
+          name: 'storefront-themes',
+          component: () => import('@/views/storefront/themes/index.vue'),
+          meta: { title: '主题管理' }
+        },
+        {
+          path: 'storefront/pages',
+          name: 'storefront-pages',
+          component: () => import('@/views/storefront/pages/index.vue'),
+          meta: { title: '页面管理' }
+        },
+        {
+          path: 'storefront/pages/:id/edit',
+          name: 'storefront-page-edit',
+          component: () => import('@/views/storefront/pages/[id]/edit.vue'),
+          meta: { title: '页面编辑' }
+        },
+        {
+          path: 'storefront/seo',
+          name: 'storefront-seo',
+          component: () => import('@/views/storefront/seo/index.vue'),
+          meta: { title: 'SEO设置' }
         }
       ]
     }
