@@ -130,8 +130,15 @@ export function assignRoles(id: number, roleIds: number[]) {
   })
 }
 
+export interface RoleListResponse {
+  list: AdminRole[]
+  total: number
+  page: number
+  page_size: number
+}
+
 export function getAvailableRoles() {
-  return request<AdminRole[]>({
+  return request<RoleListResponse>({
     url: '/api/v1/roles',
     method: 'get'
   })

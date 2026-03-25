@@ -10,8 +10,9 @@
           <div class="stat-info">
             <p class="stat-label">今日订单</p>
             <p class="stat-value">{{ stats.todayOrders }}</p>
-            <p class="stat-change positive">
-              <el-icon><ArrowUp />+12.5%</el-icon> 较昨日
+            <p class="stat-change" :class="{ positive: isGrowthPositive(stats.todayGrowth), negative: !isGrowthPositive(stats.todayGrowth) }">
+              <el-icon><ArrowUp v-if="isGrowthPositive(stats.todayGrowth)" /><ArrowDown v-else /></el-icon>
+              {{ stats.todayGrowth }} 较昨日
             </p>
           </div>
         </div>
@@ -24,8 +25,8 @@
           <div class="stat-info">
             <p class="stat-label">今日销售额</p>
             <p class="stat-value">¥{{ formatNumber(stats.todaySales) }}</p>
-            <p class="stat-change positive">
-              <el-icon><ArrowUp />+8.2%</el-icon> 较昨日
+            <p class="stat-change">
+              <span class="neutral">昨日 ¥{{ formatNumber(stats.yesterdaySales) }}</span>
             </p>
           </div>
         </div>
@@ -39,7 +40,7 @@
             <p class="stat-label">商品总数</p>
             <p class="stat-value">{{ stats.totalProducts }}</p>
             <p class="stat-change">
-              <span class="neutral">持平</span> 较昨日
+              <span class="neutral">在售商品</span>
             </p>
           </div>
         </div>
@@ -53,7 +54,7 @@
             <p class="stat-label">用户总数</p>
             <p class="stat-value">{{ stats.totalUsers }}</p>
             <p class="stat-change positive">
-              <el-icon><ArrowUp />+23</el-icon> 新增用户
+              <el-icon><ArrowUp /></el-icon>+{{ stats.newUsersToday }} 新增用户
             </p>
           </div>
         </div>
@@ -63,11 +64,11 @@
     <!-- Charts Row -->
     <el-row :gutter="20" class="charts-row">
       <el-col :xs="24" :lg="16">
-        <el-card class="chart-card">
+        <el-card class="chart-card" v-loading="loading.charts">
           <template #header>
             <div class="card-header">
               <span class="card-title">销售趋势</span>
-              <el-radio-group v-model="timeRange" size="small">
+              <el-radio-group v-model="timeRange" size="small" @change="fetchSalesTrend">
                 <el-radio-button label="week">本周</el-radio-button>
                 <el-radio-button label="month">本月</el-radio-button>
                 <el-radio-button label="year">全年</el-radio-button>
@@ -78,7 +79,7 @@
         </el-card>
       </el-col>
       <el-col :xs="24" :lg="8">
-        <el-card class="chart-card">
+        <el-card class="chart-card" v-loading="loading.charts">
           <template #header>
             <div class="card-header">
               <span class="card-title">订单状态分布</span>
@@ -98,11 +99,12 @@
               <span class="card-title">
                 <el-icon><Bell /></el-icon>
                 待处理订单
+                <el-badge :value="pendingOrdersTotal" :max="99" v-if="pendingOrdersTotal > 0" />
               </span>
               <el-button type="primary" link>查看全部</el-button>
             </div>
           </template>
-          <el-table :data="pendingOrders" stripe style="width: 100%" v-loading="loading">
+          <el-table :data="pendingOrders" stripe style="width: 100%" v-loading="loading.pending">
             <el-table-column prop="order_no" label="订单号" min-width="120">
               <template #default="{ row }">
                 <span class="order-no">{{ row.order_no }}</span>
@@ -110,13 +112,13 @@
             </el-table-column>
             <el-table-column prop="pay_amount" label="金额" width="100">
               <template #default="{ row }">
-                <span class="amount">¥{{ (row.pay_amount / 100).toFixed(2) }}</span>
+                <span class="amount">¥{{ row.pay_amount }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="90">
+            <el-table-column prop="status_text" label="状态" width="90">
               <template #default="{ row }">
                 <el-tag :type="getOrderStatusType(row.status)" size="small">
-                  {{ getOrderStatusText(row.status) }}
+                  {{ row.status_text }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -139,7 +141,7 @@
               <el-button type="primary" link>查看全部</el-button>
             </div>
           </template>
-          <el-table :data="hotProducts" stripe style="width: 100%" v-loading="loading">
+          <el-table :data="hotProducts" stripe style="width: 100%" v-loading="loading.products">
             <el-table-column type="index" label="排名" width="60" align="center">
               <template #default="{ $index }">
                 <div class="rank" :class="{ 'top3': $index < 3 }">
@@ -147,13 +149,13 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="name" label="商品名称" min-width="150">
+            <el-table-column prop="product_name" label="商品名称" min-width="150">
               <template #default="{ row }">
                 <div class="product-name">
                   <el-avatar :size="32" :src="row.image" shape="square" class="product-avatar">
                     <el-icon><Goods /></el-icon>
                   </el-avatar>
-                  <span>{{ row.name }}</span>
+                  <span>{{ row.product_name }}</span>
                 </div>
               </template>
             </el-table-column>
@@ -179,16 +181,17 @@
               </span>
             </div>
           </template>
-          <el-timeline>
+          <el-timeline v-if="recentActivities.length > 0">
             <el-timeline-item
               v-for="(activity, index) in recentActivities"
               :key="index"
-              :type="activity.type"
-              :timestamp="activity.time"
+              :type="getActivityType(activity.type)"
+              :timestamp="formatActivityTime(activity.time)"
             >
               {{ activity.content }}
             </el-timeline-item>
           </el-timeline>
+          <el-empty v-else description="暂无活动记录" :image-size="80" />
         </el-card>
       </el-col>
     </el-row>
@@ -198,85 +201,208 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
-import { 
-  ShoppingCart, Money, Goods, User, ArrowUp, 
-  Bell, TrendCharts, Timer 
+import {
+  ShoppingCart, Money, Goods, User, ArrowUp, ArrowDown,
+  Bell, TrendCharts, Timer
 } from '@element-plus/icons-vue'
+import {
+  getDashboardOverview,
+  getSalesTrend,
+  getOrderStatusDistribution,
+  getTopProducts,
+  getPendingOrders,
+  getRecentActivities,
+  type DashboardOverview,
+  type SalesTrendData,
+  type OrderStatusItem,
+  type TopProductItem,
+  type PendingOrderItem,
+  type ActivityItem
+} from '@/api/dashboard'
 
-const timeRange = ref('week')
-const loading = ref(false)
+const timeRange = ref<'week' | 'month' | 'year'>('week')
+const loading = ref({
+  overview: false,
+  charts: false,
+  pending: false,
+  products: false
+})
+
 const salesChart = ref<HTMLElement | null>(null)
 const orderChart = ref<HTMLElement | null>(null)
 let salesChartInstance: echarts.ECharts | null = null
 let orderChartInstance: echarts.ECharts | null = null
 
-const stats = ref({
-  todayOrders: 128,
-  todaySales: 15860,
-  totalProducts: 486,
-  totalUsers: 3256
+// Stats data
+const stats = ref<DashboardOverview>({
+  today_orders: 0,
+  today_sales: '0.00',
+  today_growth: '0%',
+  yesterday_sales: '0.00',
+  total_products: 0,
+  total_users: 0,
+  new_users_today: 0,
+  currency: 'CNY'
 })
 
-const pendingOrders = ref([
-  { order_no: 'ORD20240318001', pay_amount: 29900, status: 1 },
-  { order_no: 'ORD20240318002', pay_amount: 15800, status: 2 },
-  { order_no: 'ORD20240318003', pay_amount: 8990, status: 1 },
-  { order_no: 'ORD20240318004', pay_amount: 45600, status: 2 },
-  { order_no: 'ORD20240318005', pay_amount: 12300, status: 1 }
-])
+// Pending orders
+const pendingOrders = ref<PendingOrderItem[]>([])
+const pendingOrdersTotal = ref(0)
 
-const hotProducts = ref([
-  { name: '无线蓝牙耳机 Pro', sales: 256, image: '' },
-  { name: '智能手表 Series 7', sales: 198, image: '' },
-  { name: '便携充电宝 20000mAh', sales: 167, image: '' },
-  { name: '机械键盘 RGB', sales: 134, image: '' },
-  { name: '4K 高清显示器', sales: 98, image: '' }
-])
+// Hot products
+const hotProducts = ref<TopProductItem[]>([])
 
-const recentActivities = ref([
-  { content: '新订单 #ORD20240318010 已创建', time: '10分钟前', type: 'primary' },
-  { content: '用户 张三 完成了支付', time: '30分钟前', type: 'success' },
-  { content: '商品 "无线蓝牙耳机 Pro" 库存不足', time: '1小时前', type: 'warning' },
-  { content: '订单 #ORD20240318005 已发货', time: '2小时前', type: 'success' },
-  { content: '系统备份完成', time: '3小时前', type: 'info' }
-])
+// Recent activities
+const recentActivities = ref<ActivityItem[]>([])
 
-const formatNumber = (num: number) => {
-  return num.toLocaleString()
+// Sales trend data
+const salesTrendData = ref<SalesTrendData[]>([])
+
+// Order status data
+const orderStatusData = ref<OrderStatusItem[]>([])
+
+const formatNumber = (num: string | number) => {
+  const value = typeof num === 'string' ? parseFloat(num) : num
+  return value.toLocaleString()
 }
 
-const getOrderStatusType = (status: number) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'success',
-    2: 'info',
-    3: 'primary',
-    4: 'success',
-    5: 'danger'
+const isGrowthPositive = (growth: string) => {
+  return growth.startsWith('+') || growth === '0%' || !growth.startsWith('-')
+}
+
+const getOrderStatusType = (status: string) => {
+  const types: Record<string, string> = {
+    'pending_payment': 'warning',
+    'paid': 'primary',
+    'shipped': 'info',
+    'delivered': 'success',
+    'cancelled': 'danger',
+    'refunded': 'danger'
   }
   return types[status] || 'info'
 }
 
-const getOrderStatusText = (status: number) => {
-  const texts: Record<number, string> = {
-    0: '待支付',
-    1: '已支付',
-    2: '待发货',
-    3: '已发货',
-    4: '已完成',
-    5: '已取消'
+const getActivityType = (type: string) => {
+  const types: Record<string, string> = {
+    'order_created': 'primary',
+    'payment_received': 'success',
+    'product_low_stock': 'warning',
+    'order_shipped': 'info'
   }
-  return texts[status] || '未知'
+  return types[type] || 'primary'
 }
 
+const formatActivityTime = (time: string) => {
+  const date = new Date(time)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString()
+}
+
+// Fetch dashboard overview
+const fetchOverview = async () => {
+  loading.value.overview = true
+  try {
+    const { data } = await getDashboardOverview()
+    stats.value = data
+  } catch (error) {
+    console.error('Failed to fetch overview:', error)
+  } finally {
+    loading.value.overview = false
+  }
+}
+
+// Fetch sales trend
+const fetchSalesTrend = async () => {
+  loading.value.charts = true
+  try {
+    const { data } = await getSalesTrend({ period: timeRange.value })
+    salesTrendData.value = data.data
+    updateSalesChart()
+  } catch (error) {
+    console.error('Failed to fetch sales trend:', error)
+  } finally {
+    loading.value.charts = false
+  }
+}
+
+// Fetch order status distribution
+const fetchOrderStatus = async () => {
+  try {
+    const { data } = await getOrderStatusDistribution()
+    orderStatusData.value = data.list
+    updateOrderChart()
+  } catch (error) {
+    console.error('Failed to fetch order status:', error)
+  }
+}
+
+// Fetch pending orders
+const fetchPendingOrders = async () => {
+  loading.value.pending = true
+  try {
+    const { data } = await getPendingOrders({ limit: 5 })
+    pendingOrders.value = data.list
+    pendingOrdersTotal.value = data.total
+  } catch (error) {
+    console.error('Failed to fetch pending orders:', error)
+  } finally {
+    loading.value.pending = false
+  }
+}
+
+// Fetch top products
+const fetchTopProducts = async () => {
+  loading.value.products = true
+  try {
+    const { data } = await getTopProducts({ limit: 5, period: 'week' })
+    hotProducts.value = data.list
+  } catch (error) {
+    console.error('Failed to fetch top products:', error)
+  } finally {
+    loading.value.products = false
+  }
+}
+
+// Fetch recent activities
+const fetchRecentActivities = async () => {
+  try {
+    const { data } = await getRecentActivities({ limit: 10 })
+    recentActivities.value = data.list
+  } catch (error) {
+    console.error('Failed to fetch recent activities:', error)
+  }
+}
+
+// Initialize sales chart
 const initSalesChart = () => {
   if (!salesChart.value) return
-
   salesChartInstance = echarts.init(salesChart.value)
+}
+
+// Update sales chart with data
+const updateSalesChart = () => {
+  if (!salesChartInstance) return
+
+  const dates = salesTrendData.value.map(d => d.date.slice(5)) // MM-DD format
+  const sales = salesTrendData.value.map(d => parseFloat(d.sales))
+
   const option = {
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'cross' }
+      axisPointer: { type: 'cross' },
+      formatter: (params: any) => {
+        const point = params[0]
+        return `${point.axisValue}<br/>销售额: ¥${formatNumber(point.value)}`
+      }
     },
     grid: {
       left: '3%',
@@ -287,7 +413,7 @@ const initSalesChart = () => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      data: dates,
       axisLine: { lineStyle: { color: '#E5E7EB' } },
       axisLabel: { color: '#6B7280' }
     },
@@ -296,7 +422,13 @@ const initSalesChart = () => {
       axisLine: { show: false },
       axisTick: { show: false },
       splitLine: { lineStyle: { color: '#F3F4F6' } },
-      axisLabel: { color: '#6B7280' }
+      axisLabel: {
+        color: '#6B7280',
+        formatter: (value: number) => {
+          if (value >= 10000) return `${(value / 10000).toFixed(1)}万`
+          return value.toString()
+        }
+      }
     },
     series: [
       {
@@ -304,7 +436,7 @@ const initSalesChart = () => {
         type: 'line',
         smooth: true,
         symbol: 'circle',
-        symbolSize: 8,
+        symbolSize: 6,
         sampling: 'average',
         itemStyle: { color: '#6366F1' },
         areaStyle: {
@@ -313,20 +445,33 @@ const initSalesChart = () => {
             { offset: 1, color: 'rgba(99, 102, 241, 0.01)' }
           ])
         },
-        data: [8200, 9320, 9010, 14340, 12900, 15300, 15860]
+        data: sales
       }
     ]
   }
   salesChartInstance.setOption(option)
 }
 
+// Initialize order chart
 const initOrderChart = () => {
   if (!orderChart.value) return
-
   orderChartInstance = echarts.init(orderChart.value)
+}
+
+// Update order chart with data
+const updateOrderChart = () => {
+  if (!orderChartInstance) return
+
+  const pieData = orderStatusData.value.map(item => ({
+    value: item.count,
+    name: item.status_text,
+    itemStyle: { color: item.color }
+  }))
+
   const option = {
     tooltip: {
-      trigger: 'item'
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
     },
     legend: {
       bottom: '5%',
@@ -355,13 +500,7 @@ const initOrderChart = () => {
           }
         },
         labelLine: { show: false },
-        data: [
-          { value: 1048, name: '已完成', itemStyle: { color: '#10B981' } },
-          { value: 735, name: '待发货', itemStyle: { color: '#F59E0B' } },
-          { value: 580, name: '已发货', itemStyle: { color: '#6366F1' } },
-          { value: 234, name: '待支付', itemStyle: { color: '#6B7280' } },
-          { value: 148, name: '已取消', itemStyle: { color: '#EF4444' } }
-        ]
+        data: pieData
       }
     ]
   }
@@ -373,9 +512,22 @@ const handleResize = () => {
   orderChartInstance?.resize()
 }
 
+// Fetch all dashboard data
+const fetchAllData = async () => {
+  await Promise.all([
+    fetchOverview(),
+    fetchSalesTrend(),
+    fetchOrderStatus(),
+    fetchPendingOrders(),
+    fetchTopProducts(),
+    fetchRecentActivities()
+  ])
+}
+
 onMounted(() => {
   initSalesChart()
   initOrderChart()
+  fetchAllData()
   window.addEventListener('resize', handleResize)
 })
 

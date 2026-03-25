@@ -66,16 +66,11 @@ const loadRoles = async () => {
   loading.value = true
   try {
     const res = await getAvailableRoles()
-    roles.value = res || []
+    roles.value = res?.list || []
   } catch (error) {
     console.error('Failed to load roles:', error)
-    // Mock data
-    roles.value = [
-      { id: 1, name: '超级管理员', code: 'super_admin' },
-      { id: 2, name: '运营管理', code: 'operator' },
-      { id: 3, name: '客服', code: 'customer_service' },
-      { id: 4, name: '财务', code: 'finance' }
-    ]
+    ElMessage.error('获取角色列表失败')
+    roles.value = []
   } finally {
     loading.value = false
   }
