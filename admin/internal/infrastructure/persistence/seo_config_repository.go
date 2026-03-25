@@ -121,21 +121,39 @@ func (r *seoConfigRepo) FindByPageType(ctx context.Context, db *gorm.DB, tenantI
 	return model.toEntity(), nil
 }
 
-func (r *seoConfigRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*storefront.SEOConfigEntity, error) {
+func (r *seoConfigRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*storefront.SEOConfigEntity, int64, error) {
+	var total int64
+	if err := db.WithContext(ctx).Model(&seoConfigModel{}).
+		Where("tenant_id = ?", tenantID.Int64()).
+		Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	var models []seoConfigModel
+	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).
 		Where("tenant_id = ?", tenantID.Int64()).
 		Order("page_type ASC, page_id ASC").
+		Offset(offset).
+		Limit(pageSize).
 		Find(&models).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	configs := make([]*storefront.SEOConfigEntity, len(models))
 	for i, m := range models {
 		configs[i] = m.toEntity()
 	}
-	return configs, nil
+	return configs, total, nil
+}
+
+func (r *seoConfigRepo) CountAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+	var total int64
+	err := db.WithContext(ctx).Model(&seoConfigModel{}).
+		Where("tenant_id = ?", tenantID.Int64()).
+		Count(&total).Error
+	return total, err
 }
 
 func (r *seoConfigRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) error {

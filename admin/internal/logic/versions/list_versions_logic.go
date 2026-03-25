@@ -27,13 +27,13 @@ func NewListVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListV
 func (l *ListVersionsLogic) ListVersions(req *types.ListVersionsRequest) (resp *types.ListVersionsResponse, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	versions, err := l.svcCtx.VersionService.ListVersions(l.ctx, shared.TenantID(tenantID), req.PageID, 20)
+	result, err := l.svcCtx.VersionService.ListVersions(l.ctx, shared.TenantID(tenantID), req.PageID, req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	items := make([]*types.VersionListItem, 0, len(versions))
-	for _, v := range versions {
+	items := make([]*types.VersionListItem, 0, len(result.Items))
+	for _, v := range result.Items {
 		items = append(items, &types.VersionListItem{
 			ID:        v.ID,
 			Version:   v.Version,
@@ -44,5 +44,8 @@ func (l *ListVersionsLogic) ListVersions(req *types.ListVersionsRequest) (resp *
 
 	return &types.ListVersionsResponse{
 		Versions: items,
+		Total:    result.Total,
+		Page:     result.Page,
+		PageSize: result.PageSize,
 	}, nil
 }

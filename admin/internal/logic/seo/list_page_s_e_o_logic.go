@@ -24,16 +24,16 @@ func NewListPageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPa
 	}
 }
 
-func (l *ListPageSEOLogic) ListPageSEO() (resp *types.ListPageSEOConfigsResponse, err error) {
+func (l *ListPageSEOLogic) ListPageSEO(req *types.ListPageSEOConfigsRequest) (resp *types.ListPageSEOConfigsResponse, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	configs, err := l.svcCtx.SEOService.ListPageSEO(l.ctx, shared.TenantID(tenantID))
+	result, err := l.svcCtx.SEOService.ListPageSEO(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	items := make([]*types.PageSEOConfigResponse, 0, len(configs))
-	for _, c := range configs {
+	items := make([]*types.PageSEOConfigResponse, 0, len(result.Items))
+	for _, c := range result.Items {
 		items = append(items, &types.PageSEOConfigResponse{
 			PageType: c.PageType,
 			PageID:   c.PageID,
@@ -46,6 +46,9 @@ func (l *ListPageSEOLogic) ListPageSEO() (resp *types.ListPageSEOConfigsResponse
 	}
 
 	return &types.ListPageSEOConfigsResponse{
-		Configs: items,
+		Configs:  items,
+		Total:    result.Total,
+		Page:     result.Page,
+		PageSize: result.PageSize,
 	}, nil
 }

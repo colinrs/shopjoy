@@ -24,16 +24,16 @@ func NewListPagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPage
 	}
 }
 
-func (l *ListPagesLogic) ListPages() (resp *types.ListPagesResponse, err error) {
+func (l *ListPagesLogic) ListPages(req *types.ListPagesRequest) (resp *types.ListPagesResponse, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 
-	pages, err := l.svcCtx.PageService.ListPages(l.ctx, shared.TenantID(tenantID))
+	result, err := l.svcCtx.PageService.ListPages(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	items := make([]*types.PageListItem, 0, len(pages))
-	for _, p := range pages {
+	items := make([]*types.PageListItem, 0, len(result.Items))
+	for _, p := range result.Items {
 		items = append(items, &types.PageListItem{
 			ID:          p.ID,
 			PageType:    p.PageType,
@@ -45,6 +45,9 @@ func (l *ListPagesLogic) ListPages() (resp *types.ListPagesResponse, err error) 
 	}
 
 	return &types.ListPagesResponse{
-		Pages: items,
+		Pages:    items,
+		Total:    result.Total,
+		Page:     result.Page,
+		PageSize: result.PageSize,
 	}, nil
 }

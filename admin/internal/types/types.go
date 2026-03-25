@@ -481,8 +481,10 @@ type CreateWarehouseResp struct {
 }
 
 type CurrentThemeResponse struct {
-	Theme  *ThemeItem     `json:"theme"`
-	Config ThemeConfigDTO `json:"config"`
+	Theme     *ThemeItem     `json:"theme"`
+	Config    ThemeConfigDTO `json:"config"`
+	ChangedAt int64          `json:"changed_at,omitempty"`
+	ChangedBy int64          `json:"changed_by,omitempty"`
 }
 
 type DeactivatePromotionReq struct {
@@ -912,12 +914,28 @@ type ListOrderShipmentsResp struct {
 	List []*ShipmentDetailResp `json:"list"`
 }
 
+type ListPageSEOConfigsRequest struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"page_size,default=20"`
+}
+
 type ListPageSEOConfigsResponse struct {
-	Configs []*PageSEOConfigResponse `json:"configs"`
+	Configs  []*PageSEOConfigResponse `json:"configs"`
+	Total    int64                    `json:"total"`
+	Page     int                      `json:"page"`
+	PageSize int                      `json:"page_size"`
+}
+
+type ListPagesRequest struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"page_size,default=20"`
 }
 
 type ListPagesResponse struct {
-	Pages []*PageListItem `json:"pages"`
+	Pages    []*PageListItem `json:"pages"`
+	Total    int64           `json:"total"`
+	Page     int             `json:"page"`
+	PageSize int             `json:"page_size"`
 }
 
 type ListProductLocalizationsReq struct {
@@ -1051,6 +1069,11 @@ type ListShipmentsResp struct {
 	PageSize int                   `json:"page_size"`
 }
 
+type ListThemeAuditLogsResponse struct {
+	Logs  []*ThemeAuditLog `json:"logs"`
+	Total int64            `json:"total"`
+}
+
 type ListThemesResponse struct {
 	Themes []*ThemeItem `json:"themes"`
 }
@@ -1121,11 +1144,16 @@ type ListUsersResponse struct {
 }
 
 type ListVersionsRequest struct {
-	PageID int64 `path:"id"`
+	PageID   int64 `path:"id"`
+	Page     int   `form:"page,default=1"`
+	PageSize int   `form:"page_size,default=20"`
 }
 
 type ListVersionsResponse struct {
 	Versions []*VersionListItem `json:"versions"`
+	Total    int64              `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"page_size"`
 }
 
 type ListWarehouseReq struct {
@@ -1742,6 +1770,16 @@ type TaxConfig struct {
 	IncludeTax  bool   `json:"include_tax,optional"`
 }
 
+type ThemeAuditLog struct {
+	ID        int64  `json:"id"`
+	Action    string `json:"action"` // switch, update_config
+	ThemeID   int64  `json:"theme_id"`
+	ThemeName string `json:"theme_name"`
+	UserID    int64  `json:"user_id"`
+	UserName  string `json:"user_name"`
+	CreatedAt int64  `json:"created_at"`
+}
+
 type ThemeConfigDTO struct {
 	PrimaryColor   string `json:"primary_color"`
 	SecondaryColor string `json:"secondary_color"`
@@ -1749,15 +1787,34 @@ type ThemeConfigDTO struct {
 	ButtonStyle    string `json:"button_style"`
 }
 
+type ThemeConfigOption struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
+type ThemeConfigSchema struct {
+	Fields []*ThemeConfigSchemaField `json:"fields"`
+}
+
+type ThemeConfigSchemaField struct {
+	Key     string              `json:"key"`
+	Label   string              `json:"label"`
+	Type    string              `json:"type"`
+	Options []ThemeConfigOption `json:"options,omitempty"`
+	Default string              `json:"default"`
+}
+
 type ThemeItem struct {
-	ID           int64  `json:"id"`
-	Code         string `json:"code"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	PreviewImage string `json:"preview_image"`
-	Thumbnail    string `json:"thumbnail"`
-	IsPreset     bool   `json:"is_preset"`
-	IsCurrent    bool   `json:"is_current"`
+	ID            int64              `json:"id"`
+	Code          string             `json:"code"`
+	Name          string             `json:"name"`
+	Description   string             `json:"description"`
+	PreviewImage  string             `json:"preview_image"`
+	Thumbnail     string             `json:"thumbnail"`
+	IsPreset      bool               `json:"is_preset"`
+	IsCurrent     bool               `json:"is_current"`
+	DefaultConfig *ThemeConfigDTO    `json:"default_config,omitempty"`
+	ConfigSchema  *ThemeConfigSchema `json:"config_schema,omitempty"`
 }
 
 type ToggleBrandPageReq struct {

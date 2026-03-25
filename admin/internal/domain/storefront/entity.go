@@ -202,6 +202,33 @@ type BlockOrder struct {
 	SortOrder int
 }
 
+// ThemeAuditLog represents an audit log entry for theme changes
+type ThemeAuditLog struct {
+	ID         int64
+	TenantID   shared.TenantID
+	Action     string // switch_theme, update_config
+	ThemeID    int64
+	ThemeName  string
+	ThemeCode  string
+	OldConfig  string // JSON string
+	NewConfig  string // JSON string
+	UserID     int64
+	UserName   string
+	IPAddress  string
+	UserAgent  string
+	CreatedAt  int64
+}
+
+func (l *ThemeAuditLog) TableName() string {
+	return "theme_audit_logs"
+}
+
+// Audit action constants
+const (
+	AuditActionSwitchTheme  = "switch_theme"
+	AuditActionUpdateConfig = "update_config"
+)
+
 // Repository interfaces
 
 type ShopRepository interface {
@@ -226,7 +253,8 @@ type PageRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Page, error)
 	FindBySlug(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, slug string) (*Page, error)
 	FindByType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType PageType) (*Page, error)
-	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*Page, error)
+	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*Page, int64, error)
+	CountAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
 }
 
 type DecorationRepository interface {
@@ -241,16 +269,23 @@ type DecorationRepository interface {
 
 type PageVersionRepository interface {
 	Create(ctx context.Context, db *gorm.DB, v *PageVersion) error
-	FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, limit int) ([]*PageVersion, error)
+	FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, page, pageSize int) ([]*PageVersion, int64, error)
 	FindByVersion(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, version int) (*PageVersion, error)
 	DeleteOldest(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, keepCount int) error
+	CountByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) (int64, error)
 }
 
 type SEOConfigRepository interface {
 	Save(ctx context.Context, db *gorm.DB, config *SEOConfigEntity) error
 	FindByPageType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) (*SEOConfigEntity, error)
-	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*SEOConfigEntity, error)
+	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*SEOConfigEntity, int64, error)
 	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType string, pageID *int64) error
+	CountAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
+}
+
+type ThemeAuditLogRepository interface {
+	Create(ctx context.Context, db *gorm.DB, log *ThemeAuditLog) error
+	FindByTenantID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*ThemeAuditLog, int64, error)
 }
 
 type NavigationRepository interface {

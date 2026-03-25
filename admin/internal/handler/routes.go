@@ -1013,6 +1013,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: themes.ListThemesHandler(serverCtx),
 				},
 				{
+					// 获取主题变更日志
+					Method:  http.MethodGet,
+					Path:    "/api/v1/themes/audit-logs",
+					Handler: themes.ListThemeAuditLogsHandler(serverCtx),
+				},
+				{
 					// 更新主题配置
 					Method:  http.MethodPut,
 					Path:    "/api/v1/themes/config",

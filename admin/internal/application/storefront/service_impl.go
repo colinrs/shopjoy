@@ -35,8 +35,8 @@ func NewPageService(
 	}
 }
 
-func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID) ([]*PageDTO, error) {
-	pages, err := s.pageRepo.FindAll(ctx, s.db, tenantID)
+func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageDTO], error) {
+	pages, total, err := s.pageRepo.FindAll(ctx, s.db, tenantID, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,12 @@ func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID) (
 			Version:     p.Version,
 		}
 	}
-	return dtos, nil
+	return &PaginatedResult[*PageDTO]{
+		Items:    dtos,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
 }
 
 func (s *pageService) GetPage(ctx context.Context, tenantID shared.TenantID, pageID int64) (*PageDetailDTO, error) {
@@ -391,11 +396,8 @@ func NewVersionService(
 	}
 }
 
-func (s *versionService) ListVersions(ctx context.Context, tenantID shared.TenantID, pageID int64, limit int) ([]*VersionDTO, error) {
-	if limit <= 0 {
-		limit = 20
-	}
-	versions, err := s.versionRepo.FindByPageID(ctx, s.db, tenantID, pageID, limit)
+func (s *versionService) ListVersions(ctx context.Context, tenantID shared.TenantID, pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error) {
+	versions, total, err := s.versionRepo.FindByPageID(ctx, s.db, tenantID, pageID, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -409,7 +411,12 @@ func (s *versionService) ListVersions(ctx context.Context, tenantID shared.Tenan
 			CreatedAt: v.CreatedAt,
 		}
 	}
-	return dtos, nil
+	return &PaginatedResult[*VersionDTO]{
+		Items:    dtos,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
 }
 
 func (s *versionService) GetVersion(ctx context.Context, tenantID shared.TenantID, pageID int64, version int) (*VersionDetailDTO, error) {
@@ -617,8 +624,8 @@ func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }
 
-func (s *seoService) ListPageSEO(ctx context.Context, tenantID shared.TenantID) ([]*PageSEOConfigDTO, error) {
-	configs, err := s.seoRepo.FindAll(ctx, s.db, tenantID)
+func (s *seoService) ListPageSEO(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error) {
+	configs, total, err := s.seoRepo.FindAll(ctx, s.db, tenantID, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -635,5 +642,10 @@ func (s *seoService) ListPageSEO(ctx context.Context, tenantID shared.TenantID) 
 			},
 		}
 	}
-	return dtos, nil
+	return &PaginatedResult[*PageSEOConfigDTO]{
+		Items:    dtos,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
 }

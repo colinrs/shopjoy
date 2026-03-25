@@ -191,19 +191,37 @@ func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB, tenantID shared.
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*storefront.Page, error) {
+func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*storefront.Page, int64, error) {
+	var total int64
+	if err := db.WithContext(ctx).Model(&pageModel{}).
+		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	var models []pageModel
+	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).
 		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
 		Order("sort ASC, id DESC").
+		Offset(offset).
+		Limit(pageSize).
 		Find(&models).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	pages := make([]*storefront.Page, len(models))
 	for i, m := range models {
 		pages[i] = m.toEntity()
 	}
-	return pages, nil
+	return pages, total, nil
+}
+
+func (r *pageRepo) CountAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+	var total int64
+	err := db.WithContext(ctx).Model(&pageModel{}).
+		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Count(&total).Error
+	return total, err
 }

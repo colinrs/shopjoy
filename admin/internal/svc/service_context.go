@@ -163,9 +163,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	pageVersionRepo := persistence.NewPageVersionRepository()
 	seoConfigRepo := persistence.NewSEOConfigRepository()
 	shopRepo := persistence.NewShopRepository()
+	themeAuditLogRepo := persistence.NewThemeAuditLogRepository()
 
 	// Storefront services
-	themeService := appStorefront.NewThemeService(db, themeRepo, shopRepo)
+	themeService := appStorefront.NewThemeService(db, themeRepo, shopRepo, themeAuditLogRepo)
 	pageService := appStorefront.NewPageService(db, pageRepo, decorationRepo, pageVersionRepo, idGen)
 	decorationService := appStorefront.NewDecorationService(db, decorationRepo, idGen)
 	versionService := appStorefront.NewVersionService(db, pageRepo, pageVersionRepo, decorationRepo, idGen)

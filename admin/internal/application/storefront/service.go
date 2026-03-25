@@ -2,6 +2,8 @@ package storefront
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -12,16 +14,16 @@ import (
 // DTO types for application layer
 
 type ThemeDTO struct {
-	ID           int64               `json:"id"`
-	Code         string              `json:"code"`
-	Name         string              `json:"name"`
-	Description  string              `json:"description"`
-	PreviewImage string              `json:"preview_image"`
-	Thumbnail    string              `json:"thumbnail"`
-	IsPreset     bool                `json:"is_preset"`
-	IsCurrent    bool                `json:"is_current"`
-	Config       *ThemeConfigDTO     `json:"config,omitempty"`
-	ConfigSchema *ThemeConfigSchemaDTO `json:"config_schema,omitempty"`
+	ID            int64                  `json:"id"`
+	Code          string                 `json:"code"`
+	Name          string                 `json:"name"`
+	Description   string                 `json:"description"`
+	PreviewImage  string                 `json:"preview_image"`
+	Thumbnail     string                 `json:"thumbnail"`
+	IsPreset      bool                   `json:"is_preset"`
+	IsCurrent     bool                   `json:"is_current"`
+	DefaultConfig *ThemeConfigDTO        `json:"default_config,omitempty"`
+	ConfigSchema  *ThemeConfigSchemaDTO  `json:"config_schema,omitempty"`
 }
 
 type ThemeConfigDTO struct {
@@ -49,8 +51,20 @@ type SelectOptDTO struct {
 }
 
 type CurrentThemeDTO struct {
-	Theme  *ThemeDTO     `json:"theme"`
-	Config ThemeConfigDTO `json:"config"`
+	Theme     *ThemeDTO     `json:"theme"`
+	Config    ThemeConfigDTO `json:"config"`
+	ChangedAt int64         `json:"changed_at,omitempty"`
+	ChangedBy int64         `json:"changed_by,omitempty"`
+}
+
+type ThemeAuditLogDTO struct {
+	ID        int64  `json:"id"`
+	Action    string `json:"action"`
+	ThemeID   int64  `json:"theme_id"`
+	ThemeName string `json:"theme_name"`
+	UserID    int64  `json:"user_id"`
+	UserName  string `json:"user_name"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 type PageDTO struct {
@@ -103,17 +117,26 @@ type PageSEOConfigDTO struct {
 	Config   SEOConfigDTO  `json:"config"`
 }
 
+// Paginated result wrapper
+type PaginatedResult[T any] struct {
+	Items    []T   `json:"items"`
+	Total    int64 `json:"total"`
+	Page     int   `json:"page"`
+	PageSize int   `json:"page_size"`
+}
+
 // Service interfaces
 
 type ThemeService interface {
 	ListThemes(ctx context.Context, tenantID shared.TenantID) ([]*ThemeDTO, error)
 	GetCurrentTheme(ctx context.Context, tenantID shared.TenantID) (*CurrentThemeDTO, error)
-	SwitchTheme(ctx context.Context, tenantID shared.TenantID, themeID int64) error
-	UpdateThemeConfig(ctx context.Context, tenantID shared.TenantID, config ThemeConfigDTO) error
+	SwitchTheme(ctx context.Context, tenantID shared.TenantID, themeID int64, userID int64, userName string) error
+	UpdateThemeConfig(ctx context.Context, tenantID shared.TenantID, config ThemeConfigDTO, userID int64, userName string) error
+	ListAuditLogs(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error)
 }
 
 type PageService interface {
-	ListPages(ctx context.Context, tenantID shared.TenantID) ([]*PageDTO, error)
+	ListPages(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageDTO], error)
 	GetPage(ctx context.Context, tenantID shared.TenantID, pageID int64) (*PageDetailDTO, error)
 	GetPageBySlug(ctx context.Context, tenantID shared.TenantID, slug string) (*PageDetailDTO, error)
 	SaveDraft(ctx context.Context, tenantID shared.TenantID, pageID int64, blocks []*DecorationDTO, userID int64) error
@@ -130,7 +153,7 @@ type DecorationService interface {
 }
 
 type VersionService interface {
-	ListVersions(ctx context.Context, tenantID shared.TenantID, pageID int64, limit int) ([]*VersionDTO, error)
+	ListVersions(ctx context.Context, tenantID shared.TenantID, pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error)
 	GetVersion(ctx context.Context, tenantID shared.TenantID, pageID int64, version int) (*VersionDetailDTO, error)
 	RestoreVersion(ctx context.Context, tenantID shared.TenantID, pageID int64, version int, userID int64) error
 }
@@ -140,22 +163,24 @@ type SEOService interface {
 	UpdateGlobalSEO(ctx context.Context, tenantID shared.TenantID, config SEOConfigDTO) error
 	GetPageSEO(ctx context.Context, tenantID shared.TenantID, pageType string, pageID *int64) (*PageSEOConfigDTO, error)
 	UpdatePageSEO(ctx context.Context, tenantID shared.TenantID, pageType string, pageID *int64, config SEOConfigDTO) error
-	ListPageSEO(ctx context.Context, tenantID shared.TenantID) ([]*PageSEOConfigDTO, error)
+	ListPageSEO(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error)
 }
 
 // Service implementation
 
 type themeService struct {
-	db        *gorm.DB
-	themeRepo storefront.ThemeRepository
-	shopRepo  storefront.ShopRepository
+	db           *gorm.DB
+	themeRepo    storefront.ThemeRepository
+	shopRepo     storefront.ShopRepository
+	auditLogRepo storefront.ThemeAuditLogRepository
 }
 
-func NewThemeService(db *gorm.DB, themeRepo storefront.ThemeRepository, shopRepo storefront.ShopRepository) ThemeService {
+func NewThemeService(db *gorm.DB, themeRepo storefront.ThemeRepository, shopRepo storefront.ShopRepository, auditLogRepo storefront.ThemeAuditLogRepository) ThemeService {
 	return &themeService{
-		db:        db,
-		themeRepo: themeRepo,
-		shopRepo:  shopRepo,
+		db:           db,
+		themeRepo:    themeRepo,
+		shopRepo:     shopRepo,
+		auditLogRepo: auditLogRepo,
 	}
 }
 
@@ -229,7 +254,7 @@ func (s *themeService) GetCurrentTheme(ctx context.Context, tenantID shared.Tena
 	}, nil
 }
 
-func (s *themeService) SwitchTheme(ctx context.Context, tenantID shared.TenantID, themeID int64) error {
+func (s *themeService) SwitchTheme(ctx context.Context, tenantID shared.TenantID, themeID int64, userID int64, userName string) error {
 	theme, err := s.themeRepo.FindByID(ctx, s.db, tenantID, themeID)
 	if err != nil {
 		return err
@@ -246,11 +271,41 @@ func (s *themeService) SwitchTheme(ctx context.Context, tenantID shared.TenantID
 		return code.ErrShopNotFound
 	}
 
-	shop.CurrentThemeID = &themeID
-	return s.shopRepo.Save(ctx, s.db, shop)
+	// Get old theme info for audit log
+	var oldThemeName string
+	var oldThemeCode string
+	if shop.CurrentThemeID != nil {
+		oldTheme, _ := s.themeRepo.FindByID(ctx, s.db, tenantID, *shop.CurrentThemeID)
+		if oldTheme != nil {
+			oldThemeName = oldTheme.Name
+			oldThemeCode = oldTheme.Code
+		}
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		shop.CurrentThemeID = &themeID
+		if err := s.shopRepo.Save(ctx, tx, shop); err != nil {
+			return err
+		}
+
+		// Create audit log
+		auditLog := &storefront.ThemeAuditLog{
+			TenantID:   tenantID,
+			Action:     "switch_theme",
+			ThemeID:    themeID,
+			ThemeName:  theme.Name,
+			ThemeCode:  theme.Code,
+			OldConfig:  oldThemeName + " (" + oldThemeCode + ")",
+			NewConfig:  theme.Name + " (" + theme.Code + ")",
+			UserID:     userID,
+			UserName:   userName,
+			CreatedAt:  time.Now().Unix(),
+		}
+		return s.auditLogRepo.Create(ctx, tx, auditLog)
+	})
 }
 
-func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.TenantID, config ThemeConfigDTO) error {
+func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.TenantID, config ThemeConfigDTO, userID int64, userName string) error {
 	shop, err := s.shopRepo.FindByTenantID(ctx, s.db, tenantID)
 	if err != nil {
 		return err
@@ -259,9 +314,83 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.Te
 		return code.ErrShopNotFound
 	}
 
+	// Get theme info for audit log
+	var themeID int64 = 1001 // Default
+	var themeName string
+	var themeCode string
+	if shop.CurrentThemeID != nil {
+		themeID = *shop.CurrentThemeID
+	}
+	theme, _ := s.themeRepo.FindByID(ctx, s.db, tenantID, themeID)
+	if theme != nil {
+		themeName = theme.Name
+		themeCode = theme.Code
+	}
+
+	// Serialize old config for audit
+	oldConfigJSON := ""
+	if shop.ThemeConfig != nil {
+		oldConfigJSON = themeConfigToJSON(shop.ThemeConfig)
+	}
+
 	themeConfig := dtoToThemeConfig(config)
-	shop.ThemeConfig = &themeConfig
-	return s.shopRepo.Save(ctx, s.db, shop)
+	newConfigJSON := themeConfigToJSON(&themeConfig)
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		shop.ThemeConfig = &themeConfig
+		if err := s.shopRepo.Save(ctx, tx, shop); err != nil {
+			return err
+		}
+
+		// Create audit log
+		auditLog := &storefront.ThemeAuditLog{
+			TenantID:   tenantID,
+			Action:     "update_config",
+			ThemeID:    themeID,
+			ThemeName:  themeName,
+			ThemeCode:  themeCode,
+			OldConfig:  oldConfigJSON,
+			NewConfig:  newConfigJSON,
+			UserID:     userID,
+			UserName:   userName,
+			CreatedAt:  time.Now().Unix(),
+		}
+		return s.auditLogRepo.Create(ctx, tx, auditLog)
+	})
+}
+
+func (s *themeService) ListAuditLogs(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error) {
+	logs, total, err := s.auditLogRepo.FindByTenantID(ctx, s.db, tenantID, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := make([]*ThemeAuditLogDTO, len(logs))
+	for i, l := range logs {
+		dtos[i] = &ThemeAuditLogDTO{
+			ID:        l.ID,
+			Action:    l.Action,
+			ThemeID:   l.ThemeID,
+			ThemeName: l.ThemeName,
+			UserID:    l.UserID,
+			UserName:  l.UserName,
+			CreatedAt: l.CreatedAt,
+		}
+	}
+	return &PaginatedResult[*ThemeAuditLogDTO]{
+		Items:    dtos,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
+}
+
+func themeConfigToJSON(config *storefront.ThemeConfig) string {
+	if config == nil {
+		return ""
+	}
+	data, _ := json.Marshal(config)
+	return string(data)
 }
 
 func themeConfigToDTO(config *storefront.ThemeConfig) *ThemeConfigDTO {

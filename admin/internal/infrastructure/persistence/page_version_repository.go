@@ -68,26 +68,39 @@ func (r *pageVersionRepo) Create(ctx context.Context, db *gorm.DB, v *storefront
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, limit int) ([]*storefront.PageVersion, error) {
-	var models []pageVersionModel
-	query := db.WithContext(ctx).
+func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, page, pageSize int) ([]*storefront.PageVersion, int64, error) {
+	var total int64
+	if err := db.WithContext(ctx).Model(&pageVersionModel{}).
 		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
-		Order("version DESC")
-
-	if limit > 0 {
-		query = query.Limit(limit)
+		Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
-	err := query.Find(&models).Error
+	var models []pageVersionModel
+	offset := (page - 1) * pageSize
+	err := db.WithContext(ctx).
+		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Order("version DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&models).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	versions := make([]*storefront.PageVersion, len(models))
 	for i, m := range models {
 		versions[i] = m.toEntity()
 	}
-	return versions, nil
+	return versions, total, nil
+}
+
+func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) (int64, error) {
+	var total int64
+	err := db.WithContext(ctx).Model(&pageVersionModel{}).
+		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Count(&total).Error
+	return total, err
 }
 
 func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, version int) (*storefront.PageVersion, error) {
