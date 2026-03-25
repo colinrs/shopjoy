@@ -128,3 +128,32 @@ return code.ErrOrderNotFound
    - Shop: 110xxx
    - Fulfillment: 120xxx
 3. **DO NOT create local error variables** with `errors.New()` in application or domain layers
+
+## Requirement Development Workflow
+
+> **详细规范:** See [`.claude/skills/requirement/SKILL.md`](.claude/skills/requirement/SKILL.md)
+
+### 流程阶段
+
+| Phase | 名称 | 执行者 | 输出物 |
+|-------|------|--------|--------|
+| 1 | 需求分析 | `product-manager` + `shopify-expert` | PRD 文档 |
+| 2 | 设计阶段 | `backend-developer` + `api-designer` + `ui-designer` + `frontend-developer` | API设计 + UI设计 + 前端技术设计 |
+| 3 | 计划阶段 | `writing-plans` | 开发计划 |
+| 4 | 实施阶段 | `subagent-driven-development` | 代码实现 |
+
+### 关键原则
+
+| 类型 | 原则 |
+|-----|------|
+| MUST | 全栈覆盖：每个需求必须同时考虑 Frontend + Backend + UI + Database |
+| MUST | 文档先行：所有设计文档完成并审批后，方可进入开发 |
+| MUST | 一致性保证：最终实现与 PRD、UI 设计完全一致，不得遗漏功能 |
+| MUST | 两轮审查：每个阶段输出物需经过至少 2 轮评审 |
+| MUST | 用户确认：每个阶段完成必须获得用户明确同意 |
+| MUST NOT | 文档未审批即开始开发 |
+| MUST NOT | 只考虑后端忽略前端/UI |
+
+### 触发条件
+
+当用户提出新功能需求时，使用 `/requirement` skill 启动完整开发流程。
