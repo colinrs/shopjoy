@@ -73,9 +73,16 @@ docs/
 - [支付 PRD](domains/payment/2026-03-24-payment-prd.md)
 - [评价 PRD](domains/review/2026-03-24-review-prd.md)
 
+### Schema文档
+- [商品目录 Schema](domains/product/2026-03-26-product-schema.md)
+- [订单 Schema](domains/order/2026-03-26-order-schema.md)
+- [促销 Schema](domains/promotion/2026-03-26-promotion-schema.md)
+- [支付 Schema](domains/payment/2026-03-26-payment-schema.md)
+
 ### API文档
 - [API设计规范](cross-cutting/api/README.md)
-- [API参考文档](cross-cutting/api/2026-03-22-api-reference.md)
+- [API参考文档](cross-cutting/api/2026-03-26-api-reference.md)
+- [OpenAPI规范](cross-cutting/api/openapi.yaml)
 - [缺失API设计](cross-cutting/api/2026-03-25-missing-apis-design.md)
 
 ### 开发指南
