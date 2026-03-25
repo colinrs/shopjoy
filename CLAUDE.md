@@ -2,6 +2,48 @@
 
 > **Full documentation:** See [AGENTS.md](./AGENTS.md) for complete project guide.
 
+## Project Directory Convention
+
+> **详细规范:** See [`.claude/rules/document/README.md`](.claude/rules/document/README.md)
+
+### 三合一对应原则
+
+文档、SQL、代码按相同领域组织：
+
+| 领域 | 文档目录 | SQL 目录 | 代码目录 |
+|-----|---------|---------|---------|
+| user | `docs/domains/user/` | `sql/user/` | `domain/{user,adminuser,role,tenant}/` |
+| product | `docs/domains/product/` | `sql/product/` | `domain/{product,market}/` |
+| order | `docs/domains/order/` | `sql/order/` | `domain/{order,cart}/` |
+| promotion | `docs/domains/promotion/` | `sql/promotion/` | `domain/{promotion,coupon}/` |
+| points | `docs/domains/points/` | `sql/points/` | 待创建 |
+| shop | `docs/domains/shop/` | `sql/shop/` | `handler/shop/` |
+| storefront | `docs/domains/storefront/` | `sql/storefront/` | `domain/storefront/` |
+| fulfillment | `docs/domains/fulfillment/` | `sql/fulfillment/` | `domain/fulfillment/` |
+| payment | `docs/domains/payment/` | `sql/payment/` | `domain/payment/` |
+| review | `docs/domains/review/` | `sql/review/` | `domain/review/` |
+
+### 文档命名规范
+
+```
+{YYYY-MM-DD}-{领域}-{文档类型}.md
+```
+
+| 文档类型 | 命名格式 | 示例 |
+|---------|---------|------|
+| PRD | `{日期}-{领域}-prd.md` | `2026-03-24-order-prd.md` |
+| Schema | `{日期}-{领域}-schema.md` | `2026-03-24-user-schema.md` |
+| UI 设计 | `{日期}-{领域}-ui-design.md` | `2026-03-24-payment-ui-design.md` |
+| 技术设计 | `{日期}-{名称}-design.md` | `2026-03-22-sku-design.md` |
+
+### SQL 迁移命名规范
+
+```
+{YYYYMMDD}{序号}_{动作}_{对象}.sql
+```
+
+示例：`2026032401_create_reviews.sql`, `2026032201_alter_promotions_add_scope.sql`
+
 ## API Definition Changes
 
 When modifying HTTP API definitions:
