@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -55,7 +56,7 @@ func (l *ListSKUsByProductLogic) ListSKUsByProduct(req *types.ListSKUsByProductR
 			SafetyStock:    sku.SafetyStock,
 			PreSaleEnabled: sku.PreSaleEnabled,
 			Attributes:     sku.Attributes,
-			Status:         string(sku.Status),
+			Status:         strconv.Itoa(int(sku.Status)),
 			IsLowStock:     sku.IsLowStock(),
 			CreatedAt:      sku.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:      sku.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
