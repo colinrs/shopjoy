@@ -11,6 +11,7 @@ import (
 	brands "github.com/colinrs/shopjoy/admin/internal/handler/brands"
 	categories "github.com/colinrs/shopjoy/admin/internal/handler/categories"
 	coupons "github.com/colinrs/shopjoy/admin/internal/handler/coupons"
+	dashboard "github.com/colinrs/shopjoy/admin/internal/handler/dashboard"
 	fulfillment_orders "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_orders"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
@@ -21,8 +22,14 @@ import (
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
 	refunds "github.com/colinrs/shopjoy/admin/internal/handler/refunds"
 	reviews "github.com/colinrs/shopjoy/admin/internal/handler/reviews"
+	roles "github.com/colinrs/shopjoy/admin/internal/handler/roles"
 	seo "github.com/colinrs/shopjoy/admin/internal/handler/seo"
 	shipments "github.com/colinrs/shopjoy/admin/internal/handler/shipments"
+	shipping_calculator "github.com/colinrs/shopjoy/admin/internal/handler/shipping_calculator"
+	shipping_mappings "github.com/colinrs/shopjoy/admin/internal/handler/shipping_mappings"
+	shipping_templates "github.com/colinrs/shopjoy/admin/internal/handler/shipping_templates"
+	shipping_zones "github.com/colinrs/shopjoy/admin/internal/handler/shipping_zones"
+	shop "github.com/colinrs/shopjoy/admin/internal/handler/shop"
 	themes "github.com/colinrs/shopjoy/admin/internal/handler/themes"
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
@@ -329,6 +336,56 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 获取仪表盘所有数据（聚合接口）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard",
+					Handler: dashboard.GetDashboardHandler(serverCtx),
+				},
+				{
+					// 获取最近活动
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/activities",
+					Handler: dashboard.GetRecentActivitiesHandler(serverCtx),
+				},
+				{
+					// 获取订单状态分布
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/order-status",
+					Handler: dashboard.GetOrderStatusDistributionHandler(serverCtx),
+				},
+				{
+					// 获取仪表盘概览数据
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/overview",
+					Handler: dashboard.GetDashboardOverviewHandler(serverCtx),
+				},
+				{
+					// 获取待处理订单
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/pending-orders",
+					Handler: dashboard.GetPendingOrdersHandler(serverCtx),
+				},
+				{
+					// 获取销售趋势
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/sales-trend",
+					Handler: dashboard.GetSalesTrendHandler(serverCtx),
+				},
+				{
+					// 获取热销商品TOP
+					Method:  http.MethodGet,
+					Path:    "/api/v1/dashboard/top-products",
+					Handler: dashboard.GetTopProductsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
 					// 订单列表（含履约状态筛选）
 					Method:  http.MethodGet,
 					Path:    "/api/v1/orders",
@@ -347,10 +404,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: fulfillment_orders.AdjustOrderPriceHandler(serverCtx),
 				},
 				{
+					// 取消订单
+					Method:  http.MethodPut,
+					Path:    "/api/v1/orders/:id/cancel",
+					Handler: fulfillment_orders.CancelOrderHandler(serverCtx),
+				},
+				{
 					// 更新订单备注
 					Method:  http.MethodPut,
 					Path:    "/api/v1/orders/:id/remark",
 					Handler: fulfillment_orders.UpdateOrderRemarkHandler(serverCtx),
+				},
+				{
+					// 发送支付提醒
+					Method:  http.MethodPost,
+					Path:    "/api/v1/orders/:id/remind-payment",
+					Handler: fulfillment_orders.RemindPaymentHandler(serverCtx),
 				},
 				{
 					// 订单发货（创建发货单）
@@ -913,6 +982,62 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 获取所有权限列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/permissions",
+					Handler: roles.ListPermissionsHandler(serverCtx),
+				},
+				{
+					// 获取角色列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/roles",
+					Handler: roles.ListRolesHandler(serverCtx),
+				},
+				{
+					// 创建角色
+					Method:  http.MethodPost,
+					Path:    "/api/v1/roles",
+					Handler: roles.CreateRoleHandler(serverCtx),
+				},
+				{
+					// 获取角色详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/roles/:id",
+					Handler: roles.GetRoleHandler(serverCtx),
+				},
+				{
+					// 更新角色
+					Method:  http.MethodPut,
+					Path:    "/api/v1/roles/:id",
+					Handler: roles.UpdateRoleHandler(serverCtx),
+				},
+				{
+					// 删除角色
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/roles/:id",
+					Handler: roles.DeleteRoleHandler(serverCtx),
+				},
+				{
+					// 更新角色权限
+					Method:  http.MethodPut,
+					Path:    "/api/v1/roles/:id/permissions",
+					Handler: roles.UpdateRolePermissionsHandler(serverCtx),
+				},
+				{
+					// 更新角色状态
+					Method:  http.MethodPut,
+					Path:    "/api/v1/roles/:id/status",
+					Handler: roles.UpdateRoleStatusHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
 					// 获取全局SEO配置
 					Method:  http.MethodGet,
 					Path:    "/api/v1/seo/global",
@@ -997,6 +1122,190 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/shipments/batch",
 					Handler: shipments.BatchCreateShipmentsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 计算运费
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipping/calculate",
+					Handler: shipping_calculator.CalculateShippingFeeHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建模板关联
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipping-template-mappings",
+					Handler: shipping_mappings.CreateTemplateMappingHandler(serverCtx),
+				},
+				{
+					// 删除模板关联
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/shipping-template-mappings/:id",
+					Handler: shipping_mappings.DeleteTemplateMappingHandler(serverCtx),
+				},
+				{
+					// 模板关联列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipping-templates/:template_id/mappings",
+					Handler: shipping_mappings.ListTemplateMappingsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 运费模板列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipping-templates",
+					Handler: shipping_templates.ListShippingTemplatesHandler(serverCtx),
+				},
+				{
+					// 创建运费模板
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipping-templates",
+					Handler: shipping_templates.CreateShippingTemplateHandler(serverCtx),
+				},
+				{
+					// 运费模板详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipping-templates/:id",
+					Handler: shipping_templates.GetShippingTemplateHandler(serverCtx),
+				},
+				{
+					// 更新运费模板
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipping-templates/:id",
+					Handler: shipping_templates.UpdateShippingTemplateHandler(serverCtx),
+				},
+				{
+					// 删除运费模板
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/shipping-templates/:id",
+					Handler: shipping_templates.DeleteShippingTemplateHandler(serverCtx),
+				},
+				{
+					// 设置默认模板
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipping-templates/:id/set-default",
+					Handler: shipping_templates.SetDefaultTemplateHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 创建配送区域
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipping-templates/:template_id/zones",
+					Handler: shipping_zones.CreateShippingZoneHandler(serverCtx),
+				},
+				{
+					// 配送区域排序
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipping-templates/:template_id/zones/reorder",
+					Handler: shipping_zones.ReorderZonesHandler(serverCtx),
+				},
+				{
+					// 更新配送区域
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipping-zones/:id",
+					Handler: shipping_zones.UpdateShippingZoneHandler(serverCtx),
+				},
+				{
+					// 删除配送区域
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/shipping-zones/:id",
+					Handler: shipping_zones.DeleteShippingZoneHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取店铺设置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shop",
+					Handler: shop.GetShopSettingsHandler(serverCtx),
+				},
+				{
+					// 更新店铺设置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shop",
+					Handler: shop.UpdateShopSettingsHandler(serverCtx),
+				},
+				{
+					// 获取营业时间设置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shop/business-hours",
+					Handler: shop.GetBusinessHoursHandler(serverCtx),
+				},
+				{
+					// 更新营业时间设置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shop/business-hours",
+					Handler: shop.UpdateBusinessHoursHandler(serverCtx),
+				},
+				{
+					// 获取通知设置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shop/notifications",
+					Handler: shop.GetNotificationSettingsHandler(serverCtx),
+				},
+				{
+					// 更新通知设置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shop/notifications",
+					Handler: shop.UpdateNotificationSettingsHandler(serverCtx),
+				},
+				{
+					// 获取支付设置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shop/payment",
+					Handler: shop.GetPaymentSettingsHandler(serverCtx),
+				},
+				{
+					// 更新支付设置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shop/payment",
+					Handler: shop.UpdatePaymentSettingsHandler(serverCtx),
+				},
+				{
+					// 获取运费设置
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shop/shipping",
+					Handler: shop.GetShippingSettingsHandler(serverCtx),
+				},
+				{
+					// 更新运费设置
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shop/shipping",
+					Handler: shop.UpdateShippingSettingsHandler(serverCtx),
 				},
 			}...,
 		),

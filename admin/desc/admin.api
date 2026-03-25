@@ -14,6 +14,10 @@ import "fulfillment.api"
 import "review.api"
 import "payment.api"
 import "storefront.api"
+import "role.api"
+import "dashboard.api"
+import "shop.api"
+import "shipping.api"
 
 info (
 	title:   "Admin API"

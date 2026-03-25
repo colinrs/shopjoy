@@ -1,0 +1,119 @@
+syntax = "v1"
+
+info (
+	title:   "Role Management API"
+	desc:    "角色管理相关接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Role Types =====================
+	RoleInfo {
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Code        string `json:"code"`
+		Description string `json:"description"`
+		Status      int8   `json:"status"`
+		StatusText  string `json:"status_text"`
+		IsSystem    bool   `json:"is_system"`
+		CreatedAt   string `json:"created_at"`
+		UpdatedAt   string `json:"updated_at"`
+	}
+	PermissionInfo {
+		ID       int64  `json:"id"`
+		Name     string `json:"name"`
+		Code     string `json:"code"`
+		Type     int8   `json:"type"` // 0=menu, 1=button, 2=api
+		TypeText string `json:"type_text"`
+		ParentID int64  `json:"parent_id"`
+		Path     string `json:"path"`
+		Icon     string `json:"icon"`
+		Sort     int    `json:"sort"`
+	}
+	RoleWithPermissions {
+		RoleInfo
+		Permissions []*PermissionInfo `json:"permissions"`
+	}
+	// ===================== Request/Response =====================
+	ListRolesRequest {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Name     string `form:"name,optional"`
+		Code     string `form:"code,optional"`
+		Status   int8   `form:"status,optional"`
+	}
+	ListRolesResponse {
+		List     []*RoleInfo `json:"list"`
+		Total    int64       `json:"total"`
+		Page     int         `json:"page"`
+		PageSize int         `json:"page_size"`
+	}
+	CreateRoleRequest {
+		Name          string  `json:"name" validate:"required"`
+		Code          string  `json:"code" validate:"required"`
+		Description   string  `json:"description,optional"`
+		PermissionIDs []int64 `json:"permission_ids,optional"`
+	}
+	CreateRoleResponse {
+		ID int64 `json:"id"`
+	}
+	UpdateRoleRequest {
+		ID          int64  `path:"id"`
+		Name        string `json:"name,optional"`
+		Description string `json:"description,optional"`
+	}
+	RoleIDRequest {
+		ID int64 `path:"id"`
+	}
+	UpdateRolePermissionsRequest {
+		ID            int64   `path:"id"`
+		PermissionIDs []int64 `json:"permission_ids"`
+	}
+	UpdateRoleStatusRequest {
+		ID     int64 `path:"id"`
+		Status int8  `json:"status"` // 0=disabled, 1=enabled
+	}
+	ListPermissionsResponse {
+		List []*PermissionInfo `json:"list"`
+	}
+	ListPermissionsRequest  {}
+)
+
+@server (
+	group:      roles
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取角色列表"
+	@handler ListRolesHandler
+	get /api/v1/roles (ListRolesRequest) returns (ListRolesResponse)
+
+	@doc "创建角色"
+	@handler CreateRoleHandler
+	post /api/v1/roles (CreateRoleRequest) returns (CreateRoleResponse)
+
+	@doc "获取角色详情"
+	@handler GetRoleHandler
+	get /api/v1/roles/:id (RoleIDRequest) returns (RoleWithPermissions)
+
+	@doc "更新角色"
+	@handler UpdateRoleHandler
+	put /api/v1/roles/:id (UpdateRoleRequest) returns (RoleInfo)
+
+	@doc "删除角色"
+	@handler DeleteRoleHandler
+	delete /api/v1/roles/:id (RoleIDRequest)
+
+	@doc "更新角色状态"
+	@handler UpdateRoleStatusHandler
+	put /api/v1/roles/:id/status (UpdateRoleStatusRequest) returns (RoleInfo)
+
+	@doc "更新角色权限"
+	@handler UpdateRolePermissionsHandler
+	put /api/v1/roles/:id/permissions (UpdateRolePermissionsRequest)
+
+	@doc "获取所有权限列表"
+	@handler ListPermissionsHandler
+	get /api/v1/permissions (ListPermissionsRequest) returns (ListPermissionsResponse)
+}
+

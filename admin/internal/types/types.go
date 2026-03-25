@@ -11,6 +11,14 @@ type ActivateUserRequest struct {
 	ID int64 `path:"id"`
 }
 
+type ActivityItem struct {
+	ID       int64  `json:"id"`
+	Type     string `json:"type"` // order_created, payment_received, product_low_stock, etc.
+	Content  string `json:"content"`
+	Time     string `json:"time"`
+	Operator string `json:"operator,optional"`
+}
+
 type AddDecorationRequest struct {
 	PageID      int64  `path:"id"`
 	BlockType   string `json:"block_type"`
@@ -183,6 +191,55 @@ type BrandMarketItemResp struct {
 type BrandMarketVisibilityResp struct {
 	BrandID int64                 `json:"brand_id"`
 	Markets []BrandMarketItemResp `json:"markets"`
+}
+
+type BusinessHours struct {
+	DayOfWeek int8   `json:"day_of_week"` // 0=Sunday, 1=Monday...
+	OpenTime  string `json:"open_time"`   // "09:00"
+	CloseTime string `json:"close_time"`  // "18:00"
+	IsClosed  bool   `json:"is_closed"`
+}
+
+type CalculateShippingFeeReq struct {
+	Address CalculatorAddress `json:"address"`
+	Items   []CalculatorItem  `json:"items"`
+}
+
+type CalculateShippingFeeResp struct {
+	ShippingFee  string               `json:"shipping_fee"`
+	Currency     string               `json:"currency"`
+	TemplateID   int64                `json:"template_id"`
+	TemplateName string               `json:"template_name"`
+	ZoneName     string               `json:"zone_name"`
+	FeeDetail    FeeCalculationDetail `json:"fee_detail"`
+}
+
+type CalculatorAddress struct {
+	ProvinceCode string `json:"province_code"`
+	CityCode     string `json:"city_code"`
+	DistrictCode string `json:"district_code"`
+}
+
+type CalculatorItem struct {
+	ProductID int64  `json:"product_id"`
+	SKUID     int64  `json:"sku_id,optional"`
+	Quantity  int    `json:"quantity"`
+	Weight    int    `json:"weight"` // grams
+	Price     string `json:"price"`  // unit price
+}
+
+type CancelOrderReq struct {
+	ID     int64  `path:"id"`
+	Reason string `json:"reason" validate:"required,max=200"`
+}
+
+type CancelOrderResp struct {
+	OrderID     int64  `json:"order_id"`
+	OrderNo     string `json:"order_no"`
+	Status      string `json:"status"`
+	StatusText  string `json:"status_text"`
+	CancelledAt string `json:"cancelled_at"`
+	Reason      string `json:"reason"`
 }
 
 type CarrierResp struct {
@@ -436,6 +493,17 @@ type CreateReplyResp struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type CreateRoleRequest struct {
+	Name          string  `json:"name" validate:"required"`
+	Code          string  `json:"code" validate:"required"`
+	Description   string  `json:"description,optional"`
+	PermissionIDs []int64 `json:"permission_ids,optional"`
+}
+
+type CreateRoleResponse struct {
+	ID int64 `json:"id"`
+}
+
 type CreateSKUReq struct {
 	ProductID      int64             `json:"product_id"`
 	Code           string            `json:"code"`
@@ -468,6 +536,36 @@ type CreateShipmentResp struct {
 	ShipmentNo string `json:"shipment_no"`
 }
 
+type CreateShippingTemplateReq struct {
+	Name      string `json:"name"`
+	IsDefault bool   `json:"is_default,optional"`
+}
+
+type CreateShippingTemplateResp struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type CreateShippingZoneReq struct {
+	TemplateID          int64    `path:"template_id"`
+	Name                string   `json:"name"`
+	Regions             []string `json:"regions"`
+	FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
+	FirstUnit           int      `json:"first_unit,optional"`
+	FirstFee            string   `json:"first_fee,optional"`
+	AdditionalUnit      int      `json:"additional_unit,optional"`
+	AdditionalFee       string   `json:"additional_fee,optional"`
+	FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
+	FreeThresholdCount  int      `json:"free_threshold_count,optional"`
+	Sort                int      `json:"sort,optional"`
+}
+
+type CreateTemplateMappingReq struct {
+	TemplateID int64  `json:"template_id"`
+	TargetType string `json:"target_type"` // product, category
+	TargetID   int64  `json:"target_id"`
+}
+
 type CreateWarehouseReq struct {
 	Code      string `json:"code"`
 	Name      string `json:"name"`
@@ -485,6 +583,20 @@ type CurrentThemeResponse struct {
 	Config    ThemeConfigDTO `json:"config"`
 	ChangedAt int64          `json:"changed_at,omitempty"`
 	ChangedBy int64          `json:"changed_by,omitempty"`
+}
+
+type DashboardOverviewRequest struct {
+}
+
+type DashboardOverviewResponse struct {
+	TodayOrders    int64  `json:"today_orders"`
+	TodaySales     string `json:"today_sales"`     // Decimal as string
+	TodayGrowth    string `json:"today_growth"`    // Percentage string "12.5%"
+	YesterdaySales string `json:"yesterday_sales"` // For comparison
+	TotalProducts  int64  `json:"total_products"`
+	TotalUsers     int64  `json:"total_users"`
+	NewUsersToday  int64  `json:"new_users_today"`
+	Currency       string `json:"currency"`
 }
 
 type DeactivatePromotionReq struct {
@@ -538,6 +650,18 @@ type DeleteReviewResp struct {
 	DeletedAt string `json:"deleted_at"`
 }
 
+type DeleteShippingTemplateReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteShippingZoneReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteTemplateMappingReq struct {
+	ID int64 `path:"id"`
+}
+
 type DeleteUserRequest struct {
 	ID int64 `path:"id"`
 }
@@ -573,6 +697,16 @@ type ExtendedUserResponse struct {
 	TotalSpent    string `json:"total_spent"`
 	LastLogin     string `json:"last_login"`
 	CreatedAt     string `json:"created_at"`
+}
+
+type FeeCalculationDetail struct {
+	FeeType          string `json:"fee_type"`
+	FirstUnit        int    `json:"first_unit"`
+	FirstFee         string `json:"first_fee"`
+	AdditionalUnit   int    `json:"additional_unit"`
+	AdditionalFee    string `json:"additional_fee"`
+	CalculatedWeight int    `json:"calculated_weight,optional"`
+	CalculatedUnits  int    `json:"calculated_units,optional"`
 }
 
 type FulfillmentSummaryResp struct {
@@ -639,6 +773,17 @@ type GetCouponUsageReq struct {
 	ID       int64 `path:"id"`
 	Page     int   `form:"page,default=1"`
 	PageSize int   `form:"page_size,default=20"`
+}
+
+type GetDashboardRequest struct {
+}
+
+type GetDashboardResponse struct {
+	Overview           *DashboardOverviewResponse       `json:"overview"`
+	StatusDistribution *OrderStatusDistributionResponse `json:"status_distribution"`
+	PendingOrders      []*PendingOrderItem              `json:"pending_orders"`
+	TopProducts        []*TopProductItem                `json:"top_products"`
+	RecentActivities   []*ActivityItem                  `json:"recent_activities"`
 }
 
 type GetFulfillmentSummaryReq struct {
@@ -724,6 +869,14 @@ type GetSKUReq struct {
 }
 
 type GetShipmentReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetShippingTemplateReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetShippingZoneReq struct {
 	ID int64 `path:"id"`
 }
 
@@ -938,6 +1091,13 @@ type ListPagesResponse struct {
 	PageSize int             `json:"page_size"`
 }
 
+type ListPermissionsRequest struct {
+}
+
+type ListPermissionsResponse struct {
+	List []*PermissionInfo `json:"list"`
+}
+
 type ListProductLocalizationsReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -1040,6 +1200,21 @@ type ListReviewsResp struct {
 	PageSize int               `json:"page_size"`
 }
 
+type ListRolesRequest struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Name     string `form:"name,optional"`
+	Code     string `form:"code,optional"`
+	Status   int8   `form:"status,optional"`
+}
+
+type ListRolesResponse struct {
+	List     []*RoleInfo `json:"list"`
+	Total    int64       `json:"total"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"page_size"`
+}
+
 type ListSKUsByProductReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -1067,6 +1242,28 @@ type ListShipmentsResp struct {
 	Total    int64                 `json:"total"`
 	Page     int                   `json:"page"`
 	PageSize int                   `json:"page_size"`
+}
+
+type ListShippingTemplatesReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Name     string `form:"name,optional"`
+	IsActive *bool  `form:"is_active,optional"`
+}
+
+type ListShippingTemplatesResp struct {
+	List     []*ShippingTemplateListItem `json:"list"`
+	Total    int64                       `json:"total"`
+	Page     int                         `json:"page"`
+	PageSize int                         `json:"page_size"`
+}
+
+type ListTemplateMappingsReq struct {
+	TemplateID int64 `path:"template_id"`
+}
+
+type ListTemplateMappingsResp struct {
+	List []*TemplateMappingDetail `json:"list"`
 }
 
 type ListThemeAuditLogsResponse struct {
@@ -1190,6 +1387,17 @@ type MoveCategoryReq struct {
 	NewParentID int64 `json:"new_parent_id"`
 }
 
+type NotificationSettings struct {
+	OrderCreated      bool `json:"order_created"`
+	OrderPaid         bool `json:"order_paid"`
+	OrderShipped      bool `json:"order_shipped"`
+	OrderCancelled    bool `json:"order_cancelled"`
+	LowStockAlert     bool `json:"low_stock_alert"`
+	LowStockThreshold int  `json:"low_stock_threshold"`
+	RefundRequested   bool `json:"refund_requested"`
+	NewReview         bool `json:"new_review"`
+}
+
 type OrderFulfillmentDetailResp struct {
 	OrderID           string                      `json:"order_id"`
 	OrderNo           string                      `json:"order_no"`
@@ -1246,6 +1454,22 @@ type OrderPaymentResp struct {
 	Refunds           []*PaymentRefundResp `json:"refunds"`
 }
 
+type OrderStatusDistributionRequest struct {
+}
+
+type OrderStatusDistributionResponse struct {
+	List  []*OrderStatusItem `json:"list"`
+	Total int64              `json:"total"`
+}
+
+type OrderStatusItem struct {
+	Status     string `json:"status"`
+	StatusText string `json:"status_text"`
+	Count      int64  `json:"count"`
+	Percentage string `json:"percentage"` // "35.5%"
+	Color      string `json:"color"`
+}
+
 type PageDetailResponse struct {
 	Page        *PageListItem    `json:"page"`
 	Decorations []*DecorationDTO `json:"decorations"`
@@ -1280,6 +1504,11 @@ type PaymentRefundResp struct {
 	CreatedAt       string `json:"created_at"`
 }
 
+type PaymentSettings struct {
+	StripeEnabled   bool   `json:"stripe_enabled"`
+	StripePublicKey string `json:"stripe_public_key,optional"`
+}
+
 type PaymentStatsResp struct {
 	TodayReceived       string                    `json:"today_received"`
 	TodayGrowth         string                    `json:"today_growth"`
@@ -1288,6 +1517,37 @@ type PaymentStatsResp struct {
 	RefundRate          string                    `json:"refund_rate"`
 	Currency            string                    `json:"currency"`
 	ChannelDistribution []ChannelDistributionResp `json:"channel_distribution"`
+}
+
+type PendingOrderItem struct {
+	OrderID    int64  `json:"order_id"`
+	OrderNo    string `json:"order_no"`
+	PayAmount  string `json:"pay_amount"`
+	Status     string `json:"status"`
+	StatusText string `json:"status_text"`
+	CreatedAt  string `json:"created_at"`
+	UserName   string `json:"user_name,optional"`
+}
+
+type PendingOrdersRequest struct {
+	Limit int `form:"limit,default=5"`
+}
+
+type PendingOrdersResponse struct {
+	List  []*PendingOrderItem `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type PermissionInfo struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Code     string `json:"code"`
+	Type     int8   `json:"type"` // 0=menu, 1=button, 2=api
+	TypeText string `json:"type_text"`
+	ParentID int64  `json:"parent_id"`
+	Path     string `json:"path"`
+	Icon     string `json:"icon"`
+	Sort     int    `json:"sort"`
 }
 
 type ProductDetailResp struct {
@@ -1431,6 +1691,14 @@ type PutOnSaleReq struct {
 	ID int64 `path:"id"`
 }
 
+type RecentActivitiesRequest struct {
+	Limit int `form:"limit,default=10"`
+}
+
+type RecentActivitiesResponse struct {
+	List []*ActivityItem `json:"list"`
+}
+
 type RefundDailyStats struct {
 	Date   string `json:"date"`
 	Count  int64  `json:"count"`
@@ -1520,6 +1788,17 @@ type RejectRefundReq struct {
 	RejectReason string `json:"reject_reason"`
 }
 
+type RemindPaymentReq struct {
+	ID int64 `path:"id"`
+}
+
+type RemindPaymentResp struct {
+	OrderID    int64  `json:"order_id"`
+	OrderNo    string `json:"order_no"`
+	RemindedAt string `json:"reminded_at"`
+	Message    string `json:"message"`
+}
+
 type RemoveFromMarketReq struct {
 	ProductID int64 `path:"id"`
 	MarketID  int64 `path:"market_id"`
@@ -1528,6 +1807,11 @@ type RemoveFromMarketReq struct {
 type ReorderBlocksRequest struct {
 	PageID      int64            `path:"id"`
 	BlockOrders []BlockOrderItem `json:"block_orders"`
+}
+
+type ReorderZonesReq struct {
+	TemplateID int64   `path:"template_id"`
+	ZoneIDs    []int64 `json:"zone_ids"`
 }
 
 type ResetAdminPasswordResponse struct {
@@ -1618,6 +1902,27 @@ type ReviewStatsResp struct {
 	FeaturedCount    int64   `json:"featured_count"`
 }
 
+type RoleIDRequest struct {
+	ID int64 `path:"id"`
+}
+
+type RoleInfo struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	Status      int8   `json:"status"`
+	StatusText  string `json:"status_text"`
+	IsSystem    bool   `json:"is_system"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+type RoleWithPermissions struct {
+	RoleInfo
+	Permissions []*PermissionInfo `json:"permissions"`
+}
+
 type SEOConfigDTO struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -1658,6 +1963,22 @@ type SafetyStockItem struct {
 	SafetyStock int    `json:"safety_stock"`
 }
 
+type SalesTrendData struct {
+	Date   string `json:"date"`  // "2024-03-18"
+	Sales  string `json:"sales"` // Decimal as string
+	Orders int64  `json:"orders"`
+}
+
+type SalesTrendRequest struct {
+	Period string `form:"period,default=week"` // week, month, year
+}
+
+type SalesTrendResponse struct {
+	Period   string            `json:"period"`
+	Data     []*SalesTrendData `json:"data"`
+	Currency string            `json:"currency"`
+}
+
 type SaveDraftRequest struct {
 	ID     int64              `path:"id"`
 	Blocks []*DecorationInput `json:"blocks"`
@@ -1673,6 +1994,10 @@ type SetCategoryMarketVisibilityReq struct {
 	CategoryID int64   `path:"id"`
 	MarketIDs  []int64 `json:"market_ids"`
 	Visible    bool    `json:"visible"`
+}
+
+type SetDefaultTemplateReq struct {
+	ID int64 `path:"id"`
 }
 
 type SetDefaultWarehouseReq struct {
@@ -1736,6 +2061,76 @@ type ShipmentItemResp struct {
 	Quantity    int    `json:"quantity"`
 }
 
+type ShippingSettings struct {
+	FreeShippingThreshold string `json:"free_shipping_threshold"`
+	DefaultShippingFee    string `json:"default_shipping_fee"`
+	Currency              string `json:"currency"`
+}
+
+type ShippingTemplateDetailResp struct {
+	ID        int64                    `json:"id"`
+	Name      string                   `json:"name"`
+	IsDefault bool                     `json:"is_default"`
+	IsActive  bool                     `json:"is_active"`
+	Zones     []*ShippingZoneDetail    `json:"zones"`
+	Mappings  []*TemplateMappingDetail `json:"mappings"`
+	CreatedAt string                   `json:"created_at"`
+	UpdatedAt string                   `json:"updated_at"`
+}
+
+type ShippingTemplateListItem struct {
+	ID            int64  `json:"id"`
+	Name          string `json:"name"`
+	IsDefault     bool   `json:"is_default"`
+	IsActive      bool   `json:"is_active"`
+	ZoneCount     int    `json:"zone_count"`
+	ProductCount  int    `json:"product_count"`
+	CategoryCount int    `json:"category_count"`
+	CreatedAt     string `json:"created_at"`
+}
+
+type ShippingZoneDetail struct {
+	ID                  int64    `json:"id"`
+	TemplateID          int64    `json:"template_id"`
+	Name                string   `json:"name"`
+	Regions             []string `json:"regions"`               // City codes
+	FeeType             string   `json:"fee_type"`              // fixed, by_count, by_weight, free
+	FirstUnit           int      `json:"first_unit"`            // First unit (count or grams)
+	FirstFee            string   `json:"first_fee"`             // First fee (cents)
+	AdditionalUnit      int      `json:"additional_unit"`       // Additional unit
+	AdditionalFee       string   `json:"additional_fee"`        // Additional fee (cents)
+	FreeThresholdAmount string   `json:"free_threshold_amount"` // Free shipping threshold amount, 0 = disabled
+	FreeThresholdCount  int      `json:"free_threshold_count"`  // Free shipping threshold count, 0 = disabled
+	Sort                int      `json:"sort"`
+}
+
+type ShopSettings struct {
+	ID              int64  `json:"id"`
+	Name            string `json:"name"`
+	Code            string `json:"code"`
+	Logo            string `json:"logo"`
+	Description     string `json:"description,optional"`
+	ContactName     string `json:"contact_name"`
+	ContactPhone    string `json:"contact_phone"`
+	ContactEmail    string `json:"contact_email"`
+	Address         string `json:"address,optional"`
+	Domain          string `json:"domain"`
+	CustomDomain    string `json:"custom_domain,optional"`
+	PrimaryColor    string `json:"primary_color,optional"`
+	SecondaryColor  string `json:"secondary_color,optional"`
+	Favicon         string `json:"favicon,optional"`
+	DefaultCurrency string `json:"default_currency"`
+	DefaultLanguage string `json:"default_language"`
+	Timezone        string `json:"timezone"`
+	Status          int8   `json:"status"`
+	StatusText      string `json:"status_text"`
+	Plan            int8   `json:"plan"`
+	PlanText        string `json:"plan_text"`
+	ExpireAt        string `json:"expire_at,optional"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
+
 type ShowReviewReq struct {
 	ID int64 `path:"id"`
 }
@@ -1768,6 +2163,14 @@ type TaxConfig struct {
 	GstRate     string `json:"gst_rate,optional"`
 	IossEnabled bool   `json:"ioss_enabled,optional"`
 	IncludeTax  bool   `json:"include_tax,optional"`
+}
+
+type TemplateMappingDetail struct {
+	ID         int64  `json:"id"`
+	TemplateID int64  `json:"template_id"`
+	TargetType string `json:"target_type"` // product, category
+	TargetID   int64  `json:"target_id"`
+	TargetName string `json:"target_name,optional"`
 }
 
 type ThemeAuditLog struct {
@@ -1833,6 +2236,24 @@ type ToggleFeaturedResp struct {
 	UpdatedAt  string `json:"updated_at"`
 }
 
+type TopProductItem struct {
+	ProductID   int64  `json:"product_id"`
+	ProductName string `json:"product_name"`
+	Image       string `json:"image"`
+	Sales       int64  `json:"sales"`
+	Revenue     string `json:"revenue"`
+}
+
+type TopProductsRequest struct {
+	Limit  int    `form:"limit,default=5"`
+	Period string `form:"period,default=week"` // week, month, all
+}
+
+type TopProductsResponse struct {
+	List     []*TopProductItem `json:"list"`
+	Currency string            `json:"currency"`
+}
+
 type TransactionResp struct {
 	ID                   int64  `json:"id"`
 	TransactionID        string `json:"transaction_id"`
@@ -1883,6 +2304,10 @@ type UpdateBrandReq struct {
 type UpdateBrandStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type UpdateBusinessHoursRequest struct {
+	Hours []*BusinessHours `json:"hours"`
 }
 
 type UpdateCategoryReq struct {
@@ -1936,6 +2361,10 @@ type UpdateMarketReq struct {
 	TaxRules  TaxConfig `json:"tax_rules,optional"`
 }
 
+type UpdateNotificationSettingsRequest struct {
+	NotificationSettings
+}
+
 type UpdateOrderRemarkReq struct {
 	ID     int64  `path:"id"`
 	Remark string `json:"remark"` // Max 500 characters
@@ -1950,6 +2379,11 @@ type UpdatePageSEORequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Keywords    string `json:"keywords"`
+}
+
+type UpdatePaymentSettingsRequest struct {
+	StripeEnabled   bool   `json:"stripe_enabled"`
+	StripeSecretKey string `json:"stripe_secret_key,optional"` // Encrypted
 }
 
 type UpdateProductLocalizationReq struct {
@@ -2041,6 +2475,22 @@ type UpdateReplyResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
+type UpdateRolePermissionsRequest struct {
+	ID            int64   `path:"id"`
+	PermissionIDs []int64 `json:"permission_ids"`
+}
+
+type UpdateRoleRequest struct {
+	ID          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+}
+
+type UpdateRoleStatusRequest struct {
+	ID     int64 `path:"id"`
+	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
 type UpdateSEOConfigRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -2079,6 +2529,47 @@ type UpdateShipmentReq struct {
 type UpdateShipmentStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+}
+
+type UpdateShippingSettingsRequest struct {
+	FreeShippingThreshold string `json:"free_shipping_threshold,optional"`
+	DefaultShippingFee    string `json:"default_shipping_fee,optional"`
+}
+
+type UpdateShippingTemplateReq struct {
+	ID       int64  `path:"id"`
+	Name     string `json:"name,optional"`
+	IsActive *bool  `json:"is_active,optional"`
+}
+
+type UpdateShippingZoneReq struct {
+	ID                  int64    `path:"id"`
+	Name                string   `json:"name,optional"`
+	Regions             []string `json:"regions,optional"`
+	FeeType             string   `json:"fee_type,optional"`
+	FirstUnit           int      `json:"first_unit,optional"`
+	FirstFee            string   `json:"first_fee,optional"`
+	AdditionalUnit      int      `json:"additional_unit,optional"`
+	AdditionalFee       string   `json:"additional_fee,optional"`
+	FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
+	FreeThresholdCount  int      `json:"free_threshold_count,optional"`
+	Sort                int      `json:"sort,optional"`
+}
+
+type UpdateShopSettingsRequest struct {
+	Name            string `json:"name,optional" validate:"omitempty,min=2,max=100"`
+	Logo            string `json:"logo,optional"`
+	Description     string `json:"description,optional" validate:"omitempty,max=500"`
+	ContactName     string `json:"contact_name,optional"`
+	ContactPhone    string `json:"contact_phone,optional"`
+	ContactEmail    string `json:"contact_email,optional" validate:"omitempty,email"`
+	Address         string `json:"address,optional"`
+	CustomDomain    string `json:"custom_domain,optional"`
+	PrimaryColor    string `json:"primary_color,optional" validate:"omitempty,hexcolor"`
+	SecondaryColor  string `json:"secondary_color,optional" validate:"omitempty,hexcolor"`
+	Favicon         string `json:"favicon,optional"`
+	DefaultLanguage string `json:"default_language,optional"`
+	Timezone        string `json:"timezone,optional"`
 }
 
 type UpdateStockReq struct {

@@ -1,0 +1,154 @@
+syntax = "v1"
+
+info (
+	title:   "Shop Settings API"
+	desc:    "店铺设置相关接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Shop Settings Types =====================
+	ShopSettings {
+		// Basic Info
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Code        string `json:"code"`
+		Logo        string `json:"logo"`
+		Description string `json:"description,optional"`
+		// Contact Info
+		ContactName  string `json:"contact_name"`
+		ContactPhone string `json:"contact_phone"`
+		ContactEmail string `json:"contact_email"`
+		Address      string `json:"address,optional"`
+		// Domain Settings
+		Domain       string `json:"domain"`
+		CustomDomain string `json:"custom_domain,optional"`
+		// Branding
+		PrimaryColor   string `json:"primary_color,optional"`
+		SecondaryColor string `json:"secondary_color,optional"`
+		Favicon        string `json:"favicon,optional"`
+		// Business Settings
+		DefaultCurrency string `json:"default_currency"`
+		DefaultLanguage string `json:"default_language"`
+		Timezone        string `json:"timezone"`
+		// Status
+		Status     int8   `json:"status"`
+		StatusText string `json:"status_text"`
+		Plan       int8   `json:"plan"`
+		PlanText   string `json:"plan_text"`
+		ExpireAt   string `json:"expire_at,optional"`
+		// Timestamps
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	}
+	UpdateShopSettingsRequest {
+		// Basic Info
+		Name        string `json:"name,optional" validate:"omitempty,min=2,max=100"`
+		Logo        string `json:"logo,optional"`
+		Description string `json:"description,optional" validate:"omitempty,max=500"`
+		// Contact Info
+		ContactName  string `json:"contact_name,optional"`
+		ContactPhone string `json:"contact_phone,optional"`
+		ContactEmail string `json:"contact_email,optional" validate:"omitempty,email"`
+		Address      string `json:"address,optional"`
+		// Domain Settings
+		CustomDomain string `json:"custom_domain,optional"`
+		// Branding
+		PrimaryColor   string `json:"primary_color,optional" validate:"omitempty,hexcolor"`
+		SecondaryColor string `json:"secondary_color,optional" validate:"omitempty,hexcolor"`
+		Favicon        string `json:"favicon,optional"`
+		// Business Settings
+		DefaultLanguage string `json:"default_language,optional"`
+		Timezone        string `json:"timezone,optional"`
+	}
+	// ===================== Business Hours =====================
+	BusinessHours {
+		DayOfWeek int8   `json:"day_of_week"` // 0=Sunday, 1=Monday...
+		OpenTime  string `json:"open_time"` // "09:00"
+		CloseTime string `json:"close_time"` // "18:00"
+		IsClosed  bool   `json:"is_closed"`
+	}
+	UpdateBusinessHoursRequest {
+		Hours []*BusinessHours `json:"hours"`
+	}
+	// ===================== Notification Settings =====================
+	NotificationSettings {
+		OrderCreated      bool `json:"order_created"`
+		OrderPaid         bool `json:"order_paid"`
+		OrderShipped      bool `json:"order_shipped"`
+		OrderCancelled    bool `json:"order_cancelled"`
+		LowStockAlert     bool `json:"low_stock_alert"`
+		LowStockThreshold int  `json:"low_stock_threshold"`
+		RefundRequested   bool `json:"refund_requested"`
+		NewReview         bool `json:"new_review"`
+	}
+	UpdateNotificationSettingsRequest {
+		NotificationSettings
+	}
+	// ===================== Payment Settings =====================
+	PaymentSettings {
+		StripeEnabled   bool   `json:"stripe_enabled"`
+		StripePublicKey string `json:"stripe_public_key,optional"`
+	}
+	UpdatePaymentSettingsRequest {
+		StripeEnabled   bool   `json:"stripe_enabled"`
+		StripeSecretKey string `json:"stripe_secret_key,optional"` // Encrypted
+	}
+	// ===================== Shipping Settings =====================
+	ShippingSettings {
+		FreeShippingThreshold string `json:"free_shipping_threshold"`
+		DefaultShippingFee    string `json:"default_shipping_fee"`
+		Currency              string `json:"currency"`
+	}
+	UpdateShippingSettingsRequest {
+		FreeShippingThreshold string `json:"free_shipping_threshold,optional"`
+		DefaultShippingFee    string `json:"default_shipping_fee,optional"`
+	}
+)
+
+@server (
+	group:      shop
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取店铺设置"
+	@handler GetShopSettingsHandler
+	get /api/v1/shop returns (ShopSettings)
+
+	@doc "更新店铺设置"
+	@handler UpdateShopSettingsHandler
+	put /api/v1/shop (UpdateShopSettingsRequest) returns (ShopSettings)
+
+	@doc "获取营业时间设置"
+	@handler GetBusinessHoursHandler
+	get /api/v1/shop/business-hours returns ([]BusinessHours)
+
+	@doc "更新营业时间设置"
+	@handler UpdateBusinessHoursHandler
+	put /api/v1/shop/business-hours (UpdateBusinessHoursRequest)
+
+	@doc "获取通知设置"
+	@handler GetNotificationSettingsHandler
+	get /api/v1/shop/notifications returns (NotificationSettings)
+
+	@doc "更新通知设置"
+	@handler UpdateNotificationSettingsHandler
+	put /api/v1/shop/notifications (UpdateNotificationSettingsRequest) returns (NotificationSettings)
+
+	@doc "获取支付设置"
+	@handler GetPaymentSettingsHandler
+	get /api/v1/shop/payment returns (PaymentSettings)
+
+	@doc "更新支付设置"
+	@handler UpdatePaymentSettingsHandler
+	put /api/v1/shop/payment (UpdatePaymentSettingsRequest) returns (PaymentSettings)
+
+	@doc "获取运费设置"
+	@handler GetShippingSettingsHandler
+	get /api/v1/shop/shipping returns (ShippingSettings)
+
+	@doc "更新运费设置"
+	@handler UpdateShippingSettingsHandler
+	put /api/v1/shop/shipping (UpdateShippingSettingsRequest) returns (ShippingSettings)
+}
+

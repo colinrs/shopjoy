@@ -1,0 +1,143 @@
+syntax = "v1"
+
+info (
+	title:   "Dashboard Statistics API"
+	desc:    "仪表盘统计数据接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Overview Stats =====================
+	DashboardOverviewRequest  {}
+	DashboardOverviewResponse {
+		// Today's metrics
+		TodayOrders    int64  `json:"today_orders"`
+		TodaySales     string `json:"today_sales"` // Decimal as string
+		TodayGrowth    string `json:"today_growth"` // Percentage string "12.5%"
+		YesterdaySales string `json:"yesterday_sales"` // For comparison
+		// Cumulative metrics
+		TotalProducts int64 `json:"total_products"`
+		TotalUsers    int64 `json:"total_users"`
+		NewUsersToday int64 `json:"new_users_today"`
+		// Currency
+		Currency string `json:"currency"`
+	}
+	// ===================== Sales Trend =====================
+	SalesTrendRequest {
+		Period string `form:"period,default=week"` // week, month, year
+	}
+	SalesTrendData {
+		Date   string `json:"date"` // "2024-03-18"
+		Sales  string `json:"sales"` // Decimal as string
+		Orders int64  `json:"orders"`
+	}
+	SalesTrendResponse {
+		Period   string            `json:"period"`
+		Data     []*SalesTrendData `json:"data"`
+		Currency string            `json:"currency"`
+	}
+	// ===================== Order Status Distribution =====================
+	OrderStatusDistributionRequest  {}
+	OrderStatusItem {
+		Status     string `json:"status"`
+		StatusText string `json:"status_text"`
+		Count      int64  `json:"count"`
+		Percentage string `json:"percentage"` // "35.5%"
+		Color      string `json:"color"`
+	}
+	OrderStatusDistributionResponse {
+		List  []*OrderStatusItem `json:"list"`
+		Total int64              `json:"total"`
+	}
+	// ===================== Top Products =====================
+	TopProductsRequest {
+		Limit  int    `form:"limit,default=5"`
+		Period string `form:"period,default=week"` // week, month, all
+	}
+	TopProductItem {
+		ProductID   int64  `json:"product_id"`
+		ProductName string `json:"product_name"`
+		Image       string `json:"image"`
+		Sales       int64  `json:"sales"`
+		Revenue     string `json:"revenue"`
+	}
+	TopProductsResponse {
+		List     []*TopProductItem `json:"list"`
+		Currency string            `json:"currency"`
+	}
+	// ===================== Pending Orders =====================
+	PendingOrdersRequest {
+		Limit int `form:"limit,default=5"`
+	}
+	PendingOrderItem {
+		OrderID    int64  `json:"order_id"`
+		OrderNo    string `json:"order_no"`
+		PayAmount  string `json:"pay_amount"`
+		Status     string `json:"status"`
+		StatusText string `json:"status_text"`
+		CreatedAt  string `json:"created_at"`
+		UserName   string `json:"user_name,optional"`
+	}
+	PendingOrdersResponse {
+		List  []*PendingOrderItem `json:"list"`
+		Total int64               `json:"total"`
+	}
+	// ===================== Recent Activities =====================
+	RecentActivitiesRequest {
+		Limit int `form:"limit,default=10"`
+	}
+	ActivityItem {
+		ID       int64  `json:"id"`
+		Type     string `json:"type"` // order_created, payment_received, product_low_stock, etc.
+		Content  string `json:"content"`
+		Time     string `json:"time"`
+		Operator string `json:"operator,optional"`
+	}
+	RecentActivitiesResponse {
+		List []*ActivityItem `json:"list"`
+	}
+	// ===================== Unified Dashboard API =====================
+	GetDashboardRequest  {}
+	GetDashboardResponse {
+		Overview           *DashboardOverviewResponse       `json:"overview"`
+		StatusDistribution *OrderStatusDistributionResponse `json:"status_distribution"`
+		PendingOrders      []*PendingOrderItem              `json:"pending_orders"`
+		TopProducts        []*TopProductItem                `json:"top_products"`
+		RecentActivities   []*ActivityItem                  `json:"recent_activities"`
+	}
+)
+
+@server (
+	group:      dashboard
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取仪表盘概览数据"
+	@handler GetDashboardOverviewHandler
+	get /api/v1/dashboard/overview (DashboardOverviewRequest) returns (DashboardOverviewResponse)
+
+	@doc "获取销售趋势"
+	@handler GetSalesTrendHandler
+	get /api/v1/dashboard/sales-trend (SalesTrendRequest) returns (SalesTrendResponse)
+
+	@doc "获取订单状态分布"
+	@handler GetOrderStatusDistributionHandler
+	get /api/v1/dashboard/order-status (OrderStatusDistributionRequest) returns (OrderStatusDistributionResponse)
+
+	@doc "获取热销商品TOP"
+	@handler GetTopProductsHandler
+	get /api/v1/dashboard/top-products (TopProductsRequest) returns (TopProductsResponse)
+
+	@doc "获取待处理订单"
+	@handler GetPendingOrdersHandler
+	get /api/v1/dashboard/pending-orders (PendingOrdersRequest) returns (PendingOrdersResponse)
+
+	@doc "获取最近活动"
+	@handler GetRecentActivitiesHandler
+	get /api/v1/dashboard/activities (RecentActivitiesRequest) returns (RecentActivitiesResponse)
+
+	@doc "获取仪表盘所有数据（聚合接口）"
+	@handler GetDashboardHandler
+	get /api/v1/dashboard (GetDashboardRequest) returns (GetDashboardResponse)
+}
+

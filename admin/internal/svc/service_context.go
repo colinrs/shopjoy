@@ -19,6 +19,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
+	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
@@ -75,6 +76,11 @@ type ServiceContext struct {
 	DecorationService appStorefront.DecorationService
 	VersionService    appStorefront.VersionService
 	SEOService        appStorefront.SEOService
+	// Role and Permission
+	RoleRepo       role.Repository
+	PermissionRepo role.PermissionRepository
+	// Shipping
+	ShippingRepo persistence.ShippingTemplateRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -95,6 +101,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	adminUserRepo := persistence.NewAdminUserRepository()
 	roleRepo := persistence.NewRoleRepository()
+	permissionRepo := persistence.NewPermissionRepository()
 	adminUserService := appAdminUser.NewService(adminUserRepo, roleRepo, db, c.JWT.Secret)
 
 	jwtManager := auth.NewJWTManager(c.JWT.Secret, time.Duration(c.JWT.AccessExpiry)*time.Second, time.Duration(c.JWT.RefreshExpiry)*time.Second)
@@ -216,5 +223,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DecorationService: decorationService,
 		VersionService:    versionService,
 		SEOService:        seoService,
+		// Role and Permission
+		RoleRepo:       roleRepo,
+		PermissionRepo: permissionRepo,
+		// Shipping
+		ShippingRepo: persistence.NewShippingTemplateRepository(),
 	}
 }

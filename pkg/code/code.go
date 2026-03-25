@@ -99,6 +99,12 @@ var (
 	ErrOrderExportLimitExceed    = &Err{HTTPCode: http.StatusBadRequest, Code: 40011, Msg: "导出数量超出限制"}
 	ErrOrderAdjustReasonRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 40012, Msg: "改价原因不能为空"}
 	ErrOrderVersionConflict      = &Err{HTTPCode: http.StatusConflict, Code: 40013, Msg: "订单已被修改，请刷新后重试"}
+	// Order cancellation and reminder errors
+	ErrOrderCannotCancel         = &Err{HTTPCode: http.StatusBadRequest, Code: 40014, Msg: "order cannot be cancelled in current status"}
+	ErrOrderCancelReasonRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 40015, Msg: "cancel reason is required"}
+	ErrPaymentReminderSent       = &Err{HTTPCode: http.StatusTooManyRequests, Code: 40016, Msg: "payment reminder already sent recently"}
+	ErrOrderAlreadyPaidForRemind = &Err{HTTPCode: http.StatusBadRequest, Code: 40017, Msg: "order already paid, cannot send reminder"}
+	ErrOrderCannotRemind         = &Err{HTTPCode: http.StatusBadRequest, Code: 40018, Msg: "order cannot be reminded in current status"}
 
 	// ErrPaymentNotFound ==================== Payment Module (50xxx) ====================
 	ErrPaymentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}
@@ -183,13 +189,18 @@ var (
 	ErrTenantCodeRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 90008, Msg: "tenant code is required"}
 
 	// ErrRoleNotFound ==================== Role Module (100xxx) ====================
-	ErrRoleNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 100001, Msg: "role not found"}
-	ErrRoleDuplicate = &Err{HTTPCode: http.StatusConflict, Code: 100002, Msg: "duplicate role"}
-	ErrRoleInvalid   = &Err{HTTPCode: http.StatusBadRequest, Code: 100003, Msg: "invalid role"}
+	ErrRoleNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 100001, Msg: "role not found"}
+	ErrRoleDuplicate          = &Err{HTTPCode: http.StatusConflict, Code: 100002, Msg: "duplicate role"}
+	ErrRoleInvalid            = &Err{HTTPCode: http.StatusBadRequest, Code: 100003, Msg: "invalid role"}
+	ErrRoleCannotModifySystem = &Err{HTTPCode: http.StatusBadRequest, Code: 100004, Msg: "cannot modify system role"}
+	ErrRoleInUse              = &Err{HTTPCode: http.StatusBadRequest, Code: 100005, Msg: "role is in use by users"}
 
 	// ErrShopNotFound ==================== Storefront Module (110xxx) ====================
-	ErrShopNotFound = &Err{HTTPCode: http.StatusNotFound, Code: 110001, Msg: "shop not found"}
-	ErrShopInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
+	ErrShopNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 110001, Msg: "shop not found"}
+	ErrShopInvalid       = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
+	ErrShopInvalidDomain = &Err{HTTPCode: http.StatusBadRequest, Code: 110003, Msg: "invalid domain format"}
+	ErrShopDomainInUse   = &Err{HTTPCode: http.StatusConflict, Code: 110004, Msg: "custom domain already in use"}
+	ErrShopPlanRestricted = &Err{HTTPCode: http.StatusForbidden, Code: 110005, Msg: "feature not available in current plan"}
 
 	// Theme errors (110101-110199)
 	ErrThemeNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 110101, Msg: "theme not found"}
@@ -328,4 +339,38 @@ var (
 	ErrReviewInvalidRating       = &Err{HTTPCode: http.StatusBadRequest, Code: 210014, Msg: "rating must be between 1 and 5"}
 	ErrReviewBatchEmpty          = &Err{HTTPCode: http.StatusBadRequest, Code: 210015, Msg: "batch operation requires at least one review id"}
 	ErrReviewBatchLimitExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 210016, Msg: "batch operation limited to 100 reviews"}
+
+	// ErrDashboardDataUnavailable ==================== Dashboard Module (220xxx) ====================
+	ErrDashboardDataUnavailable = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 220001, Msg: "dashboard data temporarily unavailable"}
+
+	// Inventory Transfer errors (additional 170xxx)
+	ErrInventoryTransferFailed       = &Err{HTTPCode: http.StatusBadRequest, Code: 170006, Msg: "stock transfer failed"}
+	ErrInsufficientStockForTransfer  = &Err{HTTPCode: http.StatusBadRequest, Code: 170007, Msg: "insufficient stock for transfer"}
+	ErrSameWarehouseTransfer         = &Err{HTTPCode: http.StatusBadRequest, Code: 170008, Msg: "cannot transfer to same warehouse"}
+
+	// ==================== Shipping Module (230xxx) ====================
+	ErrShippingTemplateNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}
+	ErrShippingTemplateNameRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 230002, Msg: "template name is required"}
+	ErrShippingTemplateHasZones      = &Err{HTTPCode: http.StatusBadRequest, Code: 230003, Msg: "cannot delete template with zones"}
+	ErrShippingTemplateIsDefault     = &Err{HTTPCode: http.StatusBadRequest, Code: 230004, Msg: "cannot delete default template"}
+	ErrShippingTemplateDuplicate     = &Err{HTTPCode: http.StatusConflict, Code: 230005, Msg: "template name already exists"}
+
+	// Shipping Zone errors (2301xx)
+	ErrShippingZoneNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 230101, Msg: "shipping zone not found"}
+	ErrShippingZoneNameRequired      = &Err{HTTPCode: http.StatusBadRequest, Code: 230102, Msg: "zone name is required"}
+	ErrShippingZoneRegionsRequired   = &Err{HTTPCode: http.StatusBadRequest, Code: 230103, Msg: "zone regions are required"}
+	ErrShippingZoneInvalidFeeType    = &Err{HTTPCode: http.StatusBadRequest, Code: 230104, Msg: "invalid fee type"}
+	ErrShippingZoneFeeConfigRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 230105, Msg: "fee configuration is required"}
+	ErrShippingZoneDuplicateRegion   = &Err{HTTPCode: http.StatusBadRequest, Code: 230106, Msg: "region already assigned to another zone"}
+
+	// Shipping Mapping errors (2302xx)
+	ErrShippingMappingNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 230201, Msg: "shipping mapping not found"}
+	ErrShippingMappingAlreadyExists  = &Err{HTTPCode: http.StatusConflict, Code: 230202, Msg: "mapping already exists"}
+	ErrShippingMappingInvalidTarget  = &Err{HTTPCode: http.StatusBadRequest, Code: 230203, Msg: "invalid target type"}
+
+	// Shipping Calculator errors (2303xx)
+	ErrShippingCalcNoMatchZone       = &Err{HTTPCode: http.StatusBadRequest, Code: 230301, Msg: "no matching zone for address"}
+	ErrShippingCalcNoDefaultTemplate = &Err{HTTPCode: http.StatusBadRequest, Code: 230302, Msg: "no default shipping template configured"}
+	ErrShippingCalcItemsRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 230303, Msg: "items are required"}
+	ErrShippingCalcAddressRequired   = &Err{HTTPCode: http.StatusBadRequest, Code: 230304, Msg: "address is required"}
 )

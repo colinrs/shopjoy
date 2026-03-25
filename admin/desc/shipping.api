@@ -1,0 +1,284 @@
+syntax = "v1"
+
+info (
+	title:   "Shipping API"
+	desc:    "运费模板管理相关接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Shipping Template Types =====================
+	// Shipping template list item
+	ShippingTemplateListItem {
+		ID            int64  `json:"id"`
+		Name          string `json:"name"`
+		IsDefault     bool   `json:"is_default"`
+		IsActive      bool   `json:"is_active"`
+		ZoneCount     int    `json:"zone_count"`
+		ProductCount  int    `json:"product_count"`
+		CategoryCount int    `json:"category_count"`
+		CreatedAt     string `json:"created_at"`
+	}
+	// List shipping templates request
+	ListShippingTemplatesReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Name     string `form:"name,optional"`
+		IsActive *bool  `form:"is_active,optional"`
+	}
+	// List shipping templates response
+	ListShippingTemplatesResp {
+		List     []*ShippingTemplateListItem `json:"list"`
+		Total    int64                       `json:"total"`
+		Page     int                         `json:"page"`
+		PageSize int                         `json:"page_size"`
+	}
+	// Create shipping template request
+	CreateShippingTemplateReq {
+		Name      string `json:"name"`
+		IsDefault bool   `json:"is_default,optional"`
+	}
+	// Create shipping template response
+	CreateShippingTemplateResp {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+	// Update shipping template request
+	UpdateShippingTemplateReq {
+		ID       int64  `path:"id"`
+		Name     string `json:"name,optional"`
+		IsActive *bool  `json:"is_active,optional"`
+	}
+	// Set default template request
+	SetDefaultTemplateReq {
+		ID int64 `path:"id"`
+	}
+	// ===================== Shipping Zone Types =====================
+	// Shipping zone detail
+	ShippingZoneDetail {
+		ID                  int64    `json:"id"`
+		TemplateID          int64    `json:"template_id"`
+		Name                string   `json:"name"`
+		Regions             []string `json:"regions"` // City codes
+		FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
+		FirstUnit           int      `json:"first_unit"` // First unit (count or grams)
+		FirstFee            string   `json:"first_fee"` // First fee (cents)
+		AdditionalUnit      int      `json:"additional_unit"` // Additional unit
+		AdditionalFee       string   `json:"additional_fee"` // Additional fee (cents)
+		FreeThresholdAmount string   `json:"free_threshold_amount"` // Free shipping threshold amount, 0 = disabled
+		FreeThresholdCount  int      `json:"free_threshold_count"` // Free shipping threshold count, 0 = disabled
+		Sort                int      `json:"sort"`
+	}
+	// Create shipping zone request
+	CreateShippingZoneReq {
+		TemplateID          int64    `path:"template_id"`
+		Name                string   `json:"name"`
+		Regions             []string `json:"regions"`
+		FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
+		FirstUnit           int      `json:"first_unit,optional"`
+		FirstFee            string   `json:"first_fee,optional"`
+		AdditionalUnit      int      `json:"additional_unit,optional"`
+		AdditionalFee       string   `json:"additional_fee,optional"`
+		FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
+		FreeThresholdCount  int      `json:"free_threshold_count,optional"`
+		Sort                int      `json:"sort,optional"`
+	}
+	// Update shipping zone request
+	UpdateShippingZoneReq {
+		ID                  int64    `path:"id"`
+		Name                string   `json:"name,optional"`
+		Regions             []string `json:"regions,optional"`
+		FeeType             string   `json:"fee_type,optional"`
+		FirstUnit           int      `json:"first_unit,optional"`
+		FirstFee            string   `json:"first_fee,optional"`
+		AdditionalUnit      int      `json:"additional_unit,optional"`
+		AdditionalFee       string   `json:"additional_fee,optional"`
+		FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
+		FreeThresholdCount  int      `json:"free_threshold_count,optional"`
+		Sort                int      `json:"sort,optional"`
+	}
+	// Get shipping zone request
+	GetShippingZoneReq {
+		ID int64 `path:"id"`
+	}
+	// Delete shipping zone request
+	DeleteShippingZoneReq {
+		ID int64 `path:"id"`
+	}
+	// Reorder zones request
+	ReorderZonesReq {
+		TemplateID int64   `path:"template_id"`
+		ZoneIDs    []int64 `json:"zone_ids"`
+	}
+	// ===================== Template Mapping Types =====================
+	// Template mapping detail
+	TemplateMappingDetail {
+		ID         int64  `json:"id"`
+		TemplateID int64  `json:"template_id"`
+		TargetType string `json:"target_type"` // product, category
+		TargetID   int64  `json:"target_id"`
+		TargetName string `json:"target_name,optional"`
+	}
+	// List template mappings request
+	ListTemplateMappingsReq {
+		TemplateID int64 `path:"template_id"`
+	}
+	// List template mappings response
+	ListTemplateMappingsResp {
+		List []*TemplateMappingDetail `json:"list"`
+	}
+	// Create template mapping request
+	CreateTemplateMappingReq {
+		TemplateID int64  `json:"template_id"`
+		TargetType string `json:"target_type"` // product, category
+		TargetID   int64  `json:"target_id"`
+	}
+	// Delete template mapping request
+	DeleteTemplateMappingReq {
+		ID int64 `path:"id"`
+	}
+	// ===================== Shipping Fee Calculator Types =====================
+	// Calculator address
+	CalculatorAddress {
+		ProvinceCode string `json:"province_code"`
+		CityCode     string `json:"city_code"`
+		DistrictCode string `json:"district_code"`
+	}
+	// Calculator item
+	CalculatorItem {
+		ProductID int64  `json:"product_id"`
+		SKUID     int64  `json:"sku_id,optional"`
+		Quantity  int    `json:"quantity"`
+		Weight    int    `json:"weight"` // grams
+		Price     string `json:"price"` // unit price
+	}
+	// Calculate shipping fee request
+	CalculateShippingFeeReq {
+		Address CalculatorAddress `json:"address"`
+		Items   []CalculatorItem  `json:"items"`
+	}
+	// Fee calculation detail
+	FeeCalculationDetail {
+		FeeType          string `json:"fee_type"`
+		FirstUnit        int    `json:"first_unit"`
+		FirstFee         string `json:"first_fee"`
+		AdditionalUnit   int    `json:"additional_unit"`
+		AdditionalFee    string `json:"additional_fee"`
+		CalculatedWeight int    `json:"calculated_weight,optional"`
+		CalculatedUnits  int    `json:"calculated_units,optional"`
+	}
+	// Calculate shipping fee response
+	CalculateShippingFeeResp {
+		ShippingFee  string               `json:"shipping_fee"`
+		Currency     string               `json:"currency"`
+		TemplateID   int64                `json:"template_id"`
+		TemplateName string               `json:"template_name"`
+		ZoneName     string               `json:"zone_name"`
+		FeeDetail    FeeCalculationDetail `json:"fee_detail"`
+	}
+	// ===================== Template Detail (with zones and mappings) =====================
+	// Template detail response
+	ShippingTemplateDetailResp {
+		ID        int64                    `json:"id"`
+		Name      string                   `json:"name"`
+		IsDefault bool                     `json:"is_default"`
+		IsActive  bool                     `json:"is_active"`
+		Zones     []*ShippingZoneDetail    `json:"zones"`
+		Mappings  []*TemplateMappingDetail `json:"mappings"`
+		CreatedAt string                   `json:"created_at"`
+		UpdatedAt string                   `json:"updated_at"`
+	}
+	// Get template detail request
+	GetShippingTemplateReq {
+		ID int64 `path:"id"`
+	}
+	// Delete template request
+	DeleteShippingTemplateReq {
+		ID int64 `path:"id"`
+	}
+)
+
+// ===================== Shipping Template API =====================
+@server (
+	group:      shipping_templates
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "运费模板列表"
+	@handler ListShippingTemplatesHandler
+	get /api/v1/shipping-templates (ListShippingTemplatesReq) returns (ListShippingTemplatesResp)
+
+	@doc "创建运费模板"
+	@handler CreateShippingTemplateHandler
+	post /api/v1/shipping-templates (CreateShippingTemplateReq) returns (CreateShippingTemplateResp)
+
+	@doc "运费模板详情"
+	@handler GetShippingTemplateHandler
+	get /api/v1/shipping-templates/:id (GetShippingTemplateReq) returns (ShippingTemplateDetailResp)
+
+	@doc "更新运费模板"
+	@handler UpdateShippingTemplateHandler
+	put /api/v1/shipping-templates/:id (UpdateShippingTemplateReq) returns (ShippingTemplateDetailResp)
+
+	@doc "删除运费模板"
+	@handler DeleteShippingTemplateHandler
+	delete /api/v1/shipping-templates/:id (DeleteShippingTemplateReq)
+
+	@doc "设置默认模板"
+	@handler SetDefaultTemplateHandler
+	put /api/v1/shipping-templates/:id/set-default (SetDefaultTemplateReq) returns (ShippingTemplateDetailResp)
+}
+
+// ===================== Shipping Zone API =====================
+@server (
+	group:      shipping_zones
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "创建配送区域"
+	@handler CreateShippingZoneHandler
+	post /api/v1/shipping-templates/:template_id/zones (CreateShippingZoneReq) returns (ShippingZoneDetail)
+
+	@doc "更新配送区域"
+	@handler UpdateShippingZoneHandler
+	put /api/v1/shipping-zones/:id (UpdateShippingZoneReq) returns (ShippingZoneDetail)
+
+	@doc "删除配送区域"
+	@handler DeleteShippingZoneHandler
+	delete /api/v1/shipping-zones/:id (DeleteShippingZoneReq)
+
+	@doc "配送区域排序"
+	@handler ReorderZonesHandler
+	put /api/v1/shipping-templates/:template_id/zones/reorder (ReorderZonesReq)
+}
+
+// ===================== Template Mapping API =====================
+@server (
+	group:      shipping_mappings
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "模板关联列表"
+	@handler ListTemplateMappingsHandler
+	get /api/v1/shipping-templates/:template_id/mappings (ListTemplateMappingsReq) returns (ListTemplateMappingsResp)
+
+	@doc "创建模板关联"
+	@handler CreateTemplateMappingHandler
+	post /api/v1/shipping-template-mappings (CreateTemplateMappingReq) returns (TemplateMappingDetail)
+
+	@doc "删除模板关联"
+	@handler DeleteTemplateMappingHandler
+	delete /api/v1/shipping-template-mappings/:id (DeleteTemplateMappingReq)
+}
+
+// ===================== Shipping Calculator API =====================
+@server (
+	group:      shipping_calculator
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "计算运费"
+	@handler CalculateShippingFeeHandler
+	post /api/v1/shipping/calculate (CalculateShippingFeeReq) returns (CalculateShippingFeeResp)
+}
+

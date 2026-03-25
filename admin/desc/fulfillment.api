@@ -398,6 +398,29 @@ type (
 		StartTime         string `form:"start_time,optional"` // RFC3339
 		EndTime           string `form:"end_time,optional"` // RFC3339
 	}
+	// ===================== Order Cancellation Types =====================
+	CancelOrderReq {
+		ID     int64  `path:"id"`
+		Reason string `json:"reason" validate:"required,max=200"`
+	}
+	CancelOrderResp {
+		OrderID     int64  `json:"order_id"`
+		OrderNo     string `json:"order_no"`
+		Status      string `json:"status"`
+		StatusText  string `json:"status_text"`
+		CancelledAt string `json:"cancelled_at"`
+		Reason      string `json:"reason"`
+	}
+	// ===================== Payment Reminder Types =====================
+	RemindPaymentReq {
+		ID int64 `path:"id"`
+	}
+	RemindPaymentResp {
+		OrderID    int64  `json:"order_id"`
+		OrderNo    string `json:"order_no"`
+		RemindedAt string `json:"reminded_at"`
+		Message    string `json:"message"`
+	}
 )
 
 // ===================== Shipment API =====================
@@ -503,5 +526,13 @@ service admin-api {
 	@doc "导出订单"
 	@handler ExportOrdersHandler
 	get /api/v1/orders/export (ExportOrdersReq)
+
+	@doc "取消订单"
+	@handler CancelOrderHandler
+	put /api/v1/orders/:id/cancel (CancelOrderReq) returns (CancelOrderResp)
+
+	@doc "发送支付提醒"
+	@handler RemindPaymentHandler
+	post /api/v1/orders/:id/remind-payment (RemindPaymentReq) returns (RemindPaymentResp)
 }
 

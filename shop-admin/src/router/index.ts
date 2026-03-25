@@ -216,7 +216,26 @@ const router = createRouter({
           name: 'storefront-seo',
           component: () => import('@/views/storefront/seo/index.vue'),
           meta: { title: 'SEO设置' }
-        }
+        },
+        // Shipping Module Routes
+        {
+          path: 'shipping',
+          name: 'shipping',
+          component: () => import('@/views/shipping/index.vue'),
+          meta: { title: '运费模板' }
+        },
+        {
+          path: 'shipping/calculator',
+          name: 'shipping-calculator',
+          component: () => import('@/views/shipping/calculator/index.vue'),
+          meta: { title: '运费计算器' }
+        },
+        {
+          path: 'shipping/:id',
+          name: 'shipping-detail',
+          component: () => import('@/views/shipping/[id]/index.vue'),
+          meta: { title: '运费模板详情' }
+        },
       ]
     }
   ]

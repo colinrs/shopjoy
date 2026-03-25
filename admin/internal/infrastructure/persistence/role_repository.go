@@ -97,3 +97,53 @@ func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB, tenantID
 func (r *RoleRepository) GetUserRoles(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]*role.Role, error) {
 	return r.FindByUserID(ctx, db, tenantID, userID)
 }
+
+// PermissionRepository implements role.PermissionRepository
+// Note: Permissions are global (not tenant-scoped) and shared across all tenants.
+// This design allows for centralized permission management while roles are tenant-specific.
+type PermissionRepository struct{}
+
+func NewPermissionRepository() role.PermissionRepository {
+	return &PermissionRepository{}
+}
+
+func (r *PermissionRepository) FindAll(ctx context.Context, db *gorm.DB) ([]*role.Permission, error) {
+	var permissions []*role.Permission
+	err := db.WithContext(ctx).Order("sort ASC").Find(&permissions).Error
+	return permissions, err
+}
+
+func (r *PermissionRepository) FindByRoleIDs(ctx context.Context, db *gorm.DB, roleIDs []int64) ([]*role.Permission, error) {
+	if len(roleIDs) == 0 {
+		return []*role.Permission{}, nil
+	}
+	var permissions []*role.Permission
+	err := db.WithContext(ctx).
+		Distinct().
+		Table("permissions").
+		Joins("JOIN role_permissions ON role_permissions.permission_id = permissions.id").
+		Where("role_permissions.role_id IN ?", roleIDs).
+		Order("permissions.sort ASC").
+		Find(&permissions).Error
+	return permissions, err
+}
+
+func (r *PermissionRepository) AssignToRole(ctx context.Context, db *gorm.DB, roleID int64, permissionIDs []int64) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Delete existing permissions
+		if err := tx.Where("role_id = ?", roleID).Delete(&role.RolePermission{}).Error; err != nil {
+			return err
+		}
+		// Add new permissions
+		for _, permID := range permissionIDs {
+			rp := &role.RolePermission{
+				RoleID:       roleID,
+				PermissionID: permID,
+			}
+			if err := tx.Create(rp).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}

@@ -1,0 +1,72 @@
+package shipping_templates
+
+import (
+	"context"
+	"time"
+
+	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type ListShippingTemplatesLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewListShippingTemplatesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListShippingTemplatesLogic {
+	return ListShippingTemplatesLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippingTemplatesReq) (resp *types.ListShippingTemplatesResp, err error) {
+	// Get tenant ID from context
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	if tenantID == 0 {
+		return nil, code.ErrUnauthorized
+	}
+
+	// Find templates
+	templates, total, err := l.svcCtx.ShippingRepo.FindList(
+		l.ctx, l.svcCtx.DB, tenantID,
+		req.Name, req.IsActive,
+		req.Page, req.PageSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	list := make([]*types.ShippingTemplateListItem, 0, len(templates))
+	for _, t := range templates {
+		// Get statistics
+		zoneCount, _ := l.svcCtx.ShippingRepo.CountZonesByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
+		productCount, _ := l.svcCtx.ShippingRepo.CountProductsByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
+		categoryCount, _ := l.svcCtx.ShippingRepo.CountCategoriesByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
+
+		list = append(list, &types.ShippingTemplateListItem{
+			ID:            t.ID,
+			Name:          t.Name,
+			IsDefault:     t.IsDefault,
+			IsActive:      t.IsActive,
+			ZoneCount:     int(zoneCount),
+			ProductCount:  int(productCount),
+			CategoryCount: int(categoryCount),
+			CreatedAt:     t.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return &types.ListShippingTemplatesResp{
+		List:     list,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
+}
