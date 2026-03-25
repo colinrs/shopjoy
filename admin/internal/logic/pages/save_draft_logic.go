@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -34,7 +35,7 @@ func (l *SaveDraftLogic) SaveDraft(req *types.SaveDraftRequest) error {
 	for _, b := range req.Blocks {
 		var blockConfig map[string]any
 		if err := json.Unmarshal([]byte(b.BlockConfig), &blockConfig); err != nil {
-			blockConfig = make(map[string]any)
+			return code.ErrInvalidBlockConfig
 		}
 		blocks = append(blocks, &appStorefront.DecorationDTO{
 			BlockType:   b.BlockType,

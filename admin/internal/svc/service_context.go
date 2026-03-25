@@ -168,7 +168,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	themeService := appStorefront.NewThemeService(db, themeRepo, shopRepo)
 	pageService := appStorefront.NewPageService(db, pageRepo, decorationRepo, pageVersionRepo, idGen)
 	decorationService := appStorefront.NewDecorationService(db, decorationRepo, idGen)
-	versionService := appStorefront.NewVersionService(db, pageVersionRepo, decorationRepo, idGen)
+	versionService := appStorefront.NewVersionService(db, pageRepo, pageVersionRepo, decorationRepo, idGen)
 	seoService := appStorefront.NewSEOService(db, seoConfigRepo)
 
 	return &ServiceContext{

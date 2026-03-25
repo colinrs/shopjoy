@@ -369,6 +369,7 @@ func isValidBlockType(blockType string) bool {
 
 type versionService struct {
 	db            *gorm.DB
+	pageRepo      storefront.PageRepository
 	versionRepo   storefront.PageVersionRepository
 	decorationRepo storefront.DecorationRepository
 	idGen         snowflake.Snowflake
@@ -376,12 +377,14 @@ type versionService struct {
 
 func NewVersionService(
 	db *gorm.DB,
+	pageRepo storefront.PageRepository,
 	versionRepo storefront.PageVersionRepository,
 	decorationRepo storefront.DecorationRepository,
 	idGen snowflake.Snowflake,
 ) VersionService {
 	return &versionService{
 		db:            db,
+		pageRepo:      pageRepo,
 		versionRepo:   versionRepo,
 		decorationRepo: decorationRepo,
 		idGen:         idGen,
@@ -447,6 +450,15 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 		return code.ErrVersionNotFound
 	}
 
+	// Get current page to increment version
+	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+	if err != nil {
+		return err
+	}
+	if page == nil {
+		return code.ErrPageNotFound
+	}
+
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Delete existing decorations
 		if err := s.decorationRepo.DeleteByPageID(ctx, tx, tenantID, pageID); err != nil {
@@ -483,17 +495,26 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 			return err
 		}
 
+		// Increment page version number
+		newVersionNum := page.Version + 1
+
 		newVersion := &storefront.PageVersion{
 			ID:        newVersionID,
 			TenantID:  tenantID,
 			PageID:    pageID,
-			Version:   version, // Keep same version number to indicate restore
+			Version:   newVersionNum,
 			Blocks:    v.Blocks,
 			CreatedBy: userID,
 			CreatedAt: time.Now().Unix(),
 		}
 
-		return s.versionRepo.Create(ctx, tx, newVersion)
+		if err := s.versionRepo.Create(ctx, tx, newVersion); err != nil {
+			return err
+		}
+
+		// Update page version number
+		page.Version = newVersionNum
+		return s.pageRepo.Update(ctx, tx, page)
 	})
 }
 
@@ -529,6 +550,14 @@ func (s *seoService) GetGlobalSEO(ctx context.Context, tenantID shared.TenantID)
 }
 
 func (s *seoService) UpdateGlobalSEO(ctx context.Context, tenantID shared.TenantID, config SEOConfigDTO) error {
+	// Validate SEO fields
+	if len(config.Title) > 70 {
+		return code.ErrSEOTitleTooLong
+	}
+	if len(config.Description) > 160 {
+		return code.ErrSEODescriptionTooLong
+	}
+
 	seoConfig := &storefront.SEOConfigEntity{
 		TenantID:    tenantID,
 		PageType:    "global",
@@ -567,6 +596,14 @@ func (s *seoService) GetPageSEO(ctx context.Context, tenantID shared.TenantID, p
 }
 
 func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID, pageType string, pageID *int64, config SEOConfigDTO) error {
+	// Validate SEO fields
+	if len(config.Title) > 70 {
+		return code.ErrSEOTitleTooLong
+	}
+	if len(config.Description) > 160 {
+		return code.ErrSEODescriptionTooLong
+	}
+
 	seoConfig := &storefront.SEOConfigEntity{
 		TenantID:    tenantID,
 		PageType:    pageType,

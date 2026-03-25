@@ -121,8 +121,9 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 	configSchema, _ := json.Marshal(theme.ConfigSchema)
 	defaultConfig, _ := json.Marshal(theme.DefaultConfig)
 
+	// Only allow updating custom themes (not preset themes)
 	return db.WithContext(ctx).Model(&themeModel{}).
-		Where("id = ? AND tenant_id = ?", theme.ID, theme.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ? AND is_preset = 0", theme.ID, theme.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":           model.Name,
 			"description":    model.Description,

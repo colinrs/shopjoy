@@ -52,11 +52,24 @@ export interface ListPagesResponse {
   pages: PageItem[]
 }
 
+// API returns block_config as JSON string, but we use object internally
+export interface DecorationDTOAPI {
+  id: number
+  block_type: string
+  block_config: string // JSON string from API
+  sort_order: number
+}
+
 export interface DecorationDTO {
   id: number
   block_type: string
-  block_config: Record<string, any>
+  block_config: Record<string, any> // Parsed object for internal use
   sort_order: number
+}
+
+export interface PageDetailResponseAPI {
+  page: PageItem
+  decorations: DecorationDTOAPI[]
 }
 
 export interface PageDetailResponse {
@@ -65,17 +78,21 @@ export interface PageDetailResponse {
 }
 
 export interface SaveDraftRequest {
-  blocks: DecorationDTO[]
+  blocks: {
+    block_type: string
+    block_config: string // JSON string for API
+    sort_order: number
+  }[]
 }
 
 export interface AddDecorationRequest {
   block_type: string
-  block_config: Record<string, any>
+  block_config: string // JSON string for API
   sort_order: number
 }
 
 export interface UpdateDecorationRequest {
-  block_config: Record<string, any>
+  block_config: string // JSON string for API
 }
 
 export interface ReorderBlocksRequest {
@@ -169,25 +186,60 @@ export function listPages() {
   })
 }
 
-export function getPage(id: number) {
-  return request<PageDetailResponse>({
+// Helper to parse decoration from API
+function parseDecoration(d: DecorationDTOAPI): DecorationDTO {
+  let blockConfig: Record<string, any> = {}
+  try {
+    blockConfig = JSON.parse(d.block_config || '{}')
+  } catch (e) {
+    console.warn('Failed to parse block_config:', e)
+  }
+  return {
+    id: d.id,
+    block_type: d.block_type,
+    block_config: blockConfig,
+    sort_order: d.sort_order
+  }
+}
+
+// Helper to stringify decoration for API
+function stringifyDecoration(d: DecorationDTO): { block_type: string; block_config: string; sort_order: number } {
+  return {
+    block_type: d.block_type,
+    block_config: JSON.stringify(d.block_config || {}),
+    sort_order: d.sort_order
+  }
+}
+
+export async function getPage(id: number): Promise<PageDetailResponse> {
+  const res = await request<PageDetailResponseAPI>({
     url: `/api/v1/pages/${id}`,
     method: 'get'
   })
+  return {
+    page: res.page,
+    decorations: res.decorations?.map(parseDecoration) || []
+  }
 }
 
-export function getPageBySlug(slug: string) {
-  return request<PageDetailResponse>({
+export async function getPageBySlug(slug: string): Promise<PageDetailResponse> {
+  const res = await request<PageDetailResponseAPI>({
     url: `/api/v1/pages/slug/${slug}`,
     method: 'get'
   })
+  return {
+    page: res.page,
+    decorations: res.decorations?.map(parseDecoration) || []
+  }
 }
 
-export function saveDraft(pageId: number, data: SaveDraftRequest) {
+export function saveDraft(pageId: number, blocks: DecorationDTO[]) {
   return request({
     url: `/api/v1/pages/${pageId}/draft`,
     method: 'put',
-    data
+    data: {
+      blocks: blocks.map(stringifyDecoration)
+    }
   })
 }
 
@@ -207,26 +259,34 @@ export function unpublishPage(pageId: number) {
 
 // ========== Decoration API ==========
 
-export function getDecorations(pageId: number) {
-  return request<DecorationDTO[]>({
+export async function getDecorations(pageId: number): Promise<DecorationDTO[]> {
+  const res = await request<DecorationDTOAPI[]>({
     url: `/api/v1/pages/${pageId}/decorations`,
     method: 'get'
   })
+  return res?.map(parseDecoration) || []
 }
 
-export function addDecoration(pageId: number, data: AddDecorationRequest) {
-  return request<DecorationDTO>({
+export async function addDecoration(pageId: number, data: { block_type: string; block_config: Record<string, any>; sort_order: number }): Promise<DecorationDTO> {
+  const res = await request<DecorationDTOAPI>({
     url: `/api/v1/pages/${pageId}/decorations`,
     method: 'post',
-    data
+    data: {
+      block_type: data.block_type,
+      block_config: JSON.stringify(data.block_config),
+      sort_order: data.sort_order
+    }
   })
+  return parseDecoration(res)
 }
 
-export function updateDecoration(decorationId: number, data: UpdateDecorationRequest) {
+export function updateDecoration(decorationId: number, blockConfig: Record<string, any>) {
   return request({
     url: `/api/v1/decorations/${decorationId}`,
     method: 'put',
-    data
+    data: {
+      block_config: JSON.stringify(blockConfig)
+    }
   })
 }
 
