@@ -373,4 +373,7 @@ var (
 	ErrShippingCalcNoDefaultTemplate = &Err{HTTPCode: http.StatusBadRequest, Code: 230302, Msg: "no default shipping template configured"}
 	ErrShippingCalcItemsRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 230303, Msg: "items are required"}
 	ErrShippingCalcAddressRequired   = &Err{HTTPCode: http.StatusBadRequest, Code: 230304, Msg: "address is required"}
+	ErrShippingCalcInvalidQuantity   = &Err{HTTPCode: http.StatusBadRequest, Code: 230305, Msg: "invalid quantity in items"}
+	ErrShippingCalcInvalidWeight     = &Err{HTTPCode: http.StatusBadRequest, Code: 230306, Msg: "invalid weight in items"}
+	ErrShippingCalcInvalidPrice      = &Err{HTTPCode: http.StatusBadRequest, Code: 230307, Msg: "invalid price in items"}
 )

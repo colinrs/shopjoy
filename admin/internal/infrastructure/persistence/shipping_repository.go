@@ -19,6 +19,7 @@ type ShippingTemplateRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, error)
 	FindByIDWithDetails(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
+	FindListWithStats(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error)
 	FindDefault(ctx context.Context, db *gorm.DB, tenantID int64) (*shipping.ShippingTemplate, error)
 	SetDefault(ctx context.Context, db *gorm.DB, tenantID, id int64) error
 	UnsetAllDefault(ctx context.Context, db *gorm.DB, tenantID int64) error
@@ -32,8 +33,14 @@ type ShippingTemplateRepository interface {
 	ReorderZones(ctx context.Context, db *gorm.DB, templateID int64, zoneIDs []int64) error
 	FindZoneByCityCode(ctx context.Context, db *gorm.DB, tenantID int64, cityCode string) ([]*shipping.ShippingZone, error)
 
+	// Zone region operations (for indexed lookup)
+	CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error
+	DeleteZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64) error
+	FindZoneIDsByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]int64, error)
+
 	// Mapping operations
 	CreateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error
+	UpdateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error
 	DeleteMapping(ctx context.Context, db *gorm.DB, id int64) error
 	FindMappingByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplateMapping, error)
 	FindMappingsByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) ([]*shipping.ShippingTemplateMapping, error)
@@ -146,6 +153,64 @@ func (r *shippingTemplateRepo) FindList(ctx context.Context, db *gorm.DB, tenant
 	return templates, total, nil
 }
 
+// TemplateWithStats 带统计信息的模板
+type TemplateWithStats struct {
+	shipping.ShippingTemplate
+	ZoneCount     int64 `gorm:"column:zone_count"`
+	ProductCount  int64 `gorm:"column:product_count"`
+	CategoryCount int64 `gorm:"column:category_count"`
+}
+
+// FindListWithStats 查找运费模板列表（带统计信息，单次查询）
+func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error) {
+	// Build base query for count
+	baseQuery := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
+		Where("tenant_id = ?", tenantID)
+
+	if name != "" {
+		baseQuery = baseQuery.Where("name LIKE ?", "%"+name+"%")
+	}
+	if isActive != nil {
+		baseQuery = baseQuery.Where("is_active = ?", *isActive)
+	}
+
+	var total int64
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Query with subqueries for stats
+	var results []*TemplateWithStats
+	offset := (page - 1) * pageSize
+
+	query := db.WithContext(ctx).
+		Table("shipping_templates t").
+		Select(`
+			t.id, t.tenant_id, t.name, t.is_default, t.is_active, t.deleted_at, t.created_at, t.updated_at,
+			(SELECT COUNT(*) FROM shipping_zones z WHERE z.template_id = t.id AND z.deleted_at IS NULL) as zone_count,
+			(SELECT COUNT(*) FROM shipping_template_mappings m WHERE m.template_id = t.id AND m.target_type = 'product') as product_count,
+			(SELECT COUNT(*) FROM shipping_template_mappings m WHERE m.template_id = t.id AND m.target_type = 'category') as category_count
+		`).
+		Where("t.tenant_id = ?", tenantID)
+
+	if name != "" {
+		query = query.Where("t.name LIKE ?", "%"+name+"%")
+	}
+	if isActive != nil {
+		query = query.Where("t.is_active = ?", *isActive)
+	}
+
+	err := query.Order("t.is_default DESC, t.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&results).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return results, total, nil
+}
+
 // FindDefault 查找默认运费模板
 func (r *shippingTemplateRepo) FindDefault(ctx context.Context, db *gorm.DB, tenantID int64) (*shipping.ShippingTemplate, error) {
 	var template shipping.ShippingTemplate
@@ -180,18 +245,57 @@ func (r *shippingTemplateRepo) CreateZone(ctx context.Context, db *gorm.DB, zone
 	now := time.Now().UTC()
 	zone.CreatedAt = now
 	zone.UpdatedAt = now
-	return db.WithContext(ctx).Create(zone).Error
+
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Create zone
+		if err := tx.Create(zone).Error; err != nil {
+			return err
+		}
+
+		// Create zone regions for indexed lookup
+		if len(zone.Regions) > 0 {
+			if err := r.CreateZoneRegions(ctx, tx, zone.ID, zone.Regions); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // UpdateZone 更新配送区域
 func (r *shippingTemplateRepo) UpdateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error {
 	zone.UpdatedAt = time.Now().UTC()
-	return db.WithContext(ctx).Save(zone).Error
+
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Update zone
+		if err := tx.Save(zone).Error; err != nil {
+			return err
+		}
+
+		// Delete old regions and create new ones
+		if err := r.DeleteZoneRegions(ctx, tx, zone.ID); err != nil {
+			return err
+		}
+
+		if len(zone.Regions) > 0 {
+			if err := r.CreateZoneRegions(ctx, tx, zone.ID, zone.Regions); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // DeleteZone 删除配送区域
 func (r *shippingTemplateRepo) DeleteZone(ctx context.Context, db *gorm.DB, id int64) error {
-	return db.WithContext(ctx).Delete(&shipping.ShippingZone{}, id).Error
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Delete zone regions first
+		if err := r.DeleteZoneRegions(ctx, tx, id); err != nil {
+			return err
+		}
+		// Delete zone
+		return tx.Delete(&shipping.ShippingZone{}, id).Error
+	})
 }
 
 // FindZoneByID 根据ID查找配送区域
@@ -232,14 +336,59 @@ func (r *shippingTemplateRepo) ReorderZones(ctx context.Context, db *gorm.DB, te
 }
 
 // FindZoneByCityCode 根据城市代码查找匹配的配送区域
+// Uses the junction table for efficient indexed lookup
 func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB, tenantID int64, cityCode string) ([]*shipping.ShippingZone, error) {
+	// First find zone IDs via junction table (indexed)
+	zoneIDs, err := r.FindZoneIDsByCityCode(ctx, db, cityCode)
+	if err != nil {
+		return nil, err
+	}
+	if len(zoneIDs) == 0 {
+		return []*shipping.ShippingZone{}, nil
+	}
+
+	// Then fetch zones with tenant filter
 	var zones []*shipping.ShippingZone
-	err := db.WithContext(ctx).
-		Where("tenant_id = ?", tenantID).
-		Where("JSON_CONTAINS(regions, ?)", `"`+cityCode+`"`).
+	err = db.WithContext(ctx).
+		Where("id IN ? AND tenant_id = ?", zoneIDs, tenantID).
 		Order("sort ASC").
 		Find(&zones).Error
 	return zones, err
+}
+
+// CreateZoneRegions 创建配送区域城市关联
+func (r *shippingTemplateRepo) CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error {
+	if len(cityCodes) == 0 {
+		return nil
+	}
+
+	now := time.Now().UTC()
+	regions := make([]*shipping.ShippingZoneRegion, len(cityCodes))
+	for i, code := range cityCodes {
+		regions[i] = &shipping.ShippingZoneRegion{
+			ZoneID:    zoneID,
+			CityCode:  code,
+			CreatedAt: now,
+		}
+	}
+	return db.WithContext(ctx).CreateInBatches(regions, 100).Error
+}
+
+// DeleteZoneRegions 删除配送区域城市关联
+func (r *shippingTemplateRepo) DeleteZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64) error {
+	return db.WithContext(ctx).
+		Where("zone_id = ?", zoneID).
+		Delete(&shipping.ShippingZoneRegion{}).Error
+}
+
+// FindZoneIDsByCityCode 根据城市代码查找区域ID列表
+func (r *shippingTemplateRepo) FindZoneIDsByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]int64, error) {
+	var zoneIDs []int64
+	err := db.WithContext(ctx).
+		Model(&shipping.ShippingZoneRegion{}).
+		Where("city_code = ?", cityCode).
+		Pluck("zone_id", &zoneIDs).Error
+	return zoneIDs, err
 }
 
 // CreateMapping 创建模板关联
@@ -248,6 +397,12 @@ func (r *shippingTemplateRepo) CreateMapping(ctx context.Context, db *gorm.DB, m
 	mapping.CreatedAt = now
 	mapping.UpdatedAt = now
 	return db.WithContext(ctx).Create(mapping).Error
+}
+
+// UpdateMapping 更新模板关联
+func (r *shippingTemplateRepo) UpdateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error {
+	mapping.UpdatedAt = time.Now().UTC()
+	return db.WithContext(ctx).Save(mapping).Error
 }
 
 // DeleteMapping 删除模板关联

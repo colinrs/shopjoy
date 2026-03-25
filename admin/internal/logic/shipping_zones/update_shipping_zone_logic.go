@@ -39,13 +39,9 @@ func (l *UpdateShippingZoneLogic) UpdateShippingZone(req *types.UpdateShippingZo
 		return nil, err
 	}
 
-	// Verify template belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, zone.TemplateID)
-	if err != nil {
-		return nil, code.ErrShippingTemplateNotFound
-	}
-	if template == nil {
-		return nil, code.ErrShippingTemplateNotFound
+	// Verify zone belongs to tenant
+	if zone.TenantID != tenantID {
+		return nil, code.ErrShippingZoneNotFound
 	}
 
 	// Update fields if provided

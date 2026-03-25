@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -43,6 +44,31 @@ func (l *DeleteShippingTemplateLogic) DeleteShippingTemplate(req *types.DeleteSh
 		return err
 	}
 
-	// Delete template
-	return l.svcCtx.ShippingRepo.Delete(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	// Delete template with cascade (zones and mappings) in transaction
+	return l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		// Delete all zones (which also deletes zone_regions)
+		zones, err := l.svcCtx.ShippingRepo.FindZonesByTemplateID(l.ctx, tx, req.ID)
+		if err != nil {
+			return err
+		}
+		for _, zone := range zones {
+			if err := l.svcCtx.ShippingRepo.DeleteZone(l.ctx, tx, zone.ID); err != nil {
+				return err
+			}
+		}
+
+		// Delete all mappings
+		mappings, err := l.svcCtx.ShippingRepo.FindMappingsByTemplateID(l.ctx, tx, req.ID)
+		if err != nil {
+			return err
+		}
+		for _, mapping := range mappings {
+			if err := l.svcCtx.ShippingRepo.DeleteMapping(l.ctx, tx, mapping.ID); err != nil {
+				return err
+			}
+		}
+
+		// Finally delete the template
+		return l.svcCtx.ShippingRepo.Delete(l.ctx, tx, tenantID, req.ID)
+	})
 }

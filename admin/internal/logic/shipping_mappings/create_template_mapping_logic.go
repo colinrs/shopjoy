@@ -54,9 +54,9 @@ func (l *CreateTemplateMappingLogic) CreateTemplateMapping(req *types.CreateTemp
 		return nil, err
 	}
 	if existing != nil {
-		// Update existing mapping
+		// Update existing mapping to point to new template
 		existing.TemplateID = req.TemplateID
-		if err := l.svcCtx.ShippingRepo.CreateMapping(l.ctx, l.svcCtx.DB, existing); err != nil {
+		if err := l.svcCtx.ShippingRepo.UpdateMapping(l.ctx, l.svcCtx.DB, existing); err != nil {
 			return nil, err
 		}
 		return &types.TemplateMappingDetail{

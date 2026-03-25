@@ -38,15 +38,11 @@ func (l *DeleteShippingZoneLogic) DeleteShippingZone(req *types.DeleteShippingZo
 		return err
 	}
 
-	// Verify template belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, zone.TemplateID)
-	if err != nil {
-		return code.ErrShippingTemplateNotFound
-	}
-	if template == nil {
-		return code.ErrShippingTemplateNotFound
+	// Verify zone belongs to tenant
+	if zone.TenantID != tenantID {
+		return code.ErrShippingZoneNotFound
 	}
 
-	// Delete zone
+	// Delete zone (this will also delete zone_regions)
 	return l.svcCtx.ShippingRepo.DeleteZone(l.ctx, l.svcCtx.DB, req.ID)
 }

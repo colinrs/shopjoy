@@ -185,6 +185,19 @@ func (t TargetType) IsValid() bool {
 	}
 }
 
+// ShippingZoneRegion 配送区域城市关联实体（用于索引查询）
+type ShippingZoneRegion struct {
+	ID        int64     `gorm:"column:id;primaryKey"`
+	ZoneID    int64     `gorm:"column:zone_id;not null;uniqueIndex:idx_zone_city"`
+	CityCode  string    `gorm:"column:city_code;size:20;not null;uniqueIndex:idx_zone_city;index"`
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
+}
+
+// TableName 返回表名
+func (r *ShippingZoneRegion) TableName() string {
+	return "shipping_zone_regions"
+}
+
 // ShippingTemplateMapping 模板关联实体
 type ShippingTemplateMapping struct {
 	ID         int64      `gorm:"column:id;primaryKey"`

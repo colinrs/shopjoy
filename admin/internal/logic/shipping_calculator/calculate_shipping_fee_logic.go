@@ -34,6 +34,27 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		return nil, code.ErrUnauthorized
 	}
 
+	// Validate input
+	if len(req.Items) == 0 {
+		return nil, code.ErrShippingCalcItemsRequired
+	}
+	if req.Address.CityCode == "" {
+		return nil, code.ErrShippingCalcAddressRequired
+	}
+
+	// Validate each item
+	for _, item := range req.Items {
+		if item.Quantity <= 0 {
+			return nil, code.ErrShippingCalcInvalidQuantity
+		}
+		if item.Weight <= 0 {
+			return nil, code.ErrShippingCalcInvalidWeight
+		}
+		if item.Price == "" || parseAmount(item.Price) < 0 {
+			return nil, code.ErrShippingCalcInvalidPrice
+		}
+	}
+
 	// Convert calculator items to calculate items
 	items := make([]shipping.CalculateItem, 0, len(req.Items))
 	var orderAmount int64

@@ -33,8 +33,8 @@ func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippi
 		return nil, code.ErrUnauthorized
 	}
 
-	// Find templates
-	templates, total, err := l.svcCtx.ShippingRepo.FindList(
+	// Find templates with stats (single query with subqueries)
+	results, total, err := l.svcCtx.ShippingRepo.FindListWithStats(
 		l.ctx, l.svcCtx.DB, tenantID,
 		req.Name, req.IsActive,
 		req.Page, req.PageSize,
@@ -44,21 +44,16 @@ func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippi
 	}
 
 	// Build response
-	list := make([]*types.ShippingTemplateListItem, 0, len(templates))
-	for _, t := range templates {
-		// Get statistics
-		zoneCount, _ := l.svcCtx.ShippingRepo.CountZonesByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
-		productCount, _ := l.svcCtx.ShippingRepo.CountProductsByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
-		categoryCount, _ := l.svcCtx.ShippingRepo.CountCategoriesByTemplateID(l.ctx, l.svcCtx.DB, t.ID)
-
+	list := make([]*types.ShippingTemplateListItem, 0, len(results))
+	for _, t := range results {
 		list = append(list, &types.ShippingTemplateListItem{
 			ID:            t.ID,
 			Name:          t.Name,
 			IsDefault:     t.IsDefault,
 			IsActive:      t.IsActive,
-			ZoneCount:     int(zoneCount),
-			ProductCount:  int(productCount),
-			CategoryCount: int(categoryCount),
+			ZoneCount:     int(t.ZoneCount),
+			ProductCount:  int(t.ProductCount),
+			CategoryCount: int(t.CategoryCount),
 			CreatedAt:     t.CreatedAt.Format(time.RFC3339),
 		})
 	}
