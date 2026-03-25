@@ -79,9 +79,8 @@
                 <el-table-column label="商品" min-width="300">
                   <template #default="{ row }">
                     <div class="product-cell">
-                      <el-image v-if="row.image" :src="row.image" class="product-thumb" fit="cover" />
                       <div class="product-info">
-                        <p class="product-name">{{ row.name }}</p>
+                        <p class="product-name">{{ row.target_name || `商品ID: ${row.target_id}` }}</p>
                       </div>
                     </div>
                   </template>

@@ -112,6 +112,13 @@
       </el-button>
     </el-form-item>
   </el-form>
+
+  <!-- Region Selector Dialog -->
+  <RegionSelector
+    v-model="regionSelectorVisible"
+    :selected="form.regions"
+    @confirm="handleRegionConfirm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -120,6 +127,7 @@ import { ElMessage } from 'element-plus'
 import { Rank, Edit, Delete, Location } from '@element-plus/icons-vue'
 import type { ShippingZone, CreateZoneRequest } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'
+import RegionSelector from './RegionSelector.vue'
 
 const props = defineProps<{
   zone?: ShippingZone
@@ -138,6 +146,7 @@ const emit = defineEmits<{
 const formRef = ref()
 const submitting = ref(false)
 const selectedRegionsText = ref('')
+const regionSelectorVisible = ref(false)
 
 interface ZoneForm extends CreateZoneRequest {
   enable_amount_threshold: boolean
@@ -247,8 +256,12 @@ const startEdit = () => {
 }
 
 const showRegionSelector = () => {
-  // TODO: Implement region selector dialog
-  ElMessage.info('地区选择器功能开发中')
+  regionSelectorVisible.value = true
+}
+
+const handleRegionConfirm = (regions: string[]) => {
+  form.regions = regions
+  selectedRegionsText.value = formatRegions(form.regions)
 }
 
 const handleSubmit = async () => {

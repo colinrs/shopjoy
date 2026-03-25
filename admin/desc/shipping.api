@@ -282,3 +282,30 @@ service admin-api {
 	post /api/v1/shipping/calculate (CalculateShippingFeeReq) returns (CalculateShippingFeeResp)
 }
 
+// ===================== Region API =====================
+type RegionItem {
+	Code       string        `json:"code"`
+	Name       string        `json:"name"`
+	Level      int           `json:"level"`
+	ParentCode string        `json:"parent_code"`
+	Children   []*RegionItem `json:"children,optional"`
+}
+
+type ListRegionsReq {
+	ParentCode string `form:"parent_code,optional"`
+}
+
+type ListRegionsResp {
+	List []*RegionItem `json:"list"`
+}
+
+@server (
+	group:      regions
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取区域列表"
+	@handler ListRegionsHandler
+	get /api/v1/regions (ListRegionsReq) returns (ListRegionsResp)
+}
+

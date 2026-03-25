@@ -218,7 +218,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Location, Goods, Plus, Coin } from '@element-plus/icons-vue'
-import { calculateShippingFee, type CalculateResult, type Region } from '@/api/shipping'
+import { calculateShippingFee, getRegions, type CalculateResult, type Region } from '@/api/shipping'
 import { getProductList } from '@/api/product'
 import type { Product } from '@/api/product'
 
@@ -241,30 +241,10 @@ const address = reactive({
 const testItems = ref<TestItem[]>([])
 const result = ref<CalculateResult | null>(null)
 
-// Mock region data (should be loaded from API)
-const allProvinces = ref<Region[]>([
-  { code: '330000', name: '浙江省', level: 1, parent_code: '' },
-  { code: '310000', name: '上海市', level: 1, parent_code: '' },
-  { code: '110000', name: '北京市', level: 1, parent_code: '' },
-  { code: '440000', name: '广东省', level: 1, parent_code: '' }
-])
-
-const allCities = ref<Region[]>([
-  { code: '330100', name: '杭州市', level: 2, parent_code: '330000' },
-  { code: '330200', name: '宁波市', level: 2, parent_code: '330000' },
-  { code: '310100', name: '上海市', level: 2, parent_code: '310000' },
-  { code: '110100', name: '北京市', level: 2, parent_code: '110000' },
-  { code: '440100', name: '广州市', level: 2, parent_code: '440000' },
-  { code: '440300', name: '深圳市', level: 2, parent_code: '440000' }
-])
-
-const allDistricts = ref<Region[]>([
-  { code: '330102', name: '上城区', level: 3, parent_code: '330100' },
-  { code: '330103', name: '下城区', level: 3, parent_code: '330100' },
-  { code: '310101', name: '黄浦区', level: 3, parent_code: '310100' },
-  { code: '110101', name: '东城区', level: 3, parent_code: '110100' },
-  { code: '440103', name: '荔湾区', level: 3, parent_code: '440100' }
-])
+// Region data loaded from API
+const allProvinces = ref<Region[]>([])
+const allCities = ref<Region[]>([])
+const allDistricts = ref<Region[]>([])
 
 // Computed filtered lists
 const provinces = computed(() => allProvinces.value)
@@ -308,13 +288,49 @@ const loadProducts = async () => {
   }
 }
 
+const loadProvinces = async () => {
+  try {
+    const data = await getRegions()
+    allProvinces.value = data
+  } catch (error) {
+    console.error('Failed to load provinces:', error)
+  }
+}
+
+const loadCities = async (provinceCode: string) => {
+  try {
+    const data = await getRegions(provinceCode)
+    allCities.value = data
+  } catch (error) {
+    console.error('Failed to load cities:', error)
+  }
+}
+
+const loadDistricts = async (cityCode: string) => {
+  try {
+    const data = await getRegions(cityCode)
+    allDistricts.value = data
+  } catch (error) {
+    console.error('Failed to load districts:', error)
+  }
+}
+
 const handleProvinceChange = () => {
   address.city_code = ''
   address.district_code = ''
+  allCities.value = []
+  allDistricts.value = []
+  if (address.province_code) {
+    loadCities(address.province_code)
+  }
 }
 
 const handleCityChange = () => {
   address.district_code = ''
+  allDistricts.value = []
+  if (address.city_code) {
+    loadDistricts(address.city_code)
+  }
 }
 
 const addTestItem = () => {
@@ -389,6 +405,7 @@ const getFeeTypeLabel = (feeType: string) => {
 // Lifecycle
 onMounted(() => {
   loadProducts()
+  loadProvinces()
   addTestItem() // Add one item by default
 })
 </script>

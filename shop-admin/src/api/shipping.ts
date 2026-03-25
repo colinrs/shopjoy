@@ -32,10 +32,7 @@ export interface TemplateMapping {
   template_id: number
   target_type: 'product' | 'category'
   target_id: number
-  name?: string
-  image?: string
-  sku?: string
-  path?: string
+  target_name?: string
 }
 
 export interface TemplateDetail extends ShippingTemplate {
@@ -129,7 +126,7 @@ export const getShippingTemplate = (id: number) => {
 }
 
 export const createShippingTemplate = (data: CreateTemplateRequest) => {
-  return request.post<ShippingTemplate>('/api/v1/shipping-templates', data)
+  return request.post<{ id: number; name: string }>('/api/v1/shipping-templates', data)
 }
 
 export const updateShippingTemplate = (id: number, data: UpdateTemplateRequest) => {
@@ -163,7 +160,8 @@ export const reorderZones = (templateId: number, zoneIds: number[]) => {
 
 // Mappings
 export const getTemplateMappings = (templateId: number) => {
-  return request.get<TemplateMapping[]>(`/api/v1/shipping-templates/${templateId}/mappings`)
+  return request.get<{ list: TemplateMapping[] }>(`/api/v1/shipping-templates/${templateId}/mappings`)
+    .then(res => res.list || [])
 }
 
 export const createTemplateMapping = (data: { template_id: number; target_type: 'product' | 'category'; target_id: number }) => {
@@ -180,6 +178,7 @@ export const calculateShippingFee = (data: CalculateRequest) => {
 }
 
 // Regions
-export const getRegions = () => {
-  return request.get<Region[]>('/api/v1/regions')
+export const getRegions = (parentCode?: string) => {
+  return request.get<{ list: Region[] }>('/api/v1/regions', { params: { parent_code: parentCode } })
+    .then(res => res.list || [])
 }

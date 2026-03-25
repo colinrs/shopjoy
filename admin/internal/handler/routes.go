@@ -21,6 +21,7 @@ import (
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
 	refunds "github.com/colinrs/shopjoy/admin/internal/handler/refunds"
+	regions "github.com/colinrs/shopjoy/admin/internal/handler/regions"
 	reviews "github.com/colinrs/shopjoy/admin/internal/handler/reviews"
 	roles "github.com/colinrs/shopjoy/admin/internal/handler/roles"
 	seo "github.com/colinrs/shopjoy/admin/internal/handler/seo"
@@ -880,6 +881,20 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/refunds/statistics",
 					Handler: refunds.GetRefundStatisticsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取区域列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/regions",
+					Handler: regions.ListRegionsHandler(serverCtx),
 				},
 			}...,
 		),

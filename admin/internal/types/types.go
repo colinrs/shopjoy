@@ -1180,6 +1180,14 @@ type ListRefundsResp struct {
 	PageSize int                 `json:"page_size"`
 }
 
+type ListRegionsReq struct {
+	ParentCode string `form:"parent_code,optional"`
+}
+
+type ListRegionsResp struct {
+	List []*RegionItem `json:"list"`
+}
+
 type ListReviewsReq struct {
 	ProductID int64  `form:"product_id,optional"`
 	Status    string `form:"status,optional"`
@@ -1766,6 +1774,14 @@ type RefundStatisticsResp struct {
 	ReasonBreakdown []RefundReasonStats  `json:"reason_breakdown"`
 	DailyTrend      []RefundDailyStats   `json:"daily_trend,optional"`
 	TopProducts     []RefundProductStats `json:"top_products,optional"`
+}
+
+type RegionItem struct {
+	Code       string        `json:"code"`
+	Name       string        `json:"name"`
+	Level      int           `json:"level"`
+	ParentCode string        `json:"parent_code"`
+	Children   []*RegionItem `json:"children,optional"`
 }
 
 type RegisterTenantAdminRequest struct {
