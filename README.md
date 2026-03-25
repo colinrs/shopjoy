@@ -54,7 +54,16 @@ shopjoy/
 │   │   ├── orders/           # 订单列表
 │   │   └── user/             # 用户中心
 │   └── src/components/       # 公共组件
-└── migrations/               # 数据库迁移脚本
+├── docs/                     # 文档中心
+│   ├── domains/              # 业务领域文档（按领域组织）
+│   ├── cross-cutting/        # 跨领域文档
+│   ├── guides/               # 开发指南
+│   └── reference/            # 参考资料
+└── sql/                      # 数据库脚本（按领域组织）
+    ├── user/                 # 用户领域 schema + migrations
+    ├── product/              # 商品领域 schema + migrations
+    ├── order/                # 订单领域 schema + migrations
+    └── ...                   # 其他领域
 ```
 
 ## 技术栈
@@ -267,24 +276,45 @@ npm run build
 
 ## 文档
 
+> 📖 完整文档索引请查看 [docs/README.md](docs/README.md)
+
 ### 核心文档
 - [架构设计文档](docs/ARCHITECTURE.md) - DDD 战略设计、分层架构
-- [API 参考文档](docs/api-reference.md) - 完整 API 接口定义
-- [API 简要文档](docs/API.md) - 接口快速入门
-- [数据库设计](docs/database-schema.md) - 表结构设计说明
-- [错误码参考](docs/ERROR_CODES.md) - 错误码定义与处理
+- [产品路线图](docs/2026-03-25-product-roadmap.md) - 功能开发路线图
+
+### API 文档
+- [API 设计规范](docs/cross-cutting/api/README.md) - 接口设计规范
+- [API 参考文档](docs/cross-cutting/api/2026-03-22-api-reference.md) - 完整 API 接口定义
 
 ### 开发指南
-- [开发者指南](docs/developer-guide.md) - 开发环境搭建与工作流
-- [新手上路](docs/guides/ONBOARDING.md) - 开发者入门指南
-- [代码文档](docs/code-documentation.md) - 核心代码说明
+- [入职指南](docs/guides/2026-03-18-onboarding.md) - 开发者入门指南
+- [开发者指南](docs/guides/2026-03-22-developer-guide.md) - 开发环境搭建与工作流
 
-### 用户指南
-- [用户操作手册](docs/user-guide.md) - 管理后台使用教程
+### 参考资料
+- [错误码参考](docs/reference/2026-03-21-error-codes.md) - 错误码定义与处理
+- [数据库概览](docs/reference/2026-03-22-database-overview.md) - 表结构设计说明
+- [代码文档规范](docs/reference/2026-03-22-code-documentation.md) - 核心代码说明
+- [架构图](docs/reference/2026-03-22-architecture-diagrams.md) - 系统架构图
 
-### 规划文档
-- [业务开发计划](docs/plans/2026-03-18-business-development.md) - 功能开发路线图
-- [产品需求文档](docs/prd/) - 功能需求详细说明
+### 业务领域文档
+| 领域 | PRD 文档 |
+|-----|---------|
+| 用户与权限 | [user-prd.md](docs/domains/user/2026-03-24-user-prd.md) |
+| 商品目录 | [product/](docs/domains/product/) |
+| 订单 | [order-prd.md](docs/domains/order/2026-03-24-order-prd.md) |
+| 促销 | [promotion-prd.md](docs/domains/promotion/2026-03-22-promotion-prd.md) |
+| 积分 | [points-prd.md](docs/domains/points/2026-03-24-points-prd.md) |
+| 店铺设置 | [shop-prd.md](docs/domains/shop/2026-03-25-shop-prd.md) |
+| 店铺装修 | [storefront-prd.md](docs/domains/storefront/2026-03-24-storefront-prd.md) |
+| 履约 | [fulfillment-prd.md](docs/domains/fulfillment/2026-03-22-fulfillment-prd.md) |
+| 支付 | [payment-prd.md](docs/domains/payment/2026-03-24-payment-prd.md) |
+| 评价 | [review-prd.md](docs/domains/review/2026-03-24-review-prd.md) |
+
+### 技术设计文档
+- [促销系统设计](docs/cross-cutting/tech-design/2026-03-22-promotion-design.md)
+- [SKU 编码生成设计](docs/cross-cutting/tech-design/2026-03-22-sku-code-generation-design.md)
+
+### 其他
 - [前端开发指南](AGENTS.md) - 前端开发规范和最佳实践
 
 ## 开发指南
@@ -321,15 +351,19 @@ cd shop-admin && npm run format
 
 ## 数据库表结构
 
-### 核心业务表
+> 📁 SQL 文件按业务领域组织，详见 [sql/](sql/) 目录
+
+### 用户与权限领域 (`sql/user/`)
 | 表名 | 说明 |
 |------|------|
 | tenants | 租户表 |
 | users | 用户表 |
+| admin_users | 管理员表 |
 | roles | 角色表 |
 | user_roles | 用户角色关联 |
+| user_addresses | 用户地址表 |
 
-### 商品相关表
+### 商品领域 (`sql/product/`)
 | 表名 | 说明 |
 |------|------|
 | products | 商品表 (SPU) |
@@ -340,35 +374,61 @@ cd shop-admin && npm run format
 | category_markets | 分类市场可见性表 |
 | brands | 品牌表 |
 | brand_markets | 品牌市场可见性表 |
+| markets | 市场/区域表 (CN/US/UK/DE/FR/AU) |
 
-### 市场与库存表
+### 库存领域
 | 表名 | 说明 |
 |------|------|
-| markets | 市场/区域表 (CN/US/UK/DE/FR/AU) |
 | warehouses | 仓库表 |
 | warehouse_inventories | 仓库库存表 |
 | inventory_logs | 库存变动日志表 |
 
-### 订单与支付表
+### 订单领域 (`sql/order/`)
 | 表名 | 说明 |
 |------|------|
 | orders | 订单表 |
 | order_items | 订单商品表 |
 | carts | 购物车表 |
 | cart_items | 购物车商品表 |
-| payments | 支付表 |
 
-### 促销表
+### 支付领域 (`sql/payment/`)
 | 表名 | 说明 |
 |------|------|
+| order_payments | 订单支付表 |
+| payment_transactions | 支付交易表 |
+| payment_refunds | 支付退款表 |
+| webhook_events | Webhook 事件表 |
+
+### 促销领域 (`sql/promotion/`)
+| 表名 | 说明 |
+|------|------|
+| promotions | 促销活动表 |
+| promotion_rules | 促销规则表 |
+| promotion_usages | 促销使用记录表 |
 | coupons | 优惠券表 |
 | user_coupons | 用户优惠券表 |
 
-### 店铺表
+### 店铺领域
 | 表名 | 说明 |
 |------|------|
 | shops | 店铺表 |
 | themes | 主题表 |
+
+### 履约领域 (`sql/fulfillment/`)
+| 表名 | 说明 |
+|------|------|
+| shipments | 发货单表 |
+| shipment_items | 发货单商品表 |
+| shipping_zones | 配送区域表 |
+| shipping_rates | 配送费率表 |
+| carrier_accounts | 物流商账户表 |
+
+### 评价领域 (`sql/review/`)
+| 表名 | 说明 |
+|------|------|
+| reviews | 评价表 |
+| review_replies | 评价回复表 |
+| review_stats | 评价统计表 |
 
 ## API 接口
 
@@ -442,7 +502,7 @@ cd shop-admin && npm run format
 - `PUT /api/v1/cart/items/:id` - 更新数量
 - `DELETE /api/v1/cart/items/:id` - 删除商品
 
-完整 API 文档请查看 [docs/api-reference.md](docs/api-reference.md)
+完整 API 文档请查看 [docs/cross-cutting/api/2026-03-22-api-reference.md](docs/cross-cutting/api/2026-03-22-api-reference.md)
 
 ## 架构特点
 
@@ -459,14 +519,19 @@ cd shop-admin && npm run format
 └─────────────────────────────────────┘
 ```
 
-### 7 大限界上下文
-1. **Identity & Access** - 身份认证与权限
-2. **Catalog** - 商品目录
-3. **Sales & Order** - 销售订单
-4. **Promotion** - 促销活动
-5. **Storefront** - 店铺前台
-6. **Payment** - 支付
-7. **Fulfillment** - 履约
+### 10 大业务领域
+| 领域 | 说明 | 文档 | SQL | 代码目录 |
+|-----|------|------|-----|----------|
+| user | 用户与权限 | [docs/domains/user/](docs/domains/user/) | [sql/user/](sql/user/) | domain/{user,adminuser,role,tenant}/ |
+| product | 商品目录 | [docs/domains/product/](docs/domains/product/) | [sql/product/](sql/product/) | domain/{product,market}/ |
+| order | 订单 | [docs/domains/order/](docs/domains/order/) | [sql/order/](sql/order/) | domain/{order,cart}/ |
+| promotion | 促销 | [docs/domains/promotion/](docs/domains/promotion/) | [sql/promotion/](sql/promotion/) | domain/{promotion,coupon}/ |
+| points | 积分 | [docs/domains/points/](docs/domains/points/) | [sql/points/](sql/points/) | 待创建 |
+| shop | 店铺设置 | [docs/domains/shop/](docs/domains/shop/) | [sql/shop/](sql/shop/) | handler/shop/ |
+| storefront | 店铺装修 | [docs/domains/storefront/](docs/domains/storefront/) | [sql/storefront/](sql/storefront/) | domain/storefront/ |
+| fulfillment | 履约 | [docs/domains/fulfillment/](docs/domains/fulfillment/) | [sql/fulfillment/](sql/fulfillment/) | domain/fulfillment/ |
+| payment | 支付 | [docs/domains/payment/](docs/domains/payment/) | [sql/payment/](sql/payment/) | domain/payment/ |
+| review | 评价 | [docs/domains/review/](docs/domains/review/) | [sql/review/](sql/review/) | domain/review/ |
 
 ## 设计资源
 

@@ -2,69 +2,59 @@
 -- ShopJoy 数据库初始化脚本
 --
 -- 执行顺序说明:
--- 1. tenant.sql     - 租户表 (基础表，其他表依赖)
--- 2. admin_user.sql - 管理员表
--- 3. user.sql       - 用户表
--- 4. role.sql       - 角色权限表
--- 5. market.sql     - 市场表
--- 6. product.sql    - 商品相关表 (依赖分类、市场)
--- 7. storefront.sql - 店铺相关表
--- 8. coupon.sql     - 优惠券表
--- 9. promotion.sql  - 促销活动表
--- 10. cart.sql      - 购物车表
--- 11. order.sql     - 订单表
--- 12. payment.sql   - 支付表
--- 13. fulfillment.sql - 物流表
+-- 1. user/        - 用户、租户、角色表
+-- 2. product/     - 商品相关表
+-- 3. promotion/   - 促销、优惠券表
+-- 4. order/       - 订单、购物车表
+-- 5. payment/     - 支付相关表
+-- 6. fulfillment/ - 履约、物流表
+-- 7. storefront/  - 店铺装修表
+-- 8. points/      - 积分表（待创建）
+-- 9. shop/        - 店铺设置表（待创建）
+-- 10. review/     - 评价表（待创建）
 -- ============================================
 
 -- 使用方法:
 -- 方式一: 在MySQL客户端中逐个执行
--- source sql/tenant.sql;
--- source sql/admin_user.sql;
+-- source sql/user/schema.sql;
+-- source sql/product/schema.sql;
 -- ...
 
 -- 方式二: 使用命令行一次性导入
--- mysql -u username -p database_name < sql/init.sql
+-- mysql -u username -p database_name < sql/user/schema.sql
+-- mysql -u username -p database_name < sql/product/schema.sql
+-- ...
 
 -- ============================================
--- 以下为所有SQL文件的合并内容
+-- Schema 文件路径（按领域组织）
 -- ============================================
 
--- 租户表
-source tenant.sql;
+-- 用户与权限领域
+-- source user/schema.sql
 
--- 管理员表
-source admin_user.sql;
+-- 商品目录领域
+-- source product/schema.sql
 
--- 用户表
-source user.sql;
+-- 促销领域
+-- source promotion/schema.sql
 
--- 角色权限表
-source role.sql;
+-- 订单领域
+-- source order/schema.sql
 
--- 市场表
-source market.sql;
+-- 支付领域
+-- source payment/schema.sql
 
--- 商品相关表
-source product.sql;
+-- 履约领域
+-- source fulfillment/schema.sql
 
--- 店铺相关表
-source storefront.sql;
+-- 店铺装修领域
+-- source storefront/schema.sql
 
--- 优惠券表
-source coupon.sql;
+-- 积分领域（待创建）
+-- source points/schema.sql
 
--- 促销活动表
-source promotion.sql;
+-- 店铺设置领域（待创建）
+-- source shop/schema.sql
 
--- 购物车表
-source cart.sql;
-
--- 订单表
-source order.sql;
-
--- 支付表
-source payment.sql;
-
--- 物流表
-source fulfillment.sql;
+-- 评价领域（待创建）
+-- source review/schema.sql
