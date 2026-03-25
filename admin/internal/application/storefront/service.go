@@ -221,15 +221,33 @@ func (s *themeService) GetCurrentTheme(ctx context.Context, tenantID shared.Tena
 		return nil, nil
 	}
 
-	var themeID int64 = 1001 // Default to Classic theme
+	var theme *storefront.Theme
 	if shop.CurrentThemeID != nil {
-		themeID = *shop.CurrentThemeID
+		theme, err = s.themeRepo.FindByID(ctx, s.db, tenantID, *shop.CurrentThemeID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	theme, err := s.themeRepo.FindByID(ctx, s.db, tenantID, themeID)
-	if err != nil {
-		return nil, err
+	// Fall back to default theme if no current theme is set
+	if theme == nil {
+		// Try to find the "classic" preset theme first
+		theme, err = s.themeRepo.FindByCode(ctx, s.db, "classic")
+		if err != nil {
+			return nil, err
+		}
+		// If "classic" not found, try to get first preset theme
+		if theme == nil {
+			presets, err := s.themeRepo.FindPresets(ctx, s.db)
+			if err != nil {
+				return nil, err
+			}
+			if len(presets) > 0 {
+				theme = presets[0]
+			}
+		}
 	}
+
 	if theme == nil {
 		return nil, nil
 	}
@@ -315,14 +333,26 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.Te
 	}
 
 	// Get theme info for audit log
-	var themeID int64 = 1001 // Default
+	var theme *storefront.Theme
+	if shop.CurrentThemeID != nil {
+		theme, _ = s.themeRepo.FindByID(ctx, s.db, tenantID, *shop.CurrentThemeID)
+	}
+	// Fall back to default theme if no current theme is set
+	if theme == nil {
+		theme, _ = s.themeRepo.FindByCode(ctx, s.db, "classic")
+	}
+	if theme == nil {
+		presets, _ := s.themeRepo.FindPresets(ctx, s.db)
+		if len(presets) > 0 {
+			theme = presets[0]
+		}
+	}
+
+	var themeID int64
 	var themeName string
 	var themeCode string
-	if shop.CurrentThemeID != nil {
-		themeID = *shop.CurrentThemeID
-	}
-	theme, _ := s.themeRepo.FindByID(ctx, s.db, tenantID, themeID)
 	if theme != nil {
+		themeID = theme.ID
 		themeName = theme.Name
 		themeCode = theme.Code
 	}

@@ -240,6 +240,7 @@ type ThemeRepository interface {
 	Create(ctx context.Context, db *gorm.DB, theme *Theme) error
 	Update(ctx context.Context, db *gorm.DB, theme *Theme) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Theme, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Theme, error)
 	FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*Theme, error)
 	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*Theme, error)
 	FindPresets(ctx context.Context, db *gorm.DB) ([]*Theme, error)

@@ -152,6 +152,20 @@ func (r *themeRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.T
 	return model.toEntity(), nil
 }
 
+func (r *themeRepo) FindByCode(ctx context.Context, db *gorm.DB, code string) (*storefront.Theme, error) {
+	var model themeModel
+	err := db.WithContext(ctx).
+		Where("code = ? AND is_preset = 1", code).
+		First(&model).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return model.toEntity(), nil
+}
+
 func (r *themeRepo) FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*storefront.Theme, error) {
 	var model themeModel
 	err := db.WithContext(ctx).
