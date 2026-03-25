@@ -1,0 +1,5 @@
+export { default as OrderDetailDrawer } from './OrderDetailDrawer.vue'
+export { default as ShipDialog } from './ShipDialog.vue'
+export { default as AdjustPriceDialog } from './AdjustPriceDialog.vue'
+export { default as RemarkDialog } from './RemarkDialog.vue'
+export { default as BatchShipDialog } from './BatchShipDialog.vue'

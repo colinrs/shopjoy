@@ -4,26 +4,26 @@
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
-          <p class="stat-number">{{ orderStats.pending }}</p>
-          <p class="stat-label">待处理</p>
+          <p class="stat-number">{{ orderStats.pending_payment }}</p>
+          <p class="stat-label">Pending Payment</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
-          <p class="stat-number">{{ orderStats.paid }}</p>
-          <p class="stat-label">已支付</p>
+          <p class="stat-number">{{ orderStats.pending_shipment }}</p>
+          <p class="stat-label">Pending Shipment</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
           <p class="stat-number">{{ orderStats.shipped }}</p>
-          <p class="stat-label">已发货</p>
+          <p class="stat-label">Shipped</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
-          <p class="stat-number">{{ orderStats.completed }}</p>
-          <p class="stat-label">已完成</p>
+          <p class="stat-number">{{ orderStats.delivered }}</p>
+          <p class="stat-label">Delivered</p>
         </div>
       </el-col>
     </el-row>
@@ -34,53 +34,94 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索订单号/买家"
+            placeholder="Search order no. / phone"
             class="search-input"
             clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" placeholder="订单状态" clearable class="filter-select">
-            <el-option label="全部" value="" />
-            <el-option label="待支付" :value="0" />
-            <el-option label="已支付" :value="1" />
-            <el-option label="待发货" :value="2" />
-            <el-option label="已发货" :value="3" />
-            <el-option label="已完成" :value="4" />
-            <el-option label="已取消" :value="5" />
+          <el-select v-model="statusFilter" placeholder="Order Status" clearable class="filter-select" @change="handleSearch">
+            <el-option label="All" value="" />
+            <el-option label="Pending Payment" value="pending" />
+            <el-option label="Paid" value="paid" />
+            <el-option label="To Ship" value="to_ship" />
+            <el-option label="Shipped" value="shipped" />
+            <el-option label="Completed" value="completed" />
+            <el-option label="Cancelled" value="cancelled" />
+          </el-select>
+          <el-select v-model="fulfillmentFilter" placeholder="Fulfillment" clearable class="filter-select" @change="handleSearch">
+            <el-option label="All" value="" />
+            <el-option label="Unshipped" :value="0" />
+            <el-option label="Partial Shipped" :value="1" />
+            <el-option label="Shipped" :value="2" />
+            <el-option label="Delivered" :value="3" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            range-separator="to"
+            start-placeholder="Start Date"
+            end-placeholder="End Date"
             class="date-picker"
+            value-format="YYYY-MM-DD"
+            @change="handleSearch"
           />
         </div>
         <div class="filter-right">
-          <el-button @click="handleExport">
-            <el-icon><Download /></el-icon>导出
+          <el-button @click="handleExport" :loading="exporting">
+            <el-icon><Download /></el-icon>
+            Export
           </el-button>
           <el-button type="primary" @click="handleRefresh">
-            <el-icon><Refresh /></el-icon>刷新
+            <el-icon><Refresh /></el-icon>
+            Refresh
           </el-button>
         </div>
       </div>
     </el-card>
 
+    <!-- Batch Actions Bar -->
+    <transition name="slide-down">
+      <div v-if="selectedOrders.length > 0" class="batch-actions-bar">
+        <div class="batch-info">
+          <el-icon><Check /></el-icon>
+          <span>{{ selectedOrders.length }} orders selected</span>
+        </div>
+        <div class="batch-buttons">
+          <el-button type="primary" @click="handleBatchShip">
+            <el-icon><Van /></el-icon>
+            Batch Ship
+          </el-button>
+          <el-button @click="handleBatchRemark">
+            <el-icon><Edit /></el-icon>
+            Batch Remark
+          </el-button>
+          <el-button @click="clearSelection">Clear Selection</el-button>
+        </div>
+      </div>
+    </transition>
+
     <!-- Orders Table -->
     <el-card class="table-card" shadow="never">
-      <el-table :data="orderList" v-loading="loading" stripe>
+      <el-table
+        ref="tableRef"
+        :data="orderList"
+        v-loading="loading"
+        stripe
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" />
         <el-table-column type="expand">
           <template #default="{ row }">
             <div class="order-detail">
               <el-row :gutter="20">
                 <el-col :span="12">
-                  <h4>商品信息</h4>
-                  <div v-for="item in row.items" :key="item.id" class="order-item">
+                  <h4>Items</h4>
+                  <div v-for="item in row.items" :key="item.order_item_id" class="order-item">
                     <el-image :src="item.image" class="item-image" fit="cover">
                       <template #error>
                         <div class="image-placeholder">
@@ -89,33 +130,38 @@
                       </template>
                     </el-image>
                     <div class="item-info">
-                      <p class="item-name">{{ item.name }}</p>
-                      <p class="item-price">¥{{ (item.price / 100).toFixed(2) }} x {{ item.quantity }}</p>
+                      <p class="item-name">{{ item.product_name }}</p>
+                      <p class="item-sku">{{ item.sku_name }}</p>
+                      <p class="item-price">
+                        {{ row.currency }} {{ formatAmount(item.unit_price) }} x {{ item.quantity }}
+                      </p>
                     </div>
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <h4>收货信息</h4>
-                  <p><strong>收货人:</strong> {{ row.receiver_name }}</p>
-                  <p><strong>电话:</strong> {{ row.receiver_phone }}</p>
-                  <p><strong>地址:</strong> {{ row.receiver_address }}</p>
-                  <h4 style="margin-top: 20px">支付信息</h4>
-                  <p><strong>支付方式:</strong> {{ row.payment_method }}</p>
-                  <p><strong>支付时间:</strong> {{ row.paid_at || '-' }}</p>
+                  <h4>Shipping Info</h4>
+                  <p><strong>Receiver:</strong> {{ row.shipping_address?.receiver_name || '-' }}</p>
+                  <p><strong>Phone:</strong> {{ row.shipping_address?.receiver_phone || '-' }}</p>
+                  <p><strong>Address:</strong> {{ row.shipping_address?.full_address || '-' }}</p>
+                  <h4 style="margin-top: 20px">Payment Info</h4>
+                  <p><strong>Method:</strong> {{ row.payment_method_name || '-' }}</p>
+                  <p><strong>Paid At:</strong> {{ formatTime(row.paid_at) }}</p>
                 </el-col>
               </el-row>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" label="订单号" min-width="160">
+        <el-table-column prop="order_no" label="Order No." min-width="160">
           <template #default="{ row }">
             <div class="order-no-cell">
-              <span class="order-no">{{ row.order_no }}</span>
-              <el-tag v-if="row.is_urgent" size="small" type="danger" effect="dark">急</el-tag>
+              <span class="order-no" @click="handleDetail(row)">{{ row.order_no }}</span>
+              <el-tag v-if="row.refund_status > 0" size="small" type="warning" effect="dark">
+                {{ row.refund_text }}
+              </el-tag>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="商品" min-width="200">
+        <el-table-column label="Items" min-width="200">
           <template #default="{ row }">
             <div class="goods-preview">
               <el-image
@@ -135,55 +181,82 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="买家信息" min-width="150">
+        <el-table-column label="Buyer" min-width="150">
           <template #default="{ row }">
             <div class="buyer-info">
-              <p class="buyer-name">{{ row.buyer_name }}</p>
-              <p class="buyer-phone">{{ row.buyer_phone }}</p>
+              <p class="buyer-name">{{ row.user_name }}</p>
+              <p class="buyer-phone">{{ row.user_phone }}</p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="金额" width="140" align="right">
+        <el-table-column label="Amount" width="140" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
-              <p class="total-amount">¥{{ (row.pay_amount / 100).toFixed(2) }}</p>
-              <p class="item-count">共 {{ row.item_count }} 件</p>
+              <p class="total-amount">{{ row.currency }} {{ formatAmount(row.pay_amount) }}</p>
+              <p class="item-count">{{ row.item_count }} items</p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="110" align="center">
+        <el-table-column prop="status" label="Status" width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" effect="light" size="small">
-              {{ getStatusText(row.status) }}
+              {{ row.status_text }}
+            </el-tag>
+            <el-tag
+              v-if="row.fulfillment_status !== undefined && row.fulfillment_status !== 0"
+              :type="getFulfillmentType(row.fulfillment_status)"
+              effect="plain"
+              size="small"
+              style="margin-top: 4px"
+            >
+              {{ row.fulfillment_text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="下单时间" width="160">
+        <el-table-column prop="created_at" label="Created At" width="160">
           <template #default="{ row }">
-            <span class="time-text">{{ row.created_at }}</span>
+            <span class="time-text">{{ formatTime(row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="Actions" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button 
-              v-if="row.status === 1" 
-              type="primary" 
+            <el-button
+              v-if="canShip(row)"
+              type="primary"
               size="small"
               @click="handleShip(row)"
             >
-              发货
+              Ship
             </el-button>
-            <el-button 
-              v-if="row.status === 0" 
-              type="warning" 
+            <el-button
+              v-if="row.status === 'pending'"
+              type="warning"
               size="small"
               @click="handleRemind(row)"
             >
-              催付
+              Remind
             </el-button>
             <el-button type="primary" link size="small" @click="handleDetail(row)">
-              详情
+              Detail
             </el-button>
+            <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+              <el-button type="primary" link size="small">
+                More<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="remark">
+                    <el-icon><Edit /></el-icon>Edit Remark
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'pending'" command="adjust">
+                    <el-icon><PriceTag /></el-icon>Adjust Price
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="canCancel(row)" command="cancel" divided>
+                    <el-icon><Close /></el-icon>Cancel Order
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -202,215 +275,394 @@
       </div>
     </el-card>
 
+    <!-- Order Detail Drawer -->
+    <OrderDetailDrawer
+      v-model="detailDrawerVisible"
+      :order-id="currentOrderId"
+      @refresh="loadOrders"
+    />
+
     <!-- Ship Dialog -->
-    <el-dialog v-model="shipDialogVisible" title="订单发货" width="500px">
-      <el-form :model="shipForm" label-width="100px">
-        <el-form-item label="物流公司">
-          <el-select v-model="shipForm.company" placeholder="请选择物流公司" style="width: 100%">
-            <el-option label="顺丰速运" value="sf" />
-            <el-option label="中通快递" value="zt" />
-            <el-option label="圆通速递" value="yt" />
-            <el-option label="韵达快递" value="yd" />
-            <el-option label="申通快递" value="st" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="物流单号">
-          <el-input v-model="shipForm.tracking_no" placeholder="请输入物流单号" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="shipForm.remark" type="textarea" rows="3" placeholder="选填" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="shipDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmShip">确认发货</el-button>
-      </template>
-    </el-dialog>
+    <ShipDialog
+      v-model="shipDialogVisible"
+      :order="currentOrderForShip"
+      :carriers="carriers"
+      @success="handleShipSuccess"
+    />
+
+    <!-- Remark Dialog -->
+    <RemarkDialog
+      v-model="remarkDialogVisible"
+      :order-id="currentOrderId"
+      :current-remark="currentOrderRemark"
+      @success="handleRemarkSuccess"
+    />
+
+    <!-- Adjust Price Dialog -->
+    <AdjustPriceDialog
+      v-model="adjustPriceDialogVisible"
+      :order-id="currentOrderId"
+      :current-amount="currentOrderAmount"
+      :currency="currentOrderCurrency"
+      @success="handleAdjustPriceSuccess"
+    />
+
+    <!-- Batch Ship Dialog -->
+    <BatchShipDialog
+      v-model="batchShipDialogVisible"
+      :orders="selectedOrders"
+      @success="handleBatchShipSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Search, Download, Refresh, Picture } from '@element-plus/icons-vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Search,
+  Download,
+  Refresh,
+  Picture,
+  Check,
+  Van,
+  Edit,
+  ArrowDown,
+  PriceTag,
+  Close
+} from '@element-plus/icons-vue'
+import {
+  getOrderList,
+  getFulfillmentSummary,
+  remindPayment,
+  cancelOrder,
+  exportOrders,
+  getCarrierList,
+  type Order,
+  type Carrier,
+  type OrderStatus,
+  type FulfillmentStatus,
+  type OrderListParams,
+  type ExportOrdersParams
+} from '@/api/order'
+import {
+  OrderDetailDrawer,
+  ShipDialog,
+  AdjustPriceDialog,
+  RemarkDialog,
+  BatchShipDialog
+} from './components'
 
+// Loading states
 const loading = ref(false)
-const searchQuery = ref('')
-const statusFilter = ref('')
-const dateRange = ref([])
+const exporting = ref(false)
+
+// Pagination
 const currentPage = ref(1)
 const pageSize = ref(20)
-const total = ref(100)
-const shipDialogVisible = ref(false)
-const currentOrder = ref<any>(null)
+const total = ref(0)
 
-const shipForm = reactive({
-  company: '',
-  tracking_no: '',
-  remark: ''
-})
+// Filters
+const searchQuery = ref('')
+const statusFilter = ref<OrderStatus | ''>('')
+const fulfillmentFilter = ref<FulfillmentStatus | ''>('')
+const dateRange = ref<[string, string] | null>(null)
 
+// Data
+const orderList = ref<Order[]>([])
+const carriers = ref<Carrier[]>([])
+
+// Statistics
 const orderStats = ref({
-  pending: 12,
-  paid: 8,
-  shipped: 23,
-  completed: 156
+  pending_payment: 0,
+  pending_shipment: 0,
+  partial_shipped: 0,
+  shipped: 0,
+  delivered: 0,
+  pending_refund: 0
 })
 
-const orderList = ref([
-  {
-    id: 1,
-    order_no: 'ORD2024031800100',
-    buyer_name: '张三',
-    buyer_phone: '138****8001',
-    pay_amount: 29900,
-    item_count: 2,
-    status: 1,
-    created_at: '2024-03-18 14:30:25',
-    is_urgent: true,
-    payment_method: '微信支付',
-    paid_at: '2024-03-18 14:32:18',
-    receiver_name: '张三',
-    receiver_phone: '13800138001',
-    receiver_address: '广东省深圳市南山区科技园南区A栋1201',
-    items: [
-      { id: 1, name: '无线蓝牙耳机 Pro', price: 29900, quantity: 1, image: '' }
-    ]
-  },
-  {
-    id: 2,
-    order_no: 'ORD2024031800099',
-    buyer_name: '李四',
-    buyer_phone: '139****9002',
-    pay_amount: 45600,
-    item_count: 3,
-    status: 2,
-    created_at: '2024-03-18 13:15:36',
-    is_urgent: false,
-    payment_method: '支付宝',
-    paid_at: '2024-03-18 13:16:45',
-    receiver_name: '李四',
-    receiver_phone: '13900139002',
-    receiver_address: '北京市朝阳区建国路88号',
-    items: [
-      { id: 2, name: '智能手表 Series 7', price: 199900, quantity: 1, image: '' },
-      { id: 3, name: '便携充电宝', price: 12900, quantity: 2, image: '' }
-    ]
-  },
-  {
-    id: 3,
-    order_no: 'ORD2024031800098',
-    buyer_name: '王五',
-    buyer_phone: '137****7003',
-    pay_amount: 12900,
-    item_count: 1,
-    status: 0,
-    created_at: '2024-03-18 12:00:00',
-    is_urgent: false,
-    items: [
-      { id: 4, name: '便携充电宝 20000mAh', price: 12900, quantity: 1, image: '' }
-    ]
-  },
-  {
-    id: 4,
-    order_no: 'ORD2024031800097',
-    buyer_name: '赵六',
-    buyer_phone: '136****6004',
-    pay_amount: 59900,
-    item_count: 1,
-    status: 3,
-    created_at: '2024-03-18 10:30:15',
-    is_urgent: false,
-    payment_method: '微信支付',
-    paid_at: '2024-03-18 10:32:00',
-    receiver_name: '赵六',
-    receiver_phone: '13600136004',
-    receiver_address: '上海市浦东新区陆家嘴环路1000号',
-    items: [
-      { id: 5, name: '机械键盘 RGB', price: 45900, quantity: 1, image: '' }
-    ]
-  },
-  {
-    id: 5,
-    order_no: 'ORD2024031800096',
-    buyer_name: '钱七',
-    buyer_phone: '135****5005',
-    pay_amount: 159900,
-    item_count: 1,
-    status: 4,
-    created_at: '2024-03-17 16:45:30',
-    is_urgent: false,
-    payment_method: '支付宝',
-    paid_at: '2024-03-17 16:47:12',
-    receiver_name: '钱七',
-    receiver_phone: '13500135005',
-    receiver_address: '浙江省杭州市西湖区文三路200号',
-    items: [
-      { id: 6, name: '4K 高清显示器', price: 159900, quantity: 1, image: '' }
-    ]
-  }
-])
+// Selection
+const tableRef = ref()
+const selectedOrders = ref<Order[]>([])
 
-const getStatusType = (status: number) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'success',
-    2: 'info',
-    3: 'primary',
-    4: 'success',
-    5: 'danger'
+// Dialog states
+const detailDrawerVisible = ref(false)
+const shipDialogVisible = ref(false)
+const remarkDialogVisible = ref(false)
+const adjustPriceDialogVisible = ref(false)
+const batchShipDialogVisible = ref(false)
+
+// Current order for actions
+const currentOrderId = ref('')
+const currentOrderForShip = ref<Order | null>(null)
+const currentOrderRemark = ref('')
+const currentOrderAmount = ref('0')
+const currentOrderCurrency = ref('CNY')
+
+// Load orders
+const loadOrders = async () => {
+  loading.value = true
+  try {
+    const params: OrderListParams = {
+      page: currentPage.value,
+      page_size: pageSize.value
+    }
+    if (statusFilter.value) params.status = statusFilter.value as OrderStatus
+    if (fulfillmentFilter.value !== '') params.fulfillment_status = fulfillmentFilter.value as FulfillmentStatus
+    if (searchQuery.value) params.order_no = searchQuery.value
+    if (dateRange.value && dateRange.value[0]) {
+      params.start_time = dateRange.value[0]
+      params.end_time = dateRange.value[1]
+    }
+
+    const res = await getOrderList(params)
+    orderList.value = res.list || []
+    total.value = res.total || 0
+  } catch (error) {
+    console.error('Failed to load orders:', error)
+    ElMessage.error('Failed to load orders')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load statistics
+const loadStats = async () => {
+  try {
+    const res = await getFulfillmentSummary()
+    orderStats.value = {
+      pending_payment: res.pending_payment || 0,
+      pending_shipment: res.pending_shipment || 0,
+      partial_shipped: res.partial_shipped || 0,
+      shipped: res.shipped || 0,
+      delivered: res.delivered || 0,
+      pending_refund: res.pending_refund || 0
+    }
+  } catch (error) {
+    console.error('Failed to load stats:', error)
+  }
+}
+
+// Load carriers
+const loadCarriers = async () => {
+  try {
+    const res = await getCarrierList()
+    carriers.value = res.filter(c => c.is_active)
+  } catch (error) {
+    console.error('Failed to load carriers:', error)
+  }
+}
+
+// Format helpers
+const formatAmount = (amount: string | undefined) => {
+  if (!amount) return '0.00'
+  return parseFloat(amount).toFixed(2)
+}
+
+const formatTime = (time: string | undefined | null) => {
+  if (!time) return '-'
+  return time.replace('T', ' ').substring(0, 19)
+}
+
+// Status helpers
+const getStatusType = (status: OrderStatus) => {
+  const types: Record<OrderStatus, string> = {
+    pending: 'warning',
+    paid: 'success',
+    to_ship: 'primary',
+    shipped: 'info',
+    completed: 'success',
+    cancelled: 'danger'
   }
   return types[status] || 'info'
 }
 
-const getStatusText = (status: number) => {
-  const texts: Record<number, string> = {
-    0: '待支付',
-    1: '已支付',
-    2: '待发货',
-    3: '已发货',
-    4: '已完成',
-    5: '已取消'
+const getFulfillmentType = (status: FulfillmentStatus) => {
+  const types: Record<number, string> = {
+    0: 'warning',
+    1: 'primary',
+    2: 'info',
+    3: 'success'
   }
-  return texts[status] || '未知'
+  return types[status] || 'info'
 }
 
-const handleExport = () => {
-  ElMessage.success('订单导出成功')
+// Action helpers
+const canShip = (order: Order) => {
+  return ['paid', 'to_ship'].includes(order.status) &&
+    (order.fulfillment_status === 0 || order.fulfillment_status === 1)
+}
+
+const canCancel = (order: Order) => {
+  return ['pending', 'paid'].includes(order.status)
+}
+
+// Event handlers
+const handleSearch = () => {
+  currentPage.value = 1
+  loadOrders()
 }
 
 const handleRefresh = () => {
-  ElMessage.success('刷新成功')
+  loadOrders()
+  loadStats()
 }
 
-const handleShip = (row: any) => {
-  currentOrder.value = row
+const handleSizeChange = () => {
+  currentPage.value = 1
+  loadOrders()
+}
+
+const handleCurrentChange = () => {
+  loadOrders()
+}
+
+const handleSelectionChange = (selection: Order[]) => {
+  selectedOrders.value = selection
+}
+
+const clearSelection = () => {
+  tableRef.value?.clearSelection()
+}
+
+// Export
+const handleExport = async () => {
+  exporting.value = true
+  let url: string | null = null
+  try {
+    const params: ExportOrdersParams = {}
+    if (statusFilter.value) params.status = statusFilter.value as OrderStatus
+    if (searchQuery.value) params.order_no = searchQuery.value
+    if (dateRange.value && dateRange.value[0]) {
+      params.start_time = dateRange.value[0]
+      params.end_time = dateRange.value[1]
+    }
+
+    const response = await exportOrders(params)
+    // Create download link
+    url = window.URL.createObjectURL(new Blob([response]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `orders_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    ElMessage.success('Export completed')
+  } catch (error) {
+    ElMessage.error('Failed to export orders')
+  } finally {
+    if (url) {
+      window.URL.revokeObjectURL(url)
+    }
+    exporting.value = false
+  }
+}
+
+// Order actions
+const handleDetail = (row: Order) => {
+  currentOrderId.value = row.order_id
+  detailDrawerVisible.value = true
+}
+
+const handleShip = (row: Order) => {
+  currentOrderForShip.value = row
+  currentOrderId.value = row.order_id
   shipDialogVisible.value = true
 }
 
-const confirmShip = () => {
-  shipDialogVisible.value = false
-  ElMessage.success('发货成功')
+const handleRemind = async (row: Order) => {
+  try {
+    await remindPayment(row.order_id)
+    ElMessage.success(`Payment reminder sent to ${row.user_name}`)
+  } catch (error) {
+    ElMessage.error('Failed to send reminder')
+  }
 }
 
-const handleRemind = (row: any) => {
-  ElMessage.success(`已向 ${row.buyer_name} 发送催付提醒`)
+const handleCommand = (command: string, row: Order) => {
+  currentOrderId.value = row.order_id
+  switch (command) {
+    case 'remark':
+      currentOrderRemark.value = row.seller_remark || ''
+      remarkDialogVisible.value = true
+      break
+    case 'adjust':
+      currentOrderAmount.value = row.pay_amount
+      currentOrderCurrency.value = row.currency
+      adjustPriceDialogVisible.value = true
+      break
+    case 'cancel':
+      handleCancel(row)
+      break
+  }
 }
 
-const handleDetail = (row: any) => {
-  ElMessage.info('查看订单详情: ' + row.order_no)
+const handleCancel = async (row: Order) => {
+  try {
+    const { value } = await ElMessageBox.prompt('Enter cancellation reason', 'Cancel Order', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      inputPattern: /^.{5,200}$/,
+      inputErrorMessage: 'Reason must be 5-200 characters'
+    })
+    await cancelOrder(row.order_id, value)
+    ElMessage.success('Order cancelled')
+    loadOrders()
+    loadStats()
+  } catch {
+    // User cancelled
+  }
 }
 
-const handleSizeChange = (val: number) => {
-  pageSize.value = val
+// Batch actions
+const handleBatchShip = () => {
+  const shippableOrders = selectedOrders.value.filter(canShip)
+  if (shippableOrders.length === 0) {
+    ElMessage.warning('No shippable orders selected')
+    return
+  }
+  if (shippableOrders.length < selectedOrders.value.length) {
+    ElMessage.warning(`${selectedOrders.value.length - shippableOrders.length} orders cannot be shipped`)
+  }
+  selectedOrders.value = shippableOrders
+  batchShipDialogVisible.value = true
 }
 
-const handleCurrentChange = (val: number) => {
-  currentPage.value = val
+const handleBatchRemark = () => {
+  ElMessage.info('Batch remark feature coming soon')
 }
 
+// Success handlers
+const handleShipSuccess = () => {
+  ElMessage.success('Order shipped successfully')
+  loadOrders()
+  loadStats()
+}
+
+const handleRemarkSuccess = () => {
+  ElMessage.success('Remark updated')
+  loadOrders()
+}
+
+const handleAdjustPriceSuccess = () => {
+  ElMessage.success('Price adjusted')
+  loadOrders()
+}
+
+const handleBatchShipSuccess = () => {
+  ElMessage.success('Batch shipment completed')
+  clearSelection()
+  loadOrders()
+  loadStats()
+}
+
+// Initialize
 onMounted(() => {
-  // Load orders
+  loadOrders()
+  loadStats()
+  loadCarriers()
 })
 </script>
 
@@ -507,6 +759,41 @@ onMounted(() => {
   gap: 12px;
 }
 
+/* Batch Actions Bar */
+.batch-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.batch-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #4F46E5;
+}
+
+.batch-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* Table */
 .table-card {
   margin-bottom: 20px;
@@ -578,6 +865,12 @@ onMounted(() => {
   margin: 0 0 4px 0;
 }
 
+.item-sku {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0 0 4px 0;
+}
+
 .item-price {
   font-size: 13px;
   color: #6B7280;
@@ -587,8 +880,8 @@ onMounted(() => {
 /* Order No Cell */
 .order-no-cell {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .order-no {
@@ -596,6 +889,11 @@ onMounted(() => {
   font-size: 13px;
   color: #6366F1;
   font-weight: 500;
+  cursor: pointer;
+}
+
+.order-no:hover {
+  text-decoration: underline;
 }
 
 /* Goods Preview */
@@ -725,26 +1023,6 @@ onMounted(() => {
   color: #6366F1;
 }
 
-/* Dialog */
-:deep(.el-dialog) {
-  border-radius: 16px;
-}
-
-:deep(.el-dialog__header) {
-  border-bottom: 1px solid #F3F4F6;
-  padding: 16px 20px;
-}
-
-:deep(.el-dialog__title) {
-  font-weight: 600;
-  color: #1E1B4B;
-}
-
-:deep(.el-dialog__footer) {
-  border-top: 1px solid #F3F4F6;
-  padding: 16px 20px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .filter-bar {
@@ -778,6 +1056,16 @@ onMounted(() => {
   .filter-card,
   .table-card {
     border-radius: 14px;
+  }
+
+  .batch-actions-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .batch-buttons {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 </style>
