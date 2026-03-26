@@ -147,7 +147,7 @@ export interface CreateEarnRuleParams {
   condition_type?: string
   condition_value?: Record<string, any>
   expiration_months?: number
-  status?: number
+  status?: string  // 'draft' | 'active' | 'inactive'
   priority?: number
   start_at?: string
   end_at?: string
@@ -171,7 +171,7 @@ export interface CreateRedeemRuleParams {
   points_required: number
   total_stock?: number
   per_user_limit?: number
-  status?: number
+  status?: string  // 'inactive' | 'active'
   start_at?: string
   end_at?: string
 }
