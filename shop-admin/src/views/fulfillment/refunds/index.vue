@@ -219,7 +219,8 @@ import {
   rejectRefund,
   getRefundReasonList,
   type Refund,
-  type RefundReason
+  type RefundReason,
+  type RefundListParams
 } from '@/api/fulfillment'
 
 const router = useRouter()
@@ -403,13 +404,15 @@ const loadRefundReasons = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const params = {
+    const params: RefundListParams = {
       page: currentPage.value,
       page_size: pageSize.value,
-      status: statusFilter.value,
-      reason_type: reasonFilter.value,
+      reason_type: reasonFilter.value || undefined,
       start_time: dateRange.value?.[0],
       end_time: dateRange.value?.[1]
+    }
+    if (statusFilter.value !== '') {
+      params.status = statusFilter.value
     }
     const res = await getRefundList(params)
     refundList.value = res.list

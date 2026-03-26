@@ -217,7 +217,7 @@ export const adjustOrderPrice = (orderId: string, data: AdjustPriceRequest) => {
  * Export orders
  */
 export const exportOrders = (params: ExportOrdersParams) => {
-  return request.get('/api/v1/orders/export', {
+  return request.get<Blob>('/api/v1/orders/export', {
     params,
     responseType: 'blob'
   })

@@ -68,7 +68,7 @@
 import { Location, Goods, Menu, Edit, Delete, Star } from '@element-plus/icons-vue'
 import type { ShippingTemplate } from '@/api/shipping'
 
-defineProps<{
+const props = defineProps<{
   template: ShippingTemplate
 }>()
 

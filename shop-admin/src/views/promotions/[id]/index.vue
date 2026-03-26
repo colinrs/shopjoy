@@ -248,8 +248,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion,
-  type Promotion
+  getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion
 } from '@/api/promotion'
 import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'

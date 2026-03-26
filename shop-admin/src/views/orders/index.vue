@@ -432,7 +432,7 @@ const loadStats = async () => {
   try {
     const res = await getFulfillmentSummary()
     orderStats.value = {
-      pending_payment: res.pending_payment || 0,
+      pending_payment: 0,
       pending_shipment: res.pending_shipment || 0,
       partial_shipped: res.partial_shipped || 0,
       shipped: res.shipped || 0,

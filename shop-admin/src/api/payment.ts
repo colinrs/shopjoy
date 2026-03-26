@@ -63,6 +63,8 @@ export interface TransactionListResponse {
 export interface OrderPayment {
   payment_id: number
   payment_no: string
+  order_id: string
+  order_no: string
   payment_method: string
   payment_method_text: string
   channel_intent_id: string

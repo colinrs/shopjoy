@@ -150,7 +150,7 @@
               v-model="row.status"
               :active-value="'on_sale'"
               :inactive-value="'off_sale'"
-              @change="(val) => handleStatusChange(row, val)"
+              @change="(val: string) => handleStatusChange(row, val)"
             />
           </template>
         </el-table-column>
@@ -162,7 +162,7 @@
             <el-button type="primary" link size="small" @click="handleView(row)">
               预览
             </el-button>
-            <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, row)">
+            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
                 更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>

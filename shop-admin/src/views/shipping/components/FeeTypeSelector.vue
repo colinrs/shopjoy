@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { Coin, Box, Odometer, Present } from '@element-plus/icons-vue'
 import type { CreateZoneRequest } from '@/api/shipping'
 
@@ -184,7 +184,7 @@ const localForm = ref({
 })
 
 // Methods
-const handleFeeTypeChange = (value: string) => {
+const handleFeeTypeChange = (_value: string) => {
   emitUpdate()
 }
 

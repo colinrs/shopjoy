@@ -275,7 +275,7 @@ const orderForShip = computed(() => {
     order_id: order.value.order_id,
     order_no: order.value.order_no,
     items: order.value.items.map(item => ({
-      id: item.order_item_id,
+      order_item_id: item.order_item_id,
       product_name: item.product_name,
       sku_name: item.sku_name,
       image: item.image,

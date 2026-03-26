@@ -149,8 +149,8 @@
           </el-table>
 
           <TablePagination
-            :page="couponParams.page"
-            :page-size="couponParams.page_size"
+            v-model:current-page="couponParams.page"
+            v-model:page-size="couponParams.page_size"
             :total="couponTotal"
             @change="handleCouponPageChange"
           />
@@ -276,8 +276,8 @@
           </el-table>
 
           <TablePagination
-            :page="promotionParams.page"
-            :page-size="promotionParams.page_size"
+            v-model:current-page="promotionParams.page"
+            v-model:page-size="promotionParams.page_size"
             :total="promotionTotal"
             @change="handlePromotionPageChange"
           />
@@ -417,8 +417,8 @@
         </el-table-column>
       </el-table>
       <TablePagination
-        :page="usageParams.page"
-        :page-size="usageParams.page_size"
+        v-model:current-page="usageParams.page"
+        v-model:page-size="usageParams.page_size"
         :total="usageTotal"
         @change="handleUsagePageChange"
       />
@@ -427,7 +427,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Ticket, CircleCheck, User, Search, Plus, Present } from '@element-plus/icons-vue'
@@ -435,7 +435,8 @@ import {
   getCouponList, createCoupon, updateCoupon, deleteCoupon,
   getPromotionList, createPromotion, updatePromotion, deletePromotion,
   activatePromotion, deactivatePromotion, getCouponUsage,
-  type Coupon, type Promotion, type CouponUsage, type ListCouponsParams, type ListPromotionsParams
+  type Coupon, type Promotion, type CouponUsage,
+  type CouponStatus, type CouponType, type PromotionStatus, type PromotionType
 } from '@/api/promotion'
 import TablePagination from '@/components/common/TablePagination.vue'
 
@@ -456,24 +457,24 @@ const stats = ref({
 const couponList = ref<Coupon[]>([])
 const couponLoading = ref(false)
 const couponTotal = ref(0)
-const couponParams = reactive<ListCouponsParams>({
+const couponParams = reactive({
   page: 1,
   page_size: 10,
   name: '',
-  status: '',
-  type: ''
+  status: undefined as CouponStatus | undefined,
+  type: undefined as CouponType | undefined
 })
 
 // Promotion list state
 const promotionList = ref<Promotion[]>([])
 const promotionLoading = ref(false)
 const promotionTotal = ref(0)
-const promotionParams = reactive<ListPromotionsParams>({
+const promotionParams = reactive({
   page: 1,
   page_size: 10,
   name: '',
-  status: '',
-  type: ''
+  status: undefined as PromotionStatus | undefined,
+  type: undefined as PromotionType | undefined
 })
 
 // Usage dialog state
@@ -663,21 +664,15 @@ const generateCouponCode = () => {
 }
 
 // Page change handlers
-const handleCouponPageChange = (page: number, pageSize: number) => {
-  couponParams.page = page
-  couponParams.page_size = pageSize
+const handleCouponPageChange = () => {
   loadCoupons()
 }
 
-const handlePromotionPageChange = (page: number, pageSize: number) => {
-  promotionParams.page = page
-  promotionParams.page_size = pageSize
+const handlePromotionPageChange = () => {
   loadPromotions()
 }
 
-const handleUsagePageChange = (page: number, pageSize: number) => {
-  usageParams.page = page
-  usageParams.page_size = pageSize
+const handleUsagePageChange = () => {
   loadCouponUsage()
 }
 

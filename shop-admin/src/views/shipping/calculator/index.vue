@@ -105,7 +105,7 @@
                         placeholder="选择商品"
                         filterable
                         clearable
-                        @change="(val) => handleProductSelect(item, val)"
+                        @change="(val: number) => handleProductSelect(item, val)"
                       >
                         <el-option
                           v-for="p in products"

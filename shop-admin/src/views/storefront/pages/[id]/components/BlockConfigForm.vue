@@ -10,7 +10,7 @@
       </el-form-item>
       <el-form-item label="图片列表">
         <div class="image-list">
-          <div v-for="(img, idx) in localConfig.images" :key="idx" class="image-item">
+          <div v-for="(_img, idx) in localConfig.images" :key="idx" class="image-item">
             <el-input v-model="localConfig.images[idx]" placeholder="图片URL" />
             <el-button text type="danger" @click="removeImage(idx)">
               <el-icon><Delete /></el-icon>

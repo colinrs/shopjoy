@@ -241,7 +241,8 @@ import {
   getCarrierList,
   updateShipmentStatus,
   type Shipment,
-  type Carrier
+  type Carrier,
+  type ShipmentListParams
 } from '@/api/fulfillment'
 
 const router = useRouter()
@@ -406,14 +407,16 @@ const loadCarriers = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const params = {
+    const params: ShipmentListParams = {
       page: currentPage.value,
       page_size: pageSize.value,
-      status: statusFilter.value,
-      carrier_code: carrierFilter.value,
-      tracking_no: searchQuery.value,
+      carrier_code: carrierFilter.value || undefined,
+      tracking_no: searchQuery.value || undefined,
       start_time: dateRange.value?.[0],
       end_time: dateRange.value?.[1]
+    }
+    if (statusFilter.value !== '') {
+      params.status = statusFilter.value
     }
     const res = await getShipmentList(params)
     shipmentList.value = res.list

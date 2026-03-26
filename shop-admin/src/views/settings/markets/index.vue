@@ -52,7 +52,7 @@
           <template #default="{ row }">
             <el-switch
               v-model="row.is_active"
-              @change="(val) => handleStatusChange(row, val)"
+              @change="(val: boolean) => handleStatusChange(row, val)"
             />
           </template>
         </el-table-column>
@@ -235,15 +235,16 @@ const total = ref(0)
 const formRef = ref()
 const marketList = ref<Market[]>([])
 
-const marketForm = reactive<CreateMarketRequest & { id?: number; is_active?: boolean }>({
+const marketForm = reactive({
+  id: undefined as number | undefined,
   code: '',
   name: '',
   currency: 'USD',
   default_language: 'en-US',
   is_active: true,
   tax_rules: {
-    vat_rate: 0,
-    gst_rate: 0,
+    vat_rate: 0 as number | undefined,
+    gst_rate: 0 as number | undefined,
     ioss_enabled: false,
     include_tax: false
   }
@@ -340,8 +341,8 @@ const handleEdit = async (row: Market) => {
       tax_rules: {
         vat_rate: parseFloat(market.tax_rules?.vat_rate || '0'),
         gst_rate: parseFloat(market.tax_rules?.gst_rate || '0'),
-        ioss_enabled: market.tax_rules?.ioss_enabled || false,
-        include_tax: market.tax_rules?.include_tax || false
+        ioss_enabled: market.tax_rules?.ioss_enabled ?? false,
+        include_tax: market.tax_rules?.include_tax ?? false
       }
     })
     dialogVisible.value = true
@@ -424,8 +425,8 @@ const handleSave = async () => {
         name: marketForm.name,
         is_active: marketForm.is_active,
         tax_rules: {
-          vat_rate: marketForm.tax_rules?.vat_rate?.toString(),
-          gst_rate: marketForm.tax_rules?.gst_rate?.toString(),
+          vat_rate: String(marketForm.tax_rules?.vat_rate ?? 0),
+          gst_rate: String(marketForm.tax_rules?.gst_rate ?? 0),
           ioss_enabled: marketForm.tax_rules?.ioss_enabled,
           include_tax: marketForm.tax_rules?.include_tax
         }
@@ -440,8 +441,8 @@ const handleSave = async () => {
         currency: marketForm.currency,
         default_language: marketForm.default_language,
         tax_rules: {
-          vat_rate: marketForm.tax_rules?.vat_rate?.toString(),
-          gst_rate: marketForm.tax_rules?.gst_rate?.toString(),
+          vat_rate: String(marketForm.tax_rules?.vat_rate ?? 0),
+          gst_rate: String(marketForm.tax_rules?.gst_rate ?? 0),
           ioss_enabled: marketForm.tax_rules?.ioss_enabled,
           include_tax: marketForm.tax_rules?.include_tax
         }

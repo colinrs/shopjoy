@@ -1,6 +1,6 @@
 <template>
   <!-- Card Mode (for list display) -->
-  <el-card v-if="!isDialog" class="zone-card" shadow="never">
+  <el-card v-if="!isDialog && zone" class="zone-card" shadow="never">
     <div class="zone-header">
       <div class="zone-title-row">
         <el-icon class="drag-handle"><Rank /></el-icon>
@@ -122,8 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, watch } from 'vue'
 import { Rank, Edit, Delete, Location } from '@element-plus/icons-vue'
 import type { ShippingZone, CreateZoneRequest } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'

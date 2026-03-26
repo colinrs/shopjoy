@@ -160,7 +160,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { ArrowDown, CircleCheck, Warning } from '@element-plus/icons-vue'
+import { ArrowDown } from '@element-plus/icons-vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import {
   getGlobalSEO,

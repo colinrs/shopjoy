@@ -30,7 +30,7 @@ export function adminLogin(data: {
   password: string
   ip?: string
 }) {
-  return request({
+  return request<{ access_token: string; user: AdminUser }>({
     url: '/api/v1/auth/login',
     method: 'post',
     data
@@ -187,13 +187,23 @@ export function updateAdminProfile(data: {
 }
 
 // Customer/User APIs
+export interface Customer {
+  id: number
+  name: string
+  email: string
+  mobile?: string
+  avatar?: string
+  status: number
+  created_at: string
+}
+
 export function getCustomerList(params: {
   page: number
   page_size: number
   name?: string
   email?: string
 }) {
-  return request({
+  return request<{ list: Customer[]; total: number }>({
     url: '/api/v1/users',
     method: 'get',
     params

@@ -91,12 +91,12 @@
         <div class="items-list">
           <div
             v-for="item in availableItems"
-            :key="item.id"
+            :key="item.order_item_id"
             class="item-row"
-            :class="{ selected: isItemSelected(item.id) }"
+            :class="{ selected: isItemSelected(item.order_item_id) }"
             @click="toggleItem(item)"
           >
-            <el-checkbox :model-value="isItemSelected(item.id)" />
+            <el-checkbox :model-value="isItemSelected(item.order_item_id)" />
             <el-image :src="item.image" class="item-image" fit="cover">
               <template #error>
                 <div class="image-placeholder">
@@ -110,9 +110,9 @@
             </div>
             <div class="item-quantity">
               <el-input-number
-                v-if="isItemSelected(item.id)"
-                :model-value="getItemQuantity(item.id)"
-                @update:model-value="(val: number) => setItemQuantity(item.id, val)"
+                v-if="isItemSelected(item.order_item_id)"
+                :model-value="getItemQuantity(item.order_item_id)"
+                @update:model-value="(val: number) => setItemQuantity(item.order_item_id, val)"
                 :min="1"
                 :max="item.pending_qty || item.quantity"
                 size="small"
@@ -161,7 +161,7 @@ import { Document, Van, Goods, Tickets, Picture } from '@element-plus/icons-vue'
 import { shipOrder, type Carrier } from '@/api/order'
 
 interface OrderItem {
-  id: number
+  order_item_id: number
   product_name: string
   sku_name: string
   image: string
@@ -238,20 +238,20 @@ const setItemQuantity = (id: number, quantity: number) => {
 }
 
 const toggleItem = (item: OrderItem) => {
-  const index = selectedItems.value.indexOf(item.id)
+  const index = selectedItems.value.indexOf(item.order_item_id)
   if (index === -1) {
-    selectedItems.value.push(item.id)
-    form.items.push({ order_item_id: item.id, quantity: item.pending_qty || item.quantity })
+    selectedItems.value.push(item.order_item_id)
+    form.items.push({ order_item_id: item.order_item_id, quantity: item.pending_qty || item.quantity })
   } else {
     selectedItems.value.splice(index, 1)
-    form.items = form.items.filter(i => i.order_item_id !== item.id)
+    form.items = form.items.filter(i => i.order_item_id !== item.order_item_id)
   }
 }
 
 const selectAllItems = () => {
-  selectedItems.value = availableItems.value.map(item => item.id)
+  selectedItems.value = availableItems.value.map(item => item.order_item_id)
   form.items = availableItems.value.map(item => ({
-    order_item_id: item.id,
+    order_item_id: item.order_item_id,
     quantity: item.pending_qty || item.quantity
   }))
 }
@@ -262,7 +262,9 @@ const clearItems = () => {
 }
 
 const handleSubmit = async () => {
-  if (!formRef.value || !props.order) return
+  if (!formRef.value) return
+  const order = props.order
+  if (!order) return
 
   await formRef.value.validate(async (valid: boolean) => {
     if (!valid) return
@@ -274,7 +276,7 @@ const handleSubmit = async () => {
 
     submitting.value = true
     try {
-      await shipOrder(props.order.order_id, {
+      await shipOrder(order.order_id, {
         carrier_code: form.carrier_code,
         carrier_name: form.carrier_code === 'OTHER' ? form.carrier_name : undefined,
         tracking_no: form.tracking_no,
@@ -303,9 +305,9 @@ watch(visible, (val) => {
     form.shipping_cost = 0
     form.weight = 0
     form.remark = ''
-    selectedItems.value = props.order.items.map(item => item.id)
+    selectedItems.value = props.order.items.map(item => item.order_item_id)
     form.items = props.order.items.map(item => ({
-      order_item_id: item.id,
+      order_item_id: item.order_item_id,
       quantity: item.pending_qty || item.quantity
     }))
   }

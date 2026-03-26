@@ -266,6 +266,14 @@ import {
   type Carrier
 } from '@/api/fulfillment'
 
+interface TimelineEvent {
+  title: string
+  time: string | null
+  type: 'primary' | 'success' | 'warning' | 'danger' | 'info'
+  active: boolean
+  description?: string
+}
+
 const route = useRoute()
 const router = useRouter()
 
@@ -290,28 +298,28 @@ const statusTypeMap = {
   4: { type: 'danger' as const, text: 'Failed' }
 }
 
-const timeline = computed(() => {
+const timeline = computed<TimelineEvent[]>(() => {
   if (!shipment.value) return []
 
-  const events = [
-    { title: 'Shipment Created', time: shipment.value.created_at, type: 'primary' as const, active: true, description: `Order: ${shipment.value.order_no}` }
+  const events: TimelineEvent[] = [
+    { title: 'Shipment Created', time: shipment.value.created_at, type: 'primary', active: true, description: `Order: ${shipment.value.order_no}` }
   ]
 
   if (shipment.value.shipped_at) {
     events.push({
       title: 'Shipped',
       time: shipment.value.shipped_at,
-      type: 'primary' as const,
+      type: 'primary',
       active: shipment.value.status >= 1,
       description: `Carrier: ${shipment.value.carrier}, Tracking: ${shipment.value.tracking_no}`
     })
   }
 
-  if (shipment.value.status >= 2) {
+  if (shipment.value.status >= 2 && shipment.value.shipped_at) {
     events.push({
       title: 'In Transit',
       time: shipment.value.shipped_at,
-      type: 'info' as const,
+      type: 'info',
       active: shipment.value.status >= 2,
       description: 'Package is on the way'
     })
@@ -321,7 +329,7 @@ const timeline = computed(() => {
     events.push({
       title: 'Delivered',
       time: shipment.value.delivered_at,
-      type: 'success' as const,
+      type: 'success',
       active: shipment.value.status === 3,
       description: 'Package has been delivered'
     })
@@ -330,8 +338,8 @@ const timeline = computed(() => {
   if (shipment.value.status === 4) {
     events.push({
       title: 'Delivery Failed',
-      time: shipment.value.delivered_at || shipment.value.shipped_at,
-      type: 'danger' as const,
+      time: shipment.value.delivered_at || shipment.value.shipped_at || '',
+      type: 'danger',
       active: true,
       description: shipment.value.remark || 'Delivery failed'
     })

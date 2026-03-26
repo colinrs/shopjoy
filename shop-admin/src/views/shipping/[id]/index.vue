@@ -113,7 +113,7 @@
                   @close="removeCategoryMapping(cat)"
                   class="category-tag"
                 >
-                  {{ cat.path || cat.name }}
+                  {{ cat.target_name || `分类 #${cat.target_id}` }}
                 </el-tag>
               </div>
               <el-empty v-else description="暂无关联分类" :image-size="80" />
@@ -132,7 +132,7 @@
       :close-on-click-modal="false"
     >
       <ZoneConfigForm
-        :zone="editingZone"
+        :zone="editingZone ?? undefined"
         :is-dialog="true"
         @save="handleZoneSave"
         @cancel="zoneDialogVisible = false"

@@ -241,7 +241,7 @@
                 <template #default="{ row }">
                   <el-switch
                     v-model="row.is_enabled"
-                    @change="(val) => handleMarketEnableChange(row, val)"
+                    @change="(val: boolean) => handleMarketEnableChange(row, val)"
                   />
                 </template>
               </el-table-column>
@@ -751,8 +751,7 @@ import {
   type ProductMarket,
   type SKU,
   type CreateSKURequest,
-  type ProductLocalization,
-  type CreateProductLocalizationRequest
+  type ProductLocalization
 } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
 import {
@@ -837,12 +836,6 @@ const supportedLanguages = [
   { code: 'ko', name: '한국어' },
   { code: 'es', name: 'Español' }
 ]
-const localizationForm = reactive({
-  id: 0,
-  language_code: '',
-  name: '',
-  description: ''
-})
 
 // Form
 const productForm = reactive({

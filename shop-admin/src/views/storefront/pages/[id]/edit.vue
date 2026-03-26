@@ -179,11 +179,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, markRaw, shallowRef } from 'vue'
+import { ref, onMounted, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  ArrowLeft, Monitor, Grid as GridIcon, Iphone, Clock, Document, Promotion,
+  ArrowLeft, Monitor, Iphone, Clock, Document, Promotion,
   Plus, ArrowUp, ArrowDown, Delete, Close, Picture, Goods, Document as DocIcon,
   VideoPlay, Menu, Minus, Rank
 } from '@element-plus/icons-vue'
@@ -194,10 +194,7 @@ import {
   listVersions,
   getVersion,
   restoreVersion,
-  addDecoration,
-  updateDecoration,
   deleteDecoration,
-  reorderBlocks,
   BLOCK_TYPES,
   type PageDetailResponse,
   type DecorationDTO,
@@ -294,7 +291,7 @@ const onBlockDragStart = (event: DragEvent, index: number) => {
   event.dataTransfer?.setData('text/plain', `block-${index}`)
 }
 
-const onDrop = async (event: DragEvent) => {
+const onDrop = async (_event: DragEvent) => {
   if (draggedBlockType) {
     // Add new block
     const newBlock: DecorationDTO = {
@@ -308,7 +305,7 @@ const onDrop = async (event: DragEvent) => {
   }
 }
 
-const onBlockReorder = (event: DragEvent, targetIndex: number) => {
+const onBlockReorder = (_event: DragEvent, targetIndex: number) => {
   if (draggedBlockIndex !== null && draggedBlockIndex !== targetIndex) {
     const block = blocks.value.splice(draggedBlockIndex, 1)[0]
     blocks.value.splice(targetIndex, 0, block)
@@ -380,7 +377,7 @@ const updateBlockConfig = (config: Record<string, any>) => {
 const handleSaveDraft = async () => {
   saving.value = true
   try {
-    await saveDraft(pageId, { blocks: blocks.value })
+    await saveDraft(pageId, blocks.value)
     ElMessage.success('草稿已保存')
     await fetchPage()
   } catch (error: any) {
@@ -399,7 +396,7 @@ const handlePublish = async () => {
     )
     publishing.value = true
     // First save draft, then publish
-    await saveDraft(pageId, { blocks: blocks.value })
+    await saveDraft(pageId, blocks.value)
     await publishPage(pageId)
     ElMessage.success('页面已发布')
     await fetchPage()

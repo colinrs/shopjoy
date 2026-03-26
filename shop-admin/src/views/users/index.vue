@@ -358,10 +358,10 @@ const handleResetPassword = (row: User) => {
 }
 
 const handleDelete = (row: User) => {
-  ElMessageBox.confirm(`确认删除用户 "${row.name}"? 此操作不可恢复！`, '警告', {
+  ElMessageBox.confirm(`确认删除用户 "${row.name}"? 此操作不可恢复！`, '删除确认', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'danger'
+    type: 'warning'
   }).then(async () => {
     try {
       await deleteUser(row.id)

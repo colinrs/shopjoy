@@ -335,9 +335,7 @@ import {
   updateShippingSettings,
   type ShopSettings,
   type BusinessHours,
-  type NotificationSettings,
-  type PaymentSettings,
-  type ShippingSettings
+  type NotificationSettings
 } from '@/api/shop'
 
 const loading = ref(false)

@@ -582,7 +582,8 @@ import {
   getReviewStats,
   type ReviewListItem,
   type ReviewDetail,
-  type ReviewStats
+  type ReviewStats,
+  type ListReviewsParams
 } from '@/api/review'
 
 // State
@@ -866,7 +867,9 @@ const handleDeleteReply = async () => {
 }
 
 const submitReply = async () => {
-  if (!replyFormRef.value || !replyReview.value) return
+  if (!replyFormRef.value) return
+  const review = replyReview.value
+  if (!review) return
 
   await replyFormRef.value.validate(async (valid: boolean) => {
     if (!valid) return
@@ -874,18 +877,18 @@ const submitReply = async () => {
     replyLoading.value = true
     try {
       if (isEditReply.value) {
-        await updateReply(replyReview.value.id, { content: replyForm.content })
+        await updateReply(review.id, { content: replyForm.content })
         ElMessage.success('Reply updated successfully')
       } else {
-        await createReply(replyReview.value.id, { content: replyForm.content })
+        await createReply(review.id, { content: replyForm.content })
         ElMessage.success('Reply submitted successfully')
       }
       replyDialogVisible.value = false
       loadReviews()
       loadStats()
       // Refresh detail if open
-      if (currentReview.value && currentReview.value.id === replyReview.value.id) {
-        const detail = await getReviewDetail(replyReview.value.id)
+      if (currentReview.value && currentReview.value.id === review.id) {
+        const detail = await getReviewDetail(review.id)
         currentReview.value = detail
       }
     } catch (error) {
@@ -969,7 +972,7 @@ const handleReplyFromDetail = () => {
 const loadReviews = async () => {
   loading.value = true
   try {
-    const params: Record<string, any> = {
+    const params: ListReviewsParams = {
       page: pagination.page,
       page_size: pagination.pageSize
     }
