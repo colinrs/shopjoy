@@ -37,7 +37,7 @@ type Promotion struct {
 	Rules       []PromotionRule
 	StartAt     time.Time
 	EndAt       time.Time
-	DeletedAt   *time.Time
+	DeletedAt   *int64
 	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 

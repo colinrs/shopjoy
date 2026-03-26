@@ -244,7 +244,7 @@ type Promotion struct {
 	Currency    string           `json:"currency"`
 	Rules       []PromotionRule  `json:"rules,omitempty"`
 	Audit       shared.AuditInfo `json:"audit"`
-	DeletedAt   *time.Time       `json:"deleted_at,omitempty"`
+	DeletedAt   *int64          `json:"deleted_at,omitempty"`
 }
 
 func (p *Promotion) TableName() string {

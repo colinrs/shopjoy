@@ -32,7 +32,7 @@ type Market struct {
 	TaxRules        TaxConfig      `gorm:"type:json"` // 税务配置
 	CreatedAt       time.Time      // 创建时间
 	UpdatedAt       time.Time      // 更新时间
-	DeletedAt       gorm.DeletedAt // 软删除时间
+	DeletedAt       *int64        // 软删除时间
 }
 
 // TableName 表名

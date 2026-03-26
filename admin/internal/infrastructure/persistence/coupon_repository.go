@@ -61,12 +61,6 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 		json.Unmarshal([]byte(m.ExcludeIDs), &excludeIDs)
 	}
 
-	var deletedAt *time.Time
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0)
-		deletedAt = &t
-	}
-
 	return &promotion.Coupon{
 		ID:          m.ID,
 		TenantID:    shared.TenantID(m.TenantID),
@@ -95,7 +89,7 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
-		DeletedAt: deletedAt,
+		DeletedAt: m.DeletedAt,
 	}
 }
 
@@ -103,12 +97,6 @@ func fromCouponEntity(c *promotion.Coupon) *couponModel {
 	// Serialize JSON arrays for scope
 	scopeIDsJSON, _ := json.Marshal(c.Scope.IDs)
 	excludeIDsJSON, _ := json.Marshal(c.Scope.ExcludeIDs)
-
-	var deletedAt *int64
-	if c.DeletedAt != nil {
-		ts := c.DeletedAt.Unix()
-		deletedAt = &ts
-	}
 
 	return &couponModel{
 		ID:          c.ID,
@@ -132,7 +120,7 @@ func fromCouponEntity(c *promotion.Coupon) *couponModel {
 		ExcludeIDs:  string(excludeIDsJSON),
 		CreatedBy:   c.Audit.CreatedBy,
 		UpdatedBy:   c.Audit.UpdatedBy,
-		DeletedAt:   deletedAt,
+		DeletedAt:   c.DeletedAt,
 		CreatedAt:   c.Audit.CreatedAt,
 		UpdatedAt:   c.Audit.UpdatedAt,
 	}

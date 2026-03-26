@@ -50,7 +50,7 @@ func (earnRuleModel) TableName() string {
 }
 
 func (m *earnRuleModel) toEntity() *points.EarnRule {
-	var startAt, endAt, deletedAt *time.Time
+	var startAt, endAt *time.Time
 	if m.StartAt != nil {
 		t := time.Unix(*m.StartAt, 0)
 		startAt = &t
@@ -58,10 +58,6 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 	if m.EndAt != nil {
 		t := time.Unix(*m.EndAt, 0)
 		endAt = &t
-	}
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0)
-		deletedAt = &t
 	}
 
 	return &points.EarnRule{
@@ -81,7 +77,7 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 		Priority:         m.Priority,
 		StartAt:          startAt,
 		EndAt:            endAt,
-		DeletedAt:        deletedAt,
+		DeletedAt:        m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
 			UpdatedAt: m.UpdatedAt,
@@ -92,7 +88,7 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 }
 
 func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
-	var startAt, endAt, deletedAt *int64
+	var startAt, endAt *int64
 	if e.StartAt != nil {
 		ts := e.StartAt.Unix()
 		startAt = &ts
@@ -101,10 +97,7 @@ func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
 		ts := e.EndAt.Unix()
 		endAt = &ts
 	}
-	if e.DeletedAt != nil {
-		ts := e.DeletedAt.Unix()
-		deletedAt = &ts
-	}
+	deletedAt := e.DeletedAt
 
 	return &earnRuleModel{
 		ID:               e.ID,
@@ -325,7 +318,7 @@ func (redeemRuleModel) TableName() string {
 }
 
 func (m *redeemRuleModel) toEntity() *points.RedeemRule {
-	var startAt, endAt, deletedAt *time.Time
+	var startAt, endAt *time.Time
 	if m.StartAt != nil {
 		t := time.Unix(*m.StartAt, 0)
 		startAt = &t
@@ -333,10 +326,6 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 	if m.EndAt != nil {
 		t := time.Unix(*m.EndAt, 0)
 		endAt = &t
-	}
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0)
-		deletedAt = &t
 	}
 
 	return &points.RedeemRule{
@@ -352,7 +341,7 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 		Status:         points.RedeemRuleStatus(m.Status),
 		StartAt:        startAt,
 		EndAt:          endAt,
-		DeletedAt:      deletedAt,
+		DeletedAt:      m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
 			UpdatedAt: m.UpdatedAt,
@@ -363,7 +352,7 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 }
 
 func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
-	var startAt, endAt, deletedAt *int64
+	var startAt, endAt *int64
 	if r.StartAt != nil {
 		ts := r.StartAt.Unix()
 		startAt = &ts
@@ -372,10 +361,7 @@ func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
 		ts := r.EndAt.Unix()
 		endAt = &ts
 	}
-	if r.DeletedAt != nil {
-		ts := r.DeletedAt.Unix()
-		deletedAt = &ts
-	}
+	deletedAt := r.DeletedAt
 
 	return &redeemRuleModel{
 		ID:             r.ID,
@@ -750,6 +736,7 @@ type pointsTransactionModel struct {
 	ReferenceID   string `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
 	Description   string `gorm:"column:description;type:text"`
 	ExpiresAt     *int64 `gorm:"column:expires_at;type:bigint;index:idx_expires_at"`
+	DeletedAt     *int64 `gorm:"column:deleted_at;index"`
 	CreatedAt     int64  `gorm:"column:created_at"`
 	UpdatedAt     int64  `gorm:"column:updated_at"`
 	CreatedBy     int64  `gorm:"column:created_by;not null"`
@@ -779,6 +766,7 @@ func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
 		ReferenceID:   m.ReferenceID,
 		Description:   m.Description,
 		ExpiresAt:     expiresAt,
+		DeletedAt:     m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
 			UpdatedAt: m.UpdatedAt,
@@ -807,6 +795,7 @@ func fromPointsTransactionEntity(t *points.PointsTransaction) *pointsTransaction
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
 		ExpiresAt:     expiresAt,
+		DeletedAt:     t.DeletedAt,
 		CreatedAt:     t.Audit.CreatedAt,
 		UpdatedAt:     t.Audit.UpdatedAt,
 		CreatedBy:     t.Audit.CreatedBy,
@@ -945,6 +934,7 @@ type pointsRedemptionModel struct {
 	PointsUsed   int64  `gorm:"column:points_used;type:bigint;not null"`
 	Status       int    `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	CompletedAt  *int64 `gorm:"column:completed_at;type:bigint"`
+	DeletedAt    *int64 `gorm:"column:deleted_at;index"`
 	CreatedAt    int64  `gorm:"column:created_at"`
 	UpdatedAt    int64  `gorm:"column:updated_at"`
 	CreatedBy    int64  `gorm:"column:created_by;not null"`
@@ -972,6 +962,7 @@ func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
 		PointsUsed:   m.PointsUsed,
 		Status:       points.RedemptionStatus(m.Status),
 		CompletedAt:  completedAt,
+		DeletedAt:    m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
 			UpdatedAt: m.UpdatedAt,
@@ -998,6 +989,7 @@ func fromPointsRedemptionEntity(r *points.PointsRedemption) *pointsRedemptionMod
 		PointsUsed:   r.PointsUsed,
 		Status:       int(r.Status),
 		CompletedAt:  completedAt,
+		DeletedAt:    r.DeletedAt,
 		CreatedAt:    r.Audit.CreatedAt,
 		UpdatedAt:    r.Audit.UpdatedAt,
 		CreatedBy:    r.Audit.CreatedBy,

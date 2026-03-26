@@ -55,12 +55,6 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 		json.Unmarshal([]byte(m.ExcludeIDs), &excludeIDs)
 	}
 
-	var deletedAt *time.Time
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0)
-		deletedAt = &t
-	}
-
 	return &promotion.Promotion{
 		ID:          m.ID,
 		TenantID:    shared.TenantID(m.TenantID),
@@ -83,7 +77,7 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
-		DeletedAt: deletedAt,
+		DeletedAt: m.DeletedAt,
 	}
 }
 
@@ -91,12 +85,6 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 	// Serialize JSON arrays for scope
 	scopeIDsJSON, _ := json.Marshal(p.Scope.IDs)
 	excludeIDsJSON, _ := json.Marshal(p.Scope.ExcludeIDs)
-
-	var deletedAt *int64
-	if p.DeletedAt != nil {
-		ts := p.DeletedAt.Unix()
-		deletedAt = &ts
-	}
 
 	return &promotionModel{
 		ID:          p.ID,
@@ -114,7 +102,7 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 		Currency:    p.Currency,
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
-		DeletedAt:   deletedAt,
+		DeletedAt:   p.DeletedAt,
 		CreatedAt:   p.Audit.CreatedAt,
 		UpdatedAt:   p.Audit.UpdatedAt,
 	}

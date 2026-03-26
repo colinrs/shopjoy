@@ -48,12 +48,6 @@ func (refundModel) TableName() string {
 }
 
 func (m *refundModel) toEntity() *fulfillment.Refund {
-	var deletedAt gorm.DeletedAt
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0).UTC()
-		deletedAt = gorm.DeletedAt{Time: t, Valid: true}
-	}
-
 	return &fulfillment.Refund{
 		ID:           m.ID,
 		TenantID:     shared.TenantID(m.TenantID),
@@ -78,17 +72,11 @@ func (m *refundModel) toEntity() *fulfillment.Refund {
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
-		DeletedAt: deletedAt,
+		DeletedAt: m.DeletedAt,
 	}
 }
 
 func fromRefundEntity(r *fulfillment.Refund) *refundModel {
-	var deletedAt *int64
-	if r.DeletedAt.Valid {
-		ts := r.DeletedAt.Time.Unix()
-		deletedAt = &ts
-	}
-
 	return &refundModel{
 		ID:           r.ID,
 		TenantID:     r.TenantID.Int64(),
@@ -109,7 +97,7 @@ func fromRefundEntity(r *fulfillment.Refund) *refundModel {
 		CompletedAt:  r.CompletedAt,
 		CreatedBy:    r.Audit.CreatedBy,
 		UpdatedBy:    r.Audit.UpdatedBy,
-		DeletedAt:    deletedAt,
+		DeletedAt:    r.DeletedAt,
 		CreatedAt:    r.Audit.CreatedAt,
 		UpdatedAt:    r.Audit.UpdatedAt,
 	}

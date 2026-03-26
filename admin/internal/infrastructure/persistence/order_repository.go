@@ -81,12 +81,6 @@ func (m *orderModel) toEntity() *fulfillment.Order {
 		adjustedAt = &t
 	}
 
-	var deletedAt gorm.DeletedAt
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0).UTC()
-		deletedAt = gorm.DeletedAt{Time: t, Valid: true}
-	}
-
 	return &fulfillment.Order{
 		ID:                m.ID,
 		TenantID:          shared.TenantID(m.TenantID),
@@ -123,7 +117,7 @@ func (m *orderModel) toEntity() *fulfillment.Order {
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
-		DeletedAt: deletedAt,
+		DeletedAt: m.DeletedAt,
 	}
 }
 
@@ -149,9 +143,8 @@ func fromOrderEntity(o *fulfillment.Order) *orderModel {
 		ts := o.AdjustedAt.Unix()
 		adjustedAt = &ts
 	}
-	if o.DeletedAt.Valid {
-		ts := o.DeletedAt.Time.Unix()
-		deletedAt = &ts
+	if o.DeletedAt != nil {
+		deletedAt = o.DeletedAt
 	}
 
 	return &orderModel{

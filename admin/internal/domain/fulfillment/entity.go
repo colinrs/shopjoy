@@ -233,7 +233,7 @@ type Shipment struct {
 	Remark         string           `gorm:"column:remark;not null;default:''"`
 	Items          []ShipmentItem   `gorm:"foreignKey:ShipmentID"`
 	Audit          shared.AuditInfo `gorm:"embedded"`
-	DeletedAt      gorm.DeletedAt   `gorm:"column:deleted_at;index"`
+	DeletedAt      *int64          `gorm:"column:deleted_at;index"`
 }
 
 func (s *Shipment) TableName() string {
@@ -420,7 +420,7 @@ type Refund struct {
 	ApprovedBy   int64              `gorm:"column:approved_by;not null;default:0"`
 	CompletedAt  *int64            `gorm:"column:completed_at"`
 	Audit        shared.AuditInfo   `gorm:"embedded"`
-	DeletedAt    gorm.DeletedAt     `gorm:"column:deleted_at;index"`
+	DeletedAt    *int64            `gorm:"column:deleted_at;index"`
 }
 
 func (r *Refund) TableName() string {

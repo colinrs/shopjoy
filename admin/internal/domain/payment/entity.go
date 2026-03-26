@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"gorm.io/gorm"
 )
 
 // ==================== Enums ====================
@@ -143,7 +142,7 @@ type Payment struct {
 	FailedAt         int64            `gorm:"column:failed_at"`
 	FailedReason     string           `gorm:"column:failed_reason;not null;default:''"`
 	Audit            shared.AuditInfo `gorm:"embedded"`
-	DeletedAt        gorm.DeletedAt   `gorm:"column:deleted_at;index"`
+	DeletedAt        *int64          `gorm:"column:deleted_at;index"`
 }
 
 func (p *Payment) TableName() string {
@@ -244,7 +243,7 @@ type PaymentRefund struct {
 	RefundedAt          int64                `gorm:"column:refunded_at"`
 	CreatedAt           int64                `gorm:"column:created_at;not null"`
 	CreatedBy           int64                `gorm:"column:created_by;not null;default:0"`
-	DeletedAt           gorm.DeletedAt       `gorm:"column:deleted_at;index"`
+	DeletedAt           *int64              `gorm:"column:deleted_at;index"`
 }
 
 func (r *PaymentRefund) TableName() string {
@@ -309,7 +308,7 @@ type PaymentTransaction struct {
 	PaidAt               int64             `gorm:"column:paid_at"`
 	FailedReason         string            `gorm:"column:failed_reason;not null;default:''"`
 	CreatedAt            int64             `gorm:"column:created_at;not null"`
-	DeletedAt            gorm.DeletedAt    `gorm:"column:deleted_at;index"`
+	DeletedAt            *int64           `gorm:"column:deleted_at;index"`
 }
 
 func (t *PaymentTransaction) TableName() string {

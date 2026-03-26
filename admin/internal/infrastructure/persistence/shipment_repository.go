@@ -47,12 +47,6 @@ func (shipmentModel) TableName() string {
 }
 
 func (m *shipmentModel) toEntity() *fulfillment.Shipment {
-	var deletedAt gorm.DeletedAt
-	if m.DeletedAt != nil {
-		t := time.Unix(*m.DeletedAt, 0).UTC()
-		deletedAt = gorm.DeletedAt{Time: t, Valid: true}
-	}
-
 	return &fulfillment.Shipment{
 		ID:               m.ID,
 		TenantID:         shared.TenantID(m.TenantID),
@@ -74,17 +68,11 @@ func (m *shipmentModel) toEntity() *fulfillment.Shipment {
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
-		DeletedAt: deletedAt,
+		DeletedAt: m.DeletedAt,
 	}
 }
 
 func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
-	var deletedAt *int64
-	if s.DeletedAt.Valid {
-		ts := s.DeletedAt.Time.Unix()
-		deletedAt = &ts
-	}
-
 	return &shipmentModel{
 		ID:               s.ID,
 		TenantID:         s.TenantID.Int64(),
@@ -102,7 +90,7 @@ func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
 		Remark:           s.Remark,
 		CreatedBy:        s.Audit.CreatedBy,
 		UpdatedBy:        s.Audit.UpdatedBy,
-		DeletedAt:        deletedAt,
+		DeletedAt:        s.DeletedAt,
 		CreatedAt:        s.Audit.CreatedAt,
 		UpdatedAt:        s.Audit.UpdatedAt,
 	}

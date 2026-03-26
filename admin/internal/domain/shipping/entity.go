@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
-	"gorm.io/gorm"
 )
 
 // FeeType 运费计费类型
@@ -68,7 +67,7 @@ type ShippingTemplate struct {
 	IsActive  bool           `gorm:"column:is_active;not null;default:true"`
 	CreatedAt time.Time      `gorm:"column:created_at;not null"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;not null"`
-	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	DeletedAt *int64        `gorm:"column:deleted_at;index"`
 }
 
 // TableName 返回表名

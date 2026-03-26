@@ -30,7 +30,7 @@ type marketModel struct {
 	TaxRules        string         `gorm:"column:tax_rules;type:json"`
 	CreatedAt       time.Time      `gorm:"column:created_at"`
 	UpdatedAt       time.Time      `gorm:"column:updated_at"`
-	DeletedAt       gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	DeletedAt       *int64        `gorm:"column:deleted_at;index"`
 }
 
 func (marketModel) TableName() string {
