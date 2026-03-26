@@ -23,10 +23,10 @@ func NewDeleteUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 	}
 }
 
-func (l *DeleteUploadLogic) DeleteUpload(req *types.DeleteUploadReq) (resp *types.DeleteUploadResp, err error) {
-	err = l.svcCtx.Storage.Delete(l.ctx, req.ID)
+func (l *DeleteUploadLogic) DeleteUpload(req *types.DeleteUploadReq) error {
+	err := l.svcCtx.Storage.Delete(l.ctx, req.ID)
 	if err != nil {
-		return nil, code.ErrUploadNotFound
+		return code.ErrUploadNotFound
 	}
-	return &types.DeleteUploadResp{ID: req.ID}, nil
+	return nil
 }

@@ -22,11 +22,11 @@ func DeleteUploadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := uploads.NewDeleteUploadLogic(r.Context(), svcCtx)
-		resp, err := l.DeleteUpload(&req)
+		err := l.DeleteUpload(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			w.WriteHeader(http.StatusNoContent)
 		}
 	}
 }
