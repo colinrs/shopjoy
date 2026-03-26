@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { PointsTransaction } from '@/api/points'
 
 const props = withDefaults(defineProps<{

@@ -488,6 +488,17 @@ export const getRedemption = (id: number) => {
  * Get available coupons for redeem rules
  * This reuses the promotion API to get active coupons
  */
+export interface AvailableCoupon {
+  id: number
+  code: string
+  name: string
+  discount_value: string
+  type?: 'fixed_amount' | 'percentage'
+  start_time: string
+  end_time: string
+  status: string
+}
+
 export const getAvailableCoupons = (params: { page?: number; page_size?: number; name?: string }) => {
-  return request.get('/api/v1/coupons', { params })
+  return request.get<{ list: AvailableCoupon[]; total: number }>('/api/v1/coupons', { params })
 }

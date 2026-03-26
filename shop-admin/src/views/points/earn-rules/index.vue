@@ -149,8 +149,8 @@
       </el-table>
 
       <TablePagination
-        :page="searchParams.page"
-        :page-size="searchParams.page_size"
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         :total="total"
         @change="handlePageChange"
       />
@@ -181,7 +181,6 @@ import {
   activateEarnRule,
   deactivateEarnRule,
   type EarnRule,
-  type ListEarnRulesParams,
   type CreateEarnRuleParams
 } from '@/api/points'
 
@@ -199,20 +198,25 @@ const ruleStats = ref({
   active: 0
 })
 
-const searchParams = reactive<ListEarnRulesParams>({
-  page: 1,
-  page_size: 10,
+const searchParams = reactive({
   name: '',
   status: '',
   scenario: '',
   calculation_type: ''
 })
 
+const currentPage = ref(1)
+const pageSize = ref(10)
+
 // Load functions
 const loadRules = async () => {
   loading.value = true
   try {
-    const res = await getEarnRules(searchParams)
+    const res = await getEarnRules({
+      page: currentPage.value,
+      page_size: pageSize.value,
+      ...searchParams
+    })
     ruleList.value = res.list || []
     total.value = res.total || 0
     ruleStats.value = res.stats
@@ -378,9 +382,7 @@ const getCalculationPreview = (rule: EarnRule) => {
 }
 
 // Handlers
-const handlePageChange = (page: number, pageSize: number) => {
-  searchParams.page = page
-  searchParams.page_size = pageSize
+const handlePageChange = () => {
   loadRules()
 }
 

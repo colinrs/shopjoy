@@ -140,7 +140,7 @@ const handleSave = async () => {
         points_required: form.points_required,
         total_stock: form.total_stock,
         per_user_limit: form.per_user_limit,
-        status: isEdit.value ? 1 : 1 // active by default
+        status: 'active'
       }
 
       if (form.dateRange && form.dateRange.length === 2) {

@@ -49,15 +49,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { Ticket } from '@element-plus/icons-vue'
-import { getAvailableCoupons } from '@/api/points'
+import { getAvailableCoupons, type AvailableCoupon } from '@/api/points'
 
-interface Coupon {
-  id: number
-  name: string
-  code: string
+type Coupon = AvailableCoupon & {
   type: 'fixed_amount' | 'percentage'
-  discount_value: string
-  status: string
 }
 
 const props = defineProps<{
@@ -77,15 +72,19 @@ const loadCoupons = async (keyword: string = '') => {
   loading.value = true
   try {
     const res = await getAvailableCoupons({ page: 1, page_size: 20, name: keyword })
-    couponList.value = res?.list || []
+    // Map API response to include required type field
+    couponList.value = (res?.list || []).map(c => ({
+      ...c,
+      type: c.type || 'fixed_amount' as const
+    }))
   } catch (error) {
     console.error('Failed to load coupons:', error)
     // Mock data
     couponList.value = [
-      { id: 1, name: '$10 优惠券', code: 'SAVE10', type: 'fixed_amount', discount_value: '10', status: 'active' },
-      { id: 2, name: '$20 优惠券', code: 'SAVE20', type: 'fixed_amount', discount_value: '20', status: 'active' },
-      { id: 3, name: '免邮券', code: 'FREESHIP', type: 'fixed_amount', discount_value: '5', status: 'active' },
-      { id: 4, name: '9折券', code: 'DISCOUNT10', type: 'percentage', discount_value: '10', status: 'active' }
+      { id: 1, name: '$10 优惠券', code: 'SAVE10', type: 'fixed_amount', discount_value: '10', status: 'active', start_time: '', end_time: '' },
+      { id: 2, name: '$20 优惠券', code: 'SAVE20', type: 'fixed_amount', discount_value: '20', status: 'active', start_time: '', end_time: '' },
+      { id: 3, name: '免邮券', code: 'FREESHIP', type: 'fixed_amount', discount_value: '5', status: 'active', start_time: '', end_time: '' },
+      { id: 4, name: '9折券', code: 'DISCOUNT10', type: 'percentage', discount_value: '10', status: 'active', start_time: '', end_time: '' }
     ]
   } finally {
     loading.value = false

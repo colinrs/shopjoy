@@ -148,8 +148,8 @@
       </el-table>
 
       <TablePagination
-        :page="searchParams.page"
-        :page-size="searchParams.page_size"
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         :total="total"
         @change="handlePageChange"
       />
@@ -180,7 +180,6 @@ import {
   activateRedeemRule,
   deactivateRedeemRule,
   type RedeemRule,
-  type ListRedeemRulesParams,
   type CreateRedeemRuleParams
 } from '@/api/points'
 
@@ -199,18 +198,23 @@ const ruleStats = ref({
   total_redeemed: 0
 })
 
-const searchParams = reactive<ListRedeemRulesParams>({
-  page: 1,
-  page_size: 10,
+const searchParams = reactive({
   name: '',
   status: ''
 })
+
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 // Load functions
 const loadRules = async () => {
   loading.value = true
   try {
-    const res = await getRedeemRules(searchParams)
+    const res = await getRedeemRules({
+      page: currentPage.value,
+      page_size: pageSize.value,
+      ...searchParams
+    })
     ruleList.value = res.list || []
     total.value = res.total || 0
     ruleStats.value = res.stats
@@ -304,9 +308,7 @@ const getStatusText = (status: string) => {
 }
 
 // Handlers
-const handlePageChange = (page: number, pageSize: number) => {
-  searchParams.page = page
-  searchParams.page_size = pageSize
+const handlePageChange = () => {
   loadRules()
 }
 

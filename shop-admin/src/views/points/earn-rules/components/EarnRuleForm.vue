@@ -185,7 +185,7 @@ watch(() => props.rule, (rule) => {
   }
 }, { immediate: true })
 
-const getFormData = (status: number): CreateEarnRuleParams => {
+const getFormData = (status: 'draft' | 'active'): CreateEarnRuleParams => {
   const data: CreateEarnRuleParams = {
     name: form.name,
     description: form.description,
@@ -221,7 +221,7 @@ const handleSaveDraft = async () => {
   if (!formRef.value) return
   await formRef.value.validate((valid) => {
     if (valid) {
-      emit('submit', getFormData(0)) // status = 0 (draft)
+      emit('submit', getFormData('draft'))
     }
   })
 }
@@ -230,7 +230,7 @@ const handleSaveAndActivate = async () => {
   if (!formRef.value) return
   await formRef.value.validate((valid) => {
     if (valid) {
-      emit('submit', getFormData(1)) // status = 1 (active)
+      emit('submit', getFormData('active'))
     }
   })
 }

@@ -91,8 +91,8 @@
       </el-table>
 
       <TablePagination
-        :page="currentPage"
-        :page-size="pageSize"
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         :total="total"
         @change="handlePageChange"
       />
@@ -202,9 +202,7 @@ const handleSearch = () => {
   loadAccounts()
 }
 
-const handlePageChange = (page: number, size: number) => {
-  currentPage.value = page
-  pageSize.value = size
+const handlePageChange = () => {
   loadAccounts()
 }
 

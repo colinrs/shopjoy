@@ -87,8 +87,8 @@
       </el-table>
 
       <TablePagination
-        :page="searchParams.page"
-        :page-size="searchParams.page_size"
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         :total="total"
         @change="handlePageChange"
       />
@@ -154,21 +154,22 @@ const currentRedemption = ref<PointsRedemption | null>(null)
 const redemptionList = ref<PointsRedemption[]>([])
 const total = ref(0)
 
-const searchParams = reactive<ListRedemptionsParams>({
-  page: 1,
-  page_size: 20,
+const searchParams = reactive({
   status: '',
   start_time: '',
   end_time: ''
 })
+
+const currentPage = ref(1)
+const pageSize = ref(20)
 
 // Load functions
 const loadRedemptions = async () => {
   loading.value = true
   try {
     const params: ListRedemptionsParams = {
-      page: searchParams.page,
-      page_size: searchParams.page_size
+      page: currentPage.value,
+      page_size: pageSize.value
     }
     if (searchParams.status) params.status = searchParams.status
     if (searchParams.start_time) params.start_time = searchParams.start_time
@@ -279,9 +280,7 @@ const handleDateChange = () => {
   loadRedemptions()
 }
 
-const handlePageChange = (page: number, pageSize: number) => {
-  searchParams.page = page
-  searchParams.page_size = pageSize
+const handlePageChange = () => {
   loadRedemptions()
 }
 
