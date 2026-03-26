@@ -241,9 +241,10 @@ type PaymentRefund struct {
 	Status              PaymentRefundStatus  `gorm:"column:status;not null;default:0"`
 	ReasonType          string               `gorm:"column:reason_type;not null;default:''"`
 	Reason              string               `gorm:"column:reason;not null;default:''"`
-	RefundedAt          int64           `gorm:"column:refunded_at"`
-	CreatedAt           int64            `gorm:"column:created_at;not null"`
+	RefundedAt          int64                `gorm:"column:refunded_at"`
+	CreatedAt           int64                `gorm:"column:created_at;not null"`
 	CreatedBy           int64                `gorm:"column:created_by;not null;default:0"`
+	DeletedAt           gorm.DeletedAt       `gorm:"column:deleted_at;index"`
 }
 
 func (r *PaymentRefund) TableName() string {

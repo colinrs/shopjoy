@@ -16,6 +16,7 @@ type Cart struct {
 	SessionID string
 	Items     []CartItem
 	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 func (c *Cart) TableName() string {
@@ -111,6 +112,7 @@ type CartItem struct {
 	Quantity    int
 	TotalAmount shared.Money `gorm:"embedded"`
 	Selected    bool
+	DeletedAt   *time.Time
 	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 

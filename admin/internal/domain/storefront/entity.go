@@ -22,6 +22,7 @@ type Shop struct {
 	Status          shared.Status
 	CurrentThemeID  *int64
 	ThemeConfig     *ThemeConfig
+	DeletedAt       *int64
 	Audit           shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -49,6 +50,7 @@ type Theme struct {
 	IsActive      bool
 	IsCustom      bool
 	IsPreset      bool
+	DeletedAt     *int64
 }
 
 func (t *Theme) TableName() string {
@@ -120,6 +122,7 @@ type Decoration struct {
 	IsActive    bool
 	CreatedAt   int64
 	UpdatedAt   int64
+	DeletedAt   *int64
 }
 
 func (d *Decoration) TableName() string {
@@ -138,6 +141,7 @@ type PageVersion struct {
 	Blocks    []BlockSnapshot // JSON snapshot of blocks
 	CreatedBy int64
 	CreatedAt int64
+	DeletedAt *int64
 }
 
 func (v *PageVersion) TableName() string {
@@ -162,6 +166,7 @@ type SEOConfigEntity struct {
 	Keywords    string
 	CreatedAt   int64
 	UpdatedAt   int64
+	DeletedAt   *int64
 }
 
 func (s *SEOConfigEntity) TableName() string {
@@ -169,12 +174,13 @@ func (s *SEOConfigEntity) TableName() string {
 }
 
 type Navigation struct {
-	ID       int64
-	TenantID shared.TenantID
-	Name     string
-	Position string
-	Items    []NavItem
-	Status   shared.Status
+	ID        int64
+	TenantID  shared.TenantID
+	Name      string
+	Position  string
+	Items     []NavItem
+	Status    shared.Status
+	DeletedAt *int64
 }
 
 func (n *Navigation) TableName() string {
@@ -182,14 +188,15 @@ func (n *Navigation) TableName() string {
 }
 
 type NavItem struct {
-	ID       int64
-	NavID    int64
-	ParentID int64
-	Name     string
-	Link     string
-	Type     string
-	TargetID int64
-	Sort     int
+	ID        int64
+	NavID     int64
+	ParentID  int64
+	Name      string
+	Link      string
+	Type      string
+	TargetID  int64
+	Sort      int
+	DeletedAt *int64
 }
 
 func (ni *NavItem) TableName() string {
@@ -217,6 +224,7 @@ type ThemeAuditLog struct {
 	IPAddress  string
 	UserAgent  string
 	CreatedAt  int64
+	DeletedAt  *int64
 }
 
 func (l *ThemeAuditLog) TableName() string {

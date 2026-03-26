@@ -65,7 +65,8 @@ type Order struct {
 	ShippedAt      *time.Time
 	CompletedAt    *time.Time
 	CancelledAt    *time.Time
-	Audit          shared.AuditInfo `gorm:"embedded"`
+	DeletedAt     *time.Time
+	Audit         shared.AuditInfo `gorm:"embedded"`
 }
 
 func (o *Order) TableName() string {
@@ -146,6 +147,7 @@ type OrderItem struct {
 	Price       shared.Money `gorm:"embedded"`
 	Quantity    int
 	TotalAmount shared.Money `gorm:"embedded"`
+	DeletedAt   *time.Time
 }
 
 func (oi *OrderItem) TableName() string {

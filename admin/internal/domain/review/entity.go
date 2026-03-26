@@ -224,6 +224,7 @@ type ReviewReply struct {
 	AdminID   int64     // 管理员ID
 	AdminName string    // 管理员名称
 	Content   string    // 回复内容
+	DeletedAt *int64    // 软删除时间
 	CreatedAt time.Time // 创建时间
 	UpdatedAt time.Time // 更新时间
 }
@@ -283,7 +284,9 @@ type ReviewStats struct {
 	Rating4Count      int       // 4星数量
 	Rating5Count      int       // 5星数量
 	WithImageCount    int       // 有图片数量
-	LastUpdatedAt     time.Time // 最后更新时间
+	CreatedAt         time.Time // 创建时间
+	UpdatedAt         time.Time // 更新时间
+	DeletedAt         *int64    // 软删除时间
 }
 
 // TableName returns table name

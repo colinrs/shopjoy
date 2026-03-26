@@ -44,6 +44,7 @@ CREATE TABLE `review_replies` (
     `content` TEXT NOT NULL,
     `created_at` BIGINT NOT NULL,
     `updated_at` BIGINT NOT NULL,
+    `deleted_at` BIGINT NULL,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_review_id` (`review_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -66,7 +67,9 @@ CREATE TABLE `review_stats` (
     `rating_4_count` INT NOT NULL DEFAULT 0,
     `rating_5_count` INT NOT NULL DEFAULT 0,
     `with_image_count` INT NOT NULL DEFAULT 0,
-    `last_updated_at` BIGINT NOT NULL,
+    `created_at` BIGINT NOT NULL,
+    `updated_at` BIGINT NOT NULL,
+    `deleted_at` BIGINT NULL,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `uk_tenant_product` (`tenant_id`, `product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

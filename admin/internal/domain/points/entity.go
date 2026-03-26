@@ -441,6 +441,7 @@ type PointsAccount struct {
 	TotalEarned   int64            `gorm:"column:total_earned;type:bigint;not null;default:0"`
 	TotalRedeemed int64            `gorm:"column:total_redeemed;type:bigint;not null;default:0"`
 	TotalExpired  int64            `gorm:"column:total_expired;type:bigint;not null;default:0"`
+	DeletedAt     *time.Time       `gorm:"column:deleted_at;type:timestamp;index"`
 	Audit         shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -534,6 +535,7 @@ type PointsTransaction struct {
 	ReferenceID   string           `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
 	Description   string           `gorm:"column:description;type:text"`
 	ExpiresAt     *time.Time       `gorm:"column:expires_at;type:timestamp;index:idx_expires_at"`
+	DeletedAt     *time.Time       `gorm:"column:deleted_at;type:timestamp;index"`
 	Audit         shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -564,6 +566,7 @@ type PointsRedemption struct {
 	PointsUsed   int64            `gorm:"column:points_used;type:bigint;not null"`
 	Status       RedemptionStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	CompletedAt  *time.Time       `gorm:"column:completed_at;type:timestamp"`
+	DeletedAt    *time.Time       `gorm:"column:deleted_at;type:timestamp;index"`
 	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 

@@ -18,11 +18,13 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    `deleted_at` BIGINT NULL DEFAULT NULL COMMENT '删除时间（UTC时间戳）',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_order_id` (`order_id`),
     KEY `idx_tracking_no` (`tracking_no`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='物流发货表';
 
 -- ============================================
@@ -63,11 +65,13 @@ CREATE TABLE IF NOT EXISTS `refunds` (
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    `deleted_at` BIGINT NULL DEFAULT NULL COMMENT '删除时间（UTC时间戳）',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_order_id` (`order_id`),
     KEY `idx_user_id` (`user_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='退款表';
 
 -- ============================================

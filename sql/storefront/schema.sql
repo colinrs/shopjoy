@@ -19,11 +19,13 @@ CREATE TABLE IF NOT EXISTS `shops` (
     `current_theme_id` BIGINT DEFAULT NULL COMMENT 'Current active theme ID',
     `theme_config` TEXT COMMENT 'JSON theme customization config',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_tenant_id` (`tenant_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='店铺表';
 
 -- ============================================
@@ -44,12 +46,14 @@ CREATE TABLE IF NOT EXISTS `themes` (
     `is_active` TINYINT NOT NULL DEFAULT 0 COMMENT '是否激活',
     `is_custom` TINYINT NOT NULL DEFAULT 0 COMMENT '是否自定义',
     `is_preset` TINYINT NOT NULL DEFAULT 1 COMMENT '1=preset theme, 0=custom theme',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_code` (`code`),
-    KEY `idx_is_active` (`is_active`)
+    KEY `idx_is_active` (`is_active`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='主题表';
 
 -- ============================================
@@ -94,9 +98,11 @@ CREATE TABLE IF NOT EXISTS `navigations` (
     `name` VARCHAR(100) NOT NULL COMMENT '导航名称',
     `position` VARCHAR(50) DEFAULT '' COMMENT '位置: header, footer, sidebar',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
-    KEY `idx_position` (`position`)
+    KEY `idx_position` (`position`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='导航表';
 
 -- ============================================
@@ -112,9 +118,11 @@ CREATE TABLE IF NOT EXISTS `nav_items` (
     `type` VARCHAR(50) DEFAULT '' COMMENT '类型: page, category, product, custom',
     `target_id` BIGINT DEFAULT NULL COMMENT '目标ID',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     PRIMARY KEY (`id`),
     KEY `idx_nav_id` (`nav_id`),
-    KEY `idx_parent_id` (`parent_id`)
+    KEY `idx_parent_id` (`parent_id`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='导航项表';
 
 -- ============================================
@@ -129,12 +137,14 @@ CREATE TABLE IF NOT EXISTS `decorations` (
     `block_config` TEXT NOT NULL COMMENT 'JSON block configuration',
     `sort_order` INT NOT NULL DEFAULT 0 COMMENT 'Sort order within page',
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT 'Whether block is active',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     `created_at` BIGINT NOT NULL COMMENT 'Created timestamp (Unix UTC)',
     `updated_at` BIGINT NOT NULL COMMENT 'Updated timestamp (Unix UTC)',
     PRIMARY KEY (`id`),
     INDEX `idx_page_sort` (`page_id`, `sort_order`),
     INDEX `idx_tenant_page` (`tenant_id`, `page_id`),
-    INDEX `idx_block_type` (`block_type`)
+    INDEX `idx_block_type` (`block_type`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Page decoration blocks';
 
 -- ============================================
@@ -149,9 +159,11 @@ CREATE TABLE IF NOT EXISTS `page_versions` (
     `blocks` TEXT NOT NULL COMMENT 'JSON snapshot of decoration blocks',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT 'User who created this version',
     `created_at` BIGINT NOT NULL COMMENT 'Created timestamp (Unix UTC)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_tenant_page_ver` (`tenant_id`, `page_id`, `version`),
-    INDEX `idx_page_version` (`page_id`, `version`)
+    INDEX `idx_page_version` (`page_id`, `version`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Page version history';
 
 -- ============================================
@@ -168,9 +180,11 @@ CREATE TABLE IF NOT EXISTS `seo_configs` (
     `keywords` VARCHAR(500) NOT NULL DEFAULT '' COMMENT 'SEO keywords',
     `created_at` BIGINT NOT NULL COMMENT 'Created timestamp (Unix UTC)',
     `updated_at` BIGINT NOT NULL COMMENT 'Updated timestamp (Unix UTC)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_tenant_page_type` (`tenant_id`, `page_type`, `page_id`),
-    INDEX `idx_page_type` (`page_type`)
+    INDEX `idx_page_type` (`page_type`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SEO configurations';
 
 -- ============================================
@@ -191,11 +205,13 @@ CREATE TABLE IF NOT EXISTS `theme_audit_logs` (
     `ip_address` VARCHAR(45) DEFAULT '' COMMENT 'IP address',
     `user_agent` VARCHAR(500) DEFAULT '' COMMENT 'User agent',
     `created_at` BIGINT NOT NULL COMMENT 'Created timestamp (Unix UTC)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Soft delete timestamp',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_action` (`tenant_id`, `action`),
     INDEX `idx_tenant_theme` (`tenant_id`, `theme_id`),
     INDEX `idx_tenant_user` (`tenant_id`, `user_id`),
-    INDEX `idx_created_at` (`created_at`)
+    INDEX `idx_created_at` (`created_at`),
+    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Theme change audit logs';
 
 -- ============================================

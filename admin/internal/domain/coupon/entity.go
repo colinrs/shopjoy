@@ -43,6 +43,7 @@ type Coupon struct {
 	Status       Status
 	StartAt      time.Time
 	EndAt        time.Time
+	DeletedAt    *time.Time
 	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 

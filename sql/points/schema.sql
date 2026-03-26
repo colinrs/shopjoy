@@ -80,10 +80,12 @@ CREATE TABLE IF NOT EXISTS `points_accounts` (
     `total_expired` BIGINT NOT NULL DEFAULT 0 COMMENT '累计过期积分',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_tenant_user` (`tenant_id`, `user_id`),
     KEY `idx_user_id` (`user_id`),
-    KEY `idx_tenant_id` (`tenant_id`)
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分账户表';
 
 -- ============================================
@@ -104,6 +106,7 @@ CREATE TABLE IF NOT EXISTS `points_transactions` (
     `description` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '描述',
     `expires_at` BIGINT DEFAULT NULL COMMENT '积分过期时间(Unix时间戳)',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_user_id` (`user_id`),
@@ -111,7 +114,8 @@ CREATE TABLE IF NOT EXISTS `points_transactions` (
     KEY `idx_type` (`type`),
     KEY `idx_reference` (`reference_type`, `reference_id`),
     KEY `idx_created_at` (`created_at`),
-    KEY `idx_expires_at` (`expires_at`)
+    KEY `idx_expires_at` (`expires_at`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分交易记录表';
 
 -- ============================================
@@ -130,13 +134,15 @@ CREATE TABLE IF NOT EXISTS `points_redemptions` (
     `status` VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT '状态: pending-待处理, completed-已完成, cancelled-已取消',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `completed_at` BIGINT DEFAULT NULL COMMENT '完成时间(Unix时间戳)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_redeem_rule_id` (`redeem_rule_id`),
     KEY `idx_coupon_id` (`coupon_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_created_at` (`created_at`)
+    KEY `idx_created_at` (`created_at`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分兑换记录表';
 
 -- ============================================
