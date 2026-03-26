@@ -143,7 +143,7 @@ const loadAccount = async () => {
   loading.value = true
   try {
     const res = await getPointsAccount(id)
-    account.value = res.data
+    account.value = res
   } catch (error) {
     console.error('Failed to load account:', error)
     // Mock data
@@ -178,8 +178,8 @@ const loadTransactions = async (filters: { type?: string; startDate?: string; en
     if (filters.endDate) params.end_time = filters.endDate
 
     const res = await getAccountTransactions(account.value.id, params)
-    transactions.value = res.data.list || []
-    transactionTotal.value = res.data.total || 0
+    transactions.value = res.list || []
+    transactionTotal.value = res.total || 0
   } catch (error) {
     console.error('Failed to load transactions:', error)
     // Mock data

@@ -229,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, Refresh, InfoFilled, Van, Location, Goods } from '@element-plus/icons-vue'
@@ -387,7 +387,7 @@ const shipmentList = ref<Shipment[]>([
 const loadCarriers = async () => {
   try {
     const res = await getCarrierList()
-    carriers.value = res.data
+    carriers.value = res
   } catch (error) {
     // Use mock data
     carriers.value = [
@@ -416,8 +416,8 @@ const loadData = async () => {
       end_time: dateRange.value?.[1]
     }
     const res = await getShipmentList(params)
-    shipmentList.value = res.data.list
-    total.value = res.data.total
+    shipmentList.value = res.list
+    total.value = res.total
   } catch (error) {
     // Mock data already set
   } finally {

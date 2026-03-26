@@ -228,7 +228,7 @@ const totalExpiringPoints = computed(() => {
 const loadStats = async () => {
   try {
     const res = await getPointsStats(trendPeriod.value)
-    stats.value = res.data
+    stats.value = res
   } catch (error) {
     console.error('Failed to load stats:', error)
     // Use mock data
@@ -249,7 +249,7 @@ const loadTrendData = async () => {
   trendLoading.value = true
   try {
     const res = await getPointsTrend(trendPeriod.value)
-    trendData.value = res.data.data
+    trendData.value = res.data
   } catch (error) {
     console.error('Failed to load trend:', error)
     // Use mock data
@@ -271,7 +271,7 @@ const loadTopUsers = async () => {
   topUsersLoading.value = true
   try {
     const res = await getTopUsers(trendPeriod.value, 10)
-    topUsers.value = res.data.list
+    topUsers.value = res.list
   } catch (error) {
     console.error('Failed to load top users:', error)
     // Use mock data
@@ -291,7 +291,7 @@ const loadExpiring = async () => {
   expiringLoading.value = true
   try {
     const res = await getExpiringPoints(30)
-    expiringList.value = res.data.list
+    expiringList.value = res.list
   } catch (error) {
     console.error('Failed to load expiring:', error)
     // Use mock data

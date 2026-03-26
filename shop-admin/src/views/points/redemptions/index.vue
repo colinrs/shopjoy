@@ -175,8 +175,8 @@ const loadRedemptions = async () => {
     if (searchParams.end_time) params.end_time = searchParams.end_time
 
     const res = await getRedemptions(params)
-    redemptionList.value = res.data.list || []
-    total.value = res.data.total || 0
+    redemptionList.value = res.list || []
+    total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load redemptions:', error)
     // Mock data

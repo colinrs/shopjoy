@@ -386,7 +386,7 @@ const refundList = ref<Refund[]>([
 const loadRefundReasons = async () => {
   try {
     const res = await getRefundReasonList()
-    refundReasons.value = res.data
+    refundReasons.value = res
   } catch (error) {
     refundReasons.value = [
       { code: 'DEFECTIVE', name: 'Product Defective' },
@@ -412,8 +412,8 @@ const loadData = async () => {
       end_time: dateRange.value?.[1]
     }
     const res = await getRefundList(params)
-    refundList.value = res.data.list
-    total.value = res.data.total
+    refundList.value = res.list
+    total.value = res.total
   } catch (error) {
     // Mock data already set
   } finally {

@@ -9,10 +9,10 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">今日订单</p>
-            <p class="stat-value">{{ stats.todayOrders }}</p>
-            <p class="stat-change" :class="{ positive: isGrowthPositive(stats.todayGrowth), negative: !isGrowthPositive(stats.todayGrowth) }">
-              <el-icon><ArrowUp v-if="isGrowthPositive(stats.todayGrowth)" /><ArrowDown v-else /></el-icon>
-              {{ stats.todayGrowth }} 较昨日
+            <p class="stat-value">{{ stats.today_orders }}</p>
+            <p class="stat-change" :class="{ positive: isGrowthPositive(stats.today_growth), negative: !isGrowthPositive(stats.today_growth) }">
+              <el-icon><ArrowUp v-if="isGrowthPositive(stats.today_growth)" /><ArrowDown v-else /></el-icon>
+              {{ stats.today_growth }} 较昨日
             </p>
           </div>
         </div>
@@ -24,9 +24,9 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">今日销售额</p>
-            <p class="stat-value">¥{{ formatNumber(stats.todaySales) }}</p>
+            <p class="stat-value">¥{{ formatNumber(stats.today_sales) }}</p>
             <p class="stat-change">
-              <span class="neutral">昨日 ¥{{ formatNumber(stats.yesterdaySales) }}</span>
+              <span class="neutral">昨日 ¥{{ formatNumber(stats.yesterday_sales) }}</span>
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">商品总数</p>
-            <p class="stat-value">{{ stats.totalProducts }}</p>
+            <p class="stat-value">{{ stats.total_products }}</p>
             <p class="stat-change">
               <span class="neutral">在售商品</span>
             </p>
@@ -52,9 +52,9 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">用户总数</p>
-            <p class="stat-value">{{ stats.totalUsers }}</p>
+            <p class="stat-value">{{ stats.total_users }}</p>
             <p class="stat-change positive">
-              <el-icon><ArrowUp /></el-icon>+{{ stats.newUsersToday }} 新增用户
+              <el-icon><ArrowUp /></el-icon>+{{ stats.new_users_today }} 新增用户
             </p>
           </div>
         </div>
@@ -311,8 +311,7 @@ const formatActivityTime = (time: string) => {
 const fetchOverview = async () => {
   loading.value.overview = true
   try {
-    const { data } = await getDashboardOverview()
-    stats.value = data
+    stats.value = await getDashboardOverview()
   } catch (error) {
     console.error('Failed to fetch overview:', error)
   } finally {
@@ -324,7 +323,7 @@ const fetchOverview = async () => {
 const fetchSalesTrend = async () => {
   loading.value.charts = true
   try {
-    const { data } = await getSalesTrend({ period: timeRange.value })
+    const data = await getSalesTrend({ period: timeRange.value })
     salesTrendData.value = data.data
     updateSalesChart()
   } catch (error) {
@@ -337,7 +336,7 @@ const fetchSalesTrend = async () => {
 // Fetch order status distribution
 const fetchOrderStatus = async () => {
   try {
-    const { data } = await getOrderStatusDistribution()
+    const data = await getOrderStatusDistribution()
     orderStatusData.value = data.list
     updateOrderChart()
   } catch (error) {
@@ -349,7 +348,7 @@ const fetchOrderStatus = async () => {
 const fetchPendingOrders = async () => {
   loading.value.pending = true
   try {
-    const { data } = await getPendingOrders({ limit: 5 })
+    const data = await getPendingOrders({ limit: 5 })
     pendingOrders.value = data.list
     pendingOrdersTotal.value = data.total
   } catch (error) {
@@ -363,7 +362,7 @@ const fetchPendingOrders = async () => {
 const fetchTopProducts = async () => {
   loading.value.products = true
   try {
-    const { data } = await getTopProducts({ limit: 5, period: 'week' })
+    const data = await getTopProducts({ limit: 5, period: 'week' })
     hotProducts.value = data.list
   } catch (error) {
     console.error('Failed to fetch top products:', error)
@@ -375,7 +374,7 @@ const fetchTopProducts = async () => {
 // Fetch recent activities
 const fetchRecentActivities = async () => {
   try {
-    const { data } = await getRecentActivities({ limit: 10 })
+    const data = await getRecentActivities({ limit: 10 })
     recentActivities.value = data.list
   } catch (error) {
     console.error('Failed to fetch recent activities:', error)

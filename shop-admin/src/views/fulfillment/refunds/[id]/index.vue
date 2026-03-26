@@ -308,11 +308,19 @@ const statusTypeMap = {
 const timeline = computed(() => {
   if (!refund.value) return []
 
-  const events = [
+  type TimelineEvent = {
+    title: string
+    time: string
+    type: 'primary' | 'success' | 'danger' | 'warning' | 'info'
+    active: boolean
+    description?: string
+  }
+
+  const events: TimelineEvent[] = [
     {
       title: 'Refund Requested',
       time: refund.value.created_at,
-      type: 'primary' as const,
+      type: 'primary',
       active: true,
       description: `Reason: ${getReasonName(refund.value.reason_type)}`
     }
@@ -322,7 +330,7 @@ const timeline = computed(() => {
     events.push({
       title: 'Approved',
       time: refund.value.approved_at,
-      type: 'success' as const,
+      type: 'success',
       active: refund.value.status >= 1,
       description: refund.value.approved_by ? `By: ${refund.value.approved_by}` : ''
     })
@@ -332,7 +340,7 @@ const timeline = computed(() => {
     events.push({
       title: 'Rejected',
       time: refund.value.approved_at || refund.value.created_at,
-      type: 'danger' as const,
+      type: 'danger',
       active: true,
       description: refund.value.reject_reason
     })
@@ -342,7 +350,7 @@ const timeline = computed(() => {
     events.push({
       title: 'Refund Completed',
       time: refund.value.completed_at,
-      type: 'primary' as const,
+      type: 'primary',
       active: true,
       description: 'Payment has been refunded to buyer'
     })
@@ -352,7 +360,7 @@ const timeline = computed(() => {
     events.push({
       title: 'Cancelled',
       time: refund.value.completed_at || refund.value.created_at,
-      type: 'info' as const,
+      type: 'info',
       active: true,
       description: 'Request cancelled by buyer'
     })
@@ -365,7 +373,7 @@ const loadRefund = async () => {
   const id = route.params.id
   try {
     const res = await getRefundDetail(Number(id))
-    refund.value = res.data
+    refund.value = res
   } catch (error) {
     // Mock data
     refund.value = {
@@ -410,7 +418,7 @@ const loadRefund = async () => {
 const loadRefundReasons = async () => {
   try {
     const res = await getRefundReasonList()
-    refundReasons.value = res.data
+    refundReasons.value = res
   } catch (error) {
     refundReasons.value = [
       { code: 'DEFECTIVE', name: 'Product Defective' },

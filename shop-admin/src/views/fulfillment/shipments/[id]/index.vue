@@ -344,7 +344,7 @@ const loadShipment = async () => {
   const id = route.params.id
   try {
     const res = await getShipmentDetail(Number(id))
-    shipment.value = res.data
+    shipment.value = res
   } catch (error) {
     // Mock data
     shipment.value = {
@@ -374,7 +374,7 @@ const loadShipment = async () => {
 const loadCarriers = async () => {
   try {
     const res = await getCarrierList()
-    carriers.value = res.data
+    carriers.value = res
   } catch (error) {
     carriers.value = [
       { code: 'SF', name: 'SF Express', tracking_url: '', is_active: true },

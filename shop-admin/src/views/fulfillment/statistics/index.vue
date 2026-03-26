@@ -211,7 +211,7 @@ import {
   Warning, Goods, ArrowUp, ArrowDown
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { getFulfillmentStatistics, type FulfillmentStatistics } from '@/api/fulfillment'
+import { getFulfillmentStatistics } from '@/api/fulfillment'
 
 const timeRange = ref('30')
 const trendChartRef = ref<HTMLElement | null>(null)
@@ -383,7 +383,7 @@ const handleResize = () => {
 
 const loadData = async () => {
   try {
-    const res = await getFulfillmentStatistics({})
+    await getFulfillmentStatistics({})
     // Update stats from API
   } catch (error) {
     // Mock data already set

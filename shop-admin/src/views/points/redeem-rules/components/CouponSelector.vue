@@ -77,7 +77,7 @@ const loadCoupons = async (keyword: string = '') => {
   loading.value = true
   try {
     const res = await getAvailableCoupons({ page: 1, page_size: 20, name: keyword })
-    couponList.value = res.data?.list || []
+    couponList.value = res?.list || []
   } catch (error) {
     console.error('Failed to load coupons:', error)
     // Mock data

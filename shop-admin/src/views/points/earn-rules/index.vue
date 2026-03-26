@@ -213,9 +213,9 @@ const loadRules = async () => {
   loading.value = true
   try {
     const res = await getEarnRules(searchParams)
-    ruleList.value = res.data.list || []
-    total.value = res.data.total || 0
-    ruleStats.value = res.data.stats
+    ruleList.value = res.list || []
+    total.value = res.total || 0
+    ruleStats.value = res.stats
   } catch (error) {
     console.error('Failed to load earn rules:', error)
     // Mock data

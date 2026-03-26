@@ -261,7 +261,7 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 import {
   ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
   TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
-  Setting, SwitchButton, Box, CreditCard, Van, Picture, Moon, Sunny, ChatDotRound
+  Setting, SwitchButton, Moon, Sunny, ChatDotRound
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

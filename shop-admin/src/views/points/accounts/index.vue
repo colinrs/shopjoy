@@ -145,9 +145,9 @@ const loadAccounts = async () => {
     }
 
     const res = await getPointsAccounts(params)
-    accountList.value = res.data.list || []
-    total.value = res.data.total || 0
-    accountStats.value = res.data.stats
+    accountList.value = res.list || []
+    total.value = res.total || 0
+    accountStats.value = res.stats
   } catch (error) {
     console.error('Failed to load accounts:', error)
     // Mock data

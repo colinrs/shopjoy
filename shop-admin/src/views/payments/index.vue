@@ -170,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Download, Refresh, CopyDocument } from '@element-plus/icons-vue'
@@ -341,7 +341,7 @@ const handleCurrentChange = (val: number) => {
 const loadStats = async () => {
   try {
     const res = await getPaymentStats(selectedPeriod.value)
-    paymentStats.value = res.data
+    paymentStats.value = res
   } catch (error) {
     // Use mock data on error
     paymentStats.value = {
@@ -371,9 +371,9 @@ const loadData = async () => {
       end_time: dateRange.value?.[1]
     }
     const res = await getTransactionList(params as any)
-    transactionList.value = res.data.list
-    total.value = res.data.total
-    transactionStats.value = res.data.stats
+    transactionList.value = res.list
+    total.value = res.total
+    transactionStats.value = res.stats
   } catch (error) {
     // Mock data already set
     transactionStats.value = {

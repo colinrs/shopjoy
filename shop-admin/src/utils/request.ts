@@ -1,16 +1,25 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { handleAdminError } from './error-codes'
 import type { ApiResponse, ErrorResponse } from './types'
 
-const request = axios.create({
+// Custom request interface that returns T directly (not AxiosResponse<T>)
+interface RequestInstance {
+  <T = unknown>(config: AxiosRequestConfig): Promise<T>
+  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
+  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
+}
+
+const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 10000
 })
 
 // Request interceptor
-request.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.token) {
@@ -25,8 +34,8 @@ request.interceptors.request.use(
 )
 
 // Response interceptor
-request.interceptors.response.use(
-  (response) => {
+axiosInstance.interceptors.response.use(
+  (response): any => {
     const res = response.data as ApiResponse
 
     // Business error code check (code !== 0)
@@ -107,5 +116,16 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// Export typed request wrapper
+const request = Object.assign(
+  (config: AxiosRequestConfig) => axiosInstance(config) as Promise<any>,
+  {
+    get: (url: string, config?: AxiosRequestConfig) => axiosInstance.get(url, config) as Promise<any>,
+    post: (url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.post(url, data, config) as Promise<any>,
+    put: (url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.put(url, data, config) as Promise<any>,
+    delete: (url: string, config?: AxiosRequestConfig) => axiosInstance.delete(url, config) as Promise<any>
+  }
+) as RequestInstance
 
 export default request

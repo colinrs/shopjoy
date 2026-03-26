@@ -97,7 +97,7 @@
               v-model="row.status"
               :active-value="1"
               :inactive-value="2"
-              @change="(val) => handleStatusChange(row, val)"
+              @change="(val: number) => handleStatusChange(row, val)"
             />
           </template>
         </el-table-column>
@@ -229,7 +229,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import AdminUserForm from './components/AdminUserForm.vue'
 import RoleAssignDialog from './components/RoleAssignDialog.vue'
 import {
   getAdminUsers,
@@ -341,10 +340,6 @@ const handleRowClick = (row: any) => {
   } else {
     router.push(`/users/${row.id}`)
   }
-}
-
-const handleEdit = (row: any) => {
-  ElMessage.info('编辑顾客: ' + row.name)
 }
 
 const handleEditCustomer = (row: any) => {

@@ -159,9 +159,9 @@ export const reorderZones = (templateId: number, zoneIds: number[]) => {
 }
 
 // Mappings
-export const getTemplateMappings = (templateId: number) => {
-  return request.get<{ list: TemplateMapping[] }>(`/api/v1/shipping-templates/${templateId}/mappings`)
-    .then(res => res.list || [])
+export const getTemplateMappings = async (templateId: number) => {
+  const res = await request.get<{ list: TemplateMapping[] }>(`/api/v1/shipping-templates/${templateId}/mappings`)
+  return res.list || []
 }
 
 export const createTemplateMapping = (data: { template_id: number; target_type: 'product' | 'category'; target_id: number }) => {
@@ -178,7 +178,7 @@ export const calculateShippingFee = (data: CalculateRequest) => {
 }
 
 // Regions
-export const getRegions = (parentCode?: string) => {
-  return request.get<{ list: Region[] }>('/api/v1/regions', { params: { parent_code: parentCode } })
-    .then(res => res.list || [])
+export const getRegions = async (parentCode?: string) => {
+  const res = await request.get<{ list: Region[] }>('/api/v1/regions', { params: { parent_code: parentCode } })
+  return res.list || []
 }
