@@ -292,9 +292,9 @@ CREATE TABLE IF NOT EXISTS `markets` (
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否启用',
     `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否主市场',
     `tax_rules` JSON COMMENT '税务配置',
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间',
+    `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
+    `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_code` (`code`),
@@ -350,20 +350,20 @@ INSERT INTO `skus` (`id`, `product_id`, `code`, `price_amount`, `price_currency`
 -- 市场数据
 INSERT INTO `markets` (`id`, `tenant_id`, `code`, `name`, `currency`, `default_language`, `flag`, `is_active`, `is_default`, `tax_rules`, `created_at`, `updated_at`) VALUES
 -- Demo Shop 市场
-(1, 1, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
-(2, 1, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false, "GSTRate": 0}', NOW(), NOW()),
-(3, 1, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
-(4, 1, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', NOW(), NOW()),
-(5, 1, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 1, 0, '{"IncludeTax": true, "GSTRate": 0.10}', NOW(), NOW()),
+(1, 1, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(2, 1, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false, "GSTRate": 0}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(3, 1, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(4, 1, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(5, 1, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 1, 0, '{"IncludeTax": true, "GSTRate": 0.10}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
 
 -- Test Store 市场
-(6, 2, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
-(7, 2, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', NOW(), NOW()),
+(6, 2, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(7, 2, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
 
 -- Enterprise Corp 市场
-(8, 3, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
-(9, 3, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', NOW(), NOW()),
-(10, 3, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
-(11, 3, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', NOW(), NOW()),
-(12, 3, 'FR', '法国', 'EUR', 'fr', '🇫🇷', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
-(13, 3, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 0, 0, '{"IncludeTax": true, "GSTRate": 0.10}', NOW(), NOW());
+(8, 3, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(9, 3, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(10, 3, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(11, 3, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(12, 3, 'FR', '法国', 'EUR', 'fr', '🇫🇷', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(13, 3, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 0, 0, '{"IncludeTax": true, "GSTRate": 0.10}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
