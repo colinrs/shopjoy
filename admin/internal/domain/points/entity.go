@@ -245,8 +245,8 @@ type EarnRule struct {
 	ExpirationMonths int             `gorm:"column:expiration_months;type:int;not null;default:12"`
 	Status           EarnRuleStatus  `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	Priority         int             `gorm:"column:priority;type:int;not null;default:0"`
-	StartAt          *time.Time      `gorm:"column:start_at;type:timestamp"`
-	EndAt            *time.Time      `gorm:"column:end_at;type:timestamp"`
+	StartAt          *int64          `gorm:"column:start_at"`
+	EndAt            *int64          `gorm:"column:end_at"`
 	DeletedAt        *int64          `gorm:"column:deleted_at;index"`
 	Audit            shared.AuditInfo `gorm:"embedded"`
 }
@@ -261,15 +261,15 @@ func (e *EarnRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().UTC()
+	now := time.Now().UTC().UnixMilli()
 
 	// 检查开始时间
-	if e.StartAt != nil && now.Before(*e.StartAt) {
+	if e.StartAt != nil && now < *e.StartAt {
 		return false
 	}
 
 	// 检查结束时间
-	if e.EndAt != nil && now.After(*e.EndAt) {
+	if e.EndAt != nil && now > *e.EndAt {
 		return false
 	}
 
@@ -366,8 +366,8 @@ type RedeemRule struct {
 	UsedStock      int64            `gorm:"column:used_stock;type:bigint;not null;default:0"`
 	PerUserLimit   int              `gorm:"column:per_user_limit;type:int;not null;default:1"`
 	Status         RedeemRuleStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	StartAt        *time.Time       `gorm:"column:start_at;type:timestamp"`
-	EndAt          *time.Time       `gorm:"column:end_at;type:timestamp"`
+	StartAt        *int64          `gorm:"column:start_at"`
+	EndAt          *int64          `gorm:"column:end_at"`
 	DeletedAt      *int64           `gorm:"column:deleted_at;index"`
 	Audit          shared.AuditInfo `gorm:"embedded"`
 }
@@ -382,13 +382,13 @@ func (r *RedeemRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().UTC()
+	now := time.Now().UTC().UnixMilli()
 
-	if r.StartAt != nil && now.Before(*r.StartAt) {
+	if r.StartAt != nil && now < *r.StartAt {
 		return false
 	}
 
-	if r.EndAt != nil && now.After(*r.EndAt) {
+	if r.EndAt != nil && now > *r.EndAt {
 		return false
 	}
 
@@ -534,7 +534,7 @@ type PointsTransaction struct {
 	ReferenceType string           `gorm:"column:reference_type;type:varchar(50)"`
 	ReferenceID   string           `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
 	Description   string           `gorm:"column:description;type:text"`
-	ExpiresAt     *time.Time       `gorm:"column:expires_at;type:timestamp;index:idx_expires_at"`
+	ExpiresAt     *int64          `gorm:"column:expires_at;index:idx_expires_at"`
 	DeletedAt     *int64           `gorm:"column:deleted_at;index"`
 	Audit         shared.AuditInfo `gorm:"embedded"`
 }
@@ -565,7 +565,7 @@ type PointsRedemption struct {
 	UserCouponID int64            `gorm:"column:user_coupon_id;type:bigint"`
 	PointsUsed   int64            `gorm:"column:points_used;type:bigint;not null"`
 	Status       RedemptionStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	CompletedAt  *time.Time       `gorm:"column:completed_at;type:timestamp"`
+	CompletedAt  *int64          `gorm:"column:completed_at"`
 	DeletedAt    *int64           `gorm:"column:deleted_at;index"`
 	Audit        shared.AuditInfo `gorm:"embedded"`
 }
@@ -581,7 +581,7 @@ func (r *PointsRedemption) Complete(userCouponID int64, updatedBy int64) error {
 	}
 	r.Status = RedemptionStatusCompleted
 	r.UserCouponID = userCouponID
-	now := time.Now().UTC()
+	now := time.Now().UTC().UnixMilli()
 	r.CompletedAt = &now
 	r.Audit.Update(updatedBy)
 	return nil

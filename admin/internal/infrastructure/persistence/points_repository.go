@@ -50,16 +50,6 @@ func (earnRuleModel) TableName() string {
 }
 
 func (m *earnRuleModel) toEntity() *points.EarnRule {
-	var startAt, endAt *time.Time
-	if m.StartAt != nil {
-		t := time.Unix(*m.StartAt, 0)
-		startAt = &t
-	}
-	if m.EndAt != nil {
-		t := time.Unix(*m.EndAt, 0)
-		endAt = &t
-	}
-
 	return &points.EarnRule{
 		ID:               m.ID,
 		TenantID:         shared.TenantID(m.TenantID),
@@ -75,8 +65,8 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 		ExpirationMonths: m.ExpirationMonths,
 		Status:           points.EarnRuleStatus(m.Status),
 		Priority:         m.Priority,
-		StartAt:          startAt,
-		EndAt:            endAt,
+		StartAt:          m.StartAt,
+		EndAt:            m.EndAt,
 		DeletedAt:        m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
@@ -88,17 +78,6 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 }
 
 func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
-	var startAt, endAt *int64
-	if e.StartAt != nil {
-		ts := e.StartAt.Unix()
-		startAt = &ts
-	}
-	if e.EndAt != nil {
-		ts := e.EndAt.Unix()
-		endAt = &ts
-	}
-	deletedAt := e.DeletedAt
-
 	return &earnRuleModel{
 		ID:               e.ID,
 		TenantID:         e.TenantID.Int64(),
@@ -114,9 +93,9 @@ func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
 		ExpirationMonths: e.ExpirationMonths,
 		Status:           int(e.Status),
 		Priority:         e.Priority,
-		StartAt:          startAt,
-		EndAt:            endAt,
-		DeletedAt:        deletedAt,
+		StartAt:          e.StartAt,
+		EndAt:            e.EndAt,
+		DeletedAt:        e.DeletedAt,
 		CreatedAt:        e.Audit.CreatedAt,
 		UpdatedAt:        e.Audit.UpdatedAt,
 		CreatedBy:        e.Audit.CreatedBy,
@@ -318,16 +297,6 @@ func (redeemRuleModel) TableName() string {
 }
 
 func (m *redeemRuleModel) toEntity() *points.RedeemRule {
-	var startAt, endAt *time.Time
-	if m.StartAt != nil {
-		t := time.Unix(*m.StartAt, 0)
-		startAt = &t
-	}
-	if m.EndAt != nil {
-		t := time.Unix(*m.EndAt, 0)
-		endAt = &t
-	}
-
 	return &points.RedeemRule{
 		ID:             m.ID,
 		TenantID:       shared.TenantID(m.TenantID),
@@ -339,8 +308,8 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 		UsedStock:      m.UsedStock,
 		PerUserLimit:   m.PerUserLimit,
 		Status:         points.RedeemRuleStatus(m.Status),
-		StartAt:        startAt,
-		EndAt:          endAt,
+		StartAt:        m.StartAt,
+		EndAt:          m.EndAt,
 		DeletedAt:      m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
@@ -352,17 +321,6 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 }
 
 func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
-	var startAt, endAt *int64
-	if r.StartAt != nil {
-		ts := r.StartAt.Unix()
-		startAt = &ts
-	}
-	if r.EndAt != nil {
-		ts := r.EndAt.Unix()
-		endAt = &ts
-	}
-	deletedAt := r.DeletedAt
-
 	return &redeemRuleModel{
 		ID:             r.ID,
 		TenantID:       r.TenantID.Int64(),
@@ -374,9 +332,9 @@ func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
 		UsedStock:      r.UsedStock,
 		PerUserLimit:   r.PerUserLimit,
 		Status:         int(r.Status),
-		StartAt:        startAt,
-		EndAt:          endAt,
-		DeletedAt:      deletedAt,
+		StartAt:        r.StartAt,
+		EndAt:          r.EndAt,
+		DeletedAt:      r.DeletedAt,
 		CreatedAt:      r.Audit.CreatedAt,
 		UpdatedAt:      r.Audit.UpdatedAt,
 		CreatedBy:      r.Audit.CreatedBy,
@@ -748,12 +706,6 @@ func (pointsTransactionModel) TableName() string {
 }
 
 func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
-	var expiresAt *time.Time
-	if m.ExpiresAt != nil {
-		t := time.Unix(*m.ExpiresAt, 0)
-		expiresAt = &t
-	}
-
 	return &points.PointsTransaction{
 		ID:            m.ID,
 		TenantID:      shared.TenantID(m.TenantID),
@@ -765,7 +717,7 @@ func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
 		ReferenceType: m.ReferenceType,
 		ReferenceID:   m.ReferenceID,
 		Description:   m.Description,
-		ExpiresAt:     expiresAt,
+		ExpiresAt:     m.ExpiresAt,
 		DeletedAt:     m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
@@ -777,12 +729,6 @@ func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
 }
 
 func fromPointsTransactionEntity(t *points.PointsTransaction) *pointsTransactionModel {
-	var expiresAt *int64
-	if t.ExpiresAt != nil {
-		ts := t.ExpiresAt.Unix()
-		expiresAt = &ts
-	}
-
 	return &pointsTransactionModel{
 		ID:            t.ID,
 		TenantID:      t.TenantID.Int64(),
@@ -794,7 +740,7 @@ func fromPointsTransactionEntity(t *points.PointsTransaction) *pointsTransaction
 		ReferenceType: t.ReferenceType,
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
-		ExpiresAt:     expiresAt,
+		ExpiresAt:     t.ExpiresAt,
 		DeletedAt:     t.DeletedAt,
 		CreatedAt:     t.Audit.CreatedAt,
 		UpdatedAt:     t.Audit.UpdatedAt,
@@ -946,12 +892,6 @@ func (pointsRedemptionModel) TableName() string {
 }
 
 func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
-	var completedAt *time.Time
-	if m.CompletedAt != nil {
-		t := time.Unix(*m.CompletedAt, 0)
-		completedAt = &t
-	}
-
 	return &points.PointsRedemption{
 		ID:           m.ID,
 		TenantID:     shared.TenantID(m.TenantID),
@@ -961,7 +901,7 @@ func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
 		UserCouponID: m.UserCouponID,
 		PointsUsed:   m.PointsUsed,
 		Status:       points.RedemptionStatus(m.Status),
-		CompletedAt:  completedAt,
+		CompletedAt:  m.CompletedAt,
 		DeletedAt:    m.DeletedAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt,
@@ -973,12 +913,6 @@ func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
 }
 
 func fromPointsRedemptionEntity(r *points.PointsRedemption) *pointsRedemptionModel {
-	var completedAt *int64
-	if r.CompletedAt != nil {
-		ts := r.CompletedAt.Unix()
-		completedAt = &ts
-	}
-
 	return &pointsRedemptionModel{
 		ID:           r.ID,
 		TenantID:     r.TenantID.Int64(),
@@ -988,7 +922,7 @@ func fromPointsRedemptionEntity(r *points.PointsRedemption) *pointsRedemptionMod
 		UserCouponID: r.UserCouponID,
 		PointsUsed:   r.PointsUsed,
 		Status:       int(r.Status),
-		CompletedAt:  completedAt,
+		CompletedAt:  r.CompletedAt,
 		DeletedAt:    r.DeletedAt,
 		CreatedAt:    r.Audit.CreatedAt,
 		UpdatedAt:    r.Audit.UpdatedAt,

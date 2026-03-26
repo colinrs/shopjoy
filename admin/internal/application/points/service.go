@@ -307,8 +307,8 @@ func (s *service) CreateEarnRule(ctx context.Context, tenantID shared.TenantID, 
 		ExpirationMonths: req.ExpirationMonths,
 		Status:           points.EarnRuleStatusDraft,
 		Priority:         req.Priority,
-		StartAt:          req.StartAt,
-		EndAt:            req.EndAt,
+		StartAt:          timeToInt64(req.StartAt),
+		EndAt:            timeToInt64(req.EndAt),
 		Audit:            shared.NewAuditInfo(operatorID),
 	}
 
@@ -340,8 +340,8 @@ func (s *service) UpdateEarnRule(ctx context.Context, tenantID shared.TenantID, 
 	rule.ConditionValue = req.ConditionValue
 	rule.ExpirationMonths = req.ExpirationMonths
 	rule.Priority = req.Priority
-	rule.StartAt = req.StartAt
-	rule.EndAt = req.EndAt
+	rule.StartAt = timeToInt64(req.StartAt)
+	rule.EndAt = timeToInt64(req.EndAt)
 	rule.Audit.Update(operatorID)
 
 	if err := s.earnRuleRepo.Update(ctx, s.db, rule); err != nil {
@@ -446,8 +446,8 @@ func (s *service) CreateRedeemRule(ctx context.Context, tenantID shared.TenantID
 		UsedStock:      0,
 		PerUserLimit:   req.PerUserLimit,
 		Status:         points.RedeemRuleStatusInactive,
-		StartAt:        req.StartAt,
-		EndAt:          req.EndAt,
+		StartAt:        timeToInt64(req.StartAt),
+		EndAt:          timeToInt64(req.EndAt),
 		Audit:          shared.NewAuditInfo(operatorID),
 	}
 
@@ -474,8 +474,8 @@ func (s *service) UpdateRedeemRule(ctx context.Context, tenantID shared.TenantID
 	rule.PointsRequired = req.PointsRequired
 	rule.TotalStock = req.TotalStock
 	rule.PerUserLimit = req.PerUserLimit
-	rule.StartAt = req.StartAt
-	rule.EndAt = req.EndAt
+	rule.StartAt = timeToInt64(req.StartAt)
+	rule.EndAt = timeToInt64(req.EndAt)
 	rule.Audit.Update(operatorID)
 
 	if err := s.redeemRuleRepo.Update(ctx, s.db, rule); err != nil {
@@ -802,6 +802,24 @@ func (s *service) GetExpiringPoints(ctx context.Context, tenantID shared.TenantI
 
 // ==================== Helper Functions ====================
 
+// timeToInt64 converts *time.Time to *int64 (Unix milliseconds)
+func timeToInt64(t *time.Time) *int64 {
+	if t == nil {
+		return nil
+	}
+	ts := t.UnixMilli()
+	return &ts
+}
+
+// int64ToTime converts *int64 (Unix milliseconds) to *time.Time
+func int64ToTime(ts *int64) *time.Time {
+	if ts == nil {
+		return nil
+	}
+	t := time.UnixMilli(*ts)
+	return &t
+}
+
 func toEarnRuleDTO(r *points.EarnRule) *EarnRuleDTO {
 	return &EarnRuleDTO{
 		ID:               r.ID,
@@ -817,8 +835,8 @@ func toEarnRuleDTO(r *points.EarnRule) *EarnRuleDTO {
 		ExpirationMonths: r.ExpirationMonths,
 		Status:           r.Status.String(),
 		Priority:         r.Priority,
-		StartAt:          r.StartAt,
-		EndAt:            r.EndAt,
+		StartAt:          int64ToTime(r.StartAt),
+		EndAt:            int64ToTime(r.EndAt),
 		CreatedAt:        time.Unix(r.Audit.CreatedAt, 0),
 		UpdatedAt:        time.Unix(r.Audit.UpdatedAt, 0),
 	}
@@ -835,8 +853,8 @@ func toRedeemRuleDTO(r *points.RedeemRule) *RedeemRuleDTO {
 		UsedStock:      r.UsedStock,
 		PerUserLimit:   r.PerUserLimit,
 		Status:         r.Status.String(),
-		StartAt:        r.StartAt,
-		EndAt:          r.EndAt,
+		StartAt:        int64ToTime(r.StartAt),
+		EndAt:          int64ToTime(r.EndAt),
 		CreatedAt:      time.Unix(r.Audit.CreatedAt, 0),
 		UpdatedAt:      time.Unix(r.Audit.UpdatedAt, 0),
 	}
@@ -867,7 +885,7 @@ func toPointsTransactionDTO(t *points.PointsTransaction) *PointsTransactionDTO {
 		ReferenceType: t.ReferenceType,
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
-		ExpiresAt:     t.ExpiresAt,
+		ExpiresAt:     int64ToTime(t.ExpiresAt),
 		CreatedAt:     time.Unix(t.Audit.CreatedAt, 0),
 	}
 }
@@ -881,7 +899,7 @@ func toPointsRedemptionDTO(r *points.PointsRedemption) *PointsRedemptionDTO {
 		UserCouponID: r.UserCouponID,
 		PointsUsed:   r.PointsUsed,
 		Status:       r.Status.String(),
-		CompletedAt:  r.CompletedAt,
+		CompletedAt:  int64ToTime(r.CompletedAt),
 		CreatedAt:    time.Unix(r.Audit.CreatedAt, 0),
 	}
 }

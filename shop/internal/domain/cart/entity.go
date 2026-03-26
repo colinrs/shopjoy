@@ -15,7 +15,8 @@ type Cart struct {
 	UserID    int64
 	SessionID string
 	Items     []CartItem
-	UpdatedAt time.Time
+	CreatedAt int64
+	UpdatedAt int64
 	DeletedAt *int64
 }
 
@@ -32,7 +33,7 @@ func (c *Cart) AddItem(productID, skuID int64, quantity int, price shared.Money,
 		if c.Items[i].SKUId == skuID {
 			c.Items[i].Quantity += quantity
 			c.Items[i].UpdateTotal()
-			c.UpdatedAt = time.Now().UTC()
+			c.UpdatedAt = time.Now().Unix()
 			return nil
 		}
 	}
@@ -50,7 +51,7 @@ func (c *Cart) AddItem(productID, skuID int64, quantity int, price shared.Money,
 	}
 	item.UpdateTotal()
 	c.Items = append(c.Items, item)
-	c.UpdatedAt = time.Now().UTC()
+	c.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -63,7 +64,7 @@ func (c *Cart) UpdateItem(skuID int64, quantity int) error {
 		if c.Items[i].SKUId == skuID {
 			c.Items[i].Quantity = quantity
 			c.Items[i].UpdateTotal()
-			c.UpdatedAt = time.Now().UTC()
+			c.UpdatedAt = time.Now().Unix()
 			return nil
 		}
 	}
@@ -74,7 +75,7 @@ func (c *Cart) RemoveItem(skuID int64) error {
 	for i := range c.Items {
 		if c.Items[i].SKUId == skuID {
 			c.Items = append(c.Items[:i], c.Items[i+1:]...)
-			c.UpdatedAt = time.Now().UTC()
+			c.UpdatedAt = time.Now().Unix()
 			return nil
 		}
 	}
@@ -83,7 +84,7 @@ func (c *Cart) RemoveItem(skuID int64) error {
 
 func (c *Cart) Clear() {
 	c.Items = nil
-	c.UpdatedAt = time.Now().UTC()
+	c.UpdatedAt = time.Now().Unix()
 }
 
 func (c *Cart) GetTotal() shared.Money {
