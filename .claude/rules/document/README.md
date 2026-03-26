@@ -46,22 +46,23 @@ docs/
 │   └── review/
 │
 ├── cross-cutting/                 # 跨领域文档
-│   ├── api/                       # API 文档
+│   ├── api/                       # API 文档（无时间戳，始终保持最新）
 │   │   ├── README.md
-│   │   ├── {日期}-api-reference.md
+│   │   ├── api-reference.md
 │   │   └── openapi.yaml
 │   └── tech-design/               # 技术设计
 │       └── {日期}-{名称}-design.md
 │
-├── guides/                        # 开发指南
-│   ├── {日期}-onboarding.md
-│   ├── {日期}-developer-guide.md
-│   └── {日期}-user-guide.md
+├── guides/                        # 开发指南（无时间戳，始终保持最新）
+│   ├── onboarding.md
+│   ├── developer-guide.md
+│   └── user-guide.md
 │
-├── reference/                     # 参考资料
-│   ├── {日期}-error-codes.md
-│   ├── {日期}-database-overview.md
-│   └── {日期}-code-documentation.md
+├── reference/                     # 参考资料（无时间戳，始终保持最新）
+│   ├── api-reference.md
+│   ├── database-overview.md
+│   ├── error-codes.md
+│   └── code-documentation.md
 │
 ├── plans/                         # 开发计划
 ├── superpowers/                   # AI Agent 文档
@@ -87,8 +88,18 @@ docs/
 | 领域设计 | `{日期}-{领域}-domain-design.md` | `2026-03-22-fulfillment-domain-design.md` |
 | 子功能 PRD | `{日期}-{领域}-{功能}-prd.md` | `2026-03-25-fulfillment-shipping-prd.md` |
 | 技术设计（跨领域） | `{日期}-{名称}-design.md` | `2026-03-22-sku-code-generation-design.md` |
-| 指南 | `{日期}-{名称}.md` | `2026-03-18-onboarding.md` |
-| 参考资料 | `{日期}-{名称}.md` | `2026-03-21-error-codes.md` |
+
+**无时间戳文档**（始终保持最新，覆盖式更新）：
+
+| 文档类型 | 命名格式 | 示例 |
+|---------|---------|------|
+| API 参考 | `api-reference.md` | `docs/cross-cutting/api/api-reference.md` |
+| 数据库概览 | `database-overview.md` | `docs/reference/database-overview.md` |
+| 错误码 | `error-codes.md` | `docs/reference/error-codes.md` |
+| 代码文档 | `code-documentation.md` | `docs/reference/code-documentation.md` |
+| 开发指南 | `developer-guide.md` | `docs/guides/developer-guide.md` |
+| 新人上手 | `onboarding.md` | `docs/guides/onboarding.md` |
+| 用户指南 | `user-guide.md` | `docs/guides/user-guide.md` |
 
 ### 文档位置规则
 
@@ -234,25 +245,27 @@ shop-admin/                        # 或 joy/
 | # | 规则 | 说明 |
 |---|------|------|
 | 1 | 三合一对应 | 文档、SQL、代码使用相同领域划分 |
-| 2 | 日期前缀 | 文档和迁移文件使用日期前缀 |
+| 2 | 日期前缀 | 文档和迁移文件使用日期前缀（特定目录除外） |
 | 3 | 领域隔离 | 每个领域独立的目录 |
 | 4 | 跨领域放 cross-cutting | 跨领域的文档统一放置 |
+| 5 | 始终保持最新 | `docs/reference/`、`docs/guides/`、`docs/cross-cutting/api/` 始终为最新，覆盖式更新 |
 
 ### SHOULD
 
 | # | 规则 | 说明 |
 |---|------|------|
-| 5 | 归档机制 | 过期文档移入 `_archive/` |
-| 6 | 模板复用 | 使用 `_templates/` 中的模板 |
-| 7 | 索引维护 | 更新 `docs/README.md` 索引 |
+| 6 | 归档机制 | 过期文档移入 `_archive/` |
+| 7 | 模板复用 | 使用 `_templates/` 中的模板 |
+| 8 | 索引维护 | 更新 `docs/README.md` 索引 |
 
 ### FORBIDDEN
 
 | # | 规则 | 说明 |
 |---|------|------|
-| 8 | 随意放置文档 | 必须按领域组织 |
-| 9 | 省略日期前缀 | 文档必须有日期前缀 |
-| 10 | 迁移放根目录 | 迁移必须放在领域 migrations 目录 |
+| 9 | 随意放置文档 | 必须按领域组织 |
+| 10 | 省略日期前缀 | 文档必须有日期前缀（reference/guides/api 除外） |
+| 11 | 迁移放根目录 | 迁移必须放在领域 migrations 目录 |
+| 12 | 为 reference/guides/api 添加时间戳 | 这些目录的文档名必须保持无时间戳 |
 
 ## 七、示例
 

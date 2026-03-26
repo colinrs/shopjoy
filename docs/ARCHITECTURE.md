@@ -1,256 +1,698 @@
-# ShopJoy 电商SaaS平台 - 项目架构文档
+# ShopJoy Architecture Documentation
 
-## 项目概述
+> **Version:** 1.0
+> **Last Updated:** 2026-03-26
+> **Status:** Active Development
 
-ShopJoy 是一个基于 **go-zero + DDD（领域驱动设计）** 的轻量级多租户独立电商SaaS平台。
+---
 
-## 项目结构
+## Executive Summary
 
-```
-shopjoy/
-├── admin/                          # 管理后台API（go-zero）
-│   ├── internal/
-│   │   ├── application/            # 应用层 - 用例编排
-│   │   │   ├── product/            # 商品应用服务
-│   │   │   └── user/               # 用户应用服务
-│   │   ├── domain/                 # 领域层 - 核心业务逻辑
-│   │   │   ├── product/            # 商品领域（实体、值对象、仓储接口）
-│   │   │   ├── role/               # 角色权限领域
-│   │   │   ├── tenant/             # 租户领域
-│   │   │   ├── user/               # 用户领域
-│   │   │   ├── category/           # 分类领域
-│   │   │   ├── brand/              # 品牌领域
-│   │   │   ├── promotion/          # 促销领域
-│   │   │   ├── coupon/             # 优惠券领域
-│   │   │   ├── storefront/         # 店铺领域
-│   │   │   └── fulfillment/        # 履约领域
-│   │   ├── infrastructure/         # 基础设施层
-│   │   │   └── persistence/        # 仓储实现
-│   │   └── ...
-│   └── desc/                       # API定义文件
-├── shop/                           # 商城买家端API（go-zero）
-│   └── internal/
-│       ├── domain/                 # 领域层
-│       │   ├── order/              # 订单领域
-│       │   ├── cart/               # 购物车领域
-│       │   └── payment/            # 支付领域
-│       └── application/            # 应用层
-├── pkg/                            # 全局公共包
-│   ├── domain/shared/              # 共享内核
-│   │   ├── value_objects.go        # Money, TenantID, AuditInfo等
-│   │   └── event.go                # DomainEvent, EventBus等
-│   ├── tenant/                     # 多租户支持
-│   │   ├── tenant.go               # Tenant实体和上下文
-│   │   └── middleware.go           # 租户中间件
-│   ├── asyncq/                     # 异步队列（asynq）
-│   │   └── asyncq.go               # 任务队列客户端/服务端
-│   ├── application/                # 应用层基础
-│   │   └── base.go                 # CommandHandler, QueryHandler
-│   ├── cache/                      # 缓存抽象
-│   ├── code/                       # 错误码定义
-│   ├── infra/                      # 基础设施
-│   │   ├── db.go                   # 数据库连接
-│   │   └── redis.go                # Redis连接
-│   └── ...
-├── shop-admin/                     # Vue3管理后台前端
-│   ├── src/
-│   │   ├── views/                  # 页面视图
-│   │   ├── components/             # 组件
-│   │   ├── stores/                 # Pinia状态管理
-│   │   ├── router/                 # Vue Router
-│   │   └── api/                    # API接口
-│   └── package.json
-├── joy/                            # Vue3商城前端（买家端）
-│   ├── src/
-│   │   ├── views/
-│   │   ├── components/
-│   │   ├── stores/
-│   │   ├── router/
-│   │   └── themes/                 # 多主题支持
-│   └── package.json
-└── docs/                           # 文档
-    └── prd/
-        └── prd-1.md                # 产品需求文档
+ShopJoy is a **multi-tenant e-commerce SaaS platform** built with Go (go-zero framework) and Vue.js. It implements **Domain-Driven Design (DDD)** principles with clear separation of concerns across 10 business domains. The platform supports multiple tenants (merchants) with complete data isolation while sharing infrastructure resources.
+
+### Key Characteristics
+
+| Aspect | Description |
+|--------|-------------|
+| **Architecture Style** | Microservices-inspired modular monolith |
+| **Design Pattern** | Domain-Driven Design (DDD) with Layered Architecture |
+| **Multi-Tenancy** | Shared database, tenant-isolated data (tenant_id) |
+| **API Style** | RESTful with JWT authentication |
+| **Frontend** | Vue 3 + TypeScript + Vite |
+
+---
+
+## System Architecture Overview
+
+### Service Architecture
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        A[shop-admin<br/>Vue3 + Element Plus<br/>Port 3000]
+        B[joy<br/>Vue3 + Tailwind CSS<br/>Port 3001]
+    end
+
+    subgraph "API Gateway Layer"
+        C[Admin API<br/>go-zero<br/>Port 8888]
+        D[Shop API<br/>go-zero<br/>Port 8889]
+    end
+
+    subgraph "Infrastructure Layer"
+        E[(MySQL 8.0)]
+        F[(Redis 7.0)]
+        G[etcd]
+    end
+
+    A -->|HTTPS/HTTP| C
+    B -->|HTTPS/HTTP| D
+    C --> E
+    C --> F
+    D --> E
+    D --> F
+    C --> G
+    D --> G
 ```
 
-## DDD战略设计 - 6大限界上下文
+### Service Responsibilities
 
-### 1. Identity & Access Context（身份与权限上下文）
-- **位置**: `admin/internal/domain/{user,role,tenant}/`
-- **核心实体**:
-  - `Tenant` - 租户（多租户核心）
-  - `User` - 用户
-  - `Role` - 角色
-  - `Permission` - 权限
-- **关键特性**:
-  - JWT + Refresh Token 双令牌机制
-  - RBAC 权限体系
-  - 租户隔离（tenant_id全局贯穿）
+| Service | Port | Purpose | Target Users |
+|---------|------|---------|--------------|
+| **admin** | 8888 | Management backend APIs | Store administrators, operators |
+| **shop** | 8889 | Customer-facing storefront APIs | End customers |
+| **shop-admin** | 3000 | Admin dashboard UI | Store administrators |
+| **joy** | 3001 | Storefront frontend | End customers |
 
-### 2. Catalog Context（商品目录上下文）
-- **位置**: `admin/internal/domain/product/`
-- **核心实体**:
-  - `Product` - 商品（聚合根）
-  - `SKU` - SKU规格
-  - `Category` - 分类
-  - `Brand` - 品牌
-  - `Attribute` - 属性模板
-- **关键特性**:
-  - SPU + 多SKU管理
-  - 库存管理（Redis预占+确认扣减）
-  - 商品状态机（草稿→上架→下架）
+---
 
-### 3. Sales & Order Context（销售与订单上下文）
-- **位置**: `shop/internal/domain/{order,cart}/`
-- **核心实体**:
-  - `Order` - 订单（聚合根）
-  - `OrderItem` - 订单项
-  - `Cart` - 购物车
-  - `CartItem` - 购物车项
-- **关键特性**:
-  - 订单状态机（待支付→已支付→待发货→已完成）
-  - 购物车合并（游客+登录用户）
-  - 订单超时自动关闭（asyncq）
+## Domain-Driven Design Structure
 
-### 4. Promotion Context（促销上下文）
-- **位置**: `admin/internal/domain/{promotion,coupon}/`
-- **核心实体**:
-  - `Promotion` - 促销活动
-  - `PromotionRule` - 促销规则
-  - `Coupon` - 优惠券
-  - `UserCoupon` - 用户优惠券
-- **关键特性**:
-  - 秒杀、满减、折扣
-  - 促销规则引擎
-  - 优惠券全生命周期管理
+### 10 Business Domains
 
-### 5. Storefront Context（店铺前台上下文）
-- **位置**: `admin/internal/domain/storefront/`
-- **核心实体**:
-  - `Shop` - 店铺
-  - `Theme` - 主题
-  - `Page` - 页面装修
-  - `Navigation` - 导航菜单
-- **关键特性**:
-  - 多主题切换
-  - 页面装修
-  - SEO配置
+```mermaid
+graph LR
+    subgraph "Core Domains"
+        A[Product<br/>Catalog]
+        B[Order<br/>Management]
+        C[Payment<br/>Processing]
+    end
 
-### 6. Fulfillment Context（履约上下文）
-- **位置**: `admin/internal/domain/fulfillment/`
-- **核心实体**:
-  - `Shipment` - 发货单
-  - `Refund` - 退款单
-- **关键特性**:
-  - 物流跟踪
-  - 退款流程
+    subgraph "Supporting Domains"
+        D[User<br/>Management]
+        E[Fulfillment<br/>Shipping]
+        F[Promotion<br/>Coupons]
+    end
 
-### 7. Payment Context（支付上下文）
-- **位置**: `shop/internal/domain/payment/`
-- **核心实体**:
-  - `Payment` - 支付单
-  - `Refund` - 支付退款
-- **关键特性**:
-  - 多渠道支付（支付宝、微信等）
-  - 支付回调处理
+    subgraph "Generic Domains"
+        G[Tenant<br/>Management]
+        H[Storefront<br/>Configuration]
+        I[Review<br/>System]
+        J[Points<br/>Loyalty]
+    end
 
-## 架构原则
-
-### 1. 分层架构
-```
-┌─────────────────────────────────────────┐
-│           Interface Layer               │
-│  (Handler / Controller / API)           │
-├─────────────────────────────────────────┤
-│         Application Layer               │
-│  (Service / DTO / Use Case)             │
-├─────────────────────────────────────────┤
-│           Domain Layer                  │
-│  (Entity / Value Object / Repository)   │
-├─────────────────────────────────────────┤
-│       Infrastructure Layer              │
-│  (RepositoryImpl / External Service)    │
-└─────────────────────────────────────────┘
+    A --> B
+    B --> C
+    B --> E
+    F --> B
+    D --> B
+    D --> I
+    D --> J
+    G -.-> A
+    G -.-> B
+    G -.-> D
 ```
 
-### 2. Repository模式
-- 仓储接口定义在Domain层
-- 仓储实现在Infrastructure层
-- **DB/Tx作为参数传递，不存储在Repository中**
+### Domain Mapping
 
-### 3. 多租户策略
-- 所有聚合根包含 `TenantID`
-- 通过 `pkg/tenant` middleware注入租户上下文
-- 数据库采用 `tenant_id + 索引` 隔离
+| Domain | Backend Location | Database Schema | Documentation |
+|--------|-----------------|-----------------|---------------|
+| **user** | `admin/internal/domain/{user,adminuser,role,tenant}/` | `sql/user/schema.sql` | `docs/domains/user/` |
+| **product** | `admin/internal/domain/{product,market}/` | `sql/product/schema.sql` | `docs/domains/product/` |
+| **order** | `shop/internal/domain/order/`, `shop/internal/domain/cart/` | `sql/order/schema.sql` | `docs/domains/order/` |
+| **promotion** | `admin/internal/domain/{promotion,coupon}/` | `sql/promotion/schema.sql` | `docs/domains/promotion/` |
+| **payment** | `shop/internal/domain/payment/`, `admin/internal/domain/payment/` | `sql/payment/schema.sql` | `docs/domains/payment/` |
+| **fulfillment** | `admin/internal/domain/fulfillment/` | `sql/fulfillment/schema.sql` | `docs/domains/fulfillment/` |
+| **storefront** | `admin/internal/domain/storefront/` | `sql/storefront/schema.sql` | `docs/domains/storefront/` |
+| **shop** | `admin/internal/handler/shop/` | `sql/shop/schema.sql` | `docs/domains/shop/` |
+| **review** | `admin/internal/domain/review/` | `sql/review/schema.sql` | `docs/domains/review/` |
+| **points** | `admin/internal/domain/points/` | `sql/points/schema.sql` | `docs/domains/points/` |
 
-### 4. 共享内核 (Shared Kernel)
-- `pkg/domain/shared/` 包含所有上下文共享的值对象
-- `Money` - 金额（单位为分）
-- `TenantID` - 租户ID
-- `DomainEvent` - 领域事件
-- `AuditInfo` - 审计信息
+---
 
-## 技术栈
+## Layered Architecture
 
-### 后端
-- **框架**: go-zero (微服务框架)
-- **数据库**: PostgreSQL (PRD要求) / MySQL (当前)
-- **缓存**: Redis (Cluster模式)
-- **ORM**: GORM
-- **异步队列**: asynq (基于Redis)
-- **JSON**: sonic (高性能)
-- **ID生成**: snowflake
+### DDD Layer Structure
 
-### 前端
-- **框架**: Vue 3 + TypeScript
-- **状态管理**: Pinia
-- **UI组件库**: Element Plus (admin)
-- **样式**: Tailwind CSS (joy)
-- **构建工具**: Vite
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Interface Layer                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Handler   │  │ Middleware  │  │   API Definition    │  │
+│  │  (go-zero)  │  │(Auth, Tenant)│  │     (*.api)         │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│                  Application Layer                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Service   │  │     DTO     │  │   Use Case Logic    │  │
+│  │  (Logic)    │  │ (Request/   │  │   (Orchestration)   │  │
+│  │             │  │  Response)  │  │                     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│                     Domain Layer                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Entity    │  │Value Object │  │ Repository Interface│  │
+│  │ (Aggregate  │  │  (Money,    │  │    (Domain Logic)   │  │
+│  │   Root)     │  │  TenantID)  │  │                     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│               Infrastructure Layer                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │Repository   │  │   External  │  │   Message Queue     │  │
+│  │Implementation│  │   Services  │  │      (asynq)        │  │
+│  │   (GORM)    │  │             │  │                     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## 快速开始
+### Layer Responsibilities
 
-### 安装依赖
+#### 1. Interface Layer
+- **Location**: `admin/internal/handler/`, `shop/internal/handler/`
+- **Purpose**: Handle HTTP requests/responses
+- **Key Components**:
+  - API handlers (auto-generated from .api files)
+  - Middleware (authentication, tenant context)
+  - Request validation
+
+#### 2. Application Layer
+- **Location**: `admin/internal/application/`, `shop/internal/application/`
+- **Purpose**: Orchestrate use cases, coordinate domain objects
+- **Key Components**:
+  - Application services
+  - DTOs (Data Transfer Objects)
+  - Transaction management
+
+#### 3. Domain Layer
+- **Location**: `admin/internal/domain/`, `shop/internal/domain/`, `pkg/domain/`
+- **Purpose**: Core business logic, business rules
+- **Key Components**:
+  - Entities (aggregate roots)
+  - Value objects (Money, TenantID)
+  - Repository interfaces
+  - Domain events
+
+#### 4. Infrastructure Layer
+- **Location**: `admin/internal/infrastructure/`, `pkg/infra/`
+- **Purpose**: Technical capabilities, external integrations
+- **Key Components**:
+  - Repository implementations (GORM)
+  - Database connections
+  - Redis clients
+  - Message queue (asynq)
+
+---
+
+## Multi-Tenant Architecture
+
+### Tenant Isolation Strategy
+
+ShopJoy uses **Shared Database with Tenant ID Discriminator** pattern:
+
+```mermaid
+graph TD
+    subgraph "Database"
+        DB[(MySQL)]
+    end
+
+    subgraph "Tenants"
+        T1[Tenant 1<br/>Demo Shop]
+        T2[Tenant 2<br/>Test Store]
+        T3[Tenant 3<br/>Enterprise Corp]
+    end
+
+    subgraph "Data Isolation"
+        D1[products<br/>tenant_id=1]
+        D2[products<br/>tenant_id=2]
+        D3[products<br/>tenant_id=3]
+    end
+
+    T1 -->|owns| D1
+    T2 -->|owns| D2
+    T3 -->|owns| D3
+    D1 --> DB
+    D2 --> DB
+    D3 --> DB
+```
+
+### Tenant Context Propagation
+
+```go
+// From pkg/tenant/tenant.go
+type TenantContext struct {
+    TenantID   shared.TenantID
+    TenantCode string
+    UserID     int64
+    UserType   int // 1=super_admin, 2=tenant_admin, 3=sub_account
+}
+
+// Middleware injects tenant context from JWT
+func TenantMiddleware(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // Extract tenant_id from JWT claims
+        // Inject into context for downstream use
+    }
+}
+```
+
+### Tenant-Aware Queries
+
+All queries include `tenant_id` filter:
+
+```go
+// Repository pattern with tenant isolation
+func (r *ProductRepository) FindByID(ctx context.Context, db *gorm.DB,
+    tenantID shared.TenantID, id int64) (*product.Product, error) {
+    var p product.Product
+    err := db.WithContext(ctx).
+        Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+        First(&p).Error
+    return &p, err
+}
+```
+
+---
+
+## Data Flow Architecture
+
+### Order Creation Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant S as Shop API
+    participant Cart as Cart Service
+    participant Prod as Product Service
+    participant Order as Order Service
+    participant Inv as Inventory Service
+    participant Pay as Payment Service
+    participant DB as Database
+
+    C->>S: POST /api/v1/orders
+    S->>Cart: GetCart(userID)
+    Cart-->>S: Cart with Items
+
+    loop Validate Items
+        S->>Prod: GetProduct(skuID)
+        Prod-->>S: Product Info
+        S->>Inv: CheckStock(skuID, qty)
+        Inv-->>S: Stock Available
+    end
+
+    S->>Order: CreateOrder(cart, address)
+    Order->>DB: INSERT orders
+    Order->>DB: INSERT order_items
+
+    S->>Cart: ClearCart(userID)
+    S->>Inv: LockStock(orderItems)
+
+    S->>Pay: CreatePayment(order)
+    Pay-->>S: Payment Intent
+
+    S-->>C: Order + Payment URL
+```
+
+### Payment Processing Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant S as Shop API
+    participant Pay as Payment Service
+    participant Gate as Payment Gateway
+    participant Order as Order Service
+    participant Inv as Inventory Service
+    participant DB as Database
+
+    C->>S: POST /api/v1/payments
+    S->>Pay: ProcessPayment(orderID)
+    Pay->>DB: CREATE payment record
+    Pay->>Gate: Charge(amount)
+    Gate-->>Pay: Payment Result
+
+    alt Payment Success
+        Pay->>Order: ConfirmOrderPayment
+        Order->>DB: UPDATE order status=paid
+        Pay->>Inv: ConfirmStockDeduction
+        Pay-->>S: Success
+        S-->>C: Payment Success
+    else Payment Failed
+        Pay->>Order: CancelOrder
+        Order->>DB: UPDATE order status=cancelled
+        Pay->>Inv: ReleaseStock
+        Pay-->>S: Failure
+        S-->>C: Payment Failed
+    end
+```
+
+---
+
+## Shared Kernel
+
+### Common Value Objects
+
+Located in `pkg/domain/shared/`:
+
+#### Money
+```go
+type Money struct {
+    Amount   int64  // Stored in cents (smallest currency unit)
+    Currency string // ISO 4217 code: CNY, USD, EUR
+}
+
+// Methods: Add(), Subtract(), Multiply(), Equals(), IsZero()
+```
+
+#### TenantID
+```go
+type TenantID int64
+
+func (t TenantID) Int64() int64
+func (t TenantID) String() string
+func (t TenantID) IsValid() bool
+```
+
+#### AuditInfo
+```go
+type AuditInfo struct {
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    CreatedBy int64
+    UpdatedBy int64
+}
+```
+
+#### UnixTime
+```go
+// Wrapper for time.Time that stores as Unix timestamp in database
+type UnixTime struct {
+    time.Time
+}
+
+// Implements sql.Scanner and driver.Valuer for BIGINT storage
+```
+
+---
+
+## Entity Relationship Overview
+
+### Core Entity Relationships
+
+```mermaid
+erDiagram
+    TENANT ||--o{ USER : contains
+    TENANT ||--o{ PRODUCT : contains
+    TENANT ||--o{ ORDER : contains
+    TENANT ||--o{ CATEGORY : contains
+    TENANT ||--o{ BRAND : contains
+
+    USER ||--o{ ORDER : places
+    USER ||--o{ CART : owns
+    USER ||--o{ USER_COUPON : has
+
+    CATEGORY ||--o{ PRODUCT : categorizes
+    BRAND ||--o{ PRODUCT : manufactures
+    PRODUCT ||--o{ SKU : has_variants
+    PRODUCT ||--o{ PRODUCT_MARKET : available_in
+
+    ORDER ||--o{ ORDER_ITEM : contains
+    ORDER ||--o{ PAYMENT : paid_by
+    ORDER ||--o{ SHIPMENT : fulfilled_by
+    ORDER ||--o{ REFUND : has
+
+    ORDER_ITEM ||--|| SKU : references
+    ORDER_ITEM ||--|| PRODUCT : references
+
+    CART ||--o{ CART_ITEM : contains
+    CART_ITEM ||--|| SKU : references
+
+    MARKET ||--o{ PRODUCT_MARKET : includes
+    PRODUCT_MARKET ||--|| PRODUCT : references
+
+    PROMOTION ||--o{ PROMOTION_RULE : has
+    COUPON ||--o{ USER_COUPON : distributed_to
+```
+
+---
+
+## Technology Stack
+
+### Backend Technologies
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Go** | 1.24 | Primary language |
+| **go-zero** | v1.10.0 | Microservices framework |
+| **GORM** | v1.31.1 | ORM for database operations |
+| **MySQL** | 8.0 | Primary database |
+| **Redis** | 7.0 | Caching, sessions, distributed locks |
+| **etcd** | v3.6.8 | Service discovery, configuration |
+| **asynq** | v0.26.0 | Async task queue |
+| **JWT** | v4.5.2 | Authentication |
+| **sonic** | v1.15.0 | High-performance JSON |
+| **decimal** | v1.4.0 | Precise decimal arithmetic |
+| **OpenTelemetry** | v1.34.0 | Observability |
+
+### Frontend Technologies
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Vue.js** | 3.4+ | Frontend framework |
+| **TypeScript** | 5.x | Type safety |
+| **Vite** | 5.x | Build tool |
+| **Element Plus** | 2.x | UI component library (admin) |
+| **Tailwind CSS** | 3.x | Utility-first CSS (joy) |
+| **Pinia** | 2.x | State management |
+| **Vue Router** | 4.x | Routing |
+| **ECharts** | 5.x | Data visualization |
+
+---
+
+## Security Architecture
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as Admin API
+    participant Auth as Auth Service
+    participant JWT as JWT Service
+    participant DB as Database
+
+    C->>A: POST /api/v1/auth/login
+    A->>Auth: ValidateCredentials(email, password)
+    Auth->>DB: Query admin_users
+    DB-->>Auth: User record
+    Auth->>Auth: VerifyPassword(hash, password)
+    Auth->>JWT: GenerateToken(user)
+    JWT-->>Auth: Access + Refresh tokens
+    Auth-->>A: Tokens
+    A-->>C: { token, expire }
+```
+
+### JWT Token Structure
+
+```go
+// Token claims include:
+type CustomClaims struct {
+    UserID     int64  `json:"user_id"`
+    TenantID   int64  `json:"tenant_id"`
+    UserType   int    `json:"user_type"`   // 1=super, 2=tenant_admin, 3=sub
+    Permission string `json:"permission"`  // Role-based permissions
+}
+```
+
+### RBAC Permission Model
+
+```mermaid
+graph TD
+    User -->|belongs to| Role
+    Role -->|has many| Permission
+
+    subgraph "Permission Types"
+        P1[Menu Permission]
+        P2[Button Permission]
+        P3[API Permission]
+    end
+
+    Permission --> P1
+    Permission --> P2
+    Permission --> P3
+```
+
+---
+
+## Scalability Considerations
+
+### Horizontal Scaling
+
+| Component | Scaling Strategy |
+|-----------|-----------------|
+| **API Services** | Stateless, can run multiple instances behind load balancer |
+| **MySQL** | Read replicas for query scaling; sharding for tenant isolation |
+| **Redis** | Redis Cluster for cache and session distribution |
+| **File Storage** | CDN for static assets; object storage (S3/MinIO) for uploads |
+
+### Performance Optimizations
+
+1. **Caching Strategy**
+   - Redis for session storage
+   - Product catalog caching
+   - Hot data memoization
+
+2. **Database Optimization**
+   - Proper indexing on tenant_id for all queries
+   - Query result pagination
+   - Connection pooling
+
+3. **Async Processing**
+   - Order timeout handling via asynq
+   - Inventory reconciliation
+   - Report generation
+
+---
+
+## Deployment Architecture
+
+### Docker Compose Setup
+
+```yaml
+# Services defined in docker-compose.yml
+services:
+  mysql:      # Database
+  redis:      # Cache & Queue
+  admin:      # Admin API service
+  shop:       # Shop API service
+  shop-admin: # Admin UI
+  joy:        # Storefront UI
+```
+
+### Production Deployment
+
+```mermaid
+graph TB
+    subgraph "Load Balancer"
+        LB[Nginx/Traefik]
+    end
+
+    subgraph "API Cluster"
+        A1[Admin API Instance 1]
+        A2[Admin API Instance 2]
+        S1[Shop API Instance 1]
+        S2[Shop API Instance 2]
+    end
+
+    subgraph "Data Layer"
+        DB[(MySQL Primary)]
+        DBR[(MySQL Read Replica)]
+        R1[Redis Cluster]
+    end
+
+    LB --> A1
+    LB --> A2
+    LB --> S1
+    LB --> S2
+    A1 --> DB
+    A2 --> DB
+    S1 --> DB
+    S2 --> DB
+    A1 --> R1
+    S1 --> R1
+```
+
+---
+
+## Monitoring & Observability
+
+### Metrics & Logging
+
+| Tool | Purpose |
+|------|---------|
+| **Prometheus** | Metrics collection |
+| **Grafana** | Visualization dashboards |
+| **OpenTelemetry** | Distributed tracing |
+| **Zap** | Structured logging |
+| **Pyroscope** | Continuous profiling |
+
+### Key Metrics
+
+- API response times and error rates
+- Database query performance
+- Cache hit rates
+- Queue depths and processing times
+- Business metrics (orders/min, revenue)
+
+---
+
+## API Design Principles
+
+### RESTful API Standards
+
+1. **Resource Naming**: Plural nouns (`/products`, `/orders`)
+2. **HTTP Methods**:
+   - `GET` - Read
+   - `POST` - Create
+   - `PUT` - Update (full)
+   - `PATCH` - Update (partial)
+   - `DELETE` - Remove
+3. **Status Codes**: Standard HTTP status codes
+4. **Pagination**: Standard page/page_size pattern
+5. **Filtering**: Query parameters for list endpoints
+
+### API Versioning
+
+Current version: **v1**
+
+All endpoints prefixed with `/api/v1/`
+
+### Error Response Format
+
+```json
+{
+  "code": 30012,
+  "message": "product not found"
+}
+```
+
+See [Error Codes Reference](../reference/error-codes.md) for complete list.
+
+---
+
+## Development Guidelines
+
+### Code Organization
+
+```
+# Three-way correspondence principle
+# Document, SQL, and Code organized by same domain
+
+| Domain | Document | SQL | Code |
+|--------|----------|-----|------|
+| user   | docs/domains/user/ | sql/user/ | domain/{user,adminuser,role,tenant}/ |
+```
+
+### Build Commands
+
 ```bash
-# 后端
-go mod download
-
-# 前端 - 管理后台
-cd shop-admin && npm install
-
-# 前端 - 商城
-cd joy && npm install
-```
-
-### 运行服务
-```bash
-# Admin API
-cd admin && go run admin.go -f etc/admin-api.yaml
-
-# Shop API  
-cd shop && go run shop.go -f etc/shop-api.yaml
-
-# 前端 - 管理后台
-cd shop-admin && npm run dev
-
-# 前端 - 商城
-cd joy && npm run dev
-```
-
-### 代码生成
-```bash
-# 生成API代码（修改.desc文件后执行）
+# Generate API code from .api files
 cd admin && make api
 cd shop && make api
+
+# Build services
+make build
+
+# Run tests
+go test ./...
 ```
 
-## 下一步开发计划
+### Code Generation
 
-1. **API定义完善**: 使用go-zero的.api文件定义所有接口
-2. **仓储实现**: 实现各个领域的GORM仓储
-3. **应用服务实现**: 实现应用层服务逻辑
-4. **认证授权**: 集成JWT和RBAC中间件
-5. **前端页面**: 开发管理后台和商城页面
-6. **支付集成**: 接入支付宝/微信支付
-7. **物流集成**: 接入快递鸟等物流查询
-8. **测试覆盖**: 单元测试和集成测试
+Handlers and types are auto-generated from `.api` files using go-zero's `goctl` tool.
+
+---
+
+## References
+
+- [Developer Guide](../guides/developer-guide.md)
+- [API Reference](../cross-cutting/api/api-reference.md)
+- [Database Overview](../reference/database-overview.md)
+- [Error Codes](../reference/error-codes.md)
+- [Domain Documentation](../domains/)
+
+---
+
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | 2026-03-26 | Technical Team | Initial comprehensive architecture documentation |
