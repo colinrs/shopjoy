@@ -305,6 +305,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
 import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
+import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
 
 const router = useRouter()
@@ -602,8 +603,14 @@ const handleSave = async () => {
   })
 }
 
-const handleImageChange = (file: any) => {
-  productForm.image = URL.createObjectURL(file.raw)
+const handleImageChange = async (file: any) => {
+  try {
+    const response = await uploadImage(file.raw, 'product')
+    productForm.image = response.url
+  } catch (error) {
+    console.error('Upload failed:', error)
+    ElMessage.error('图片上传失败')
+  }
 }
 
 const handleSizeChange = (val: number) => {

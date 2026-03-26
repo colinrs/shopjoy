@@ -235,10 +235,11 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { 
-  Shop, Plus, Phone, Message, Location, Search, 
-  InfoFilled, Bell, Operation, Document, Share, Delete, Check 
+import {
+  Shop, Plus, Phone, Message, Location, Search,
+  InfoFilled, Bell, Operation, Document, Share, Delete, Check
 } from '@element-plus/icons-vue'
+import { uploadImage } from '@/api/upload'
 
 const saving = ref(false)
 const shopFormRef = ref()
@@ -288,8 +289,14 @@ const shopRules = {
   ]
 }
 
-const handleLogoChange = (file: any) => {
-  shopForm.logo = URL.createObjectURL(file.raw)
+const handleLogoChange = async (file: any) => {
+  try {
+    const response = await uploadImage(file.raw, 'banner')
+    shopForm.logo = response.url
+  } catch (error) {
+    console.error('Upload failed:', error)
+    ElMessage.error('Logo上传失败')
+  }
 }
 
 const handleSave = async () => {
