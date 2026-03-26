@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `birthday` BIGINT DEFAULT NULL COMMENT '生日(Unix时间戳)',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未激活, 1-正常, 2-暂停, 3-已删除',
     `last_login` BIGINT DEFAULT NULL COMMENT '最后登录时间',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
@@ -255,3 +256,28 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 -- 角色权限关联 (Demo Shop 客服)
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (3, 1), (3, 6), (3, 7), (3, 21);
+
+-- ============================================
+-- 用户地址表 (user_addresses)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `user_addresses` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `name` VARCHAR(100) NOT NULL COMMENT '收货人姓名',
+    `phone` VARCHAR(20) NOT NULL COMMENT '收货人电话',
+    `country` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '国家代码',
+    `province` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '省份/州',
+    `city` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '城市',
+    `district` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '区/县',
+    `address` VARCHAR(255) NOT NULL COMMENT '详细地址',
+    `postal_code` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '邮编',
+    `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否默认地址',
+    `deleted_at` BIGINT NULL DEFAULT NULL COMMENT 'Deleted at (UTC timestamp)',
+    `created_at` BIGINT NOT NULL COMMENT 'Created at (UTC timestamp)',
+    `updated_at` BIGINT NOT NULL COMMENT 'Updated at (UTC timestamp)',
+    PRIMARY KEY (`id`),
+    INDEX `idx_tenant_user` (`tenant_id`, `user_id`),
+    INDEX `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户收货地址表';

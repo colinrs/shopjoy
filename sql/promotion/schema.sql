@@ -9,8 +9,14 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     `description` TEXT COMMENT '描述',
     `type` TINYINT NOT NULL DEFAULT 0 COMMENT '类型: 0-折扣, 1-限时抢购, 2-捆绑销售, 3-买X送Y',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待生效, 1-生效中, 2-已暂停, 3-已结束',
+    `priority` INT NOT NULL DEFAULT 0 COMMENT '优先级',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY' COMMENT '货币',
+    `scope_type` VARCHAR(32) NOT NULL DEFAULT 'STOREWIDE' COMMENT '范围类型',
+    `scope_ids` JSON DEFAULT NULL COMMENT '范围ID列表',
+    `exclude_ids` JSON DEFAULT NULL COMMENT '排除ID列表',
     `start_at` BIGINT NOT NULL DEFAULT 0 COMMENT '开始时间',
     `end_at` BIGINT NOT NULL DEFAULT 0 COMMENT '结束时间',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
@@ -19,7 +25,10 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_status` (`status`),
     KEY `idx_type` (`type`),
-    KEY `idx_start_end` (`start_at`, `end_at`)
+    KEY `idx_priority` (`priority`),
+    KEY `idx_deleted_at` (`deleted_at`),
+    KEY `idx_start_end` (`start_at`, `end_at`),
+    KEY `idx_active` (`status`, `currency`, `start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销活动表';
 
 -- ============================================
@@ -35,9 +44,96 @@ CREATE TABLE IF NOT EXISTS `promotion_rules` (
     `action_value` BIGINT NOT NULL DEFAULT 0 COMMENT '动作值',
     `max_discount_amount` BIGINT NOT NULL DEFAULT 0 COMMENT '最大优惠金额(分)',
     `max_discount_currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY' COMMENT '货币',
+    `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序',
     PRIMARY KEY (`id`),
-    KEY `idx_promotion_id` (`promotion_id`)
+    KEY `idx_promotion_id` (`promotion_id`),
+    KEY `idx_promotion_rules_sort_order` (`promotion_id`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销规则表';
+
+-- ============================================
+-- 促销使用记录表 (promotion_usage)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `promotion_usage` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `promotion_id` BIGINT NOT NULL,
+    `rule_id` BIGINT DEFAULT NULL,
+    `order_id` VARCHAR(50) NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `discount_amount` BIGINT NOT NULL DEFAULT 0,
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY',
+    `original_amount` BIGINT NOT NULL DEFAULT 0,
+    `final_amount` BIGINT NOT NULL DEFAULT 0,
+    `coupon_id` BIGINT DEFAULT NULL,
+    `created_at` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `idx_tenant_id` (`tenant_id`),
+    INDEX `idx_promotion_id` (`promotion_id`),
+    INDEX `idx_order_id` (`order_id`),
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销使用记录表';
+
+-- ============================================
+-- 优惠券表 (coupons)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `coupons` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '优惠券ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
+    `name` VARCHAR(255) NOT NULL COMMENT '名称',
+    `code` VARCHAR(100) NOT NULL COMMENT '优惠券代码',
+    `description` TEXT COMMENT '描述',
+    `type` TINYINT NOT NULL DEFAULT 0 COMMENT '类型: 0-固定金额, 1-百分比, 2-免邮',
+    `value` BIGINT NOT NULL DEFAULT 0 COMMENT '优惠值(分或百分比)',
+    `min_amount` BIGINT NOT NULL DEFAULT 0 COMMENT '最低消费(分)',
+    `max_discount` BIGINT NOT NULL DEFAULT 0 COMMENT '最大优惠(分)',
+    `total_count` INT NOT NULL DEFAULT 0 COMMENT '发放总数',
+    `used_count` INT NOT NULL DEFAULT 0 COMMENT '已使用数量',
+    `per_user_limit` INT NOT NULL DEFAULT 1 COMMENT '每用户限领',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未激活, 1-激活, 2-过期, 3-用完',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY' COMMENT '货币',
+    `scope_type` VARCHAR(32) NOT NULL DEFAULT 'STOREWIDE' COMMENT '范围类型',
+    `scope_ids` JSON DEFAULT NULL COMMENT '范围ID列表',
+    `exclude_ids` JSON DEFAULT NULL COMMENT '排除ID列表',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
+    `start_at` BIGINT NOT NULL DEFAULT 0 COMMENT '开始时间',
+    `end_at` BIGINT NOT NULL DEFAULT 0 COMMENT '结束时间',
+    `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
+    `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
+    `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
+    `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_deleted_at` (`deleted_at`),
+    KEY `idx_start_end` (`start_at`, `end_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='优惠券表';
+
+-- ============================================
+-- 用户优惠券表 (user_coupons)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `user_coupons` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `coupon_id` BIGINT NOT NULL COMMENT '优惠券ID',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未使用, 1-已使用, 2-已过期',
+    `used_at` BIGINT DEFAULT NULL COMMENT '使用时间',
+    `order_id` VARCHAR(64) DEFAULT '' COMMENT '订单ID',
+    `received_at` BIGINT NOT NULL DEFAULT 0 COMMENT '领取时间',
+    `expire_at` BIGINT NOT NULL DEFAULT 0 COMMENT '过期时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_coupon_id` (`coupon_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_expire_at` (`expire_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户优惠券表';
 
 -- ============================================
 -- 测试数据
@@ -79,62 +175,7 @@ INSERT INTO `promotion_rules` (`id`, `promotion_id`, `condition_type`, `conditio
 (9, 6, 0, 100000, 1, 20, 50000, 'CNY'), -- 满1000减20%, 最多减500
 
 -- 跨境特惠规则
-(10, 7, 0, 30000, 1, 10, 20000, 'CNY'); -- 满300减10%, 最多减200-- ============================================
--- 优惠券表 (coupons)
--- ============================================
-
-CREATE TABLE IF NOT EXISTS `coupons` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '优惠券ID',
-    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
-    `name` VARCHAR(255) NOT NULL COMMENT '名称',
-    `code` VARCHAR(100) NOT NULL COMMENT '优惠券代码',
-    `description` TEXT COMMENT '描述',
-    `type` TINYINT NOT NULL DEFAULT 0 COMMENT '类型: 0-固定金额, 1-百分比, 2-免邮',
-    `value` BIGINT NOT NULL DEFAULT 0 COMMENT '优惠值(分或百分比)',
-    `min_amount` BIGINT NOT NULL DEFAULT 0 COMMENT '最低消费(分)',
-    `max_discount` BIGINT NOT NULL DEFAULT 0 COMMENT '最大优惠(分)',
-    `total_count` INT NOT NULL DEFAULT 0 COMMENT '发放总数',
-    `used_count` INT NOT NULL DEFAULT 0 COMMENT '已使用数量',
-    `per_user_limit` INT NOT NULL DEFAULT 1 COMMENT '每用户限领',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未激活, 1-激活, 2-过期, 3-用完',
-    `start_at` BIGINT NOT NULL DEFAULT 0 COMMENT '开始时间',
-    `end_at` BIGINT NOT NULL DEFAULT 0 COMMENT '结束时间',
-    `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
-    `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
-    `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
-    `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_code` (`code`),
-    KEY `idx_tenant_id` (`tenant_id`),
-    KEY `idx_status` (`status`),
-    KEY `idx_start_end` (`start_at`, `end_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='优惠券表';
-
--- ============================================
--- 用户优惠券表 (user_coupons)
--- ============================================
-
-CREATE TABLE IF NOT EXISTS `user_coupons` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
-    `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `coupon_id` BIGINT NOT NULL COMMENT '优惠券ID',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未使用, 1-已使用, 2-已过期',
-    `used_at` BIGINT DEFAULT NULL COMMENT '使用时间',
-    `order_id` VARCHAR(64) DEFAULT '' COMMENT '订单ID',
-    `received_at` BIGINT NOT NULL DEFAULT 0 COMMENT '领取时间',
-    `expire_at` BIGINT NOT NULL DEFAULT 0 COMMENT '过期时间',
-    PRIMARY KEY (`id`),
-    KEY `idx_tenant_id` (`tenant_id`),
-    KEY `idx_user_id` (`user_id`),
-    KEY `idx_coupon_id` (`coupon_id`),
-    KEY `idx_status` (`status`),
-    KEY `idx_expire_at` (`expire_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户优惠券表';
-
--- ============================================
--- 测试数据
--- ============================================
+(10, 7, 0, 30000, 1, 10, 20000, 'CNY'); -- 满300减10%, 最多减200
 
 -- 优惠券数据 (Demo Shop)
 INSERT INTO `coupons` (`id`, `tenant_id`, `name`, `code`, `description`, `type`, `value`, `min_amount`, `max_discount`, `total_count`, `used_count`, `per_user_limit`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES

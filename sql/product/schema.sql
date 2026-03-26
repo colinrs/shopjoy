@@ -12,15 +12,19 @@ CREATE TABLE IF NOT EXISTS `categories` (
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序',
     `icon` VARCHAR(255) DEFAULT '' COMMENT '图标',
     `image` VARCHAR(500) DEFAULT '' COMMENT '图片',
+    `seo_title` VARCHAR(200) DEFAULT '' COMMENT 'SEO标题',
+    `seo_description` VARCHAR(500) DEFAULT '' COMMENT 'SEO描述',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_parent_id` (`parent_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类表';
 
 -- ============================================
@@ -35,15 +39,20 @@ CREATE TABLE IF NOT EXISTS `brands` (
     `description` TEXT COMMENT '描述',
     `website` VARCHAR(255) DEFAULT '' COMMENT '官网',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序',
+    `enable_page` TINYINT NOT NULL DEFAULT 0 COMMENT '是否启用品牌专区',
+    `trademark_number` VARCHAR(100) DEFAULT '' COMMENT '商标号',
+    `trademark_country` VARCHAR(10) DEFAULT '' COMMENT '商标注册国家',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_name` (`name`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌表';
 
 -- ============================================
@@ -52,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `brands` (
 
 CREATE TABLE IF NOT EXISTS `products` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '商品ID',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID',
     `sku` VARCHAR(64) DEFAULT '' COMMENT 'SKU代码',
     `name` VARCHAR(200) NOT NULL COMMENT '商品名称',
     `description` TEXT COMMENT '商品描述',
@@ -62,6 +72,8 @@ CREATE TABLE IF NOT EXISTS `products` (
     `status` INT NOT NULL DEFAULT 0 COMMENT '状态: 0-草稿, 1-上架, 2-下架, 3-已删除',
     `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '分类ID',
     `brand` VARCHAR(64) DEFAULT '' COMMENT '品牌',
+    `brand_id` BIGINT NULL COMMENT '品牌ID',
+    `sku_prefix` VARCHAR(8) DEFAULT '' COMMENT '商品SKU前缀',
     `tags` JSON COMMENT '标签',
     `images` JSON COMMENT '图片列表',
     `is_matrix_product` TINYINT NOT NULL DEFAULT 0 COMMENT '是否有变体',
@@ -73,13 +85,17 @@ CREATE TABLE IF NOT EXISTS `products` (
     `width` DECIMAL(10,2) DEFAULT 0.00 COMMENT '宽度(cm)',
     `height` DECIMAL(10,2) DEFAULT 0.00 COMMENT '高度(cm)',
     `dangerous_goods` JSON COMMENT '危险品标识',
+    `deleted_at` BIGINT NULL COMMENT '删除时间',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
     `updated_at` BIGINT NOT NULL DEFAULT 0 COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_sku` (`sku`),
+    KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_name` (`name`),
     KEY `idx_category_id` (`category_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_brand_id` (`brand_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品表';
 
 -- ============================================
@@ -88,11 +104,16 @@ CREATE TABLE IF NOT EXISTS `products` (
 
 CREATE TABLE IF NOT EXISTS `skus` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'SKU ID',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID',
     `product_id` BIGINT NOT NULL COMMENT '商品ID',
     `code` VARCHAR(100) NOT NULL COMMENT 'SKU代码',
     `price_amount` BIGINT NOT NULL DEFAULT 0 COMMENT '价格(分)',
     `price_currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
     `stock` INT NOT NULL DEFAULT 0 COMMENT '库存',
+    `available_stock` INT NOT NULL DEFAULT 0 COMMENT '可用库存',
+    `locked_stock` INT NOT NULL DEFAULT 0 COMMENT '锁定库存',
+    `safety_stock` INT NOT NULL DEFAULT 0 COMMENT '安全库存阈值',
+    `presale_enabled` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启预售',
     `attributes` JSON COMMENT '属性',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
@@ -101,8 +122,10 @@ CREATE TABLE IF NOT EXISTS `skus` (
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_code` (`code`),
+    UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_product_id` (`product_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
+    KEY `idx_low_stock_alert` (`tenant_id`, `status`, `safety_stock`, `available_stock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SKU表';
 
 -- ============================================
@@ -129,6 +152,155 @@ CREATE TABLE IF NOT EXISTS `product_markets` (
     KEY `idx_market_id` (`market_id`),
     KEY `idx_variant_id` (`variant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品市场关联表';
+
+-- ============================================
+-- 商品多语言表 (product_localizations)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `product_localizations` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `product_id` BIGINT NOT NULL,
+    `language_code` VARCHAR(10) NOT NULL COMMENT '语言代码: en, zh-CN, ja',
+    `name` VARCHAR(200) DEFAULT '' COMMENT '产品名称',
+    `description` TEXT COMMENT '产品描述',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_product_id` (`product_id`),
+    UNIQUE KEY `idx_tenant_product_language` (`tenant_id`, `product_id`, `language_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品多语言表';
+
+-- ============================================
+-- 分类市场可见性表 (category_markets)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `category_markets` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `category_id` BIGINT NOT NULL,
+    `market_id` BIGINT NOT NULL,
+    `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_category_id` (`category_id`),
+    KEY `idx_market_id` (`market_id`),
+    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类市场可见性';
+
+-- ============================================
+-- 品牌市场可见性表 (brand_markets)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `brand_markets` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `brand_id` BIGINT NOT NULL,
+    `market_id` BIGINT NOT NULL,
+    `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_brand_id` (`brand_id`),
+    KEY `idx_market_id` (`market_id`),
+    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌市场可见性';
+
+-- ============================================
+-- 仓库表 (warehouses)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `warehouses` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `code` VARCHAR(50) NOT NULL COMMENT '仓库代码',
+    `name` VARCHAR(100) NOT NULL COMMENT '仓库名称',
+    `country` VARCHAR(10) DEFAULT '' COMMENT '所在国家',
+    `address` VARCHAR(500) DEFAULT '' COMMENT '详细地址',
+    `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否默认仓库',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    `deleted_at` BIGINT DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    UNIQUE KEY `idx_tenant_code` (`tenant_id`, `code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库表';
+
+-- ============================================
+-- 仓库库存表 (warehouse_inventories)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `warehouse_inventories` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `sku_code` VARCHAR(100) NOT NULL COMMENT 'SKU代码',
+    `warehouse_id` BIGINT NOT NULL,
+    `available_stock` INT NOT NULL DEFAULT 0,
+    `locked_stock` INT NOT NULL DEFAULT 0,
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    `updated_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_sku_code` (`sku_code`),
+    KEY `idx_warehouse_id` (`warehouse_id`),
+    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库库存表';
+
+-- ============================================
+-- 库存变更日志表 (inventory_logs)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `inventory_logs` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `tenant_id` BIGINT NOT NULL,
+    `sku_code` VARCHAR(100) NOT NULL,
+    `product_id` BIGINT NOT NULL,
+    `warehouse_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0=汇总',
+    `change_type` VARCHAR(30) NOT NULL COMMENT 'manual, order, return, adjustment',
+    `change_quantity` INT NOT NULL COMMENT '正数增加，负数减少',
+    `before_stock` INT NOT NULL,
+    `after_stock` INT NOT NULL,
+    `order_no` VARCHAR(50) DEFAULT '',
+    `remark` VARCHAR(500) DEFAULT '',
+    `operator_id` BIGINT NOT NULL,
+    `created_at` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_id` (`tenant_id`),
+    KEY `idx_sku_code` (`sku_code`),
+    KEY `idx_product_id` (`product_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存变更日志';
+
+-- ============================================
+-- 市场表 (markets)
+-- 跨境电商市场配置
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `markets` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '市场ID',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID',
+    `code` VARCHAR(10) NOT NULL COMMENT '市场代码: US, UK, DE, FR, AU',
+    `name` VARCHAR(100) NOT NULL COMMENT '市场名称',
+    `currency` VARCHAR(10) NOT NULL COMMENT '货币: USD, GBP, EUR, AUD',
+    `default_language` VARCHAR(10) DEFAULT 'en' COMMENT '默认语言',
+    `flag` VARCHAR(255) DEFAULT '' COMMENT '旗帜图标',
+    `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否启用',
+    `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否主市场',
+    `tax_rules` JSON COMMENT '税务配置',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
+    KEY `idx_code` (`code`),
+    KEY `idx_is_active` (`is_active`),
+    KEY `idx_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='市场表';
 
 -- ============================================
 -- 测试数据
@@ -169,36 +341,13 @@ INSERT INTO `skus` (`id`, `product_id`, `code`, `price_amount`, `price_currency`
 (6, 2, 'SKU-002-BLK-43', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (7, 3, 'SKU-003-BLK', 9900, 'CNY', 200, '{"颜色": "黑色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (8, 3, 'SKU-003-WHT', 9900, 'CNY', 200, '{"颜色": "白色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);-- ============================================
--- 市场表 (markets)
--- 跨境电商市场配置
--- ============================================
-
-CREATE TABLE IF NOT EXISTS `markets` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '市场ID',
-    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID',
-    `code` VARCHAR(10) NOT NULL COMMENT '市场代码: US, UK, DE, FR, AU',
-    `name` VARCHAR(100) NOT NULL COMMENT '市场名称',
-    `currency` VARCHAR(10) NOT NULL COMMENT '货币: USD, GBP, EUR, AUD',
-    `default_language` VARCHAR(10) DEFAULT 'en' COMMENT '默认语言',
-    `flag` VARCHAR(255) DEFAULT '' COMMENT '旗帜图标',
-    `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否启用',
-    `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT '是否主市场',
-    `tax_rules` JSON COMMENT '税务配置',
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
-    KEY `idx_code` (`code`),
-    KEY `idx_is_active` (`is_active`),
-    KEY `idx_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='市场表';
+(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
 
 -- ============================================
 -- 测试数据
 -- ============================================
 
+-- 市场数据
 INSERT INTO `markets` (`id`, `tenant_id`, `code`, `name`, `currency`, `default_language`, `flag`, `is_active`, `is_default`, `tax_rules`, `created_at`, `updated_at`) VALUES
 -- Demo Shop 市场
 (1, 1, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),

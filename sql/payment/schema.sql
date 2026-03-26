@@ -57,6 +57,119 @@ CREATE TABLE IF NOT EXISTS `payment_refunds` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付退款表';
 
 -- ============================================
+-- 订单支付表 (order_payments)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `order_payments` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `tenant_id` BIGINT UNSIGNED NOT NULL COMMENT 'Tenant ID',
+    `order_id` BIGINT UNSIGNED NOT NULL COMMENT 'Order ID',
+    `payment_no` VARCHAR(32) NOT NULL COMMENT 'Payment number',
+    `payment_method` VARCHAR(32) NOT NULL COMMENT 'Payment method: stripe, alipay, wechat',
+    `channel_intent_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel PaymentIntent ID (Stripe: pi_xxx)',
+    `channel_payment_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel Charge ID (Stripe: ch_xxx)',
+    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Payment amount in cents',
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=processing, 2=success, 3=failed, 4=cancelled, 5=refunded, 6=partially_refunded, 7=requires_action',
+    `transaction_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction fee in cents',
+    `fee_currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Fee currency',
+    `paid_at` BIGINT DEFAULT NULL COMMENT 'Payment success time (UTC timestamp)',
+    `failed_at` BIGINT DEFAULT NULL COMMENT 'Payment failure time (UTC timestamp)',
+    `failed_reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Failure reason',
+    `created_at` BIGINT NOT NULL COMMENT 'Created at (UTC timestamp)',
+    `updated_at` BIGINT NOT NULL COMMENT 'Updated at (UTC timestamp)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Deleted at (UTC timestamp, soft delete)',
+    PRIMARY KEY (`id`),
+    INDEX `idx_tenant_order` (`tenant_id`, `order_id`),
+    UNIQUE INDEX `uk_payment_no` (`payment_no`),
+    INDEX `idx_channel_payment_id` (`channel_payment_id`),
+    INDEX `idx_channel_intent_id` (`channel_intent_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Order payments table';
+
+-- ============================================
+-- 支付交易记录表 (payment_transactions)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `payment_transactions` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `tenant_id` BIGINT UNSIGNED NOT NULL COMMENT 'Tenant ID',
+    `order_id` BIGINT UNSIGNED NOT NULL COMMENT 'Order ID',
+    `payment_id` BIGINT UNSIGNED NOT NULL COMMENT 'Payment ID',
+    `transaction_id` VARCHAR(64) NOT NULL COMMENT 'Transaction ID',
+    `payment_method` VARCHAR(32) NOT NULL COMMENT 'Payment method: stripe, alipay, wechat',
+    `channel_transaction_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel transaction ID',
+    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction amount in cents',
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=succeeded, 2=failed',
+    `transaction_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction fee in cents',
+    `paid_at` BIGINT DEFAULT NULL COMMENT 'Payment success time (UTC timestamp)',
+    `failed_reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Failure reason',
+    `created_at` BIGINT NOT NULL COMMENT 'Created at (UTC timestamp)',
+    `updated_at` BIGINT NOT NULL COMMENT 'Updated at (UTC timestamp)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Deleted at (UTC timestamp, soft delete)',
+    PRIMARY KEY (`id`),
+    INDEX `idx_tenant_order` (`tenant_id`, `order_id`),
+    UNIQUE INDEX `uk_transaction_id` (`transaction_id`),
+    INDEX `idx_channel_transaction_id` (`channel_transaction_id`),
+    INDEX `idx_payment_id` (`payment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Payment transactions table';
+
+-- ============================================
+-- 支付退款详情表 (payment_refunds_detail)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `payment_refunds` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `tenant_id` BIGINT UNSIGNED NOT NULL COMMENT 'Tenant ID',
+    `order_id` BIGINT UNSIGNED NOT NULL COMMENT 'Order ID',
+    `payment_id` BIGINT UNSIGNED NOT NULL COMMENT 'Payment ID',
+    `fulfillment_refund_id` BIGINT UNSIGNED DEFAULT NULL COMMENT 'Fulfillment refund ID (link to fulfillment.refunds)',
+    `refund_no` VARCHAR(32) NOT NULL COMMENT 'Refund number',
+    `idempotency_key` VARCHAR(64) NOT NULL COMMENT 'Idempotency key for deduplication',
+    `channel_refund_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel refund ID (Stripe: re_xxx)',
+    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Refund amount in cents',
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
+    `refund_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Refund fee in cents',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=succeeded, 2=failed',
+    `reason_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Refund reason type',
+    `reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Refund reason details',
+    `created_at` BIGINT NOT NULL COMMENT 'Created at (UTC timestamp)',
+    `updated_at` BIGINT NOT NULL COMMENT 'Updated at (UTC timestamp)',
+    `refunded_at` BIGINT DEFAULT NULL COMMENT 'Refund completed time (UTC timestamp)',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT 'Deleted at for soft delete (UTC timestamp)',
+    `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT 'Created by user ID',
+    PRIMARY KEY (`id`),
+    INDEX `idx_tenant_order` (`tenant_id`, `order_id`),
+    UNIQUE INDEX `uk_refund_no` (`refund_no`),
+    UNIQUE INDEX `uk_idempotency_key` (`idempotency_key`),
+    INDEX `idx_channel_refund_id` (`channel_refund_id`),
+    INDEX `idx_payment_id` (`payment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Payment refunds table';
+
+-- ============================================
+-- Webhook 事件表 (webhook_events)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `webhook_events` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `tenant_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Tenant ID (0 for platform-level events)',
+    `event_id` VARCHAR(64) NOT NULL COMMENT 'Event ID (Stripe: evt_xxx)',
+    `event_type` VARCHAR(64) NOT NULL COMMENT 'Event type',
+    `resource_id` VARCHAR(64) DEFAULT '' COMMENT 'Resource ID (PaymentIntent/Charge ID)',
+    `processed` TINYINT NOT NULL DEFAULT 0 COMMENT 'Processed status: 0=pending, 1=processed, 2=failed',
+    `raw_payload` TEXT COMMENT 'Raw event JSON payload',
+    `error_message` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Processing error message',
+    `created_at` BIGINT NOT NULL COMMENT 'Created at (UTC timestamp)',
+    `updated_at` BIGINT NOT NULL COMMENT 'Updated at (UTC timestamp)',
+    `processed_at` BIGINT DEFAULT NULL COMMENT 'Processed time (UTC timestamp)',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_event_id` (`event_id`),
+    INDEX `idx_tenant_event` (`tenant_id`, `event_type`),
+    INDEX `idx_resource` (`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Webhook events table for deduplication';
+
+-- ============================================
 -- 测试数据
 -- ============================================
 
