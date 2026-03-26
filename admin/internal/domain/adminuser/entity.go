@@ -5,7 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 // Type 管理员类型
@@ -51,11 +50,11 @@ type AdminUser struct {
 	Avatar      string         `gorm:"column:avatar;size:255"`
 	Type        Type           `gorm:"column:type;not null;default:1;index"`
 	Status      Status         `gorm:"column:status;not null;default:1;index"`
-	LastLoginAt *time.Time     `gorm:"column:last_login_at"`
+	LastLoginAt *int64         `gorm:"column:last_login_at"`
 	LastLoginIP string         `gorm:"column:last_login_ip;size:45"`
-	CreatedAt   time.Time      `gorm:"column:created_at;not null"`
-	UpdatedAt   time.Time      `gorm:"column:updated_at;not null"`
-	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	CreatedAt   int64          `gorm:"column:created_at;not null"`
+	UpdatedAt   int64          `gorm:"column:updated_at;not null"`
+	DeletedAt   *int64         `gorm:"column:deleted_at;index"`
 }
 
 func (u *AdminUser) TableName() string {
@@ -88,7 +87,7 @@ func (u *AdminUser) CanLogin() bool {
 
 // UpdateLastLogin 更新最后登录时间
 func (u *AdminUser) UpdateLastLogin(ip string) {
-	now := time.Now().UTC()
+	now := time.Now().UTC().Unix()
 	u.LastLoginAt = &now
 	u.LastLoginIP = ip
 }

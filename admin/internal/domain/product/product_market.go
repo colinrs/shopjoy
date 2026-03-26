@@ -22,9 +22,9 @@ type ProductMarket struct {
 	Price               decimal.Decimal  // 市场专属价格
 	CompareAtPrice      *decimal.Decimal // 对比价格
 	StockAlertThreshold int              // 库存预警阈值
-	PublishedAt         *time.Time       // 发布时间
-	CreatedAt           time.Time        // 创建时间
-	UpdatedAt           time.Time        // 更新时间
+	PublishedAt         *int64           // 发布时间
+	CreatedAt           int64            // 创建时间
+	UpdatedAt           int64            // 更新时间
 }
 
 // TableName 表名
@@ -41,7 +41,7 @@ func NewProductMarket(productID, marketID int64) (*ProductMarket, error) {
 		return nil, code.ErrMarketNotFound
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 	return &ProductMarket{
 		ProductID: productID,
 		MarketID:  marketID,
@@ -54,13 +54,13 @@ func NewProductMarket(productID, marketID int64) (*ProductMarket, error) {
 // Enable 启用市场可见性
 func (pm *ProductMarket) Enable() {
 	pm.IsEnabled = true
-	pm.UpdatedAt = time.Now()
+	pm.UpdatedAt = time.Now().Unix()
 }
 
 // Disable 禁用市场可见性
 func (pm *ProductMarket) Disable() {
 	pm.IsEnabled = false
-	pm.UpdatedAt = time.Now()
+	pm.UpdatedAt = time.Now().Unix()
 }
 
 // SetPrice 设置价格
@@ -69,7 +69,7 @@ func (pm *ProductMarket) SetPrice(price decimal.Decimal) error {
 		return code.ErrProductMarketPriceRequired
 	}
 	pm.Price = price
-	pm.UpdatedAt = time.Now()
+	pm.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -79,7 +79,7 @@ func (pm *ProductMarket) Publish() error {
 		return code.ErrProductMarketPriceRequired
 	}
 	pm.Enable()
-	now := time.Now()
+	now := time.Now().Unix()
 	pm.PublishedAt = &now
 	return nil
 }

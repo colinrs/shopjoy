@@ -41,8 +41,11 @@ type Tenant struct {
 	ContactEmail string
 	Address      string
 	SKUPrefix    string // SKU default prefix
-	ExpireAt     *time.Time
-	Audit        shared.AuditInfo `gorm:"embedded"`
+	ExpireAt     *int64
+	CreatedAt    int64
+	UpdatedAt    int64
+	CreatedBy    int64
+	UpdatedBy    int64
 }
 
 func (t *Tenant) TableName() string {
@@ -53,7 +56,7 @@ func (t *Tenant) IsActive() bool {
 	if t.Status != StatusActive {
 		return false
 	}
-	if t.ExpireAt != nil && time.Now().After(*t.ExpireAt) {
+	if t.ExpireAt != nil && time.Now().Unix() > *t.ExpireAt {
 		return false
 	}
 	return true

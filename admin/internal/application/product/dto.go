@@ -1,6 +1,8 @@
 package product
 
 import (
+	"time"
+
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 )
 
@@ -88,8 +90,8 @@ func FromDomainProduct(p *product.Product) *ProductResponse {
 		Stock:       p.Stock,
 		Status:      p.Status.String(),
 		CategoryID:  p.CategoryID,
-		CreatedAt:   p.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   p.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:   time.Unix(p.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:   time.Unix(p.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}
 }
 

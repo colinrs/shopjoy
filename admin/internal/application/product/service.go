@@ -71,7 +71,7 @@ func (s *service) UpdateProduct(ctx context.Context, tenantID shared.TenantID, r
 	p.Name = req.Name
 	p.Description = req.Description
 	p.CategoryID = req.CategoryID
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 
 	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
 		return nil, err

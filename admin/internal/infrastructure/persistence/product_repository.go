@@ -98,8 +98,8 @@ func (m *productModel) toEntity() *product.Product {
 			Unit:   "cm",
 		},
 		DangerousGoods: dangerousGoods,
-		CreatedAt:      time.Unix(m.CreatedAt, 0),
-		UpdatedAt:      time.Unix(m.UpdatedAt, 0),
+		CreatedAt:      m.CreatedAt,
+		UpdatedAt:      m.UpdatedAt,
 	}
 }
 
@@ -133,8 +133,8 @@ func fromEntity(p *product.Product) *productModel {
 		Width:           p.Dimensions.Width.String(),
 		Height:          p.Dimensions.Height.String(),
 		DangerousGoods:  string(dangerousGoodsJSON),
-		CreatedAt:       p.CreatedAt.Unix(),
-		UpdatedAt:       p.UpdatedAt.Unix(),
+		CreatedAt:       p.CreatedAt,
+		UpdatedAt:       p.UpdatedAt,
 	}
 }
 

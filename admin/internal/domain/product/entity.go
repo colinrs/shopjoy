@@ -135,9 +135,9 @@ type Product struct {
 	Dimensions     Dimensions      `gorm:"embedded"`  // 尺寸
 	DangerousGoods []string        `gorm:"type:json"` // 危险品标识
 
-	DeletedAt *int64     // 软删除时间
-	CreatedAt time.Time  // 创建时间
-	UpdatedAt time.Time  // 更新时间
+	DeletedAt *int64 // 软删除时间
+	CreatedAt int64  // 创建时间
+	UpdatedAt int64  // 更新时间
 }
 
 // TableName 表名
@@ -157,7 +157,7 @@ func NewProduct(id int64, tenantID shared.TenantID, name, description string, pr
 		return nil, code.ErrProductInvalidID
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 	return &Product{
 		ID:          id,
 		TenantID:    tenantID,
@@ -184,7 +184,7 @@ func NewProductWithCompliance(id int64, tenantID shared.TenantID, name, descript
 		return nil, code.ErrProductInvalidID
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 	return &Product{
 		ID:          id,
 		TenantID:    tenantID,
@@ -207,7 +207,7 @@ func (p *Product) SetCompliance(hsCode, coo string, weight decimal.Decimal, weig
 	p.Weight = weight
 	p.WeightUnit = weightUnit
 	p.Dimensions = dims
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 }
 
 // HasComplianceInfo 检查是否有合规信息
@@ -232,7 +232,7 @@ func (p *Product) PutOnSale() error {
 		return code.ErrProductNoStock
 	}
 	p.Status = StatusOnSale
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -245,7 +245,7 @@ func (p *Product) TakeOffSale() error {
 		return code.ErrProductInvalidStatusTransition
 	}
 	p.Status = StatusOffSale
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -258,7 +258,7 @@ func (p *Product) UpdateStock(quantity int) error {
 		return code.ErrProductNegativeStock
 	}
 	p.Stock = quantity
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -274,7 +274,7 @@ func (p *Product) DeductStock(quantity int) error {
 		return code.ErrProductInsufficientStock
 	}
 	p.Stock -= quantity
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -287,7 +287,7 @@ func (p *Product) UpdatePrice(newPrice Money) error {
 		return code.ErrProductInvalidPrice
 	}
 	p.Price = newPrice
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -298,7 +298,7 @@ func (p *Product) SoftDelete() error {
 	}
 	now := time.Now().Unix()
 	p.DeletedAt = &now
-	p.UpdatedAt = time.Now()
+	p.UpdatedAt = now
 	return nil
 }
 
