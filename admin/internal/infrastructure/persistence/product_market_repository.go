@@ -38,6 +38,12 @@ func (productMarketModel) TableName() string {
 }
 
 func (m *productMarketModel) toEntity() *product.ProductMarket {
+	var publishedAt *int64
+	if m.PublishedAt != nil {
+		t := m.PublishedAt.Unix()
+		publishedAt = &t
+	}
+
 	pm := &product.ProductMarket{
 		ID:                  m.ID,
 		TenantID:            m.TenantID,
@@ -46,9 +52,9 @@ func (m *productMarketModel) toEntity() *product.ProductMarket {
 		MarketID:            m.MarketID,
 		IsEnabled:           m.IsEnabled,
 		StockAlertThreshold: m.StockAlertThreshold,
-		PublishedAt:         m.PublishedAt,
-		CreatedAt:           m.CreatedAt,
-		UpdatedAt:           m.UpdatedAt,
+		PublishedAt:         publishedAt,
+		CreatedAt:           m.CreatedAt.Unix(),
+		UpdatedAt:           m.UpdatedAt.Unix(),
 	}
 
 	pm.Price, _ = decimal.NewFromString(m.Price)
@@ -65,6 +71,12 @@ func (m *productMarketModel) toEntity() *product.ProductMarket {
 }
 
 func fromProductMarketEntity(pm *product.ProductMarket) *productMarketModel {
+	var publishedAt *time.Time
+	if pm.PublishedAt != nil {
+		t := time.Unix(*pm.PublishedAt, 0)
+		publishedAt = &t
+	}
+
 	m := &productMarketModel{
 		ID:                  pm.ID,
 		TenantID:            pm.TenantID,
@@ -73,9 +85,9 @@ func fromProductMarketEntity(pm *product.ProductMarket) *productMarketModel {
 		MarketID:            pm.MarketID,
 		IsEnabled:           pm.IsEnabled,
 		StockAlertThreshold: pm.StockAlertThreshold,
-		PublishedAt:         pm.PublishedAt,
-		CreatedAt:           pm.CreatedAt,
-		UpdatedAt:           pm.UpdatedAt,
+		PublishedAt:         publishedAt,
+		CreatedAt:           time.Unix(pm.CreatedAt, 0),
+		UpdatedAt:           time.Unix(pm.UpdatedAt, 0),
 	}
 
 	m.Price = pm.Price.String()

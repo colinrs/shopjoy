@@ -278,7 +278,7 @@ func (h *DashboardHelper) GetPendingOrders(tenantID shared.TenantID, limit int) 
 			PayAmount:  formatAmount(o.PayAmount, o.Currency),
 			Status:     string(o.Status),
 			StatusText: o.Status.Text(),
-			CreatedAt:  o.Audit.CreatedAt.Format(time.RFC3339),
+			CreatedAt:  time.Unix(o.Audit.CreatedAt, 0).Format(time.RFC3339),
 		})
 	}
 
@@ -305,7 +305,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 				ID:      o.ID,
 				Type:    "order_created",
 				Content: fmt.Sprintf("新订单 %s，金额 %s", o.OrderNo, formatAmount(o.PayAmount, o.Currency)),
-				Time:    o.Audit.CreatedAt.Format(time.RFC3339),
+				Time:    time.Unix(o.Audit.CreatedAt, 0).Format(time.RFC3339),
 			})
 		}
 	}

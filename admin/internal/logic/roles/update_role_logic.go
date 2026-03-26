@@ -50,7 +50,7 @@ func (l *UpdateRoleLogic) UpdateRole(req *types.UpdateRoleRequest) (resp *types.
 	if req.Description != "" {
 		r.Description = req.Description
 	}
-	r.Audit.UpdatedAt = time.Now().UTC()
+	r.Audit.UpdatedAt = time.Now().Unix()
 
 	// Save role
 	if err := l.svcCtx.RoleRepo.Update(l.ctx, l.svcCtx.DB, r); err != nil {
@@ -65,7 +65,7 @@ func (l *UpdateRoleLogic) UpdateRole(req *types.UpdateRoleRequest) (resp *types.
 		Status:      int8(r.Status),
 		StatusText:  getStatusText(r.Status),
 		IsSystem:    r.IsSystem,
-		CreatedAt:   r.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   r.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:   time.Unix(r.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:   time.Unix(r.Audit.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}, nil
 }

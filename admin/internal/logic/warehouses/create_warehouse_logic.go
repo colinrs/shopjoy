@@ -55,8 +55,8 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 		IsDefault: req.IsDefault,
 		Status:    shared.StatusEnabled,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().Unix(),
+			UpdatedAt: time.Now().Unix(),
 		},
 	}
 

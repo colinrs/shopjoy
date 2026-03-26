@@ -153,8 +153,8 @@ func toTransactionDTO(txn *payment.PaymentTransaction) *TransactionDTO {
 		TransactionFee:       shared.NewMoney(txn.TransactionFee, txn.Currency).String(),
 		Status:               int8(txn.Status),
 		StatusText:           txn.Status.String(),
-		CreatedAt:            txn.CreatedAt.Format(time.RFC3339),
-		PaidAt:               formatTimeToString(txn.PaidAt),
+		CreatedAt:            timestampToString(txn.CreatedAt),
+		PaidAt:               timestampToString(txn.PaidAt),
 	}
 }
 
@@ -170,8 +170,8 @@ func toPaymentRefundDTO(refund *payment.PaymentRefund) *PaymentRefundDTO {
 		StatusText:      refund.Status.String(),
 		ReasonType:      refund.ReasonType,
 		Reason:          refund.Reason,
-		RefundedAt:      formatTimeToString(refund.RefundedAt),
-		CreatedAt:       refund.CreatedAt.Format(time.RFC3339),
+		RefundedAt:      timestampToString(refund.RefundedAt),
+		CreatedAt:       timestampToString(refund.CreatedAt),
 	}
 }
 

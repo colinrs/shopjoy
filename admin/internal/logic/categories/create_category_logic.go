@@ -78,8 +78,8 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 		SeoDescription: req.SeoDescription,
 		Status:         product.CategoryStatusEnabled,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().Unix(),
+			UpdatedAt: time.Now().Unix(),
 		},
 	}
 

@@ -260,7 +260,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 		// Get the latest refund
 		latestRefund := refunds[0]
 		for _, r := range refunds {
-			if r.Audit.CreatedAt.After(latestRefund.Audit.CreatedAt) {
+			if r.Audit.CreatedAt > latestRefund.Audit.CreatedAt {
 				latestRefund = r
 			}
 		}
@@ -347,7 +347,8 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 
 		// Set shipped at
 		now := time.Now().UTC()
-		shipment.ShippedAt = &now
+		nowUnix := now.Unix()
+		shipment.ShippedAt = &nowUnix
 
 		// Create shipment
 		if err := a.shipmentRepo.Create(ctx, tx, shipment); err != nil {
@@ -499,7 +500,7 @@ func (a *orderFulfillmentApp) ExportOrders(ctx context.Context, tenantID shared.
 			ReceiverPhone:    o.ReceiverPhone,
 			ReceiverAddress:  o.ReceiverAddress,
 			PaymentMethod:    o.PaymentMethod,
-			CreatedAt:        o.Audit.CreatedAt,
+			CreatedAt:        time.Unix(o.Audit.CreatedAt, 0),
 			PaidAt:           o.PaidAt,
 		}
 	}
@@ -529,10 +530,37 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 		Amount:       r.Amount,
 		Currency:     r.Currency,
 		RejectReason: r.RejectReason,
-		ApprovedAt:   r.ApprovedAt,
+		ApprovedAt:   timePtrToTime(r.ApprovedAt),
 		ApprovedBy:   r.ApprovedBy,
-		CompletedAt:  r.CompletedAt,
-		CreatedAt:    r.Audit.CreatedAt,
-		UpdatedAt:    r.Audit.UpdatedAt,
+		CompletedAt:  timePtrToTime(r.CompletedAt),
+		CreatedAt:    time.Unix(r.Audit.CreatedAt, 0),
+		UpdatedAt:    time.Unix(r.Audit.UpdatedAt, 0),
 	}
+}
+
+// timePtrToInt64Ptr converts *time.Time to *int64 (unix timestamp)
+func timePtrToInt64Ptr(t *time.Time) *int64 {
+	if t == nil {
+		return nil
+	}
+	v := t.Unix()
+	return &v
+}
+
+// timeInt64PtrToTimePtr converts *int64 (unix timestamp) to *time.Time
+func timeInt64PtrToTimePtr(v *int64) *time.Time {
+	if v == nil {
+		return nil
+	}
+	t := time.Unix(*v, 0)
+	return &t
+}
+
+// timePtrToTime converts *int64 (unix timestamp) to *time.Time
+func timePtrToTime(v *int64) *time.Time {
+	if v == nil {
+		return nil
+	}
+	t := time.Unix(*v, 0)
+	return &t
 }

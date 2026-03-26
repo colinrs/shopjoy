@@ -40,7 +40,7 @@ func (l *ToggleBrandPageLogic) ToggleBrandPage(req *types.ToggleBrandPageReq) (r
 
 	// Toggle page
 	brand.TogglePage(req.Enabled)
-	brand.Audit.UpdatedAt = time.Now()
+	brand.Audit.UpdatedAt = time.Now().Unix()
 
 	if err := l.svcCtx.BrandRepo.Update(l.ctx, l.svcCtx.DB, brand); err != nil {
 		return nil, err

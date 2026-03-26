@@ -228,8 +228,8 @@ type Shipment struct {
 	ShippingCost   int64            `gorm:"column:shipping_cost;not null;default:0"` // 运费（分）
 	ShippingCurrency string         `gorm:"column:shipping_currency;not null;default:'CNY'"`
 	Weight         float64          `gorm:"column:weight;not null;default:0"` // 重量（kg）
-	ShippedAt      *time.Time       `gorm:"column:shipped_at"`
-	DeliveredAt    *time.Time       `gorm:"column:delivered_at"`
+	ShippedAt      *int64          `gorm:"column:shipped_at"`
+	DeliveredAt    *int64          `gorm:"column:delivered_at"`
 	Remark         string           `gorm:"column:remark;not null;default:''"`
 	Items          []ShipmentItem   `gorm:"foreignKey:ShipmentID"`
 	Audit          shared.AuditInfo `gorm:"embedded"`
@@ -242,7 +242,7 @@ func (s *Shipment) TableName() string {
 
 // NewShipment 创建发货单
 func NewShipment(tenantID shared.TenantID, orderID string, items []ShipmentItem, createdBy int64) *Shipment {
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	return &Shipment{
 		TenantID:         tenantID,
 		OrderID:          orderID,
@@ -273,7 +273,7 @@ func (s *Shipment) Ship(carrier, carrierCode, trackingNo string, updatedBy int64
 	s.Carrier = carrier
 	s.CarrierCode = carrierCode
 	s.TrackingNo = trackingNo
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	s.ShippedAt = &now
 	s.Status = ShipmentStatusShipped
 	s.Audit.Update(updatedBy)
@@ -295,7 +295,7 @@ func (s *Shipment) MarkDelivered(updatedBy int64) error {
 	if s.Status != ShipmentStatusShipped && s.Status != ShipmentStatusInTransit {
 		return code.ErrShipmentInvalidStatusTransition
 	}
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	s.DeliveredAt = &now
 	s.Status = ShipmentStatusDelivered
 	s.Audit.Update(updatedBy)
@@ -416,9 +416,9 @@ type Refund struct {
 	Amount       int64              `gorm:"column:amount;not null;default:0"`       // 退款金额（分）
 	Currency     string             `gorm:"column:currency;not null;default:'CNY'"`
 	RejectReason string             `gorm:"column:reject_reason;not null;default:''"`
-	ApprovedAt   *time.Time         `gorm:"column:approved_at"`
+	ApprovedAt   *int64            `gorm:"column:approved_at"`
 	ApprovedBy   int64              `gorm:"column:approved_by;not null;default:0"`
-	CompletedAt  *time.Time         `gorm:"column:completed_at"`
+	CompletedAt  *int64            `gorm:"column:completed_at"`
 	Audit        shared.AuditInfo   `gorm:"embedded"`
 	DeletedAt    gorm.DeletedAt     `gorm:"column:deleted_at;index"`
 }
@@ -430,7 +430,7 @@ func (r *Refund) TableName() string {
 // NewRefund 创建退款申请
 func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
 	reasonType, reason, description string, images []string, amount int64, currency string) *Refund {
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	return &Refund{
 		TenantID:    tenantID,
 		OrderID:     orderID,
@@ -456,7 +456,7 @@ func (r *Refund) Approve(approvedBy int64) error {
 	if r.Status != RefundStatusPending {
 		return code.ErrRefundInvalidStatus
 	}
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	r.Status = RefundStatusApproved
 	r.ApprovedAt = &now
 	r.ApprovedBy = approvedBy
@@ -480,7 +480,7 @@ func (r *Refund) Complete(updatedBy int64) error {
 	if r.Status != RefundStatusApproved {
 		return code.ErrRefundInvalidStatus
 	}
-	now := time.Now().UTC()
+	now := time.Now().Unix()
 	r.Status = RefundStatusCompleted
 	r.CompletedAt = &now
 	r.Audit.Update(updatedBy)

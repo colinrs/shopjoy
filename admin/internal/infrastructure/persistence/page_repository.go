@@ -61,8 +61,8 @@ func (m *pageModel) toEntity() *storefront.Page {
 		PublishedAt: m.PublishedAt,
 		Version:     m.Version,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -70,16 +70,6 @@ func (m *pageModel) toEntity() *storefront.Page {
 }
 
 func fromPageEntity(p *storefront.Page) *pageModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !p.Audit.CreatedAt.IsZero() {
-		createdAt = p.Audit.CreatedAt.Unix()
-	}
-	if !p.Audit.UpdatedAt.IsZero() {
-		updatedAt = p.Audit.UpdatedAt.Unix()
-	}
-
 	isPublished := 0
 	if p.IsPublished {
 		isPublished = 1
@@ -100,8 +90,8 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 		IsPublished: isPublished,
 		PublishedAt: p.PublishedAt,
 		Version:     p.Version,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		CreatedAt:   p.Audit.CreatedAt,
+		UpdatedAt:   p.Audit.UpdatedAt,
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
 	}

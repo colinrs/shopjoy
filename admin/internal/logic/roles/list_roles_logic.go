@@ -2,6 +2,7 @@ package roles
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -58,8 +59,8 @@ func (l *ListRolesLogic) ListRoles(req *types.ListRolesRequest) (resp *types.Lis
 			Status:      int8(r.Status),
 			StatusText:  getStatusText(r.Status),
 			IsSystem:    r.IsSystem,
-			CreatedAt:   r.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:   r.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:   time.Unix(r.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+			UpdatedAt:   time.Unix(r.Audit.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 		})
 	}
 

@@ -84,8 +84,8 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 			ProductID: req.ProductID,
 			MarketID:  marketID,
 			Price:     price,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().Unix(),
+			UpdatedAt: time.Now().Unix(),
 		}
 
 		if err := repo.Create(l.ctx, db, pm); err != nil {

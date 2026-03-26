@@ -229,7 +229,8 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 
 		// Set shipped at
 		now := time.Now().UTC()
-		shipment.ShippedAt = &now
+		nowUnix := now.Unix()
+		shipment.ShippedAt = &nowUnix
 
 		// Create shipment
 		if err := a.shipmentRepo.Create(ctx, tx, shipment); err != nil {
@@ -521,12 +522,12 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		ShippingCost:  s.ShippingCost,
 		Currency:      s.ShippingCurrency,
 		Weight:        s.Weight,
-		ShippedAt:     s.ShippedAt,
-		DeliveredAt:   s.DeliveredAt,
+		ShippedAt:     int64PtrToTimePtr(s.ShippedAt),
+		DeliveredAt:   int64PtrToTimePtr(s.DeliveredAt),
 		Remark:        s.Remark,
 		Items:         items,
-		CreatedAt:     s.Audit.CreatedAt,
-		UpdatedAt:     s.Audit.UpdatedAt,
+		CreatedAt:     time.Unix(s.Audit.CreatedAt, 0),
+		UpdatedAt:     time.Unix(s.Audit.UpdatedAt, 0),
 		CreatedBy:     s.Audit.CreatedBy,
 	}
 }
@@ -547,4 +548,13 @@ func FormatMoneyToInt64(s string) int64 {
 // FormatInt64ToMoney converts int64 to money string
 func FormatInt64ToMoney(v int64) string {
 	return fmt.Sprintf("%d", v)
+}
+
+// int64PtrToTimePtr converts *int64 (unix timestamp) to *time.Time
+func int64PtrToTimePtr(v *int64) *time.Time {
+	if v == nil {
+		return nil
+	}
+	t := time.Unix(*v, 0)
+	return &t
 }

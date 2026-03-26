@@ -68,7 +68,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 	if req.Attributes != nil {
 		sku.Attributes = req.Attributes
 	}
-	sku.Audit.UpdatedAt = time.Now()
+	sku.Audit.UpdatedAt = time.Now().Unix()
 
 	// Save
 	if err := l.svcCtx.SKURepo.Update(l.ctx, l.svcCtx.DB, sku); err != nil {
@@ -89,7 +89,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 		Attributes:     sku.Attributes,
 		Status:         strconv.Itoa(int(sku.Status)),
 		IsLowStock:     sku.IsLowStock(),
-		CreatedAt:      sku.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      sku.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:      time.Unix(sku.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:      time.Unix(sku.Audit.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}, nil
 }

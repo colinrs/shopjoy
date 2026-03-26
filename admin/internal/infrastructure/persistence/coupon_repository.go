@@ -90,8 +90,8 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 			ExcludeIDs: excludeIDs,
 		},
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -133,8 +133,8 @@ func fromCouponEntity(c *promotion.Coupon) *couponModel {
 		CreatedBy:   c.Audit.CreatedBy,
 		UpdatedBy:   c.Audit.UpdatedBy,
 		DeletedAt:   deletedAt,
-		CreatedAt:   c.Audit.CreatedAt.Unix(),
-		UpdatedAt:   c.Audit.UpdatedAt.Unix(),
+		CreatedAt:   c.Audit.CreatedAt,
+		UpdatedAt:   c.Audit.UpdatedAt,
 	}
 }
 

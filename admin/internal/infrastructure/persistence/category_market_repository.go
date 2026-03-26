@@ -37,30 +37,21 @@ func (m *categoryMarketModel) toEntity() *product.CategoryMarket {
 		MarketID:   m.MarketID,
 		IsVisible:  m.IsVisible,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
 
 func fromCategoryMarketEntity(cm *product.CategoryMarket) *categoryMarketModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !cm.Audit.CreatedAt.IsZero() {
-		createdAt = cm.Audit.CreatedAt.Unix()
-	}
-	if !cm.Audit.UpdatedAt.IsZero() {
-		updatedAt = cm.Audit.UpdatedAt.Unix()
-	}
 	return &categoryMarketModel{
 		ID:         cm.ID,
 		TenantID:   cm.TenantID.Int64(),
 		CategoryID: cm.CategoryID,
 		MarketID:   cm.MarketID,
 		IsVisible:  cm.IsVisible,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
+		CreatedAt:  cm.Audit.CreatedAt,
+		UpdatedAt:  cm.Audit.UpdatedAt,
 	}
 }
 

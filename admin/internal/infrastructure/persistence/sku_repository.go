@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -54,8 +53,8 @@ func (m *skuModel) toEntity() *product.SKU {
 		Attributes:     attributes,
 		Status:         shared.Status(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
@@ -77,8 +76,8 @@ func fromSKUEntity(sku *product.SKU) *skuModel {
 		PreSaleEnabled: sku.PreSaleEnabled,
 		Attributes:     string(attributesJSON),
 		Status:         int(sku.Status),
-		CreatedAt:      sku.Audit.CreatedAt.Unix(),
-		UpdatedAt:      sku.Audit.UpdatedAt.Unix(),
+		CreatedAt:      sku.Audit.CreatedAt,
+		UpdatedAt:      sku.Audit.UpdatedAt,
 	}
 }
 

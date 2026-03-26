@@ -37,30 +37,21 @@ func (m *brandMarketModel) toEntity() *product.BrandMarket {
 		MarketID:  m.MarketID,
 		IsVisible: m.IsVisible,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
 
 func fromBrandMarketEntity(bm *product.BrandMarket) *brandMarketModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !bm.Audit.CreatedAt.IsZero() {
-		createdAt = bm.Audit.CreatedAt.Unix()
-	}
-	if !bm.Audit.UpdatedAt.IsZero() {
-		updatedAt = bm.Audit.UpdatedAt.Unix()
-	}
 	return &brandMarketModel{
 		ID:        bm.ID,
 		TenantID:  bm.TenantID.Int64(),
 		BrandID:   bm.BrandID,
 		MarketID:  bm.MarketID,
 		IsVisible: bm.IsVisible,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		CreatedAt: bm.Audit.CreatedAt,
+		UpdatedAt: bm.Audit.UpdatedAt,
 	}
 }
 

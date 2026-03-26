@@ -43,7 +43,7 @@ func (l *UpdateProductLocalizationLogic) UpdateProductLocalization(req *types.Up
 	if req.Description != "" {
 		localization.Description = req.Description
 	}
-	localization.AuditInfo.UpdatedAt = time.Now()
+	localization.AuditInfo.UpdatedAt = time.Now().Unix()
 
 	// Save
 	if err := l.svcCtx.ProductLocalizationRepo.Update(l.ctx, l.svcCtx.DB, localization); err != nil {
@@ -56,7 +56,7 @@ func (l *UpdateProductLocalizationLogic) UpdateProductLocalization(req *types.Up
 		LanguageCode: localization.LanguageCode,
 		Name:         localization.Name,
 		Description:  localization.Description,
-		CreatedAt:    localization.AuditInfo.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:    localization.AuditInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:    time.Unix(localization.AuditInfo.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:    time.Unix(localization.AuditInfo.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}, nil
 }

@@ -49,8 +49,8 @@ func (l *CreateRoleLogic) CreateRole(req *types.CreateRoleRequest) (resp *types.
 		Status:      role.StatusEnabled,
 		IsSystem:    false,
 		Audit: shared.AuditInfo{
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: now.Unix(),
+			UpdatedAt: now.Unix(),
 		},
 	}
 

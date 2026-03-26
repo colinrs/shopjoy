@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -46,7 +47,7 @@ func (l *GetProductLocalizationLogic) GetProductLocalization(req *types.GetProdu
 		LanguageCode: localization.LanguageCode,
 		Name:         localization.Name,
 		Description:  localization.Description,
-		CreatedAt:    localization.AuditInfo.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:    localization.AuditInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:    time.Unix(localization.AuditInfo.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:    time.Unix(localization.AuditInfo.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}, nil
 }

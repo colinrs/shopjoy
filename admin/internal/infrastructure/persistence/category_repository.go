@@ -55,8 +55,8 @@ func (m *categoryModel) toEntity() *product.Category {
 		SeoDescription: m.SeoDescription,
 		Status:         product.CategoryStatus(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -64,15 +64,6 @@ func (m *categoryModel) toEntity() *product.Category {
 }
 
 func fromCategoryEntity(c *product.Category) *categoryModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !c.Audit.CreatedAt.IsZero() {
-		createdAt = c.Audit.CreatedAt.Unix()
-	}
-	if !c.Audit.UpdatedAt.IsZero() {
-		updatedAt = c.Audit.UpdatedAt.Unix()
-	}
 	return &categoryModel{
 		ID:             c.ID,
 		TenantID:       c.TenantID.Int64(),
@@ -86,8 +77,8 @@ func fromCategoryEntity(c *product.Category) *categoryModel {
 		SeoTitle:       c.SeoTitle,
 		SeoDescription: c.SeoDescription,
 		Status:         int8(c.Status),
-		CreatedAt:      createdAt,
-		UpdatedAt:      updatedAt,
+		CreatedAt:      c.Audit.CreatedAt,
+		UpdatedAt:      c.Audit.UpdatedAt,
 		CreatedBy:      c.Audit.CreatedBy,
 		UpdatedBy:      c.Audit.UpdatedBy,
 	}

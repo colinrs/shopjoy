@@ -45,22 +45,13 @@ func (m *warehouseModel) toEntity() *product.Warehouse {
 		IsDefault: m.IsDefault,
 		Status:    shared.Status(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
 
 func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !w.Audit.CreatedAt.IsZero() {
-		createdAt = w.Audit.CreatedAt.Unix()
-	}
-	if !w.Audit.UpdatedAt.IsZero() {
-		updatedAt = w.Audit.UpdatedAt.Unix()
-	}
 	return &warehouseModel{
 		ID:        w.ID,
 		TenantID:  w.TenantID.Int64(),
@@ -70,8 +61,8 @@ func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
 		Address:   w.Address,
 		IsDefault: w.IsDefault,
 		Status:    int8(w.Status),
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		CreatedAt: w.Audit.CreatedAt,
+		UpdatedAt: w.Audit.UpdatedAt,
 	}
 }
 

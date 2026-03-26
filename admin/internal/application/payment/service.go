@@ -288,7 +288,7 @@ func (s *service) GetOrderPayment(ctx context.Context, tenantID shared.TenantID,
 		FeeCurrency:       paymentEntity.FeeCurrency,
 		Status:            int8(paymentEntity.Status),
 		StatusText:        paymentEntity.Status.String(),
-		PaidAt:            formatTimeToString(paymentEntity.PaidAt),
+		PaidAt:            timestampToString(paymentEntity.PaidAt),
 		RefundedAmount:    shared.NewMoney(totalRefunded, paymentEntity.Currency).String(),
 		Refunds:           refundDTOs,
 	}, nil
@@ -447,7 +447,7 @@ func (s *service) HandleWebhook(ctx context.Context, event *WebhookEvent) error 
 		EventType:  event.EventType,
 		ResourceID: event.ResourceID,
 		RawPayload: event.RawPayload,
-		CreatedAt:  time.Now().UTC(),
+		CreatedAt:  time.Now().Unix(),
 	}
 
 	if existingEvent == nil {
@@ -553,6 +553,13 @@ func formatTimeToString(t *time.Time) string {
 		return ""
 	}
 	return t.Format(time.RFC3339)
+}
+
+func timestampToString(timestamp int64) string {
+	if timestamp == 0 {
+		return ""
+	}
+	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
 }
 
 func formatPercentage(value float64) string {

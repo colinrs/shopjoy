@@ -48,16 +48,6 @@ func (refundModel) TableName() string {
 }
 
 func (m *refundModel) toEntity() *fulfillment.Refund {
-	var approvedAt, completedAt *time.Time
-	if m.ApprovedAt != nil {
-		t := time.Unix(*m.ApprovedAt, 0).UTC()
-		approvedAt = &t
-	}
-	if m.CompletedAt != nil {
-		t := time.Unix(*m.CompletedAt, 0).UTC()
-		completedAt = &t
-	}
-
 	var deletedAt gorm.DeletedAt
 	if m.DeletedAt != nil {
 		t := time.Unix(*m.DeletedAt, 0).UTC()
@@ -79,12 +69,12 @@ func (m *refundModel) toEntity() *fulfillment.Refund {
 		Amount:       m.Amount,
 		Currency:     m.Currency,
 		RejectReason: m.RejectReason,
-		ApprovedAt:   approvedAt,
+		ApprovedAt:   m.ApprovedAt,
 		ApprovedBy:   m.ApprovedBy,
-		CompletedAt:  completedAt,
+		CompletedAt:  m.CompletedAt,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -93,15 +83,7 @@ func (m *refundModel) toEntity() *fulfillment.Refund {
 }
 
 func fromRefundEntity(r *fulfillment.Refund) *refundModel {
-	var approvedAt, completedAt, deletedAt *int64
-	if r.ApprovedAt != nil {
-		ts := r.ApprovedAt.Unix()
-		approvedAt = &ts
-	}
-	if r.CompletedAt != nil {
-		ts := r.CompletedAt.Unix()
-		completedAt = &ts
-	}
+	var deletedAt *int64
 	if r.DeletedAt.Valid {
 		ts := r.DeletedAt.Time.Unix()
 		deletedAt = &ts
@@ -122,14 +104,14 @@ func fromRefundEntity(r *fulfillment.Refund) *refundModel {
 		Amount:       r.Amount,
 		Currency:     r.Currency,
 		RejectReason: r.RejectReason,
-		ApprovedAt:   approvedAt,
+		ApprovedAt:   r.ApprovedAt,
 		ApprovedBy:   r.ApprovedBy,
-		CompletedAt:  completedAt,
+		CompletedAt:  r.CompletedAt,
 		CreatedBy:    r.Audit.CreatedBy,
 		UpdatedBy:    r.Audit.UpdatedBy,
 		DeletedAt:    deletedAt,
-		CreatedAt:    r.Audit.CreatedAt.Unix(),
-		UpdatedAt:    r.Audit.UpdatedAt.Unix(),
+		CreatedAt:    r.Audit.CreatedAt,
+		UpdatedAt:    r.Audit.UpdatedAt,
 	}
 }
 

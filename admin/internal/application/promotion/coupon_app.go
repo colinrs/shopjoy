@@ -457,7 +457,7 @@ func toCouponResponse(c *pkgcoupon.Coupon) *CouponResponse {
 		Status:       int(c.Status),
 		StartAt:      c.StartAt.Format(time.RFC3339),
 		EndAt:        c.EndAt.Format(time.RFC3339),
-		CreatedAt:    c.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:    c.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:    time.Unix(c.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:    time.Unix(c.Audit.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}
 }

@@ -47,16 +47,6 @@ func (shipmentModel) TableName() string {
 }
 
 func (m *shipmentModel) toEntity() *fulfillment.Shipment {
-	var shippedAt, deliveredAt *time.Time
-	if m.ShippedAt != nil {
-		t := time.Unix(*m.ShippedAt, 0).UTC()
-		shippedAt = &t
-	}
-	if m.DeliveredAt != nil {
-		t := time.Unix(*m.DeliveredAt, 0).UTC()
-		deliveredAt = &t
-	}
-
 	var deletedAt gorm.DeletedAt
 	if m.DeletedAt != nil {
 		t := time.Unix(*m.DeletedAt, 0).UTC()
@@ -75,12 +65,12 @@ func (m *shipmentModel) toEntity() *fulfillment.Shipment {
 		ShippingCost:     m.ShippingCost,
 		ShippingCurrency: m.ShippingCurrency,
 		Weight:           m.Weight,
-		ShippedAt:        shippedAt,
-		DeliveredAt:      deliveredAt,
+		ShippedAt:        m.ShippedAt,
+		DeliveredAt:      m.DeliveredAt,
 		Remark:           m.Remark,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -89,15 +79,7 @@ func (m *shipmentModel) toEntity() *fulfillment.Shipment {
 }
 
 func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
-	var shippedAt, deliveredAt, deletedAt *int64
-	if s.ShippedAt != nil {
-		ts := s.ShippedAt.Unix()
-		shippedAt = &ts
-	}
-	if s.DeliveredAt != nil {
-		ts := s.DeliveredAt.Unix()
-		deliveredAt = &ts
-	}
+	var deletedAt *int64
 	if s.DeletedAt.Valid {
 		ts := s.DeletedAt.Time.Unix()
 		deletedAt = &ts
@@ -115,14 +97,14 @@ func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
 		ShippingCost:     s.ShippingCost,
 		ShippingCurrency: s.ShippingCurrency,
 		Weight:           s.Weight,
-		ShippedAt:        shippedAt,
-		DeliveredAt:      deliveredAt,
+		ShippedAt:        s.ShippedAt,
+		DeliveredAt:      s.DeliveredAt,
 		Remark:           s.Remark,
 		CreatedBy:        s.Audit.CreatedBy,
 		UpdatedBy:        s.Audit.UpdatedBy,
 		DeletedAt:        deletedAt,
-		CreatedAt:        s.Audit.CreatedAt.Unix(),
-		UpdatedAt:        s.Audit.UpdatedAt.Unix(),
+		CreatedAt:        s.Audit.CreatedAt,
+		UpdatedAt:        s.Audit.UpdatedAt,
 	}
 }
 

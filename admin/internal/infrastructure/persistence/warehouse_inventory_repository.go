@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -40,22 +39,13 @@ func (m *warehouseInventoryModel) toEntity() *product.WarehouseInventory {
 		AvailableStock: m.AvailableStock,
 		LockedStock:    m.LockedStock,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
 
 func fromWarehouseInventoryEntity(wi *product.WarehouseInventory) *warehouseInventoryModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !wi.Audit.CreatedAt.IsZero() {
-		createdAt = wi.Audit.CreatedAt.Unix()
-	}
-	if !wi.Audit.UpdatedAt.IsZero() {
-		updatedAt = wi.Audit.UpdatedAt.Unix()
-	}
 	return &warehouseInventoryModel{
 		ID:             wi.ID,
 		TenantID:       wi.TenantID.Int64(),
@@ -63,8 +53,8 @@ func fromWarehouseInventoryEntity(wi *product.WarehouseInventory) *warehouseInve
 		WarehouseID:    wi.WarehouseID,
 		AvailableStock: wi.AvailableStock,
 		LockedStock:    wi.LockedStock,
-		CreatedAt:      createdAt,
-		UpdatedAt:      updatedAt,
+		CreatedAt:      wi.Audit.CreatedAt,
+		UpdatedAt:      wi.Audit.UpdatedAt,
 	}
 }
 

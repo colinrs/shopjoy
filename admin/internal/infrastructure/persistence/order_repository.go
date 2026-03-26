@@ -118,8 +118,8 @@ func (m *orderModel) toEntity() *fulfillment.Order {
 		DeliveredAt:       deliveredAt,
 		CancelledAt:       cancelledAt,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -187,8 +187,8 @@ func fromOrderEntity(o *fulfillment.Order) *orderModel {
 		CreatedBy:         o.Audit.CreatedBy,
 		UpdatedBy:         o.Audit.UpdatedBy,
 		DeletedAt:         deletedAt,
-		CreatedAt:         o.Audit.CreatedAt.Unix(),
-		UpdatedAt:         o.Audit.UpdatedAt.Unix(),
+		CreatedAt:         o.Audit.CreatedAt,
+		UpdatedAt:         o.Audit.UpdatedAt,
 	}
 }
 

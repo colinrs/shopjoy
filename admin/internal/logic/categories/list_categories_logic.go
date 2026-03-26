@@ -55,8 +55,8 @@ func (l *ListCategoriesLogic) ListCategories(req *types.ListCategoryReq) (resp *
 			SeoDescription: c.SeoDescription,
 			Status:         int8(c.Status),
 			ProductCount:   productCount,
-			CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:      time.Unix(c.Audit.CreatedAt, 0).Format(time.RFC3339),
+			UpdatedAt:      time.Unix(c.Audit.UpdatedAt, 0).Format(time.RFC3339),
 		})
 	}
 

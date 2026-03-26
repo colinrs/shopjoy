@@ -78,8 +78,8 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		Attributes:     req.Attributes,
 		Status:         shared.StatusEnabled,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().Unix(),
+			UpdatedAt: time.Now().Unix(),
 		},
 	}
 

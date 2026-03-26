@@ -53,8 +53,8 @@ func (m *brandModel) toEntity() *product.Brand {
 		TrademarkCountry: m.TrademarkCountry,
 		Status:           shared.Status(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -62,15 +62,6 @@ func (m *brandModel) toEntity() *product.Brand {
 }
 
 func fromBrandEntity(b *product.Brand) *brandModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if !b.Audit.CreatedAt.IsZero() {
-		createdAt = b.Audit.CreatedAt.Unix()
-	}
-	if !b.Audit.UpdatedAt.IsZero() {
-		updatedAt = b.Audit.UpdatedAt.Unix()
-	}
 	return &brandModel{
 		ID:               b.ID,
 		TenantID:         b.TenantID.Int64(),
@@ -83,8 +74,8 @@ func fromBrandEntity(b *product.Brand) *brandModel {
 		TrademarkNumber:  b.TrademarkNumber,
 		TrademarkCountry: b.TrademarkCountry,
 		Status:           int8(b.Status),
-		CreatedAt:        createdAt,
-		UpdatedAt:        updatedAt,
+		CreatedAt:        b.Audit.CreatedAt,
+		UpdatedAt:        b.Audit.UpdatedAt,
 		CreatedBy:        b.Audit.CreatedBy,
 		UpdatedBy:        b.Audit.UpdatedBy,
 	}

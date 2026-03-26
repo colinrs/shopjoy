@@ -3,6 +3,7 @@ package products
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -55,7 +56,7 @@ func (l *GetSKULogic) GetSKU(req *types.GetSKUReq) (resp *types.SKUDetailResp, e
 		Attributes:     sku.Attributes,
 		Status:         strconv.Itoa(int(sku.Status)),
 		IsLowStock:     sku.IsLowStock(),
-		CreatedAt:      sku.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      sku.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:      time.Unix(sku.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		UpdatedAt:      time.Unix(sku.Audit.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 	}, nil
 }

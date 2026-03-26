@@ -270,7 +270,7 @@ func toUserResponse(u *domain.User) *UserResponse {
 		Avatar:    u.Avatar,
 		Gender:    int(u.Gender),
 		Status:    int(u.Status),
-		CreatedAt: u.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt: time.Unix(u.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"),
 	}
 
 	if u.Birthday != nil {
@@ -504,7 +504,7 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID,
 			statusText = "inactive"
 		}
 		csvContent += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
-			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Audit.CreatedAt.Format("2006-01-02 15:04:05"))
+			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, time.Unix(u.Audit.CreatedAt, 0).Format("2006-01-02 15:04:05"))
 	}
 
 	return []byte(csvContent), nil
@@ -536,8 +536,8 @@ func toUserDetailResponse(u *domain.User) *UserDetailResponse {
 		GenderText: getGenderText(u.Gender),
 		Status:    int(u.Status),
 		StatusText: getStatusText(u.Status),
-		CreatedAt: u.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: u.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt: time.Unix(u.Audit.CreatedAt, 0).Format(time.RFC3339),
+		UpdatedAt: time.Unix(u.Audit.UpdatedAt, 0).Format(time.RFC3339),
 	}
 
 	if u.Birthday != nil {
@@ -561,7 +561,7 @@ func toExtendedUserResponse(u *domain.User) *ExtendedUserResponse {
 		Avatar:     u.Avatar,
 		Status:     int(u.Status),
 		StatusText: getStatusText(u.Status),
-		CreatedAt:  u.Audit.CreatedAt.Format(time.RFC3339),
+		CreatedAt:  time.Unix(u.Audit.CreatedAt, 0).Format(time.RFC3339),
 	}
 
 	if u.LastLogin != nil {

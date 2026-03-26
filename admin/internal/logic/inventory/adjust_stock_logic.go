@@ -69,8 +69,8 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			AvailableStock: newStock,
 			LockedStock:    0,
 			Audit: shared.AuditInfo{
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
 			},
 		}
 		if err := l.svcCtx.WarehouseInventoryRepo.Create(l.ctx, l.svcCtx.DB, inventory); err != nil {
@@ -84,7 +84,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			return nil, code.ErrInventoryInsufficientStock
 		}
 		inventory.AvailableStock = newStock
-		inventory.Audit.UpdatedAt = time.Now()
+		inventory.Audit.UpdatedAt = time.Now().Unix()
 		if err := l.svcCtx.WarehouseInventoryRepo.Update(l.ctx, l.svcCtx.DB, inventory); err != nil {
 			return nil, err
 		}
