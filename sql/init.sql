@@ -10,8 +10,8 @@
 -- 6. fulfillment/ - 履约、物流表
 -- 7. storefront/  - 店铺装修表
 -- 8. points/      - 积分表
--- 9. shop/        - 店铺设置表（待创建）
--- 10. review/     - 评价表（待创建）
+-- 9. shop/        - 店铺设置表
+-- 10. review/     - 评价表
 -- ============================================
 
 -- 使用方法:
@@ -53,8 +53,8 @@
 -- 积分领域
 -- source points/schema.sql
 
--- 店铺设置领域（待创建）
+-- 店铺设置领域
 -- source shop/schema.sql
 
--- 评价领域（待创建）
+-- 评价领域
 -- source review/schema.sql
