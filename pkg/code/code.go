@@ -383,4 +383,33 @@ var (
 	ErrUploadInvalidCategory     = &Err{HTTPCode: http.StatusBadRequest, Code: 240003, Msg: "invalid category"}
 	ErrUploadFailed              = &Err{HTTPCode: http.StatusInternalServerError, Code: 240004, Msg: "upload failed"}
 	ErrUploadNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 240005, Msg: "file not found"}
+
+	// ==================== Points Module (250xxx) ====================
+	// EarnRule errors (250xxx)
+	ErrEarnRuleNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 250001, Msg: "earn rule not found"}
+	ErrEarnRuleInvalid       = &Err{HTTPCode: http.StatusBadRequest, Code: 250002, Msg: "invalid earn rule"}
+	ErrEarnRuleNotActive     = &Err{HTTPCode: http.StatusBadRequest, Code: 250003, Msg: "earn rule is not active"}
+	ErrEarnRuleAlreadyActive = &Err{HTTPCode: http.StatusBadRequest, Code: 250004, Msg: "earn rule is already active"}
+	ErrEarnRuleExpired       = &Err{HTTPCode: http.StatusBadRequest, Code: 250005, Msg: "earn rule has expired"}
+	ErrEarnRuleNotStarted    = &Err{HTTPCode: http.StatusBadRequest, Code: 250006, Msg: "earn rule has not started"}
+
+	// RedeemRule errors (2501xx)
+	ErrRedeemRuleNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 250101, Msg: "redeem rule not found"}
+	ErrRedeemRuleInvalid        = &Err{HTTPCode: http.StatusBadRequest, Code: 250102, Msg: "invalid redeem rule"}
+	ErrRedeemRuleNotActive      = &Err{HTTPCode: http.StatusBadRequest, Code: 250103, Msg: "redeem rule is not active"}
+	ErrRedeemRuleOutOfStock     = &Err{HTTPCode: http.StatusBadRequest, Code: 250104, Msg: "redeem rule is out of stock"}
+	ErrRedeemRuleUserLimitReached = &Err{HTTPCode: http.StatusBadRequest, Code: 250105, Msg: "user has reached redemption limit"}
+
+	// PointsAccount errors (2502xx)
+	ErrPointsAccountNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 250201, Msg: "points account not found"}
+	ErrPointsAccountInsufficient  = &Err{HTTPCode: http.StatusBadRequest, Code: 250202, Msg: "insufficient points balance"}
+	ErrPointsAccountFrozen        = &Err{HTTPCode: http.StatusBadRequest, Code: 250203, Msg: "points are frozen"}
+
+	// PointsTransaction errors (2503xx)
+	ErrPointsTransactionNotFound = &Err{HTTPCode: http.StatusNotFound, Code: 250301, Msg: "points transaction not found"}
+
+	// PointsRedemption errors (2504xx)
+	ErrPointsRedemptionNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 250401, Msg: "points redemption not found"}
+	ErrPointsRedemptionInvalidStatus = &Err{HTTPCode: http.StatusBadRequest, Code: 250402, Msg: "invalid redemption status"}
+	ErrPointsRedemptionCannotCancel  = &Err{HTTPCode: http.StatusBadRequest, Code: 250403, Msg: "cannot cancel redemption in current status"}
 )

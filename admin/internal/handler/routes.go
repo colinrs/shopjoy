@@ -17,6 +17,12 @@ import (
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	pages "github.com/colinrs/shopjoy/admin/internal/handler/pages"
 	payments "github.com/colinrs/shopjoy/admin/internal/handler/payments"
+	pointsaccounts "github.com/colinrs/shopjoy/admin/internal/handler/points/accounts"
+	pointsearn_rules "github.com/colinrs/shopjoy/admin/internal/handler/points/earn_rules"
+	pointsredeem_rules "github.com/colinrs/shopjoy/admin/internal/handler/points/redeem_rules"
+	pointsredemptions "github.com/colinrs/shopjoy/admin/internal/handler/points/redemptions"
+	pointsstats "github.com/colinrs/shopjoy/admin/internal/handler/points/stats"
+	pointstransactions "github.com/colinrs/shopjoy/admin/internal/handler/points/transactions"
 	product_markets "github.com/colinrs/shopjoy/admin/internal/handler/product_markets"
 	products "github.com/colinrs/shopjoy/admin/internal/handler/products"
 	promotions "github.com/colinrs/shopjoy/admin/internal/handler/promotions"
@@ -621,6 +627,216 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/payments/transactions/:id",
 					Handler: payments.GetTransactionHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取积分账户列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/accounts",
+					Handler: pointsaccounts.ListAccountsHandler(serverCtx),
+				},
+				{
+					// 获取积分账户详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/accounts/:id",
+					Handler: pointsaccounts.GetAccountHandler(serverCtx),
+				},
+				{
+					// 手动调整积分
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/accounts/:id/adjust",
+					Handler: pointsaccounts.AdjustPointsHandler(serverCtx),
+				},
+				{
+					// 获取账户交易记录
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/accounts/:id/transactions",
+					Handler: pointsaccounts.GetAccountTransactionsHandler(serverCtx),
+				},
+				{
+					// 根据用户ID获取积分账户
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/accounts/by-user/:userId",
+					Handler: pointsaccounts.GetAccountByUserHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取积分获取规则列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/earn-rules",
+					Handler: pointsearn_rules.ListEarnRulesHandler(serverCtx),
+				},
+				{
+					// 创建积分获取规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/earn-rules",
+					Handler: pointsearn_rules.CreateEarnRuleHandler(serverCtx),
+				},
+				{
+					// 获取积分获取规则详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/earn-rules/:id",
+					Handler: pointsearn_rules.GetEarnRuleHandler(serverCtx),
+				},
+				{
+					// 更新积分获取规则
+					Method:  http.MethodPut,
+					Path:    "/api/v1/points/earn-rules/:id",
+					Handler: pointsearn_rules.UpdateEarnRuleHandler(serverCtx),
+				},
+				{
+					// 删除积分获取规则
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/points/earn-rules/:id",
+					Handler: pointsearn_rules.DeleteEarnRuleHandler(serverCtx),
+				},
+				{
+					// 激活积分获取规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/earn-rules/:id/activate",
+					Handler: pointsearn_rules.ActivateEarnRuleHandler(serverCtx),
+				},
+				{
+					// 停用积分获取规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/earn-rules/:id/deactivate",
+					Handler: pointsearn_rules.DeactivateEarnRuleHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取积分兑换规则列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/redeem-rules",
+					Handler: pointsredeem_rules.ListRedeemRulesHandler(serverCtx),
+				},
+				{
+					// 创建积分兑换规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/redeem-rules",
+					Handler: pointsredeem_rules.CreateRedeemRuleHandler(serverCtx),
+				},
+				{
+					// 获取积分兑换规则详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/redeem-rules/:id",
+					Handler: pointsredeem_rules.GetRedeemRuleHandler(serverCtx),
+				},
+				{
+					// 更新积分兑换规则
+					Method:  http.MethodPut,
+					Path:    "/api/v1/points/redeem-rules/:id",
+					Handler: pointsredeem_rules.UpdateRedeemRuleHandler(serverCtx),
+				},
+				{
+					// 删除积分兑换规则
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/points/redeem-rules/:id",
+					Handler: pointsredeem_rules.DeleteRedeemRuleHandler(serverCtx),
+				},
+				{
+					// 激活积分兑换规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/redeem-rules/:id/activate",
+					Handler: pointsredeem_rules.ActivateRedeemRuleHandler(serverCtx),
+				},
+				{
+					// 停用积分兑换规则
+					Method:  http.MethodPost,
+					Path:    "/api/v1/points/redeem-rules/:id/deactivate",
+					Handler: pointsredeem_rules.DeactivateRedeemRuleHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取积分兑换记录列表
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/redemptions",
+					Handler: pointsredemptions.ListRedemptionsHandler(serverCtx),
+				},
+				{
+					// 获取积分兑换记录详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/redemptions/:id",
+					Handler: pointsredemptions.GetRedemptionHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取积分统计概览
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/stats",
+					Handler: pointsstats.GetPointsStatsHandler(serverCtx),
+				},
+				{
+					// 获取即将过期积分
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/stats/expiring",
+					Handler: pointsstats.GetExpiringPointsHandler(serverCtx),
+				},
+				{
+					// 获取积分排名用户
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/stats/top-users",
+					Handler: pointsstats.GetTopUsersHandler(serverCtx),
+				},
+				{
+					// 获取积分趋势数据
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/stats/trend",
+					Handler: pointsstats.GetPointsTrendHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 获取所有积分交易记录
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/transactions",
+					Handler: pointstransactions.ListTransactionsHandler(serverCtx),
+				},
+				{
+					// 获取积分交易详情
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/transactions/:id",
+					Handler: pointstransactions.GetTransactionHandler(serverCtx),
 				},
 			}...,
 		),

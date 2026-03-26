@@ -11,12 +11,14 @@ import (
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
+	appPoints "github.com/colinrs/shopjoy/admin/internal/application/points"
 	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
 	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
+	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
@@ -84,6 +86,13 @@ type ServiceContext struct {
 	ShippingRepo persistence.ShippingTemplateRepository
 	// Storage
 	Storage storage.Storage
+	// Points
+	PointsService          appPoints.Service
+	EarnRuleRepo           points.EarnRuleRepository
+	RedeemRuleRepo         points.RedeemRuleRepository
+	PointsAccountRepo      points.PointsAccountRepository
+	PointsTransactionRepo  points.PointsTransactionRepository
+	PointsRedemptionRepo   points.PointsRedemptionRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -182,6 +191,24 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	versionService := appStorefront.NewVersionService(db, pageRepo, pageVersionRepo, decorationRepo, idGen)
 	seoService := appStorefront.NewSEOService(db, seoConfigRepo)
 
+	// Points repositories
+	earnRuleRepo := persistence.NewEarnRuleRepository()
+	redeemRuleRepo := persistence.NewRedeemRuleRepository()
+	pointsAccountRepo := persistence.NewPointsAccountRepository()
+	pointsTransactionRepo := persistence.NewPointsTransactionRepository()
+	pointsRedemptionRepo := persistence.NewPointsRedemptionRepository()
+
+	// Points service
+	pointsService := appPoints.NewService(
+		db,
+		earnRuleRepo,
+		redeemRuleRepo,
+		pointsAccountRepo,
+		pointsTransactionRepo,
+		pointsRedemptionRepo,
+		idGen,
+	)
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
@@ -236,5 +263,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Storage: storage.MustNewStorage(storage.Config{
 			Type: storage.StorageTypeLocal,
 		}),
+
+		// Points repositories and service
+		PointsService:         pointsService,
+		EarnRuleRepo:          earnRuleRepo,
+		RedeemRuleRepo:        redeemRuleRepo,
+		PointsAccountRepo:     pointsAccountRepo,
+		PointsTransactionRepo: pointsTransactionRepo,
+		PointsRedemptionRepo:  pointsRedemptionRepo,
 	}
 }

@@ -44,10 +44,27 @@
           v-model="localConfig.product_ids"
           multiple
           filterable
-          placeholder="选择商品"
+          remote
+          :remote-method="loadProducts"
+          :loading="loadingProducts"
+          placeholder="搜索并选择商品"
+          style="width: 100%"
         >
-          <!-- TODO: Load product options -->
+          <el-option
+            v-for="product in productOptions"
+            :key="product.id"
+            :label="product.name"
+            :value="product.id"
+          >
+            <span>{{ product.name }}</span>
+            <span style="color: #909399; font-size: 12px; margin-left: 8px;">
+              {{ product.sku_code }}
+            </span>
+          </el-option>
         </el-select>
+        <div style="font-size: 12px; color: #909399; margin-top: 4px;">
+          已选择 {{ localConfig.product_ids?.length || 0 }} 个商品
+        </div>
       </el-form-item>
     </template>
 
@@ -130,8 +147,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, onMounted } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
+import { getProductList } from '@/api/product'
 
 const props = defineProps<{
   blockType: string
@@ -143,6 +161,33 @@ const emit = defineEmits<{
 }>()
 
 const localConfig = reactive<Record<string, any>>({ ...props.config })
+
+// Product options for product_grid selector
+const productOptions = ref<Array<{ id: number; name: string; sku_code: string }>>([])
+const loadingProducts = ref(false)
+
+// Load product options
+const loadProducts = async () => {
+  loadingProducts.value = true
+  try {
+    const response = await getProductList({ page: 1, page_size: 100 })
+    productOptions.value = response.list.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      sku_code: p.sku_code || ''
+    }))
+  } catch (error) {
+    console.error('Failed to load products:', error)
+  } finally {
+    loadingProducts.value = false
+  }
+}
+
+onMounted(() => {
+  if (props.blockType === 'product_grid') {
+    loadProducts()
+  }
+})
 
 watch(() => props.config, (newConfig) => {
   Object.assign(localConfig, newConfig)

@@ -9,7 +9,7 @@
 -- 5. payment/     - 支付相关表
 -- 6. fulfillment/ - 履约、物流表
 -- 7. storefront/  - 店铺装修表
--- 8. points/      - 积分表（待创建）
+-- 8. points/      - 积分表
 -- 9. shop/        - 店铺设置表（待创建）
 -- 10. review/     - 评价表（待创建）
 -- ============================================
@@ -50,7 +50,7 @@
 -- 店铺装修领域
 -- source storefront/schema.sql
 
--- 积分领域（待创建）
+-- 积分领域
 -- source points/schema.sql
 
 -- 店铺设置领域（待创建）

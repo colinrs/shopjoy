@@ -18,6 +18,7 @@ import "role.api"
 import "dashboard.api"
 import "shop.api"
 import "shipping.api"
+import "points.api"
 
 info (
 	title:   "Admin API"

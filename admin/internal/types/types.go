@@ -3,9 +3,21 @@
 
 package types
 
-import "mime/multipart"
+type AccountsStats struct {
+	Total        int64 `json:"total"`
+	TotalBalance int64 `json:"total_balance"`
+	Active       int64 `json:"active"`
+}
+
+type ActivateEarnRuleReq struct {
+	ID int64 `path:"id"`
+}
 
 type ActivatePromotionReq struct {
+	ID int64 `path:"id"`
+}
+
+type ActivateRedeemRuleReq struct {
 	ID int64 `path:"id"`
 }
 
@@ -48,6 +60,20 @@ type AdjustOrderPriceResp struct {
 	NewPayAmount   string `json:"new_pay_amount"`
 	AdjustReason   string `json:"adjust_reason"`
 	AdjustedAt     string `json:"adjusted_at"`
+}
+
+type AdjustPointsReq struct {
+	ID             int64  `path:"id"`
+	AdjustmentType string `json:"adjustment_type"` // ADD, DEDUCT
+	Points         int64  `json:"points"`
+	Reason         string `json:"reason"`
+}
+
+type AdjustPointsResp struct {
+	TransactionID int64  `json:"transaction_id"`
+	Points        int64  `json:"points"`
+	BalanceAfter  int64  `json:"balance_after"`
+	CreatedAt     string `json:"created_at"`
 }
 
 type AdjustStockReq struct {
@@ -408,6 +434,23 @@ type CreateCouponResp struct {
 	ID int64 `json:"id"`
 }
 
+type CreateEarnRuleReq struct {
+	Name             string        `json:"name"`
+	Description      string        `json:"description,optional"`
+	Scenario         string        `json:"scenario"`
+	CalculationType  string        `json:"calculation_type"`
+	FixedPoints      int64         `json:"fixed_points,optional"`
+	Ratio            string        `json:"ratio,optional"`
+	Tiers            []*TierConfig `json:"tiers,optional"`
+	ConditionType    string        `json:"condition_type,optional"`
+	ConditionValue   string        `json:"condition_value,optional"`
+	ExpirationMonths int           `json:"expiration_months,optional,default=12"`
+	Status           string        `json:"status,optional,default=draft"`
+	Priority         int           `json:"priority,optional,default=0"`
+	StartAt          string        `json:"start_at,optional"`
+	EndAt            string        `json:"end_at,optional"`
+}
+
 type CreateMarketReq struct {
 	Code            string    `json:"code"`     // US, UK, DE, FR, AU
 	Name            string    `json:"name"`     // United States
@@ -479,6 +522,18 @@ type CreatePromotionRulesReq struct {
 
 type CreatePromotionRulesResp struct {
 	IDs []int64 `json:"ids"`
+}
+
+type CreateRedeemRuleReq struct {
+	Name           string `json:"name"`
+	Description    string `json:"description,optional"`
+	CouponID       int64  `json:"coupon_id"`
+	PointsRequired int64  `json:"points_required"`
+	TotalStock     int64  `json:"total_stock,optional,default=0"`
+	PerUserLimit   int    `json:"per_user_limit,optional,default=1"`
+	Status         string `json:"status,optional,default=inactive"`
+	StartAt        string `json:"start_at,optional"`
+	EndAt          string `json:"end_at,optional"`
 }
 
 type CreateReplyReq struct {
@@ -601,7 +656,15 @@ type DashboardOverviewResponse struct {
 	Currency       string `json:"currency"`
 }
 
+type DeactivateEarnRuleReq struct {
+	ID int64 `path:"id"`
+}
+
 type DeactivatePromotionReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeactivateRedeemRuleReq struct {
 	ID int64 `path:"id"`
 }
 
@@ -626,11 +689,19 @@ type DeleteDecorationRequest struct {
 	ID int64 `path:"id"`
 }
 
+type DeleteEarnRuleReq struct {
+	ID int64 `path:"id"`
+}
+
 type DeletePromotionReq struct {
 	ID int64 `path:"id"`
 }
 
 type DeletePromotionRuleReq struct {
+	ID int64 `path:"id"`
+}
+
+type DeleteRedeemRuleReq struct {
 	ID int64 `path:"id"`
 }
 
@@ -664,16 +735,44 @@ type DeleteTemplateMappingReq struct {
 	ID int64 `path:"id"`
 }
 
-type DeleteUploadReq struct {
-	ID string `path:"id"`
-}
-
-type DeleteUploadResp struct {
-	ID string `json:"id"`
-}
-
 type DeleteUserRequest struct {
 	ID int64 `path:"id"`
+}
+
+type EarnRule struct {
+	ID               int64         `json:"id"`
+	Name             string        `json:"name"`
+	Description      string        `json:"description"`
+	Scenario         string        `json:"scenario"`         // ORDER_PAYMENT, SIGN_IN, PRODUCT_REVIEW, FIRST_ORDER
+	CalculationType  string        `json:"calculation_type"` // FIXED, RATIO, TIERED
+	FixedPoints      int64         `json:"fixed_points"`
+	Ratio            string        `json:"ratio"`
+	Tiers            []*TierConfig `json:"tiers,optional"`
+	ConditionType    string        `json:"condition_type"`           // NONE, NEW_USER, FIRST_ORDER, SPECIFIC_PRODUCTS, MIN_AMOUNT
+	ConditionValue   string        `json:"condition_value,optional"` // JSON string
+	ExpirationMonths int           `json:"expiration_months"`
+	Status           string        `json:"status"` // draft, active, inactive
+	Priority         int           `json:"priority"`
+	StartAt          string        `json:"start_at,optional"`
+	EndAt            string        `json:"end_at,optional"`
+	CreatedAt        string        `json:"created_at"`
+	UpdatedAt        string        `json:"updated_at"`
+}
+
+type EarnRulesStats struct {
+	Total  int64 `json:"total"`
+	Active int64 `json:"active"`
+}
+
+type ExpiringPoints struct {
+	Date      string `json:"date"`
+	Points    int64  `json:"points"`
+	UserCount int64  `json:"user_count"`
+}
+
+type ExpiringPointsResp struct {
+	List        []ExpiringPoints `json:"list"`
+	TotalPoints int64            `json:"total_points"`
 }
 
 type ExportOrdersReq struct {
@@ -743,6 +842,14 @@ type GenerateCouponCodesResp struct {
 	Count int      `json:"count"`
 }
 
+type GetAccountByUserReq struct {
+	UserID int64 `path:"userId"`
+}
+
+type GetAccountReq struct {
+	ID int64 `path:"id"`
+}
+
 type GetBrandMarketVisibilityReq struct {
 	BrandID int64 `path:"id"`
 }
@@ -796,6 +903,14 @@ type GetDashboardResponse struct {
 	RecentActivities   []*ActivityItem                  `json:"recent_activities"`
 }
 
+type GetEarnRuleReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetExpiringPointsReq struct {
+	Days int `form:"days,default=30"`
+}
+
 type GetFulfillmentSummaryReq struct {
 }
 
@@ -840,6 +955,19 @@ type GetPaymentStatsReq struct {
 	Period string `form:"period,default=7d"` // 7d, 30d, 90d
 }
 
+type GetPointsStatsReq struct {
+	Period string `form:"period,default=7d"` // 7d, 30d, 90d, 1y
+}
+
+type GetPointsTransactionReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetPointsTrendReq struct {
+	Period      string `form:"period,default=7d"`
+	Granularity string `form:"granularity,default=daily"` // daily, weekly
+}
+
 type GetProductLocalizationReq struct {
 	ID int64 `path:"id"`
 }
@@ -854,6 +982,14 @@ type GetPromotionReq struct {
 
 type GetPromotionRulesReq struct {
 	PromotionID int64 `path:"id"`
+}
+
+type GetRedeemRuleReq struct {
+	ID int64 `path:"id"`
+}
+
+type GetRedemptionReq struct {
+	ID int64 `path:"id"`
 }
 
 type GetRefundReq struct {
@@ -888,6 +1024,11 @@ type GetShippingTemplateReq struct {
 
 type GetShippingZoneReq struct {
 	ID int64 `path:"id"`
+}
+
+type GetTopUsersReq struct {
+	Period string `form:"period,default=7d"`
+	Limit  int    `form:"limit,default=10"`
 }
 
 type GetTransactionReq struct {
@@ -975,6 +1116,28 @@ type IssueUserCouponResp struct {
 	ID int64 `json:"id"`
 }
 
+type ListAccountTransactionsReq struct {
+	ID       int64  `path:"id"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Type     string `form:"type,optional"`
+}
+
+type ListAccountsReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	UserID   int64  `form:"user_id,optional"`
+	Email    string `form:"email,optional"`
+}
+
+type ListAccountsResp struct {
+	List     []*PointsAccount `json:"list"`
+	Total    int64            `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
+	Stats    AccountsStats    `json:"stats"`
+}
+
 type ListAdminUsersRequest struct {
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"page_size,default=20"`
@@ -1036,6 +1199,23 @@ type ListCouponsResp struct {
 	Total    int64               `json:"total"`
 	Page     int                 `json:"page"`
 	PageSize int                 `json:"page_size"`
+}
+
+type ListEarnRulesReq struct {
+	Page            int    `form:"page,default=1"`
+	PageSize        int    `form:"page_size,default=20"`
+	Name            string `form:"name,optional"`
+	Status          string `form:"status,optional"`
+	Scenario        string `form:"scenario,optional"`
+	CalculationType string `form:"calculation_type,optional"`
+}
+
+type ListEarnRulesResp struct {
+	List     []*EarnRule    `json:"list"`
+	Total    int64          `json:"total"`
+	Page     int            `json:"page"`
+	PageSize int            `json:"page_size"`
+	Stats    EarnRulesStats `json:"stats"`
 }
 
 type ListFulfillmentOrdersReq struct {
@@ -1108,6 +1288,24 @@ type ListPermissionsResponse struct {
 	List []*PermissionInfo `json:"list"`
 }
 
+type ListPointsTransactionsReq struct {
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"page_size,default=20"`
+	UserID    int64  `form:"user_id,optional"`
+	AccountID int64  `form:"account_id,optional"`
+	Type      string `form:"type,optional"`
+	StartTime string `form:"start_time,optional"`
+	EndTime   string `form:"end_time,optional"`
+}
+
+type ListPointsTransactionsResp struct {
+	List     []*PointsTransaction    `json:"list"`
+	Total    int64                   `json:"total"`
+	Page     int                     `json:"page"`
+	PageSize int                     `json:"page_size"`
+	Stats    PointsTransactionsStats `json:"stats"`
+}
+
 type ListProductLocalizationsReq struct {
 	ProductID int64 `path:"product_id"`
 }
@@ -1162,6 +1360,37 @@ type ListPromotionsResp struct {
 	Total    int64                  `json:"total"`
 	Page     int                    `json:"page"`
 	PageSize int                    `json:"page_size"`
+}
+
+type ListRedeemRulesReq struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Name     string `form:"name,optional"`
+	Status   string `form:"status,optional"`
+}
+
+type ListRedeemRulesResp struct {
+	List     []*RedeemRule    `json:"list"`
+	Total    int64            `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
+	Stats    RedeemRulesStats `json:"stats"`
+}
+
+type ListRedemptionsReq struct {
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"page_size,default=20"`
+	UserID    int64  `form:"user_id,optional"`
+	Status    string `form:"status,optional"`
+	StartTime string `form:"start_time,optional"`
+	EndTime   string `form:"end_time,optional"`
+}
+
+type ListRedemptionsResp struct {
+	List     []*PointsRedemption `json:"list"`
+	Total    int64               `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 }
 
 type ListRefundReasonsReq struct {
@@ -1568,6 +1797,67 @@ type PermissionInfo struct {
 	Sort     int    `json:"sort"`
 }
 
+type PointsAccount struct {
+	ID            int64  `json:"id"`
+	UserID        int64  `json:"user_id"`
+	UserEmail     string `json:"user_email,optional"`
+	Balance       int64  `json:"balance"`
+	FrozenBalance int64  `json:"frozen_balance"`
+	TotalEarned   int64  `json:"total_earned"`
+	TotalRedeemed int64  `json:"total_redeemed"`
+	TotalExpired  int64  `json:"total_expired"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+}
+
+type PointsRedemption struct {
+	ID           int64  `json:"id"`
+	UserID       int64  `json:"user_id"`
+	RedeemRuleID int64  `json:"redeem_rule_id"`
+	CouponID     int64  `json:"coupon_id"`
+	CouponName   string `json:"coupon_name"`
+	UserCouponID int64  `json:"user_coupon_id,optional"`
+	PointsUsed   int64  `json:"points_used"`
+	Status       string `json:"status"` // pending, completed, cancelled
+	CreatedAt    string `json:"created_at"`
+	CompletedAt  string `json:"completed_at,optional"`
+}
+
+type PointsStats struct {
+	TotalIssued        int64  `json:"total_issued"`
+	TotalRedeemed      int64  `json:"total_redeemed"`
+	TotalExpired       int64  `json:"total_expired"`
+	OutstandingBalance int64  `json:"outstanding_balance"`
+	RedemptionRate     string `json:"redemption_rate"`
+	ActiveUsers        int64  `json:"active_users"`
+	PeriodStart        string `json:"period_start"`
+	PeriodEnd          string `json:"period_end"`
+}
+
+type PointsTransaction struct {
+	ID            int64  `json:"id"`
+	UserID        int64  `json:"user_id"`
+	AccountID     int64  `json:"account_id"`
+	Points        int64  `json:"points"` // Positive = earn, negative = deduct
+	BalanceAfter  int64  `json:"balance_after"`
+	Type          string `json:"type"` // EARN, REDEEM, ADJUST, EXPIRE, FREEZE, UNFREEZE
+	ReferenceType string `json:"reference_type"`
+	ReferenceID   string `json:"reference_id"`
+	Description   string `json:"description"`
+	ExpiresAt     string `json:"expires_at,optional"`
+	CreatedAt     string `json:"created_at"`
+}
+
+type PointsTransactionsStats struct {
+	TotalEarned   int64 `json:"total_earned"`
+	TotalRedeemed int64 `json:"total_redeemed"`
+}
+
+type PointsTrendResp struct {
+	Data   []TrendDataPoint `json:"data"`
+	Period string           `json:"period"`
+}
+
 type ProductDetailResp struct {
 	ID              int64               `json:"id"`
 	Name            string              `json:"name"`
@@ -1715,6 +2005,29 @@ type RecentActivitiesRequest struct {
 
 type RecentActivitiesResponse struct {
 	List []*ActivityItem `json:"list"`
+}
+
+type RedeemRule struct {
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	CouponID       int64  `json:"coupon_id"`
+	CouponName     string `json:"coupon_name"`
+	PointsRequired int64  `json:"points_required"`
+	TotalStock     int64  `json:"total_stock"`
+	UsedStock      int64  `json:"used_stock"`
+	PerUserLimit   int    `json:"per_user_limit"`
+	Status         string `json:"status"` // inactive, active
+	StartAt        string `json:"start_at,optional"`
+	EndAt          string `json:"end_at,optional"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
+}
+
+type RedeemRulesStats struct {
+	Total         int64 `json:"total"`
+	Active        int64 `json:"active"`
+	TotalRedeemed int64 `json:"total_redeemed"`
 }
 
 type RefundDailyStats struct {
@@ -2246,6 +2559,11 @@ type ThemeItem struct {
 	ConfigSchema  *ThemeConfigSchema `json:"config_schema,omitempty"`
 }
 
+type TierConfig struct {
+	Threshold *int64 `json:"threshold"` // null for last tier (unlimited)
+	Ratio     string `json:"ratio"`     // Points per currency unit
+}
+
 type ToggleBrandPageReq struct {
 	ID      int64 `path:"id"`
 	Enabled bool  `json:"enabled"`
@@ -2280,6 +2598,18 @@ type TopProductsResponse struct {
 	Currency string            `json:"currency"`
 }
 
+type TopUser struct {
+	UserID       int64  `json:"user_id"`
+	UserEmail    string `json:"user_email,optional"`
+	PointsEarned int64  `json:"points_earned"`
+	CreatedAt    string `json:"created_at"`
+}
+
+type TopUsersResp struct {
+	List   []TopUser `json:"list"`
+	Period string    `json:"period"`
+}
+
 type TransactionResp struct {
 	ID                   int64  `json:"id"`
 	TransactionID        string `json:"transaction_id"`
@@ -2301,6 +2631,13 @@ type TransactionStats struct {
 	Success int64 `json:"success"`
 	Pending int64 `json:"pending"`
 	Failed  int64 `json:"failed"`
+}
+
+type TrendDataPoint struct {
+	Date     string `json:"date"`
+	Earned   int64  `json:"earned"`
+	Redeemed int64  `json:"redeemed"`
+	Expired  int64  `json:"expired"`
 }
 
 type UnpublishPageRequest struct {
@@ -2377,6 +2714,23 @@ type UpdateCouponReq struct {
 type UpdateDecorationRequest struct {
 	ID          int64  `path:"id"`
 	BlockConfig string `json:"block_config"` // JSON string
+}
+
+type UpdateEarnRuleReq struct {
+	ID               int64         `path:"id"`
+	Name             string        `json:"name"`
+	Description      string        `json:"description,optional"`
+	Scenario         string        `json:"scenario"`
+	CalculationType  string        `json:"calculation_type"`
+	FixedPoints      int64         `json:"fixed_points,optional"`
+	Ratio            string        `json:"ratio,optional"`
+	Tiers            []*TierConfig `json:"tiers,optional"`
+	ConditionType    string        `json:"condition_type,optional"`
+	ConditionValue   string        `json:"condition_value,optional"`
+	ExpirationMonths int           `json:"expiration_months,optional"`
+	Priority         int           `json:"priority,optional"`
+	StartAt          string        `json:"start_at,optional"`
+	EndAt            string        `json:"end_at,optional"`
 }
 
 type UpdateMarketReq struct {
@@ -2484,6 +2838,18 @@ type UpdatePromotionRuleReq struct {
 	DiscountType  string `json:"discount_type,optional"`
 	DiscountValue string `json:"discount_value,optional"`
 	Priority      int    `json:"priority,optional"`
+}
+
+type UpdateRedeemRuleReq struct {
+	ID             int64  `path:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description,optional"`
+	CouponID       int64  `json:"coupon_id"`
+	PointsRequired int64  `json:"points_required"`
+	TotalStock     int64  `json:"total_stock,optional"`
+	PerUserLimit   int    `json:"per_user_limit,optional"`
+	StartAt        string `json:"start_at,optional"`
+	EndAt          string `json:"end_at,optional"`
 }
 
 type UpdateReplyReq struct {
@@ -2624,23 +2990,6 @@ type UpdateWarehouseReq struct {
 type UpdateWarehouseStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
-}
-
-type UploadRequest struct {
-	File     *multipart.FileHeader `json:"file,optional"`
-	Category string                `form:"category,optional"`
-}
-
-type UploadResponse struct {
-	ID        string `json:"id"`
-	URL       string `json:"url"`
-	Filename  string `json:"filename"`
-	Category  string `json:"category"`
-	Size      int64  `json:"size"`
-	MimeType  string `json:"mime_type"`
-	Width     int    `json:"width"`
-	Height    int    `json:"height"`
-	CreatedAt string `json:"created_at"`
 }
 
 type UserAddressListResponse struct {

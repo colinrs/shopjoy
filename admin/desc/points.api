@@ -1,0 +1,495 @@
+syntax = "v1"
+
+info (
+	title:   "Points API"
+	desc:    "积分系统管理相关接口"
+	version: "v1"
+)
+
+type (
+	// ===================== Statistics Types =====================
+	PointsStats {
+		TotalIssued        int64  `json:"total_issued"`
+		TotalRedeemed      int64  `json:"total_redeemed"`
+		TotalExpired       int64  `json:"total_expired"`
+		OutstandingBalance int64  `json:"outstanding_balance"`
+		RedemptionRate     string `json:"redemption_rate"`
+		ActiveUsers        int64  `json:"active_users"`
+		PeriodStart        string `json:"period_start"`
+		PeriodEnd          string `json:"period_end"`
+	}
+	GetPointsStatsReq {
+		Period string `form:"period,default=7d"` // 7d, 30d, 90d, 1y
+	}
+	TrendDataPoint {
+		Date     string `json:"date"`
+		Earned   int64  `json:"earned"`
+		Redeemed int64  `json:"redeemed"`
+		Expired  int64  `json:"expired"`
+	}
+	GetPointsTrendReq {
+		Period      string `form:"period,default=7d"`
+		Granularity string `form:"granularity,default=daily"` // daily, weekly
+	}
+	PointsTrendResp {
+		Data   []TrendDataPoint `json:"data"`
+		Period string           `json:"period"`
+	}
+	TopUser {
+		UserID       int64  `json:"user_id"`
+		UserEmail    string `json:"user_email,optional"`
+		PointsEarned int64  `json:"points_earned"`
+		CreatedAt    string `json:"created_at"`
+	}
+	GetTopUsersReq {
+		Period string `form:"period,default=7d"`
+		Limit  int    `form:"limit,default=10"`
+	}
+	TopUsersResp {
+		List   []TopUser `json:"list"`
+		Period string    `json:"period"`
+	}
+	ExpiringPoints {
+		Date      string `json:"date"`
+		Points    int64  `json:"points"`
+		UserCount int64  `json:"user_count"`
+	}
+	GetExpiringPointsReq {
+		Days int `form:"days,default=30"`
+	}
+	ExpiringPointsResp {
+		List        []ExpiringPoints `json:"list"`
+		TotalPoints int64            `json:"total_points"`
+	}
+	// ===================== Earn Rule Types =====================
+	TierConfig {
+		Threshold *int64 `json:"threshold"` // null for last tier (unlimited)
+		Ratio     string `json:"ratio"` // Points per currency unit
+	}
+	EarnRule {
+		ID               int64         `json:"id"`
+		Name             string        `json:"name"`
+		Description      string        `json:"description"`
+		Scenario         string        `json:"scenario"` // ORDER_PAYMENT, SIGN_IN, PRODUCT_REVIEW, FIRST_ORDER
+		CalculationType  string        `json:"calculation_type"` // FIXED, RATIO, TIERED
+		FixedPoints      int64         `json:"fixed_points"`
+		Ratio            string        `json:"ratio"`
+		Tiers            []*TierConfig `json:"tiers,optional"`
+		ConditionType    string        `json:"condition_type"` // NONE, NEW_USER, FIRST_ORDER, SPECIFIC_PRODUCTS, MIN_AMOUNT
+		ConditionValue   string        `json:"condition_value,optional"` // JSON string
+		ExpirationMonths int           `json:"expiration_months"`
+		Status           string        `json:"status"` // draft, active, inactive
+		Priority         int           `json:"priority"`
+		StartAt          string        `json:"start_at,optional"`
+		EndAt            string        `json:"end_at,optional"`
+		CreatedAt        string        `json:"created_at"`
+		UpdatedAt        string        `json:"updated_at"`
+	}
+	ListEarnRulesReq {
+		Page            int    `form:"page,default=1"`
+		PageSize        int    `form:"page_size,default=20"`
+		Name            string `form:"name,optional"`
+		Status          string `form:"status,optional"`
+		Scenario        string `form:"scenario,optional"`
+		CalculationType string `form:"calculation_type,optional"`
+	}
+	EarnRulesStats {
+		Total  int64 `json:"total"`
+		Active int64 `json:"active"`
+	}
+	ListEarnRulesResp {
+		List     []*EarnRule    `json:"list"`
+		Total    int64          `json:"total"`
+		Page     int            `json:"page"`
+		PageSize int            `json:"page_size"`
+		Stats    EarnRulesStats `json:"stats"`
+	}
+	CreateEarnRuleReq {
+		Name             string        `json:"name"`
+		Description      string        `json:"description,optional"`
+		Scenario         string        `json:"scenario"`
+		CalculationType  string        `json:"calculation_type"`
+		FixedPoints      int64         `json:"fixed_points,optional"`
+		Ratio            string        `json:"ratio,optional"`
+		Tiers            []*TierConfig `json:"tiers,optional"`
+		ConditionType    string        `json:"condition_type,optional"`
+		ConditionValue   string        `json:"condition_value,optional"`
+		ExpirationMonths int           `json:"expiration_months,optional,default=12"`
+		Status           string        `json:"status,optional,default=draft"`
+		Priority         int           `json:"priority,optional,default=0"`
+		StartAt          string        `json:"start_at,optional"`
+		EndAt            string        `json:"end_at,optional"`
+	}
+	UpdateEarnRuleReq {
+		ID               int64         `path:"id"`
+		Name             string        `json:"name"`
+		Description      string        `json:"description,optional"`
+		Scenario         string        `json:"scenario"`
+		CalculationType  string        `json:"calculation_type"`
+		FixedPoints      int64         `json:"fixed_points,optional"`
+		Ratio            string        `json:"ratio,optional"`
+		Tiers            []*TierConfig `json:"tiers,optional"`
+		ConditionType    string        `json:"condition_type,optional"`
+		ConditionValue   string        `json:"condition_value,optional"`
+		ExpirationMonths int           `json:"expiration_months,optional"`
+		Priority         int           `json:"priority,optional"`
+		StartAt          string        `json:"start_at,optional"`
+		EndAt            string        `json:"end_at,optional"`
+	}
+	GetEarnRuleReq {
+		ID int64 `path:"id"`
+	}
+	DeleteEarnRuleReq {
+		ID int64 `path:"id"`
+	}
+	ActivateEarnRuleReq {
+		ID int64 `path:"id"`
+	}
+	DeactivateEarnRuleReq {
+		ID int64 `path:"id"`
+	}
+	// ===================== Redeem Rule Types =====================
+	RedeemRule {
+		ID             int64  `json:"id"`
+		Name           string `json:"name"`
+		Description    string `json:"description"`
+		CouponID       int64  `json:"coupon_id"`
+		CouponName     string `json:"coupon_name"`
+		PointsRequired int64  `json:"points_required"`
+		TotalStock     int64  `json:"total_stock"`
+		UsedStock      int64  `json:"used_stock"`
+		PerUserLimit   int    `json:"per_user_limit"`
+		Status         string `json:"status"` // inactive, active
+		StartAt        string `json:"start_at,optional"`
+		EndAt          string `json:"end_at,optional"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+	}
+	ListRedeemRulesReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Name     string `form:"name,optional"`
+		Status   string `form:"status,optional"`
+	}
+	RedeemRulesStats {
+		Total         int64 `json:"total"`
+		Active        int64 `json:"active"`
+		TotalRedeemed int64 `json:"total_redeemed"`
+	}
+	ListRedeemRulesResp {
+		List     []*RedeemRule    `json:"list"`
+		Total    int64            `json:"total"`
+		Page     int              `json:"page"`
+		PageSize int              `json:"page_size"`
+		Stats    RedeemRulesStats `json:"stats"`
+	}
+	CreateRedeemRuleReq {
+		Name           string `json:"name"`
+		Description    string `json:"description,optional"`
+		CouponID       int64  `json:"coupon_id"`
+		PointsRequired int64  `json:"points_required"`
+		TotalStock     int64  `json:"total_stock,optional,default=0"`
+		PerUserLimit   int    `json:"per_user_limit,optional,default=1"`
+		Status         string `json:"status,optional,default=inactive"`
+		StartAt        string `json:"start_at,optional"`
+		EndAt          string `json:"end_at,optional"`
+	}
+	UpdateRedeemRuleReq {
+		ID             int64  `path:"id"`
+		Name           string `json:"name"`
+		Description    string `json:"description,optional"`
+		CouponID       int64  `json:"coupon_id"`
+		PointsRequired int64  `json:"points_required"`
+		TotalStock     int64  `json:"total_stock,optional"`
+		PerUserLimit   int    `json:"per_user_limit,optional"`
+		StartAt        string `json:"start_at,optional"`
+		EndAt          string `json:"end_at,optional"`
+	}
+	GetRedeemRuleReq {
+		ID int64 `path:"id"`
+	}
+	DeleteRedeemRuleReq {
+		ID int64 `path:"id"`
+	}
+	ActivateRedeemRuleReq {
+		ID int64 `path:"id"`
+	}
+	DeactivateRedeemRuleReq {
+		ID int64 `path:"id"`
+	}
+	// ===================== Points Account Types =====================
+	PointsAccount {
+		ID            int64  `json:"id"`
+		UserID        int64  `json:"user_id"`
+		UserEmail     string `json:"user_email,optional"`
+		Balance       int64  `json:"balance"`
+		FrozenBalance int64  `json:"frozen_balance"`
+		TotalEarned   int64  `json:"total_earned"`
+		TotalRedeemed int64  `json:"total_redeemed"`
+		TotalExpired  int64  `json:"total_expired"`
+		CreatedAt     string `json:"created_at"`
+		UpdatedAt     string `json:"updated_at"`
+	}
+	ListAccountsReq {
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		UserID   int64  `form:"user_id,optional"`
+		Email    string `form:"email,optional"`
+	}
+	AccountsStats {
+		Total        int64 `json:"total"`
+		TotalBalance int64 `json:"total_balance"`
+		Active       int64 `json:"active"`
+	}
+	ListAccountsResp {
+		List     []*PointsAccount `json:"list"`
+		Total    int64            `json:"total"`
+		Page     int              `json:"page"`
+		PageSize int              `json:"page_size"`
+		Stats    AccountsStats    `json:"stats"`
+	}
+	GetAccountReq {
+		ID int64 `path:"id"`
+	}
+	GetAccountByUserReq {
+		UserID int64 `path:"userId"`
+	}
+	// Account transactions request (for account detail endpoint)
+	ListAccountTransactionsReq {
+		ID       int64  `path:"id"`
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+		Type     string `form:"type,optional"`
+	}
+	// ===================== Points Transaction Types =====================
+	PointsTransaction {
+		ID            int64  `json:"id"`
+		UserID        int64  `json:"user_id"`
+		AccountID     int64  `json:"account_id"`
+		Points        int64  `json:"points"` // Positive = earn, negative = deduct
+		BalanceAfter  int64  `json:"balance_after"`
+		Type          string `json:"type"` // EARN, REDEEM, ADJUST, EXPIRE, FREEZE, UNFREEZE
+		ReferenceType string `json:"reference_type"`
+		ReferenceID   string `json:"reference_id"`
+		Description   string `json:"description"`
+		ExpiresAt     string `json:"expires_at,optional"`
+		CreatedAt     string `json:"created_at"`
+	}
+	ListPointsTransactionsReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"page_size,default=20"`
+		UserID    int64  `form:"user_id,optional"`
+		AccountID int64  `form:"account_id,optional"`
+		Type      string `form:"type,optional"`
+		StartTime string `form:"start_time,optional"`
+		EndTime   string `form:"end_time,optional"`
+	}
+	PointsTransactionsStats {
+		TotalEarned   int64 `json:"total_earned"`
+		TotalRedeemed int64 `json:"total_redeemed"`
+	}
+	ListPointsTransactionsResp {
+		List     []*PointsTransaction    `json:"list"`
+		Total    int64                   `json:"total"`
+		Page     int                     `json:"page"`
+		PageSize int                     `json:"page_size"`
+		Stats    PointsTransactionsStats `json:"stats"`
+	}
+	GetPointsTransactionReq {
+		ID int64 `path:"id"`
+	}
+	// ===================== Manual Adjustment Types =====================
+	AdjustPointsReq {
+		ID             int64  `path:"id"`
+		AdjustmentType string `json:"adjustment_type"` // ADD, DEDUCT
+		Points         int64  `json:"points"`
+		Reason         string `json:"reason"`
+	}
+	AdjustPointsResp {
+		TransactionID int64  `json:"transaction_id"`
+		Points        int64  `json:"points"`
+		BalanceAfter  int64  `json:"balance_after"`
+		CreatedAt     string `json:"created_at"`
+	}
+	// ===================== Redemption Types =====================
+	PointsRedemption {
+		ID           int64  `json:"id"`
+		UserID       int64  `json:"user_id"`
+		RedeemRuleID int64  `json:"redeem_rule_id"`
+		CouponID     int64  `json:"coupon_id"`
+		CouponName   string `json:"coupon_name"`
+		UserCouponID int64  `json:"user_coupon_id,optional"`
+		PointsUsed   int64  `json:"points_used"`
+		Status       string `json:"status"` // pending, completed, cancelled
+		CreatedAt    string `json:"created_at"`
+		CompletedAt  string `json:"completed_at,optional"`
+	}
+	ListRedemptionsReq {
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"page_size,default=20"`
+		UserID    int64  `form:"user_id,optional"`
+		Status    string `form:"status,optional"`
+		StartTime string `form:"start_time,optional"`
+		EndTime   string `form:"end_time,optional"`
+	}
+	ListRedemptionsResp {
+		List     []*PointsRedemption `json:"list"`
+		Total    int64               `json:"total"`
+		Page     int                 `json:"page"`
+		PageSize int                 `json:"page_size"`
+	}
+	GetRedemptionReq {
+		ID int64 `path:"id"`
+	}
+)
+
+// ===================== Statistics Endpoints =====================
+@server (
+	group:      points/stats
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取积分统计概览"
+	@handler GetPointsStatsHandler
+	get /api/v1/points/stats (GetPointsStatsReq) returns (PointsStats)
+
+	@doc "获取积分趋势数据"
+	@handler GetPointsTrendHandler
+	get /api/v1/points/stats/trend (GetPointsTrendReq) returns (PointsTrendResp)
+
+	@doc "获取积分排名用户"
+	@handler GetTopUsersHandler
+	get /api/v1/points/stats/top-users (GetTopUsersReq) returns (TopUsersResp)
+
+	@doc "获取即将过期积分"
+	@handler GetExpiringPointsHandler
+	get /api/v1/points/stats/expiring (GetExpiringPointsReq) returns (ExpiringPointsResp)
+}
+
+// ===================== Earn Rules Endpoints =====================
+@server (
+	group:      points/earn_rules
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取积分获取规则列表"
+	@handler ListEarnRulesHandler
+	get /api/v1/points/earn-rules (ListEarnRulesReq) returns (ListEarnRulesResp)
+
+	@doc "获取积分获取规则详情"
+	@handler GetEarnRuleHandler
+	get /api/v1/points/earn-rules/:id (GetEarnRuleReq) returns (EarnRule)
+
+	@doc "创建积分获取规则"
+	@handler CreateEarnRuleHandler
+	post /api/v1/points/earn-rules (CreateEarnRuleReq) returns (EarnRule)
+
+	@doc "更新积分获取规则"
+	@handler UpdateEarnRuleHandler
+	put /api/v1/points/earn-rules/:id (UpdateEarnRuleReq) returns (EarnRule)
+
+	@doc "删除积分获取规则"
+	@handler DeleteEarnRuleHandler
+	delete /api/v1/points/earn-rules/:id (DeleteEarnRuleReq)
+
+	@doc "激活积分获取规则"
+	@handler ActivateEarnRuleHandler
+	post /api/v1/points/earn-rules/:id/activate (ActivateEarnRuleReq) returns (EarnRule)
+
+	@doc "停用积分获取规则"
+	@handler DeactivateEarnRuleHandler
+	post /api/v1/points/earn-rules/:id/deactivate (DeactivateEarnRuleReq) returns (EarnRule)
+}
+
+// ===================== Redeem Rules Endpoints =====================
+@server (
+	group:      points/redeem_rules
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取积分兑换规则列表"
+	@handler ListRedeemRulesHandler
+	get /api/v1/points/redeem-rules (ListRedeemRulesReq) returns (ListRedeemRulesResp)
+
+	@doc "获取积分兑换规则详情"
+	@handler GetRedeemRuleHandler
+	get /api/v1/points/redeem-rules/:id (GetRedeemRuleReq) returns (RedeemRule)
+
+	@doc "创建积分兑换规则"
+	@handler CreateRedeemRuleHandler
+	post /api/v1/points/redeem-rules (CreateRedeemRuleReq) returns (RedeemRule)
+
+	@doc "更新积分兑换规则"
+	@handler UpdateRedeemRuleHandler
+	put /api/v1/points/redeem-rules/:id (UpdateRedeemRuleReq) returns (RedeemRule)
+
+	@doc "删除积分兑换规则"
+	@handler DeleteRedeemRuleHandler
+	delete /api/v1/points/redeem-rules/:id (DeleteRedeemRuleReq)
+
+	@doc "激活积分兑换规则"
+	@handler ActivateRedeemRuleHandler
+	post /api/v1/points/redeem-rules/:id/activate (ActivateRedeemRuleReq) returns (RedeemRule)
+
+	@doc "停用积分兑换规则"
+	@handler DeactivateRedeemRuleHandler
+	post /api/v1/points/redeem-rules/:id/deactivate (DeactivateRedeemRuleReq) returns (RedeemRule)
+}
+
+// ===================== Points Accounts Endpoints =====================
+@server (
+	group:      points/accounts
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取积分账户列表"
+	@handler ListAccountsHandler
+	get /api/v1/points/accounts (ListAccountsReq) returns (ListAccountsResp)
+
+	@doc "获取积分账户详情"
+	@handler GetAccountHandler
+	get /api/v1/points/accounts/:id (GetAccountReq) returns (PointsAccount)
+
+	@doc "根据用户ID获取积分账户"
+	@handler GetAccountByUserHandler
+	get /api/v1/points/accounts/by-user/:userId (GetAccountByUserReq) returns (PointsAccount)
+
+	@doc "获取账户交易记录"
+	@handler GetAccountTransactionsHandler
+	get /api/v1/points/accounts/:id/transactions (ListAccountTransactionsReq) returns (ListPointsTransactionsResp)
+
+	@doc "手动调整积分"
+	@handler AdjustPointsHandler
+	post /api/v1/points/accounts/:id/adjust (AdjustPointsReq) returns (AdjustPointsResp)
+}
+
+// ===================== Points Transactions Endpoints =====================
+@server (
+	group:      points/transactions
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取所有积分交易记录"
+	@handler ListTransactionsHandler
+	get /api/v1/points/transactions (ListPointsTransactionsReq) returns (ListPointsTransactionsResp)
+
+	@doc "获取积分交易详情"
+	@handler GetTransactionHandler
+	get /api/v1/points/transactions/:id (GetPointsTransactionReq) returns (PointsTransaction)
+}
+
+// ===================== Points Redemptions Endpoints =====================
+@server (
+	group:      points/redemptions
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "获取积分兑换记录列表"
+	@handler ListRedemptionsHandler
+	get /api/v1/points/redemptions (ListRedemptionsReq) returns (ListRedemptionsResp)
+
+	@doc "获取积分兑换记录详情"
+	@handler GetRedemptionHandler
+	get /api/v1/points/redemptions/:id (GetRedemptionReq) returns (PointsRedemption)
+}
+
