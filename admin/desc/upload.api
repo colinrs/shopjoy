@@ -1,0 +1,46 @@
+syntax = "v1"
+
+info (
+	title:   "Upload API"
+	desc:    "通用图片上传接口"
+	version: "v1"
+)
+
+type (
+	UploadRequest {
+		// 业务分类：product/banner/avatar
+		Category string `form:"category,optional"`
+	}
+	UploadResponse {
+		ID        string `json:"id"`
+		URL       string `json:"url"`
+		Filename  string `json:"filename"`
+		Category  string `json:"category"`
+		Size      int64  `json:"size"`
+		MimeType  string `json:"mime_type"`
+		Width     int    `json:"width"`
+		Height    int    `json:"height"`
+		CreatedAt string `json:"created_at"`
+	}
+	DeleteUploadReq {
+		ID string `path:"id"`
+	}
+	DeleteUploadResp {
+		ID string `json:"id"`
+	}
+)
+
+@server (
+	group:      uploads
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "上传图片"
+	@handler UploadHandler
+	post /api/v1/uploads returns (UploadResponse)
+
+	@doc "删除图片"
+	@handler DeleteUploadHandler
+	delete /api/v1/uploads/:id (DeleteUploadReq) returns (DeleteUploadResp)
+}
+

@@ -3,6 +3,8 @@
 
 package types
 
+import "mime/multipart"
+
 type ActivatePromotionReq struct {
 	ID int64 `path:"id"`
 }
@@ -660,6 +662,14 @@ type DeleteShippingZoneReq struct {
 
 type DeleteTemplateMappingReq struct {
 	ID int64 `path:"id"`
+}
+
+type DeleteUploadReq struct {
+	ID string `path:"id"`
+}
+
+type DeleteUploadResp struct {
+	ID string `json:"id"`
 }
 
 type DeleteUserRequest struct {
@@ -2614,6 +2624,23 @@ type UpdateWarehouseReq struct {
 type UpdateWarehouseStatusReq struct {
 	ID     int64 `path:"id"`
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
+}
+
+type UploadRequest struct {
+	File     *multipart.FileHeader `json:"file,optional"`
+	Category string                `form:"category,optional"`
+}
+
+type UploadResponse struct {
+	ID        string `json:"id"`
+	URL       string `json:"url"`
+	Filename  string `json:"filename"`
+	Category  string `json:"category"`
+	Size      int64  `json:"size"`
+	MimeType  string `json:"mime_type"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
+	CreatedAt string `json:"created_at"`
 }
 
 type UserAddressListResponse struct {

@@ -30,5 +30,7 @@ func main() {
 	httpx.SetErrorHandlerCtx(response.ErrHandle)
 	httpx.SetOkHandler(response.OKHandle)
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	fmt.Printf("Upload files are stored in ./uploads directory\n")
+	fmt.Printf("Configure Nginx or CDN to serve /uploads/* in production\n")
 	server.Start()
 }

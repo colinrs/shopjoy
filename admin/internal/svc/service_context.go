@@ -21,6 +21,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
+	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/auth"
@@ -81,6 +82,8 @@ type ServiceContext struct {
 	PermissionRepo role.PermissionRepository
 	// Shipping
 	ShippingRepo persistence.ShippingTemplateRepository
+	// Storage
+	Storage storage.Storage
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -228,5 +231,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PermissionRepo: permissionRepo,
 		// Shipping
 		ShippingRepo: persistence.NewShippingTemplateRepository(),
+
+		// Storage
+		Storage: storage.MustNewStorage(storage.Config{
+			Type: storage.StorageTypeLocal,
+		}),
 	}
 }

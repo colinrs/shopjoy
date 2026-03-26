@@ -376,4 +376,11 @@ var (
 	ErrShippingCalcInvalidQuantity   = &Err{HTTPCode: http.StatusBadRequest, Code: 230305, Msg: "invalid quantity in items"}
 	ErrShippingCalcInvalidWeight     = &Err{HTTPCode: http.StatusBadRequest, Code: 230306, Msg: "invalid weight in items"}
 	ErrShippingCalcInvalidPrice      = &Err{HTTPCode: http.StatusBadRequest, Code: 230307, Msg: "invalid price in items"}
+
+	// ==================== Upload Module (240xxx) ====================
+	ErrUploadUnsupportedFileType = &Err{HTTPCode: http.StatusBadRequest, Code: 240001, Msg: "unsupported file type"}
+	ErrUploadFileSizeExceeded    = &Err{HTTPCode: http.StatusBadRequest, Code: 240002, Msg: "file size exceeded"}
+	ErrUploadInvalidCategory     = &Err{HTTPCode: http.StatusBadRequest, Code: 240003, Msg: "invalid category"}
+	ErrUploadFailed              = &Err{HTTPCode: http.StatusInternalServerError, Code: 240004, Msg: "upload failed"}
+	ErrUploadNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 240005, Msg: "file not found"}
 )

@@ -46,7 +46,7 @@ func (s *localStorage) Save(ctx context.Context, file *multipart.FileHeader, cat
 	id := fmt.Sprintf("img_%s", uuid.New().String()[:12])
 
 	// 构建存储路径: /uploads/{category}/{year}/{month}/{day}/
-	now := time.Now()
+	now := time.Now().UTC()
 	dir := filepath.Join(s.basePath, string(category), fmt.Sprintf("%d", now.Year()), fmt.Sprintf("%02d", now.Month()), fmt.Sprintf("%02d", now.Day()))
 
 	// 创建目录
@@ -106,7 +106,7 @@ func (s *localStorage) Save(ctx context.Context, file *multipart.FileHeader, cat
 
 func (s *localStorage) Delete(ctx context.Context, id string) error {
 	// 尝试删除常见目录下的文件
-	now := time.Now()
+	now := time.Now().UTC()
 	for _, category := range []Category{CategoryProduct, CategoryBanner, CategoryAvatar} {
 		for day := now.Day() - 7; day <= now.Day()+1; day++ {
 			for _, ext := range []string{".jpg", ".jpeg", ".png", ".gif", ".webp"} {
@@ -122,7 +122,7 @@ func (s *localStorage) Delete(ctx context.Context, id string) error {
 }
 
 func (s *localStorage) GetURL(ctx context.Context, id string) (string, error) {
-	now := time.Now()
+	now := time.Now().UTC()
 	for _, category := range []Category{CategoryProduct, CategoryBanner, CategoryAvatar} {
 		for day := now.Day() - 7; day <= now.Day()+1; day++ {
 			for _, ext := range []string{".jpg", ".jpeg", ".png", ".gif", ".webp"} {
@@ -147,6 +147,6 @@ func (s *localStorage) Get(ctx context.Context, id string) (*FileInfo, error) {
 	return &FileInfo{
 		ID:        id,
 		Path:      url,
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 	}, nil
 }
