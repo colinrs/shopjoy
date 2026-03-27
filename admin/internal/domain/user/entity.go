@@ -37,10 +37,10 @@ type User struct {
 	Name      string
 	Avatar    string
 	Gender    Gender
-	Birthday  *shared.UnixTime
+	Birthday  *time.Time
 	Status    Status
-	LastLogin *shared.UnixTime
-	DeletedAt *int64
+	LastLogin *time.Time
+	DeletedAt gorm.DeletedAt
 	Audit     shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -70,12 +70,12 @@ func (u *User) CanLogin() bool {
 }
 
 func (u *User) UpdateLastLogin() {
-	now := shared.NewUnixTime(time.Now().UTC())
+	now := time.Now().UTC()
 	u.LastLogin = &now
 }
 
 func (u *User) Suspend() error {
-	if u.DeletedAt != nil {
+	if u.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusSuspended
@@ -83,7 +83,7 @@ func (u *User) Suspend() error {
 }
 
 func (u *User) Activate() error {
-	if u.DeletedAt != nil {
+	if u.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusActive
@@ -91,16 +91,15 @@ func (u *User) Activate() error {
 }
 
 func (u *User) SoftDelete() error {
-	if u.DeletedAt != nil {
+	if u.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
-	now := time.Now().Unix()
-	u.DeletedAt = &now
+	u.DeletedAt = gorm.DeletedAt{Time: time.Now().UTC()}
 	return nil
 }
 
 func (u *User) IsDeleted() bool {
-	return u.DeletedAt != nil
+	return u.DeletedAt.Valid
 }
 
 type Repository interface {

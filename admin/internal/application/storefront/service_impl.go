@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -127,15 +128,13 @@ func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, p
 			}
 
 			decoration := &storefront.Decoration{
-				ID:          id,
+				Model:       application.Model{ID: id},
 				TenantID:    tenantID,
 				PageID:      pageID,
 				BlockType:   block.BlockType,
 				BlockConfig: block.BlockConfig,
 				SortOrder:   sortOrder,
 				IsActive:    true,
-				CreatedAt:   time.Now().Unix(),
-				UpdatedAt:   time.Now().Unix(),
 			}
 
 			if err := s.decorationRepo.Create(ctx, tx, decoration); err != nil {
@@ -189,13 +188,12 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 		}
 
 		version := &storefront.PageVersion{
-			ID:        id,
+			Model:     application.Model{ID: id},
 			TenantID:  tenantID,
 			PageID:    pageID,
 			Version:   page.Version,
 			Blocks:    blocks,
 			CreatedBy: userID,
-			CreatedAt: time.Now().Unix(),
 		}
 
 		if err := s.versionRepo.Create(ctx, tx, version); err != nil {
@@ -208,7 +206,7 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 		}
 
 		// Update page status
-		now := time.Now().Unix()
+		now := time.Now().UTC()
 		page.IsPublished = true
 		page.PublishedAt = &now
 		if err := s.pageRepo.Update(ctx, tx, page); err != nil {
@@ -303,15 +301,13 @@ func (s *decorationService) AddDecoration(ctx context.Context, tenantID shared.T
 	}
 
 	decoration := &storefront.Decoration{
-		ID:          id,
+		Model:       application.Model{ID: id},
 		TenantID:    tenantID,
 		PageID:      pageID,
 		BlockType:   blockType,
 		BlockConfig: blockConfig,
 		SortOrder:   sortOrder,
 		IsActive:    true,
-		CreatedAt:   time.Now().Unix(),
-		UpdatedAt:   time.Now().Unix(),
 	}
 
 	if err := s.decorationRepo.Create(ctx, s.db, decoration); err != nil {
@@ -336,7 +332,6 @@ func (s *decorationService) UpdateDecoration(ctx context.Context, tenantID share
 	}
 
 	decoration.BlockConfig = blockConfig
-	decoration.UpdatedAt = time.Now().Unix()
 	return s.decorationRepo.Update(ctx, s.db, decoration)
 }
 
@@ -408,7 +403,7 @@ func (s *versionService) ListVersions(ctx context.Context, tenantID shared.Tenan
 			ID:        v.ID,
 			Version:   v.Version,
 			CreatedBy: v.CreatedBy,
-			CreatedAt: v.CreatedAt,
+			CreatedAt: v.CreatedAt.Format(time.RFC3339),
 		}
 	}
 	return &PaginatedResult[*VersionDTO]{
@@ -442,7 +437,7 @@ func (s *versionService) GetVersion(ctx context.Context, tenantID shared.TenantI
 			ID:        v.ID,
 			Version:   v.Version,
 			CreatedBy: v.CreatedBy,
-			CreatedAt: v.CreatedAt,
+			CreatedAt: v.CreatedAt.Format(time.RFC3339),
 		},
 		Blocks: blocks,
 	}, nil
@@ -480,15 +475,13 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 			}
 
 			decoration := &storefront.Decoration{
-				ID:          id,
+				Model:       application.Model{ID: id},
 				TenantID:    tenantID,
 				PageID:      pageID,
 				BlockType:   block.BlockType,
 				BlockConfig: block.BlockConfig,
 				SortOrder:   block.SortOrder,
 				IsActive:    true,
-				CreatedAt:   time.Now().Unix(),
-				UpdatedAt:   time.Now().Unix(),
 			}
 
 			if err := s.decorationRepo.Create(ctx, tx, decoration); err != nil {
@@ -506,13 +499,12 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 		newVersionNum := page.Version + 1
 
 		newVersion := &storefront.PageVersion{
-			ID:        newVersionID,
+			Model:     application.Model{ID: newVersionID},
 			TenantID:  tenantID,
 			PageID:    pageID,
 			Version:   newVersionNum,
 			Blocks:    v.Blocks,
 			CreatedBy: userID,
-			CreatedAt: time.Now().Unix(),
 		}
 
 		if err := s.versionRepo.Create(ctx, tx, newVersion); err != nil {
@@ -572,8 +564,6 @@ func (s *seoService) UpdateGlobalSEO(ctx context.Context, tenantID shared.Tenant
 		Title:       config.Title,
 		Description: config.Description,
 		Keywords:    config.Keywords,
-		CreatedAt:   time.Now().Unix(),
-		UpdatedAt:   time.Now().Unix(),
 	}
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }
@@ -618,8 +608,6 @@ func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID
 		Title:       config.Title,
 		Description: config.Description,
 		Keywords:    config.Keywords,
-		CreatedAt:   time.Now().Unix(),
-		UpdatedAt:   time.Now().Unix(),
 	}
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }

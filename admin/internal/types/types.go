@@ -2527,7 +2527,7 @@ type ThemeAuditLog struct {
 	ThemeName string `json:"theme_name"`
 	UserID    int64  `json:"user_id"`
 	UserName  string `json:"user_name"`
-	CreatedAt int64  `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 type ThemeConfigDTO struct {
@@ -3104,7 +3104,7 @@ type VersionListItem struct {
 	ID        int64 `json:"id"`
 	Version   int   `json:"version"`
 	CreatedBy int64 `json:"created_by"`
-	CreatedAt int64 `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 type WarehouseDetailResp struct {

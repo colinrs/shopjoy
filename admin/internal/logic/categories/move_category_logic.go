@@ -98,8 +98,8 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 		SeoDescription: category.SeoDescription,
 		Status:         int8(category.Status),
 		ProductCount:   productCount,
-		CreatedAt:      time.Unix(category.Audit.CreatedAt, 0).Format(time.RFC3339),
-		UpdatedAt:      time.Unix(category.Audit.UpdatedAt, 0).Format(time.RFC3339),
+		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }
 

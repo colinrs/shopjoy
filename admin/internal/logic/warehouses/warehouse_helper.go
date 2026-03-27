@@ -16,7 +16,7 @@ func toWarehouseDetailResp(w *product.Warehouse) *types.WarehouseDetailResp {
 		Address:   w.Address,
 		IsDefault: w.IsDefault,
 		Status:    int8(w.Status),
-		CreatedAt: time.Unix(w.Audit.CreatedAt, 0).Format(time.RFC3339),
-		UpdatedAt: time.Unix(w.Audit.UpdatedAt, 0).Format(time.RFC3339),
+		CreatedAt: w.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: w.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }

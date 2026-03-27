@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,8 +30,6 @@ func NewUpdateSKUStockLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upd
 func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp *types.CreateWarehouseResp, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	userID, _ := contextx.GetUserID(l.ctx)
-
-	now := time.Now().Unix()
 
 	// If warehouse ID is specified, update that warehouse's inventory
 	if req.WarehouseID > 0 {
@@ -56,8 +55,8 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 				AvailableStock: req.AvailableStock,
 				LockedStock:    0,
 				Audit: shared.AuditInfo{
-					CreatedAt: time.Now().Unix(),
-					UpdatedAt: time.Now().Unix(),
+					CreatedAt: time.Now().UTC(),
+					UpdatedAt: time.Now().UTC(),
 				},
 			}
 			if err := l.svcCtx.WarehouseInventoryRepo.Create(l.ctx, l.svcCtx.DB, inventory); err != nil {
@@ -66,7 +65,7 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 		} else {
 			// Update existing inventory
 			inventory.AvailableStock = req.AvailableStock
-			inventory.Audit.UpdatedAt = time.Now().Unix()
+			inventory.Audit.UpdatedAt = time.Now().UTC()
 			if err := l.svcCtx.WarehouseInventoryRepo.Update(l.ctx, l.svcCtx.DB, inventory); err != nil {
 				return nil, err
 			}
@@ -75,7 +74,7 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 		// Create inventory log
 		logID, _ := l.svcCtx.IDGen.NextID(l.ctx)
 		log := &product.InventoryLog{
-			ID:             logID,
+			Model:          application.Model{ID: logID},
 			TenantID:       shared.TenantID(tenantID),
 			SKUCode:        req.SKUCode,
 			ProductID:      0, // Would need to fetch from SKU
@@ -86,7 +85,6 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 			AfterStock:     req.AvailableStock,
 			Remark:         req.Remark,
 			OperatorID:     userID,
-			CreatedAt:      now,
 		}
 		if err := l.svcCtx.InventoryLogRepo.Create(l.ctx, l.svcCtx.DB, log); err != nil {
 			return nil, err

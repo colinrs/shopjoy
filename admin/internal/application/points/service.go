@@ -837,8 +837,8 @@ func toEarnRuleDTO(r *points.EarnRule) *EarnRuleDTO {
 		Priority:         r.Priority,
 		StartAt:          int64ToTime(r.StartAt),
 		EndAt:            int64ToTime(r.EndAt),
-		CreatedAt:        time.Unix(r.Audit.CreatedAt, 0),
-		UpdatedAt:        time.Unix(r.Audit.UpdatedAt, 0),
+		CreatedAt:        r.Audit.CreatedAt,
+		UpdatedAt:        r.Audit.UpdatedAt,
 	}
 }
 
@@ -855,8 +855,8 @@ func toRedeemRuleDTO(r *points.RedeemRule) *RedeemRuleDTO {
 		Status:         r.Status.String(),
 		StartAt:        int64ToTime(r.StartAt),
 		EndAt:          int64ToTime(r.EndAt),
-		CreatedAt:      time.Unix(r.Audit.CreatedAt, 0),
-		UpdatedAt:      time.Unix(r.Audit.UpdatedAt, 0),
+		CreatedAt:      r.Audit.CreatedAt,
+		UpdatedAt:      r.Audit.UpdatedAt,
 	}
 }
 
@@ -869,8 +869,8 @@ func toPointsAccountDTO(a *points.PointsAccount) *PointsAccountDTO {
 		TotalEarned:   a.TotalEarned,
 		TotalRedeemed: a.TotalRedeemed,
 		TotalExpired:  a.TotalExpired,
-		CreatedAt:     time.Unix(a.Audit.CreatedAt, 0),
-		UpdatedAt:     time.Unix(a.Audit.UpdatedAt, 0),
+		CreatedAt:     a.Audit.CreatedAt,
+		UpdatedAt:     a.Audit.UpdatedAt,
 	}
 }
 
@@ -886,7 +886,7 @@ func toPointsTransactionDTO(t *points.PointsTransaction) *PointsTransactionDTO {
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
 		ExpiresAt:     int64ToTime(t.ExpiresAt),
-		CreatedAt:     time.Unix(t.Audit.CreatedAt, 0),
+		CreatedAt:     t.Audit.CreatedAt,
 	}
 }
 
@@ -900,7 +900,7 @@ func toPointsRedemptionDTO(r *points.PointsRedemption) *PointsRedemptionDTO {
 		PointsUsed:   r.PointsUsed,
 		Status:       r.Status.String(),
 		CompletedAt:  int64ToTime(r.CompletedAt),
-		CreatedAt:    time.Unix(r.Audit.CreatedAt, 0),
+		CreatedAt:    r.Audit.CreatedAt,
 	}
 }
 

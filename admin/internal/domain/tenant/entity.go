@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ const (
 )
 
 type Tenant struct {
-	ID           int64
+	application.Model
 	Name         string
 	Code         string
 	Status       Status
@@ -40,12 +41,8 @@ type Tenant struct {
 	ContactPhone string
 	ContactEmail string
 	Address      string
-	SKUPrefix    string // SKU default prefix
-	ExpireAt     *int64
-	CreatedAt    int64
-	UpdatedAt    int64
-	CreatedBy    int64
-	UpdatedBy    int64
+	SKUPrefix    string       // SKU default prefix
+	ExpireAt     *time.Time
 }
 
 func (t *Tenant) TableName() string {
@@ -56,7 +53,7 @@ func (t *Tenant) IsActive() bool {
 	if t.Status != StatusActive {
 		return false
 	}
-	if t.ExpireAt != nil && time.Now().Unix() > *t.ExpireAt {
+	if t.ExpireAt != nil && time.Now().UTC().After(*t.ExpireAt) {
 		return false
 	}
 	return true

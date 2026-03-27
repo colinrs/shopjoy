@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -74,8 +75,8 @@ func (m *shopModel) toEntity() *storefront.Shop {
 		CurrentThemeID: m.CurrentThemeID,
 		ThemeConfig:    themeConfig,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 		},
 	}
 }
@@ -105,8 +106,8 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 		Status:         int8(s.Status),
 		CurrentThemeID: s.CurrentThemeID,
 		ThemeConfig:    themeConfig,
-		CreatedAt:      s.Audit.CreatedAt,
-		UpdatedAt:      s.Audit.UpdatedAt,
+		CreatedAt:      s.Audit.CreatedAt.Unix(),
+		UpdatedAt:      s.Audit.UpdatedAt.Unix(),
 	}
 }
 

@@ -20,9 +20,9 @@ CREATE TABLE `reviews` (
     `is_verified` BOOLEAN NOT NULL DEFAULT FALSE,
     `is_featured` BOOLEAN NOT NULL DEFAULT FALSE,
     `helpful_count` INT NOT NULL DEFAULT 0,
-    `created_at` BIGINT NOT NULL COMMENT '创建时间(Unix时间戳(秒))',
-    `updated_at` BIGINT NOT NULL COMMENT '更新时间(Unix时间戳(秒))',
-    `deleted_at` BIGINT NULL COMMENT '删除时间(Unix时间戳(秒))',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_product` (`tenant_id`, `product_id`),
     INDEX `idx_tenant_user` (`tenant_id`, `user_id`),
@@ -42,9 +42,9 @@ CREATE TABLE `review_replies` (
     `admin_id` BIGINT NOT NULL,
     `admin_name` VARCHAR(100) NOT NULL,
     `content` TEXT NOT NULL,
-    `created_at` BIGINT NOT NULL COMMENT '创建时间(Unix时间戳(秒))',
-    `updated_at` BIGINT NOT NULL COMMENT '更新时间(Unix时间戳(秒))',
-    `deleted_at` BIGINT NULL COMMENT '删除时间(Unix时间戳(秒))',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_review_id` (`review_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -67,9 +67,9 @@ CREATE TABLE `review_stats` (
     `rating_4_count` INT NOT NULL DEFAULT 0,
     `rating_5_count` INT NOT NULL DEFAULT 0,
     `with_image_count` INT NOT NULL DEFAULT 0,
-    `created_at` BIGINT NOT NULL COMMENT '创建时间(Unix时间戳(秒))',
-    `updated_at` BIGINT NOT NULL COMMENT '更新时间(Unix时间戳(秒))',
-    `deleted_at` BIGINT NULL COMMENT '删除时间(Unix时间戳(秒))',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `uk_tenant_product` (`tenant_id`, `product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

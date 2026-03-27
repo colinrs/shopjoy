@@ -46,8 +46,8 @@ func (l *CreateProductLocalizationLogic) CreateProductLocalization(req *types.Cr
 		Name:         req.Name,
 		Description:  req.Description,
 		AuditInfo: shared.AuditInfo{
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
 		},
 	}
 

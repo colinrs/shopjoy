@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -17,15 +18,15 @@ func NewSEOConfigRepository() storefront.SEOConfigRepository {
 }
 
 type seoConfigModel struct {
-	ID          int64  `gorm:"column:id;primaryKey"`
-	TenantID    int64  `gorm:"column:tenant_id;not null;uniqueIndex:idx_tenant_page_type"`
-	PageType    string `gorm:"column:page_type;type:varchar(30);not null;uniqueIndex:idx_tenant_page_type;index"`
-	PageID      *int64 `gorm:"column:page_id;uniqueIndex:idx_tenant_page_type"`
-	Title       string `gorm:"column:title;type:varchar(200);not null;default:''"`
-	Description string `gorm:"column:description;type:text;not null"`
-	Keywords    string `gorm:"column:keywords;type:varchar(500);not null;default:''"`
-	CreatedAt   int64  `gorm:"column:created_at;not null"`
-	UpdatedAt   int64  `gorm:"column:updated_at;not null"`
+	ID          int64     `gorm:"column:id;primaryKey"`
+	TenantID    int64     `gorm:"column:tenant_id;not null;uniqueIndex:idx_tenant_page_type"`
+	PageType    string    `gorm:"column:page_type;type:varchar(30);not null;uniqueIndex:idx_tenant_page_type;index"`
+	PageID      *int64    `gorm:"column:page_id;uniqueIndex:idx_tenant_page_type"`
+	Title       string    `gorm:"column:title;type:varchar(200);not null;default:''"`
+	Description string    `gorm:"column:description;type:text;not null"`
+	Keywords    string    `gorm:"column:keywords;type:varchar(500);not null;default:''"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (seoConfigModel) TableName() string {
@@ -34,28 +35,18 @@ func (seoConfigModel) TableName() string {
 
 func (m *seoConfigModel) toEntity() *storefront.SEOConfigEntity {
 	return &storefront.SEOConfigEntity{
-		ID:          m.ID,
+		Model:       application.Model{ID: m.ID},
 		TenantID:    shared.TenantID(m.TenantID),
 		PageType:    m.PageType,
 		PageID:      m.PageID,
 		Title:       m.Title,
 		Description: m.Description,
 		Keywords:    m.Keywords,
-		CreatedAt:   m.CreatedAt,
-		UpdatedAt:   m.UpdatedAt,
 	}
 }
 
 func fromSEOConfigEntity(s *storefront.SEOConfigEntity) *seoConfigModel {
-	now := time.Now().Unix()
-	createdAt := now
-	updatedAt := now
-	if s.CreatedAt > 0 {
-		createdAt = s.CreatedAt
-	}
-	if s.UpdatedAt > 0 {
-		updatedAt = s.UpdatedAt
-	}
+	now := time.Now().UTC()
 	return &seoConfigModel{
 		ID:          s.ID,
 		TenantID:    s.TenantID.Int64(),
@@ -64,8 +55,8 @@ func fromSEOConfigEntity(s *storefront.SEOConfigEntity) *seoConfigModel {
 		Title:       s.Title,
 		Description: s.Description,
 		Keywords:    s.Keywords,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 }
 

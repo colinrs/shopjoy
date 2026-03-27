@@ -37,8 +37,8 @@ func (m *categoryMarketModel) toEntity() *product.CategoryMarket {
 		MarketID:   m.MarketID,
 		IsVisible:  m.IsVisible,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 		},
 	}
 }
@@ -50,8 +50,8 @@ func fromCategoryMarketEntity(cm *product.CategoryMarket) *categoryMarketModel {
 		CategoryID: cm.CategoryID,
 		MarketID:   cm.MarketID,
 		IsVisible:  cm.IsVisible,
-		CreatedAt:  cm.Audit.CreatedAt,
-		UpdatedAt:  cm.Audit.UpdatedAt,
+		CreatedAt:  cm.Audit.CreatedAt.Unix(),
+		UpdatedAt:  cm.Audit.UpdatedAt.Unix(),
 	}
 }
 

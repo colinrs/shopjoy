@@ -260,7 +260,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 		// Get the latest refund
 		latestRefund := refunds[0]
 		for _, r := range refunds {
-			if r.Audit.CreatedAt > latestRefund.Audit.CreatedAt {
+			if r.Audit.CreatedAt.After(latestRefund.Audit.CreatedAt) {
 				latestRefund = r
 			}
 		}
@@ -500,7 +500,7 @@ func (a *orderFulfillmentApp) ExportOrders(ctx context.Context, tenantID shared.
 			ReceiverPhone:    o.ReceiverPhone,
 			ReceiverAddress:  o.ReceiverAddress,
 			PaymentMethod:    o.PaymentMethod,
-			CreatedAt:        time.Unix(o.Audit.CreatedAt, 0),
+			CreatedAt:        o.Audit.CreatedAt,
 			PaidAt:           o.PaidAt,
 		}
 	}
@@ -533,8 +533,8 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 		ApprovedAt:   timePtrToTime(r.ApprovedAt),
 		ApprovedBy:   r.ApprovedBy,
 		CompletedAt:  timePtrToTime(r.CompletedAt),
-		CreatedAt:    time.Unix(r.Audit.CreatedAt, 0),
-		UpdatedAt:    time.Unix(r.Audit.UpdatedAt, 0),
+		CreatedAt:    r.Audit.CreatedAt,
+		UpdatedAt:    r.Audit.UpdatedAt,
 	}
 }
 

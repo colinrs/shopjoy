@@ -536,11 +536,11 @@ func (s *service) toResponse(user *adminuser.AdminUser) *AdminUserResponse {
 		Type:      int(user.Type),
 		TypeText:  user.Type.String(),
 		Status:    int(user.Status),
-		CreatedAt: time.Unix(user.CreatedAt, 0).UTC().Format(time.RFC3339),
+		CreatedAt: user.CreatedAt.UTC().Format(time.RFC3339),
 	}
 
 	if user.LastLoginAt != nil {
-		resp.LastLoginAt = time.Unix(*user.LastLoginAt, 0).UTC().Format(time.RFC3339)
+		resp.LastLoginAt = user.LastLoginAt.UTC().Format(time.RFC3339)
 	}
 
 	return resp

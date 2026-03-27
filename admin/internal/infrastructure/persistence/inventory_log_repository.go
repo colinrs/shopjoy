@@ -2,8 +2,10 @@ package persistence
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -15,19 +17,19 @@ func NewInventoryLogRepository() product.InventoryLogRepository {
 }
 
 type inventoryLogModel struct {
-	ID             int64  `gorm:"column:id;primaryKey"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;index"`
-	SKUCode        string `gorm:"column:sku_code;type:varchar(50);not null;index"`
-	ProductID      int64  `gorm:"column:product_id;not null;index"`
-	WarehouseID    int64  `gorm:"column:warehouse_id;not null;default:0"`
-	ChangeType     string `gorm:"column:change_type;type:varchar(20);not null"`
-	ChangeQuantity int    `gorm:"column:change_quantity;not null"`
-	BeforeStock    int    `gorm:"column:before_stock;not null"`
-	AfterStock     int    `gorm:"column:after_stock;not null"`
-	OrderNo        string `gorm:"column:order_no;type:varchar(50)"`
-	Remark         string `gorm:"column:remark;type:varchar(500)"`
-	OperatorID     int64  `gorm:"column:operator_id;not null"`
-	CreatedAt      int64  `gorm:"column:created_at;not null;index"`
+	ID             int64     `gorm:"column:id;primaryKey"`
+	TenantID       int64     `gorm:"column:tenant_id;not null;index"`
+	SKUCode        string    `gorm:"column:sku_code;type:varchar(50);not null;index"`
+	ProductID      int64     `gorm:"column:product_id;not null;index"`
+	WarehouseID    int64     `gorm:"column:warehouse_id;not null;default:0"`
+	ChangeType     string    `gorm:"column:change_type;type:varchar(20);not null"`
+	ChangeQuantity int       `gorm:"column:change_quantity;not null"`
+	BeforeStock    int       `gorm:"column:before_stock;not null"`
+	AfterStock     int       `gorm:"column:after_stock;not null"`
+	OrderNo        string    `gorm:"column:order_no;type:varchar(50)"`
+	Remark         string    `gorm:"column:remark;type:varchar(500)"`
+	OperatorID     int64     `gorm:"column:operator_id;not null"`
+	CreatedAt      time.Time `gorm:"column:created_at;not null;index"`
 }
 
 func (inventoryLogModel) TableName() string {
@@ -36,37 +38,36 @@ func (inventoryLogModel) TableName() string {
 
 func (m *inventoryLogModel) toEntity() *product.InventoryLog {
 	return &product.InventoryLog{
-		ID:             m.ID,
-		TenantID:       shared.TenantID(m.TenantID),
-		SKUCode:        m.SKUCode,
-		ProductID:      m.ProductID,
-		WarehouseID:    m.WarehouseID,
-		ChangeType:     m.ChangeType,
+		Model:         application.Model{ID: m.ID},
+		TenantID:      shared.TenantID(m.TenantID),
+		SKUCode:       m.SKUCode,
+		ProductID:     m.ProductID,
+		WarehouseID:   m.WarehouseID,
+		ChangeType:    m.ChangeType,
 		ChangeQuantity: m.ChangeQuantity,
-		BeforeStock:    m.BeforeStock,
-		AfterStock:     m.AfterStock,
-		OrderNo:        m.OrderNo,
-		Remark:         m.Remark,
-		OperatorID:     m.OperatorID,
-		CreatedAt:      m.CreatedAt,
+		BeforeStock:   m.BeforeStock,
+		AfterStock:    m.AfterStock,
+		OrderNo:       m.OrderNo,
+		Remark:        m.Remark,
+		OperatorID:    m.OperatorID,
 	}
 }
 
 func fromInventoryLogEntity(il *product.InventoryLog) *inventoryLogModel {
 	return &inventoryLogModel{
-		ID:             il.ID,
-		TenantID:       il.TenantID.Int64(),
-		SKUCode:        il.SKUCode,
-		ProductID:      il.ProductID,
-		WarehouseID:    il.WarehouseID,
-		ChangeType:     il.ChangeType,
-		ChangeQuantity: il.ChangeQuantity,
-		BeforeStock:    il.BeforeStock,
-		AfterStock:     il.AfterStock,
-		OrderNo:        il.OrderNo,
-		Remark:         il.Remark,
-		OperatorID:     il.OperatorID,
-		CreatedAt:      il.CreatedAt,
+		ID:              il.ID,
+		TenantID:        il.TenantID.Int64(),
+		SKUCode:         il.SKUCode,
+		ProductID:       il.ProductID,
+		WarehouseID:     il.WarehouseID,
+		ChangeType:      il.ChangeType,
+		ChangeQuantity:  il.ChangeQuantity,
+		BeforeStock:     il.BeforeStock,
+		AfterStock:      il.AfterStock,
+		OrderNo:         il.OrderNo,
+		Remark:          il.Remark,
+		OperatorID:      il.OperatorID,
+		CreatedAt:       time.Now().UTC(),
 	}
 }
 
@@ -85,10 +86,10 @@ func (r *inventoryLogRepo) FindBySKU(ctx context.Context, db *gorm.DB, tenantID 
 	if query.ChangeType != "" {
 		dbQuery = dbQuery.Where("change_type = ?", query.ChangeType)
 	}
-	if query.StartTime > 0 {
+	if !query.StartTime.IsZero() {
 		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
-	if query.EndTime > 0 {
+	if !query.EndTime.IsZero() {
 		dbQuery = dbQuery.Where("created_at <= ?", query.EndTime)
 	}
 
@@ -118,10 +119,10 @@ func (r *inventoryLogRepo) FindByProduct(ctx context.Context, db *gorm.DB, tenan
 	if query.ChangeType != "" {
 		dbQuery = dbQuery.Where("change_type = ?", query.ChangeType)
 	}
-	if query.StartTime > 0 {
+	if !query.StartTime.IsZero() {
 		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
-	if query.EndTime > 0 {
+	if !query.EndTime.IsZero() {
 		dbQuery = dbQuery.Where("created_at <= ?", query.EndTime)
 	}
 

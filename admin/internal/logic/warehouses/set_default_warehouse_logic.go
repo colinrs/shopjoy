@@ -45,7 +45,7 @@ func (l *SetDefaultWarehouseLogic) SetDefaultWarehouse(req *types.SetDefaultWare
 
 	// Set as default
 	warehouse.IsDefault = true
-	warehouse.Audit.UpdatedAt = time.Now().Unix()
+	warehouse.Audit.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.WarehouseRepo.Update(l.ctx, l.svcCtx.DB, warehouse); err != nil {
 		return nil, err

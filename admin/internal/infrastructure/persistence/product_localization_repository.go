@@ -39,8 +39,8 @@ func (m *productLocalizationModel) toEntity() *product.ProductLocalization {
 		Name:         m.Name,
 		Description:  m.Description,
 		AuditInfo: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 		},
 	}
 }
@@ -53,8 +53,8 @@ func fromProductLocalizationEntity(pl *product.ProductLocalization) *productLoca
 		LanguageCode: pl.LanguageCode,
 		Name:         pl.Name,
 		Description:  pl.Description,
-		CreatedAt:    pl.AuditInfo.CreatedAt,
-		UpdatedAt:    pl.AuditInfo.UpdatedAt,
+		CreatedAt:    pl.AuditInfo.CreatedAt.Unix(),
+		UpdatedAt:    pl.AuditInfo.UpdatedAt.Unix(),
 	}
 }
 

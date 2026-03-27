@@ -55,8 +55,8 @@ func (m *categoryModel) toEntity() *product.Category {
 		SeoDescription: m.SeoDescription,
 		Status:         product.CategoryStatus(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -77,8 +77,8 @@ func fromCategoryEntity(c *product.Category) *categoryModel {
 		SeoTitle:       c.SeoTitle,
 		SeoDescription: c.SeoDescription,
 		Status:         int8(c.Status),
-		CreatedAt:      c.Audit.CreatedAt,
-		UpdatedAt:      c.Audit.UpdatedAt,
+		CreatedAt:      c.Audit.CreatedAt.Unix(),
+		UpdatedAt:      c.Audit.UpdatedAt.Unix(),
 		CreatedBy:      c.Audit.CreatedBy,
 		UpdatedBy:      c.Audit.UpdatedBy,
 	}

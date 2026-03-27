@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -18,13 +19,13 @@ func NewPageVersionRepository() storefront.PageVersionRepository {
 }
 
 type pageVersionModel struct {
-	ID        int64  `gorm:"column:id;primaryKey"`
-	TenantID  int64  `gorm:"column:tenant_id;not null;uniqueIndex:idx_tenant_page_ver"`
-	PageID    int64  `gorm:"column:page_id;not null;uniqueIndex:idx_tenant_page_ver;index"`
-	Version   int    `gorm:"column:version;not null;uniqueIndex:idx_tenant_page_ver"`
-	Blocks    string `gorm:"column:blocks;type:text;not null"`
-	CreatedBy int64  `gorm:"column:created_by;not null;default:0"`
-	CreatedAt int64  `gorm:"column:created_at;not null"`
+	ID        int64     `gorm:"column:id;primaryKey"`
+	TenantID  int64     `gorm:"column:tenant_id;not null;uniqueIndex:idx_tenant_page_ver"`
+	PageID    int64     `gorm:"column:page_id;not null;uniqueIndex:idx_tenant_page_ver;index"`
+	Version   int       `gorm:"column:version;not null;uniqueIndex:idx_tenant_page_ver"`
+	Blocks    string    `gorm:"column:blocks;type:text;not null"`
+	CreatedBy int64     `gorm:"column:created_by;not null;default:0"`
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
 }
 
 func (pageVersionModel) TableName() string {
@@ -37,13 +38,12 @@ func (m *pageVersionModel) toEntity() *storefront.PageVersion {
 		json.Unmarshal([]byte(m.Blocks), &blocks)
 	}
 	return &storefront.PageVersion{
-		ID:        m.ID,
+		Model:     application.Model{ID: m.ID},
 		TenantID:  shared.TenantID(m.TenantID),
 		PageID:    m.PageID,
 		Version:   m.Version,
 		Blocks:    blocks,
 		CreatedBy: m.CreatedBy,
-		CreatedAt: m.CreatedAt,
 	}
 }
 
@@ -56,14 +56,11 @@ func fromPageVersionEntity(v *storefront.PageVersion) *pageVersionModel {
 		Version:   v.Version,
 		Blocks:    string(blocks),
 		CreatedBy: v.CreatedBy,
-		CreatedAt: v.CreatedAt,
+		CreatedAt: time.Now().UTC(),
 	}
 }
 
 func (r *pageVersionRepo) Create(ctx context.Context, db *gorm.DB, v *storefront.PageVersion) error {
-	if v.CreatedAt == 0 {
-		v.CreatedAt = time.Now().Unix()
-	}
 	model := fromPageVersionEntity(v)
 	return db.WithContext(ctx).Create(model).Error
 }

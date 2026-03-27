@@ -47,7 +47,7 @@ func (l *SetCategoryMarketVisibilityLogic) SetCategoryMarketVisibility(req *type
 	// Create new market visibility entries
 	if len(req.MarketIDs) > 0 {
 		items := make([]*product.CategoryMarket, 0, len(req.MarketIDs))
-		now := time.Now().Unix()
+		now := time.Now().UTC()
 		for _, marketID := range req.MarketIDs {
 			id, _ := l.svcCtx.IDGen.NextID(l.ctx)
 			items = append(items, &product.CategoryMarket{

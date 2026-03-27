@@ -151,7 +151,7 @@ func (p *Payment) TableName() string {
 
 // NewPayment 创建支付记录
 func NewPayment(tenantID shared.TenantID, orderID int64, method PaymentMethod, amount int64, currency string) *Payment {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return &Payment{
 		TenantID:      tenantID,
 		OrderID:       orderID,
@@ -174,12 +174,13 @@ func (p *Payment) MarkSuccess(channelPaymentID string, fee int64, feeCurrency st
 		return code.ErrPaymentAlreadyPaid
 	}
 	now := time.Now().Unix()
+	nowTime := time.Now().UTC()
 	p.Status = PaymentStatusSuccess
 	p.ChannelPaymentID = channelPaymentID
 	p.TransactionFee = fee
 	p.FeeCurrency = feeCurrency
 	p.PaidAt = now
-	p.Audit.UpdatedAt = now
+	p.Audit.UpdatedAt = nowTime
 	return nil
 }
 
@@ -189,10 +190,11 @@ func (p *Payment) MarkFailed(reason string) error {
 		return code.ErrPaymentAlreadyPaid
 	}
 	now := time.Now().Unix()
+	nowTime := time.Now().UTC()
 	p.Status = PaymentStatusFailed
 	p.FailedAt = now
 	p.FailedReason = reason
-	p.Audit.UpdatedAt = now
+	p.Audit.UpdatedAt = nowTime
 	return nil
 }
 
@@ -201,7 +203,7 @@ func (p *Payment) MarkRefunded(partial bool) error {
 	if p.Status != PaymentStatusSuccess && p.Status != PaymentStatusPartiallyRefunded {
 		return code.ErrPaymentOrderNotPaid
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	if partial {
 		p.Status = PaymentStatusPartiallyRefunded
 	} else {

@@ -242,7 +242,7 @@ func (s *Shipment) TableName() string {
 
 // NewShipment 创建发货单
 func NewShipment(tenantID shared.TenantID, orderID string, items []ShipmentItem, createdBy int64) *Shipment {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return &Shipment{
 		TenantID:         tenantID,
 		OrderID:          orderID,
@@ -430,7 +430,7 @@ func (r *Refund) TableName() string {
 // NewRefund 创建退款申请
 func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
 	reasonType, reason, description string, images []string, amount int64, currency string) *Refund {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return &Refund{
 		TenantID:    tenantID,
 		OrderID:     orderID,

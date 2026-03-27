@@ -59,7 +59,7 @@ func (l *UpdateBrandLogic) UpdateBrand(req *types.UpdateBrandReq) (resp *types.B
 	brand.TrademarkCountry = req.TrademarkCountry
 	brand.EnablePage = req.EnablePage
 	brand.Sort = req.Sort
-	brand.Audit.UpdatedAt = time.Now().Unix()
+	brand.Audit.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.BrandRepo.Update(l.ctx, l.svcCtx.DB, brand); err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func toBrandDetailResp(brand *product.Brand, productCount int64) *types.BrandDet
 		Sort:             brand.Sort,
 		Status:           int8(brand.Status),
 		ProductCount:     productCount,
-		CreatedAt:        time.Unix(brand.Audit.CreatedAt, 0).Format(time.RFC3339),
-		UpdatedAt:        time.Unix(brand.Audit.UpdatedAt, 0).Format(time.RFC3339),
+		CreatedAt:        brand.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:        brand.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }

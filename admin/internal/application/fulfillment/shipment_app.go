@@ -526,8 +526,8 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		DeliveredAt:   int64PtrToTimePtr(s.DeliveredAt),
 		Remark:        s.Remark,
 		Items:         items,
-		CreatedAt:     time.Unix(s.Audit.CreatedAt, 0),
-		UpdatedAt:     time.Unix(s.Audit.UpdatedAt, 0),
+		CreatedAt:     s.Audit.CreatedAt,
+		UpdatedAt:     s.Audit.UpdatedAt,
 		CreatedBy:     s.Audit.CreatedBy,
 	}
 }

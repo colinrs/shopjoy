@@ -44,7 +44,7 @@ func (l *UpdateCategoryStatusLogic) UpdateCategoryStatus(req *types.UpdateCatego
 	} else {
 		category.Disable()
 	}
-	category.Audit.UpdatedAt = time.Now().Unix()
+	category.Audit.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.CategoryRepo.Update(l.ctx, l.svcCtx.DB, category); err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (l *UpdateCategoryStatusLogic) UpdateCategoryStatus(req *types.UpdateCatego
 		SeoDescription: category.SeoDescription,
 		Status:         int8(category.Status),
 		ProductCount:   productCount,
-		CreatedAt:      time.Unix(category.Audit.CreatedAt, 0).Format(time.RFC3339),
-		UpdatedAt:      time.Unix(category.Audit.UpdatedAt, 0).Format(time.RFC3339),
+		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

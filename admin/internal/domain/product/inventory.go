@@ -2,7 +2,9 @@ package product
 
 import (
 	"context"
+	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -63,19 +65,18 @@ func (wi *WarehouseInventory) CanDeduct(quantity int) bool {
 
 // InventoryLog records all stock changes
 type InventoryLog struct {
-	ID             int64
+	application.Model
 	TenantID       shared.TenantID
 	SKUCode        string
 	ProductID      int64
-	WarehouseID    int64  // 0 = total/summary
+	WarehouseID    int64 // 0 = total/summary
 	ChangeType     string // manual, order, return, adjustment
 	ChangeQuantity int    // positive = increase, negative = decrease
 	BeforeStock    int
 	AfterStock     int
 	OrderNo        string
-	Remark         string
+	Remark        string
 	OperatorID     int64
-	CreatedAt      int64 // Unix timestamp
 }
 
 func (il *InventoryLog) TableName() string {
@@ -121,8 +122,8 @@ type InventoryLogQuery struct {
 	shared.PageQuery
 	SKUCode    string
 	ChangeType string
-	StartTime  int64 // Unix timestamp
-	EndTime    int64 // Unix timestamp
+	StartTime  time.Time
+	EndTime    time.Time
 }
 
 // InventoryRepository interface for SKU-level inventory operations

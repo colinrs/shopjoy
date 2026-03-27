@@ -67,8 +67,8 @@ func (m *refundModel) toEntity() *fulfillment.Refund {
 		ApprovedBy:   m.ApprovedBy,
 		CompletedAt:  m.CompletedAt,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -98,8 +98,8 @@ func fromRefundEntity(r *fulfillment.Refund) *refundModel {
 		CreatedBy:    r.Audit.CreatedBy,
 		UpdatedBy:    r.Audit.UpdatedBy,
 		DeletedAt:    r.DeletedAt,
-		CreatedAt:    r.Audit.CreatedAt,
-		UpdatedAt:    r.Audit.UpdatedAt,
+		CreatedAt:    r.Audit.CreatedAt.Unix(),
+		UpdatedAt:    r.Audit.UpdatedAt.Unix(),
 	}
 }
 

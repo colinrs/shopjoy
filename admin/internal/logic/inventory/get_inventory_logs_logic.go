@@ -71,7 +71,7 @@ func (l *GetInventoryLogsLogic) GetInventoryLogs(req *types.GetInventoryLogsReq)
 			OrderNo:        log.OrderNo,
 			Remark:         log.Remark,
 			OperatorID:     log.OperatorID,
-			CreatedAt:      time.Unix(log.CreatedAt, 0).Format(time.RFC3339),
+			CreatedAt:      log.CreatedAt.Format(time.RFC3339),
 		})
 	}
 

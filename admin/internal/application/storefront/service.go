@@ -64,7 +64,7 @@ type ThemeAuditLogDTO struct {
 	ThemeName string `json:"theme_name"`
 	UserID    int64  `json:"user_id"`
 	UserName  string `json:"user_name"`
-	CreatedAt int64  `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 type PageDTO struct {
@@ -97,7 +97,7 @@ type VersionDTO struct {
 	ID        int64  `json:"id"`
 	Version   int    `json:"version"`
 	CreatedBy int64  `json:"created_by"`
-	CreatedAt int64  `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 type VersionDetailDTO struct {
@@ -317,7 +317,6 @@ func (s *themeService) SwitchTheme(ctx context.Context, tenantID shared.TenantID
 			NewConfig:  theme.Name + " (" + theme.Code + ")",
 			UserID:     userID,
 			UserName:   userName,
-			CreatedAt:  time.Now().Unix(),
 		}
 		return s.auditLogRepo.Create(ctx, tx, auditLog)
 	})
@@ -383,7 +382,6 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.Te
 			NewConfig:  newConfigJSON,
 			UserID:     userID,
 			UserName:   userName,
-			CreatedAt:  time.Now().Unix(),
 		}
 		return s.auditLogRepo.Create(ctx, tx, auditLog)
 	})
@@ -404,7 +402,7 @@ func (s *themeService) ListAuditLogs(ctx context.Context, tenantID shared.Tenant
 			ThemeName: l.ThemeName,
 			UserID:    l.UserID,
 			UserName:  l.UserName,
-			CreatedAt: l.CreatedAt,
+			CreatedAt: l.CreatedAt.UTC().Format(time.RFC3339),
 		}
 	}
 	return &PaginatedResult[*ThemeAuditLogDTO]{

@@ -72,8 +72,8 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 		},
 		Currency: m.Currency,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -103,8 +103,8 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
 		DeletedAt:   p.DeletedAt,
-		CreatedAt:   p.Audit.CreatedAt,
-		UpdatedAt:   p.Audit.UpdatedAt,
+		CreatedAt:   p.Audit.CreatedAt.Unix(),
+		UpdatedAt:   p.Audit.UpdatedAt.Unix(),
 	}
 }
 

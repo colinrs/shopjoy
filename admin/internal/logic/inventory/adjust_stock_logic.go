@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -30,8 +31,6 @@ func NewAdjustStockLogic(ctx context.Context, svcCtx *svc.ServiceContext) Adjust
 func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.CreateWarehouseResp, err error) {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	userID, _ := contextx.GetUserID(l.ctx)
-
-	now := time.Now().Unix()
 
 	// Verify warehouse exists
 	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.WarehouseID)
@@ -69,8 +68,8 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			AvailableStock: newStock,
 			LockedStock:    0,
 			Audit: shared.AuditInfo{
-				CreatedAt: time.Now().Unix(),
-				UpdatedAt: time.Now().Unix(),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
 			},
 		}
 		if err := l.svcCtx.WarehouseInventoryRepo.Create(l.ctx, l.svcCtx.DB, inventory); err != nil {
@@ -84,7 +83,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			return nil, code.ErrInventoryInsufficientStock
 		}
 		inventory.AvailableStock = newStock
-		inventory.Audit.UpdatedAt = time.Now().Unix()
+		inventory.Audit.UpdatedAt = time.Now().UTC()
 		if err := l.svcCtx.WarehouseInventoryRepo.Update(l.ctx, l.svcCtx.DB, inventory); err != nil {
 			return nil, err
 		}
@@ -93,7 +92,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 	// Create inventory log
 	logID, _ := l.svcCtx.IDGen.NextID(l.ctx)
 	log := &product.InventoryLog{
-		ID:             logID,
+		Model:          application.Model{ID: logID},
 		TenantID:       shared.TenantID(tenantID),
 		SKUCode:        req.SKUCode,
 		ProductID:      0, // Would need to fetch from SKU
@@ -104,7 +103,6 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 		AfterStock:     inventory.AvailableStock,
 		Remark:         req.Remark,
 		OperatorID:     userID,
-		CreatedAt:      now,
 	}
 	if err := l.svcCtx.InventoryLogRepo.Create(l.ctx, l.svcCtx.DB, log); err != nil {
 		return nil, err

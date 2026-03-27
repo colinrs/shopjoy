@@ -58,8 +58,8 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 		Sort:             req.Sort,
 		Status:           shared.StatusEnabled,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
 		},
 	}
 

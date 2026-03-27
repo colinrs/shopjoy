@@ -63,8 +63,8 @@ func (m *shipmentModel) toEntity() *fulfillment.Shipment {
 		DeliveredAt:      m.DeliveredAt,
 		Remark:           m.Remark,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -91,8 +91,8 @@ func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
 		CreatedBy:        s.Audit.CreatedBy,
 		UpdatedBy:        s.Audit.UpdatedBy,
 		DeletedAt:        s.DeletedAt,
-		CreatedAt:        s.Audit.CreatedAt,
-		UpdatedAt:        s.Audit.UpdatedAt,
+		CreatedAt:        s.Audit.CreatedAt.Unix(),
+		UpdatedAt:        s.Audit.UpdatedAt.Unix(),
 	}
 }
 

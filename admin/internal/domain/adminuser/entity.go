@@ -3,6 +3,7 @@ package adminuser
 import (
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -40,21 +41,18 @@ const (
 
 // AdminUser 管理后台用户实体
 type AdminUser struct {
-	ID          int64          `gorm:"column:id;primaryKey"`
-	TenantID    int64          `gorm:"column:tenant_id;not null;default:0;index"`
-	Username    string         `gorm:"column:username;uniqueIndex;size:64"`
-	Email       string         `gorm:"column:email;uniqueIndex;not null;size:128"`
-	Mobile      string         `gorm:"column:mobile;uniqueIndex;size:20"`
-	Password    string         `gorm:"column:password;not null;size:255"`
-	RealName    string         `gorm:"column:real_name;size:32"`
-	Avatar      string         `gorm:"column:avatar;size:255"`
-	Type        Type           `gorm:"column:type;not null;default:1;index"`
-	Status      Status         `gorm:"column:status;not null;default:1;index"`
-	LastLoginAt *int64         `gorm:"column:last_login_at"`
-	LastLoginIP string         `gorm:"column:last_login_ip;size:45"`
-	CreatedAt   int64          `gorm:"column:created_at;not null"`
-	UpdatedAt   int64          `gorm:"column:updated_at;not null"`
-	DeletedAt   *int64         `gorm:"column:deleted_at;index"`
+	application.Model
+	TenantID    int64     `gorm:"column:tenant_id;not null;default:0;index"`
+	Username    string    `gorm:"column:username;uniqueIndex;size:64"`
+	Email       string    `gorm:"column:email;uniqueIndex;not null;size:128"`
+	Mobile      string    `gorm:"column:mobile;uniqueIndex;size:20"`
+	Password    string    `gorm:"column:password;not null;size:255"`
+	RealName    string    `gorm:"column:real_name;size:32"`
+	Avatar      string    `gorm:"column:avatar;size:255"`
+	Type        Type      `gorm:"column:type;not null;default:1;index"`
+	Status      Status    `gorm:"column:status;not null;default:1;index"`
+	LastLoginAt *time.Time `gorm:"column:last_login_at"`
+	LastLoginIP string    `gorm:"column:last_login_ip;size:45"`
 }
 
 func (u *AdminUser) TableName() string {
@@ -87,7 +85,7 @@ func (u *AdminUser) CanLogin() bool {
 
 // UpdateLastLogin 更新最后登录时间
 func (u *AdminUser) UpdateLastLogin(ip string) {
-	now := time.Now().UTC().Unix()
+	now := time.Now().UTC()
 	u.LastLoginAt = &now
 	u.LastLoginIP = ip
 }

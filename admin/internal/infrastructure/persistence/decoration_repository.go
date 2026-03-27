@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -18,15 +19,15 @@ func NewDecorationRepository() storefront.DecorationRepository {
 }
 
 type decorationModel struct {
-	ID          int64  `gorm:"column:id;primaryKey"`
-	TenantID    int64  `gorm:"column:tenant_id;not null;index"`
-	PageID      int64  `gorm:"column:page_id;not null;index"`
-	BlockType   string `gorm:"column:block_type;type:varchar(50);not null;index"`
-	BlockConfig string `gorm:"column:block_config;type:text;not null"`
-	SortOrder   int    `gorm:"column:sort_order;not null"`
-	IsActive    int    `gorm:"column:is_active;not null;default:1"`
-	CreatedAt   int64  `gorm:"column:created_at;not null"`
-	UpdatedAt   int64  `gorm:"column:updated_at;not null"`
+	ID          int64     `gorm:"column:id;primaryKey"`
+	TenantID    int64     `gorm:"column:tenant_id;not null;index"`
+	PageID      int64     `gorm:"column:page_id;not null;index"`
+	BlockType   string    `gorm:"column:block_type;type:varchar(50);not null;index"`
+	BlockConfig string    `gorm:"column:block_config;type:text;not null"`
+	SortOrder   int       `gorm:"column:sort_order;not null"`
+	IsActive    int       `gorm:"column:is_active;not null;default:1"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (decorationModel) TableName() string {
@@ -39,34 +40,23 @@ func (m *decorationModel) toEntity() *storefront.Decoration {
 		json.Unmarshal([]byte(m.BlockConfig), &config)
 	}
 	return &storefront.Decoration{
-		ID:          m.ID,
+		Model:       application.Model{ID: m.ID},
 		TenantID:    shared.TenantID(m.TenantID),
 		PageID:      m.PageID,
 		BlockType:   m.BlockType,
 		BlockConfig: config,
 		SortOrder:   m.SortOrder,
 		IsActive:    m.IsActive == 1,
-		CreatedAt:   m.CreatedAt,
-		UpdatedAt:   m.UpdatedAt,
 	}
 }
 
 func fromDecorationEntity(d *storefront.Decoration) *decorationModel {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	config, _ := json.Marshal(d.BlockConfig)
 
 	isActive := 0
 	if d.IsActive {
 		isActive = 1
-	}
-
-	createdAt := now
-	updatedAt := now
-	if d.CreatedAt > 0 {
-		createdAt = d.CreatedAt
-	}
-	if d.UpdatedAt > 0 {
-		updatedAt = d.UpdatedAt
 	}
 
 	return &decorationModel{
@@ -77,8 +67,8 @@ func fromDecorationEntity(d *storefront.Decoration) *decorationModel {
 		BlockConfig: string(config),
 		SortOrder:   d.SortOrder,
 		IsActive:    isActive,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 }
 

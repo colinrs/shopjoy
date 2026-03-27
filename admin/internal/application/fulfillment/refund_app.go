@@ -332,8 +332,8 @@ func toRefundDetailResponse(r *fulfillment.Refund) *RefundDetailResponse {
 		ApprovedAt:   formatTimeToString(r.ApprovedAt),
 		ApprovedBy:   r.ApprovedBy,
 		CompletedAt:  formatTimeToString(r.CompletedAt),
-		CreatedAt:    time.Unix(r.Audit.CreatedAt, 0).Format(time.RFC3339),
-		UpdatedAt:    time.Unix(r.Audit.UpdatedAt, 0).Format(time.RFC3339),
+		CreatedAt:    r.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    r.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }
 

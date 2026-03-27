@@ -2,7 +2,9 @@ package storefront
 
 import (
 	"context"
+	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -93,7 +95,7 @@ type Page struct {
 	Status      shared.Status
 	Sort        int
 	IsPublished bool
-	PublishedAt *int64
+	PublishedAt *time.Time
 	Version     int
 	Audit       shared.AuditInfo `gorm:"embedded"`
 }
@@ -113,16 +115,13 @@ func (p *Page) TableName() string {
 
 // Decoration represents a decoration block on a page
 type Decoration struct {
-	ID          int64
+	application.Model
 	TenantID    shared.TenantID
 	PageID      int64
 	BlockType   string      // banner, product_grid, rich_text, image_carousel, etc.
 	BlockConfig BlockConfig // JSON configuration
 	SortOrder   int
 	IsActive    bool
-	CreatedAt   int64
-	UpdatedAt   int64
-	DeletedAt   *int64
 }
 
 func (d *Decoration) TableName() string {
@@ -134,14 +133,12 @@ type BlockConfig map[string]interface{}
 
 // PageVersion represents a snapshot of page decoration at a point in time
 type PageVersion struct {
-	ID        int64
+	application.Model
 	TenantID  shared.TenantID
 	PageID    int64
 	Version   int
 	Blocks    []BlockSnapshot // JSON snapshot of blocks
 	CreatedBy int64
-	CreatedAt int64
-	DeletedAt *int64
 }
 
 func (v *PageVersion) TableName() string {
@@ -157,16 +154,13 @@ type BlockSnapshot struct {
 
 // SEOConfigEntity represents SEO configuration for a page type
 type SEOConfigEntity struct {
-	ID          int64
+	application.Model
 	TenantID    shared.TenantID
 	PageType    string // global, home, category, product, custom
 	PageID      *int64 // NULL for global/page type defaults
 	Title       string
 	Description string
 	Keywords    string
-	CreatedAt   int64
-	UpdatedAt   int64
-	DeletedAt   *int64
 }
 
 func (s *SEOConfigEntity) TableName() string {
@@ -211,7 +205,7 @@ type BlockOrder struct {
 
 // ThemeAuditLog represents an audit log entry for theme changes
 type ThemeAuditLog struct {
-	ID         int64
+	application.Model
 	TenantID   shared.TenantID
 	Action     string // switch_theme, update_config
 	ThemeID    int64
@@ -223,8 +217,6 @@ type ThemeAuditLog struct {
 	UserName   string
 	IPAddress  string
 	UserAgent  string
-	CreatedAt  int64
-	DeletedAt  *int64
 }
 
 func (l *ThemeAuditLog) TableName() string {

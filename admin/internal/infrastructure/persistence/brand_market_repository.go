@@ -37,8 +37,8 @@ func (m *brandMarketModel) toEntity() *product.BrandMarket {
 		MarketID:  m.MarketID,
 		IsVisible: m.IsVisible,
 		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 		},
 	}
 }
@@ -50,8 +50,8 @@ func fromBrandMarketEntity(bm *product.BrandMarket) *brandMarketModel {
 		BrandID:   bm.BrandID,
 		MarketID:  bm.MarketID,
 		IsVisible: bm.IsVisible,
-		CreatedAt: bm.Audit.CreatedAt,
-		UpdatedAt: bm.Audit.UpdatedAt,
+		CreatedAt: bm.Audit.CreatedAt.Unix(),
+		UpdatedAt: bm.Audit.UpdatedAt.Unix(),
 	}
 }
 

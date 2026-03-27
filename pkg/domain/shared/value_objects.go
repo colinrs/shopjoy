@@ -120,15 +120,15 @@ func (s Status) IsValid() bool {
 
 // AuditInfo 审计信息（值对象）
 type AuditInfo struct {
-	CreatedAt int64
-	UpdatedAt int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	CreatedBy int64
 	UpdatedBy int64
 }
 
 // NewAuditInfo 创建审计信息
 func NewAuditInfo(createdBy int64) AuditInfo {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return AuditInfo{
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -139,7 +139,7 @@ func NewAuditInfo(createdBy int64) AuditInfo {
 
 // Update 更新审计信息
 func (a *AuditInfo) Update(updatedBy int64) {
-	a.UpdatedAt = time.Now().Unix()
+	a.UpdatedAt = time.Now().UTC()
 	a.UpdatedBy = updatedBy
 }
 
