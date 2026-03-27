@@ -32,28 +32,29 @@ func (replyModel) TableName() string {
 }
 
 func (m *replyModel) toEntity() *review.ReviewReply {
-	return &review.ReviewReply{
-		ID:        m.ID,
+	entity := &review.ReviewReply{
 		ReviewID:  m.ReviewID,
 		TenantID:  m.TenantID,
 		AdminID:   m.AdminID,
 		AdminName: m.AdminName,
 		Content:   m.Content,
-		CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
 	}
+	if m.CreatedAt > 0 {
+		entity.CreatedAt = time.Unix(m.CreatedAt, 0)
+	}
+	if m.UpdatedAt > 0 {
+		entity.UpdatedAt = time.Unix(m.UpdatedAt, 0)
+	}
+	return entity
 }
 
 func fromReplyEntity(r *review.ReviewReply) *replyModel {
 	return &replyModel{
-		ID:        r.ID,
 		ReviewID:  r.ReviewID,
 		TenantID:  r.TenantID,
 		AdminID:   r.AdminID,
 		AdminName: r.AdminName,
 		Content:   r.Content,
-		CreatedAt: r.CreatedAt.Unix(),
-		UpdatedAt: r.UpdatedAt.Unix(),
 	}
 }
 

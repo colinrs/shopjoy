@@ -8,12 +8,13 @@ Rules for database schema design and operations.
 |---|------|-----------|
 | 1 | All database object names must use lowercase + underscores | Consistency, case-sensitivity issues across DBs |
 | 2 | All tables must have a primary key that cannot be updated | Data integrity, replication support |
-| 3 | Every table must include `created_at` / `updated_at` / `deleted_at` | Audit trail, soft delete support |
-| 4 | Fields must explicitly define NOT NULL or default value | Prevent ambiguous NULL handling |
-| 5 | Monetary fields must use DECIMAL / NUMERIC | Precision for financial calculations |
-| 6 | Related field types must be exactly identical | Join performance, data integrity |
-| 7 | DDL must be centrally managed and traceable | Change tracking, rollback capability |
-| 8 | Production database changes must follow standard process | Safety, audit compliance |
+| 3 | Every table must include `created_at` / `updated_at` / `deleted_at` via `gorm.Model` | Audit trail, soft delete support |
+| 4 | All database Model entities must embed `gorm.Model` (do NOT define time fields directly) | Consistency, following LeafAlloc pattern |
+| 5 | Fields must explicitly define NOT NULL or default value | Prevent ambiguous NULL handling |
+| 6 | Monetary fields must use DECIMAL / NUMERIC | Precision for financial calculations |
+| 7 | Related field types must be exactly identical | Join performance, data integrity |
+| 8 | DDL must be centrally managed and traceable | Change tracking, rollback capability |
+| 9 | Production database changes must follow standard process | Safety, audit compliance |
 
 ## SHOULD
 
@@ -42,7 +43,7 @@ Rules for database schema design and operations.
 ### Table Schema
 
 ```sql
--- GOOD: Proper table structure with BIGINT timestamps (seconds precision)
+-- GOOD: Proper table structure with gorm.Model (time.Time timestamps)
 CREATE TABLE orders (
     id              BIGINT          PRIMARY KEY,
     order_number    VARCHAR(32)     NOT NULL,
@@ -50,9 +51,9 @@ CREATE TABLE orders (
     total_amount    DECIMAL(19,4)   NOT NULL,  -- Precise decimal
     currency        VARCHAR(3)      NOT NULL,
     status          VARCHAR(32)     NOT NULL DEFAULT 'pending',
-    created_at      BIGINT          NOT NULL DEFAULT (UNIX_TIMESTAMP()),  -- Unix timestamp (seconds)
-    updated_at      BIGINT          NOT NULL DEFAULT (UNIX_TIMESTAMP()),  -- Unix timestamp (seconds)
-    deleted_at      BIGINT          NULL,                                        -- Unix timestamp (seconds), soft delete
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at      TIMESTAMP       NULL,                                        -- soft delete
 
     CONSTRAINT uk_order_number UNIQUE (order_number)
 );
@@ -108,11 +109,46 @@ type Customer struct {
 }
 ```
 
+### gorm.Model Pattern
+
+```go
+import "gorm.io/gorm"
+
+// GOOD: Model entity embeds gorm.Model (LeafAlloc pattern)
+// gorm.Model includes: ID, CreatedAt, UpdatedAt, DeletedAt
+type LeafAlloc struct {
+    gorm.Model
+}
+
+func (*LeafAlloc) TableName() string {
+    return "leaf_alloc"
+}
+
+// GOOD: Other entities should also embed gorm.Model
+type ShippingTemplate struct {
+    gorm.Model
+    TenantID  int64  `gorm:"column:tenant_id;not null;index"`
+    Name      string `gorm:"column:name;size:100;not null"`
+    IsDefault bool   `gorm:"column:is_default;not null;default:false;index"`
+    IsActive  bool   `gorm:"column:is_active;not null;default:true"`
+}
+
+// GOOD: Business time fields (PaidAt, ShippedAt, etc.) use *time.Time
+type Order struct {
+    gorm.Model
+    Status     OrderStatus   `gorm:"column:status;not null;default:'pending_payment'"`
+    PaidAt     *time.Time   `gorm:"column:paid_at"`
+    ShippedAt  *time.Time   `gorm:"column:shipped_at"`
+    DeliveredAt *time.Time  `gorm:"column:delivered_at"`
+}
+```
+
 ## Checklist
 
 - [ ] Table/column names are lowercase with underscores
 - [ ] Table has primary key
-- [ ] Table has `created_at`, `updated_at`, `deleted_at`
+- [ ] Entity embeds `gorm.Model` (not defining time fields directly)
+- [ ] Business time fields use `*time.Time`
 - [ ] Fields have NOT NULL or default value
 - [ ] Monetary fields use DECIMAL/NUMERIC
 - [ ] Related fields have matching types

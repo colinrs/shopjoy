@@ -21,7 +21,7 @@ func NewProductRepository() product.Repository {
 }
 
 type productModel struct {
-	ID              int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
+	gorm.Model
 	TenantID        int64  `gorm:"column:tenant_id;not null;index"`
 	SKU             string `gorm:"column:sku;size:64;uniqueIndex"`
 	Name            string `gorm:"column:name;size:200;not null;index"`
@@ -44,9 +44,6 @@ type productModel struct {
 	Width           string `gorm:"column:width;type:decimal(10,2)"`
 	Height          string `gorm:"column:height;type:decimal(10,2)"`
 	DangerousGoods  string `gorm:"column:dangerous_goods;type:json"`
-	DeletedAt       *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt       int64  `gorm:"column:created_at"`
-	UpdatedAt       int64  `gorm:"column:updated_at"`
 }
 
 func (productModel) TableName() string {
@@ -72,8 +69,7 @@ func (m *productModel) toEntity() *product.Product {
 	width, _ := decimal.NewFromString(m.Width)
 	height, _ := decimal.NewFromString(m.Height)
 
-	return &product.Product{
-		ID:              m.ID,
+	entity := &product.Product{
 		TenantID:        shared.TenantID(m.TenantID),
 		SKU:             m.SKU,
 		Name:            m.Name,
@@ -98,9 +94,12 @@ func (m *productModel) toEntity() *product.Product {
 			Unit:   "cm",
 		},
 		DangerousGoods: dangerousGoods,
-		CreatedAt:      m.CreatedAt,
-		UpdatedAt:      m.UpdatedAt,
 	}
+	entity.ID = m.ID
+	entity.CreatedAt = m.CreatedAt
+	entity.UpdatedAt = m.UpdatedAt
+	entity.DeletedAt = m.DeletedAt
+	return entity
 }
 
 func fromEntity(p *product.Product) *productModel {
@@ -109,8 +108,7 @@ func fromEntity(p *product.Product) *productModel {
 	imagesJSON, _ := json.Marshal(p.Images)
 	dangerousGoodsJSON, _ := json.Marshal(p.DangerousGoods)
 
-	return &productModel{
-		ID:              p.ID,
+	model := &productModel{
 		TenantID:        p.TenantID.Int64(),
 		SKU:             p.SKU,
 		Name:            p.Name,
@@ -133,9 +131,11 @@ func fromEntity(p *product.Product) *productModel {
 		Width:           p.Dimensions.Width.String(),
 		Height:          p.Dimensions.Height.String(),
 		DangerousGoods:  string(dangerousGoodsJSON),
-		CreatedAt:       p.CreatedAt,
-		UpdatedAt:       p.UpdatedAt,
 	}
+	model.ID = p.ID
+	model.CreatedAt = p.CreatedAt
+	model.UpdatedAt = p.UpdatedAt
+	return model
 }
 
 func (r *productRepo) Create(ctx context.Context, db *gorm.DB, p *product.Product) error {

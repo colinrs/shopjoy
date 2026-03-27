@@ -59,7 +59,7 @@ func (l *GetLowStockSKUsLogic) GetLowStockSKUs(req *types.GetLowStockSKUsReq) (r
 	// Build product name map
 	productNames := make(map[int64]string)
 	for _, p := range products {
-		productNames[p.ID] = p.Name
+		productNames[int64(p.ID)] = p.Name
 	}
 
 	// Build response

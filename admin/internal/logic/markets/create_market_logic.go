@@ -2,7 +2,6 @@ package markets
 
 import (
 	"context"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
@@ -67,7 +66,7 @@ func parseDecimal(s string) decimal.Decimal {
 
 func toMarketResponse(m *market.Market) *types.MarketResponse {
 	return &types.MarketResponse{
-		ID:              m.ID,
+		ID:              int64(m.ID),
 		Code:            m.Code,
 		Name:            m.Name,
 		Currency:        m.Currency,
@@ -81,7 +80,7 @@ func toMarketResponse(m *market.Market) *types.MarketResponse {
 			IossEnabled: m.TaxRules.IOSSEnabled,
 			IncludeTax:  m.TaxRules.IncludeTax,
 		},
-		CreatedAt: time.Unix(m.CreatedAt, 0).Format("2006-01-02 15:04:05"),
-		UpdatedAt: time.Unix(m.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
+		CreatedAt: m.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: m.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 }

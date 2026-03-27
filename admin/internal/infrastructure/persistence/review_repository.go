@@ -53,7 +53,6 @@ func (m *reviewModel) toEntity() *review.Review {
 	}
 
 	return &review.Review{
-		ID:            m.ID,
 		TenantID:      shared.TenantID(m.TenantID),
 		OrderID:       m.OrderID,
 		ProductID:     m.ProductID,
@@ -70,16 +69,12 @@ func (m *reviewModel) toEntity() *review.Review {
 		IsVerified:    m.IsVerified,
 		IsFeatured:    m.IsFeatured,
 		HelpfulCount:  m.HelpfulCount,
-		DeletedAt:     m.DeletedAt,
-		CreatedAt:     time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt:     time.Unix(m.UpdatedAt, 0).UTC(),
 	}
 }
 
 func fromReviewEntity(r *review.Review) *reviewModel {
 	imagesJSON, _ := json.Marshal(r.Images)
 	return &reviewModel{
-		ID:            r.ID,
 		TenantID:      r.TenantID.Int64(),
 		OrderID:       r.OrderID,
 		ProductID:     r.ProductID,
@@ -96,9 +91,6 @@ func fromReviewEntity(r *review.Review) *reviewModel {
 		IsVerified:    r.IsVerified,
 		IsFeatured:    r.IsFeatured,
 		HelpfulCount:  r.HelpfulCount,
-		DeletedAt:     r.DeletedAt,
-		CreatedAt:     r.CreatedAt.Unix(),
-		UpdatedAt:     r.UpdatedAt.Unix(),
 	}
 }
 

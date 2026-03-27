@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
+	"gorm.io/gorm"
 )
 
 // FeeType 运费计费类型
@@ -60,14 +60,11 @@ func (r *Regions) Scan(value interface{}) error {
 
 // ShippingTemplate 运费模板实体
 type ShippingTemplate struct {
-	ID        int64          `gorm:"column:id;primaryKey"`
-	TenantID  int64          `gorm:"column:tenant_id;not null;index"`
-	Name      string         `gorm:"column:name;size:100;not null"`
-	IsDefault bool           `gorm:"column:is_default;not null;default:false;index"`
-	IsActive  bool           `gorm:"column:is_active;not null;default:true"`
-	CreatedAt time.Time      `gorm:"column:created_at;not null"`
-	UpdatedAt time.Time      `gorm:"column:updated_at;not null"`
-	DeletedAt *int64        `gorm:"column:deleted_at;index"`
+	gorm.Model
+	TenantID  int64  `gorm:"column:tenant_id;not null;index"`
+	Name      string `gorm:"column:name;size:100;not null"`
+	IsDefault bool   `gorm:"column:is_default;not null;default:false;index"`
+	IsActive  bool   `gorm:"column:is_active;not null;default:true"`
 }
 
 // TableName 返回表名
@@ -105,21 +102,19 @@ func (t *ShippingTemplate) Deactivate() {
 
 // ShippingZone 配送区域实体
 type ShippingZone struct {
-	ID                  int64     `gorm:"column:id;primaryKey"`
-	TenantID            int64     `gorm:"column:tenant_id;not null;index"`
-	TemplateID          int64     `gorm:"column:template_id;not null;index"`
-	Name                string    `gorm:"column:name;size:100;not null"`
-	Regions             Regions   `gorm:"column:regions;type:jsonb;not null"`
-	FeeType             FeeType   `gorm:"column:fee_type;size:20;not null"`
-	FirstUnit           int       `gorm:"column:first_unit;not null;default:1"`
-	FirstFee            int64     `gorm:"column:first_fee;not null;default:0"` // 分为单位
-	AdditionalUnit      int       `gorm:"column:additional_unit;not null;default:1"`
-	AdditionalFee       int64     `gorm:"column:additional_fee;not null;default:0"`
-	FreeThresholdAmount int64     `gorm:"column:free_threshold_amount;not null;default:0"` // 满额包邮，0表示不限制
-	FreeThresholdCount  int       `gorm:"column:free_threshold_count;not null;default:0"`  // 满件包邮，0表示不限制
-	Sort                int       `gorm:"column:sort;not null;default:0"`
-	CreatedAt           time.Time `gorm:"column:created_at;not null"`
-	UpdatedAt           time.Time `gorm:"column:updated_at;not null"`
+	gorm.Model
+	TenantID            int64   `gorm:"column:tenant_id;not null;index"`
+	TemplateID          int64   `gorm:"column:template_id;not null;index"`
+	Name                string  `gorm:"column:name;size:100;not null"`
+	Regions             Regions `gorm:"column:regions;type:jsonb;not null"`
+	FeeType             FeeType `gorm:"column:fee_type;size:20;not null"`
+	FirstUnit           int     `gorm:"column:first_unit;not null;default:1"`
+	FirstFee            int64   `gorm:"column:first_fee;not null;default:0"`                   // 分为单位
+	AdditionalUnit      int     `gorm:"column:additional_unit;not null;default:1"`
+	AdditionalFee       int64   `gorm:"column:additional_fee;not null;default:0"`
+	FreeThresholdAmount int64   `gorm:"column:free_threshold_amount;not null;default:0"` // 满额包邮，0表示不限制
+	FreeThresholdCount  int     `gorm:"column:free_threshold_count;not null;default:0"`  // 满件包邮，0表示不限制
+	Sort                int     `gorm:"column:sort;not null;default:0"`
 }
 
 // TableName 返回表名
@@ -186,10 +181,9 @@ func (t TargetType) IsValid() bool {
 
 // ShippingZoneRegion 配送区域城市关联实体（用于索引查询）
 type ShippingZoneRegion struct {
-	ID        int64     `gorm:"column:id;primaryKey"`
-	ZoneID    int64     `gorm:"column:zone_id;not null;uniqueIndex:idx_zone_city"`
-	CityCode  string    `gorm:"column:city_code;size:20;not null;uniqueIndex:idx_zone_city;index"`
-	CreatedAt time.Time `gorm:"column:created_at;not null"`
+	gorm.Model
+	ZoneID   int64  `gorm:"column:zone_id;not null;uniqueIndex:idx_zone_city"`
+	CityCode string `gorm:"column:city_code;size:20;not null;uniqueIndex:idx_zone_city;index"`
 }
 
 // TableName 返回表名
@@ -199,13 +193,11 @@ func (r *ShippingZoneRegion) TableName() string {
 
 // ShippingTemplateMapping 模板关联实体
 type ShippingTemplateMapping struct {
-	ID         int64      `gorm:"column:id;primaryKey"`
+	gorm.Model
 	TenantID   int64      `gorm:"column:tenant_id;not null;index"`
 	TemplateID int64      `gorm:"column:template_id;not null;index"`
 	TargetType TargetType `gorm:"column:target_type;size:20;not null"`
 	TargetID   int64      `gorm:"column:target_id;not null;index"`
-	CreatedAt  time.Time  `gorm:"column:created_at;not null"`
-	UpdatedAt  time.Time  `gorm:"column:updated_at;not null"`
 }
 
 // TableName 返回表名

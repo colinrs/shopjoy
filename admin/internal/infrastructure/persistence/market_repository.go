@@ -17,19 +17,16 @@ func NewMarketRepository() market.Repository {
 }
 
 type marketModel struct {
-	ID              int64          `gorm:"column:id;primaryKey;autoIncrement"`
-	TenantID        int64          `gorm:"column:tenant_id;not null;default:0"`
-	Code            string         `gorm:"column:code;size:10;not null;uniqueIndex:uk_tenant_code"`
-	Name            string         `gorm:"column:name;size:64;not null"`
-	Currency        string         `gorm:"column:currency;size:10;not null"`
-	DefaultLanguage string         `gorm:"column:default_language;size:10;not null;default:'en'"`
-	Flag            string         `gorm:"column:flag;size:32"`
-	IsActive        bool           `gorm:"column:is_active;not null;default:true"`
-	IsDefault       bool           `gorm:"column:is_default;not null;default:false"`
-	TaxRules        string         `gorm:"column:tax_rules;type:json"`
-	CreatedAt       int64          `gorm:"column:created_at"`
-	UpdatedAt       int64          `gorm:"column:updated_at"`
-	DeletedAt       *int64        `gorm:"column:deleted_at;index"`
+	gorm.Model
+	TenantID        int64  `gorm:"column:tenant_id;not null;default:0"`
+	Code            string `gorm:"column:code;size:10;not null;uniqueIndex:uk_tenant_code"`
+	Name            string `gorm:"column:name;size:64;not null"`
+	Currency        string `gorm:"column:currency;size:10;not null"`
+	DefaultLanguage string `gorm:"column:default_language;size:10;not null;default:'en'"`
+	Flag            string `gorm:"column:flag;size:32"`
+	IsActive        bool   `gorm:"column:is_active;not null;default:true"`
+	IsDefault       bool   `gorm:"column:is_default;not null;default:false"`
+	TaxRules        string `gorm:"column:tax_rules;type:json"`
 }
 
 func (marketModel) TableName() string {
@@ -42,8 +39,7 @@ func (m *marketModel) toEntity() *market.Market {
 		json.Unmarshal([]byte(m.TaxRules), &taxRules)
 	}
 
-	return &market.Market{
-		ID:              m.ID,
+	entity := &market.Market{
 		TenantID:        m.TenantID,
 		Code:            m.Code,
 		Name:            m.Name,
@@ -53,16 +49,17 @@ func (m *marketModel) toEntity() *market.Market {
 		IsActive:        m.IsActive,
 		IsDefault:       m.IsDefault,
 		TaxRules:        taxRules,
-		CreatedAt:       m.CreatedAt,
-		UpdatedAt:       m.UpdatedAt,
 	}
+	entity.ID = m.ID
+	entity.CreatedAt = m.CreatedAt
+	entity.UpdatedAt = m.UpdatedAt
+	return entity
 }
 
 func fromMarketEntity(m *market.Market) *marketModel {
 	taxRulesJSON, _ := json.Marshal(m.TaxRules)
 
-	return &marketModel{
-		ID:              m.ID,
+	model := &marketModel{
 		TenantID:        m.TenantID,
 		Code:            m.Code,
 		Name:            m.Name,
@@ -72,9 +69,11 @@ func fromMarketEntity(m *market.Market) *marketModel {
 		IsActive:        m.IsActive,
 		IsDefault:       m.IsDefault,
 		TaxRules:        string(taxRulesJSON),
-		CreatedAt:       m.CreatedAt,
-		UpdatedAt:       m.UpdatedAt,
 	}
+	model.ID = m.ID
+	model.CreatedAt = m.CreatedAt
+	model.UpdatedAt = m.UpdatedAt
+	return model
 }
 
 func (r *marketRepo) Create(ctx context.Context, db *gorm.DB, m *market.Market) error {

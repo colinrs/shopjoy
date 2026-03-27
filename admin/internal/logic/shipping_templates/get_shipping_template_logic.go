@@ -43,7 +43,7 @@ func (l *GetShippingTemplateLogic) GetShippingTemplate(req *types.GetShippingTem
 
 	// Build response
 	return &types.ShippingTemplateDetailResp{
-		ID:        template.ID,
+		ID:        int64(template.ID),
 		Name:      template.Name,
 		IsDefault: template.IsDefault,
 		IsActive:  template.IsActive,
@@ -58,7 +58,7 @@ func buildZoneDetails(zones []*shipping.ShippingZone) []*types.ShippingZoneDetai
 	result := make([]*types.ShippingZoneDetail, 0, len(zones))
 	for _, z := range zones {
 		result = append(result, &types.ShippingZoneDetail{
-			ID:                  z.ID,
+			ID:                  int64(z.ID),
 			TemplateID:          z.TemplateID,
 			Name:                z.Name,
 			Regions:             z.Regions,
@@ -79,7 +79,7 @@ func buildMappingDetails(mappings []*shipping.ShippingTemplateMapping) []*types.
 	result := make([]*types.TemplateMappingDetail, 0, len(mappings))
 	for _, m := range mappings {
 		result = append(result, &types.TemplateMappingDetail{
-			ID:         m.ID,
+			ID:         int64(m.ID),
 			TemplateID: m.TemplateID,
 			TargetType: string(m.TargetType),
 			TargetID:   m.TargetID,

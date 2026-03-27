@@ -80,27 +80,24 @@ func (s Status) CanShow() bool {
 
 // Review 评价实体
 type Review struct {
-	ID            int64           // 评价ID
+	gorm.Model
 	TenantID      shared.TenantID // 租户ID
-	OrderID       int64           // 订单ID
-	ProductID     int64           // 商品ID
-	SKUCode       string          // SKU代码
-	UserID        int64           // 用户ID
-	UserName      string          // 用户名（用于显示）
-	QualityRating int             // 质量评分 (1-5)
-	ValueRating   int             // 性价比评分 (1-5)
-	OverallRating float64         // 综合评分
-	Content       string          // 评价内容
-	Images        []string        // 图片URL列表
-	Status        Status          // 状态
-	IsAnonymous   bool            // 是否匿名
-	IsVerified    bool            // 是否已验证购买
-	IsFeatured    bool            // 是否精选
-	HelpfulCount  int             // 有帮助数
-	Reply         *ReviewReply    // 商家回复
-	DeletedAt     *int64          // 软删除时间
-	CreatedAt     time.Time       // 创建时间
-	UpdatedAt     time.Time       // 更新时间
+	OrderID       int64          // 订单ID
+	ProductID     int64          // 商品ID
+	SKUCode       string         // SKU代码
+	UserID        int64          // 用户ID
+	UserName      string         // 用户名（用于显示）
+	QualityRating int            // 质量评分 (1-5)
+	ValueRating   int            // 性价比评分 (1-5)
+	OverallRating float64        // 综合评分
+	Content       string         // 评价内容
+	Images        []string       // 图片URL列表
+	Status        Status         // 状态
+	IsAnonymous   bool           // 是否匿名
+	IsVerified    bool           // 是否已验证购买
+	IsFeatured    bool           // 是否精选
+	HelpfulCount  int            // 有帮助数
+	Reply         *ReviewReply   // 商家回复
 }
 
 // TableName returns table name
@@ -109,7 +106,7 @@ func (Review) TableName() string {
 }
 
 // NewReview creates a new review
-func NewReview(id int64, tenantID shared.TenantID, orderID, productID int64, skuCode string,
+func NewReview(tenantID shared.TenantID, orderID, productID int64, skuCode string,
 	userID int64, userName string, qualityRating, valueRating int, content string,
 	images []string, isAnonymous bool) (*Review, error) {
 	if qualityRating < 1 || qualityRating > 5 || valueRating < 1 || valueRating > 5 {
@@ -119,7 +116,6 @@ func NewReview(id int64, tenantID shared.TenantID, orderID, productID int64, sku
 		return nil, code.ErrReviewContentTooLong
 	}
 
-	now := time.Now().UTC()
 	overallRating := float64(qualityRating+valueRating) / 2.0
 
 	// Auto-approve high ratings (>= 4)
@@ -129,7 +125,6 @@ func NewReview(id int64, tenantID shared.TenantID, orderID, productID int64, sku
 	}
 
 	return &Review{
-		ID:            id,
 		TenantID:      tenantID,
 		OrderID:       orderID,
 		ProductID:     productID,
@@ -146,8 +141,6 @@ func NewReview(id int64, tenantID shared.TenantID, orderID, productID int64, sku
 		IsVerified:    true, // All reviews are verified purchases
 		IsFeatured:    false,
 		HelpfulCount:  0,
-		CreatedAt:     now,
-		UpdatedAt:     now,
 	}, nil
 }
 
@@ -157,7 +150,6 @@ func (r *Review) Approve() error {
 		return code.ErrReviewCannotApprove
 	}
 	r.Status = StatusApproved
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -167,7 +159,6 @@ func (r *Review) Hide(reason string) error {
 		return code.ErrReviewCannotHide
 	}
 	r.Status = StatusHidden
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -177,7 +168,6 @@ func (r *Review) Show() error {
 		return code.ErrReviewCannotShow
 	}
 	r.Status = StatusApproved
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -186,10 +176,7 @@ func (r *Review) SoftDelete() error {
 	if r.Status == StatusDeleted {
 		return code.ErrReviewAlreadyDeleted
 	}
-	now := time.Now().UTC().Unix()
-	r.DeletedAt = &now
 	r.Status = StatusDeleted
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -199,7 +186,6 @@ func (r *Review) SetFeatured(featured bool) error {
 		return code.ErrReviewCannotFeature
 	}
 	r.IsFeatured = featured
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -218,15 +204,12 @@ func (r *Review) DisplayName() string {
 
 // ReviewReply 商家回复实体
 type ReviewReply struct {
-	ID        int64     // 回复ID
-	ReviewID  int64     // 评价ID
-	TenantID  int64     // 租户ID
-	AdminID   int64     // 管理员ID
-	AdminName string    // 管理员名称
-	Content   string    // 回复内容
-	DeletedAt *int64    // 软删除时间
-	CreatedAt time.Time // 创建时间
-	UpdatedAt time.Time // 更新时间
+	gorm.Model
+	ReviewID  int64  // 评价ID
+	TenantID  int64  // 租户ID
+	AdminID   int64  // 管理员ID
+	AdminName string // 管理员名称
+	Content   string // 回复内容
 }
 
 // TableName returns table name
@@ -235,7 +218,7 @@ func (ReviewReply) TableName() string {
 }
 
 // NewReviewReply creates a new review reply
-func NewReviewReply(id, reviewID, tenantID, adminID int64, adminName, content string) (*ReviewReply, error) {
+func NewReviewReply(reviewID, tenantID, adminID int64, adminName, content string) (*ReviewReply, error) {
 	if content == "" {
 		return nil, code.ErrReviewReplyEmpty
 	}
@@ -243,16 +226,12 @@ func NewReviewReply(id, reviewID, tenantID, adminID int64, adminName, content st
 		return nil, code.ErrReplyContentTooLong
 	}
 
-	now := time.Now().UTC()
 	return &ReviewReply{
-		ID:        id,
 		ReviewID:  reviewID,
 		TenantID:  tenantID,
 		AdminID:   adminID,
 		AdminName: adminName,
 		Content:   content,
-		CreatedAt: now,
-		UpdatedAt: now,
 	}, nil
 }
 
@@ -265,28 +244,24 @@ func (r *ReviewReply) Update(content string) error {
 		return code.ErrReplyContentTooLong
 	}
 	r.Content = content
-	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
 // ReviewStats 商品评价统计
 type ReviewStats struct {
-	ID                int64     // 统计ID
-	TenantID          int64     // 租户ID
-	ProductID         int64     // 商品ID
-	TotalReviews      int       // 总评价数
-	AverageRating     float64   // 平均评分
-	QualityAvgRating  float64   // 质量平均分
-	ValueAvgRating    float64   // 性价比平均分
-	Rating1Count      int       // 1星数量
-	Rating2Count      int       // 2星数量
-	Rating3Count      int       // 3星数量
-	Rating4Count      int       // 4星数量
-	Rating5Count      int       // 5星数量
-	WithImageCount    int       // 有图片数量
-	CreatedAt         time.Time // 创建时间
-	UpdatedAt         time.Time // 更新时间
-	DeletedAt         *int64    // 软删除时间
+	gorm.Model
+	TenantID          int64    // 租户ID
+	ProductID         int64    // 商品ID
+	TotalReviews      int      // 总评价数
+	AverageRating     float64  // 平均评分
+	QualityAvgRating  float64  // 质量平均分
+	ValueAvgRating    float64  // 性价比平均分
+	Rating1Count      int      // 1星数量
+	Rating2Count      int      // 2星数量
+	Rating3Count      int      // 3星数量
+	Rating4Count      int      // 4星数量
+	Rating5Count      int      // 5星数量
+	WithImageCount    int      // 有图片数量
 }
 
 // TableName returns table name

@@ -2,6 +2,7 @@ package uploads
 
 import (
 	"context"
+	"mime/multipart"
 	"path/filepath"
 	"strings"
 
@@ -37,13 +38,15 @@ func (l *UploadLogic) Upload(req *types.UploadRequest) (resp *types.UploadRespon
 		return nil, code.ErrUploadFailed
 	}
 
+	file := req.File.(*multipart.FileHeader)
+
 	// 验证文件大小
-	if req.File.Size > maxFileSize {
+	if file.Size > maxFileSize {
 		return nil, code.ErrUploadFileSizeExceeded
 	}
 
 	// 验证文件类型
-	ext := strings.ToLower(filepath.Ext(req.File.Filename))
+	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if !strings.Contains(allowedExtensions, ext) {
 		return nil, code.ErrUploadUnsupportedFileType
 	}
@@ -55,7 +58,7 @@ func (l *UploadLogic) Upload(req *types.UploadRequest) (resp *types.UploadRespon
 	}
 
 	// 保存文件
-	fileInfo, err := l.svcCtx.Storage.Save(l.ctx, req.File, category)
+	fileInfo, err := l.svcCtx.Storage.Save(l.ctx, file, category)
 	if err != nil {
 		return nil, code.ErrUploadFailed
 	}

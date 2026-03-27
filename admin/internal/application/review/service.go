@@ -80,7 +80,7 @@ func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req
 	// Get reply status for all reviews
 	reviewIDs := make([]int64, len(reviews))
 	for i, r := range reviews {
-		reviewIDs[i] = r.ID
+		reviewIDs[i] = int64(r.ID)
 	}
 
 	replies, err := s.replyRepo.FindByReviewIDs(ctx, s.db, reviewIDs)
@@ -96,7 +96,7 @@ func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req
 	list := make([]*ReviewListItem, len(reviews))
 	for i, r := range reviews {
 		list[i] = &ReviewListItem{
-			ID:            r.ID,
+			ID:            int64(r.ID),
 			OrderID:       r.OrderID,
 			ProductID:     r.ProductID,
 			SKUCode:       r.SKUCode,
@@ -111,7 +111,7 @@ func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req
 			Status:        r.Status.String(),
 			IsFeatured:    r.IsFeatured,
 			HelpfulCount:  r.HelpfulCount,
-			HasReply:      replyMap[r.ID],
+			HasReply:      replyMap[int64(r.ID)],
 			CreatedAt:     r.CreatedAt.Format(time.RFC3339),
 		}
 	}
@@ -189,7 +189,7 @@ func (s *service) DeleteReview(ctx context.Context, tenantID shared.TenantID, id
 		return err
 	}
 
-	return s.reviewRepo.Delete(ctx, s.db, tenantID, rev.ID)
+	return s.reviewRepo.Delete(ctx, s.db, tenantID, int64(rev.ID))
 }
 
 func (s *service) ToggleFeatured(ctx context.Context, tenantID shared.TenantID, id int64, featured bool) error {
@@ -224,12 +224,7 @@ func (s *service) CreateReply(ctx context.Context, tenantID shared.TenantID, adm
 		return nil, err
 	}
 
-	id, err := s.idGen.NextID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	reply, err := domainReview.NewReviewReply(id, reviewID, tenantID.Int64(), adminID, adminName, req.Content)
+	reply, err := domainReview.NewReviewReply(reviewID, tenantID.Int64(), adminID, adminName, req.Content)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +234,7 @@ func (s *service) CreateReply(ctx context.Context, tenantID shared.TenantID, adm
 	}
 
 	return &ReplyDTO{
-		ID:        reply.ID,
+		ID:        int64(reply.ID),
 		Content:   reply.Content,
 		AdminName: reply.AdminName,
 		CreatedAt: reply.CreatedAt.Format(time.RFC3339),
@@ -262,7 +257,7 @@ func (s *service) UpdateReply(ctx context.Context, tenantID shared.TenantID, rev
 	}
 
 	return &ReplyDTO{
-		ID:        reply.ID,
+		ID:        int64(reply.ID),
 		Content:   reply.Content,
 		AdminName: reply.AdminName,
 		CreatedAt: reply.CreatedAt.Format(time.RFC3339),

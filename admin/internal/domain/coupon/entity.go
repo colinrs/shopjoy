@@ -28,7 +28,7 @@ const (
 )
 
 type Coupon struct {
-	ID           int64
+	gorm.Model
 	TenantID     shared.TenantID
 	Name         string
 	Code         string
@@ -43,7 +43,6 @@ type Coupon struct {
 	Status       Status
 	StartAt      time.Time
 	EndAt        time.Time
-	DeletedAt    *int64
 	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -112,7 +111,7 @@ func (c *Coupon) Use() error {
 }
 
 type UserCoupon struct {
-	ID         int64
+	gorm.Model
 	TenantID   shared.TenantID
 	UserID     int64
 	CouponID   int64

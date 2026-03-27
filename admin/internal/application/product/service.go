@@ -2,7 +2,6 @@ package product
 
 import (
 	"context"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -43,10 +42,11 @@ func (s *service) CreateProduct(ctx context.Context, tenantID shared.TenantID, r
 	}
 
 	price := ToDomainMoney(req.Price, req.Currency)
-	p, err := product.NewProduct(id, tenantID, req.Name, req.Description, price, req.CategoryID)
+	p, err := product.NewProduct(tenantID, req.Name, req.Description, price, req.CategoryID)
 	if err != nil {
 		return nil, err
 	}
+	p.ID = uint(id)
 
 	p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
 
@@ -71,7 +71,6 @@ func (s *service) UpdateProduct(ctx context.Context, tenantID shared.TenantID, r
 	p.Name = req.Name
 	p.Description = req.Description
 	p.CategoryID = req.CategoryID
-	p.UpdatedAt = time.Now().Unix()
 
 	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
 		return nil, err
@@ -186,10 +185,11 @@ func (s *service) CreateProductWithTx(ctx context.Context, tenantID shared.Tenan
 		}
 
 		price := ToDomainMoney(req.Price, req.Currency)
-		p, err := product.NewProduct(id, tenantID, req.Name, req.Description, price, req.CategoryID)
+		p, err := product.NewProduct(tenantID, req.Name, req.Description, price, req.CategoryID)
 		if err != nil {
 			return err
 		}
+		p.ID = uint(id)
 
 		p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
 

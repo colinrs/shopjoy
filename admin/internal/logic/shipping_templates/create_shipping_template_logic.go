@@ -54,7 +54,7 @@ func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateSh
 	}
 
 	return &types.CreateShippingTemplateResp{
-		ID:   template.ID,
+		ID:   int64(template.ID),
 		Name: template.Name,
 	}, nil
 }

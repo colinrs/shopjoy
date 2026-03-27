@@ -453,7 +453,7 @@ func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context, tenantID sha
 		AdjustAmount:   order.AdjustAmount,
 		NewPayAmount:   order.PayAmount,
 		AdjustReason:   order.AdjustReason,
-		AdjustedAt:     order.AdjustedAt.Format(time.RFC3339),
+		AdjustedAt:     order.AdjustedAt.Format("2006-01-02 15:04:05"),
 	}, nil
 }
 

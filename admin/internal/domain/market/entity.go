@@ -3,7 +3,6 @@ package market
 
 import (
 	"context"
-	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/shopspring/decimal"
@@ -20,19 +19,16 @@ type TaxConfig struct {
 
 // Market 市场实体
 type Market struct {
-	ID              int64          // 市场ID
-	TenantID        int64          // 租户ID
-	Code            string         // 市场代码: US, UK, DE, FR, AU
-	Name            string         // 市场名称
-	Currency        string         // 货币: USD, GBP, EUR, AUD
-	DefaultLanguage string         // 默认语言
-	Flag            string         // 旗帜图标
-	IsActive        bool           // 是否启用
-	IsDefault       bool           // 是否主市场
-	TaxRules        TaxConfig      `gorm:"type:json"` // 税务配置
-	CreatedAt       int64         // 创建时间
-	UpdatedAt       int64         // 更新时间
-	DeletedAt       *int64        // 软删除时间
+	gorm.Model
+	TenantID        int64     // 租户ID
+	Code            string    // 市场代码: US, UK, DE, FR, AU
+	Name            string    // 市场名称
+	Currency        string    // 货币: USD, GBP, EUR, AUD
+	DefaultLanguage string    // 默认语言
+	Flag            string    // 旗帜图标
+	IsActive        bool      // 是否启用
+	IsDefault       bool      // 是否主市场
+	TaxRules        TaxConfig `gorm:"type:json"` // 税务配置
 }
 
 // TableName 表名
@@ -52,34 +48,28 @@ func NewMarket(marketCode, name, currency, defaultLanguage string) (*Market, err
 		return nil, code.ErrMarketCurrencyRequired
 	}
 
-	now := time.Now().Unix()
 	return &Market{
 		Code:            marketCode,
 		Name:            name,
 		Currency:        currency,
 		DefaultLanguage: defaultLanguage,
 		IsActive:        true,
-		CreatedAt:       now,
-		UpdatedAt:       now,
 	}, nil
 }
 
 // Activate 激活市场
 func (m *Market) Activate() {
 	m.IsActive = true
-	m.UpdatedAt = time.Now().Unix()
 }
 
 // Deactivate 停用市场
 func (m *Market) Deactivate() {
 	m.IsActive = false
-	m.UpdatedAt = time.Now().Unix()
 }
 
 // SetAsDefault 设置为主市场
 func (m *Market) SetAsDefault() {
 	m.IsDefault = true
-	m.UpdatedAt = time.Now().Unix()
 }
 
 // Repository 市场仓储接口

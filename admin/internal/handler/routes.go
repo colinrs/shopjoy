@@ -38,6 +38,7 @@ import (
 	shipping_zones "github.com/colinrs/shopjoy/admin/internal/handler/shipping_zones"
 	shop "github.com/colinrs/shopjoy/admin/internal/handler/shop"
 	themes "github.com/colinrs/shopjoy/admin/internal/handler/themes"
+	uploads "github.com/colinrs/shopjoy/admin/internal/handler/uploads"
 	user_coupons "github.com/colinrs/shopjoy/admin/internal/handler/user_coupons"
 	users "github.com/colinrs/shopjoy/admin/internal/handler/users"
 	versions "github.com/colinrs/shopjoy/admin/internal/handler/versions"
@@ -1575,6 +1576,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPut,
 					Path:    "/api/v1/themes/switch",
 					Handler: themes.SwitchThemeHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 上传图片
+					Method:  http.MethodPost,
+					Path:    "/api/v1/uploads",
+					Handler: uploads.UploadHandler(serverCtx),
+				},
+				{
+					// 删除图片
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/uploads/:id",
+					Handler: uploads.DeleteUploadHandler(serverCtx),
 				},
 			}...,
 		),

@@ -69,7 +69,7 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 	}
 
 	return &types.ShippingTemplateDetailResp{
-		ID:        template.ID,
+		ID:        int64(template.ID),
 		Name:      template.Name,
 		IsDefault: template.IsDefault,
 		IsActive:  template.IsActive,

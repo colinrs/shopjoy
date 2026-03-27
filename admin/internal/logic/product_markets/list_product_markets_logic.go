@@ -47,8 +47,8 @@ func (l *ListProductMarketsLogic) ListProductMarkets(req *types.ListProductMarke
 
 	marketMap := make(map[int64]*types.MarketResponse)
 	for _, m := range markets {
-		marketMap[m.ID] = &types.MarketResponse{
-			ID:              m.ID,
+		marketMap[int64(m.ID)] = &types.MarketResponse{
+			ID:              int64(m.ID),
 			Code:            m.Code,
 			Name:            m.Name,
 			Currency:        m.Currency,

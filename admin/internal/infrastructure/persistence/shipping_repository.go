@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -62,15 +61,11 @@ func NewShippingTemplateRepository() ShippingTemplateRepository {
 
 // Create 创建运费模板
 func (r *shippingTemplateRepo) Create(ctx context.Context, db *gorm.DB, template *shipping.ShippingTemplate) error {
-	now := time.Now().UTC()
-	template.CreatedAt = now
-	template.UpdatedAt = now
 	return db.WithContext(ctx).Create(template).Error
 }
 
 // Update 更新运费模板
 func (r *shippingTemplateRepo) Update(ctx context.Context, db *gorm.DB, template *shipping.ShippingTemplate) error {
-	template.UpdatedAt = time.Now().UTC()
 	return db.WithContext(ctx).Save(template).Error
 }
 
@@ -242,10 +237,6 @@ func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB,
 
 // CreateZone 创建配送区域
 func (r *shippingTemplateRepo) CreateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error {
-	now := time.Now().UTC()
-	zone.CreatedAt = now
-	zone.UpdatedAt = now
-
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Create zone
 		if err := tx.Create(zone).Error; err != nil {
@@ -254,7 +245,7 @@ func (r *shippingTemplateRepo) CreateZone(ctx context.Context, db *gorm.DB, zone
 
 		// Create zone regions for indexed lookup
 		if len(zone.Regions) > 0 {
-			if err := r.CreateZoneRegions(ctx, tx, zone.ID, zone.Regions); err != nil {
+			if err := r.CreateZoneRegions(ctx, tx, int64(zone.ID), zone.Regions); err != nil {
 				return err
 			}
 		}
@@ -264,8 +255,6 @@ func (r *shippingTemplateRepo) CreateZone(ctx context.Context, db *gorm.DB, zone
 
 // UpdateZone 更新配送区域
 func (r *shippingTemplateRepo) UpdateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error {
-	zone.UpdatedAt = time.Now().UTC()
-
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Update zone
 		if err := tx.Save(zone).Error; err != nil {
@@ -273,12 +262,12 @@ func (r *shippingTemplateRepo) UpdateZone(ctx context.Context, db *gorm.DB, zone
 		}
 
 		// Delete old regions and create new ones
-		if err := r.DeleteZoneRegions(ctx, tx, zone.ID); err != nil {
+		if err := r.DeleteZoneRegions(ctx, tx, int64(zone.ID)); err != nil {
 			return err
 		}
 
 		if len(zone.Regions) > 0 {
-			if err := r.CreateZoneRegions(ctx, tx, zone.ID, zone.Regions); err != nil {
+			if err := r.CreateZoneRegions(ctx, tx, int64(zone.ID), zone.Regions); err != nil {
 				return err
 			}
 		}
@@ -362,13 +351,11 @@ func (r *shippingTemplateRepo) CreateZoneRegions(ctx context.Context, db *gorm.D
 		return nil
 	}
 
-	now := time.Now().UTC()
 	regions := make([]*shipping.ShippingZoneRegion, len(cityCodes))
 	for i, code := range cityCodes {
 		regions[i] = &shipping.ShippingZoneRegion{
-			ZoneID:    zoneID,
-			CityCode:  code,
-			CreatedAt: now,
+			ZoneID:   zoneID,
+			CityCode: code,
 		}
 	}
 	return db.WithContext(ctx).CreateInBatches(regions, 100).Error
@@ -393,15 +380,11 @@ func (r *shippingTemplateRepo) FindZoneIDsByCityCode(ctx context.Context, db *go
 
 // CreateMapping 创建模板关联
 func (r *shippingTemplateRepo) CreateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error {
-	now := time.Now().UTC()
-	mapping.CreatedAt = now
-	mapping.UpdatedAt = now
 	return db.WithContext(ctx).Create(mapping).Error
 }
 
 // UpdateMapping 更新模板关联
 func (r *shippingTemplateRepo) UpdateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error {
-	mapping.UpdatedAt = time.Now().UTC()
 	return db.WithContext(ctx).Save(mapping).Error
 }
 

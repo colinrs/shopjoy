@@ -2,7 +2,6 @@ package products
 
 import (
 	"context"
-	"time"
 
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
@@ -101,8 +100,8 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 		}
 
 		for _, m := range markets {
-			marketsMap[m.ID] = &types.MarketResponse{
-				ID:              m.ID,
+			marketsMap[int64(m.ID)] = &types.MarketResponse{
+				ID:              int64(m.ID),
 				Code:            m.Code,
 				Name:            m.Name,
 				Currency:        m.Currency,
@@ -110,8 +109,8 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 				Flag:            m.Flag,
 				IsActive:        m.IsActive,
 				IsDefault:       m.IsDefault,
-				CreatedAt:       time.Unix(m.CreatedAt, 0).Format("2006-01-02 15:04:05"),
-				UpdatedAt:       time.Unix(m.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
+				CreatedAt:       m.CreatedAt.Format("2006-01-02 15:04:05"),
+				UpdatedAt:       m.UpdatedAt.Format("2006-01-02 15:04:05"),
 			}
 		}
 	}

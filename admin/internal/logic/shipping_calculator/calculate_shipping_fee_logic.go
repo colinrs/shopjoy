@@ -88,7 +88,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	return &types.CalculateShippingFeeResp{
 		ShippingFee:  formatAmount(shippingFee),
 		Currency:     "CNY",
-		TemplateID:   template.ID,
+		TemplateID:   int64(template.ID),
 		TemplateName: template.Name,
 		ZoneName:     zone.Name,
 		FeeDetail: types.FeeCalculationDetail{
@@ -111,7 +111,7 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID int64, cityCod
 		if err == nil && mapping != nil {
 			template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, mapping.TemplateID)
 			if err == nil && template != nil && template.IsActive {
-				zone := l.findZoneForCity(template.ID, cityCode)
+				zone := l.findZoneForCity(int64(template.ID), cityCode)
 				if zone != nil {
 					return template, zone
 				}
@@ -126,7 +126,7 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID int64, cityCod
 	// Priority 3: Use default template
 	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefault(l.ctx, l.svcCtx.DB, tenantID)
 	if err == nil && defaultTemplate != nil {
-		zone := l.findZoneForCity(defaultTemplate.ID, cityCode)
+		zone := l.findZoneForCity(int64(defaultTemplate.ID), cityCode)
 		if zone != nil {
 			return defaultTemplate, zone
 		}

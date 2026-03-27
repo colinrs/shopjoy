@@ -51,7 +51,7 @@ func (l *ListTemplateMappingsLogic) ListTemplateMappings(req *types.ListTemplate
 	list := make([]*types.TemplateMappingDetail, 0, len(mappings))
 	for _, m := range mappings {
 		list = append(list, &types.TemplateMappingDetail{
-			ID:         m.ID,
+			ID:         int64(m.ID),
 			TemplateID: m.TemplateID,
 			TargetType: string(m.TargetType),
 			TargetID:   m.TargetID,

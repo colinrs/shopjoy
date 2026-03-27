@@ -52,7 +52,7 @@ func (l *DeleteShippingTemplateLogic) DeleteShippingTemplate(req *types.DeleteSh
 			return err
 		}
 		for _, zone := range zones {
-			if err := l.svcCtx.ShippingRepo.DeleteZone(l.ctx, tx, zone.ID); err != nil {
+			if err := l.svcCtx.ShippingRepo.DeleteZone(l.ctx, tx, int64(zone.ID)); err != nil {
 				return err
 			}
 		}
@@ -63,7 +63,7 @@ func (l *DeleteShippingTemplateLogic) DeleteShippingTemplate(req *types.DeleteSh
 			return err
 		}
 		for _, mapping := range mappings {
-			if err := l.svcCtx.ShippingRepo.DeleteMapping(l.ctx, tx, mapping.ID); err != nil {
+			if err := l.svcCtx.ShippingRepo.DeleteMapping(l.ctx, tx, int64(mapping.ID)); err != nil {
 				return err
 			}
 		}

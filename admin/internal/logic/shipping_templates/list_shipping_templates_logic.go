@@ -47,7 +47,7 @@ func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippi
 	list := make([]*types.ShippingTemplateListItem, 0, len(results))
 	for _, t := range results {
 		list = append(list, &types.ShippingTemplateListItem{
-			ID:            t.ID,
+			ID:            int64(t.ID),
 			Name:          t.Name,
 			IsDefault:     t.IsDefault,
 			IsActive:      t.IsActive,

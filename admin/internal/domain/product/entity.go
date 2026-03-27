@@ -111,21 +111,21 @@ type Dimensions struct {
 
 // Product 商品实体
 type Product struct {
-	ID              int64           // 商品ID
+	gorm.Model
 	TenantID        shared.TenantID // 租户ID
 	SKU             string          // SKU代码
 	Name            string          // 商品名称
-	Description     string   // 商品描述
-	Price           Money    `gorm:"embedded"` // 售价
-	CostPrice       Money    `gorm:"embedded"` // 成本价
-	Stock           int      // 库存
-	Status          Status   // 状态
-	CategoryID      int64    // 分类ID
-	Brand           string   // 品牌
-	SKUPrefix       string   // SKU前缀
-	Tags            []string `gorm:"type:json"` // 标签
-	Images          []string `gorm:"type:json"` // 图片列表
-	IsMatrixProduct bool     // 是否有变体
+	Description     string          // 商品描述
+	Price           Money           `gorm:"embedded"` // 售价
+	CostPrice       Money           `gorm:"embedded"` // 成本价
+	Stock           int             // 库存
+	Status          Status          // 状态
+	CategoryID      int64           // 分类ID
+	Brand           string          // 品牌
+	SKUPrefix       string          // SKU前缀
+	Tags            []string        `gorm:"type:json"` // 标签
+	Images          []string        `gorm:"type:json"` // 图片列表
+	IsMatrixProduct bool            // 是否有变体
 
 	// Compliance fields (cross-border)
 	HSCode         string          // HS编码
@@ -134,10 +134,6 @@ type Product struct {
 	WeightUnit     string          // 重量单位
 	Dimensions     Dimensions      `gorm:"embedded"`  // 尺寸
 	DangerousGoods []string        `gorm:"type:json"` // 危险品标识
-
-	DeletedAt *int64 // 软删除时间
-	CreatedAt int64  // 创建时间
-	UpdatedAt int64  // 更新时间
 }
 
 // TableName 表名
@@ -146,20 +142,15 @@ func (p *Product) TableName() string {
 }
 
 // NewProduct 创建新商品
-func NewProduct(id int64, tenantID shared.TenantID, name, description string, price Money, categoryID int64) (*Product, error) {
+func NewProduct(tenantID shared.TenantID, name, description string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
 	if price.Amount <= 0 {
 		return nil, code.ErrProductInvalidPrice
 	}
-	if id <= 0 {
-		return nil, code.ErrProductInvalidID
-	}
 
-	now := time.Now().Unix()
 	return &Product{
-		ID:          id,
 		TenantID:    tenantID,
 		Name:        name,
 		Description: description,
@@ -167,26 +158,19 @@ func NewProduct(id int64, tenantID shared.TenantID, name, description string, pr
 		Stock:       0,
 		Status:      StatusDraft,
 		CategoryID:  categoryID,
-		CreatedAt:   now,
-		UpdatedAt:   now,
 	}, nil
 }
 
 // NewProductWithCompliance 创建带合规信息的商品
-func NewProductWithCompliance(id int64, tenantID shared.TenantID, name, description, sku string, price Money, categoryID int64) (*Product, error) {
+func NewProductWithCompliance(tenantID shared.TenantID, name, description, sku string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
 	if price.Amount <= 0 {
 		return nil, code.ErrProductInvalidPrice
 	}
-	if id <= 0 {
-		return nil, code.ErrProductInvalidID
-	}
 
-	now := time.Now().Unix()
 	return &Product{
-		ID:          id,
 		TenantID:    tenantID,
 		SKU:         sku,
 		Name:        name,
@@ -195,8 +179,6 @@ func NewProductWithCompliance(id int64, tenantID shared.TenantID, name, descript
 		Status:      StatusDraft,
 		CategoryID:  categoryID,
 		WeightUnit:  "g",
-		CreatedAt:   now,
-		UpdatedAt:   now,
 	}, nil
 }
 
@@ -207,7 +189,6 @@ func (p *Product) SetCompliance(hsCode, coo string, weight decimal.Decimal, weig
 	p.Weight = weight
 	p.WeightUnit = weightUnit
 	p.Dimensions = dims
-	p.UpdatedAt = time.Now().Unix()
 }
 
 // HasComplianceInfo 检查是否有合规信息
@@ -222,7 +203,7 @@ func (p *Product) IsDangerousGoods() bool {
 
 // PutOnSale 上架商品
 func (p *Product) PutOnSale() error {
-	if p.DeletedAt != nil {
+	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOnSale) {
@@ -232,33 +213,30 @@ func (p *Product) PutOnSale() error {
 		return code.ErrProductNoStock
 	}
 	p.Status = StatusOnSale
-	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
 // TakeOffSale 下架商品
 func (p *Product) TakeOffSale() error {
-	if p.DeletedAt != nil {
+	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
 	if !p.Status.CanTransitionTo(StatusOffSale) {
 		return code.ErrProductInvalidStatusTransition
 	}
 	p.Status = StatusOffSale
-	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
 // UpdateStock 更新库存
 func (p *Product) UpdateStock(quantity int) error {
-	if p.DeletedAt != nil {
+	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
 	if quantity < 0 {
 		return code.ErrProductNegativeStock
 	}
 	p.Stock = quantity
-	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
@@ -274,37 +252,33 @@ func (p *Product) DeductStock(quantity int) error {
 		return code.ErrProductInsufficientStock
 	}
 	p.Stock -= quantity
-	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
 // UpdatePrice 更新价格
 func (p *Product) UpdatePrice(newPrice Money) error {
-	if p.DeletedAt != nil {
+	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
 	if newPrice.Amount <= 0 {
 		return code.ErrProductInvalidPrice
 	}
 	p.Price = newPrice
-	p.UpdatedAt = time.Now().Unix()
 	return nil
 }
 
 // SoftDelete 软删除
 func (p *Product) SoftDelete() error {
-	if p.DeletedAt != nil {
+	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
-	now := time.Now().Unix()
-	p.DeletedAt = &now
-	p.UpdatedAt = now
+	p.DeletedAt = gorm.DeletedAt{Time: time.Now()}
 	return nil
 }
 
 // IsDeleted 检查是否已删除
 func (p *Product) IsDeleted() bool {
-	return p.DeletedAt != nil
+	return p.DeletedAt.Valid
 }
 
 // IsOnSale 是否在售

@@ -19,6 +19,7 @@ import "dashboard.api"
 import "shop.api"
 import "shipping.api"
 import "points.api"
+import "upload.api"
 
 info (
 	title:   "Admin API"

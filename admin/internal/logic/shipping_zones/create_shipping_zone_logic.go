@@ -76,7 +76,7 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 	}
 
 	return &types.ShippingZoneDetail{
-		ID:                  zone.ID,
+		ID:                  int64(zone.ID),
 		TemplateID:          zone.TemplateID,
 		Name:                zone.Name,
 		Regions:             zone.Regions,

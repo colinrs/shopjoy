@@ -60,7 +60,7 @@ func (l *CreateTemplateMappingLogic) CreateTemplateMapping(req *types.CreateTemp
 			return nil, err
 		}
 		return &types.TemplateMappingDetail{
-			ID:         existing.ID,
+			ID:         int64(existing.ID),
 			TemplateID: existing.TemplateID,
 			TargetType: string(existing.TargetType),
 			TargetID:   existing.TargetID,
@@ -86,7 +86,7 @@ func (l *CreateTemplateMappingLogic) CreateTemplateMapping(req *types.CreateTemp
 	}
 
 	return &types.TemplateMappingDetail{
-		ID:         mapping.ID,
+		ID:         int64(mapping.ID),
 		TemplateID: mapping.TemplateID,
 		TargetType: string(mapping.TargetType),
 		TargetID:   mapping.TargetID,

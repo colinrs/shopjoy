@@ -105,7 +105,7 @@ type BatchOperationResult struct {
 // FromDomainReview converts domain review to DTO
 func FromDomainReview(r *review.Review) *ReviewDetailDTO {
 	dto := &ReviewDetailDTO{
-		ID:            r.ID,
+		ID:            int64(r.ID),
 		TenantID:      r.TenantID.Int64(),
 		OrderID:       r.OrderID,
 		ProductID:     r.ProductID,
@@ -128,7 +128,7 @@ func FromDomainReview(r *review.Review) *ReviewDetailDTO {
 
 	if r.Reply != nil {
 		dto.Reply = &ReplyDTO{
-			ID:        r.Reply.ID,
+			ID:        int64(r.Reply.ID),
 			Content:   r.Reply.Content,
 			AdminName: r.Reply.AdminName,
 			CreatedAt: r.Reply.CreatedAt.Format(time.RFC3339),
