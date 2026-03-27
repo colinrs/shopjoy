@@ -802,21 +802,21 @@ func (s *service) GetExpiringPoints(ctx context.Context, tenantID shared.TenantI
 
 // ==================== Helper Functions ====================
 
-// timeToInt64 converts *time.Time to *int64 (Unix milliseconds)
+// timeToInt64 converts *time.Time to *int64 (Unix seconds)
 func timeToInt64(t *time.Time) *int64 {
 	if t == nil {
 		return nil
 	}
-	ts := t.UnixMilli()
+	ts := t.Unix()
 	return &ts
 }
 
-// int64ToTime converts *int64 (Unix milliseconds) to *time.Time
+// int64ToTime converts *int64 (Unix seconds) to *time.Time
 func int64ToTime(ts *int64) *time.Time {
 	if ts == nil {
 		return nil
 	}
-	t := time.UnixMilli(*ts)
+	t := time.Unix(*ts, 0)
 	return &t
 }
 

@@ -42,7 +42,7 @@ Rules for database schema design and operations.
 ### Table Schema
 
 ```sql
--- GOOD: Proper table structure
+-- GOOD: Proper table structure with BIGINT timestamps (seconds precision)
 CREATE TABLE orders (
     id              BIGINT          PRIMARY KEY,
     order_number    VARCHAR(32)     NOT NULL,
@@ -50,10 +50,10 @@ CREATE TABLE orders (
     total_amount    DECIMAL(19,4)   NOT NULL,  -- Precise decimal
     currency        VARCHAR(3)      NOT NULL,
     status          VARCHAR(32)     NOT NULL DEFAULT 'pending',
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP       NULL,      -- Soft delete
-    
+    created_at      BIGINT          NOT NULL DEFAULT (UNIX_TIMESTAMP()),  -- Unix timestamp (seconds)
+    updated_at      BIGINT          NOT NULL DEFAULT (UNIX_TIMESTAMP()),  -- Unix timestamp (seconds)
+    deleted_at      BIGINT          NULL,                                        -- Unix timestamp (seconds), soft delete
+
     CONSTRAINT uk_order_number UNIQUE (order_number)
 );
 

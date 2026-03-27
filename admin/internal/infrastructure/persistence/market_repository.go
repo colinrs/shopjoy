@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -28,8 +27,8 @@ type marketModel struct {
 	IsActive        bool           `gorm:"column:is_active;not null;default:true"`
 	IsDefault       bool           `gorm:"column:is_default;not null;default:false"`
 	TaxRules        string         `gorm:"column:tax_rules;type:json"`
-	CreatedAt       time.Time      `gorm:"column:created_at"`
-	UpdatedAt       time.Time      `gorm:"column:updated_at"`
+	CreatedAt       int64          `gorm:"column:created_at"`
+	UpdatedAt       int64          `gorm:"column:updated_at"`
 	DeletedAt       *int64        `gorm:"column:deleted_at;index"`
 }
 

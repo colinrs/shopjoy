@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"time"
 
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
@@ -109,8 +110,8 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 				Flag:            m.Flag,
 				IsActive:        m.IsActive,
 				IsDefault:       m.IsDefault,
-				CreatedAt:       m.CreatedAt.Format("2006-01-02 15:04:05"),
-				UpdatedAt:       m.UpdatedAt.Format("2006-01-02 15:04:05"),
+				CreatedAt:       time.Unix(m.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+				UpdatedAt:       time.Unix(m.UpdatedAt, 0).Format("2006-01-02 15:04:05"),
 			}
 		}
 	}

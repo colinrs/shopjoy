@@ -30,8 +30,8 @@ type Market struct {
 	IsActive        bool           // 是否启用
 	IsDefault       bool           // 是否主市场
 	TaxRules        TaxConfig      `gorm:"type:json"` // 税务配置
-	CreatedAt       time.Time      // 创建时间
-	UpdatedAt       time.Time      // 更新时间
+	CreatedAt       int64         // 创建时间
+	UpdatedAt       int64         // 更新时间
 	DeletedAt       *int64        // 软删除时间
 }
 
@@ -52,7 +52,7 @@ func NewMarket(marketCode, name, currency, defaultLanguage string) (*Market, err
 		return nil, code.ErrMarketCurrencyRequired
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 	return &Market{
 		Code:            marketCode,
 		Name:            name,
@@ -67,19 +67,19 @@ func NewMarket(marketCode, name, currency, defaultLanguage string) (*Market, err
 // Activate 激活市场
 func (m *Market) Activate() {
 	m.IsActive = true
-	m.UpdatedAt = time.Now()
+	m.UpdatedAt = time.Now().Unix()
 }
 
 // Deactivate 停用市场
 func (m *Market) Deactivate() {
 	m.IsActive = false
-	m.UpdatedAt = time.Now()
+	m.UpdatedAt = time.Now().Unix()
 }
 
 // SetAsDefault 设置为主市场
 func (m *Market) SetAsDefault() {
 	m.IsDefault = true
-	m.UpdatedAt = time.Now()
+	m.UpdatedAt = time.Now().Unix()
 }
 
 // Repository 市场仓储接口
