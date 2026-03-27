@@ -261,7 +261,7 @@ func (e *EarnRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().UTC().UnixMilli()
+	now := time.Now().Unix()
 
 	// 检查开始时间
 	if e.StartAt != nil && now < *e.StartAt {
@@ -382,7 +382,7 @@ func (r *RedeemRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().UTC().UnixMilli()
+	now := time.Now().Unix()
 
 	if r.StartAt != nil && now < *r.StartAt {
 		return false
@@ -581,7 +581,7 @@ func (r *PointsRedemption) Complete(userCouponID int64, updatedBy int64) error {
 	}
 	r.Status = RedemptionStatusCompleted
 	r.UserCouponID = userCouponID
-	now := time.Now().UTC().UnixMilli()
+	now := time.Now().Unix()
 	r.CompletedAt = &now
 	r.Audit.Update(updatedBy)
 	return nil
