@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
@@ -126,7 +127,7 @@ var SupportedCurrencies = map[string]bool{
 
 // Payment 支付记录
 type Payment struct {
-	ID               int64            `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID         shared.TenantID  `gorm:"column:tenant_id;not null;index:idx_tenant_order"`
 	OrderID          int64            `gorm:"column:order_id;not null;index:idx_tenant_order"`
 	PaymentNo        string           `gorm:"column:payment_no;not null;uniqueIndex:uk_payment_no"`
@@ -138,11 +139,10 @@ type Payment struct {
 	Status           PaymentStatus    `gorm:"column:status;not null;default:0;index"`
 	TransactionFee   int64            `gorm:"column:transaction_fee;not null;default:0"`
 	FeeCurrency      string           `gorm:"column:fee_currency;not null;default:'USD'"`
-	PaidAt           int64            `gorm:"column:paid_at"`
-	FailedAt         int64            `gorm:"column:failed_at"`
+	PaidAt           *time.Time     `gorm:"column:paid_at"`
+	FailedAt         *time.Time     `gorm:"column:failed_at"`
 	FailedReason     string           `gorm:"column:failed_reason;not null;default:''"`
 	Audit            shared.AuditInfo `gorm:"embedded"`
-	DeletedAt        *int64          `gorm:"column:deleted_at;index"`
 }
 
 func (p *Payment) TableName() string {
@@ -173,14 +173,13 @@ func (p *Payment) MarkSuccess(channelPaymentID string, fee int64, feeCurrency st
 	if p.Status != PaymentStatusPending && p.Status != PaymentStatusProcessing {
 		return code.ErrPaymentAlreadyPaid
 	}
-	now := time.Now().Unix()
-	nowTime := time.Now().UTC()
+	now := time.Now().UTC()
 	p.Status = PaymentStatusSuccess
 	p.ChannelPaymentID = channelPaymentID
 	p.TransactionFee = fee
 	p.FeeCurrency = feeCurrency
-	p.PaidAt = now
-	p.Audit.UpdatedAt = nowTime
+	p.PaidAt = &now
+	p.Audit.UpdatedAt = now
 	return nil
 }
 
@@ -189,12 +188,11 @@ func (p *Payment) MarkFailed(reason string) error {
 	if p.Status != PaymentStatusPending && p.Status != PaymentStatusProcessing {
 		return code.ErrPaymentAlreadyPaid
 	}
-	now := time.Now().Unix()
-	nowTime := time.Now().UTC()
+	now := time.Now().UTC()
 	p.Status = PaymentStatusFailed
-	p.FailedAt = now
+	p.FailedAt = &now
 	p.FailedReason = reason
-	p.Audit.UpdatedAt = nowTime
+	p.Audit.UpdatedAt = now
 	return nil
 }
 
@@ -228,7 +226,7 @@ func GeneratePaymentNo(tenantID shared.TenantID, sequence int) string {
 
 // PaymentRefund 支付退款记录
 type PaymentRefund struct {
-	ID                  int64                `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID            shared.TenantID      `gorm:"column:tenant_id;not null;index:idx_tenant_order"`
 	OrderID             int64                `gorm:"column:order_id;not null;index:idx_tenant_order"`
 	PaymentID           int64                `gorm:"column:payment_id;not null;index"`
@@ -242,10 +240,8 @@ type PaymentRefund struct {
 	Status              PaymentRefundStatus  `gorm:"column:status;not null;default:0"`
 	ReasonType          string               `gorm:"column:reason_type;not null;default:''"`
 	Reason              string               `gorm:"column:reason;not null;default:''"`
-	RefundedAt          int64                `gorm:"column:refunded_at"`
-	CreatedAt           int64                `gorm:"column:created_at;not null"`
+	RefundedAt          *time.Time          `gorm:"column:refunded_at"`
 	CreatedBy           int64                `gorm:"column:created_by;not null;default:0"`
-	DeletedAt           *int64              `gorm:"column:deleted_at;index"`
 }
 
 func (r *PaymentRefund) TableName() string {
@@ -265,18 +261,17 @@ func NewPaymentRefund(tenantID shared.TenantID, orderID, paymentID int64, idempo
 		Status:         PaymentRefundStatusPending,
 		ReasonType:     reasonType,
 		Reason:         reason,
-		CreatedAt:      time.Now().Unix(),
 		CreatedBy:      createdBy,
 	}
 }
 
 // MarkSucceeded 标记退款成功
 func (r *PaymentRefund) MarkSucceeded(channelRefundID string, refundFee int64) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	r.Status = PaymentRefundStatusSucceeded
 	r.ChannelRefundID = channelRefundID
 	r.RefundFee = refundFee
-	r.RefundedAt = now
+	r.RefundedAt = &now
 	return nil
 }
 
@@ -296,7 +291,7 @@ func GenerateRefundNo(tenantID shared.TenantID, sequence int) string {
 
 // PaymentTransaction 支付交易记录
 type PaymentTransaction struct {
-	ID                   int64             `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID             shared.TenantID   `gorm:"column:tenant_id;not null;index:idx_tenant_order"`
 	OrderID              int64             `gorm:"column:order_id;not null;index:idx_tenant_order"`
 	PaymentID            int64             `gorm:"column:payment_id;not null;index"`
@@ -307,10 +302,8 @@ type PaymentTransaction struct {
 	Currency             string            `gorm:"column:currency;not null;default:'USD'"`
 	Status               TransactionStatus `gorm:"column:status;not null;default:0"`
 	TransactionFee       int64             `gorm:"column:transaction_fee;not null;default:0"`
-	PaidAt               int64             `gorm:"column:paid_at"`
+	PaidAt               *time.Time       `gorm:"column:paid_at"`
 	FailedReason         string            `gorm:"column:failed_reason;not null;default:''"`
-	CreatedAt            int64             `gorm:"column:created_at;not null"`
-	DeletedAt            *int64           `gorm:"column:deleted_at;index"`
 }
 
 func (t *PaymentTransaction) TableName() string {
@@ -321,7 +314,7 @@ func (t *PaymentTransaction) TableName() string {
 
 // WebhookEvent Webhook事件记录
 type WebhookEvent struct {
-	ID           int64            `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID     shared.TenantID  `gorm:"column:tenant_id;not null;default:0"`
 	EventID      string           `gorm:"column:event_id;not null;uniqueIndex:uk_event_id"`
 	EventType    string           `gorm:"column:event_type;not null;index:idx_tenant_event"`
@@ -329,8 +322,7 @@ type WebhookEvent struct {
 	Processed    int8             `gorm:"column:processed;not null;default:0"` // 0=pending, 1=processed, 2=failed
 	RawPayload   string           `gorm:"column:raw_payload;type:text"`
 	ErrorMessage string           `gorm:"column:error_message;not null;default:''"`
-	CreatedAt    int64            `gorm:"column:created_at;not null"`
-	ProcessedAt  int64            `gorm:"column:processed_at"`
+	ProcessedAt  *time.Time     `gorm:"column:processed_at"`
 }
 
 func (e *WebhookEvent) TableName() string {

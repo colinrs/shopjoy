@@ -447,7 +447,6 @@ func (s *service) HandleWebhook(ctx context.Context, event *WebhookEvent) error 
 		EventType:  event.EventType,
 		ResourceID: event.ResourceID,
 		RawPayload: event.RawPayload,
-		CreatedAt:  time.Now().Unix(),
 	}
 
 	if existingEvent == nil {
@@ -555,11 +554,11 @@ func formatTimeToString(t *time.Time) string {
 	return t.Format(time.RFC3339)
 }
 
-func timestampToString(timestamp int64) string {
-	if timestamp == 0 {
+func timestampToString(timestamp *time.Time) string {
+	if timestamp == nil {
 		return ""
 	}
-	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+	return timestamp.Format(time.RFC3339)
 }
 
 func formatPercentage(value float64) string {
