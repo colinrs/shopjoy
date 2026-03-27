@@ -8,8 +8,8 @@ Rules for database schema design and operations.
 |---|------|-----------|
 | 1 | All database object names must use lowercase + underscores | Consistency, case-sensitivity issues across DBs |
 | 2 | All tables must have a primary key that cannot be updated | Data integrity, replication support |
-| 3 | Every table must include `created_at` / `updated_at` / `deleted_at` via `gorm.Model` | Audit trail, soft delete support |
-| 4 | All database Model entities must embed `gorm.Model` (do NOT define time fields directly) | Consistency, following LeafAlloc pattern |
+| 3 | Every table must include `created_at` / `updated_at` / `deleted_at` via `application.Model` | Audit trail, soft delete support |
+| 4 | All database Model entities must embed `application.Model` (do NOT define time fields directly) | Consistency, following LeafAlloc pattern |
 | 5 | Fields must explicitly define NOT NULL or default value | Prevent ambiguous NULL handling |
 | 6 | Monetary fields must use DECIMAL / NUMERIC | Precision for financial calculations |
 | 7 | Related field types must be exactly identical | Join performance, data integrity |
@@ -43,7 +43,7 @@ Rules for database schema design and operations.
 ### Table Schema
 
 ```sql
--- GOOD: Proper table structure with gorm.Model (time.Time timestamps)
+-- GOOD: Proper table structure with application.Model (time.Time timestamps)
 CREATE TABLE orders (
     id              BIGINT          PRIMARY KEY,
     order_number    VARCHAR(32)     NOT NULL,
@@ -109,24 +109,24 @@ type Customer struct {
 }
 ```
 
-### gorm.Model Pattern
+### application.Model Pattern
 
 ```go
-import "gorm.io/gorm"
+import "github.com/colinrs/shopjoy/pkg/application"
 
-// GOOD: Model entity embeds gorm.Model (LeafAlloc pattern)
-// gorm.Model includes: ID, CreatedAt, UpdatedAt, DeletedAt
+// GOOD: Model entity embeds application.Model (LeafAlloc pattern)
+// application.Model includes: ID, CreatedAt, UpdatedAt, DeletedAt
 type LeafAlloc struct {
-    gorm.Model
+    application.Model
 }
 
 func (*LeafAlloc) TableName() string {
     return "leaf_alloc"
 }
 
-// GOOD: Other entities should also embed gorm.Model
+// GOOD: Other entities should also embed application.Model
 type ShippingTemplate struct {
-    gorm.Model
+    application.Model
     TenantID  int64  `gorm:"column:tenant_id;not null;index"`
     Name      string `gorm:"column:name;size:100;not null"`
     IsDefault bool   `gorm:"column:is_default;not null;default:false;index"`
@@ -135,7 +135,7 @@ type ShippingTemplate struct {
 
 // GOOD: Business time fields (PaidAt, ShippedAt, etc.) use *time.Time
 type Order struct {
-    gorm.Model
+    application.Model
     Status     OrderStatus   `gorm:"column:status;not null;default:'pending_payment'"`
     PaidAt     *time.Time   `gorm:"column:paid_at"`
     ShippedAt  *time.Time   `gorm:"column:shipped_at"`
@@ -147,7 +147,7 @@ type Order struct {
 
 - [ ] Table/column names are lowercase with underscores
 - [ ] Table has primary key
-- [ ] Entity embeds `gorm.Model` (not defining time fields directly)
+- [ ] Entity embeds `application.Model` (not defining time fields directly)
 - [ ] Business time fields use `*time.Time`
 - [ ] Fields have NOT NULL or default value
 - [ ] Monetary fields use DECIMAL/NUMERIC

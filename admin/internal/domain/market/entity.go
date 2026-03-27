@@ -4,6 +4,7 @@ package market
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ type TaxConfig struct {
 
 // Market 市场实体
 type Market struct {
-	gorm.Model
+	application.Model
 	TenantID        int64     // 租户ID
 	Code            string    // 市场代码: US, UK, DE, FR, AU
 	Name            string    // 市场名称

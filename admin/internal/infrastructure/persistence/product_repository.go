@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -21,7 +22,7 @@ func NewProductRepository() product.Repository {
 }
 
 type productModel struct {
-	gorm.Model
+	application.Model
 	TenantID        int64  `gorm:"column:tenant_id;not null;index"`
 	SKU             string `gorm:"column:sku;size:64;uniqueIndex"`
 	Name            string `gorm:"column:name;size:200;not null;index"`

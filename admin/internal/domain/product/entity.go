@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -111,7 +112,7 @@ type Dimensions struct {
 
 // Product 商品实体
 type Product struct {
-	gorm.Model
+	application.Model
 	TenantID        shared.TenantID // 租户ID
 	SKU             string          // SKU代码
 	Name            string          // 商品名称

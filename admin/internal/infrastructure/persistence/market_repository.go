@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,7 @@ func NewMarketRepository() market.Repository {
 }
 
 type marketModel struct {
-	gorm.Model
+	application.Model
 	TenantID        int64  `gorm:"column:tenant_id;not null;default:0"`
 	Code            string `gorm:"column:code;size:10;not null;uniqueIndex:uk_tenant_code"`
 	Name            string `gorm:"column:name;size:64;not null"`

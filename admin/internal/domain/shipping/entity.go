@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"gorm.io/gorm"
 )
 
 // FeeType 运费计费类型
@@ -60,7 +60,7 @@ func (r *Regions) Scan(value interface{}) error {
 
 // ShippingTemplate 运费模板实体
 type ShippingTemplate struct {
-	gorm.Model
+	application.Model
 	TenantID  int64  `gorm:"column:tenant_id;not null;index"`
 	Name      string `gorm:"column:name;size:100;not null"`
 	IsDefault bool   `gorm:"column:is_default;not null;default:false;index"`
@@ -102,7 +102,7 @@ func (t *ShippingTemplate) Deactivate() {
 
 // ShippingZone 配送区域实体
 type ShippingZone struct {
-	gorm.Model
+	application.Model
 	TenantID            int64   `gorm:"column:tenant_id;not null;index"`
 	TemplateID          int64   `gorm:"column:template_id;not null;index"`
 	Name                string  `gorm:"column:name;size:100;not null"`
@@ -181,7 +181,7 @@ func (t TargetType) IsValid() bool {
 
 // ShippingZoneRegion 配送区域城市关联实体（用于索引查询）
 type ShippingZoneRegion struct {
-	gorm.Model
+	application.Model
 	ZoneID   int64  `gorm:"column:zone_id;not null;uniqueIndex:idx_zone_city"`
 	CityCode string `gorm:"column:city_code;size:20;not null;uniqueIndex:idx_zone_city;index"`
 }
@@ -193,7 +193,7 @@ func (r *ShippingZoneRegion) TableName() string {
 
 // ShippingTemplateMapping 模板关联实体
 type ShippingTemplateMapping struct {
-	gorm.Model
+	application.Model
 	TenantID   int64      `gorm:"column:tenant_id;not null;index"`
 	TemplateID int64      `gorm:"column:template_id;not null;index"`
 	TargetType TargetType `gorm:"column:target_type;size:20;not null"`

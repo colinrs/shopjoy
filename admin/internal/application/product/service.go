@@ -46,7 +46,7 @@ func (s *service) CreateProduct(ctx context.Context, tenantID shared.TenantID, r
 	if err != nil {
 		return nil, err
 	}
-	p.ID = uint(id)
+	p.ID = id
 
 	p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
 
@@ -189,7 +189,7 @@ func (s *service) CreateProductWithTx(ctx context.Context, tenantID shared.Tenan
 		if err != nil {
 			return err
 		}
-		p.ID = uint(id)
+		p.ID = id
 
 		p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ const (
 )
 
 type Coupon struct {
-	gorm.Model
+	application.Model
 	TenantID     shared.TenantID
 	Name         string
 	Code         string
@@ -111,7 +112,7 @@ func (c *Coupon) Use() error {
 }
 
 type UserCoupon struct {
-	gorm.Model
+	application.Model
 	TenantID   shared.TenantID
 	UserID     int64
 	CouponID   int64

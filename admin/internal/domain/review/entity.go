@@ -8,6 +8,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -80,7 +81,7 @@ func (s Status) CanShow() bool {
 
 // Review 评价实体
 type Review struct {
-	gorm.Model
+	application.Model
 	TenantID      shared.TenantID // 租户ID
 	OrderID       int64          // 订单ID
 	ProductID     int64          // 商品ID
@@ -204,7 +205,7 @@ func (r *Review) DisplayName() string {
 
 // ReviewReply 商家回复实体
 type ReviewReply struct {
-	gorm.Model
+	application.Model
 	ReviewID  int64  // 评价ID
 	TenantID  int64  // 租户ID
 	AdminID   int64  // 管理员ID
@@ -249,7 +250,7 @@ func (r *ReviewReply) Update(content string) error {
 
 // ReviewStats 商品评价统计
 type ReviewStats struct {
-	gorm.Model
+	application.Model
 	TenantID          int64    // 租户ID
 	ProductID         int64    // 商品ID
 	TotalReviews      int      // 总评价数

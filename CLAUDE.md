@@ -108,7 +108,7 @@ Examples: `2026032401_create_reviews.sql`, `2026032201_alter_promotions_add_scop
 ## Go Backend Conventions
 
 - **VAT/GST rates:** Use `string` type (backend returns strings), implement string↔number conversion in handlers
-- **Timestamps:** Database Model 实体必须组合 `gorm.Model`（包含 `created_at`, `updated_at`, `deleted_at`），业务时间字段使用 `*time.Time`
+- **Timestamps:** Database Model 实体必须组合 `application.Model`（包含 `created_at`, `updated_at`, `deleted_at`），业务时间字段使用 `*time.Time`
 - **Migrations:** Merge into schema files, check for duplicate table definitions
 - **Errors:** Always use `code` package for standardized error codes, never `errors.New()`
 
