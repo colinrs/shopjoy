@@ -332,8 +332,8 @@ func toRefundDetailResponse(r *fulfillment.Refund) *RefundDetailResponse {
 		ApprovedAt:   formatTimeToString(r.ApprovedAt),
 		ApprovedBy:   r.ApprovedBy,
 		CompletedAt:  formatTimeToString(r.CompletedAt),
-		CreatedAt:    r.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    r.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:    r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    r.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -377,10 +377,10 @@ func formatPercentage(value float64) string {
 	return shared.NewMoney(int64(value*100), "").String()
 }
 
-// formatTimeToString formats an int64 timestamp pointer to RFC3339 string
-func formatTimeToString(t *int64) string {
+// formatTimeToString formats a time.Time pointer to RFC3339 string
+func formatTimeToString(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
-	return time.Unix(*t, 0).Format(time.RFC3339)
+	return t.Format(time.RFC3339)
 }

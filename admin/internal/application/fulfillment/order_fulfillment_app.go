@@ -260,7 +260,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 		// Get the latest refund
 		latestRefund := refunds[0]
 		for _, r := range refunds {
-			if r.Audit.CreatedAt.After(latestRefund.Audit.CreatedAt) {
+			if r.CreatedAt.After(latestRefund.CreatedAt) {
 				latestRefund = r
 			}
 		}
@@ -330,7 +330,6 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 
 		// Create shipment entity
 		shipment := &fulfillment.Shipment{
-			ID:               shipmentID,
 			TenantID:         tenantID,
 			OrderID:          orderID,
 			ShipmentNo:       shipmentNo,
@@ -342,13 +341,11 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 			ShippingCurrency: req.Currency,
 			Weight:           req.Weight,
 			Remark:           req.Remark,
-			Audit:            shared.NewAuditInfo(userID),
 		}
 
 		// Set shipped at
 		now := time.Now().UTC()
-		nowUnix := now.Unix()
-		shipment.ShippedAt = &nowUnix
+		shipment.ShippedAt = &now
 
 		// Create shipment
 		if err := a.shipmentRepo.Create(ctx, tx, shipment); err != nil {
@@ -530,37 +527,10 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 		Amount:       r.Amount,
 		Currency:     r.Currency,
 		RejectReason: r.RejectReason,
-		ApprovedAt:   timePtrToTime(r.ApprovedAt),
+		ApprovedAt:   r.ApprovedAt,
 		ApprovedBy:   r.ApprovedBy,
-		CompletedAt:  timePtrToTime(r.CompletedAt),
-		CreatedAt:    r.Audit.CreatedAt,
-		UpdatedAt:    r.Audit.UpdatedAt,
+		CompletedAt:  r.CompletedAt,
+		CreatedAt:    r.CreatedAt,
+		UpdatedAt:    r.UpdatedAt,
 	}
-}
-
-// timePtrToInt64Ptr converts *time.Time to *int64 (unix timestamp)
-func timePtrToInt64Ptr(t *time.Time) *int64 {
-	if t == nil {
-		return nil
-	}
-	v := t.Unix()
-	return &v
-}
-
-// timeInt64PtrToTimePtr converts *int64 (unix timestamp) to *time.Time
-func timeInt64PtrToTimePtr(v *int64) *time.Time {
-	if v == nil {
-		return nil
-	}
-	t := time.Unix(*v, 0)
-	return &t
-}
-
-// timePtrToTime converts *int64 (unix timestamp) to *time.Time
-func timePtrToTime(v *int64) *time.Time {
-	if v == nil {
-		return nil
-	}
-	t := time.Unix(*v, 0)
-	return &t
 }

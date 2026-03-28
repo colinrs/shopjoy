@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -21,25 +22,23 @@ func NewShipmentRepository() fulfillment.ShipmentRepository {
 
 // shipmentModel represents the database model for Shipment
 type shipmentModel struct {
-	ID               int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID         int64  `gorm:"column:tenant_id;not null;index"`
-	OrderID          string `gorm:"column:order_id;size:64;not null;index"`
-	ShipmentNo       string `gorm:"column:shipment_no;size:32;not null;uniqueIndex:uk_shipment_no"`
-	Status           int    `gorm:"column:status;not null;default:0;index"`
-	Carrier          string `gorm:"column:carrier;size:50;not null;default:''"`
-	CarrierCode      string `gorm:"column:carrier_code;size:20;not null;default:''"`
-	TrackingNo       string `gorm:"column:tracking_no;size:100;not null;default:'';index"`
-	ShippingCost     int64  `gorm:"column:shipping_cost;not null;default:0"`
-	ShippingCurrency string `gorm:"column:shipping_currency;size:10;not null;default:'CNY'"`
-	Weight           float64 `gorm:"column:weight;not null;default:0"`
-	ShippedAt        *int64 `gorm:"column:shipped_at"`
-	DeliveredAt      *int64 `gorm:"column:delivered_at"`
-	Remark           string `gorm:"column:remark;size:500;not null;default:''"`
-	CreatedBy        int64  `gorm:"column:created_by;not null"`
-	UpdatedBy        int64  `gorm:"column:updated_by;not null"`
-	DeletedAt        *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt        int64  `gorm:"column:created_at;not null"`
-	UpdatedAt        int64  `gorm:"column:updated_at;not null"`
+	ID               int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID         int64      `gorm:"column:tenant_id;not null;index"`
+	OrderID          string     `gorm:"column:order_id;size:64;not null;index"`
+	ShipmentNo       string     `gorm:"column:shipment_no;size:32;not null;uniqueIndex:uk_shipment_no"`
+	Status           int        `gorm:"column:status;not null;default:0;index"`
+	Carrier          string     `gorm:"column:carrier;size:50;not null;default:''"`
+	CarrierCode      string     `gorm:"column:carrier_code;size:20;not null;default:''"`
+	TrackingNo       string     `gorm:"column:tracking_no;size:100;not null;default:'';index"`
+	ShippingCost     int64      `gorm:"column:shipping_cost;not null;default:0"`
+	ShippingCurrency string     `gorm:"column:shipping_currency;size:10;not null;default:'CNY'"`
+	Weight           float64    `gorm:"column:weight;not null;default:0"`
+	ShippedAt        *time.Time `gorm:"column:shipped_at"`
+	DeliveredAt      *time.Time `gorm:"column:delivered_at"`
+	Remark           string     `gorm:"column:remark;size:500;not null;default:''"`
+	DeletedAt        *time.Time `gorm:"column:deleted_at;index"`
+	CreatedAt        time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time  `gorm:"column:updated_at;not null"`
 }
 
 func (shipmentModel) TableName() string {
@@ -47,8 +46,17 @@ func (shipmentModel) TableName() string {
 }
 
 func (m *shipmentModel) toEntity() *fulfillment.Shipment {
+	var deletedAt gorm.DeletedAt
+	if m.DeletedAt != nil {
+		deletedAt = gorm.DeletedAt{Time: *m.DeletedAt, Valid: true}
+	}
 	return &fulfillment.Shipment{
-		ID:               m.ID,
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
+			DeletedAt: deletedAt,
+		},
 		TenantID:         shared.TenantID(m.TenantID),
 		OrderID:          m.OrderID,
 		ShipmentNo:       m.ShipmentNo,
@@ -62,19 +70,16 @@ func (m *shipmentModel) toEntity() *fulfillment.Shipment {
 		ShippedAt:        m.ShippedAt,
 		DeliveredAt:      m.DeliveredAt,
 		Remark:           m.Remark,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
-		DeletedAt: m.DeletedAt,
 	}
 }
 
 func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
+	var deletedAt *time.Time
+	if s.Model.DeletedAt.Valid {
+		deletedAt = &s.Model.DeletedAt.Time
+	}
 	return &shipmentModel{
-		ID:               s.ID,
+		ID:               s.Model.ID,
 		TenantID:         s.TenantID.Int64(),
 		OrderID:          s.OrderID,
 		ShipmentNo:       s.ShipmentNo,
@@ -88,11 +93,9 @@ func fromShipmentEntity(s *fulfillment.Shipment) *shipmentModel {
 		ShippedAt:        s.ShippedAt,
 		DeliveredAt:      s.DeliveredAt,
 		Remark:           s.Remark,
-		CreatedBy:        s.Audit.CreatedBy,
-		UpdatedBy:        s.Audit.UpdatedBy,
-		DeletedAt:        s.DeletedAt,
-		CreatedAt:        s.Audit.CreatedAt.Unix(),
-		UpdatedAt:        s.Audit.UpdatedAt.Unix(),
+		DeletedAt:        deletedAt,
+		CreatedAt:        s.Model.CreatedAt,
+		UpdatedAt:        s.Model.UpdatedAt,
 	}
 }
 
@@ -119,7 +122,6 @@ func (r *shipmentRepo) Update(ctx context.Context, db *gorm.DB, s *fulfillment.S
 			"shipped_at":        model.ShippedAt,
 			"delivered_at":      model.DeliveredAt,
 			"remark":            model.Remark,
-			"updated_by":        model.UpdatedBy,
 			"updated_at":        model.UpdatedAt,
 		}).Error
 }
@@ -217,10 +219,10 @@ func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 		dbQuery = dbQuery.Where("tracking_no LIKE ?", escapeLikePattern(query.TrackingNo))
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
 	}
 
 	var total int64
@@ -250,7 +252,7 @@ func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
 	if result.Error != nil {

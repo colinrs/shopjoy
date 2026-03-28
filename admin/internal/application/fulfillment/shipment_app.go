@@ -212,7 +212,6 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 
 		// Create shipment entity
 		shipment := &fulfillment.Shipment{
-			ID:               shipmentID,
 			TenantID:         tenantID,
 			OrderID:          req.OrderID,
 			ShipmentNo:       shipmentNo,
@@ -224,13 +223,11 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 			ShippingCurrency: req.Currency,
 			Weight:           req.Weight,
 			Remark:           req.Remark,
-			Audit:            shared.NewAuditInfo(userID),
 		}
 
 		// Set shipped at
 		now := time.Now().UTC()
-		nowUnix := now.Unix()
-		shipment.ShippedAt = &nowUnix
+		shipment.ShippedAt = &now
 
 		// Create shipment
 		if err := a.shipmentRepo.Create(ctx, tx, shipment); err != nil {
@@ -410,7 +407,7 @@ func (a *shipmentApp) UpdateShipment(ctx context.Context, tenantID shared.Tenant
 	}
 	shipment.Weight = req.Weight
 	shipment.Remark = req.Remark
-	shipment.Audit.Update(userID)
+	shipment.UpdatedAt = time.Now().UTC()
 
 	if err := a.shipmentRepo.Update(ctx, a.db, shipment); err != nil {
 		return nil, err
@@ -522,13 +519,12 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		ShippingCost:  s.ShippingCost,
 		Currency:      s.ShippingCurrency,
 		Weight:        s.Weight,
-		ShippedAt:     int64PtrToTimePtr(s.ShippedAt),
-		DeliveredAt:   int64PtrToTimePtr(s.DeliveredAt),
+		ShippedAt:     s.ShippedAt,
+		DeliveredAt:   s.DeliveredAt,
 		Remark:        s.Remark,
 		Items:         items,
-		CreatedAt:     s.Audit.CreatedAt,
-		UpdatedAt:     s.Audit.UpdatedAt,
-		CreatedBy:     s.Audit.CreatedBy,
+		CreatedAt:     s.CreatedAt,
+		UpdatedAt:     s.UpdatedAt,
 	}
 }
 
@@ -551,6 +547,7 @@ func FormatInt64ToMoney(v int64) string {
 }
 
 // int64PtrToTimePtr converts *int64 (unix timestamp) to *time.Time
+// Deprecated: This function is no longer needed as entities now use *time.Time
 func int64PtrToTimePtr(v *int64) *time.Time {
 	if v == nil {
 		return nil

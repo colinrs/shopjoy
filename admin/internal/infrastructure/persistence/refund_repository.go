@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -19,28 +20,26 @@ func NewRefundRepository() fulfillment.RefundRepository {
 
 // refundModel represents the database model for Refund
 type refundModel struct {
-	ID           int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID     int64  `gorm:"column:tenant_id;not null;index"`
-	OrderID      string `gorm:"column:order_id;size:64;not null;index"`
-	RefundNo     string `gorm:"column:refund_no;size:32;not null;uniqueIndex:uk_refund_no"`
-	UserID       int64  `gorm:"column:user_id;not null;index"`
-	Type         int    `gorm:"column:type;not null;default:1"`
-	Status       int    `gorm:"column:status;not null;default:0;index"`
-	ReasonType   string `gorm:"column:reason_type;size:50;not null;default:''"`
-	Reason       string `gorm:"column:reason;size:500;not null;default:''"`
-	Description  string `gorm:"column:description;type:text"`
-	Images       string `gorm:"column:images;type:json"`
-	Amount       int64  `gorm:"column:amount;not null;default:0"`
-	Currency     string `gorm:"column:currency;size:10;not null;default:'CNY'"`
-	RejectReason string `gorm:"column:reject_reason;size:500;not null;default:''"`
-	ApprovedAt   *int64 `gorm:"column:approved_at"`
-	ApprovedBy   int64  `gorm:"column:approved_by;not null;default:0"`
-	CompletedAt  *int64 `gorm:"column:completed_at"`
-	CreatedBy    int64  `gorm:"column:created_by;not null"`
-	UpdatedBy    int64  `gorm:"column:updated_by;not null"`
-	DeletedAt    *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt    int64  `gorm:"column:created_at;not null"`
-	UpdatedAt    int64  `gorm:"column:updated_at;not null"`
+	ID           int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID     int64      `gorm:"column:tenant_id;not null;index"`
+	OrderID      string     `gorm:"column:order_id;size:64;not null;index"`
+	RefundNo     string     `gorm:"column:refund_no;size:32;not null;uniqueIndex:uk_refund_no"`
+	UserID       int64      `gorm:"column:user_id;not null;index"`
+	Type         int        `gorm:"column:type;not null;default:1"`
+	Status       int        `gorm:"column:status;not null;default:0;index"`
+	ReasonType   string     `gorm:"column:reason_type;size:50;not null;default:''"`
+	Reason       string     `gorm:"column:reason;size:500;not null;default:''"`
+	Description  string     `gorm:"column:description;type:text"`
+	Images       string     `gorm:"column:images;type:json"`
+	Amount       int64      `gorm:"column:amount;not null;default:0"`
+	Currency     string     `gorm:"column:currency;size:10;not null;default:'CNY'"`
+	RejectReason string     `gorm:"column:reject_reason;size:500;not null;default:''"`
+	ApprovedAt   *time.Time `gorm:"column:approved_at"`
+	ApprovedBy   int64      `gorm:"column:approved_by;not null;default:0"`
+	CompletedAt  *time.Time `gorm:"column:completed_at"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at;index"`
+	CreatedAt    time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt    time.Time  `gorm:"column:updated_at;not null"`
 }
 
 func (refundModel) TableName() string {
@@ -48,8 +47,17 @@ func (refundModel) TableName() string {
 }
 
 func (m *refundModel) toEntity() *fulfillment.Refund {
+	var deletedAt gorm.DeletedAt
+	if m.DeletedAt != nil {
+		deletedAt = gorm.DeletedAt{Time: *m.DeletedAt, Valid: true}
+	}
 	return &fulfillment.Refund{
-		ID:           m.ID,
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
+			DeletedAt: deletedAt,
+		},
 		TenantID:     shared.TenantID(m.TenantID),
 		OrderID:      m.OrderID,
 		RefundNo:     m.RefundNo,
@@ -66,19 +74,16 @@ func (m *refundModel) toEntity() *fulfillment.Refund {
 		ApprovedAt:   m.ApprovedAt,
 		ApprovedBy:   m.ApprovedBy,
 		CompletedAt:  m.CompletedAt,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
-		DeletedAt: m.DeletedAt,
 	}
 }
 
 func fromRefundEntity(r *fulfillment.Refund) *refundModel {
+	var deletedAt *time.Time
+	if r.Model.DeletedAt.Valid {
+		deletedAt = &r.Model.DeletedAt.Time
+	}
 	return &refundModel{
-		ID:           r.ID,
+		ID:           r.Model.ID,
 		TenantID:     r.TenantID.Int64(),
 		OrderID:      r.OrderID,
 		RefundNo:     r.RefundNo,
@@ -95,11 +100,9 @@ func fromRefundEntity(r *fulfillment.Refund) *refundModel {
 		ApprovedAt:   r.ApprovedAt,
 		ApprovedBy:   r.ApprovedBy,
 		CompletedAt:  r.CompletedAt,
-		CreatedBy:    r.Audit.CreatedBy,
-		UpdatedBy:    r.Audit.UpdatedBy,
-		DeletedAt:    r.DeletedAt,
-		CreatedAt:    r.Audit.CreatedAt.Unix(),
-		UpdatedAt:    r.Audit.UpdatedAt.Unix(),
+		DeletedAt:    deletedAt,
+		CreatedAt:    r.Model.CreatedAt,
+		UpdatedAt:    r.Model.UpdatedAt,
 	}
 }
 
@@ -121,7 +124,6 @@ func (r *refundRepo) Update(ctx context.Context, db *gorm.DB, refund *fulfillmen
 			"approved_at":   model.ApprovedAt,
 			"approved_by":   model.ApprovedBy,
 			"completed_at":  model.CompletedAt,
-			"updated_by":    model.UpdatedBy,
 			"updated_at":    model.UpdatedAt,
 		}).Error
 }
@@ -212,10 +214,10 @@ func (r *refundRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID sha
 		dbQuery = dbQuery.Where("status = ?", query.Status)
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
 	}
 
 	var total int64
@@ -262,10 +264,10 @@ func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 		dbQuery = dbQuery.Where("reason_type = ?", query.ReasonType)
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
 	}
 
 	var total int64
@@ -295,7 +297,7 @@ func (r *refundRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
 	if result.Error != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -217,23 +218,21 @@ var DefaultRefundReasons = []RefundReason{
 
 // Shipment 发货单
 type Shipment struct {
-	ID             int64            `gorm:"column:id;primaryKey"`
-	TenantID       shared.TenantID  `gorm:"column:tenant_id;not null;index"`
-	OrderID        string           `gorm:"column:order_id;not null;index"`
-	ShipmentNo     string           `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
-	Status         ShipmentStatus   `gorm:"column:status;not null;default:0;index"`
-	Carrier        string           `gorm:"column:carrier;not null;default:''"`
-	CarrierCode    string           `gorm:"column:carrier_code;not null;default:''"`
-	TrackingNo     string           `gorm:"column:tracking_no;not null;default:'';index"`
-	ShippingCost   int64            `gorm:"column:shipping_cost;not null;default:0"` // 运费（分）
-	ShippingCurrency string         `gorm:"column:shipping_currency;not null;default:'CNY'"`
-	Weight         float64          `gorm:"column:weight;not null;default:0"` // 重量（kg）
-	ShippedAt      *int64          `gorm:"column:shipped_at"`
-	DeliveredAt    *int64          `gorm:"column:delivered_at"`
-	Remark         string           `gorm:"column:remark;not null;default:''"`
-	Items          []ShipmentItem   `gorm:"foreignKey:ShipmentID"`
-	Audit          shared.AuditInfo `gorm:"embedded"`
-	DeletedAt      *int64          `gorm:"column:deleted_at;index"`
+	application.Model
+	TenantID       shared.TenantID `gorm:"column:tenant_id;not null;index"`
+	OrderID        string          `gorm:"column:order_id;not null;index"`
+	ShipmentNo     string          `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
+	Status         ShipmentStatus  `gorm:"column:status;not null;default:0;index"`
+	Carrier        string          `gorm:"column:carrier;not null;default:''"`
+	CarrierCode    string          `gorm:"column:carrier_code;not null;default:''"`
+	TrackingNo     string          `gorm:"column:tracking_no;not null;default:'';index"`
+	ShippingCost   int64           `gorm:"column:shipping_cost;not null;default:0"` // 运费（分）
+	ShippingCurrency string        `gorm:"column:shipping_currency;not null;default:'CNY'"`
+	Weight         float64         `gorm:"column:weight;not null;default:0"` // 重量（kg）
+	ShippedAt      *time.Time     `gorm:"column:shipped_at"`
+	DeliveredAt    *time.Time     `gorm:"column:delivered_at"`
+	Remark         string          `gorm:"column:remark;not null;default:''"`
+	Items          []ShipmentItem  `gorm:"foreignKey:ShipmentID"`
 }
 
 func (s *Shipment) TableName() string {
@@ -242,19 +241,12 @@ func (s *Shipment) TableName() string {
 
 // NewShipment 创建发货单
 func NewShipment(tenantID shared.TenantID, orderID string, items []ShipmentItem, createdBy int64) *Shipment {
-	now := time.Now().UTC()
 	return &Shipment{
 		TenantID:         tenantID,
 		OrderID:          orderID,
 		Status:           ShipmentStatusPending,
 		ShippingCurrency: "CNY",
 		Items:            items,
-		Audit: shared.AuditInfo{
-			CreatedAt: now,
-			UpdatedAt: now,
-			CreatedBy: createdBy,
-			UpdatedBy: createdBy,
-		},
 	}
 }
 
@@ -273,10 +265,10 @@ func (s *Shipment) Ship(carrier, carrierCode, trackingNo string, updatedBy int64
 	s.Carrier = carrier
 	s.CarrierCode = carrierCode
 	s.TrackingNo = trackingNo
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	s.ShippedAt = &now
 	s.Status = ShipmentStatusShipped
-	s.Audit.Update(updatedBy)
+	s.UpdatedAt = now
 	return nil
 }
 
@@ -286,7 +278,7 @@ func (s *Shipment) MarkInTransit(updatedBy int64) error {
 		return code.ErrShipmentInvalidStatusTransition
 	}
 	s.Status = ShipmentStatusInTransit
-	s.Audit.Update(updatedBy)
+	s.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -295,10 +287,10 @@ func (s *Shipment) MarkDelivered(updatedBy int64) error {
 	if s.Status != ShipmentStatusShipped && s.Status != ShipmentStatusInTransit {
 		return code.ErrShipmentInvalidStatusTransition
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	s.DeliveredAt = &now
 	s.Status = ShipmentStatusDelivered
-	s.Audit.Update(updatedBy)
+	s.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -309,7 +301,7 @@ func (s *Shipment) MarkFailed(reason string, updatedBy int64) error {
 	}
 	s.Status = ShipmentStatusFailed
 	s.Remark = reason
-	s.Audit.Update(updatedBy)
+	s.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -320,7 +312,7 @@ func (s *Shipment) Cancel(reason string, updatedBy int64) error {
 	}
 	s.Status = ShipmentStatusCancelled
 	s.Remark = reason
-	s.Audit.Update(updatedBy)
+	s.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -402,25 +394,23 @@ func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int
 
 // Refund 退款单
 type Refund struct {
-	ID           int64              `gorm:"column:id;primaryKey"`
-	TenantID     shared.TenantID    `gorm:"column:tenant_id;not null;index"`
-	OrderID      string             `gorm:"column:order_id;not null;index"`
-	RefundNo     string             `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
-	UserID       int64              `gorm:"column:user_id;not null;index"`
-	Type         RefundType         `gorm:"column:type;not null;default:1"`
-	Status       RefundStatus       `gorm:"column:status;not null;default:0;index"`
-	ReasonType   string             `gorm:"column:reason_type;not null;default:''"`
-	Reason       string             `gorm:"column:reason;not null;default:''"`
-	Description  string             `gorm:"column:description"`
-	Images       string             `gorm:"column:images;type:json"` // JSON array of image URLs
-	Amount       int64              `gorm:"column:amount;not null;default:0"`       // 退款金额（分）
-	Currency     string             `gorm:"column:currency;not null;default:'CNY'"`
-	RejectReason string             `gorm:"column:reject_reason;not null;default:''"`
-	ApprovedAt   *int64            `gorm:"column:approved_at"`
-	ApprovedBy   int64              `gorm:"column:approved_by;not null;default:0"`
-	CompletedAt  *int64            `gorm:"column:completed_at"`
-	Audit        shared.AuditInfo   `gorm:"embedded"`
-	DeletedAt    *int64            `gorm:"column:deleted_at;index"`
+	application.Model
+	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
+	OrderID      string         `gorm:"column:order_id;not null;index"`
+	RefundNo     string         `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
+	UserID       int64          `gorm:"column:user_id;not null;index"`
+	Type         RefundType     `gorm:"column:type;not null;default:1"`
+	Status       RefundStatus   `gorm:"column:status;not null;default:0;index"`
+	ReasonType   string         `gorm:"column:reason_type;not null;default:''"`
+	Reason       string         `gorm:"column:reason;not null;default:''"`
+	Description  string         `gorm:"column:description"`
+	Images       string         `gorm:"column:images;type:json"` // JSON array of image URLs
+	Amount       int64          `gorm:"column:amount;not null;default:0"`       // 退款金额（分）
+	Currency     string         `gorm:"column:currency;not null;default:'CNY'"`
+	RejectReason string         `gorm:"column:reject_reason;not null;default:''"`
+	ApprovedAt   *time.Time   `gorm:"column:approved_at"`
+	ApprovedBy   int64          `gorm:"column:approved_by;not null;default:0"`
+	CompletedAt  *time.Time   `gorm:"column:completed_at"`
 }
 
 func (r *Refund) TableName() string {
@@ -430,7 +420,6 @@ func (r *Refund) TableName() string {
 // NewRefund 创建退款申请
 func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
 	reasonType, reason, description string, images []string, amount int64, currency string) *Refund {
-	now := time.Now().UTC()
 	return &Refund{
 		TenantID:    tenantID,
 		OrderID:     orderID,
@@ -442,12 +431,6 @@ func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
 		Description: description,
 		Amount:      amount,
 		Currency:    currency,
-		Audit: shared.AuditInfo{
-			CreatedAt: now,
-			UpdatedAt: now,
-			CreatedBy: userID,
-			UpdatedBy: userID,
-		},
 	}
 }
 
@@ -456,11 +439,11 @@ func (r *Refund) Approve(approvedBy int64) error {
 	if r.Status != RefundStatusPending {
 		return code.ErrRefundInvalidStatus
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	r.Status = RefundStatusApproved
 	r.ApprovedAt = &now
 	r.ApprovedBy = approvedBy
-	r.Audit.Update(approvedBy)
+	r.UpdatedAt = now
 	return nil
 }
 
@@ -471,7 +454,7 @@ func (r *Refund) Reject(rejectReason string, updatedBy int64) error {
 	}
 	r.Status = RefundStatusRejected
 	r.RejectReason = rejectReason
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -480,10 +463,10 @@ func (r *Refund) Complete(updatedBy int64) error {
 	if r.Status != RefundStatusApproved {
 		return code.ErrRefundInvalidStatus
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	r.Status = RefundStatusCompleted
 	r.CompletedAt = &now
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = now
 	return nil
 }
 
@@ -493,7 +476,7 @@ func (r *Refund) Cancel(updatedBy int64) error {
 		return code.ErrRefundCannotCancel
 	}
 	r.Status = RefundStatusCancelled
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
