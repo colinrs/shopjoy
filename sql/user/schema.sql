@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `tenants` (
     `expire_at` TIMESTAMP NULL COMMENT '过期时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     PRIMARY KEY (`id`),
@@ -109,7 +110,6 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_type` (`type`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员用户表';
 
 -- ============================================
@@ -145,12 +145,13 @@ CREATE TABLE IF NOT EXISTS `roles` (
     `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统角色',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_code` (`code`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
 
 -- ============================================
@@ -166,10 +167,13 @@ CREATE TABLE IF NOT EXISTS `permissions` (
     `path` VARCHAR(255) DEFAULT '' COMMENT '路径',
     `icon` VARCHAR(100) DEFAULT '' COMMENT '图标',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_code` (`code`),
-    KEY `idx_type` (`type`)
+    KEY `idx_type` (`type`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='权限表';
 
 -- ============================================
@@ -179,8 +183,11 @@ CREATE TABLE IF NOT EXISTS `permissions` (
 CREATE TABLE IF NOT EXISTS `user_roles` (
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`user_id`, `role_id`),
-    KEY `idx_role_id` (`role_id`)
+    KEY `idx_role_id` (`role_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
 
 -- ============================================
@@ -190,8 +197,11 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
 CREATE TABLE IF NOT EXISTS `role_permissions` (
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
     `permission_id` BIGINT NOT NULL COMMENT '权限ID',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`role_id`, `permission_id`),
-    KEY `idx_permission_id` (`permission_id`)
+    KEY `idx_permission_id` (`permission_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色权限关联表';
 
 -- ============================================

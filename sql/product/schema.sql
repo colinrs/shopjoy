@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS `categories` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类表';
 
 -- ============================================
@@ -52,7 +51,6 @@ CREATE TABLE IF NOT EXISTS `brands` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_name` (`name`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌表';
 
 -- ============================================
@@ -95,7 +93,6 @@ CREATE TABLE IF NOT EXISTS `products` (
     KEY `idx_category_id` (`category_id`),
     KEY `idx_brand_id` (`brand_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品表';
 
 -- ============================================
@@ -118,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `skus` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     PRIMARY KEY (`id`),
@@ -125,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `skus` (
     UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_product_id` (`product_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_low_stock_alert` (`tenant_id`, `status`, `safety_stock`, `available_stock`)
+    KEY `idx_low_stock_alert` (`tenant_id`, `status`, `safety_stock`, `available_stock`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SKU表';
 
 -- ============================================
@@ -146,11 +144,12 @@ CREATE TABLE IF NOT EXISTS `product_markets` (
     `published_at` TIMESTAMP NULL COMMENT '发布时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_product_id` (`product_id`),
     KEY `idx_market_id` (`market_id`),
-    KEY `idx_variant_id` (`variant_id`)
+    KEY `idx_variant_id` (`variant_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品市场关联表';
 
 -- ============================================
@@ -166,10 +165,11 @@ CREATE TABLE IF NOT EXISTS `product_localizations` (
     `description` TEXT COMMENT '产品描述',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_product_id` (`product_id`),
-    UNIQUE KEY `idx_tenant_product_language` (`tenant_id`, `product_id`, `language_code`)
+    UNIQUE KEY `idx_tenant_product_language` (`tenant_id`, `product_id`, `language_code`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品多语言表';
 
 -- ============================================
@@ -184,11 +184,12 @@ CREATE TABLE IF NOT EXISTS `category_markets` (
     `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_category_id` (`category_id`),
     KEY `idx_market_id` (`market_id`),
-    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`)
+    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类市场可见性';
 
 -- ============================================
@@ -203,11 +204,12 @@ CREATE TABLE IF NOT EXISTS `brand_markets` (
     `is_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_brand_id` (`brand_id`),
     KEY `idx_market_id` (`market_id`),
-    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`)
+    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌市场可见性';
 
 -- ============================================
@@ -244,11 +246,12 @@ CREATE TABLE IF NOT EXISTS `warehouse_inventories` (
     `locked_stock` INT NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_sku_code` (`sku_code`),
     KEY `idx_warehouse_id` (`warehouse_id`),
-    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`)
+    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库库存表';
 
 -- ============================================
@@ -269,11 +272,13 @@ CREATE TABLE IF NOT EXISTS `inventory_logs` (
     `remark` VARCHAR(500) DEFAULT '',
     `operator_id` BIGINT NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_sku_code` (`sku_code`),
     KEY `idx_product_id` (`product_id`),
-    KEY `idx_created_at` (`created_at`)
+    KEY `idx_created_at` (`created_at`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存变更日志';
 
 -- ============================================
@@ -299,7 +304,6 @@ CREATE TABLE IF NOT EXISTS `markets` (
     UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_code` (`code`),
     KEY `idx_is_active` (`is_active`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='市场表';
 
 -- ============================================

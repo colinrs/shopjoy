@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
     `return_url` VARCHAR(500) DEFAULT '' COMMENT '返回URL',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
     `updated_by` BIGINT NOT NULL DEFAULT 0 COMMENT '更新人',
     PRIMARY KEY (`id`),
@@ -25,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
     KEY `idx_order_id` (`order_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_transaction_id` (`transaction_id`),
-    KEY `idx_status` (`status`)
+    KEY `idx_status` (`status`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付表';
 
 -- ============================================
@@ -135,10 +136,11 @@ CREATE TABLE IF NOT EXISTS `webhook_events` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
     `processed_at` TIMESTAMP NULL COMMENT 'Processed time',
+    `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `uk_event_id` (`event_id`),
     INDEX `idx_tenant_event` (`tenant_id`, `event_type`),
-    INDEX `idx_resource` (`resource_id`)
+    INDEX `idx_resource` (`resource_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Webhook events table for deduplication';
 
 -- ============================================

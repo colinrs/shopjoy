@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS `earn_rules` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_scenario` (`scenario`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`),
     KEY `idx_start_end` (`start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分获取规则表';
 
@@ -60,7 +59,6 @@ CREATE TABLE IF NOT EXISTS `redeem_rules` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_coupon_id` (`coupon_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`),
     KEY `idx_start_end` (`start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分兑换规则表';
 
@@ -85,7 +83,6 @@ CREATE TABLE IF NOT EXISTS `points_accounts` (
     UNIQUE KEY `uk_tenant_user` (`tenant_id`, `user_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_tenant_id` (`tenant_id`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分账户表';
 
 -- ============================================
@@ -106,6 +103,7 @@ CREATE TABLE IF NOT EXISTS `points_transactions` (
     `description` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '描述',
     `expires_at` TIMESTAMP NULL COMMENT '积分过期时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
@@ -115,7 +113,6 @@ CREATE TABLE IF NOT EXISTS `points_transactions` (
     KEY `idx_reference` (`reference_type`, `reference_id`),
     KEY `idx_created_at` (`created_at`),
     KEY `idx_expires_at` (`expires_at`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分交易记录表';
 
 -- ============================================
@@ -132,7 +129,8 @@ CREATE TABLE IF NOT EXISTS `points_redemptions` (
     `user_coupon_id` BIGINT DEFAULT NULL COMMENT '用户优惠券ID(兑换成功后生成)',
     `points_used` BIGINT NOT NULL COMMENT '消耗积分',
     `status` VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT '状态: pending-待处理, completed-已完成, cancelled-已取消',
-    `created_at` BIGINT NOT NULL DEFAULT 0 COMMENT '创建时间',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `completed_at` TIMESTAMP NULL COMMENT '完成时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
@@ -142,7 +140,6 @@ CREATE TABLE IF NOT EXISTS `points_redemptions` (
     KEY `idx_coupon_id` (`coupon_id`),
     KEY `idx_status` (`status`),
     KEY `idx_created_at` (`created_at`),
-    KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='积分兑换记录表';
 
 -- ============================================

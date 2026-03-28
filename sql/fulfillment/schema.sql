@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     KEY `idx_order_id` (`order_id`),
     KEY `idx_tracking_no` (`tracking_no`),
     KEY `idx_status` (`status`),
-    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='物流发货表';
 
 -- ============================================
@@ -38,10 +37,13 @@ CREATE TABLE IF NOT EXISTS `shipment_items` (
     `product_id` BIGINT NOT NULL COMMENT '商品ID',
     `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_shipment_id` (`shipment_id`),
     KEY `idx_order_item_id` (`order_item_id`),
-    KEY `idx_product_id` (`product_id`)
+    KEY `idx_product_id` (`product_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='发货商品表';
 
 -- ============================================
@@ -71,7 +73,6 @@ CREATE TABLE IF NOT EXISTS `refunds` (
     KEY `idx_order_id` (`order_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_status` (`status`),
-    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='退款表';
 
 -- ============================================
@@ -90,7 +91,6 @@ CREATE TABLE IF NOT EXISTS `shipping_templates` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_is_default` (`is_default`),
-    INDEX `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping templates table';
 
 -- ============================================
@@ -113,9 +113,10 @@ CREATE TABLE IF NOT EXISTS `shipping_zones` (
     `sort` INT NOT NULL DEFAULT 0 COMMENT 'Sort order',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
+    `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
-    INDEX `idx_template_id` (`template_id`)
+    INDEX `idx_template_id` (`template_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping zones table';
 
 -- ============================================
@@ -130,10 +131,11 @@ CREATE TABLE IF NOT EXISTS `shipping_template_mappings` (
     `target_id` BIGINT NOT NULL COMMENT 'Target ID (product_id or category_id)',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
+    `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_template_id` (`template_id`),
-    INDEX `idx_target` (`target_type`, `target_id`)
+    INDEX `idx_target` (`target_type`, `target_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping template mappings table';
 
 -- ============================================
@@ -145,9 +147,11 @@ CREATE TABLE IF NOT EXISTS `shipping_zone_regions` (
     `zone_id` BIGINT NOT NULL COMMENT 'Zone ID',
     `city_code` VARCHAR(20) NOT NULL COMMENT 'City code',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
+    `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_zone_city` (`zone_id`, `city_code`),
-    INDEX `idx_city_code` (`city_code`)
+    INDEX `idx_city_code` (`city_code`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping zone regions junction table';
 
 -- ============================================

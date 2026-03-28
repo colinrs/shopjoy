@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     KEY `idx_status` (`status`),
     KEY `idx_type` (`type`),
     KEY `idx_priority` (`priority`),
-    KEY `idx_deleted_at` (`deleted_at`),
     KEY `idx_start_end` (`start_at`, `end_at`),
     KEY `idx_active` (`status`, `currency`, `start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销活动表';
@@ -46,9 +45,12 @@ CREATE TABLE IF NOT EXISTS `promotion_rules` (
     `max_discount_currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
     `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY' COMMENT '货币',
     `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_promotion_id` (`promotion_id`),
-    KEY `idx_promotion_rules_sort_order` (`promotion_id`, `sort_order`)
+    KEY `idx_promotion_rules_sort_order` (`promotion_id`, `sort_order`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销规则表';
 
 -- ============================================
@@ -68,12 +70,14 @@ CREATE TABLE IF NOT EXISTS `promotion_usage` (
     `final_amount` BIGINT NOT NULL DEFAULT 0,
     `coupon_id` BIGINT DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_promotion_id` (`promotion_id`),
     INDEX `idx_order_id` (`order_id`),
     INDEX `idx_user_id` (`user_id`),
-    INDEX `idx_created_at` (`created_at`)
+    INDEX `idx_created_at` (`created_at`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销使用记录表';
 
 -- ============================================
@@ -109,7 +113,6 @@ CREATE TABLE IF NOT EXISTS `coupons` (
     UNIQUE KEY `uk_code` (`code`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_deleted_at` (`deleted_at`),
     KEY `idx_start_end` (`start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='优惠券表';
 
@@ -127,12 +130,15 @@ CREATE TABLE IF NOT EXISTS `user_coupons` (
     `order_id` VARCHAR(64) DEFAULT '' COMMENT '订单ID',
     `received_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '领取时间',
     `expire_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '过期时间',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_coupon_id` (`coupon_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_expire_at` (`expire_at`)
+    KEY `idx_expire_at` (`expire_at`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户优惠券表';
 
 -- ============================================
