@@ -2,6 +2,7 @@ package transactions
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -47,6 +48,6 @@ func (l *GetTransactionLogic) GetTransaction(req *types.GetPointsTransactionReq)
 		ReferenceID:   transaction.ReferenceID,
 		Description:   transaction.Description,
 		ExpiresAt:     formatTimePtrFromTime(transaction.ExpiresAt),
-		CreatedAt:     transaction.CreatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:     transaction.CreatedAt.Format(time.RFC3339),
 	}, nil
 }

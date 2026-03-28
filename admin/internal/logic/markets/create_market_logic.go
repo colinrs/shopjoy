@@ -2,6 +2,7 @@ package markets
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
@@ -80,7 +81,7 @@ func toMarketResponse(m *market.Market) *types.MarketResponse {
 			IossEnabled: m.TaxRules.IOSSEnabled,
 			IncludeTax:  m.TaxRules.IncludeTax,
 		},
-		CreatedAt: m.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt: m.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt: m.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: m.UpdatedAt.Format(time.RFC3339),
 	}
 }

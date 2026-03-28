@@ -70,8 +70,8 @@ func (l *ListRedeemRulesLogic) ListRedeemRules(req *types.ListRedeemRulesReq) (r
 			Status:         r.Status,
 			StartAt:        formatTimePtrFromTime(r.StartAt),
 			EndAt:          formatTimePtrFromTime(r.EndAt),
-			CreatedAt:      r.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:      r.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:      r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:      r.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

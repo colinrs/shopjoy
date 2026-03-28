@@ -65,7 +65,7 @@ func (l *UpdateRoleLogic) UpdateRole(req *types.UpdateRoleRequest) (resp *types.
 		Status:      int8(r.Status),
 		StatusText:  getStatusText(r.Status),
 		IsSystem:    r.IsSystem,
-		CreatedAt:   r.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   r.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:   r.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   r.Audit.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

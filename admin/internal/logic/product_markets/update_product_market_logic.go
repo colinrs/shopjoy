@@ -79,7 +79,7 @@ func (l *UpdateProductMarketLogic) UpdateProductMarket(req *types.UpdateProductM
 
 	var publishedAt string
 	if pm.PublishedAt != nil {
-		publishedAt = pm.PublishedAt.Format("2006-01-02 15:04:05")
+		publishedAt = pm.PublishedAt.Format(time.RFC3339)
 	}
 
 	return &types.ProductMarketResp{

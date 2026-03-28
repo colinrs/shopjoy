@@ -768,7 +768,7 @@ func (s *service) GetTrend(ctx context.Context, tenantID shared.TenantID, startT
 		for t := startTime; t.Before(endTime); t = t.AddDate(0, 0, 1) {
 			// Would query actual data for each day
 			result = append(result, TrendDataPoint{
-				Date:     t.Format("2006-01-02"),
+				Date:     t.Format(time.DateOnly),
 				Earned:   0,
 				Redeemed: 0,
 				Expired:  0,
@@ -777,7 +777,7 @@ func (s *service) GetTrend(ctx context.Context, tenantID shared.TenantID, startT
 	case "weekly":
 		for t := startTime; t.Before(endTime); t = t.AddDate(0, 0, 7) {
 			result = append(result, TrendDataPoint{
-				Date:     t.Format("2006-01-02"),
+				Date:     t.Format(time.DateOnly),
 				Earned:   0,
 				Redeemed: 0,
 				Expired:  0,

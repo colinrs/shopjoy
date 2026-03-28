@@ -81,7 +81,7 @@ func (l *ListRedemptionsLogic) ListRedemptions(req *types.ListRedemptionsReq) (r
 			UserCouponID: r.UserCouponID,
 			PointsUsed:   r.PointsUsed,
 			Status:       r.Status,
-			CreatedAt:    r.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:    r.CreatedAt.Format(time.RFC3339),
 			CompletedAt:  formatTimePtrFromTime(r.CompletedAt),
 		}
 	}

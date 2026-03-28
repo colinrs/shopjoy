@@ -132,7 +132,7 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		PaidAt:            formatTimeToRFC3339(o.PaidAt),
 		ShippedAt:         formatTimeToRFC3339(o.ShippedAt),
 		DeliveredAt:       formatTimeToRFC3339(o.DeliveredAt),
-		CreatedAt:         o.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:         o.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:         o.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:         o.UpdatedAt.Format(time.RFC3339),
 	}
 }

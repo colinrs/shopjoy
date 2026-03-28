@@ -89,7 +89,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 		Attributes:     sku.Attributes,
 		Status:         strconv.Itoa(int(sku.Status)),
 		IsLowStock:     sku.IsLowStock(),
-		CreatedAt:      sku.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      sku.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:      sku.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      sku.Audit.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

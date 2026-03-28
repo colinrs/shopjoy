@@ -20,7 +20,7 @@ func FormatDateTime(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format(time.RFC3339)
 }
 
 // FormatDate formats a time.Time to a date string
@@ -28,7 +28,7 @@ func FormatDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format("2006-01-02")
+	return t.Format(time.DateOnly)
 }
 
 // Pagination represents common pagination parameters

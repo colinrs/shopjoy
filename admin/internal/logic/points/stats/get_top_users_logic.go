@@ -69,7 +69,7 @@ func (l *GetTopUsersLogic) GetTopUsers(req *types.GetTopUsersReq) (resp *types.T
 			UserID:       u.UserID,
 			UserEmail:    "", // Would need to fetch from user service
 			PointsEarned: u.PointsEarned,
-			CreatedAt:    time.Now().Format("2006-01-02 15:04:05"),
+			CreatedAt:    time.Now().Format(time.RFC3339),
 		}
 	}
 

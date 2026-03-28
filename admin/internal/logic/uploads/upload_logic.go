@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -78,7 +79,7 @@ func (l *UploadLogic) Upload(req *types.UploadRequest) (resp *types.UploadRespon
 		MimeType:  fileInfo.MimeType,
 		Width:     fileInfo.Width,
 		Height:    fileInfo.Height,
-		CreatedAt: fileInfo.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		CreatedAt: fileInfo.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
 

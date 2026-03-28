@@ -338,7 +338,7 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		StartAt:     p.StartAt.Format(time.RFC3339),
 		EndAt:       p.EndAt.Format(time.RFC3339),
 		Rules:       rules,
-		CreatedAt:   p.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   p.Audit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:   p.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   p.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }

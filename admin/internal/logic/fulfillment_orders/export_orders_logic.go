@@ -117,7 +117,7 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 			row.ReceiverPhone,
 			row.ReceiverAddress,
 			row.PaymentMethod,
-			row.CreatedAt.Format("2006-01-02 15:04:05"),
+			row.CreatedAt.Format(time.RFC3339),
 			formatTimeForExport(row.PaidAt),
 		}
 		if err := writer.Write(record); err != nil {
@@ -133,5 +133,5 @@ func formatTimeForExport(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format(time.RFC3339)
 }

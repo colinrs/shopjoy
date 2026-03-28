@@ -72,7 +72,7 @@ func (l *UpdateRedeemRuleLogic) UpdateRedeemRule(req *types.UpdateRedeemRuleReq)
 		Status:         rule.Status,
 		StartAt:        formatTimePtrFromTime(rule.StartAt),
 		EndAt:          formatTimePtrFromTime(rule.EndAt),
-		CreatedAt:      rule.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      rule.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:      rule.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      rule.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

@@ -2,6 +2,7 @@ package earn_rules
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -77,8 +78,8 @@ func (l *ListEarnRulesLogic) ListEarnRules(req *types.ListEarnRulesReq) (resp *t
 			Priority:         r.Priority,
 			StartAt:          formatTimePtrToStr(r.StartAt),
 			EndAt:            formatTimePtrToStr(r.EndAt),
-			CreatedAt:        r.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:        r.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:        r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:        r.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

@@ -43,8 +43,8 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		DeliveredAt:   formatTimeToRFC3339(s.DeliveredAt),
 		Remark:        s.Remark,
 		Items:         items,
-		CreatedAt:     s.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:     s.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:     s.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:     s.UpdatedAt.Format(time.RFC3339),
 		CreatedBy:     s.CreatedBy,
 	}
 }
@@ -62,7 +62,7 @@ func formatTimeToRFC3339(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format(time.RFC3339)
 }
 
 // parseFloat parses a string to float64

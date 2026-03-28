@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -45,7 +46,7 @@ func (l *GetAccountByUserLogic) GetAccountByUser(req *types.GetAccountByUserReq)
 		TotalEarned:   account.TotalEarned,
 		TotalRedeemed: account.TotalRedeemed,
 		TotalExpired:  account.TotalExpired,
-		CreatedAt:     account.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:     account.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:     account.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:     account.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

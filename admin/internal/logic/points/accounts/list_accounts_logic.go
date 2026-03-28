@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -57,8 +58,8 @@ func (l *ListAccountsLogic) ListAccounts(req *types.ListAccountsReq) (resp *type
 			TotalEarned:   a.TotalEarned,
 			TotalRedeemed: a.TotalRedeemed,
 			TotalExpired:  a.TotalExpired,
-			CreatedAt:     a.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:     a.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:     a.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:     a.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

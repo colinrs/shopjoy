@@ -59,7 +59,7 @@ func (l *GetAccountTransactionsLogic) GetAccountTransactions(req *types.ListAcco
 			ReferenceID:   t.ReferenceID,
 			Description:   t.Description,
 			ExpiresAt:     formatTimePtrFromTime(t.ExpiresAt),
-			CreatedAt:     t.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:     t.CreatedAt.Format(time.RFC3339),
 		}
 	}
 

@@ -2,6 +2,7 @@ package redemptions
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -45,7 +46,7 @@ func (l *GetRedemptionLogic) GetRedemption(req *types.GetRedemptionReq) (resp *t
 		UserCouponID: redemption.UserCouponID,
 		PointsUsed:   redemption.PointsUsed,
 		Status:       redemption.Status,
-		CreatedAt:    redemption.CreatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:    redemption.CreatedAt.Format(time.RFC3339),
 		CompletedAt:  formatTimePtrFromTime(redemption.CompletedAt),
 	}, nil
 }

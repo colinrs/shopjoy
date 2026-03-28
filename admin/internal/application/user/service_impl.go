@@ -57,7 +57,7 @@ func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*Use
 	}
 
 	if req.Birthday != "" {
-		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
+		if t, err := time.Parse(time.DateOnly, req.Birthday); err == nil {
 			t = t.UTC()
 			u.Birthday = &t
 		}
@@ -85,7 +85,7 @@ func (s *ServiceImpl) Update(ctx context.Context, req UpdateUserRequest) (*UserR
 	u.Gender = req.Gender
 
 	if req.Birthday != "" {
-		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
+		if t, err := time.Parse(time.DateOnly, req.Birthday); err == nil {
 			t = t.UTC()
 			u.Birthday = &t
 		}
@@ -271,15 +271,15 @@ func toUserResponse(u *domain.User) *UserResponse {
 		Avatar:    u.Avatar,
 		Gender:    int(u.Gender),
 		Status:    int(u.Status),
-		CreatedAt: u.Audit.CreatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt: u.Audit.CreatedAt.Format(time.RFC3339),
 	}
 
 	if u.Birthday != nil {
-		resp.Birthday = u.Birthday.Format("2006-01-02")
+		resp.Birthday = u.Birthday.Format(time.DateOnly)
 	}
 
 	if u.LastLogin != nil {
-		resp.LastLogin = u.LastLogin.Format("2006-01-02 15:04:05")
+		resp.LastLogin = u.LastLogin.Format(time.RFC3339)
 	}
 
 	return resp
@@ -505,7 +505,7 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID,
 			statusText = "inactive"
 		}
 		csvContent += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
-			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Audit.CreatedAt.Format("2006-01-02 15:04:05"))
+			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Audit.CreatedAt.Format(time.RFC3339))
 	}
 
 	return []byte(csvContent), nil
@@ -542,7 +542,7 @@ func toUserDetailResponse(u *domain.User) *UserDetailResponse {
 	}
 
 	if u.Birthday != nil {
-		resp.Birthday = u.Birthday.Format("2006-01-02")
+		resp.Birthday = u.Birthday.Format(time.DateOnly)
 	}
 
 	if u.LastLogin != nil {

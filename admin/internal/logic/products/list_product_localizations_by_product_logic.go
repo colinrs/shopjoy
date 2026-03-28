@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -49,8 +50,8 @@ func (l *ListProductLocalizationsByProductLogic) ListProductLocalizationsByProdu
 			LanguageCode: loc.LanguageCode,
 			Name:         loc.Name,
 			Description:  loc.Description,
-			CreatedAt:    loc.AuditInfo.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:    loc.AuditInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:    loc.AuditInfo.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    loc.AuditInfo.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

@@ -436,14 +436,14 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	// Map results by date
 	salesMap := make(map[string]dailySales)
 	for _, r := range results {
-		dateStr := r.Date.Format("2006-01-02")
+		dateStr := r.Date.Format(time.DateOnly)
 		salesMap[dateStr] = r
 	}
 
 	// Build response for all dates
 	data := make([]*types.SalesTrendData, days)
 	for i, d := range dates {
-		dateStr := d.Format("2006-01-02")
+		dateStr := d.Format(time.DateOnly)
 		sales := salesMap[dateStr]
 		data[i] = &types.SalesTrendData{
 			Date:   dateStr,
