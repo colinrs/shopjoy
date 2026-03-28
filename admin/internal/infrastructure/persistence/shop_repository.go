@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
-	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -57,18 +56,17 @@ func (m *shopModel) toEntity() *storefront.Shop {
 		}
 	}
 
-	return &storefront.Shop{
-		Model: application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
-		TenantID:       shared.TenantID(m.TenantID),
-		Name:           m.Name,
-		Description:    m.Description,
-		Logo:           m.Logo,
-		Banner:         m.Banner,
-		ContactPhone:   m.ContactPhone,
-		ContactEmail:   m.ContactEmail,
-		Address:        m.Address,
-		SocialLinks:    socialLinks,
-		SEO:            storefront.SEOConfig{
+	shop := &storefront.Shop{
+		TenantID:     shared.TenantID(m.TenantID),
+		Name:         m.Name,
+		Description:  m.Description,
+		Logo:         m.Logo,
+		Banner:       m.Banner,
+		ContactPhone: m.ContactPhone,
+		ContactEmail: m.ContactEmail,
+		Address:      m.Address,
+		SocialLinks:  socialLinks,
+		SEO: storefront.SEOConfig{
 			Title:       m.SEOTitle,
 			Description: m.SEODescription,
 		},
@@ -76,6 +74,10 @@ func (m *shopModel) toEntity() *storefront.Shop {
 		CurrentThemeID: m.CurrentThemeID,
 		ThemeConfig:    themeConfig,
 	}
+	shop.ID = m.ID
+	shop.CreatedAt = time.Unix(m.CreatedAt, 0).UTC()
+	shop.UpdatedAt = time.Unix(m.UpdatedAt, 0).UTC()
+	return shop
 }
 
 func fromShopEntity(s *storefront.Shop) *shopModel {
@@ -87,7 +89,7 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 	}
 
 	return &shopModel{
-		ID:             s.Model.ID,
+		ID:             s.ID,
 		TenantID:       s.TenantID.Int64(),
 		Name:           s.Name,
 		Description:    s.Description,
@@ -103,8 +105,8 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 		Status:         int8(s.Status),
 		CurrentThemeID: s.CurrentThemeID,
 		ThemeConfig:    themeConfig,
-		CreatedAt:      s.Model.CreatedAt.Unix(),
-		UpdatedAt:      s.Model.UpdatedAt.Unix(),
+		CreatedAt:      s.CreatedAt.Unix(),
+		UpdatedAt:      s.UpdatedAt.Unix(),
 	}
 }
 
