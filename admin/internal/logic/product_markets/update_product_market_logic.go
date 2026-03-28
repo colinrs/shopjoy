@@ -59,7 +59,7 @@ func (l *UpdateProductMarketLogic) UpdateProductMarket(req *types.UpdateProductM
 	}
 
 	pm.StockAlertThreshold = req.StockAlertThreshold
-	pm.UpdatedAt = time.Now().Unix()
+	pm.UpdatedAt = time.Now().UTC()
 
 	if err := repo.Update(l.ctx, db, pm); err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (l *UpdateProductMarketLogic) UpdateProductMarket(req *types.UpdateProductM
 
 	var publishedAt string
 	if pm.PublishedAt != nil {
-		publishedAt = time.Unix(*pm.PublishedAt, 0).Format("2006-01-02 15:04:05")
+		publishedAt = pm.PublishedAt.Format("2006-01-02 15:04:05")
 	}
 
 	return &types.ProductMarketResp{

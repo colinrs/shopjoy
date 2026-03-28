@@ -5,6 +5,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ import (
 
 // ProductMarket 商品-市场关联实体
 type ProductMarket struct {
-	ID                  int64            // 关联ID
+	application.Model
 	TenantID            int64            // 租户ID
 	ProductID           int64            // 商品ID
 	VariantID           *int64           // 变体ID，NULL表示基础商品
@@ -22,9 +23,7 @@ type ProductMarket struct {
 	Price               decimal.Decimal  // 市场专属价格
 	CompareAtPrice      *decimal.Decimal // 对比价格
 	StockAlertThreshold int              // 库存预警阈值
-	PublishedAt         *int64           // 发布时间
-	CreatedAt           int64            // 创建时间
-	UpdatedAt           int64            // 更新时间
+	PublishedAt         *time.Time       // 发布时间
 }
 
 // TableName 表名
@@ -41,26 +40,23 @@ func NewProductMarket(productID, marketID int64) (*ProductMarket, error) {
 		return nil, code.ErrMarketNotFound
 	}
 
-	now := time.Now().Unix()
 	return &ProductMarket{
 		ProductID: productID,
 		MarketID:  marketID,
 		IsEnabled: false, // Default to disabled, requires price setup
-		CreatedAt: now,
-		UpdatedAt: now,
 	}, nil
 }
 
 // Enable 启用市场可见性
 func (pm *ProductMarket) Enable() {
 	pm.IsEnabled = true
-	pm.UpdatedAt = time.Now().Unix()
+	pm.UpdatedAt = time.Now().UTC()
 }
 
 // Disable 禁用市场可见性
 func (pm *ProductMarket) Disable() {
 	pm.IsEnabled = false
-	pm.UpdatedAt = time.Now().Unix()
+	pm.UpdatedAt = time.Now().UTC()
 }
 
 // SetPrice 设置价格
@@ -69,7 +65,7 @@ func (pm *ProductMarket) SetPrice(price decimal.Decimal) error {
 		return code.ErrProductMarketPriceRequired
 	}
 	pm.Price = price
-	pm.UpdatedAt = time.Now().Unix()
+	pm.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -79,7 +75,7 @@ func (pm *ProductMarket) Publish() error {
 		return code.ErrProductMarketPriceRequired
 	}
 	pm.Enable()
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	pm.PublishedAt = &now
 	return nil
 }

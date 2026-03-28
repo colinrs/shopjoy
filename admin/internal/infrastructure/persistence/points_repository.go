@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -22,7 +23,7 @@ func NewEarnRuleRepository() points.EarnRuleRepository {
 }
 
 type earnRuleModel struct {
-	ID               int64           `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID         int64           `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
 	Name             string          `gorm:"column:name;type:varchar(255);not null"`
 	Description      string          `gorm:"column:description;type:text"`
@@ -36,13 +37,8 @@ type earnRuleModel struct {
 	ExpirationMonths int             `gorm:"column:expiration_months;type:int;not null;default:12"`
 	Status           int             `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	Priority         int             `gorm:"column:priority;type:int;not null;default:0"`
-	StartAt          *int64          `gorm:"column:start_at;type:bigint"`
-	EndAt            *int64          `gorm:"column:end_at;type:bigint"`
-	DeletedAt        *int64          `gorm:"column:deleted_at;type:bigint;index"`
-	CreatedAt        int64           `gorm:"column:created_at"`
-	UpdatedAt        int64           `gorm:"column:updated_at"`
-	CreatedBy        int64           `gorm:"column:created_by;not null"`
-	UpdatedBy        int64           `gorm:"column:updated_by;not null"`
+	StartAt          *time.Time      `gorm:"column:start_at"`
+	EndAt            *time.Time      `gorm:"column:end_at"`
 }
 
 func (earnRuleModel) TableName() string {
@@ -51,7 +47,7 @@ func (earnRuleModel) TableName() string {
 
 func (m *earnRuleModel) toEntity() *points.EarnRule {
 	return &points.EarnRule{
-		ID:               m.ID,
+		Model:            application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:         shared.TenantID(m.TenantID),
 		Name:             m.Name,
 		Description:      m.Description,
@@ -67,19 +63,12 @@ func (m *earnRuleModel) toEntity() *points.EarnRule {
 		Priority:         m.Priority,
 		StartAt:          m.StartAt,
 		EndAt:            m.EndAt,
-		DeletedAt:        m.DeletedAt,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
 	}
 }
 
 func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
 	return &earnRuleModel{
-		ID:               e.ID,
+		Model:            application.Model{ID: e.ID, CreatedAt: e.CreatedAt, UpdatedAt: e.UpdatedAt, DeletedAt: e.DeletedAt},
 		TenantID:         e.TenantID.Int64(),
 		Name:             e.Name,
 		Description:      e.Description,
@@ -95,11 +84,6 @@ func fromEarnRuleEntity(e *points.EarnRule) *earnRuleModel {
 		Priority:         e.Priority,
 		StartAt:          e.StartAt,
 		EndAt:            e.EndAt,
-		DeletedAt:        e.DeletedAt,
-		CreatedAt:        e.Audit.CreatedAt.Unix(),
-		UpdatedAt:        e.Audit.UpdatedAt.Unix(),
-		CreatedBy:        e.Audit.CreatedBy,
-		UpdatedBy:        e.Audit.UpdatedBy,
 	}
 }
 
@@ -128,7 +112,6 @@ func (r *earnRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.Ear
 			"priority":          model.Priority,
 			"start_at":          model.StartAt,
 			"end_at":            model.EndAt,
-			"updated_by":        model.UpdatedBy,
 			"updated_at":        model.UpdatedAt,
 		}).Error
 }
@@ -138,7 +121,7 @@ func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 	if result.Error != nil {
 		return result.Error
@@ -232,7 +215,7 @@ func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID s
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return query.Updates(map[string]interface{}{
 		"status":     status,
 		"updated_at": now,
@@ -273,23 +256,18 @@ func NewRedeemRuleRepository() points.RedeemRuleRepository {
 }
 
 type redeemRuleModel struct {
-	ID           int64  `gorm:"column:id;primaryKey"`
-	TenantID     int64  `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
-	Name         string `gorm:"column:name;type:varchar(255);not null"`
-	Description  string `gorm:"column:description;type:text"`
-	CouponID     int64  `gorm:"column:coupon_id;type:bigint;not null"`
-	PointsRequired int64 `gorm:"column:points_required;type:bigint;not null"`
-	TotalStock   int64  `gorm:"column:total_stock;type:bigint;not null;default:0"`
-	UsedStock    int64  `gorm:"column:used_stock;type:bigint;not null;default:0"`
-	PerUserLimit int    `gorm:"column:per_user_limit;type:int;not null;default:1"`
-	Status       int    `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	StartAt      *int64 `gorm:"column:start_at;type:bigint"`
-	EndAt        *int64 `gorm:"column:end_at;type:bigint"`
-	DeletedAt    *int64 `gorm:"column:deleted_at;type:bigint;index"`
-	CreatedAt    int64  `gorm:"column:created_at"`
-	UpdatedAt    int64  `gorm:"column:updated_at"`
-	CreatedBy    int64  `gorm:"column:created_by;not null"`
-	UpdatedBy    int64  `gorm:"column:updated_by;not null"`
+	application.Model
+	TenantID       int64           `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
+	Name           string          `gorm:"column:name;type:varchar(255);not null"`
+	Description    string          `gorm:"column:description;type:text"`
+	CouponID       int64           `gorm:"column:coupon_id;type:bigint;not null"`
+	PointsRequired int64           `gorm:"column:points_required;type:bigint;not null"`
+	TotalStock     int64           `gorm:"column:total_stock;type:bigint;not null;default:0"`
+	UsedStock      int64           `gorm:"column:used_stock;type:bigint;not null;default:0"`
+	PerUserLimit   int             `gorm:"column:per_user_limit;type:int;not null;default:1"`
+	Status         int             `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
+	StartAt        *time.Time      `gorm:"column:start_at"`
+	EndAt          *time.Time      `gorm:"column:end_at"`
 }
 
 func (redeemRuleModel) TableName() string {
@@ -298,7 +276,7 @@ func (redeemRuleModel) TableName() string {
 
 func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 	return &points.RedeemRule{
-		ID:             m.ID,
+		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:       shared.TenantID(m.TenantID),
 		Name:           m.Name,
 		Description:    m.Description,
@@ -310,19 +288,12 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 		Status:         points.RedeemRuleStatus(m.Status),
 		StartAt:        m.StartAt,
 		EndAt:          m.EndAt,
-		DeletedAt:      m.DeletedAt,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
 	}
 }
 
 func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
 	return &redeemRuleModel{
-		ID:             r.ID,
+		Model:         application.Model{ID: r.ID, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, DeletedAt: r.DeletedAt},
 		TenantID:       r.TenantID.Int64(),
 		Name:           r.Name,
 		Description:    r.Description,
@@ -334,11 +305,6 @@ func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
 		Status:         int(r.Status),
 		StartAt:        r.StartAt,
 		EndAt:          r.EndAt,
-		DeletedAt:      r.DeletedAt,
-		CreatedAt:      r.Audit.CreatedAt.Unix(),
-		UpdatedAt:      r.Audit.UpdatedAt.Unix(),
-		CreatedBy:      r.Audit.CreatedBy,
-		UpdatedBy:      r.Audit.UpdatedBy,
 	}
 }
 
@@ -363,7 +329,6 @@ func (r *redeemRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.R
 			"status":          model.Status,
 			"start_at":        model.StartAt,
 			"end_at":          model.EndAt,
-			"updated_by":      model.UpdatedBy,
 			"updated_at":      model.UpdatedAt,
 		}).Error
 }
@@ -373,7 +338,7 @@ func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID share
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 	if result.Error != nil {
 		return result.Error
@@ -442,7 +407,7 @@ func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return query.Updates(map[string]interface{}{
 		"status":     status,
 		"updated_at": now,
@@ -499,7 +464,7 @@ func NewPointsAccountRepository() points.PointsAccountRepository {
 }
 
 type pointsAccountModel struct {
-	ID            int64 `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID      int64 `gorm:"column:tenant_id;not null;uniqueIndex:uniq_tenant_user"`
 	UserID        int64 `gorm:"column:user_id;not null;uniqueIndex:uniq_tenant_user"`
 	Balance       int64 `gorm:"column:balance;type:bigint;not null;default:0"`
@@ -507,10 +472,6 @@ type pointsAccountModel struct {
 	TotalEarned   int64 `gorm:"column:total_earned;type:bigint;not null;default:0"`
 	TotalRedeemed int64 `gorm:"column:total_redeemed;type:bigint;not null;default:0"`
 	TotalExpired  int64 `gorm:"column:total_expired;type:bigint;not null;default:0"`
-	CreatedAt     int64 `gorm:"column:created_at"`
-	UpdatedAt     int64 `gorm:"column:updated_at"`
-	CreatedBy     int64 `gorm:"column:created_by;not null"`
-	UpdatedBy     int64 `gorm:"column:updated_by;not null"`
 }
 
 func (pointsAccountModel) TableName() string {
@@ -519,7 +480,7 @@ func (pointsAccountModel) TableName() string {
 
 func (m *pointsAccountModel) toEntity() *points.PointsAccount {
 	return &points.PointsAccount{
-		ID:            m.ID,
+		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:      shared.TenantID(m.TenantID),
 		UserID:        m.UserID,
 		Balance:       m.Balance,
@@ -527,18 +488,12 @@ func (m *pointsAccountModel) toEntity() *points.PointsAccount {
 		TotalEarned:   m.TotalEarned,
 		TotalRedeemed: m.TotalRedeemed,
 		TotalExpired:  m.TotalExpired,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
 	}
 }
 
 func fromPointsAccountEntity(a *points.PointsAccount) *pointsAccountModel {
 	return &pointsAccountModel{
-		ID:            a.ID,
+		Model:         application.Model{ID: a.ID, CreatedAt: a.CreatedAt, UpdatedAt: a.UpdatedAt, DeletedAt: a.DeletedAt},
 		TenantID:      a.TenantID.Int64(),
 		UserID:        a.UserID,
 		Balance:       a.Balance,
@@ -546,10 +501,6 @@ func fromPointsAccountEntity(a *points.PointsAccount) *pointsAccountModel {
 		TotalEarned:   a.TotalEarned,
 		TotalRedeemed: a.TotalRedeemed,
 		TotalExpired:  a.TotalExpired,
-		CreatedAt:     a.Audit.CreatedAt.Unix(),
-		UpdatedAt:     a.Audit.UpdatedAt.Unix(),
-		CreatedBy:     a.Audit.CreatedBy,
-		UpdatedBy:     a.Audit.UpdatedBy,
 	}
 }
 
@@ -569,7 +520,6 @@ func (r *pointsAccountRepo) Update(ctx context.Context, db *gorm.DB, account *po
 			"total_earned":   model.TotalEarned,
 			"total_redeemed": model.TotalRedeemed,
 			"total_expired":  model.TotalExpired,
-			"updated_by":     model.UpdatedBy,
 			"updated_at":     model.UpdatedAt,
 		}).Error
 }
@@ -683,7 +633,7 @@ func NewPointsTransactionRepository() points.PointsTransactionRepository {
 }
 
 type pointsTransactionModel struct {
-	ID            int64  `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID      int64  `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
 	UserID        int64  `gorm:"column:user_id;not null;index:idx_tenant_user"`
 	AccountID     int64  `gorm:"column:account_id;not null;index:idx_account_id"`
@@ -693,12 +643,7 @@ type pointsTransactionModel struct {
 	ReferenceType string `gorm:"column:reference_type;type:varchar(50)"`
 	ReferenceID   string `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
 	Description   string `gorm:"column:description;type:text"`
-	ExpiresAt     *int64 `gorm:"column:expires_at;type:bigint;index:idx_expires_at"`
-	DeletedAt     *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt     int64  `gorm:"column:created_at"`
-	UpdatedAt     int64  `gorm:"column:updated_at"`
-	CreatedBy     int64  `gorm:"column:created_by;not null"`
-	UpdatedBy     int64  `gorm:"column:updated_by;not null"`
+	ExpiresAt     *time.Time `gorm:"column:expires_at"`
 }
 
 func (pointsTransactionModel) TableName() string {
@@ -707,7 +652,7 @@ func (pointsTransactionModel) TableName() string {
 
 func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
 	return &points.PointsTransaction{
-		ID:            m.ID,
+		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:      shared.TenantID(m.TenantID),
 		UserID:        m.UserID,
 		AccountID:     m.AccountID,
@@ -718,19 +663,12 @@ func (m *pointsTransactionModel) toEntity() *points.PointsTransaction {
 		ReferenceID:   m.ReferenceID,
 		Description:   m.Description,
 		ExpiresAt:     m.ExpiresAt,
-		DeletedAt:     m.DeletedAt,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
 	}
 }
 
 func fromPointsTransactionEntity(t *points.PointsTransaction) *pointsTransactionModel {
 	return &pointsTransactionModel{
-		ID:            t.ID,
+		Model:         application.Model{ID: t.ID, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt, DeletedAt: t.DeletedAt},
 		TenantID:      t.TenantID.Int64(),
 		UserID:        t.UserID,
 		AccountID:     t.AccountID,
@@ -741,11 +679,6 @@ func fromPointsTransactionEntity(t *points.PointsTransaction) *pointsTransaction
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
 		ExpiresAt:     t.ExpiresAt,
-		DeletedAt:     t.DeletedAt,
-		CreatedAt:     t.Audit.CreatedAt.Unix(),
-		UpdatedAt:     t.Audit.UpdatedAt.Unix(),
-		CreatedBy:     t.Audit.CreatedBy,
-		UpdatedBy:     t.Audit.UpdatedBy,
 	}
 }
 
@@ -789,10 +722,10 @@ func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenan
 		dbQuery = dbQuery.Where("type = ?", query.Type)
 	}
 	if query.StartTime != nil {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", *query.StartTime)
 	}
 	if query.EndTime != nil {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", *query.EndTime)
 	}
 
 	var total int64
@@ -824,10 +757,10 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 	}
 
 	if query.StartTime != nil {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", *query.StartTime)
 	}
 	if query.EndTime != nil {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", *query.EndTime)
 	}
 
 	var totalEarned, totalRedeemed int64
@@ -837,10 +770,10 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 		earnQuery = earnQuery.Where("tenant_id = ?", tenantID.Int64())
 	}
 	if query.StartTime != nil {
-		earnQuery = earnQuery.Where("created_at >= ?", query.StartTime.Unix())
+		earnQuery = earnQuery.Where("created_at >= ?", *query.StartTime)
 	}
 	if query.EndTime != nil {
-		earnQuery = earnQuery.Where("created_at < ?", query.EndTime.Unix())
+		earnQuery = earnQuery.Where("created_at < ?", *query.EndTime)
 	}
 	earnQuery.Select("COALESCE(SUM(points), 0)").Scan(&totalEarned)
 
@@ -849,10 +782,10 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 		redeemQuery = redeemQuery.Where("tenant_id = ?", tenantID.Int64())
 	}
 	if query.StartTime != nil {
-		redeemQuery = redeemQuery.Where("created_at >= ?", query.StartTime.Unix())
+		redeemQuery = redeemQuery.Where("created_at >= ?", *query.StartTime)
 	}
 	if query.EndTime != nil {
-		redeemQuery = redeemQuery.Where("created_at < ?", query.EndTime.Unix())
+		redeemQuery = redeemQuery.Where("created_at < ?", *query.EndTime)
 	}
 	redeemQuery.Select("COALESCE(SUM(ABS(points)), 0)").Scan(&totalRedeemed)
 
@@ -871,20 +804,15 @@ func NewPointsRedemptionRepository() points.PointsRedemptionRepository {
 }
 
 type pointsRedemptionModel struct {
-	ID           int64  `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID     int64  `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
 	UserID       int64  `gorm:"column:user_id;not null;index:idx_tenant_user"`
-	RedeemRuleID int64  `gorm:"column:redeem_rule_id;not null;index:idx_redeem_rule"`
+	RedeemRuleID int64  `gorm="column:redeem_rule_id;not null;index:idx_redeem_rule"`
 	CouponID     int64  `gorm:"column:coupon_id;type:bigint;not null"`
 	UserCouponID int64  `gorm:"column:user_coupon_id;type:bigint"`
 	PointsUsed   int64  `gorm:"column:points_used;type:bigint;not null"`
 	Status       int    `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	CompletedAt  *int64 `gorm:"column:completed_at;type:bigint"`
-	DeletedAt    *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt    int64  `gorm:"column:created_at"`
-	UpdatedAt    int64  `gorm:"column:updated_at"`
-	CreatedBy    int64  `gorm:"column:created_by;not null"`
-	UpdatedBy    int64  `gorm:"column:updated_by;not null"`
+	CompletedAt  *time.Time `gorm:"column:completed_at"`
 }
 
 func (pointsRedemptionModel) TableName() string {
@@ -893,7 +821,7 @@ func (pointsRedemptionModel) TableName() string {
 
 func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
 	return &points.PointsRedemption{
-		ID:           m.ID,
+		Model:        application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:     shared.TenantID(m.TenantID),
 		UserID:       m.UserID,
 		RedeemRuleID: m.RedeemRuleID,
@@ -902,19 +830,12 @@ func (m *pointsRedemptionModel) toEntity() *points.PointsRedemption {
 		PointsUsed:   m.PointsUsed,
 		Status:       points.RedemptionStatus(m.Status),
 		CompletedAt:  m.CompletedAt,
-		DeletedAt:    m.DeletedAt,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
 	}
 }
 
 func fromPointsRedemptionEntity(r *points.PointsRedemption) *pointsRedemptionModel {
 	return &pointsRedemptionModel{
-		ID:           r.ID,
+		Model:        application.Model{ID: r.ID, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, DeletedAt: r.DeletedAt},
 		TenantID:     r.TenantID.Int64(),
 		UserID:       r.UserID,
 		RedeemRuleID: r.RedeemRuleID,
@@ -923,11 +844,6 @@ func fromPointsRedemptionEntity(r *points.PointsRedemption) *pointsRedemptionMod
 		PointsUsed:   r.PointsUsed,
 		Status:       int(r.Status),
 		CompletedAt:  r.CompletedAt,
-		DeletedAt:    r.DeletedAt,
-		CreatedAt:    r.Audit.CreatedAt.Unix(),
-		UpdatedAt:    r.Audit.UpdatedAt.Unix(),
-		CreatedBy:    r.Audit.CreatedBy,
-		UpdatedBy:    r.Audit.UpdatedBy,
 	}
 }
 
@@ -945,7 +861,6 @@ func (r *pointsRedemptionRepo) Update(ctx context.Context, db *gorm.DB, redempti
 			"user_coupon_id": model.UserCouponID,
 			"status":         model.Status,
 			"completed_at":   model.CompletedAt,
-			"updated_by":     model.UpdatedBy,
 			"updated_at":     model.UpdatedAt,
 		}).Error
 }
@@ -982,10 +897,10 @@ func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB, tenant
 		dbQuery = dbQuery.Where("status = ?", query.Status)
 	}
 	if query.StartTime != nil {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", *query.StartTime)
 	}
 	if query.EndTime != nil {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", *query.EndTime)
 	}
 
 	var total int64

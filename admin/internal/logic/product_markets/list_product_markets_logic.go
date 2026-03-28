@@ -5,7 +5,6 @@ package product_markets
 
 import (
 	"context"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -73,7 +72,7 @@ func (l *ListProductMarketsLogic) ListProductMarkets(req *types.ListProductMarke
 
 		var publishedAt string
 		if pm.PublishedAt != nil {
-			publishedAt = time.Unix(*pm.PublishedAt, 0).Format("2006-01-02 15:04:05")
+			publishedAt = pm.PublishedAt.Format("2006-01-02 15:04:05")
 		}
 
 		list = append(list, &types.ProductMarketResp{

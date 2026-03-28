@@ -38,24 +38,20 @@ func (productMarketModel) TableName() string {
 }
 
 func (m *productMarketModel) toEntity() *product.ProductMarket {
-	var publishedAt *int64
-	if m.PublishedAt != nil {
-		t := m.PublishedAt.Unix()
-		publishedAt = &t
-	}
-
 	pm := &product.ProductMarket{
-		ID:                  m.ID,
 		TenantID:            m.TenantID,
 		ProductID:           m.ProductID,
 		VariantID:           m.VariantID,
 		MarketID:            m.MarketID,
 		IsEnabled:           m.IsEnabled,
 		StockAlertThreshold: m.StockAlertThreshold,
-		PublishedAt:         publishedAt,
-		CreatedAt:           m.CreatedAt.Unix(),
-		UpdatedAt:           m.UpdatedAt.Unix(),
+		PublishedAt:         m.PublishedAt,
 	}
+
+	// Set embedded Model fields
+	pm.Model.ID = m.ID
+	pm.Model.CreatedAt = m.CreatedAt
+	pm.Model.UpdatedAt = m.UpdatedAt
 
 	pm.Price, _ = decimal.NewFromString(m.Price)
 	if m.CompareAtPrice != nil {
@@ -71,23 +67,17 @@ func (m *productMarketModel) toEntity() *product.ProductMarket {
 }
 
 func fromProductMarketEntity(pm *product.ProductMarket) *productMarketModel {
-	var publishedAt *time.Time
-	if pm.PublishedAt != nil {
-		t := time.Unix(*pm.PublishedAt, 0)
-		publishedAt = &t
-	}
-
 	m := &productMarketModel{
-		ID:                  pm.ID,
+		ID:                  pm.Model.ID,
 		TenantID:            pm.TenantID,
 		ProductID:           pm.ProductID,
 		VariantID:           pm.VariantID,
 		MarketID:            pm.MarketID,
 		IsEnabled:           pm.IsEnabled,
 		StockAlertThreshold: pm.StockAlertThreshold,
-		PublishedAt:         publishedAt,
-		CreatedAt:           time.Unix(pm.CreatedAt, 0),
-		UpdatedAt:           time.Unix(pm.UpdatedAt, 0),
+		PublishedAt:         pm.PublishedAt,
+		CreatedAt:           pm.Model.CreatedAt,
+		UpdatedAt:           pm.Model.UpdatedAt,
 	}
 
 	m.Price = pm.Price.String()

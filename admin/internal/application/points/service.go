@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -293,7 +294,7 @@ func (s *service) CreateEarnRule(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	rule := &points.EarnRule{
-		ID:               id,
+		Model:            application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:         tenantID,
 		Name:             req.Name,
 		Description:      req.Description,
@@ -307,9 +308,8 @@ func (s *service) CreateEarnRule(ctx context.Context, tenantID shared.TenantID, 
 		ExpirationMonths: req.ExpirationMonths,
 		Status:           points.EarnRuleStatusDraft,
 		Priority:         req.Priority,
-		StartAt:          timeToInt64(req.StartAt),
-		EndAt:            timeToInt64(req.EndAt),
-		Audit:            shared.NewAuditInfo(operatorID),
+		StartAt:          req.StartAt,
+		EndAt:            req.EndAt,
 	}
 
 	if err := s.earnRuleRepo.Create(ctx, s.db, rule); err != nil {
@@ -340,9 +340,9 @@ func (s *service) UpdateEarnRule(ctx context.Context, tenantID shared.TenantID, 
 	rule.ConditionValue = req.ConditionValue
 	rule.ExpirationMonths = req.ExpirationMonths
 	rule.Priority = req.Priority
-	rule.StartAt = timeToInt64(req.StartAt)
-	rule.EndAt = timeToInt64(req.EndAt)
-	rule.Audit.Update(operatorID)
+	rule.StartAt = req.StartAt
+	rule.EndAt = req.EndAt
+	rule.UpdatedAt = time.Now().UTC()
 
 	if err := s.earnRuleRepo.Update(ctx, s.db, rule); err != nil {
 		return nil, err
@@ -436,7 +436,7 @@ func (s *service) CreateRedeemRule(ctx context.Context, tenantID shared.TenantID
 	}
 
 	rule := &points.RedeemRule{
-		ID:             id,
+		Model:         application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:       tenantID,
 		Name:           req.Name,
 		Description:    req.Description,
@@ -446,9 +446,8 @@ func (s *service) CreateRedeemRule(ctx context.Context, tenantID shared.TenantID
 		UsedStock:      0,
 		PerUserLimit:   req.PerUserLimit,
 		Status:         points.RedeemRuleStatusInactive,
-		StartAt:        timeToInt64(req.StartAt),
-		EndAt:          timeToInt64(req.EndAt),
-		Audit:          shared.NewAuditInfo(operatorID),
+		StartAt:        req.StartAt,
+		EndAt:          req.EndAt,
 	}
 
 	if err := s.redeemRuleRepo.Create(ctx, s.db, rule); err != nil {
@@ -474,9 +473,9 @@ func (s *service) UpdateRedeemRule(ctx context.Context, tenantID shared.TenantID
 	rule.PointsRequired = req.PointsRequired
 	rule.TotalStock = req.TotalStock
 	rule.PerUserLimit = req.PerUserLimit
-	rule.StartAt = timeToInt64(req.StartAt)
-	rule.EndAt = timeToInt64(req.EndAt)
-	rule.Audit.Update(operatorID)
+	rule.StartAt = req.StartAt
+	rule.EndAt = req.EndAt
+	rule.UpdatedAt = time.Now().UTC()
 
 	if err := s.redeemRuleRepo.Update(ctx, s.db, rule); err != nil {
 		return nil, err
@@ -629,7 +628,7 @@ func (s *service) AdjustPoints(ctx context.Context, tenantID shared.TenantID, re
 		}
 
 		transaction = &points.PointsTransaction{
-			ID:           id,
+			Model:       application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 			TenantID:     tenantID,
 			UserID:       account.UserID,
 			AccountID:    account.ID,
@@ -637,7 +636,6 @@ func (s *service) AdjustPoints(ctx context.Context, tenantID shared.TenantID, re
 			BalanceAfter: account.Balance,
 			Type:         points.TransactionTypeAdjust,
 			Description:  req.Reason,
-			Audit:        shared.NewAuditInfo(req.OperatorID),
 		}
 
 		return s.transactionRepo.Create(ctx, tx, transaction)
@@ -802,24 +800,6 @@ func (s *service) GetExpiringPoints(ctx context.Context, tenantID shared.TenantI
 
 // ==================== Helper Functions ====================
 
-// timeToInt64 converts *time.Time to *int64 (Unix seconds)
-func timeToInt64(t *time.Time) *int64 {
-	if t == nil {
-		return nil
-	}
-	ts := t.Unix()
-	return &ts
-}
-
-// int64ToTime converts *int64 (Unix seconds) to *time.Time
-func int64ToTime(ts *int64) *time.Time {
-	if ts == nil {
-		return nil
-	}
-	t := time.Unix(*ts, 0)
-	return &t
-}
-
 func toEarnRuleDTO(r *points.EarnRule) *EarnRuleDTO {
 	return &EarnRuleDTO{
 		ID:               r.ID,
@@ -835,10 +815,10 @@ func toEarnRuleDTO(r *points.EarnRule) *EarnRuleDTO {
 		ExpirationMonths: r.ExpirationMonths,
 		Status:           r.Status.String(),
 		Priority:         r.Priority,
-		StartAt:          int64ToTime(r.StartAt),
-		EndAt:            int64ToTime(r.EndAt),
-		CreatedAt:        r.Audit.CreatedAt,
-		UpdatedAt:        r.Audit.UpdatedAt,
+		StartAt:          r.StartAt,
+		EndAt:            r.EndAt,
+		CreatedAt:        r.CreatedAt,
+		UpdatedAt:        r.UpdatedAt,
 	}
 }
 
@@ -853,10 +833,10 @@ func toRedeemRuleDTO(r *points.RedeemRule) *RedeemRuleDTO {
 		UsedStock:      r.UsedStock,
 		PerUserLimit:   r.PerUserLimit,
 		Status:         r.Status.String(),
-		StartAt:        int64ToTime(r.StartAt),
-		EndAt:          int64ToTime(r.EndAt),
-		CreatedAt:      r.Audit.CreatedAt,
-		UpdatedAt:      r.Audit.UpdatedAt,
+		StartAt:        r.StartAt,
+		EndAt:          r.EndAt,
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 	}
 }
 
@@ -869,8 +849,8 @@ func toPointsAccountDTO(a *points.PointsAccount) *PointsAccountDTO {
 		TotalEarned:   a.TotalEarned,
 		TotalRedeemed: a.TotalRedeemed,
 		TotalExpired:  a.TotalExpired,
-		CreatedAt:     a.Audit.CreatedAt,
-		UpdatedAt:     a.Audit.UpdatedAt,
+		CreatedAt:     a.CreatedAt,
+		UpdatedAt:     a.UpdatedAt,
 	}
 }
 
@@ -885,8 +865,8 @@ func toPointsTransactionDTO(t *points.PointsTransaction) *PointsTransactionDTO {
 		ReferenceType: t.ReferenceType,
 		ReferenceID:   t.ReferenceID,
 		Description:   t.Description,
-		ExpiresAt:     int64ToTime(t.ExpiresAt),
-		CreatedAt:     t.Audit.CreatedAt,
+		ExpiresAt:     t.ExpiresAt,
+		CreatedAt:     t.CreatedAt,
 	}
 }
 
@@ -899,8 +879,8 @@ func toPointsRedemptionDTO(r *points.PointsRedemption) *PointsRedemptionDTO {
 		UserCouponID: r.UserCouponID,
 		PointsUsed:   r.PointsUsed,
 		Status:       r.Status.String(),
-		CompletedAt:  int64ToTime(r.CompletedAt),
-		CreatedAt:    r.Audit.CreatedAt,
+		CompletedAt:  r.CompletedAt,
+		CreatedAt:    r.CreatedAt,
 	}
 }
 

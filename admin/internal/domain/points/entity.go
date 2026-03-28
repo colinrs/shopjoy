@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -231,7 +232,7 @@ func (t TierConfigs) Value() (driver.Value, error) {
 
 // EarnRule 积分获取规则
 type EarnRule struct {
-	ID               int64           `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID         shared.TenantID `gorm:"column:tenant_id;type:bigint;not null;index:idx_tenant_id"`
 	Name             string          `gorm:"column:name;type:varchar(255);not null"`
 	Description      string          `gorm:"column:description;type:text"`
@@ -245,10 +246,8 @@ type EarnRule struct {
 	ExpirationMonths int             `gorm:"column:expiration_months;type:int;not null;default:12"`
 	Status           EarnRuleStatus  `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	Priority         int             `gorm:"column:priority;type:int;not null;default:0"`
-	StartAt          *int64          `gorm:"column:start_at"`
-	EndAt            *int64          `gorm:"column:end_at"`
-	DeletedAt        *int64          `gorm:"column:deleted_at;index"`
-	Audit            shared.AuditInfo `gorm:"embedded"`
+	StartAt          *time.Time      `gorm:"column:start_at"`
+	EndAt            *time.Time      `gorm:"column:end_at"`
 }
 
 func (e *EarnRule) TableName() string {
@@ -261,15 +260,15 @@ func (e *EarnRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 
 	// 检查开始时间
-	if e.StartAt != nil && now < *e.StartAt {
+	if e.StartAt != nil && now.Before(*e.StartAt) {
 		return false
 	}
 
 	// 检查结束时间
-	if e.EndAt != nil && now > *e.EndAt {
+	if e.EndAt != nil && now.After(*e.EndAt) {
 		return false
 	}
 
@@ -338,7 +337,7 @@ func (e *EarnRule) Activate(updatedBy int64) error {
 		return code.ErrParam
 	}
 	e.Status = EarnRuleStatusActive
-	e.Audit.Update(updatedBy)
+	e.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -348,7 +347,7 @@ func (e *EarnRule) Deactivate(updatedBy int64) error {
 		return code.ErrParam
 	}
 	e.Status = EarnRuleStatusInactive
-	e.Audit.Update(updatedBy)
+	e.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -356,7 +355,7 @@ func (e *EarnRule) Deactivate(updatedBy int64) error {
 
 // RedeemRule 积分兑换规则
 type RedeemRule struct {
-	ID             int64            `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID       shared.TenantID  `gorm:"column:tenant_id;type:bigint;not null;index:idx_tenant_id"`
 	Name           string           `gorm:"column:name;type:varchar(255);not null"`
 	Description    string           `gorm:"column:description;type:text"`
@@ -366,10 +365,8 @@ type RedeemRule struct {
 	UsedStock      int64            `gorm:"column:used_stock;type:bigint;not null;default:0"`
 	PerUserLimit   int              `gorm:"column:per_user_limit;type:int;not null;default:1"`
 	Status         RedeemRuleStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	StartAt        *int64          `gorm:"column:start_at"`
-	EndAt          *int64          `gorm:"column:end_at"`
-	DeletedAt      *int64           `gorm:"column:deleted_at;index"`
-	Audit          shared.AuditInfo `gorm:"embedded"`
+	StartAt        *time.Time      `gorm:"column:start_at"`
+	EndAt          *time.Time      `gorm:"column:end_at"`
 }
 
 func (r *RedeemRule) TableName() string {
@@ -382,13 +379,13 @@ func (r *RedeemRule) IsActive() bool {
 		return false
 	}
 
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 
-	if r.StartAt != nil && now < *r.StartAt {
+	if r.StartAt != nil && now.Before(*r.StartAt) {
 		return false
 	}
 
-	if r.EndAt != nil && now > *r.EndAt {
+	if r.EndAt != nil && now.After(*r.EndAt) {
 		return false
 	}
 
@@ -415,7 +412,7 @@ func (r *RedeemRule) Activate(updatedBy int64) error {
 		return code.ErrParam
 	}
 	r.Status = RedeemRuleStatusActive
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -425,7 +422,7 @@ func (r *RedeemRule) Deactivate(updatedBy int64) error {
 		return code.ErrParam
 	}
 	r.Status = RedeemRuleStatusInactive
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -433,16 +430,14 @@ func (r *RedeemRule) Deactivate(updatedBy int64) error {
 
 // PointsAccount 积分账户
 type PointsAccount struct {
-	ID            int64            `gorm:"column:id;primaryKey"`
-	TenantID      shared.TenantID  `gorm:"column:tenant_id;type:bigint;not null;uniqueIndex:uniq_tenant_user"`
-	UserID        int64            `gorm:"column:user_id;type:bigint;not null;uniqueIndex:uniq_tenant_user"`
-	Balance       int64            `gorm:"column:balance;type:bigint;not null;default:0"`
-	FrozenBalance int64            `gorm:"column:frozen_balance;type:bigint;not null;default:0"`
-	TotalEarned   int64            `gorm:"column:total_earned;type:bigint;not null;default:0"`
-	TotalRedeemed int64            `gorm:"column:total_redeemed;type:bigint;not null;default:0"`
-	TotalExpired  int64            `gorm:"column:total_expired;type:bigint;not null;default:0"`
-	DeletedAt     *int64           `gorm:"column:deleted_at;index"`
-	Audit         shared.AuditInfo `gorm:"embedded"`
+	application.Model
+	TenantID      shared.TenantID `gorm:"column:tenant_id;type:bigint;not null;uniqueIndex:uniq_tenant_user"`
+	UserID        int64           `gorm:"column:user_id;type:bigint;not null;uniqueIndex:uniq_tenant_user"`
+	Balance       int64           `gorm:"column:balance;type:bigint;not null;default:0"`
+	FrozenBalance int64           `gorm:"column:frozen_balance;type:bigint;not null;default:0"`
+	TotalEarned   int64           `gorm:"column:total_earned;type:bigint;not null;default:0"`
+	TotalRedeemed int64           `gorm:"column:total_redeemed;type:bigint;not null;default:0"`
+	TotalExpired  int64           `gorm:"column:total_expired;type:bigint;not null;default:0"`
 }
 
 func (a *PointsAccount) TableName() string {
@@ -461,7 +456,7 @@ func (a *PointsAccount) AddPoints(points int64, updatedBy int64) error {
 	}
 	a.Balance += points
 	a.TotalEarned += points
-	a.Audit.Update(updatedBy)
+	a.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -475,7 +470,7 @@ func (a *PointsAccount) DeductPoints(points int64, updatedBy int64) error {
 	}
 	a.Balance -= points
 	a.TotalRedeemed += points
-	a.Audit.Update(updatedBy)
+	a.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -489,7 +484,7 @@ func (a *PointsAccount) Freeze(points int64, updatedBy int64) error {
 		return code.ErrSharedInsufficientAmount
 	}
 	a.FrozenBalance += points
-	a.Audit.Update(updatedBy)
+	a.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -502,7 +497,7 @@ func (a *PointsAccount) Unfreeze(points int64, updatedBy int64) error {
 		return code.ErrSharedInsufficientAmount
 	}
 	a.FrozenBalance -= points
-	a.Audit.Update(updatedBy)
+	a.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -516,7 +511,7 @@ func (a *PointsAccount) Expire(points int64, updatedBy int64) error {
 	}
 	a.Balance -= points
 	a.TotalExpired += points
-	a.Audit.Update(updatedBy)
+	a.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -524,19 +519,17 @@ func (a *PointsAccount) Expire(points int64, updatedBy int64) error {
 
 // PointsTransaction 积分交易记录
 type PointsTransaction struct {
-	ID            int64            `gorm:"column:id;primaryKey"`
-	TenantID      shared.TenantID  `gorm:"column:tenant_id;type:bigint;not null;index:idx_tenant_user"`
-	UserID        int64            `gorm:"column:user_id;type:bigint;not null;index:idx_tenant_user"`
-	AccountID     int64            `gorm:"column:account_id;type:bigint;not null;index:idx_account_id"`
-	Points        int64            `gorm:"column:points;type:bigint;not null"` // Positive = earn, negative = deduct
-	BalanceAfter  int64            `gorm:"column:balance_after;type:bigint;not null"`
-	Type          TransactionType  `gorm:"column:type;type:varchar(20);not null;index:idx_type"`
-	ReferenceType string           `gorm:"column:reference_type;type:varchar(50)"`
-	ReferenceID   string           `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
-	Description   string           `gorm:"column:description;type:text"`
-	ExpiresAt     *int64          `gorm:"column:expires_at;index:idx_expires_at"`
-	DeletedAt     *int64           `gorm:"column:deleted_at;index"`
-	Audit         shared.AuditInfo `gorm:"embedded"`
+	application.Model
+	TenantID      shared.TenantID `gorm:"column:tenant_id;type:bigint;not null;index:idx_tenant_user"`
+	UserID        int64           `gorm:"column:user_id;type:bigint;not null;index:idx_tenant_user"`
+	AccountID     int64           `gorm:"column:account_id;type:bigint;not null;index:idx_account_id"`
+	Points        int64           `gorm:"column:points;type:bigint;not null"` // Positive = earn, negative = deduct
+	BalanceAfter  int64           `gorm:"column:balance_after;type:bigint;not null"`
+	Type          TransactionType `gorm:"column:type;type:varchar(20);not null;index:idx_type"`
+	ReferenceType string          `gorm:"column:reference_type;type:varchar(50)"`
+	ReferenceID   string          `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
+	Description   string          `gorm:"column:description;type:text"`
+	ExpiresAt     *time.Time      `gorm:"column:expires_at;index:idx_expires_at"`
 }
 
 func (t *PointsTransaction) TableName() string {
@@ -557,7 +550,7 @@ func (t *PointsTransaction) IsDeduction() bool {
 
 // PointsRedemption 积分兑换记录
 type PointsRedemption struct {
-	ID           int64            `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID     shared.TenantID  `gorm:"column:tenant_id;type:bigint;not null;index:idx_tenant_user"`
 	UserID       int64            `gorm:"column:user_id;type:bigint;not null;index:idx_tenant_user"`
 	RedeemRuleID int64            `gorm:"column:redeem_rule_id;type:bigint;not null;index:idx_redeem_rule"`
@@ -565,9 +558,7 @@ type PointsRedemption struct {
 	UserCouponID int64            `gorm:"column:user_coupon_id;type:bigint"`
 	PointsUsed   int64            `gorm:"column:points_used;type:bigint;not null"`
 	Status       RedemptionStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	CompletedAt  *int64          `gorm:"column:completed_at"`
-	DeletedAt    *int64           `gorm:"column:deleted_at;index"`
-	Audit        shared.AuditInfo `gorm:"embedded"`
+	CompletedAt  *time.Time       `gorm:"column:completed_at"`
 }
 
 func (r *PointsRedemption) TableName() string {
@@ -581,9 +572,9 @@ func (r *PointsRedemption) Complete(userCouponID int64, updatedBy int64) error {
 	}
 	r.Status = RedemptionStatusCompleted
 	r.UserCouponID = userCouponID
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	r.CompletedAt = &now
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = now
 	return nil
 }
 
@@ -593,7 +584,7 @@ func (r *PointsRedemption) Cancel(updatedBy int64) error {
 		return code.ErrParam
 	}
 	r.Status = RedemptionStatusCancelled
-	r.Audit.Update(updatedBy)
+	r.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
