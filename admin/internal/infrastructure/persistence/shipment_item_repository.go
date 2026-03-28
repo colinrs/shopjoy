@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -36,7 +37,10 @@ func (shipmentItemModel) TableName() string {
 
 func (m *shipmentItemModel) toEntity() fulfillment.ShipmentItem {
 	return fulfillment.ShipmentItem{
-		ID:          m.ID,
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+		},
 		TenantID:    shared.TenantID(m.TenantID),
 		ShipmentID:  m.ShipmentID,
 		OrderItemID: m.OrderItemID,
@@ -46,13 +50,12 @@ func (m *shipmentItemModel) toEntity() fulfillment.ShipmentItem {
 		SKUName:     m.SKUName,
 		Image:       m.Image,
 		Quantity:    m.Quantity,
-		CreatedAt:   time.Unix(m.CreatedAt, 0).UTC(),
 	}
 }
 
 func fromShipmentItemEntity(item fulfillment.ShipmentItem) *shipmentItemModel {
 	return &shipmentItemModel{
-		ID:          item.ID,
+		ID:          item.Model.ID,
 		TenantID:    item.TenantID.Int64(),
 		ShipmentID:  item.ShipmentID,
 		OrderItemID: item.OrderItemID,
@@ -62,7 +65,7 @@ func fromShipmentItemEntity(item fulfillment.ShipmentItem) *shipmentItemModel {
 		SKUName:     item.SKUName,
 		Image:       item.Image,
 		Quantity:    item.Quantity,
-		CreatedAt:   item.CreatedAt.Unix(),
+		CreatedAt:   item.Model.CreatedAt.Unix(),
 	}
 }
 

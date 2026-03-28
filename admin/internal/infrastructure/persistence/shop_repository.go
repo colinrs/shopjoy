@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -57,7 +58,7 @@ func (m *shopModel) toEntity() *storefront.Shop {
 	}
 
 	return &storefront.Shop{
-		ID:             m.ID,
+		Model: application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:       shared.TenantID(m.TenantID),
 		Name:           m.Name,
 		Description:    m.Description,
@@ -74,10 +75,6 @@ func (m *shopModel) toEntity() *storefront.Shop {
 		Status:         shared.Status(m.Status),
 		CurrentThemeID: m.CurrentThemeID,
 		ThemeConfig:    themeConfig,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-		},
 	}
 }
 
@@ -90,7 +87,7 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 	}
 
 	return &shopModel{
-		ID:             s.ID,
+		ID:             s.Model.ID,
 		TenantID:       s.TenantID.Int64(),
 		Name:           s.Name,
 		Description:    s.Description,
@@ -106,8 +103,8 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 		Status:         int8(s.Status),
 		CurrentThemeID: s.CurrentThemeID,
 		ThemeConfig:    themeConfig,
-		CreatedAt:      s.Audit.CreatedAt.Unix(),
-		UpdatedAt:      s.Audit.UpdatedAt.Unix(),
+		CreatedAt:      s.Model.CreatedAt.Unix(),
+		UpdatedAt:      s.Model.UpdatedAt.Unix(),
 	}
 }
 
@@ -151,7 +148,7 @@ func (r *shopRepo) Save(ctx context.Context, db *gorm.DB, shop *storefront.Shop)
 	}
 
 	// Update existing
-	shop.ID = existing.ID
+	shop.Model.ID = existing.ID
 	model.ID = existing.ID
 	return db.WithContext(ctx).Model(&shopModel{}).
 		Where("id = ?", existing.ID).

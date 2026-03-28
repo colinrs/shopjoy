@@ -41,7 +41,6 @@ func (m *skuModel) toEntity() *product.SKU {
 	}
 
 	return &product.SKU{
-		ID:             m.ID,
 		TenantID:       shared.TenantID(m.TenantID),
 		ProductID:      m.ProductID,
 		Code:           m.Code,
@@ -64,7 +63,7 @@ func fromSKUEntity(sku *product.SKU) *skuModel {
 	attributesJSON, _ := json.Marshal(sku.Attributes)
 
 	return &skuModel{
-		ID:             sku.ID,
+		ID:             sku.Model.ID,
 		TenantID:       sku.TenantID.Int64(),
 		ProductID:      sku.ProductID,
 		Code:           sku.Code,
@@ -97,7 +96,7 @@ func (r *skuRepo) Update(ctx context.Context, db *gorm.DB, sku *product.SKU) err
 	model := fromSKUEntity(sku)
 	return db.WithContext(ctx).
 		Model(&skuModel{}).
-		Where("id = ? AND tenant_id = ?", sku.ID, sku.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ?", sku.Model.ID, sku.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"code":             model.Code,
 			"price_amount":     model.PriceAmount,

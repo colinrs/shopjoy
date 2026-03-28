@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -30,9 +31,9 @@ type themeModel struct {
 	DefaultConfig string `gorm:"column:default_config;type:text"`
 	IsActive      int    `gorm:"column:is_active;not null;default:0;index"`
 	IsCustom      int    `gorm:"column:is_custom;not null;default:0"`
-	IsPreset      int    `gorm:"column:is_preset;not null;default:1"`
-	CreatedAt     int64  `gorm:"column:created_at;not null"`
-	UpdatedAt     int64  `gorm:"column:updated_at;not null"`
+	IsPreset      int       `gorm:"column:is_preset;not null;default:1"`
+	CreatedAt     time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt     time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (themeModel) TableName() string {
@@ -56,7 +57,7 @@ func (m *themeModel) toEntity() *storefront.Theme {
 	}
 
 	return &storefront.Theme{
-		ID:            m.ID,
+		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:      shared.TenantID(m.TenantID),
 		Name:          m.Name,
 		Code:          m.Code,
@@ -73,7 +74,6 @@ func (m *themeModel) toEntity() *storefront.Theme {
 }
 
 func fromThemeEntity(t *storefront.Theme) *themeModel {
-	now := time.Now().Unix()
 	config, _ := json.Marshal(t.Config)
 	configSchema, _ := json.Marshal(t.ConfigSchema)
 	defaultConfig, _ := json.Marshal(t.DefaultConfig)
@@ -92,7 +92,7 @@ func fromThemeEntity(t *storefront.Theme) *themeModel {
 	}
 
 	return &themeModel{
-		ID:            t.ID,
+		ID:            t.Model.ID,
 		TenantID:      t.TenantID.Int64(),
 		Name:          t.Name,
 		Code:          t.Code,
@@ -105,8 +105,8 @@ func fromThemeEntity(t *storefront.Theme) *themeModel {
 		IsActive:      isActive,
 		IsCustom:      isCustom,
 		IsPreset:      isPreset,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		CreatedAt:     t.Model.CreatedAt,
+		UpdatedAt:     t.Model.UpdatedAt,
 	}
 }
 
@@ -123,7 +123,7 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 
 	// Only allow updating custom themes (not preset themes)
 	return db.WithContext(ctx).Model(&themeModel{}).
-		Where("id = ? AND tenant_id = ? AND is_preset = 0", theme.ID, theme.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ? AND is_preset = 0", theme.Model.ID, theme.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":           model.Name,
 			"description":    model.Description,

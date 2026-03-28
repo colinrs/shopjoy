@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -33,29 +34,25 @@ func (warehouseInventoryModel) TableName() string {
 
 func (m *warehouseInventoryModel) toEntity() *product.WarehouseInventory {
 	return &product.WarehouseInventory{
-		ID:             m.ID,
+		Model:          application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:       shared.TenantID(m.TenantID),
 		SKUCode:        m.SKUCode,
 		WarehouseID:    m.WarehouseID,
 		AvailableStock: m.AvailableStock,
 		LockedStock:    m.LockedStock,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-		},
 	}
 }
 
 func fromWarehouseInventoryEntity(wi *product.WarehouseInventory) *warehouseInventoryModel {
 	return &warehouseInventoryModel{
-		ID:             wi.ID,
+		ID:             wi.Model.ID,
 		TenantID:       wi.TenantID.Int64(),
 		SKUCode:        wi.SKUCode,
 		WarehouseID:    wi.WarehouseID,
 		AvailableStock: wi.AvailableStock,
 		LockedStock:    wi.LockedStock,
-		CreatedAt:      wi.Audit.CreatedAt.Unix(),
-		UpdatedAt:      wi.Audit.UpdatedAt.Unix(),
+		CreatedAt:      wi.Model.CreatedAt.Unix(),
+		UpdatedAt:      wi.Model.UpdatedAt.Unix(),
 	}
 }
 
@@ -67,7 +64,7 @@ func (r *warehouseInventoryRepo) Create(ctx context.Context, db *gorm.DB, wi *pr
 func (r *warehouseInventoryRepo) Update(ctx context.Context, db *gorm.DB, wi *product.WarehouseInventory) error {
 	model := fromWarehouseInventoryEntity(wi)
 	return db.WithContext(ctx).Model(&warehouseInventoryModel{}).
-		Where("id = ? AND tenant_id = ?", wi.ID, wi.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ?", wi.Model.ID, wi.TenantID.Int64()).
 		Updates(map[string]any{
 			"available_stock": model.AvailableStock,
 			"locked_stock":    model.LockedStock,

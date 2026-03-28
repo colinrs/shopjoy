@@ -181,7 +181,7 @@ func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.T
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
 	if result.Error != nil {

@@ -41,7 +41,6 @@ func (brandModel) TableName() string {
 
 func (m *brandModel) toEntity() *product.Brand {
 	return &product.Brand{
-		ID:               m.ID,
 		TenantID:         shared.TenantID(m.TenantID),
 		Name:             m.Name,
 		Logo:             m.Logo,
@@ -63,7 +62,7 @@ func (m *brandModel) toEntity() *product.Brand {
 
 func fromBrandEntity(b *product.Brand) *brandModel {
 	return &brandModel{
-		ID:               b.ID,
+		ID:               b.Model.ID,
 		TenantID:         b.TenantID.Int64(),
 		Name:             b.Name,
 		Logo:             b.Logo,
@@ -89,7 +88,7 @@ func (r *brandRepo) Create(ctx context.Context, db *gorm.DB, b *product.Brand) e
 func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) error {
 	model := fromBrandEntity(b)
 	return db.WithContext(ctx).Model(&brandModel{}).
-		Where("id = ? AND tenant_id = ?", b.ID, b.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ?", b.Model.ID, b.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":              model.Name,
 			"logo":              model.Logo,
@@ -106,7 +105,7 @@ func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) e
 }
 
 func (r *brandRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&brandModel{}).
 		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
 		Update("deleted_at", now).Error

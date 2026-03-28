@@ -117,7 +117,7 @@ func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
 	if result.Error != nil {
@@ -244,7 +244,7 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantI
 		query = query.Where("status IN ?", []int{int(review.StatusPending), int(review.StatusApproved)})
 	}
 
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := query.Updates(map[string]interface{}{
 		"status":     int(status),
 		"updated_at": now,

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -31,27 +32,23 @@ func (brandMarketModel) TableName() string {
 
 func (m *brandMarketModel) toEntity() *product.BrandMarket {
 	return &product.BrandMarket{
-		ID:        m.ID,
+		Model:     application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:  shared.TenantID(m.TenantID),
 		BrandID:   m.BrandID,
 		MarketID:  m.MarketID,
 		IsVisible: m.IsVisible,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-		},
 	}
 }
 
 func fromBrandMarketEntity(bm *product.BrandMarket) *brandMarketModel {
 	return &brandMarketModel{
-		ID:        bm.ID,
+		ID:        bm.Model.ID,
 		TenantID:  bm.TenantID.Int64(),
 		BrandID:   bm.BrandID,
 		MarketID:  bm.MarketID,
 		IsVisible: bm.IsVisible,
-		CreatedAt: bm.Audit.CreatedAt.Unix(),
-		UpdatedAt: bm.Audit.UpdatedAt.Unix(),
+		CreatedAt: bm.Model.CreatedAt.Unix(),
+		UpdatedAt: bm.Model.UpdatedAt.Unix(),
 	}
 }
 
@@ -62,10 +59,10 @@ func (r *brandMarketRepo) Create(ctx context.Context, db *gorm.DB, bm *product.B
 
 func (r *brandMarketRepo) Update(ctx context.Context, db *gorm.DB, bm *product.BrandMarket) error {
 	return db.WithContext(ctx).Model(&brandMarketModel{}).
-		Where("id = ?", bm.ID).
+		Where("id = ?", bm.Model.ID).
 		Updates(map[string]any{
 			"is_visible": bm.IsVisible,
-			"updated_at": time.Now().Unix(),
+			"updated_at": time.Now().UTC(),
 		}).Error
 }
 

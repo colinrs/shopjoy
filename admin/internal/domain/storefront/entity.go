@@ -10,7 +10,7 @@ import (
 )
 
 type Shop struct {
-	ID              int64
+	application.Model
 	TenantID        shared.TenantID
 	Name            string
 	Description     string
@@ -24,7 +24,6 @@ type Shop struct {
 	Status          shared.Status
 	CurrentThemeID  *int64
 	ThemeConfig     *ThemeConfig
-	DeletedAt       *int64
 	Audit           shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -39,7 +38,7 @@ type SEOConfig struct {
 }
 
 type Theme struct {
-	ID            int64
+	application.Model
 	TenantID      shared.TenantID
 	Name          string
 	Code          string
@@ -52,7 +51,6 @@ type Theme struct {
 	IsActive      bool
 	IsCustom      bool
 	IsPreset      bool
-	DeletedAt     *int64
 }
 
 func (t *Theme) TableName() string {
@@ -85,7 +83,7 @@ type SelectOpt struct {
 }
 
 type Page struct {
-	ID          int64
+	application.Model
 	TenantID    shared.TenantID
 	Name        string
 	Slug        string
@@ -168,13 +166,12 @@ func (s *SEOConfigEntity) TableName() string {
 }
 
 type Navigation struct {
-	ID        int64
+	application.Model
 	TenantID  shared.TenantID
 	Name      string
 	Position  string
 	Items     []NavItem
 	Status    shared.Status
-	DeletedAt *int64
 }
 
 func (n *Navigation) TableName() string {
@@ -182,7 +179,7 @@ func (n *Navigation) TableName() string {
 }
 
 type NavItem struct {
-	ID        int64
+	application.Model
 	NavID     int64
 	ParentID  int64
 	Name      string
@@ -190,7 +187,6 @@ type NavItem struct {
 	Type      string
 	TargetID  int64
 	Sort      int
-	DeletedAt *int64
 }
 
 func (ni *NavItem) TableName() string {
@@ -199,7 +195,7 @@ func (ni *NavItem) TableName() string {
 
 // BlockOrder represents the sort order for reordering blocks
 type BlockOrder struct {
-	ID        int64
+	application.Model
 	SortOrder int
 }
 

@@ -11,7 +11,7 @@ import (
 
 // Warehouse represents a physical storage location
 type Warehouse struct {
-	ID        int64
+	application.Model
 	TenantID  shared.TenantID
 	Code      string // 仓库代码
 	Name      string // 仓库名称
@@ -40,7 +40,7 @@ func (w *Warehouse) IsEnabled() bool {
 
 // WarehouseInventory tracks stock per SKU per warehouse
 type WarehouseInventory struct {
-	ID             int64
+	application.Model
 	TenantID       shared.TenantID
 	SKUCode        string // SKU代码
 	WarehouseID    int64

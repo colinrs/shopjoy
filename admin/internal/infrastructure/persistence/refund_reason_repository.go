@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
@@ -32,12 +33,11 @@ func (refundReasonModel) TableName() string {
 
 func (m *refundReasonModel) toEntity() *fulfillment.RefundReason {
 	return &fulfillment.RefundReason{
-		ID:        m.ID,
+		Model:    application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC()},
 		Code:      m.Code,
 		Name:      m.Name,
 		Sort:      m.Sort,
 		IsActive:  m.IsActive == 1,
-		CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
 	}
 }
 
@@ -47,12 +47,12 @@ func fromRefundReasonEntity(r *fulfillment.RefundReason) *refundReasonModel {
 		isActive = 1
 	}
 	return &refundReasonModel{
-		ID:        r.ID,
+		ID:        r.Model.ID,
 		Code:      r.Code,
 		Name:      r.Name,
 		Sort:      r.Sort,
 		IsActive:  isActive,
-		CreatedAt: r.CreatedAt.Unix(),
+		CreatedAt: r.Model.CreatedAt.Unix(),
 	}
 }
 
@@ -126,7 +126,7 @@ func (r *refundReasonRepo) Update(ctx context.Context, db *gorm.DB, reason *fulf
 	model := fromRefundReasonEntity(reason)
 	return db.WithContext(ctx).
 		Model(&refundReasonModel{}).
-		Where("id = ?", reason.ID).
+		Where("id = ?", reason.Model.ID).
 		Updates(map[string]any{
 			"name":      model.Name,
 			"sort":      model.Sort,

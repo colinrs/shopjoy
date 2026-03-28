@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -32,29 +33,25 @@ func (productLocalizationModel) TableName() string {
 
 func (m *productLocalizationModel) toEntity() *product.ProductLocalization {
 	return &product.ProductLocalization{
-		ID:           m.ID,
+		Model:        application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:     shared.TenantID(m.TenantID),
 		ProductID:    m.ProductID,
 		LanguageCode: m.LanguageCode,
 		Name:         m.Name,
 		Description:  m.Description,
-		AuditInfo: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-		},
 	}
 }
 
 func fromProductLocalizationEntity(pl *product.ProductLocalization) *productLocalizationModel {
 	return &productLocalizationModel{
-		ID:           pl.ID,
+		ID:           pl.Model.ID,
 		TenantID:     pl.TenantID.Int64(),
 		ProductID:    pl.ProductID,
 		LanguageCode: pl.LanguageCode,
 		Name:         pl.Name,
 		Description:  pl.Description,
-		CreatedAt:    pl.AuditInfo.CreatedAt.Unix(),
-		UpdatedAt:    pl.AuditInfo.UpdatedAt.Unix(),
+		CreatedAt:    pl.Model.CreatedAt.Unix(),
+		UpdatedAt:    pl.Model.UpdatedAt.Unix(),
 	}
 }
 
@@ -65,12 +62,12 @@ func (r *productLocalizationRepo) Create(ctx context.Context, db *gorm.DB, local
 
 func (r *productLocalizationRepo) Update(ctx context.Context, db *gorm.DB, localization *product.ProductLocalization) error {
 	return db.WithContext(ctx).Model(&productLocalizationModel{}).
-		Where("id = ? AND tenant_id = ?", localization.ID, localization.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ?", localization.Model.ID, localization.TenantID.Int64()).
 		Updates(map[string]any{
 			"language_code": localization.LanguageCode,
 			"name":          localization.Name,
 			"description":   localization.Description,
-			"updated_at":    time.Now().Unix(),
+			"updated_at":    time.Now().UTC(),
 		}).Error
 }
 

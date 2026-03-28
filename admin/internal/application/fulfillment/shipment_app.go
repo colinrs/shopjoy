@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -243,7 +244,10 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 					return err
 				}
 				items[i] = fulfillment.ShipmentItem{
-					ID:          itemID,
+					Model: application.Model{
+						ID:        itemID,
+						CreatedAt: time.Now().UTC(),
+					},
 					TenantID:    tenantID,
 					ShipmentID:  shipmentID,
 					OrderItemID: itemReq.OrderItemID,
@@ -253,7 +257,6 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 					SKUName:     itemReq.SKUName,
 					Image:       itemReq.Image,
 					Quantity:    itemReq.Quantity,
-					CreatedAt:   time.Now().UTC(),
 				}
 			}
 			if err := a.shipmentItemRepo.BatchCreate(ctx, tx, items); err != nil {
@@ -489,7 +492,7 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 	items := make([]*ShipmentItemResponse, len(s.Items))
 	for i, item := range s.Items {
 		items[i] = &ShipmentItemResponse{
-			ID:          item.ID,
+			ID:          item.Model.ID,
 			ShipmentID:  item.ShipmentID,
 			OrderItemID: item.OrderItemID,
 			ProductID:   item.ProductID,

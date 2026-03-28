@@ -7,6 +7,7 @@ import (
 	"time"
 
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -44,7 +45,7 @@ func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*Use
 	}
 
 	u := &domain.User{
-		ID:       id,
+		Model:    application.Model{ID: id},
 		TenantID: req.TenantID,
 		Email:    req.Email,
 		Phone:    req.Phone,

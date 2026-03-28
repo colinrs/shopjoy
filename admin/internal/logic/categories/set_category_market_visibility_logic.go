@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -51,15 +52,11 @@ func (l *SetCategoryMarketVisibilityLogic) SetCategoryMarketVisibility(req *type
 		for _, marketID := range req.MarketIDs {
 			id, _ := l.svcCtx.IDGen.NextID(l.ctx)
 			items = append(items, &product.CategoryMarket{
-				ID:         id,
+				Model:      application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
 				TenantID:   shared.TenantID(tenantID),
 				CategoryID: req.CategoryID,
 				MarketID:   marketID,
 				IsVisible:  req.Visible,
-				Audit: shared.AuditInfo{
-					CreatedAt: now,
-					UpdatedAt: now,
-				},
 			})
 		}
 		if err := l.svcCtx.CategoryMarketRepo.BatchCreate(l.ctx, l.svcCtx.DB, items); err != nil {

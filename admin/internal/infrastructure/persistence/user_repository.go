@@ -26,7 +26,7 @@ func (r *UserRepository) Update(ctx context.Context, db *gorm.DB, u *user.User) 
 }
 
 func (r *UserRepository) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := db.WithContext(ctx).Model(&user.User{}).
 		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
 		Update("deleted_at", now)

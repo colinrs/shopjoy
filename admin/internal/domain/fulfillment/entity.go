@@ -132,13 +132,12 @@ func (s FulfillmentStatus) IsValid() bool {
 
 // Carrier 物流公司
 type Carrier struct {
-	ID         int64 `gorm:"column:id;primaryKey"`
+	application.Model
 	Code       string
 	Name       string
 	TrackingURL string
 	IsActive   bool
 	Sort       int
-	CreatedAt  time.Time
 }
 
 func (c *Carrier) TableName() string {
@@ -180,12 +179,11 @@ var DefaultCarriers = []Carrier{
 
 // RefundReason 退款原因
 type RefundReason struct {
-	ID        int64 `gorm:"column:id;primaryKey"`
+	application.Model
 	Code      string
 	Name      string
 	Sort      int
 	IsActive  bool
-	CreatedAt time.Time
 }
 
 func (r *RefundReason) TableName() string {
@@ -357,7 +355,7 @@ func (s *Shipment) CanShip() bool {
 
 // ShipmentItem 发货单明细
 type ShipmentItem struct {
-	ID           int64           `gorm:"column:id;primaryKey"`
+	Model        application.Model
 	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
 	ShipmentID   int64           `gorm:"column:shipment_id;not null;index"`
 	OrderItemID  int64           `gorm:"column:order_item_id;not null;index"`
@@ -367,7 +365,6 @@ type ShipmentItem struct {
 	SKUName      string          `gorm:"column:sku_name;not null;default:''"`     // SKU名称快照
 	Image        string          `gorm:"column:image;not null;default:''"`        // 商品图片快照
 	Quantity     int             `gorm:"column:quantity;not null;default:1"`
-	CreatedAt    time.Time       `gorm:"column:created_at;not null"`
 }
 
 func (si *ShipmentItem) TableName() string {
@@ -378,6 +375,9 @@ func (si *ShipmentItem) TableName() string {
 func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int64,
 	productName, skuName, image string, quantity int) *ShipmentItem {
 	return &ShipmentItem{
+		Model: application.Model{
+			CreatedAt: time.Now().UTC(),
+		},
 		TenantID:    tenantID,
 		OrderItemID: orderItemID,
 		ProductID:   productID,
@@ -386,7 +386,6 @@ func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int
 		SKUName:     skuName,
 		Image:       image,
 		Quantity:    quantity,
-		CreatedAt:   time.Now().UTC(),
 	}
 }
 

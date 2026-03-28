@@ -48,16 +48,12 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 				return nil, err
 			}
 			inventory = &product.WarehouseInventory{
-				ID:             id,
+				Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:       shared.TenantID(tenantID),
 				SKUCode:        req.SKUCode,
 				WarehouseID:    req.WarehouseID,
 				AvailableStock: req.AvailableStock,
 				LockedStock:    0,
-				Audit: shared.AuditInfo{
-					CreatedAt: time.Now().UTC(),
-					UpdatedAt: time.Now().UTC(),
-				},
 			}
 			if err := l.svcCtx.WarehouseInventoryRepo.Create(l.ctx, l.svcCtx.DB, inventory); err != nil {
 				return nil, err
@@ -65,7 +61,7 @@ func (l *UpdateSKUStockLogic) UpdateSKUStock(req *types.UpdateSKUStockReq) (resp
 		} else {
 			// Update existing inventory
 			inventory.AvailableStock = req.AvailableStock
-			inventory.Audit.UpdatedAt = time.Now().UTC()
+			inventory.Model.UpdatedAt = time.Now().UTC()
 			if err := l.svcCtx.WarehouseInventoryRepo.Update(l.ctx, l.svcCtx.DB, inventory); err != nil {
 				return nil, err
 			}

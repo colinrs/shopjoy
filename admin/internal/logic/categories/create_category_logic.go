@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -65,7 +66,7 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 	}
 
 	category := &product.Category{
-		ID:             id,
+		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:       shared.TenantID(tenantID),
 		ParentID:       req.ParentID,
 		Name:           req.Name,
@@ -77,10 +78,6 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 		SeoTitle:       req.SeoTitle,
 		SeoDescription: req.SeoDescription,
 		Status:         product.CategoryStatusEnabled,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
 	}
 
 	if err := l.svcCtx.CategoryRepo.Create(l.ctx, l.svcCtx.DB, category); err != nil {
@@ -88,6 +85,6 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 	}
 
 	return &types.CreateCategoryResp{
-		ID: category.ID,
+		ID: category.Model.ID,
 	}, nil
 }

@@ -61,16 +61,12 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			newStock = 0
 		}
 		inventory = &product.WarehouseInventory{
-			ID:             id,
+			Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 			TenantID:       shared.TenantID(tenantID),
 			SKUCode:        req.SKUCode,
 			WarehouseID:    req.WarehouseID,
 			AvailableStock: newStock,
 			LockedStock:    0,
-			Audit: shared.AuditInfo{
-				CreatedAt: time.Now().UTC(),
-				UpdatedAt: time.Now().UTC(),
-			},
 		}
 		if err := l.svcCtx.WarehouseInventoryRepo.Create(l.ctx, l.svcCtx.DB, inventory); err != nil {
 			return nil, err

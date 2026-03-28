@@ -3,13 +3,14 @@ package user
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
 // UserAddress 用户收货地址实体
 type UserAddress struct {
-	ID         int64           `gorm:"column:id;primaryKey"`
+	application.Model
 	TenantID   shared.TenantID `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
 	UserID     int64           `gorm:"column:user_id;not null;index:idx_tenant_user"`
 	Name       string          `gorm:"column:name;not null;size:100"`
@@ -21,9 +22,6 @@ type UserAddress struct {
 	Address    string          `gorm:"column:address;not null;size:255"`
 	PostalCode string          `gorm:"column:postal_code;size:20;default:''"`
 	IsDefault  bool            `gorm:"column:is_default;default:false"`
-	DeletedAt  *int64          `gorm:"column:deleted_at"`
-	CreatedAt  shared.UnixTime `gorm:"column:created_at;not null"`
-	UpdatedAt  shared.UnixTime `gorm:"column:updated_at;not null"`
 }
 
 func (a *UserAddress) TableName() string {

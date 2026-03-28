@@ -42,7 +42,6 @@ func (categoryModel) TableName() string {
 
 func (m *categoryModel) toEntity() *product.Category {
 	return &product.Category{
-		ID:             m.ID,
 		TenantID:       shared.TenantID(m.TenantID),
 		ParentID:       m.ParentID,
 		Name:           m.Name,
@@ -65,7 +64,7 @@ func (m *categoryModel) toEntity() *product.Category {
 
 func fromCategoryEntity(c *product.Category) *categoryModel {
 	return &categoryModel{
-		ID:             c.ID,
+		ID:             c.Model.ID,
 		TenantID:       c.TenantID.Int64(),
 		ParentID:       c.ParentID,
 		Name:           c.Name,
@@ -92,7 +91,7 @@ func (r *categoryRepo) Create(ctx context.Context, db *gorm.DB, c *product.Categ
 func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Category) error {
 	model := fromCategoryEntity(c)
 	return db.WithContext(ctx).Model(&categoryModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", c.ID, c.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", c.Model.ID, c.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":            model.Name,
 			"code":            model.Code,
@@ -110,7 +109,7 @@ func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Categ
 }
 
 func (r *categoryRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&categoryModel{}).
 		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
 		Update("deleted_at", now).Error

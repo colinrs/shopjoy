@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"gorm.io/gorm"
 )
@@ -33,13 +34,12 @@ func (carrierModel) TableName() string {
 
 func (m *carrierModel) toEntity() *fulfillment.Carrier {
 	return &fulfillment.Carrier{
-		ID:         m.ID,
+		Model:      application.Model{ID: m.ID, CreatedAt: parseUnixTime(m.CreatedAt)},
 		Code:       m.Code,
 		Name:       m.Name,
 		TrackingURL: m.TrackingURL,
 		IsActive:   m.IsActive == 1,
 		Sort:       m.Sort,
-		CreatedAt:  parseUnixTime(m.CreatedAt),
 	}
 }
 
@@ -49,13 +49,13 @@ func fromCarrierEntity(c *fulfillment.Carrier) *carrierModel {
 		isActive = 1
 	}
 	return &carrierModel{
-		ID:         c.ID,
+		ID:         c.Model.ID,
 		Code:       c.Code,
 		Name:       c.Name,
 		TrackingURL: c.TrackingURL,
 		IsActive:   isActive,
 		Sort:       c.Sort,
-		CreatedAt:  c.CreatedAt.Unix(),
+		CreatedAt:  c.Model.CreatedAt.Unix(),
 	}
 }
 
@@ -129,7 +129,7 @@ func (r *carrierRepo) Update(ctx context.Context, db *gorm.DB, carrier *fulfillm
 	model := fromCarrierEntity(carrier)
 	return db.WithContext(ctx).
 		Model(&carrierModel{}).
-		Where("id = ?", carrier.ID).
+		Where("id = ?", carrier.Model.ID).
 		Updates(map[string]any{
 			"name":         model.Name,
 			"tracking_url": model.TrackingURL,

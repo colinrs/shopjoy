@@ -4,13 +4,14 @@ package product
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
 // ProductLocalization 商品多语言本地化实体
 type ProductLocalization struct {
-	ID           int64           // 本地化ID
+	application.Model
 	TenantID     shared.TenantID // 租户ID
 	ProductID    int64           // 商品ID
 	LanguageCode string          // 语言代码，如 en, zh-CN, ja

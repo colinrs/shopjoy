@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -46,7 +47,7 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 	}
 
 	warehouse := &product.Warehouse{
-		ID:        id,
+		Model:    application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:  shared.TenantID(tenantID),
 		Code:      req.Code,
 		Name:      req.Name,
@@ -54,10 +55,6 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 		Address:   req.Address,
 		IsDefault: req.IsDefault,
 		Status:    shared.StatusEnabled,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
 	}
 
 	if err := l.svcCtx.WarehouseRepo.Create(l.ctx, l.svcCtx.DB, warehouse); err != nil {
@@ -65,6 +62,6 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 	}
 
 	return &types.CreateWarehouseResp{
-		ID: warehouse.ID,
+		ID: warehouse.Model.ID,
 	}, nil
 }

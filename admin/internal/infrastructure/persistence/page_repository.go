@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/storefront"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -45,7 +46,7 @@ func (pageModel) TableName() string {
 
 func (m *pageModel) toEntity() *storefront.Page {
 	return &storefront.Page{
-		ID:       m.ID,
+		Model:     application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID: shared.TenantID(m.TenantID),
 		Name:     m.Name,
 		Slug:     m.Slug,
@@ -60,12 +61,7 @@ func (m *pageModel) toEntity() *storefront.Page {
 		IsPublished: m.IsPublished == 1,
 		PublishedAt: m.PublishedAt,
 		Version:     m.Version,
-		Audit: shared.AuditInfo{
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
-			CreatedBy: m.CreatedBy,
-			UpdatedBy: m.UpdatedBy,
-		},
+		Audit:       shared.AuditInfo{CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, CreatedBy: m.CreatedBy, UpdatedBy: m.UpdatedBy},
 	}
 }
 
@@ -76,7 +72,7 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 	}
 
 	return &pageModel{
-		ID:          p.ID,
+		ID:          p.Model.ID,
 		TenantID:    p.TenantID.Int64(),
 		Name:        p.Name,
 		Slug:        p.Slug,
@@ -90,8 +86,8 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 		IsPublished: isPublished,
 		PublishedAt: p.PublishedAt,
 		Version:     p.Version,
-		CreatedAt:   p.Audit.CreatedAt,
-		UpdatedAt:   p.Audit.UpdatedAt,
+		CreatedAt:   p.Model.CreatedAt,
+		UpdatedAt:   p.Model.UpdatedAt,
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
 	}
@@ -113,7 +109,7 @@ func (r *pageRepo) Create(ctx context.Context, db *gorm.DB, page *storefront.Pag
 func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Page) error {
 	model := fromPageEntity(page)
 	return db.WithContext(ctx).Model(&pageModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", page.ID, page.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", page.Model.ID, page.TenantID.Int64()).
 		Updates(map[string]interface{}{
 			"name":          model.Name,
 			"slug":          model.Slug,

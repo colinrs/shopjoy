@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -65,7 +66,7 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 
 	// Create SKU entity
 	sku := &product.SKU{
-		ID:             id,
+		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:       shared.TenantID(tenantID),
 		ProductID:      req.ProductID,
 		Code:           skuCode,
@@ -77,10 +78,6 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		PreSaleEnabled: req.PreSaleEnabled,
 		Attributes:     req.Attributes,
 		Status:         shared.StatusEnabled,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
 	}
 
 	if err := l.svcCtx.SKURepo.Create(l.ctx, l.svcCtx.DB, sku); err != nil {

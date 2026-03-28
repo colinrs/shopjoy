@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -16,7 +17,7 @@ const (
 )
 
 type Category struct {
-	ID             int64
+	application.Model
 	TenantID       shared.TenantID
 	ParentID       int64
 	Name           string
@@ -52,7 +53,7 @@ func (c *Category) IsRoot() bool {
 }
 
 type Brand struct {
-	ID               int64
+	application.Model
 	TenantID         shared.TenantID
 	Name             string
 	Logo             string
@@ -87,7 +88,7 @@ func (b *Brand) TogglePage(enabled bool) {
 }
 
 type Attribute struct {
-	ID         int64
+	application.Model
 	TenantID   shared.TenantID
 	Name       string
 	Code       string
@@ -109,7 +110,7 @@ const (
 )
 
 type SKU struct {
-	ID             int64
+	application.Model
 	TenantID       shared.TenantID
 	ProductID      int64
 	Code           string
@@ -221,7 +222,7 @@ type BrandQuery struct {
 
 // CategoryMarket represents category visibility in specific markets
 type CategoryMarket struct {
-	ID         int64
+	application.Model
 	TenantID   shared.TenantID
 	CategoryID int64
 	MarketID   int64
@@ -235,7 +236,7 @@ func (cm *CategoryMarket) TableName() string {
 
 // BrandMarket represents brand visibility in specific markets
 type BrandMarket struct {
-	ID        int64
+	application.Model
 	TenantID  shared.TenantID
 	BrandID   int64
 	MarketID  int64

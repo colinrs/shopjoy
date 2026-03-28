@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"golang.org/x/crypto/bcrypt"
@@ -29,7 +30,7 @@ const (
 )
 
 type User struct {
-	ID        int64
+	application.Model
 	TenantID  shared.TenantID
 	Email     string
 	Phone     string
@@ -40,7 +41,6 @@ type User struct {
 	Birthday  *time.Time
 	Status    Status
 	LastLogin *time.Time
-	DeletedAt gorm.DeletedAt
 	Audit     shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -75,7 +75,7 @@ func (u *User) UpdateLastLogin() {
 }
 
 func (u *User) Suspend() error {
-	if u.DeletedAt.Valid {
+	if u.Model.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusSuspended
@@ -83,7 +83,7 @@ func (u *User) Suspend() error {
 }
 
 func (u *User) Activate() error {
-	if u.DeletedAt.Valid {
+	if u.Model.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
 	u.Status = StatusActive
@@ -91,15 +91,15 @@ func (u *User) Activate() error {
 }
 
 func (u *User) SoftDelete() error {
-	if u.DeletedAt.Valid {
+	if u.Model.DeletedAt.Valid {
 		return code.ErrUserAlreadyDeleted
 	}
-	u.DeletedAt = gorm.DeletedAt{Time: time.Now().UTC()}
+	u.Model.DeletedAt = gorm.DeletedAt{Time: time.Now().UTC()}
 	return nil
 }
 
 func (u *User) IsDeleted() bool {
-	return u.DeletedAt.Valid
+	return u.Model.DeletedAt.Valid
 }
 
 type Repository interface {

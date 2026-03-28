@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -36,7 +37,7 @@ func (warehouseModel) TableName() string {
 
 func (m *warehouseModel) toEntity() *product.Warehouse {
 	return &product.Warehouse{
-		ID:        m.ID,
+		Model:    application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:  shared.TenantID(m.TenantID),
 		Code:      m.Code,
 		Name:      m.Name,
@@ -44,16 +45,12 @@ func (m *warehouseModel) toEntity() *product.Warehouse {
 		Address:   m.Address,
 		IsDefault: m.IsDefault,
 		Status:    shared.Status(m.Status),
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
-		},
 	}
 }
 
 func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
 	return &warehouseModel{
-		ID:        w.ID,
+		ID:        w.Model.ID,
 		TenantID:  w.TenantID.Int64(),
 		Code:      w.Code,
 		Name:      w.Name,
@@ -61,8 +58,8 @@ func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
 		Address:   w.Address,
 		IsDefault: w.IsDefault,
 		Status:    int8(w.Status),
-		CreatedAt: w.Audit.CreatedAt.Unix(),
-		UpdatedAt: w.Audit.UpdatedAt.Unix(),
+		CreatedAt: w.Model.CreatedAt.Unix(),
+		UpdatedAt: w.Model.UpdatedAt.Unix(),
 	}
 }
 
@@ -74,7 +71,7 @@ func (r *warehouseRepo) Create(ctx context.Context, db *gorm.DB, w *product.Ware
 func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Warehouse) error {
 	model := fromWarehouseEntity(w)
 	return db.WithContext(ctx).Model(&warehouseModel{}).
-		Where("id = ? AND tenant_id = ?", w.ID, w.TenantID.Int64()).
+		Where("id = ? AND tenant_id = ?", w.Model.ID, w.TenantID.Int64()).
 		Updates(map[string]any{
 			"name":       model.Name,
 			"country":    model.Country,
@@ -86,7 +83,7 @@ func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Ware
 }
 
 func (r *warehouseRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&warehouseModel{}).
 		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
 		Update("deleted_at", now).Error

@@ -3,6 +3,7 @@ package role
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ const (
 )
 
 type Role struct {
-	ID          int64
+	application.Model
 	TenantID    shared.TenantID
 	Name        string
 	Code        string
@@ -42,7 +43,7 @@ func (r *Role) IsActive() bool {
 }
 
 type Permission struct {
-	ID       int64
+	application.Model
 	Name     string
 	Code     string
 	Type     PermissionType
@@ -61,11 +62,13 @@ const (
 )
 
 type RolePermission struct {
+	application.Model
 	RoleID       int64
 	PermissionID int64
 }
 
 type UserRole struct {
+	application.Model
 	UserID int64
 	RoleID int64
 }

@@ -145,7 +145,7 @@ func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB, t
 
 // MarkUsed marks a user coupon as used
 func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID string) error {
-	now := time.Now().Unix()
+	now := time.Now().UTC()
 	result := db.WithContext(ctx).
 		Model(&userCouponModel{}).
 		Where("id = ? AND tenant_id = ? AND status = ?", id, tenantID.Int64(), promotion.UserCouponStatusUnused).

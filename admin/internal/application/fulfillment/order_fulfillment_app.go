@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -249,7 +250,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 	// Convert shipments
 	detail.Shipments = make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
-		items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, s.ID)
+		items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, s.Model.ID)
 		s.Items = items
 		carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, s.CarrierCode)
 		detail.Shipments[i] = toShipmentResponse(s, carrier)
@@ -260,7 +261,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 		// Get the latest refund
 		latestRefund := refunds[0]
 		for _, r := range refunds {
-			if r.CreatedAt.After(latestRefund.CreatedAt) {
+			if r.Model.CreatedAt.After(latestRefund.Model.CreatedAt) {
 				latestRefund = r
 			}
 		}
@@ -361,7 +362,7 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 					return err
 				}
 				items[i] = fulfillment.ShipmentItem{
-					ID:          itemID,
+					Model:       application.Model{ID: itemID, CreatedAt: time.Now().UTC()},
 					TenantID:    tenantID,
 					ShipmentID:  shipmentID,
 					OrderItemID: itemReq.OrderItemID,
@@ -371,7 +372,6 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 					SKUName:     itemReq.SKUName,
 					Image:       itemReq.Image,
 					Quantity:    itemReq.Quantity,
-					CreatedAt:   time.Now().UTC(),
 				}
 			}
 			if err := a.shipmentItemRepo.BatchCreate(ctx, tx, items); err != nil {
@@ -512,7 +512,7 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 	// In a real implementation, you would parse the JSON string
 
 	return &RefundResponse{
-		ID:           r.ID,
+		ID:           r.Model.ID,
 		RefundNo:     r.RefundNo,
 		OrderID:      r.OrderID,
 		UserID:       r.UserID,
@@ -530,7 +530,7 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 		ApprovedAt:   r.ApprovedAt,
 		ApprovedBy:   r.ApprovedBy,
 		CompletedAt:  r.CompletedAt,
-		CreatedAt:    r.CreatedAt,
-		UpdatedAt:    r.UpdatedAt,
+		CreatedAt:    r.Model.CreatedAt,
+		UpdatedAt:    r.Model.UpdatedAt,
 	}
 }

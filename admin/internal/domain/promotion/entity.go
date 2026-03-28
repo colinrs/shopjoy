@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ const (
 )
 
 type Promotion struct {
-	ID          int64
+	application.Model
 	TenantID    shared.TenantID
 	Name        string
 	Description string
@@ -37,7 +38,6 @@ type Promotion struct {
 	Rules       []PromotionRule
 	StartAt     time.Time
 	EndAt       time.Time
-	DeletedAt   *int64
 	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -83,7 +83,7 @@ func (p *Promotion) Apply(cartAmount shared.Money) (shared.Money, error) {
 }
 
 type PromotionRule struct {
-	ID             int64
+	application.Model
 	PromotionID    int64
 	ConditionType  ConditionType
 	ConditionValue int64

@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -46,7 +47,7 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 	}
 
 	brand := &product.Brand{
-		ID:               id,
+		Model:           application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:         shared.TenantID(tenantID),
 		Name:             req.Name,
 		Logo:             req.Logo,
@@ -57,10 +58,6 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 		EnablePage:       req.EnablePage,
 		Sort:             req.Sort,
 		Status:           shared.StatusEnabled,
-		Audit: shared.AuditInfo{
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
 	}
 
 	if err := l.svcCtx.BrandRepo.Create(l.ctx, l.svcCtx.DB, brand); err != nil {
@@ -68,6 +65,6 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 	}
 
 	return &types.CreateBrandResp{
-		ID: brand.ID,
+		ID: brand.Model.ID,
 	}, nil
 }

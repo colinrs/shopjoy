@@ -45,7 +45,7 @@ func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID, p
 	dtos := make([]*PageDTO, len(pages))
 	for i, p := range pages {
 		dtos[i] = &PageDTO{
-			ID:          p.ID,
+			ID:          p.Model.ID,
 			PageType:    pageTypeToString(p.Type),
 			Name:        p.Name,
 			Slug:        p.Slug,
@@ -77,7 +77,7 @@ func (s *pageService) GetPage(ctx context.Context, tenantID shared.TenantID, pag
 
 	return &PageDetailDTO{
 		Page: &PageDTO{
-			ID:          page.ID,
+			ID:          page.Model.ID,
 			PageType:    pageTypeToString(page.Type),
 			Name:        page.Name,
 			Slug:        page.Slug,
@@ -97,7 +97,7 @@ func (s *pageService) GetPageBySlug(ctx context.Context, tenantID shared.TenantI
 		return nil, code.ErrPageNotFound
 	}
 
-	return s.GetPage(ctx, tenantID, page.ID)
+	return s.GetPage(ctx, tenantID, page.Model.ID)
 }
 
 func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, pageID int64, blocks []*DecorationDTO, userID int64) error {
@@ -254,7 +254,7 @@ func decorationsToDTOs(decorations []*storefront.Decoration) []*DecorationDTO {
 	dtos := make([]*DecorationDTO, len(decorations))
 	for i, d := range decorations {
 		dtos[i] = &DecorationDTO{
-			ID:          d.ID,
+			ID:          d.Model.ID,
 			BlockType:   d.BlockType,
 			BlockConfig: d.BlockConfig,
 			SortOrder:   d.SortOrder,
@@ -315,7 +315,7 @@ func (s *decorationService) AddDecoration(ctx context.Context, tenantID shared.T
 	}
 
 	return &DecorationDTO{
-		ID:          decoration.ID,
+		ID:          decoration.Model.ID,
 		BlockType:   decoration.BlockType,
 		BlockConfig: decoration.BlockConfig,
 		SortOrder:   decoration.SortOrder,
@@ -343,7 +343,7 @@ func (s *decorationService) ReorderBlocks(ctx context.Context, tenantID shared.T
 	blockOrders := make([]storefront.BlockOrder, len(orders))
 	for i, o := range orders {
 		blockOrders[i] = storefront.BlockOrder{
-			ID:        o.ID,
+			Model:    application.Model{ID: o.ID},
 			SortOrder: o.SortOrder,
 		}
 	}
@@ -400,10 +400,10 @@ func (s *versionService) ListVersions(ctx context.Context, tenantID shared.Tenan
 	dtos := make([]*VersionDTO, len(versions))
 	for i, v := range versions {
 		dtos[i] = &VersionDTO{
-			ID:        v.ID,
+			ID:        v.Model.ID,
 			Version:   v.Version,
 			CreatedBy: v.CreatedBy,
-			CreatedAt: v.CreatedAt.Format(time.RFC3339),
+			CreatedAt: v.Model.CreatedAt.Format(time.RFC3339),
 		}
 	}
 	return &PaginatedResult[*VersionDTO]{
@@ -434,10 +434,10 @@ func (s *versionService) GetVersion(ctx context.Context, tenantID shared.TenantI
 
 	return &VersionDetailDTO{
 		Version: &VersionDTO{
-			ID:        v.ID,
+			ID:        v.Model.ID,
 			Version:   v.Version,
 			CreatedBy: v.CreatedBy,
-			CreatedAt: v.CreatedAt.Format(time.RFC3339),
+			CreatedAt: v.Model.CreatedAt.Format(time.RFC3339),
 		},
 		Blocks: blocks,
 	}, nil
