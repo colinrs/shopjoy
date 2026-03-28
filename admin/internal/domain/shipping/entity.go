@@ -7,6 +7,7 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/shopspring/decimal"
 )
 
 // FeeType 运费计费类型
@@ -103,18 +104,18 @@ func (t *ShippingTemplate) Deactivate() {
 // ShippingZone 配送区域实体
 type ShippingZone struct {
 	application.Model
-	TenantID            int64   `gorm:"column:tenant_id;not null;index"`
-	TemplateID          int64   `gorm:"column:template_id;not null;index"`
-	Name                string  `gorm:"column:name;size:100;not null"`
-	Regions             Regions `gorm:"column:regions;type:jsonb;not null"`
-	FeeType             FeeType `gorm:"column:fee_type;size:20;not null"`
-	FirstUnit           int     `gorm:"column:first_unit;not null;default:1"`
-	FirstFee            int64   `gorm:"column:first_fee;not null;default:0"`                   // 分为单位
-	AdditionalUnit      int     `gorm:"column:additional_unit;not null;default:1"`
-	AdditionalFee       int64   `gorm:"column:additional_fee;not null;default:0"`
-	FreeThresholdAmount int64   `gorm:"column:free_threshold_amount;not null;default:0"` // 满额包邮，0表示不限制
-	FreeThresholdCount  int     `gorm:"column:free_threshold_count;not null;default:0"`  // 满件包邮，0表示不限制
-	Sort                int     `gorm:"column:sort;not null;default:0"`
+	TenantID            int64           `gorm:"column:tenant_id;not null;index"`
+	TemplateID          int64           `gorm:"column:template_id;not null;index"`
+	Name                string          `gorm:"column:name;size:100;not null"`
+	Regions             Regions         `gorm:"column:regions;type:jsonb;not null"`
+	FeeType             FeeType         `gorm:"column:fee_type;size:20;not null"`
+	FirstUnit           int             `gorm:"column:first_unit;not null;default:1"`
+	FirstFee            decimal.Decimal `gorm:"column:first_fee;type:decimal(19,4);not null;default:0"`
+	AdditionalUnit      int             `gorm:"column:additional_unit;not null;default:1"`
+	AdditionalFee       decimal.Decimal `gorm:"column:additional_fee;type:decimal(19,4);not null;default:0"`
+	FreeThresholdAmount decimal.Decimal `gorm:"column:free_threshold_amount;type:decimal(19,4);not null;default:0"`
+	FreeThresholdCount  int             `gorm:"column:free_threshold_count;not null;default:0"`
+	Sort                int             `gorm:"column:sort;not null;default:0"`
 }
 
 // TableName 返回表名
@@ -138,13 +139,13 @@ func (z *ShippingZone) Validate() error {
 		if z.FirstUnit <= 0 {
 			return code.ErrShippingZoneFeeConfigRequired
 		}
-		if z.FirstFee < 0 {
+		if z.FirstFee.IsNegative() {
 			return code.ErrShippingZoneFeeConfigRequired
 		}
 		if z.AdditionalUnit <= 0 {
 			return code.ErrShippingZoneFeeConfigRequired
 		}
-		if z.AdditionalFee < 0 {
+		if z.AdditionalFee.IsNegative() {
 			return code.ErrShippingZoneFeeConfigRequired
 		}
 	}
@@ -226,39 +227,39 @@ type CalculateItem struct {
 	ProductID int64
 	SKUID     int64
 	Quantity  int
-	Weight    int    // 克
-	Price     int64  // 分为单位
+	Weight    int             // 克
+	Price     decimal.Decimal // 金额
 }
 
 // CalculateShippingFeeResult 计算运费结果
 type CalculateShippingFeeResult struct {
-	ShippingFee    int64
+	ShippingFee    decimal.Decimal
 	Currency       string
 	TemplateID     int64
 	TemplateName   string
 	ZoneName       string
 	FeeType        FeeType
 	FirstUnit      int
-	FirstFee       int64
+	FirstFee       decimal.Decimal
 	AdditionalUnit int
-	AdditionalFee  int64
+	AdditionalFee  decimal.Decimal
 	TotalWeight    int
 	TotalUnits     int
 }
 
 // CalculateFee 计算运费
-func (z *ShippingZone) CalculateFee(items []CalculateItem, orderAmount int64, itemCount int) int64 {
+func (z *ShippingZone) CalculateFee(items []CalculateItem, orderAmount decimal.Decimal, itemCount int) decimal.Decimal {
 	// 检查免运费条件
-	if z.FreeThresholdAmount > 0 && orderAmount >= z.FreeThresholdAmount {
-		return 0
+	if z.FreeThresholdAmount.IsPositive() && orderAmount.GreaterThanOrEqual(z.FreeThresholdAmount) {
+		return decimal.Zero
 	}
 	if z.FreeThresholdCount > 0 && itemCount >= z.FreeThresholdCount {
-		return 0
+		return decimal.Zero
 	}
 
 	// 免运费类型
 	if z.FeeType == FeeTypeFree {
-		return 0
+		return decimal.Zero
 	}
 
 	// 固定运费
@@ -286,5 +287,5 @@ func (z *ShippingZone) CalculateFee(items []CalculateItem, orderAmount int64, it
 
 	// 计算续费单位数
 	additionalUnits := (totalUnits - z.FirstUnit + z.AdditionalUnit - 1) / z.AdditionalUnit
-	return z.FirstFee + int64(additionalUnits)*z.AdditionalFee
+	return z.FirstFee.Add(z.AdditionalFee.Mul(decimal.NewFromInt(int64(additionalUnits))))
 }

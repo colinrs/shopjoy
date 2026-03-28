@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -35,9 +36,9 @@ type Coupon struct {
 	Code         string
 	Description  string
 	Type         Type
-	Value        int64
-	MinAmount    int64
-	MaxDiscount  int64
+	Value        decimal.Decimal `gorm:"column:value;type:decimal(19,4);not null;default:0"`
+	MinAmount    decimal.Decimal `gorm:"column:min_amount;type:decimal(19,4);not null;default:0"`
+	MaxDiscount  decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
 	TotalCount   int
 	UsedCount    int
 	PerUserLimit int
@@ -71,7 +72,7 @@ func (c *Coupon) CanUse(userID int64, cartAmount shared.Money) error {
 	if !c.IsActive() {
 		return code.ErrCouponExpired
 	}
-	if cartAmount.Amount < c.MinAmount {
+	if cartAmount.Amount < c.MinAmount.IntPart() {
 		return code.ErrCouponAmountBelowMin
 	}
 	return nil
@@ -81,16 +82,16 @@ func (c *Coupon) CalculateDiscount(cartAmount shared.Money) shared.Money {
 	var discount shared.Money
 	switch c.Type {
 	case TypeFixedAmount:
-		discount = shared.NewMoney(c.Value, cartAmount.Currency)
+		discount = shared.NewMoney(c.Value.IntPart(), cartAmount.Currency)
 	case TypePercentage:
-		percentage := float64(c.Value) / 100
+		percentage, _ := c.Value.Div(decimal.NewFromInt(100)).Float64()
 		discount = cartAmount.MultiplyFloat(percentage)
 	case TypeFreeShipping:
 		discount = shared.NewMoney(0, cartAmount.Currency)
 	}
 
-	if c.MaxDiscount > 0 && discount.Amount > c.MaxDiscount {
-		discount = shared.NewMoney(c.MaxDiscount, cartAmount.Currency)
+	if c.MaxDiscount.IsPositive() && discount.Amount > c.MaxDiscount.IntPart() {
+		discount = shared.NewMoney(c.MaxDiscount.IntPart(), cartAmount.Currency)
 	}
 
 	if discount.Amount > cartAmount.Amount {

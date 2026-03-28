@@ -3,7 +3,6 @@ package payment
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -94,10 +94,10 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		return nil, err
 	}
 
-	var todayReceived int64
+	var todayReceived decimal.Decimal
 	for _, txn := range todayTxns {
 		if txn.Status == payment.TransactionStatusSucceeded {
-			todayReceived += txn.Amount
+			todayReceived = todayReceived.Add(txn.Amount)
 		}
 	}
 
@@ -111,18 +111,18 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		return nil, err
 	}
 
-	var yesterdayReceived int64
+	var yesterdayReceived decimal.Decimal
 	for _, txn := range yesterdayTxns {
 		if txn.Status == payment.TransactionStatusSucceeded {
-			yesterdayReceived += txn.Amount
+			yesterdayReceived = yesterdayReceived.Add(txn.Amount)
 		}
 	}
 
 	// Calculate growth rate
 	var todayGrowth float64
-	if yesterdayReceived > 0 {
-		todayGrowth = float64(todayReceived-yesterdayReceived) / float64(yesterdayReceived) * 100
-	} else if todayReceived > 0 {
+	if yesterdayReceived.IsPositive() {
+		todayGrowth, _ = todayReceived.Sub(yesterdayReceived).Div(yesterdayReceived).Mul(decimal.NewFromInt(100)).Float64()
+	} else if todayReceived.IsPositive() {
 		todayGrowth = 100
 	}
 
@@ -136,17 +136,17 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		return nil, err
 	}
 
-	var periodReceived int64
+	var periodReceived decimal.Decimal
 	channelMap := make(map[string]struct {
 		Count  int64
-		Amount int64
+		Amount decimal.Decimal
 	})
 	for _, txn := range periodTxns {
 		if txn.Status == payment.TransactionStatusSucceeded {
-			periodReceived += txn.Amount
+			periodReceived = periodReceived.Add(txn.Amount)
 			data := channelMap[string(txn.PaymentMethod)]
 			data.Count++
-			data.Amount += txn.Amount
+			data.Amount = data.Amount.Add(txn.Amount)
 			channelMap[string(txn.PaymentMethod)] = data
 		}
 	}
@@ -155,13 +155,14 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 	channelDistribution := make([]ChannelDistributionDTO, 0, len(channelMap))
 	for method, data := range channelMap {
 		percent := 0
-		if periodReceived > 0 {
-			percent = int(float64(data.Amount) / float64(periodReceived) * 100)
+		if periodReceived.IsPositive() {
+			p, _ := data.Amount.Div(periodReceived).Mul(decimal.NewFromInt(100)).Float64()
+			percent = int(p)
 		}
 		channelDistribution = append(channelDistribution, ChannelDistributionDTO{
 			Name:    getPaymentMethodText(payment.PaymentMethod(method)),
 			Percent: percent,
-			Amount:  shared.NewMoney(data.Amount, "USD").String(),
+			Amount:  shared.NewMoney(data.Amount.IntPart(), "USD").String(),
 			Count:   data.Count,
 			Color:   getChannelColor(payment.PaymentMethod(method)),
 		})
@@ -172,9 +173,9 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 	refundRate := "0.00%"
 
 	return &PaymentStatsDTO{
-		TodayReceived:       shared.NewMoney(todayReceived, "USD").String(),
+		TodayReceived:       shared.NewMoney(todayReceived.IntPart(), "USD").String(),
 		TodayGrowth:         formatPercentage(todayGrowth),
-		PeriodReceived:      shared.NewMoney(periodReceived, "USD").String(),
+		PeriodReceived:      shared.NewMoney(periodReceived.IntPart(), "USD").String(),
 		RefundAmount:        shared.NewMoney(refundAmount, "USD").String(),
 		RefundRate:          refundRate,
 		Currency:            "USD",
@@ -282,14 +283,14 @@ func (s *service) GetOrderPayment(ctx context.Context, tenantID shared.TenantID,
 		PaymentMethodText: getPaymentMethodText(paymentEntity.PaymentMethod),
 		ChannelIntentID:   paymentEntity.ChannelIntentID,
 		ChannelPaymentID:  paymentEntity.ChannelPaymentID,
-		Amount:            shared.NewMoney(paymentEntity.Amount, paymentEntity.Currency).String(),
+		Amount:            shared.NewMoney(paymentEntity.Amount.IntPart(), paymentEntity.Currency).String(),
 		Currency:          paymentEntity.Currency,
-		TransactionFee:    shared.NewMoney(paymentEntity.TransactionFee, paymentEntity.FeeCurrency).String(),
+		TransactionFee:    shared.NewMoney(paymentEntity.TransactionFee.IntPart(), paymentEntity.FeeCurrency).String(),
 		FeeCurrency:       paymentEntity.FeeCurrency,
 		Status:            int8(paymentEntity.Status),
 		StatusText:        paymentEntity.Status.String(),
 		PaidAt:            timestampToString(paymentEntity.PaidAt),
-		RefundedAmount:    shared.NewMoney(totalRefunded, paymentEntity.Currency).String(),
+		RefundedAmount:    shared.NewMoney(totalRefunded.IntPart(), paymentEntity.Currency).String(),
 		Refunds:           refundDTOs,
 	}, nil
 }
@@ -304,7 +305,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Validate refund amount
-	if amount <= 0 {
+	if amount.IsZero() || amount.IsNegative() {
 		return nil, code.ErrPaymentInvalidAmount
 	}
 
@@ -318,7 +319,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 		return &InitiateRefundResponse{
 			RefundID:        existingRefund.ID,
 			RefundNo:        existingRefund.RefundNo,
-			Amount:          shared.NewMoney(existingRefund.Amount, existingRefund.Currency).String(),
+			Amount:          shared.NewMoney(existingRefund.Amount.IntPart(), existingRefund.Currency).String(),
 			Currency:        existingRefund.Currency,
 			Status:          int8(existingRefund.Status),
 			StatusText:      existingRefund.Status.String(),
@@ -348,8 +349,8 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 		return nil, err
 	}
 
-	refundableAmount := paymentEntity.Amount - totalRefunded
-	if amount > refundableAmount {
+	refundableAmount := paymentEntity.Amount.Sub(totalRefunded)
+	if amount.GreaterThan(refundableAmount) {
 		return nil, code.ErrPaymentRefundAmountExceeded
 	}
 
@@ -399,14 +400,14 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	// TODO: Call Stripe API to initiate refund (actual Stripe integration will be separate)
 	// For now, mark as succeeded directly
 	channelRefundID := "re_stub_" + refund.RefundNo
-	refund.MarkSucceeded(channelRefundID, 0)
+	refund.MarkSucceeded(channelRefundID, decimal.Zero)
 	if err := s.refundRepo.Update(ctx, tx, refund); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	// Update payment status
-	isPartial := amount < refundableAmount
+	isPartial := amount.LessThan(refundableAmount)
 	paymentEntity.MarkRefunded(isPartial)
 	if err := s.paymentRepo.Update(ctx, tx, paymentEntity); err != nil {
 		tx.Rollback()
@@ -421,7 +422,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	return &InitiateRefundResponse{
 		RefundID:        refund.ID,
 		RefundNo:        refund.RefundNo,
-		Amount:          shared.NewMoney(refund.Amount, refund.Currency).String(),
+		Amount:          shared.NewMoney(refund.Amount.IntPart(), refund.Currency).String(),
 		Currency:        refund.Currency,
 		Status:          int8(refund.Status),
 		StatusText:      refund.Status.String(),
@@ -489,7 +490,7 @@ func (s *service) handlePaymentIntentSucceeded(ctx context.Context, paymentInten
 
 	// Mark payment as succeeded
 	// Fee calculation would come from webhook payload in real implementation
-	paymentEntity.MarkSuccess(paymentIntentID, 0, paymentEntity.Currency)
+	paymentEntity.MarkSuccess(paymentIntentID, decimal.Zero, paymentEntity.Currency)
 	return s.paymentRepo.Update(ctx, s.db, paymentEntity)
 }
 
@@ -568,55 +569,22 @@ func formatPercentage(value float64) string {
 	return fmt.Sprintf("%.1f%%", value)
 }
 
-// parseMoneyString parses a money string to cents (int64)
-// Supports formats: "99.99 USD", "99.99", "100" (cents)
-// Uses integer-based parsing to avoid floating-point precision errors
-func parseMoneyString(s string) (int64, error) {
+// parseMoneyString parses a money string to decimal.Decimal
+// Supports formats: "99.99 USD", "99.99", "100"
+func parseMoneyString(s string) (decimal.Decimal, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
-		return 0, nil
+		return decimal.Zero, nil
 	}
 
 	// Remove currency suffix if present
 	parts := strings.Split(s, " ")
 	amountStr := parts[0]
 
-	// Check if it's already in cents (no decimal point)
-	if !strings.Contains(amountStr, ".") {
-		return strconv.ParseInt(amountStr, 10, 64)
-	}
-
-	// Parse decimal amount using integer math to avoid precision loss
-	// Format: "dollars.cents" where cents is up to 2 decimal places
-	decimalParts := strings.Split(amountStr, ".")
-	if len(decimalParts) != 2 {
-		return 0, strconv.ErrSyntax
-	}
-
-	// Parse dollars part
-	dollars, err := strconv.ParseInt(decimalParts[0], 10, 64)
+	// Parse using decimal for precision
+	d, err := decimal.NewFromString(amountStr)
 	if err != nil {
-		return 0, err
+		return decimal.Zero, err
 	}
-
-	// Parse cents part (handle 1 or 2 decimal places)
-	centsStr := decimalParts[1]
-	if len(centsStr) > 2 {
-		centsStr = centsStr[:2] // Truncate to 2 decimal places
-	}
-	cents, err := strconv.ParseInt(centsStr, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-
-	// Adjust for single digit cents (e.g., "9.9" means 9 dollars and 90 cents)
-	if len(decimalParts[1]) == 1 {
-		cents *= 10
-	}
-
-	// Calculate total cents, handling negative amounts
-	if dollars >= 0 {
-		return dollars*100 + cents, nil
-	}
-	return dollars*100 - cents, nil
+	return d, nil
 }

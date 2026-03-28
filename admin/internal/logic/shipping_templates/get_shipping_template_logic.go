@@ -2,7 +2,6 @@ package shipping_templates
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
@@ -10,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -89,6 +89,6 @@ func buildMappingDetails(mappings []*shipping.ShippingTemplateMapping) []*types.
 }
 
 // Helper to convert int64 cents to string
-func formatAmount(cents int64) string {
-	return strconv.FormatFloat(float64(cents)/100, 'f', 2, 64)
+func formatAmount(amount decimal.Decimal) string {
+	return amount.StringFixed(2)
 }

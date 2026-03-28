@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +28,7 @@ type PaymentRefundRepository interface {
 	FindByIdempotencyKey(ctx context.Context, db *gorm.DB, idempotencyKey string) (*PaymentRefund, error)
 	FindByPaymentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) ([]*PaymentRefund, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query RefundQuery) ([]*PaymentRefund, int64, error)
-	GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) (int64, error)
+	GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) (decimal.Decimal, error)
 }
 
 // PaymentTransactionRepository 交易仓储接口

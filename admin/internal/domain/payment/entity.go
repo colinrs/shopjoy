@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 )
 
 // ==================== Enums ====================
@@ -134,10 +135,10 @@ type Payment struct {
 	PaymentMethod    PaymentMethod    `gorm:"column:payment_method;not null"`
 	ChannelIntentID  string           `gorm:"column:channel_intent_id;not null;default:'';index"`
 	ChannelPaymentID string           `gorm:"column:channel_payment_id;not null;default:'';index"`
-	Amount           int64            `gorm:"column:amount;not null;default:0"` // 分
+	Amount           decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
 	Currency         string           `gorm:"column:currency;not null;default:'USD'"`
 	Status           PaymentStatus    `gorm:"column:status;not null;default:0;index"`
-	TransactionFee   int64            `gorm:"column:transaction_fee;not null;default:0"`
+	TransactionFee   decimal.Decimal `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
 	FeeCurrency      string           `gorm:"column:fee_currency;not null;default:'USD'"`
 	PaidAt           *time.Time     `gorm:"column:paid_at"`
 	FailedAt         *time.Time     `gorm:"column:failed_at"`
@@ -150,7 +151,7 @@ func (p *Payment) TableName() string {
 }
 
 // NewPayment 创建支付记录
-func NewPayment(tenantID shared.TenantID, orderID int64, method PaymentMethod, amount int64, currency string) *Payment {
+func NewPayment(tenantID shared.TenantID, orderID int64, method PaymentMethod, amount decimal.Decimal, currency string) *Payment {
 	now := time.Now().UTC()
 	return &Payment{
 		TenantID:      tenantID,
@@ -169,7 +170,7 @@ func NewPayment(tenantID shared.TenantID, orderID int64, method PaymentMethod, a
 }
 
 // MarkSuccess 标记支付成功
-func (p *Payment) MarkSuccess(channelPaymentID string, fee int64, feeCurrency string) error {
+func (p *Payment) MarkSuccess(channelPaymentID string, fee decimal.Decimal, feeCurrency string) error {
 	if p.Status != PaymentStatusPending && p.Status != PaymentStatusProcessing {
 		return code.ErrPaymentAlreadyPaid
 	}
@@ -234,9 +235,9 @@ type PaymentRefund struct {
 	RefundNo            string               `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
 	IdempotencyKey      string               `gorm:"column:idempotency_key;not null;default:'';uniqueIndex:uk_idempotency_key"`
 	ChannelRefundID     string               `gorm:"column:channel_refund_id;not null;default:'';index"`
-	Amount              int64                `gorm:"column:amount;not null;default:0"`
+	Amount              decimal.Decimal      `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
 	Currency            string               `gorm:"column:currency;not null;default:'USD'"`
-	RefundFee           int64                `gorm:"column:refund_fee;not null;default:0"`
+	RefundFee           decimal.Decimal      `gorm:"column:refund_fee;type:decimal(19,4);not null;default:0"`
 	Status              PaymentRefundStatus  `gorm:"column:status;not null;default:0"`
 	ReasonType          string               `gorm:"column:reason_type;not null;default:''"`
 	Reason              string               `gorm:"column:reason;not null;default:''"`
@@ -249,7 +250,7 @@ func (r *PaymentRefund) TableName() string {
 }
 
 // NewPaymentRefund 创建退款记录
-func NewPaymentRefund(tenantID shared.TenantID, orderID, paymentID int64, idempotencyKey string, amount int64, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
+func NewPaymentRefund(tenantID shared.TenantID, orderID, paymentID int64, idempotencyKey string, amount decimal.Decimal, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
 	return &PaymentRefund{
 		TenantID:       tenantID,
 		OrderID:        orderID,
@@ -266,7 +267,7 @@ func NewPaymentRefund(tenantID shared.TenantID, orderID, paymentID int64, idempo
 }
 
 // MarkSucceeded 标记退款成功
-func (r *PaymentRefund) MarkSucceeded(channelRefundID string, refundFee int64) error {
+func (r *PaymentRefund) MarkSucceeded(channelRefundID string, refundFee decimal.Decimal) error {
 	now := time.Now().UTC()
 	r.Status = PaymentRefundStatusSucceeded
 	r.ChannelRefundID = channelRefundID
@@ -298,10 +299,10 @@ type PaymentTransaction struct {
 	TransactionID        string            `gorm:"column:transaction_id;not null;uniqueIndex:uk_transaction_id"`
 	PaymentMethod        PaymentMethod     `gorm:"column:payment_method;not null"`
 	ChannelTransactionID string            `gorm:"column:channel_transaction_id;not null;default:'';index"`
-	Amount               int64             `gorm:"column:amount;not null;default:0"`
+	Amount               decimal.Decimal   `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
 	Currency             string            `gorm:"column:currency;not null;default:'USD'"`
 	Status               TransactionStatus `gorm:"column:status;not null;default:0"`
-	TransactionFee       int64             `gorm:"column:transaction_fee;not null;default:0"`
+	TransactionFee       decimal.Decimal   `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
 	PaidAt               *time.Time       `gorm:"column:paid_at"`
 	FailedReason         string            `gorm:"column:failed_reason;not null;default:''"`
 }

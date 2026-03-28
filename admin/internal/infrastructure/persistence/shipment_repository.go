@@ -11,6 +11,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -22,23 +23,23 @@ func NewShipmentRepository() fulfillment.ShipmentRepository {
 
 // shipmentModel represents the database model for Shipment
 type shipmentModel struct {
-	ID               int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID         int64      `gorm:"column:tenant_id;not null;index"`
-	OrderID          string     `gorm:"column:order_id;size:64;not null;index"`
-	ShipmentNo       string     `gorm:"column:shipment_no;size:32;not null;uniqueIndex:uk_shipment_no"`
-	Status           int        `gorm:"column:status;not null;default:0;index"`
-	Carrier          string     `gorm:"column:carrier;size:50;not null;default:''"`
-	CarrierCode      string     `gorm:"column:carrier_code;size:20;not null;default:''"`
-	TrackingNo       string     `gorm:"column:tracking_no;size:100;not null;default:'';index"`
-	ShippingCost     int64      `gorm:"column:shipping_cost;not null;default:0"`
-	ShippingCurrency string     `gorm:"column:shipping_currency;size:10;not null;default:'CNY'"`
-	Weight           float64    `gorm:"column:weight;not null;default:0"`
-	ShippedAt        *time.Time `gorm:"column:shipped_at"`
-	DeliveredAt      *time.Time `gorm:"column:delivered_at"`
-	Remark           string     `gorm:"column:remark;size:500;not null;default:''"`
-	DeletedAt        *time.Time `gorm:"column:deleted_at;index"`
-	CreatedAt        time.Time  `gorm:"column:created_at;not null"`
-	UpdatedAt        time.Time  `gorm:"column:updated_at;not null"`
+	ID               int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID         int64           `gorm:"column:tenant_id;not null;index"`
+	OrderID          string          `gorm:"column:order_id;size:64;not null;index"`
+	ShipmentNo       string          `gorm:"column:shipment_no;size:32;not null;uniqueIndex:uk_shipment_no"`
+	Status           int             `gorm:"column:status;not null;default:0;index"`
+	Carrier          string          `gorm:"column:carrier;size:50;not null;default:''"`
+	CarrierCode      string          `gorm:"column:carrier_code;size:20;not null;default:''"`
+	TrackingNo       string          `gorm:"column:tracking_no;size:100;not null;default:'';index"`
+	ShippingCost     decimal.Decimal `gorm:"column:shipping_cost;type:decimal(19,4);not null;default:0"`
+	ShippingCurrency string          `gorm:"column:shipping_currency;size:10;not null;default:'CNY'"`
+	Weight           decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"`
+	ShippedAt        *time.Time      `gorm:"column:shipped_at"`
+	DeliveredAt      *time.Time      `gorm:"column:delivered_at"`
+	Remark           string          `gorm:"column:remark;size:500;not null;default:''"`
+	DeletedAt        *time.Time      `gorm:"column:deleted_at;index"`
+	CreatedAt        time.Time       `gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time       `gorm:"column:updated_at;not null"`
 }
 
 func (shipmentModel) TableName() string {

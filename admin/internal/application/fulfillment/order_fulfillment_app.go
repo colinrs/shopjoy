@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -170,14 +171,14 @@ type OrderFulfillmentApp interface {
 
 // ShipOrderRequest 发货请求
 type ShipOrderRequest struct {
-	CarrierCode  string
-	CarrierName  string
-	TrackingNo   string
-	ShippingCost int64
-	Currency     string
-	Weight       float64
-	Remark       string
-	Items        []CreateShipmentItemRequest
+	CarrierCode   string
+	CarrierName   string
+	TrackingNo    string
+	ShippingCost  decimal.Decimal
+	Currency      string
+	Weight        decimal.Decimal
+	Remark        string
+	Items         []CreateShipmentItemRequest
 }
 
 type orderFulfillmentApp struct {

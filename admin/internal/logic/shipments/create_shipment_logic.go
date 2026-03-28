@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -40,21 +41,20 @@ func (l *CreateShipmentLogic) CreateShipment(req *types.CreateShipmentReq) (resp
 	userID := contextx.GetCurrentUserID(l.ctx)
 
 	// Build request
+	shippingCost, _ := decimal.NewFromString(req.ShippingCost)
 	createReq := appfulfillment.CreateShipmentRequest{
-		OrderID:      req.OrderID,
-		CarrierCode:  req.CarrierCode,
-		CarrierName:  req.CarrierName,
-		TrackingNo:   req.TrackingNo,
-		ShippingCost: appfulfillment.FormatMoneyToInt64(req.ShippingCost),
-		Currency:     req.Currency,
-		Remark:       req.Remark,
+		OrderID:       req.OrderID,
+		CarrierCode:   req.CarrierCode,
+		CarrierName:   req.CarrierName,
+		TrackingNo:    req.TrackingNo,
+		ShippingCost:  shippingCost,
+		Currency:      req.Currency,
+		Remark:        req.Remark,
 	}
 
 	// Parse weight
-	if req.Weight != "" {
-		// Weight is in kg, stored as float
-		// In a real implementation, you would parse this properly
-	}
+	weight, _ := decimal.NewFromString(req.Weight)
+	createReq.Weight = weight
 
 	// Build items
 	if len(req.Items) > 0 {

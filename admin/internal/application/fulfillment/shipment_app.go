@@ -11,20 +11,21 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 // CreateShipmentRequest 创建发货单请求
 type CreateShipmentRequest struct {
-	OrderID      string
-	CarrierCode  string
-	CarrierName  string
-	TrackingNo   string
-	ShippingCost int64
-	Currency     string
-	Weight       float64
-	Remark       string
-	Items        []CreateShipmentItemRequest
+	OrderID       string
+	CarrierCode   string
+	CarrierName   string
+	TrackingNo    string
+	ShippingCost  decimal.Decimal
+	Currency      string
+	Weight        decimal.Decimal
+	Remark        string
+	Items         []CreateShipmentItemRequest
 }
 
 // CreateShipmentItemRequest 创建发货单明细请求
@@ -40,14 +41,14 @@ type CreateShipmentItemRequest struct {
 
 // UpdateShipmentRequest 更新发货单请求
 type UpdateShipmentRequest struct {
-	ID           int64
-	CarrierCode  string
-	CarrierName  string
-	TrackingNo   string
-	ShippingCost int64
-	Currency     string
-	Weight       float64
-	Remark       string
+	ID            int64
+	CarrierCode   string
+	CarrierName   string
+	TrackingNo    string
+	ShippingCost  decimal.Decimal
+	Currency      string
+	Weight        decimal.Decimal
+	Remark        string
 }
 
 // QueryShipmentRequest 查询发货单请求
@@ -75,9 +76,9 @@ type ShipmentResponse struct {
 	CarrierCode   string                       `json:"carrier_code"`
 	TrackingNo    string                       `json:"tracking_no"`
 	TrackingURL   string                       `json:"tracking_url,omitempty"`
-	ShippingCost  int64                        `json:"shipping_cost"`
+	ShippingCost  string                       `json:"shipping_cost"`
 	Currency      string                       `json:"currency"`
-	Weight        float64                      `json:"weight"`
+	Weight        string                       `json:"weight"`
 	ShippedAt     *time.Time                   `json:"shipped_at,omitempty"`
 	DeliveredAt   *time.Time                   `json:"delivered_at,omitempty"`
 	Remark        string                       `json:"remark"`
@@ -519,9 +520,9 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		CarrierCode:   s.CarrierCode,
 		TrackingNo:    s.TrackingNo,
 		TrackingURL:   trackingURL,
-		ShippingCost:  s.ShippingCost,
+		ShippingCost:  s.ShippingCost.StringFixed(2),
 		Currency:      s.ShippingCurrency,
-		Weight:        s.Weight,
+		Weight:        s.Weight.StringFixed(3),
 		ShippedAt:     s.ShippedAt,
 		DeliveredAt:   s.DeliveredAt,
 		Remark:        s.Remark,

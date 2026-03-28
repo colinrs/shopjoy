@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `earn_rules` (
     `scenario` VARCHAR(50) NOT NULL COMMENT '场景: ORDER_PAYMENT-订单支付, SIGN_IN-签到, PRODUCT_REVIEW-商品评价, FIRST_ORDER-首单',
     `calculation_type` VARCHAR(20) NOT NULL COMMENT '计算类型: FIXED-固定积分, RATIO-比例, TIERED-阶梯',
     `fixed_points` BIGINT NOT NULL DEFAULT 0 COMMENT '固定积分数(当calculation_type=FIXED时使用)',
-    `ratio` VARCHAR(20) DEFAULT '' COMMENT '积分比例(当calculation_type=RATIO时使用,如"1:100"表示1元=100积分)',
+    `ratio` DECIMAL(10,4) DEFAULT 0 COMMENT '积分比例(当calculation_type=RATIO时使用,如1.5表示1元=1.5积分)',
     `tiers` TEXT COMMENT '阶梯配置JSON(当calculation_type=TIERED时使用)',
     `condition_type` VARCHAR(50) NOT NULL DEFAULT 'NONE' COMMENT '条件类型: NONE-无条件, NEW_USER-新用户, FIRST_ORDER-首单, SPECIFIC_PRODUCTS-指定商品, MIN_AMOUNT-最低金额',
     `condition_value` TEXT COMMENT '条件值JSON',

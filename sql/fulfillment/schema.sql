@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     `carrier` VARCHAR(50) DEFAULT '' COMMENT '快递公司',
     `tracking_no` VARCHAR(100) DEFAULT '' COMMENT '快递单号',
     `weight` DECIMAL(10,2) DEFAULT 0.00 COMMENT '重量(kg)',
-    `cost_amount` BIGINT NOT NULL DEFAULT 0 COMMENT '运费成本(分)',
+    `cost_amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '运费成本',
     `cost_currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
     `shipped_at` TIMESTAMP NULL COMMENT '发货时间',
     `delivered_at` TIMESTAMP NULL COMMENT '送达时间',
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `shipments` (
 
 CREATE TABLE IF NOT EXISTS `shipment_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `shipment_id` BIGINT NOT NULL COMMENT '发货ID',
     `order_item_id` BIGINT NOT NULL COMMENT '订单商品ID',
     `product_id` BIGINT NOT NULL COMMENT '商品ID',
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `refunds` (
     `reason` VARCHAR(500) DEFAULT '' COMMENT '退款原因',
     `description` TEXT COMMENT '详细描述',
     `images` JSON COMMENT '凭证图片',
-    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT '退款金额(分)',
+    `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '退款金额',
     `currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
     `approved_at` TIMESTAMP NULL COMMENT '批准时间',
     `completed_at` TIMESTAMP NULL COMMENT '完成时间',
@@ -105,10 +106,10 @@ CREATE TABLE IF NOT EXISTS `shipping_zones` (
     `regions` JSON NOT NULL COMMENT 'Region codes (city codes array)',
     `fee_type` VARCHAR(20) NOT NULL COMMENT 'Fee type: fixed, by_count, by_weight, free',
     `first_unit` INT NOT NULL DEFAULT 1 COMMENT 'First unit (count or grams)',
-    `first_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'First fee in cents',
+    `first_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'First fee',
     `additional_unit` INT NOT NULL DEFAULT 1 COMMENT 'Additional unit',
-    `additional_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Additional fee in cents',
-    `free_threshold_amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Free shipping threshold amount in cents, 0=disabled',
+    `additional_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Additional fee',
+    `free_threshold_amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Free shipping threshold amount, 0=disabled',
     `free_threshold_count` INT NOT NULL DEFAULT 0 COMMENT 'Free shipping threshold count, 0=disabled',
     `sort` INT NOT NULL DEFAULT 0 COMMENT 'Sort order',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
@@ -170,12 +171,12 @@ INSERT INTO `shipments` (`id`, `tenant_id`, `order_id`, `status`, `carrier`, `tr
 (3, 3, 'ORD202503120001', 3, 'EMS', 'EMS2025031201', 0.55, 1500, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), 5, 5);
 
 -- 发货商品数据
-INSERT INTO `shipment_items` (`id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
-(1, 1, 1, 1, 1, 1),
-(2, 1, 2, 3, 7, 3),
-(3, 1, 3, 5, 0, 1),
-(4, 2, 4, 2, 5, 1),
-(5, 3, 8, 4, 0, 1);
+INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
+(1, 1, 1, 1, 1, 1, 1),
+(2, 1, 1, 2, 3, 7, 3),
+(3, 1, 1, 3, 5, 0, 1),
+(4, 1, 2, 4, 2, 5, 1),
+(5, 3, 3, 8, 4, 0, 1);
 
 -- 退款数据
 INSERT INTO `refunds` (`id`, `tenant_id`, `order_id`, `user_id`, `status`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES

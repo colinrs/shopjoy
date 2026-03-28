@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -39,19 +40,17 @@ func (l *UpdateShipmentLogic) UpdateShipment(req *types.UpdateShipmentReq) (resp
 	userID := contextx.GetCurrentUserID(l.ctx)
 
 	// Build update request
+	shippingCost, _ := decimal.NewFromString(req.ShippingCost)
+	weight, _ := decimal.NewFromString(req.Weight)
 	updateReq := appfulfillment.UpdateShipmentRequest{
-		ID:           req.ID,
-		CarrierCode:  req.CarrierCode,
-		CarrierName:  req.CarrierName,
-		TrackingNo:   req.TrackingNo,
-		ShippingCost: appfulfillment.FormatMoneyToInt64(req.ShippingCost),
-		Currency:     req.Currency,
-		Remark:       req.Remark,
-	}
-
-	// Parse weight
-	if req.Weight != "" {
-		updateReq.Weight = parseFloat(req.Weight)
+		ID:            req.ID,
+		CarrierCode:   req.CarrierCode,
+		CarrierName:   req.CarrierName,
+		TrackingNo:    req.TrackingNo,
+		ShippingCost:  shippingCost,
+		Currency:      req.Currency,
+		Weight:        weight,
+		Remark:        req.Remark,
 	}
 
 	// Update shipment

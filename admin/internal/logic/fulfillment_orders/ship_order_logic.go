@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -40,21 +41,18 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 	userID := contextx.GetCurrentUserID(l.ctx)
 
 	// Parse shipping cost
-	shippingCost, _ := parseMoneyToInt64(req.ShippingCost)
+	shippingCost, _ := decimal.NewFromString(req.ShippingCost)
+	weight, _ := decimal.NewFromString(req.Weight)
 
 	// Build ship order request
 	shipReq := appfulfillment.ShipOrderRequest{
-		CarrierCode:  req.CarrierCode,
-		CarrierName:  req.CarrierName,
-		TrackingNo:   req.TrackingNo,
-		ShippingCost: shippingCost,
-		Currency:     req.Currency,
-		Remark:       req.Remark,
-	}
-
-	// Parse weight
-	if req.Weight != "" {
-		shipReq.Weight = parseFloat(req.Weight)
+		CarrierCode:   req.CarrierCode,
+		CarrierName:   req.CarrierName,
+		TrackingNo:    req.TrackingNo,
+		ShippingCost:  shippingCost,
+		Currency:      req.Currency,
+		Weight:        weight,
+		Remark:        req.Remark,
 	}
 
 	// Build items

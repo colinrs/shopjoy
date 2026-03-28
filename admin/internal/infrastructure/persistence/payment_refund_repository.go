@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -119,14 +120,14 @@ func (r *paymentRefundRepository) FindList(ctx context.Context, db *gorm.DB, ten
 	return list, total, nil
 }
 
-func (r *paymentRefundRepository) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) (int64, error) {
+func (r *paymentRefundRepository) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) (decimal.Decimal, error) {
 	query := db.WithContext(ctx).
 		Model(&payment.PaymentRefund{}).
 		Where("payment_id = ? AND status = ?", paymentID, payment.PaymentRefundStatusSucceeded)
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
-	var total int64
+	var total decimal.Decimal
 	err := query.Select("COALESCE(SUM(amount), 0)").Scan(&total).Error
 	return total, err
 }

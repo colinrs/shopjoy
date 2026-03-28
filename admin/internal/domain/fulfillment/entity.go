@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -224,9 +225,9 @@ type Shipment struct {
 	Carrier        string          `gorm:"column:carrier;not null;default:''"`
 	CarrierCode    string          `gorm:"column:carrier_code;not null;default:''"`
 	TrackingNo     string          `gorm:"column:tracking_no;not null;default:'';index"`
-	ShippingCost   int64           `gorm:"column:shipping_cost;not null;default:0"` // 运费（分）
+	ShippingCost   decimal.Decimal `gorm:"column:shipping_cost;type:decimal(19,4);not null;default:0"` // 运费
 	ShippingCurrency string        `gorm:"column:shipping_currency;not null;default:'CNY'"`
-	Weight         float64         `gorm:"column:weight;not null;default:0"` // 重量（kg）
+	Weight         decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"` // 重量（kg）
 	ShippedAt      *time.Time     `gorm:"column:shipped_at"`
 	DeliveredAt    *time.Time     `gorm:"column:delivered_at"`
 	Remark         string          `gorm:"column:remark;not null;default:''"`
@@ -315,7 +316,7 @@ func (s *Shipment) Cancel(reason string, updatedBy int64) error {
 }
 
 // SetShippingCost 设置运费
-func (s *Shipment) SetShippingCost(cost int64, currency string) {
+func (s *Shipment) SetShippingCost(cost decimal.Decimal, currency string) {
 	s.ShippingCost = cost
 	if currency != "" {
 		s.ShippingCurrency = currency
@@ -323,7 +324,7 @@ func (s *Shipment) SetShippingCost(cost int64, currency string) {
 }
 
 // SetWeight 设置重量
-func (s *Shipment) SetWeight(weight float64) {
+func (s *Shipment) SetWeight(weight decimal.Decimal) {
 	s.Weight = weight
 }
 
@@ -546,11 +547,11 @@ type FulfillmentSummary struct {
 
 // RefundStatistics 退款统计
 type RefundStatistics struct {
-	TotalRefunds      int64   `json:"total_refunds"`       // 总退款数
-	TotalRefundAmount int64   `json:"total_refund_amount"` // 总退款金额
-	RefundRate        float64 `json:"refund_rate"`         // 退款率
-	TopReasons        []RefundReasonCount `json:"top_reasons"` // 热门退款原因
-	TopProducts       []ProductRefundCount `json:"top_products"` // 高退款率商品
+	TotalRefunds      int64           `json:"total_refunds"`        // 总退款数
+	TotalRefundAmount decimal.Decimal `json:"total_refund_amount"`  // 总退款金额
+	RefundRate        float64         `json:"refund_rate"`          // 退款率
+	TopReasons        []RefundReasonCount `json:"top_reasons"`     // 热门退款原因
+	TopProducts       []ProductRefundCount `json:"top_products"`  // 高退款率商品
 }
 
 // RefundReasonCount 退款原因统计

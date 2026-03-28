@@ -1,15 +1,14 @@
 package shipping_zones
 
 import (
-	"strconv"
+	"context"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-
-	"context"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -91,19 +90,19 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 	}, nil
 }
 
-// parseAmount converts string amount to int64 cents
-func parseAmount(s string) int64 {
+// parseAmount converts string amount to decimal.Decimal
+func parseAmount(s string) decimal.Decimal {
 	if s == "" {
-		return 0
+		return decimal.Zero
 	}
-	f, err := strconv.ParseFloat(s, 64)
+	d, err := decimal.NewFromString(s)
 	if err != nil {
-		return 0
+		return decimal.Zero
 	}
-	return int64(f * 100)
+	return d
 }
 
-// formatAmount converts int64 cents to string
-func formatAmount(cents int64) string {
-	return strconv.FormatFloat(float64(cents)/100, 'f', 2, 64)
+// formatAmount converts decimal.Decimal to string
+func formatAmount(amount decimal.Decimal) string {
+	return amount.StringFixed(2)
 }

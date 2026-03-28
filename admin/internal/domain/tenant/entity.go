@@ -41,7 +41,6 @@ type Tenant struct {
 	ContactPhone string
 	ContactEmail string
 	Address      string
-	SKUPrefix    string       // SKU default prefix
 	ExpireAt     *time.Time
 }
 

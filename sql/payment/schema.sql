@@ -1,5 +1,5 @@
 -- ============================================
--- 支付表 (payments)
+-- 支付表 (payments) - 已废弃，请使用 order_payments
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS `payments` (
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT '支付金额(分)',
+    `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '支付金额',
     `currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待支付, 1-处理中, 2-成功, 3-失败, 4-取消, 5-已退款',
     `method` TINYINT NOT NULL DEFAULT 0 COMMENT '支付方式: 0-支付宝, 1-微信, 2-信用卡, 3-银行转账, 4-货到付款',
@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS `order_payments` (
     `payment_method` VARCHAR(32) NOT NULL COMMENT 'Payment method: stripe, alipay, wechat',
     `channel_intent_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel PaymentIntent ID (Stripe: pi_xxx)',
     `channel_payment_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel Charge ID (Stripe: ch_xxx)',
-    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Payment amount in cents',
+    `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Payment amount',
     `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=processing, 2=success, 3=failed, 4=cancelled, 5=refunded, 6=partially_refunded, 7=requires_action',
-    `transaction_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction fee in cents',
+    `transaction_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Transaction fee',
     `fee_currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Fee currency',
     `paid_at` TIMESTAMP NULL COMMENT 'Payment success time',
     `failed_at` TIMESTAMP NULL COMMENT 'Payment failure time',
@@ -72,10 +72,10 @@ CREATE TABLE IF NOT EXISTS `payment_transactions` (
     `transaction_id` VARCHAR(64) NOT NULL COMMENT 'Transaction ID',
     `payment_method` VARCHAR(32) NOT NULL COMMENT 'Payment method: stripe, alipay, wechat',
     `channel_transaction_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel transaction ID',
-    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction amount in cents',
+    `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Transaction amount',
     `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=succeeded, 2=failed',
-    `transaction_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Transaction fee in cents',
+    `transaction_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Transaction fee',
     `paid_at` TIMESTAMP NULL COMMENT 'Payment success time',
     `failed_reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Failure reason',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
@@ -101,9 +101,9 @@ CREATE TABLE IF NOT EXISTS `payment_refunds` (
     `refund_no` VARCHAR(32) NOT NULL COMMENT 'Refund number',
     `idempotency_key` VARCHAR(64) NOT NULL COMMENT 'Idempotency key for deduplication',
     `channel_refund_id` VARCHAR(64) DEFAULT '' COMMENT 'Channel refund ID (Stripe: re_xxx)',
-    `amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'Refund amount in cents',
+    `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Refund amount',
     `currency` VARCHAR(3) NOT NULL DEFAULT 'USD' COMMENT 'Currency (ISO 4217)',
-    `refund_fee` BIGINT NOT NULL DEFAULT 0 COMMENT 'Refund fee in cents',
+    `refund_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Refund fee',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'Status: 0=pending, 1=succeeded, 2=failed',
     `reason_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Refund reason type',
     `reason` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Refund reason details',

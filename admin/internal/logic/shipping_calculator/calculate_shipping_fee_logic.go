@@ -2,13 +2,13 @@ package shipping_calculator
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -50,14 +50,14 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		if item.Weight <= 0 {
 			return nil, code.ErrShippingCalcInvalidWeight
 		}
-		if item.Price == "" || parseAmount(item.Price) < 0 {
+		if item.Price == "" || parseAmount(item.Price).IsNegative() {
 			return nil, code.ErrShippingCalcInvalidPrice
 		}
 	}
 
 	// Convert calculator items to calculate items
 	items := make([]shipping.CalculateItem, 0, len(req.Items))
-	var orderAmount int64
+	var orderAmount decimal.Decimal
 	var totalWeight int
 	var totalQuantity int
 
@@ -70,7 +70,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 			Weight:    item.Weight,
 			Price:     price,
 		})
-		orderAmount += price * int64(item.Quantity)
+		orderAmount = orderAmount.Add(price.Mul(decimal.NewFromInt(int64(item.Quantity))))
 		totalWeight += item.Weight * item.Quantity
 		totalQuantity += item.Quantity
 	}
@@ -155,18 +155,18 @@ func (l *CalculateShippingFeeLogic) findZoneForCity(templateID int64, cityCode s
 }
 
 // parseAmount converts string amount to int64 cents
-func parseAmount(s string) int64 {
+func parseAmount(s string) decimal.Decimal {
 	if s == "" {
-		return 0
+		return decimal.Zero
 	}
-	f, err := strconv.ParseFloat(s, 64)
+	d, err := decimal.NewFromString(s)
 	if err != nil {
-		return 0
+		return decimal.Zero
 	}
-	return int64(f * 100)
+	return d
 }
 
-// formatAmount converts int64 cents to string
-func formatAmount(cents int64) string {
-	return strconv.FormatFloat(float64(cents)/100, 'f', 2, 64)
+// formatAmount converts decimal.Decimal to string
+func formatAmount(amount decimal.Decimal) string {
+	return amount.StringFixed(2)
 }
