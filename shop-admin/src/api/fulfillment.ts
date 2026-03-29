@@ -69,7 +69,7 @@ export interface Refund {
   reason: string
   description: string
   images: string[]
-  amount: number
+  amount: string
   currency: string
   reject_reason: string
   approved_at: string | null
@@ -86,7 +86,7 @@ export interface RefundOrderItem {
   sku_name: string
   image: string
   quantity: number
-  price: number
+  price: string
 }
 
 export interface RefundListParams {
