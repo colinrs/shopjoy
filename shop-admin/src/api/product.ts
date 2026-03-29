@@ -236,7 +236,7 @@ export interface SKU {
   id: number
   product_id: number
   code: string
-  price: number
+  price: string
   currency: string
   stock: number
   available_stock: number
@@ -253,7 +253,7 @@ export interface SKU {
 export interface CreateSKURequest {
   product_id: number
   code: string
-  price: number
+  price: string
   currency?: string
   stock?: number
   safety_stock?: number
@@ -264,7 +264,7 @@ export interface CreateSKURequest {
 export interface UpdateSKURequest {
   id: number
   code?: string
-  price?: number
+  price?: string
   currency?: string
   stock?: number
   safety_stock?: number
