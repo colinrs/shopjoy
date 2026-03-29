@@ -3,25 +3,25 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-item pending" @click="handleStatusFilter(0)">
+        <div class="stat-item pending" @click="handleStatusFilter('pending')">
           <p class="stat-number">{{ stats.pending }}</p>
           <p class="stat-label">Pending</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item approved" @click="handleStatusFilter(1)">
+        <div class="stat-item approved" @click="handleStatusFilter('approved')">
           <p class="stat-number">{{ stats.approved }}</p>
           <p class="stat-label">Approved</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item rejected" @click="handleStatusFilter(2)">
+        <div class="stat-item rejected" @click="handleStatusFilter('rejected')">
           <p class="stat-number">{{ stats.rejected }}</p>
           <p class="stat-label">Rejected</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item completed" @click="handleStatusFilter(3)">
+        <div class="stat-item completed" @click="handleStatusFilter('completed')">
           <p class="stat-number">{{ stats.completed }}</p>
           <p class="stat-label">Completed</p>
         </div>
@@ -45,11 +45,11 @@
           </el-input>
           <el-select v-model="statusFilter" placeholder="Status" clearable class="filter-select">
             <el-option label="All" value="" />
-            <el-option label="Pending" :value="0" />
-            <el-option label="Approved" :value="1" />
-            <el-option label="Rejected" :value="2" />
-            <el-option label="Completed" :value="3" />
-            <el-option label="Cancelled" :value="4" />
+            <el-option label="Pending" value="pending" />
+            <el-option label="Approved" value="approved" />
+            <el-option label="Rejected" value="rejected" />
+            <el-option label="Completed" value="completed" />
+            <el-option label="Cancelled" value="cancelled" />
           </el-select>
           <el-select v-model="reasonFilter" placeholder="Refund Reason" clearable class="filter-select">
             <el-option label="All" value="" />
@@ -87,7 +87,7 @@
         class="pending-alert"
       >
         <template #action>
-          <el-button type="warning" size="small" @click="handleStatusFilter(0)">
+          <el-button type="warning" size="small" @click="handleStatusFilter('pending')">
             Review Now
           </el-button>
         </template>
@@ -150,7 +150,7 @@
               Details
             </el-button>
             <el-button
-              v-if="row.status === 0"
+              v-if="row.status === 'pending'"
               type="success"
               link
               size="small"
@@ -159,7 +159,7 @@
               Approve
             </el-button>
             <el-button
-              v-if="row.status === 0"
+              v-if="row.status === 'pending'"
               type="danger"
               link
               size="small"
@@ -228,7 +228,7 @@ const router = useRouter()
 // State
 const loading = ref(false)
 const searchQuery = ref('')
-const statusFilter = ref<number | ''>('')
+const statusFilter = ref<string | ''>('')
 const reasonFilter = ref('')
 const dateRange = ref<[string, string] | null>(null)
 const currentPage = ref(1)
@@ -256,12 +256,12 @@ const stats = ref({
   completed: 45
 })
 
-const statusTypeMap = {
-  0: { type: 'warning' as const, text: 'Pending' },
-  1: { type: 'success' as const, text: 'Approved' },
-  2: { type: 'danger' as const, text: 'Rejected' },
-  3: { type: 'primary' as const, text: 'Completed' },
-  4: { type: 'info' as const, text: 'Cancelled' }
+const statusTypeMap: Record<string, { type: 'warning' | 'success' | 'danger' | 'primary' | 'info', text: string }> = {
+  'pending': { type: 'warning', text: 'Pending' },
+  'approved': { type: 'success', text: 'Approved' },
+  'rejected': { type: 'danger', text: 'Rejected' },
+  'completed': { type: 'primary', text: 'Completed' },
+  'cancelled': { type: 'info', text: 'Cancelled' }
 }
 
 // Mock data
@@ -274,9 +274,9 @@ const refundList = ref<Refund[]>([
     user_id: 101,
     user_name: 'John Doe',
     user_phone: '138****8001',
-    type: 1,
+    type: 'full_refund',
     type_text: '全额退款',
-    status: 0,
+    status: 'pending',
     status_text: '待处理',
     reason_type: 'DEFECTIVE',
     reason: 'Product has scratches on screen',
@@ -301,9 +301,9 @@ const refundList = ref<Refund[]>([
     user_id: 102,
     user_name: 'Jane Smith',
     user_phone: '139****9002',
-    type: 1,
+    type: 'full_refund',
     type_text: '全额退款',
-    status: 1,
+    status: 'approved',
     status_text: '已通过',
     reason_type: 'WRONG_ITEM',
     reason: 'Received wrong color',
@@ -328,9 +328,9 @@ const refundList = ref<Refund[]>([
     user_id: 103,
     user_name: 'Mike Johnson',
     user_phone: '137****7003',
-    type: 1,
+    type: 'full_refund',
     type_text: '全额退款',
-    status: 2,
+    status: 'rejected',
     status_text: '已拒绝',
     reason_type: 'NO_LONGER_NEEDED',
     reason: 'Changed mind',
@@ -355,9 +355,9 @@ const refundList = ref<Refund[]>([
     user_id: 104,
     user_name: 'Sarah Wilson',
     user_phone: '136****6004',
-    type: 1,
+    type: 'full_refund',
     type_text: '全额退款',
-    status: 3,
+    status: 'completed',
     status_text: '已完成',
     reason_type: 'DAMAGED',
     reason: 'Damaged during shipping',
@@ -382,9 +382,9 @@ const refundList = ref<Refund[]>([
     user_id: 105,
     user_name: 'Tom Brown',
     user_phone: '135****5005',
-    type: 1,
+    type: 'full_refund',
     type_text: '全额退款',
-    status: 0,
+    status: 'pending',
     status_text: '待处理',
     reason_type: 'NOT_AS_DESCRIBED',
     reason: 'Product differs from description',
@@ -432,7 +432,7 @@ const loadData = async () => {
       end_time: dateRange.value?.[1]
     }
     if (statusFilter.value !== '') {
-      params.status = statusFilter.value
+      params.status = statusFilter.value as import('@/api/fulfillment').RefundStatus
     }
     const res = await getRefundList(params)
     refundList.value = res.list
@@ -449,7 +449,7 @@ const getReasonName = (code: string) => {
   return reason?.name || code
 }
 
-const handleStatusFilter = (status: number) => {
+const handleStatusFilter = (status: string) => {
   statusFilter.value = status
   currentPage.value = 1
   loadData()

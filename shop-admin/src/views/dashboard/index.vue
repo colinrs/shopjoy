@@ -275,9 +275,10 @@ const getOrderStatusType = (status: string) => {
     'pending_payment': 'warning',
     'paid': 'primary',
     'shipped': 'info',
-    'delivered': 'success',
     'cancelled': 'danger',
-    'refunded': 'danger'
+    'refunded': 'danger',
+    'pending_shipment': 'primary',
+    'refunding': 'warning'
   }
   return types[status] || 'info'
 }

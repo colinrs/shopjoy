@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"net/http"
+	"strconv"
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
@@ -50,8 +51,18 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 		OrderNo:           req.OrderNo,
 		UserID:            req.UserID,
 		Status:            req.Status,
-		FulfillmentStatus: req.FulfillmentStatus,
-		RefundStatus:      req.RefundStatus,
+	}
+
+	// Parse fulfillment status - convert from string to int8
+	if req.FulfillmentStatus != "" {
+		v, _ := strconv.ParseInt(req.FulfillmentStatus, 10, 8)
+		queryReq.FulfillmentStatus = int8(v)
+	}
+
+	// Parse refund status - convert from string to int8
+	if req.RefundStatus != "" {
+		v, _ := strconv.ParseInt(req.RefundStatus, 10, 8)
+		queryReq.RefundStatus = int8(v)
 	}
 
 	// Parse start time

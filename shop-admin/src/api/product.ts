@@ -10,6 +10,8 @@ export interface ProductMarketInfo {
   currency: string
 }
 
+export type ProductStatus = 'draft' | 'on_sale' | 'off_sale' | 'deleted'
+
 // Product interface matching backend ProductDetailResp
 export interface Product {
   id: number
@@ -19,7 +21,7 @@ export interface Product {
   currency: string
   cost_price: string
   stock: number
-  status: string
+  status: ProductStatus
   category_id: number
   created_at: string
   updated_at: string

@@ -2,6 +2,7 @@ package shipments
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
@@ -45,12 +46,17 @@ func (l *ListShipmentsLogic) ListShipments(req *types.ListShipmentsReq) (resp *t
 		OrderID:      req.OrderID,
 		TrackingNo:   req.TrackingNo,
 		CarrierCode:  req.CarrierCode,
-		FulfillmentStatus: req.FulfillmentStatus,
 	}
 
-	// Parse status
-	if req.Status > 0 {
-		queryReq.Status = fulfillment.ShipmentStatus(req.Status)
+	// Parse status - convert from string to domain enum
+	if req.Status != "" {
+		queryReq.Status = fulfillment.ParseShipmentStatus(req.Status)
+	}
+
+	// Parse fulfillment status - convert from string to int8
+	if req.FulfillmentStatus != "" {
+		v, _ := strconv.ParseInt(req.FulfillmentStatus, 10, 8)
+		queryReq.FulfillmentStatus = int8(v)
 	}
 
 	// Parse time range

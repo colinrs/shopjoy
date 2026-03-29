@@ -3,15 +3,15 @@ import request from '@/utils/request'
 // ==================== Types ====================
 
 // Promotion Types
-export type PromotionType = 'discount' | 'full_reduce' | 'flash_sale' | 'bundle'
-export type PromotionStatus = 'draft' | 'active' | 'inactive' | 'expired'
-export type DiscountType = 'percentage' | 'fixed_amount'
+export type PromotionType = 'discount' | 'coupon' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
+export type PromotionStatus = 'pending' | 'active' | 'paused' | 'ended'
+export type DiscountType = 'percentage' | 'fixed_amount' | 'buy_x_get_y'
 export type ConditionType = 'min_amount' | 'min_quantity'
 export type ScopeType = 'storewide' | 'products' | 'categories' | 'brands'
 
 // Coupon Types
-export type CouponType = 'fixed_amount' | 'percentage'
-export type CouponStatus = 'inactive' | 'active'
+export type CouponType = 'fixed_amount' | 'percentage' | 'free_shipping'
+export type CouponStatus = 'inactive' | 'active' | 'expired' | 'depleted'
 
 // User Coupon Types
 export type UserCouponStatus = 'unused' | 'used' | 'expired'

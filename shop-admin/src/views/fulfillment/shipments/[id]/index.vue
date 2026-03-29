@@ -61,7 +61,7 @@
                 Logistics Information
               </span>
               <el-button
-                v-if="shipment?.status === 0"
+                v-if="shipment?.status === 'pending'"
                 type="primary"
                 size="small"
                 @click="openEditLogistics"
@@ -179,7 +179,7 @@
           </template>
           <div class="action-buttons">
             <el-button
-              v-if="shipment?.status === 0"
+              v-if="shipment?.status === 'pending'"
               type="success"
               class="action-btn"
               @click="confirmShip"
@@ -188,7 +188,7 @@
               Confirm Shipment
             </el-button>
             <el-button
-              v-if="shipment?.status === 2"
+              v-if="shipment?.status === 'in_transit'"
               type="primary"
               class="action-btn"
               @click="markDelivered"
@@ -205,7 +205,7 @@
               Track Package
             </el-button>
             <el-button
-              v-if="shipment?.status === 0"
+              v-if="shipment?.status === 'pending'"
               type="danger"
               class="action-btn"
               @click="cancelShipment"
@@ -290,12 +290,12 @@ const editForm = reactive({
   currency: 'CNY'
 })
 
-const statusTypeMap = {
-  0: { type: 'warning' as const, text: 'Pending' },
-  1: { type: 'primary' as const, text: 'Shipped' },
-  2: { type: 'info' as const, text: 'In Transit' },
-  3: { type: 'success' as const, text: 'Delivered' },
-  4: { type: 'danger' as const, text: 'Failed' }
+const statusTypeMap: Record<string, { type: 'warning' | 'primary' | 'info' | 'success' | 'danger', text: string }> = {
+  'pending': { type: 'warning', text: 'Pending' },
+  'shipped': { type: 'primary', text: 'Shipped' },
+  'in_transit': { type: 'info', text: 'In Transit' },
+  'delivered': { type: 'success', text: 'Delivered' },
+  'failed': { type: 'danger', text: 'Failed' }
 }
 
 const timeline = computed<TimelineEvent[]>(() => {
@@ -310,17 +310,17 @@ const timeline = computed<TimelineEvent[]>(() => {
       title: 'Shipped',
       time: shipment.value.shipped_at,
       type: 'primary',
-      active: shipment.value.status >= 1,
+      active: ['shipped', 'in_transit', 'delivered', 'failed'].includes(shipment.value.status),
       description: `Carrier: ${shipment.value.carrier}, Tracking: ${shipment.value.tracking_no}`
     })
   }
 
-  if (shipment.value.status >= 2 && shipment.value.shipped_at) {
+  if (['shipped', 'in_transit', 'delivered'].includes(shipment.value.status) && shipment.value.shipped_at) {
     events.push({
       title: 'In Transit',
       time: shipment.value.shipped_at,
       type: 'info',
-      active: shipment.value.status >= 2,
+      active: ['in_transit', 'delivered'].includes(shipment.value.status),
       description: 'Package is on the way'
     })
   }
@@ -330,12 +330,12 @@ const timeline = computed<TimelineEvent[]>(() => {
       title: 'Delivered',
       time: shipment.value.delivered_at,
       type: 'success',
-      active: shipment.value.status === 3,
+      active: shipment.value.status === 'delivered',
       description: 'Package has been delivered'
     })
   }
 
-  if (shipment.value.status === 4) {
+  if (shipment.value.status === 'failed') {
     events.push({
       title: 'Delivery Failed',
       time: shipment.value.delivered_at || shipment.value.shipped_at || '',
@@ -360,7 +360,7 @@ const loadShipment = async () => {
       shipment_no: 'SHP20260322001',
       order_id: 'ORD001',
       order_no: 'ORD2026031800100',
-      status: 2,
+      status: 'in_transit',
       status_text: '运输中',
       carrier: 'SF Express',
       carrier_code: 'SF',
@@ -438,7 +438,7 @@ const confirmShip = async () => {
       'Confirm Shipment',
       { type: 'success' }
     )
-    await updateShipmentStatus(shipment.value!.id, 1)
+    await updateShipmentStatus(shipment.value!.id, 'shipped')
     ElMessage.success('Shipment confirmed')
     loadShipment()
   } catch (error) {
@@ -453,7 +453,7 @@ const markDelivered = async () => {
       'Confirm Delivery',
       { type: 'success' }
     )
-    await updateShipmentStatus(shipment.value!.id, 3)
+    await updateShipmentStatus(shipment.value!.id, 'delivered')
     ElMessage.success('Shipment marked as delivered')
     loadShipment()
   } catch (error) {

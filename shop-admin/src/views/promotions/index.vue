@@ -174,15 +174,17 @@
               </el-input>
               <el-select v-model="promotionParams.status" placeholder="状态" clearable class="filter-select" @change="loadPromotions">
                 <el-option label="全部" value="" />
-                <el-option label="草稿" value="draft" />
+                <el-option label="待开始" value="pending" />
                 <el-option label="进行中" value="active" />
-                <el-option label="已停用" value="inactive" />
-                <el-option label="已过期" value="expired" />
+                <el-option label="已暂停" value="paused" />
+                <el-option label="已结束" value="ended" />
               </el-select>
               <el-select v-model="promotionParams.type" placeholder="类型" clearable class="filter-select" @change="loadPromotions">
                 <el-option label="全部" value="" />
-                <el-option label="满减" value="full_reduce" />
                 <el-option label="折扣" value="discount" />
+                <el-option label="限时秒杀" value="flash_sale" />
+                <el-option label="捆绑销售" value="bundle" />
+                <el-option label="买X送Y" value="buy_x_get_y" />
               </el-select>
             </div>
             <el-button type="primary" @click="handleAddPromotion">
@@ -245,7 +247,7 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="row.status === 'draft' || row.status === 'inactive'"
+                  v-if="row.status === 'pending' || row.status === 'paused'"
                   type="success"
                   link
                   size="small"
@@ -359,7 +361,9 @@
         <el-form-item label="活动类型" prop="type">
           <el-radio-group v-model="promotionForm.type">
             <el-radio label="discount">折扣</el-radio>
-            <el-radio label="full_reduce">满减</el-radio>
+            <el-radio label="flash_sale">限时秒杀</el-radio>
+            <el-radio label="bundle">捆绑销售</el-radio>
+            <el-radio label="buy_x_get_y">买X送Y</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="优惠类型" prop="discount_type">
@@ -523,8 +527,8 @@ const promotionForm = reactive({
   id: 0,
   name: '',
   description: '',
-  type: 'discount' as 'discount' | 'full_reduce',
-  discount_type: 'fixed_amount' as 'fixed_amount' | 'percentage',
+  type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
+  discount_type: 'fixed_amount' as 'fixed_amount' | 'percentage' | 'buy_x_get_y',
   discount_value_num: 0,
   min_order_amount_num: 0,
   max_discount_num: 0,
@@ -611,7 +615,9 @@ const getProgressStatus = (row: Coupon) => {
 const getCouponStatusType = (status: string) => {
   const types: Record<string, string> = {
     'inactive': 'info',
-    'active': 'success'
+    'active': 'success',
+    'expired': 'warning',
+    'depleted': 'danger'
   }
   return types[status] || 'info'
 }
@@ -619,7 +625,9 @@ const getCouponStatusType = (status: string) => {
 const getCouponStatusText = (status: string) => {
   const texts: Record<string, string> = {
     'inactive': '未激活',
-    'active': '已激活'
+    'active': '已激活',
+    'expired': '已过期',
+    'depleted': '已用完'
   }
   return texts[status] || status
 }
@@ -627,9 +635,9 @@ const getCouponStatusText = (status: string) => {
 const getPromoStatusType = (status: string) => {
   const types: Record<string, string> = {
     'active': 'success',
-    'inactive': 'warning',
-    'draft': 'info',
-    'expired': 'info'
+    'paused': 'warning',
+    'pending': 'info',
+    'ended': 'info'
   }
   return types[status] || 'info'
 }
@@ -637,9 +645,9 @@ const getPromoStatusType = (status: string) => {
 const getPromoStatusText = (status: string) => {
   const texts: Record<string, string> = {
     'active': '进行中',
-    'inactive': '已停用',
-    'draft': '草稿',
-    'expired': '已过期'
+    'paused': '已暂停',
+    'pending': '待开始',
+    'ended': '已结束'
   }
   return texts[status] || status
 }
@@ -647,9 +655,9 @@ const getPromoStatusText = (status: string) => {
 const getPromotionTypeText = (type: string) => {
   const texts: Record<string, string> = {
     'discount': '折扣',
-    'full_reduce': '满减',
     'flash_sale': '限时秒杀',
-    'bundle': '捆绑销售'
+    'bundle': '捆绑销售',
+    'buy_x_get_y': '买X送Y'
   }
   return texts[type] || type
 }

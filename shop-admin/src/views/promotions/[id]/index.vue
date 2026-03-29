@@ -28,7 +28,9 @@
                 <el-form-item label="活动类型" prop="type">
                   <el-select v-model="promotionForm.type" placeholder="请选择活动类型" style="width: 100%">
                     <el-option label="折扣" value="discount" />
-                    <el-option label="满减" value="full_reduce" />
+                    <el-option label="限时秒杀" value="flash_sale" />
+                    <el-option label="捆绑销售" value="bundle" />
+                    <el-option label="买X送Y" value="buy_x_get_y" />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -180,7 +182,7 @@
             </el-tag>
             <div class="status-actions">
               <el-button
-                v-if="promotionForm.status === 'draft' || promotionForm.status === 'inactive'"
+                v-if="promotionForm.status === 'pending' || promotionForm.status === 'paused'"
                 type="success"
                 @click="handleActivate"
                 :loading="activating"
@@ -268,8 +270,8 @@ const isEdit = computed(() => promotionId.value > 0)
 const promotionForm = reactive({
   name: '',
   description: '',
-  type: 'discount' as 'discount' | 'full_reduce',
-  discount_type: 'fixed_amount' as 'fixed_amount' | 'percentage',
+  type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
+  discount_type: 'fixed_amount' as 'fixed_amount' | 'percentage' | 'buy_x_get_y',
   discount_value_num: 0,
   min_order_amount_num: 0,
   max_discount_num: 0,
@@ -279,7 +281,7 @@ const promotionForm = reactive({
   category_ids: [] as number[],
   usage_limit: 0,
   per_user_limit: 0,
-  status: 'draft' as string
+  status: 'pending' as string
 })
 
 const rules = {
@@ -300,7 +302,7 @@ const loadPromotion = async () => {
     const res = await getPromotion(promotionId.value)
     promotionForm.name = res.name
     promotionForm.description = res.description || ''
-    promotionForm.type = res.type as 'discount' | 'full_reduce'
+    promotionForm.type = res.type as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
     promotionForm.discount_type = (res.discount_type || 'fixed_amount') as 'fixed_amount' | 'percentage'
     promotionForm.discount_value_num = parseFloat(res.discount_value) || 0
     promotionForm.min_order_amount_num = parseFloat(res.min_order_amount) || 0
@@ -400,7 +402,7 @@ const handleDeactivate = async () => {
   try {
     await deactivatePromotion(promotionId.value)
     ElMessage.success('停用成功')
-    promotionForm.status = 'inactive'
+    promotionForm.status = 'paused'
   } catch (error) {
     console.error('Failed to deactivate:', error)
   } finally {
@@ -423,9 +425,9 @@ const formatDateTime = (dateStr: string) => {
 const getStatusType = (status: string) => {
   const types: Record<string, string> = {
     'active': 'success',
-    'inactive': 'warning',
-    'draft': 'info',
-    'expired': 'info'
+    'paused': 'warning',
+    'pending': 'info',
+    'ended': 'info'
   }
   return types[status] || 'info'
 }
@@ -433,9 +435,9 @@ const getStatusType = (status: string) => {
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
     'active': '进行中',
-    'inactive': '已停用',
-    'draft': '草稿',
-    'expired': '已过期'
+    'paused': '已暂停',
+    'pending': '待开始',
+    'ended': '已结束'
   }
   return texts[status] || status
 }

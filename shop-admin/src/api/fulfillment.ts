@@ -1,12 +1,22 @@
 import request from '@/utils/request'
 
 // Types
+export type ShipmentStatus = 'pending' | 'shipped' | 'in_transit' | 'delivered' | 'failed' | 'cancelled'
+
+export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
+
+export type RefundType = 'full_refund' | 'partial_refund'
+
+export type RefundStatus = 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled'
+
+export type OrderRefundStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'completed'
+
 export interface Shipment {
   id: number
   shipment_no: string
   order_id: string
   order_no: string
-  status: number // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+  status: ShipmentStatus
   status_text: string
   carrier: string
   carrier_code: string
@@ -63,7 +73,7 @@ export interface UpdateShipmentRequest {
 export interface ShipmentListParams {
   page?: number
   page_size?: number
-  status?: number
+  status?: ShipmentStatus
   carrier_code?: string
   tracking_no?: string
   start_time?: string
@@ -78,9 +88,9 @@ export interface Refund {
   user_id: number
   user_name: string
   user_phone: string
-  type: number // 1=full_refund, 2=partial_refund
+  type: RefundType
   type_text: string
-  status: number // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+  status: RefundStatus
   status_text: string
   reason_type: string
   reason: string
@@ -111,7 +121,7 @@ export interface RefundOrderItem {
 export interface RefundListParams {
   page?: number
   page_size?: number
-  status?: number
+  status?: RefundStatus
   reason_type?: string
   start_time?: string
   end_time?: string
@@ -192,7 +202,7 @@ export const batchCreateShipments = (data: {
   return request.post<Shipment[]>('/api/v1/shipments/batch', data)
 }
 
-export const updateShipmentStatus = (id: number, status: number) => {
+export const updateShipmentStatus = (id: number, status: ShipmentStatus) => {
   return request.put(`/api/v1/shipments/${id}/status`, { status })
 }
 

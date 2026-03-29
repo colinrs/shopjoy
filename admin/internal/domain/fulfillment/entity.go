@@ -49,6 +49,26 @@ func (s ShipmentStatus) IsValid() bool {
 	return s >= ShipmentStatusPending && s <= ShipmentStatusCancelled
 }
 
+// ParseShipmentStatus parses a string to ShipmentStatus
+func ParseShipmentStatus(s string) ShipmentStatus {
+	switch s {
+	case "pending":
+		return ShipmentStatusPending
+	case "shipped":
+		return ShipmentStatusShipped
+	case "in_transit":
+		return ShipmentStatusInTransit
+	case "delivered":
+		return ShipmentStatusDelivered
+	case "failed":
+		return ShipmentStatusFailed
+	case "cancelled":
+		return ShipmentStatusCancelled
+	default:
+		return ShipmentStatusPending
+	}
+}
+
 // RefundStatus 退款状态
 type RefundStatus int
 
@@ -81,6 +101,24 @@ func (s RefundStatus) IsValid() bool {
 	return s >= RefundStatusPending && s <= RefundStatusCancelled
 }
 
+// ParseRefundStatus parses a string to RefundStatus
+func ParseRefundStatus(s string) RefundStatus {
+	switch s {
+	case "pending":
+		return RefundStatusPending
+	case "approved":
+		return RefundStatusApproved
+	case "rejected":
+		return RefundStatusRejected
+	case "completed":
+		return RefundStatusCompleted
+	case "cancelled":
+		return RefundStatusCancelled
+	default:
+		return RefundStatusPending
+	}
+}
+
 // RefundType 退款类型
 type RefundType int
 
@@ -97,6 +135,18 @@ func (t RefundType) String() string {
 		return "partial_refund"
 	default:
 		return "unknown"
+	}
+}
+
+// ParseRefundType parses a string to RefundType
+func ParseRefundType(s string) RefundType {
+	switch s {
+	case "full_refund":
+		return RefundTypeFull
+	case "partial_refund":
+		return RefundTypePartial
+	default:
+		return RefundTypeFull
 	}
 }
 
@@ -127,6 +177,22 @@ func (s FulfillmentStatus) String() string {
 
 func (s FulfillmentStatus) IsValid() bool {
 	return s >= FulfillmentStatusPending && s <= FulfillmentStatusDelivered
+}
+
+// ParseFulfillmentStatus parses a string to FulfillmentStatus
+func ParseFulfillmentStatus(s string) FulfillmentStatus {
+	switch s {
+	case "pending":
+		return FulfillmentStatusPending
+	case "partial_shipped":
+		return FulfillmentStatusPartialShipped
+	case "shipped":
+		return FulfillmentStatusShipped
+	case "delivered":
+		return FulfillmentStatusDelivered
+	default:
+		return FulfillmentStatusPending
+	}
 }
 
 // ==================== Carrier (物流公司) ====================

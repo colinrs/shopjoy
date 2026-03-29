@@ -46,19 +46,19 @@
           </el-input>
           <el-select v-model="statusFilter" placeholder="Order Status" clearable class="filter-select" @change="handleSearch">
             <el-option label="All" value="" />
-            <el-option label="Pending Payment" value="pending" />
+            <el-option label="Pending Payment" value="pending_payment" />
             <el-option label="Paid" value="paid" />
-            <el-option label="To Ship" value="to_ship" />
+            <el-option label="To Ship" value="pending_shipment" />
             <el-option label="Shipped" value="shipped" />
             <el-option label="Completed" value="completed" />
             <el-option label="Cancelled" value="cancelled" />
           </el-select>
           <el-select v-model="fulfillmentFilter" placeholder="Fulfillment" clearable class="filter-select" @change="handleSearch">
             <el-option label="All" value="" />
-            <el-option label="Unshipped" :value="0" />
-            <el-option label="Partial Shipped" :value="1" />
-            <el-option label="Shipped" :value="2" />
-            <el-option label="Delivered" :value="3" />
+            <el-option label="Unshipped" value="pending" />
+            <el-option label="Partial Shipped" value="partial_shipped" />
+            <el-option label="Shipped" value="shipped" />
+            <el-option label="Delivered" value="delivered" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -155,7 +155,7 @@
           <template #default="{ row }">
             <div class="order-no-cell">
               <span class="order-no" @click="handleDetail(row)">{{ row.order_no }}</span>
-              <el-tag v-if="row.refund_status > 0" size="small" type="warning" effect="dark">
+              <el-tag v-if="row.refund_status !== 'none' && row.refund_status !== undefined" size="small" type="warning" effect="dark">
                 {{ row.refund_text }}
               </el-tag>
             </div>
@@ -203,7 +203,7 @@
               {{ row.status_text }}
             </el-tag>
             <el-tag
-              v-if="row.fulfillment_status !== undefined && row.fulfillment_status !== 0"
+              v-if="row.fulfillment_status !== undefined && row.fulfillment_status !== 'pending'"
               :type="getFulfillmentType(row.fulfillment_status)"
               effect="plain"
               size="small"
@@ -229,7 +229,7 @@
               Ship
             </el-button>
             <el-button
-              v-if="row.status === 'pending'"
+              v-if="row.status === 'pending_payment'"
               type="warning"
               size="small"
               @click="handleRemind(row)"
@@ -468,34 +468,36 @@ const formatTime = (time: string | undefined | null) => {
 // Status helpers
 const getStatusType = (status: OrderStatus) => {
   const types: Record<OrderStatus, string> = {
-    pending: 'warning',
+    pending_payment: 'warning',
     paid: 'success',
-    to_ship: 'primary',
+    pending_shipment: 'primary',
     shipped: 'info',
     completed: 'success',
-    cancelled: 'danger'
+    cancelled: 'danger',
+    refunding: 'warning',
+    refunded: 'info'
   }
   return types[status] || 'info'
 }
 
-const getFulfillmentType = (status: FulfillmentStatus) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'primary',
-    2: 'info',
-    3: 'success'
+const getFulfillmentType = (status: string) => {
+  const types: Record<string, string> = {
+    'pending': 'warning',
+    'partial_shipped': 'primary',
+    'shipped': 'info',
+    'delivered': 'success'
   }
   return types[status] || 'info'
 }
 
 // Action helpers
 const canShip = (order: Order) => {
-  return ['paid', 'to_ship'].includes(order.status) &&
-    (order.fulfillment_status === 0 || order.fulfillment_status === 1)
+  return ['paid', 'pending_shipment'].includes(order.status) &&
+    (order.fulfillment_status === 'pending' || order.fulfillment_status === 'partial_shipped')
 }
 
 const canCancel = (order: Order) => {
-  return ['pending', 'paid'].includes(order.status)
+  return ['pending_payment', 'paid'].includes(order.status)
 }
 
 // Event handlers

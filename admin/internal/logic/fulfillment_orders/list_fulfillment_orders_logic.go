@@ -2,9 +2,11 @@ package fulfillment_orders
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
+	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
@@ -44,8 +46,18 @@ func (l *ListFulfillmentOrdersLogic) ListFulfillmentOrders(req *types.ListFulfil
 		UserID:            req.UserID,
 		UserName:          req.UserName,
 		Status:            req.Status,
-		FulfillmentStatus: req.FulfillmentStatus,
-		RefundStatus:      req.RefundStatus,
+	}
+
+	// Parse fulfillment status - convert from string to int8
+	if req.FulfillmentStatus != "" {
+		v, _ := strconv.ParseInt(req.FulfillmentStatus, 10, 8)
+		queryReq.FulfillmentStatus = int8(v)
+	}
+
+	// Parse refund status - convert from string to int8
+	if req.RefundStatus != "" {
+		v, _ := strconv.ParseInt(req.RefundStatus, 10, 8)
+		queryReq.RefundStatus = int8(v)
 	}
 
 	// Parse time range
@@ -129,9 +141,9 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		OrderID:           o.OrderID,
 		OrderNo:           o.OrderNo,
 		Status:            o.Status,
-		FulfillmentStatus: o.FulfillmentStatus,
+		FulfillmentStatus: fulfillment.FulfillmentStatus(o.FulfillmentStatus).String(),
 		FulfillmentText:   o.FulfillmentText,
-		RefundStatus:      o.RefundStatus,
+		RefundStatus:      fulfillment.RefundStatus(o.RefundStatus).String(),
 		RefundText:        o.RefundText,
 		TotalAmount:       formatAmount(o.TotalAmount),
 		Currency:          o.Currency,

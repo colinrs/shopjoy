@@ -35,7 +35,7 @@ type ActivityItem struct {
 
 type AddDecorationRequest struct {
 	PageID      int64  `path:"id"`
-	BlockType   string `json:"block_type"`
+	BlockType   string `json:"block_type"`   // banner, product_grid, text, image, video, etc
 	BlockConfig string `json:"block_config"` // JSON string
 	SortOrder   int    `json:"sort_order,optional"`
 }
@@ -353,7 +353,7 @@ type CouponDetailResp struct {
 	Code           string `json:"code"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
-	Type           string `json:"type"`
+	Type           string `json:"type"` // fixed_amount, percentage, free_shipping
 	DiscountValue  string `json:"discount_value"`
 	MinOrderAmount string `json:"min_order_amount"`
 	MaxDiscount    string `json:"max_discount"`
@@ -365,7 +365,7 @@ type CouponDetailResp struct {
 	ProductIDs     string `json:"product_ids"`
 	CategoryIDs    string `json:"category_ids"`
 	MarketIDs      string `json:"market_ids"`
-	Status         string `json:"status"`
+	Status         string `json:"status"` // inactive, active, expired, depleted
 	CreatedAt      string `json:"created_at"`
 	UpdatedAt      string `json:"updated_at"`
 }
@@ -678,7 +678,7 @@ type DeactivateRedeemRuleReq struct {
 
 type DecorationDTO struct {
 	ID          int64  `json:"id"`
-	BlockType   string `json:"block_type"`
+	BlockType   string `json:"block_type"`   // banner, product_grid, text, image, video, etc
 	BlockConfig string `json:"block_config"` // JSON string
 	SortOrder   int    `json:"sort_order"`
 }
@@ -795,15 +795,15 @@ type ExportOrdersReq struct {
 	OrderNo           string `form:"order_no,optional"`
 	UserID            int64  `form:"user_id,optional"`
 	Status            string `form:"status,optional"`
-	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
-	RefundStatus      int8   `form:"refund_status,optional"`
-	StartTime         string `form:"start_time,optional"` // RFC3339
-	EndTime           string `form:"end_time,optional"`   // RFC3339
+	FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+	RefundStatus      string `form:"refund_status,optional"`      // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
+	StartTime         string `form:"start_time,optional"`         // RFC3339
+	EndTime           string `form:"end_time,optional"`           // RFC3339
 }
 
 type ExportUsersRequest struct {
 	Keyword       string `form:"keyword,optional"`
-	Status        int    `form:"status,optional"`
+	Status        int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	RegisterStart string `form:"register_start,optional"`
 	RegisterEnd   string `form:"register_end,optional"`
 }
@@ -815,7 +815,7 @@ type ExtendedUserResponse struct {
 	Phone         string `json:"phone"`
 	Name          string `json:"name"`
 	Avatar        string `json:"avatar"`
-	Status        int    `json:"status"`
+	Status        int    `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	StatusText    string `json:"status_text"`
 	PointsBalance int64  `json:"points_balance"`
 	OrderCount    int64  `json:"order_count"`
@@ -1084,7 +1084,7 @@ type GetUserResponse struct {
 	Phone     string `json:"phone"`
 	Name      string `json:"name"`
 	Avatar    string `json:"avatar"`
-	Status    int    `json:"status"`
+	Status    int    `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	CreatedAt string `json:"created_at"`
 	LastLogin string `json:"last_login,optional"`
 }
@@ -1126,7 +1126,7 @@ type InitiateRefundResp struct {
 	RefundNo        string `json:"refund_no"`
 	Amount          string `json:"amount"`
 	Currency        string `json:"currency"`
-	Status          int8   `json:"status"`
+	Status          int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 	StatusText      string `json:"status_text"`
 	ChannelRefundID string `json:"channel_refund_id,optional"`
 }
@@ -1264,10 +1264,10 @@ type ListFulfillmentOrdersReq struct {
 	UserID            int64  `form:"user_id,optional"`
 	UserName          string `form:"user_name,optional"`
 	Status            string `form:"status,optional"`
-	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
-	RefundStatus      int8   `form:"refund_status,optional"`
-	StartTime         string `form:"start_time,optional"` // RFC3339
-	EndTime           string `form:"end_time,optional"`   // RFC3339
+	FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+	RefundStatus      string `form:"refund_status,optional"`      // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
+	StartTime         string `form:"start_time,optional"`         // RFC3339
+	EndTime           string `form:"end_time,optional"`           // RFC3339
 }
 
 type ListFulfillmentOrdersResp struct {
@@ -1365,7 +1365,7 @@ type ListProductMarketsResp struct {
 type ListProductReq struct {
 	Name       string `form:"name,optional"`
 	CategoryID int64  `form:"category_id,optional"`
-	Status     string `form:"status,optional"`
+	Status     string `form:"status,optional"`    // draft, on_sale, off_sale, deleted
 	MinPrice   string `form:"min_price,optional"` // 最低价格，单位：元
 	MaxPrice   string `form:"max_price,optional"` // 最高价格，单位：元
 	Page       int    `form:"page,default=1"`
@@ -1445,7 +1445,7 @@ type ListRefundsReq struct {
 	RefundNo   string `form:"refund_no,optional"`
 	OrderID    string `form:"order_id,optional"`
 	UserID     int64  `form:"user_id,optional"`
-	Status     int8   `form:"status,optional"`
+	Status     string `form:"status,optional"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
 	ReasonType string `form:"reason_type,optional"`
 	StartTime  string `form:"start_time,optional"` // RFC3339
 	EndTime    string `form:"end_time,optional"`   // RFC3339
@@ -1491,7 +1491,7 @@ type ListRolesRequest struct {
 	PageSize int    `form:"page_size,default=20"`
 	Name     string `form:"name,optional"`
 	Code     string `form:"code,optional"`
-	Status   int8   `form:"status,optional"`
+	Status   int8   `form:"status,optional"` // 0=disabled, 1=enabled
 }
 
 type ListRolesResponse struct {
@@ -1516,11 +1516,11 @@ type ListShipmentsReq struct {
 	ShipmentNo        string `form:"shipment_no,optional"`
 	OrderID           string `form:"order_id,optional"`
 	TrackingNo        string `form:"tracking_no,optional"`
-	Status            int8   `form:"status,optional"`
+	Status            string `form:"status,optional"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	CarrierCode       string `form:"carrier_code,optional"`
-	FulfillmentStatus int8   `form:"fulfillment_status,optional"`
-	StartTime         string `form:"start_time,optional"` // RFC3339
-	EndTime           string `form:"end_time,optional"`   // RFC3339
+	FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+	StartTime         string `form:"start_time,optional"`         // RFC3339
+	EndTime           string `form:"end_time,optional"`           // RFC3339
 }
 
 type ListShipmentsResp struct {
@@ -1599,7 +1599,7 @@ type ListUsersEnhancedRequest struct {
 	Page          int    `form:"page,default=1"`
 	PageSize      int    `form:"page_size,default=20"`
 	Keyword       string `form:"keyword,optional"`
-	Status        int    `form:"status,optional"`
+	Status        int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	RegisterStart string `form:"register_start,optional"`
 	RegisterEnd   string `form:"register_end,optional"`
 }
@@ -1616,7 +1616,7 @@ type ListUsersRequest struct {
 	PageSize int    `form:"page_size,default=20"`
 	Name     string `form:"name,optional"`
 	Email    string `form:"email,optional"`
-	Status   int    `form:"status,optional"`
+	Status   int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	Keyword  string `form:"keyword,optional"`
 }
 
@@ -1689,9 +1689,9 @@ type OrderFulfillmentDetailResp struct {
 	OrderID           string                      `json:"order_id"`
 	OrderNo           string                      `json:"order_no"`
 	Status            string                      `json:"status"`
-	FulfillmentStatus int8                        `json:"fulfillment_status"`
+	FulfillmentStatus string                      `json:"fulfillment_status"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
 	FulfillmentText   string                      `json:"fulfillment_text"`
-	RefundStatus      int8                        `json:"refund_status"`
+	RefundStatus      string                      `json:"refund_status"` // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
 	RefundText        string                      `json:"refund_text"`
 	TotalAmount       string                      `json:"total_amount"`
 	Currency          string                      `json:"currency"`
@@ -1734,7 +1734,7 @@ type OrderPaymentResp struct {
 	Currency          string               `json:"currency"`
 	TransactionFee    string               `json:"transaction_fee"`
 	FeeCurrency       string               `json:"fee_currency"`
-	Status            int8                 `json:"status"`
+	Status            int8                 `json:"status"` // 0=pending, 1=succeeded, 2=failed
 	StatusText        string               `json:"status_text"`
 	PaidAt            string               `json:"paid_at,optional"`
 	RefundedAmount    string               `json:"refunded_amount"`
@@ -1774,7 +1774,7 @@ type PageDetailResponse struct {
 
 type PageListItem struct {
 	ID          int64  `json:"id"`
-	PageType    string `json:"page_type"`
+	PageType    string `json:"page_type"` // home, category, product, cart, order, custom
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	IsPublished bool   `json:"is_published"`
@@ -1793,7 +1793,7 @@ type PaymentRefundResp struct {
 	ChannelRefundID string `json:"channel_refund_id"`
 	Amount          string `json:"amount"`
 	Currency        string `json:"currency"`
-	Status          int8   `json:"status"`
+	Status          int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 	StatusText      string `json:"status_text"`
 	ReasonType      string `json:"reason_type"`
 	Reason          string `json:"reason"`
@@ -1925,7 +1925,7 @@ type ProductDetailResp struct {
 	Currency        string              `json:"currency"`
 	CostPrice       string              `json:"cost_price"` // 成本价，单位：元
 	Stock           int                 `json:"stock"`
-	Status          string              `json:"status"`
+	Status          string              `json:"status"` // draft, on_sale, off_sale, deleted
 	CategoryID      int64               `json:"category_id"`
 	CreatedAt       string              `json:"created_at"`
 	UpdatedAt       string              `json:"updated_at"`
@@ -1998,11 +1998,11 @@ type PromotionDetailResp struct {
 	ID             int64    `json:"id"`
 	Name           string   `json:"name"`
 	Description    string   `json:"description"`
-	Type           string   `json:"type"`
-	Status         string   `json:"status"` // draft, active, inactive, expired
+	Type           string   `json:"type"`   // discount, flash_sale, bundle, buy_x_get_y
+	Status         string   `json:"status"` // pending, active, paused, ended
 	StartTime      string   `json:"start_time"`
 	EndTime        string   `json:"end_time"`
-	DiscountType   string   `json:"discount_type"`
+	DiscountType   string   `json:"discount_type"` // percentage, fixed_amount, buy_x_get_y
 	DiscountValue  string   `json:"discount_value"`
 	MinOrderAmount string   `json:"min_order_amount"`
 	MaxDiscount    string   `json:"max_discount"`
@@ -2102,9 +2102,9 @@ type RefundDetailResp struct {
 	UserID         int64                  `json:"user_id"`
 	UserName       string                 `json:"user_name,optional"`
 	UserPhone      string                 `json:"user_phone,optional"`
-	Type           int8                   `json:"type"` // 1=full_refund, 2=partial_refund
+	Type           string                 `json:"type"` // 1=full_refund, 2=partial_refund
 	TypeText       string                 `json:"type_text"`
-	Status         int8                   `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+	Status         string                 `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
 	StatusText     string                 `json:"status_text"`
 	ReasonType     string                 `json:"reason_type"`
 	Reason         string                 `json:"reason"`
@@ -2333,7 +2333,7 @@ type RoleInfo struct {
 	Name        string `json:"name"`
 	Code        string `json:"code"`
 	Description string `json:"description"`
-	Status      int8   `json:"status"`
+	Status      int8   `json:"status"` // 0=disabled, 1=enabled
 	StatusText  string `json:"status_text"`
 	IsSystem    bool   `json:"is_system"`
 	CreatedAt   string `json:"created_at"`
@@ -2447,7 +2447,7 @@ type ShipmentDetailResp struct {
 	ID            int64               `json:"id"`
 	ShipmentNo    string              `json:"shipment_no"`
 	OrderID       string              `json:"order_id"`
-	Status        int8                `json:"status"`
+	Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	StatusText    string              `json:"status_text"`
 	Carrier       string              `json:"carrier"`
 	CarrierCode   string              `json:"carrier_code"`
@@ -2544,9 +2544,9 @@ type ShopSettings struct {
 	DefaultCurrency string `json:"default_currency"`
 	DefaultLanguage string `json:"default_language"`
 	Timezone        string `json:"timezone"`
-	Status          int8   `json:"status"`
+	Status          int8   `json:"status"` // 0=inactive, 1=active, 2=suspended
 	StatusText      string `json:"status_text"`
-	Plan            int8   `json:"plan"`
+	Plan            int8   `json:"plan"` // 0=basic, 1=standard, 2=premium
 	PlanText        string `json:"plan_text"`
 	ExpireAt        string `json:"expire_at,optional"`
 	CreatedAt       string `json:"created_at"`
@@ -2704,7 +2704,7 @@ type TransactionResp struct {
 	Amount               string `json:"amount"`
 	Currency             string `json:"currency"`
 	TransactionFee       string `json:"transaction_fee"`
-	Status               int8   `json:"status"`
+	Status               int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 	StatusText           string `json:"status_text"`
 	CreatedAt            string `json:"created_at"`
 	PaidAt               string `json:"paid_at,optional"`
@@ -3002,8 +3002,8 @@ type UpdateShipmentReq struct {
 }
 
 type UpdateShipmentStatusReq struct {
-	ID     int64 `path:"id"`
-	Status int8  `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+	ID     int64  `path:"id"`
+	Status string `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
 }
 
 type UpdateShippingSettingsRequest struct {
@@ -3124,7 +3124,7 @@ type UserCouponDetailResp struct {
 	MaxDiscount    string `json:"max_discount"`
 	StartTime      string `json:"start_time"`
 	EndTime        string `json:"end_time"`
-	Status         string `json:"status"`
+	Status         string `json:"status"` // unused, used, expired
 	UsedAt         string `json:"used_at,optional"`
 	OrderID        int64  `json:"order_id,optional"`
 	CreatedAt      string `json:"created_at"`
@@ -3137,10 +3137,10 @@ type UserDetailResponse struct {
 	Phone          string               `json:"phone"`
 	Name           string               `json:"name"`
 	Avatar         string               `json:"avatar"`
-	Gender         int                  `json:"gender"`
+	Gender         int                  `json:"gender"` // 0=unknown, 1=male, 2=female, 3=other
 	GenderText     string               `json:"gender_text"`
 	Birthday       string               `json:"birthday"`
-	Status         int                  `json:"status"`
+	Status         int                  `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	StatusText     string               `json:"status_text"`
 	PointsBalance  int64                `json:"points_balance"`
 	PointsFrozen   int64                `json:"frozen_points"`

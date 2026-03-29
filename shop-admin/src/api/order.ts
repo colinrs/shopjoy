@@ -3,10 +3,10 @@ import request from '@/utils/request'
 // ===================== Types =====================
 
 // Order status
-export type OrderStatus = 'pending' | 'paid' | 'to_ship' | 'shipped' | 'completed' | 'cancelled'
+export type OrderStatus = 'pending_payment' | 'paid' | 'pending_shipment' | 'shipped' | 'completed' | 'cancelled' | 'refunding' | 'refunded'
 
-// Fulfillment status (0=unshipped, 1=partial_shipped, 2=shipped, 3=delivered)
-export type FulfillmentStatus = 0 | 1 | 2 | 3
+// Fulfillment status
+export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
 
 // Order list query parameters
 export interface OrderListParams {
@@ -64,7 +64,7 @@ export interface ShipmentInfo {
   carrier_code: string
   carrier_name: string
   tracking_no: string
-  status: number
+  status: string
   shipped_at: string
   delivered_at: string
 }
@@ -77,7 +77,7 @@ export interface Order {
   status_text: string
   fulfillment_status: FulfillmentStatus
   fulfillment_text: string
-  refund_status: number
+  refund_status: string
   refund_text: string
   user_id: number
   user_name: string
@@ -168,7 +168,7 @@ export interface ExportOrdersParams {
   user_id?: number
   status?: OrderStatus
   fulfillment_status?: FulfillmentStatus
-  refund_status?: number
+  refund_status?: string
   start_time?: string
   end_time?: string
 }

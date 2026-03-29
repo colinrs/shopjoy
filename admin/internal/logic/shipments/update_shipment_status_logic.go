@@ -39,7 +39,7 @@ func (l *UpdateShipmentStatusLogic) UpdateShipmentStatus(req *types.UpdateShipme
 	userID := contextx.GetCurrentUserID(l.ctx)
 
 	// Update shipment status
-	shipmentResp, err := l.svcCtx.ShipmentApp.UpdateShipmentStatus(l.ctx, shared.TenantID(tenantID), userID, req.ID, fulfillment.ShipmentStatus(req.Status))
+	shipmentResp, err := l.svcCtx.ShipmentApp.UpdateShipmentStatus(l.ctx, shared.TenantID(tenantID), userID, req.ID, fulfillment.ParseShipmentStatus(req.Status))
 	if err != nil {
 		return nil, err
 	}

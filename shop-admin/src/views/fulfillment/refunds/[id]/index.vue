@@ -138,7 +138,7 @@
         </el-card>
 
         <!-- Rejection Info -->
-        <el-card v-if="refund?.status === 2 && refund.reject_reason" class="info-card rejection-card" shadow="never">
+        <el-card v-if="refund?.status === 'rejected' && refund.reject_reason" class="info-card rejection-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -208,7 +208,7 @@
         </el-card>
 
         <!-- Actions Card -->
-        <el-card v-if="refund?.status === 0" class="actions-card" shadow="never">
+        <el-card v-if="refund?.status === 'pending'" class="actions-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -297,12 +297,12 @@ const rejectRules = {
   reject_reason: [{ required: true, message: 'Please enter rejection reason', trigger: 'blur' }]
 }
 
-const statusTypeMap = {
-  0: { type: 'warning' as const, text: 'Pending' },
-  1: { type: 'success' as const, text: 'Approved' },
-  2: { type: 'danger' as const, text: 'Rejected' },
-  3: { type: 'primary' as const, text: 'Completed' },
-  4: { type: 'info' as const, text: 'Cancelled' }
+const statusTypeMap: Record<string, { type: 'warning' | 'success' | 'danger' | 'primary' | 'info', text: string }> = {
+  'pending': { type: 'warning', text: 'Pending' },
+  'approved': { type: 'success', text: 'Approved' },
+  'rejected': { type: 'danger', text: 'Rejected' },
+  'completed': { type: 'primary', text: 'Completed' },
+  'cancelled': { type: 'info', text: 'Cancelled' }
 }
 
 const timeline = computed(() => {
@@ -326,17 +326,17 @@ const timeline = computed(() => {
     }
   ]
 
-  if (refund.value.status >= 1 && refund.value.approved_at) {
+  if ((refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed') && refund.value.approved_at) {
     events.push({
       title: 'Approved',
       time: refund.value.approved_at,
       type: 'success',
-      active: refund.value.status >= 1,
+      active: refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed',
       description: refund.value.approved_by ? `By: ${refund.value.approved_by}` : ''
     })
   }
 
-  if (refund.value.status === 2) {
+  if (refund.value.status === 'rejected') {
     events.push({
       title: 'Rejected',
       time: refund.value.approved_at || refund.value.created_at,
@@ -346,7 +346,7 @@ const timeline = computed(() => {
     })
   }
 
-  if (refund.value.status === 3 && refund.value.completed_at) {
+  if (refund.value.status === 'completed' && refund.value.completed_at) {
     events.push({
       title: 'Refund Completed',
       time: refund.value.completed_at,
@@ -356,7 +356,7 @@ const timeline = computed(() => {
     })
   }
 
-  if (refund.value.status === 4) {
+  if (refund.value.status === 'cancelled') {
     events.push({
       title: 'Cancelled',
       time: refund.value.completed_at || refund.value.created_at,
@@ -384,9 +384,9 @@ const loadRefund = async () => {
       user_id: 101,
       user_name: 'John Doe',
       user_phone: '138****8001',
-      type: 1,
+      type: 'full_refund',
       type_text: '全额退款',
-      status: 0,
+      status: 'pending',
       status_text: '待处理',
       reason_type: 'DEFECTIVE',
       reason: 'Product has scratches on screen',

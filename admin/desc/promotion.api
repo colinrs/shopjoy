@@ -53,11 +53,11 @@ type (
 		ID             int64    `json:"id"`
 		Name           string   `json:"name"`
 		Description    string   `json:"description"`
-		Type           string   `json:"type"`
-		Status         string   `json:"status"` // draft, active, inactive, expired
+		Type           string   `json:"type"` // discount, coupon, flash_sale, bundle, buy_x_get_y
+		Status         string   `json:"status"` // pending, active, paused, ended
 		StartTime      string   `json:"start_time"`
 		EndTime        string   `json:"end_time"`
-		DiscountType   string   `json:"discount_type"`
+		DiscountType   string   `json:"discount_type"` // percentage, fixed_amount, buy_x_get_y
 		DiscountValue  string   `json:"discount_value"`
 		MinOrderAmount string   `json:"min_order_amount"`
 		MaxDiscount    string   `json:"max_discount"`
@@ -186,7 +186,7 @@ type (
 		Code           string `json:"code"`
 		Name           string `json:"name"`
 		Description    string `json:"description"`
-		Type           string `json:"type"`
+		Type           string `json:"type"` // fixed_amount, percentage, free_shipping
 		DiscountValue  string `json:"discount_value"`
 		MinOrderAmount string `json:"min_order_amount"`
 		MaxDiscount    string `json:"max_discount"`
@@ -198,7 +198,7 @@ type (
 		ProductIDs     string `json:"product_ids"`
 		CategoryIDs    string `json:"category_ids"`
 		MarketIDs      string `json:"market_ids"`
-		Status         string `json:"status"`
+		Status         string `json:"status"` // inactive, active, expired, depleted
 		CreatedAt      string `json:"created_at"`
 		UpdatedAt      string `json:"updated_at"`
 	}
@@ -275,7 +275,7 @@ type (
 		MaxDiscount    string `json:"max_discount"`
 		StartTime      string `json:"start_time"`
 		EndTime        string `json:"end_time"`
-		Status         string `json:"status"`
+		Status         string `json:"status"` // unused, used, expired
 		UsedAt         string `json:"used_at,optional"`
 		OrderID        int64  `json:"order_id,optional"`
 		CreatedAt      string `json:"created_at"`

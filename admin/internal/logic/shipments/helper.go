@@ -30,7 +30,7 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		ID:            s.ID,
 		ShipmentNo:    s.ShipmentNo,
 		OrderID:       s.OrderID,
-		Status:        int8(s.Status),
+		Status:        fulfillment.ShipmentStatus(s.Status).String(),
 		StatusText:    fulfillment.ShipmentStatus(s.Status).String(),
 		Carrier:       s.Carrier,
 		CarrierCode:   s.CarrierCode,

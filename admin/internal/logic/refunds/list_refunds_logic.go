@@ -5,6 +5,7 @@ import (
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
+	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
@@ -56,7 +57,7 @@ func (l *ListRefundsLogic) ListRefunds(req *types.ListRefundsReq) (resp *types.L
 		PageSize:   req.PageSize,
 		OrderID:    req.OrderID,
 		UserID:     req.UserID,
-		Status:     mapRefundStatus(req.Status),
+		Status:     fulfillment.ParseRefundStatus(req.Status),
 		ReasonType: req.ReasonType,
 		StartTime:  startTime,
 		EndTime:    endTime,

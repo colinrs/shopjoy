@@ -69,8 +69,8 @@ type (
 	}
 	// Update shipment status request
 	UpdateShipmentStatusReq {
-		ID     int64 `path:"id"`
-		Status int8  `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+		ID     int64  `path:"id"`
+		Status string `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
 	}
 	// Shipment item response
 	ShipmentItemResp {
@@ -89,7 +89,7 @@ type (
 		ID            int64               `json:"id"`
 		ShipmentNo    string              `json:"shipment_no"`
 		OrderID       string              `json:"order_id"`
-		Status        int8                `json:"status"`
+		Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 		StatusText    string              `json:"status_text"`
 		Carrier       string              `json:"carrier"`
 		CarrierCode   string              `json:"carrier_code"`
@@ -118,9 +118,9 @@ type (
 		ShipmentNo        string `form:"shipment_no,optional"`
 		OrderID           string `form:"order_id,optional"`
 		TrackingNo        string `form:"tracking_no,optional"`
-		Status            int8   `form:"status,optional"`
+		Status            string `form:"status,optional"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 		CarrierCode       string `form:"carrier_code,optional"`
-		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
+		FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
 		StartTime         string `form:"start_time,optional"` // RFC3339
 		EndTime           string `form:"end_time,optional"` // RFC3339
 	}
@@ -171,9 +171,9 @@ type (
 		UserID         int64    `json:"user_id"`
 		UserName       string   `json:"user_name,optional"`
 		UserPhone      string   `json:"user_phone,optional"`
-		Type           int8     `json:"type"` // 1=full_refund, 2=partial_refund
+		Type           string   `json:"type"` // 1=full_refund, 2=partial_refund
 		TypeText       string   `json:"type_text"`
-		Status         int8     `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+		Status         string   `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
 		StatusText     string   `json:"status_text"`
 		ReasonType     string   `json:"reason_type"`
 		Reason         string   `json:"reason"`
@@ -204,7 +204,7 @@ type (
 		RefundNo   string `form:"refund_no,optional"`
 		OrderID    string `form:"order_id,optional"`
 		UserID     int64  `form:"user_id,optional"`
-		Status     int8   `form:"status,optional"`
+		Status     string `form:"status,optional"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
 		ReasonType string `form:"reason_type,optional"`
 		StartTime  string `form:"start_time,optional"` // RFC3339
 		EndTime    string `form:"end_time,optional"` // RFC3339
@@ -358,9 +358,9 @@ type (
 		OrderID           string                      `json:"order_id"`
 		OrderNo           string                      `json:"order_no"`
 		Status            string                      `json:"status"`
-		FulfillmentStatus int8                        `json:"fulfillment_status"`
+		FulfillmentStatus string                      `json:"fulfillment_status"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
 		FulfillmentText   string                      `json:"fulfillment_text"`
-		RefundStatus      int8                        `json:"refund_status"`
+		RefundStatus      string                      `json:"refund_status"` // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
 		RefundText        string                      `json:"refund_text"`
 		TotalAmount       string                      `json:"total_amount"`
 		Currency          string                      `json:"currency"`
@@ -389,8 +389,8 @@ type (
 		UserID            int64  `form:"user_id,optional"`
 		UserName          string `form:"user_name,optional"`
 		Status            string `form:"status,optional"`
-		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
-		RefundStatus      int8   `form:"refund_status,optional"`
+		FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+		RefundStatus      string `form:"refund_status,optional"` // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
 		StartTime         string `form:"start_time,optional"` // RFC3339
 		EndTime           string `form:"end_time,optional"` // RFC3339
 	}
@@ -464,8 +464,8 @@ type (
 		OrderNo           string `form:"order_no,optional"`
 		UserID            int64  `form:"user_id,optional"`
 		Status            string `form:"status,optional"`
-		FulfillmentStatus int8   `form:"fulfillment_status,optional"`
-		RefundStatus      int8   `form:"refund_status,optional"`
+		FulfillmentStatus string `form:"fulfillment_status,optional"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+		RefundStatus      string `form:"refund_status,optional"` // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
 		StartTime         string `form:"start_time,optional"` // RFC3339
 		EndTime           string `form:"end_time,optional"` // RFC3339
 	}

@@ -3,25 +3,25 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-item pending" @click="handleStatusFilter(0)">
+        <div class="stat-item pending" @click="handleStatusFilter('pending')">
           <p class="stat-number">{{ stats.pending }}</p>
           <p class="stat-label">待发货</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item shipped" @click="handleStatusFilter(1)">
+        <div class="stat-item shipped" @click="handleStatusFilter('shipped')">
           <p class="stat-number">{{ stats.shipped }}</p>
           <p class="stat-label">已发货</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item transit" @click="handleStatusFilter(2)">
+        <div class="stat-item transit" @click="handleStatusFilter('in_transit')">
           <p class="stat-number">{{ stats.in_transit }}</p>
           <p class="stat-label">运输中</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item delivered" @click="handleStatusFilter(3)">
+        <div class="stat-item delivered" @click="handleStatusFilter('delivered')">
           <p class="stat-number">{{ stats.delivered }}</p>
           <p class="stat-label">已送达</p>
         </div>
@@ -45,11 +45,11 @@
           </el-input>
           <el-select v-model="statusFilter" placeholder="发货状态" clearable class="filter-select">
             <el-option label="全部" value="" />
-            <el-option label="待发货" :value="0" />
-            <el-option label="已发货" :value="1" />
-            <el-option label="运输中" :value="2" />
-            <el-option label="已送达" :value="3" />
-            <el-option label="配送失败" :value="4" />
+            <el-option label="待发货" value="pending" />
+            <el-option label="已发货" value="shipped" />
+            <el-option label="运输中" value="in_transit" />
+            <el-option label="已送达" value="delivered" />
+            <el-option label="配送失败" value="failed" />
           </el-select>
           <el-select v-model="carrierFilter" placeholder="物流公司" clearable class="filter-select">
             <el-option label="全部" value="" />
@@ -166,7 +166,7 @@
               详情
             </el-button>
             <el-button
-              v-if="row.status === 0"
+              v-if="row.status === ShipmentStatus.PENDING"
               type="success"
               link
               size="small"
@@ -175,7 +175,7 @@
               发货
             </el-button>
             <el-button
-              v-if="row.status === 2"
+              v-if="row.status === ShipmentStatus.IN_TRANSIT"
               type="primary"
               link
               size="small"
@@ -245,12 +245,21 @@ import {
   type ShipmentListParams
 } from '@/api/fulfillment'
 
+const ShipmentStatus = {
+  PENDING: 'pending',
+  SHIPPED: 'shipped',
+  IN_TRANSIT: 'in_transit',
+  DELIVERED: 'delivered',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+} as const
+
 const router = useRouter()
 
 // State
 const loading = ref(false)
 const searchQuery = ref('')
-const statusFilter = ref<number | ''>('')
+const statusFilter = ref<string | ''>('')
 const carrierFilter = ref('')
 const dateRange = ref<[string, string] | null>(null)
 const currentPage = ref(1)
@@ -271,12 +280,13 @@ const stats = ref({
   delivered: 156
 })
 
-const statusTypeMap = {
-  0: { type: 'warning' as const, text: '待发货' },
-  1: { type: 'primary' as const, text: '已发货' },
-  2: { type: 'info' as const, text: '运输中' },
-  3: { type: 'success' as const, text: '已送达' },
-  4: { type: 'danger' as const, text: '配送失败' }
+const statusTypeMap: Record<string, { type: 'warning' | 'primary' | 'info' | 'success' | 'danger', text: string }> = {
+  'pending': { type: 'warning', text: '待发货' },
+  'shipped': { type: 'primary', text: '已发货' },
+  'in_transit': { type: 'info', text: '运输中' },
+  'delivered': { type: 'success', text: '已送达' },
+  'failed': { type: 'danger', text: '配送失败' },
+  'cancelled': { type: 'info', text: '已取消' }
 }
 
 // Mock data for development
@@ -286,7 +296,7 @@ const shipmentList = ref<Shipment[]>([
     shipment_no: 'SHP20260322001',
     order_id: 'ORD001',
     order_no: 'ORD2026031800100',
-    status: 1,
+    status: 'shipped',
     status_text: '已发货',
     carrier: 'SF Express',
     carrier_code: 'SF',
@@ -311,7 +321,7 @@ const shipmentList = ref<Shipment[]>([
     shipment_no: 'SHP20260322002',
     order_id: 'ORD002',
     order_no: 'ORD2026031800099',
-    status: 0,
+    status: 'pending',
     status_text: '待发货',
     carrier: '',
     carrier_code: '',
@@ -337,7 +347,7 @@ const shipmentList = ref<Shipment[]>([
     shipment_no: 'SHP20260322003',
     order_id: 'ORD003',
     order_no: 'ORD2026031800098',
-    status: 2,
+    status: 'in_transit',
     status_text: '运输中',
     carrier: 'ZTO Express',
     carrier_code: 'ZT',
@@ -362,7 +372,7 @@ const shipmentList = ref<Shipment[]>([
     shipment_no: 'SHP20260322004',
     order_id: 'ORD004',
     order_no: 'ORD2026031800097',
-    status: 3,
+    status: 'delivered',
     status_text: '已送达',
     carrier: 'SF Express',
     carrier_code: 'SF',
@@ -387,7 +397,7 @@ const shipmentList = ref<Shipment[]>([
     shipment_no: 'SHP20260322005',
     order_id: 'ORD005',
     order_no: 'ORD2026031800096',
-    status: 4,
+    status: 'failed',
     status_text: '配送失败',
     carrier: 'YTO Express',
     carrier_code: 'YT',
@@ -441,7 +451,7 @@ const loadData = async () => {
       end_time: dateRange.value?.[1]
     }
     if (statusFilter.value !== '') {
-      params.status = statusFilter.value
+      params.status = statusFilter.value as import('@/api/fulfillment').ShipmentStatus
     }
     const res = await getShipmentList(params)
     shipmentList.value = res.list
@@ -453,7 +463,7 @@ const loadData = async () => {
   }
 }
 
-const handleStatusFilter = (status: number) => {
+const handleStatusFilter = (status: string) => {
   statusFilter.value = status
   currentPage.value = 1
   loadData()
@@ -477,7 +487,7 @@ const handleSelectionChange = (rows: Shipment[]) => {
 }
 
 const isSelectable = (row: Shipment) => {
-  return row.status === 0
+  return row.status === ShipmentStatus.PENDING
 }
 
 const clearSelection = () => {
@@ -525,7 +535,7 @@ const markDelivered = async (row: Shipment) => {
         type: 'success'
       }
     )
-    await updateShipmentStatus(row.id, 3)
+    await updateShipmentStatus(row.id, ShipmentStatus.DELIVERED)
     ElMessage.success('Shipment marked as delivered')
     loadData()
   } catch (error) {

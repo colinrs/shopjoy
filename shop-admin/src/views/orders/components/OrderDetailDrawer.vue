@@ -348,13 +348,13 @@ const statusTimeline = computed(() => {
 // Computed flags for actions
 const canShip = computed(() => {
   if (!order.value) return false
-  return ['paid', 'to_ship'].includes(order.value.status) &&
-    (order.value.fulfillment_status === 0 || order.value.fulfillment_status === 1)
+  return ['paid', 'pending_shipment'].includes(order.value.status) &&
+    (order.value.fulfillment_status === 'pending' || order.value.fulfillment_status === 'partial_shipped')
 })
 
 const canAdjustPrice = computed(() => {
   if (!order.value) return false
-  return order.value.status === 'pending'
+  return order.value.status === 'pending_payment'
 })
 
 // Load order detail
@@ -396,42 +396,46 @@ const formatAmount = (amount: string | undefined) => {
 // Status helpers
 const getStatusTagType = (status: OrderStatus | undefined) => {
   const types: Record<OrderStatus, string> = {
-    pending: 'warning',
+    pending_payment: 'warning',
     paid: 'success',
-    to_ship: 'primary',
+    pending_shipment: 'primary',
     shipped: 'info',
     completed: 'success',
-    cancelled: 'danger'
+    cancelled: 'danger',
+    refunding: 'warning',
+    refunded: 'info'
   }
   return status ? types[status] : 'info'
 }
 
 const getFulfillmentTagType = (status: FulfillmentStatus | undefined) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'primary',
-    2: 'info',
-    3: 'success'
+  const types: Record<FulfillmentStatus, string> = {
+    'pending': 'warning',
+    'partial_shipped': 'primary',
+    'shipped': 'info',
+    'delivered': 'success'
   }
   return status !== undefined ? types[status] : 'info'
 }
 
-const getShipmentStatusTagType = (status: number) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'primary',
-    2: 'info',
-    3: 'success'
+const getShipmentStatusTagType = (status: string) => {
+  const types: Record<string, string> = {
+    'pending': 'warning',
+    'shipped': 'primary',
+    'in_transit': 'info',
+    'delivered': 'success',
+    'failed': 'danger'
   }
   return types[status] || 'info'
 }
 
-const getShipmentStatusText = (status: number) => {
-  const texts: Record<number, string> = {
-    0: 'Pending',
-    1: 'Shipped',
-    2: 'In Transit',
-    3: 'Delivered'
+const getShipmentStatusText = (status: string) => {
+  const texts: Record<string, string> = {
+    'pending': 'Pending',
+    'shipped': 'Shipped',
+    'in_transit': 'In Transit',
+    'delivered': 'Delivered',
+    'failed': 'Failed'
   }
   return texts[status] || 'Unknown'
 }
