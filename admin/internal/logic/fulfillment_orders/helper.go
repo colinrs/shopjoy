@@ -8,21 +8,29 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/shopspring/decimal"
 )
 
-// parseMoneyToInt64 parses a money string to int64 (cents)
-func parseMoneyToInt64(s string) (int64, error) {
+// parseMoneyToDecimal parses a money string to decimal.Decimal
+func parseMoneyToDecimal(s string) (decimal.Decimal, error) {
 	if s == "" {
-		return 0, nil
+		return decimal.Zero, nil
 	}
-	var v int64
-	_, err := fmt.Sscanf(s, "%d", &v)
+	v, err := decimal.NewFromString(s)
 	return v, err
 }
 
-// formatMoney formats cents to money string
-func formatMoney(cents int64) string {
-	return fmt.Sprintf("%d", cents)
+// formatDecimal formats decimal to string
+func formatDecimal(v decimal.Decimal) string {
+	if v.IsZero() {
+		return "0"
+	}
+	return v.StringFixed(2)
+}
+
+// formatAmount is alias for formatDecimal
+func formatAmount(amount decimal.Decimal) string {
+	return formatDecimal(amount)
 }
 
 // truncateString truncates a string to maxChars characters (UTF-8 safe)
@@ -32,14 +40,6 @@ func truncateString(s string, maxChars int) string {
 	}
 	runes := []rune(s)
 	return string(runes[:maxChars])
-}
-
-// formatAmount formats amount in cents to string
-func formatAmount(amount int64) string {
-	if amount == 0 {
-		return "0"
-	}
-	return fmt.Sprintf("%d", amount)
 }
 
 // formatTimeToRFC3339 formats time to RFC3339 string

@@ -59,10 +59,10 @@ func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromot
 		}
 
 		// Parse condition value
-		rule.ConditionValue = parseMoneyToInt64(ruleReq.Value)
+		rule.ConditionValue = parseMoneyToDecimal(ruleReq.Value)
 
 		// Parse action value
-		rule.ActionValue = parseMoneyToInt64(ruleReq.DiscountValue)
+		rule.ActionValue = parseMoneyToDecimal(ruleReq.DiscountValue)
 
 		rules = append(rules, rule)
 		ids = append(ids, id)

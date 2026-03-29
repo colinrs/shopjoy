@@ -43,8 +43,8 @@ func (l *AdjustOrderPriceLogic) AdjustOrderPrice(req *types.AdjustOrderPriceReq)
 		return nil, code.ErrParam
 	}
 
-	// Parse adjust amount from string (in cents)
-	adjustAmount, err := parseMoneyToInt64(req.AdjustAmount)
+	// Parse adjust amount from string
+	adjustAmount, err := parseMoneyToDecimal(req.AdjustAmount)
 	if err != nil {
 		return nil, err
 	}
@@ -65,9 +65,9 @@ func (l *AdjustOrderPriceLogic) AdjustOrderPrice(req *types.AdjustOrderPriceReq)
 
 	return &types.AdjustOrderPriceResp{
 		OrderID:        result.OrderID,
-		OriginalAmount: formatMoney(result.OriginalAmount),
-		AdjustAmount:   formatMoney(result.AdjustAmount),
-		NewPayAmount:   formatMoney(result.NewPayAmount),
+		OriginalAmount: formatDecimal(result.OriginalAmount),
+		AdjustAmount:   formatDecimal(result.AdjustAmount),
+		NewPayAmount:   formatDecimal(result.NewPayAmount),
 		AdjustReason:   result.AdjustReason,
 		AdjustedAt:     result.AdjustedAt,
 	}, nil

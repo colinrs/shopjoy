@@ -405,7 +405,7 @@ type Refund struct {
 	Reason       string         `gorm:"column:reason;not null;default:''"`
 	Description  string         `gorm:"column:description"`
 	Images       string         `gorm:"column:images;type:json"` // JSON array of image URLs
-	Amount       int64          `gorm:"column:amount;not null;default:0"`       // 退款金额（分）
+	Amount       decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"`       // 退款金额
 	Currency     string         `gorm:"column:currency;not null;default:'CNY'"`
 	RejectReason string         `gorm:"column:reject_reason;not null;default:''"`
 	ApprovedAt   *time.Time   `gorm:"column:approved_at"`
@@ -419,7 +419,7 @@ func (r *Refund) TableName() string {
 
 // NewRefund 创建退款申请
 func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
-	reasonType, reason, description string, images []string, amount int64, currency string) *Refund {
+	reasonType, reason, description string, images []string, amount decimal.Decimal, currency string) *Refund {
 	return &Refund{
 		TenantID:    tenantID,
 		OrderID:     orderID,

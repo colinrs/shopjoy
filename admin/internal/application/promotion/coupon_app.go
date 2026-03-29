@@ -9,6 +9,7 @@ import (
 	pkgcoupon "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -18,9 +19,9 @@ type CreateCouponRequest struct {
 	Code         string
 	Description  string
 	Type         pkgcoupon.CouponType
-	Value        int64
-	MinAmount    int64
-	MaxDiscount  int64
+	Value        decimal.Decimal
+	MinAmount    decimal.Decimal
+	MaxDiscount  decimal.Decimal
 	TotalCount   int
 	PerUserLimit int
 	StartAt      time.Time
@@ -32,8 +33,8 @@ type UpdateCouponRequest struct {
 	ID           int64
 	Name         string
 	Description  string
-	MinAmount    int64
-	MaxDiscount  int64
+	MinAmount    decimal.Decimal
+	MaxDiscount  decimal.Decimal
 	TotalCount   int
 	PerUserLimit int
 	StartAt      time.Time
@@ -42,22 +43,22 @@ type UpdateCouponRequest struct {
 
 // CouponResponse 优惠券响应
 type CouponResponse struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	Code         string `json:"code"`
-	Description  string `json:"description"`
-	Type         int    `json:"type"`
-	Value        int64  `json:"value"`
-	MinAmount    int64  `json:"min_amount"`
-	MaxDiscount  int64  `json:"max_discount"`
-	TotalCount   int    `json:"total_count"`
-	UsedCount    int    `json:"used_count"`
-	PerUserLimit int    `json:"per_user_limit"`
-	Status       int    `json:"status"`
-	StartAt      string `json:"start_at"`
-	EndAt        string `json:"end_at"`
-	CreatedAt    string `json:"created_at"`
-	UpdatedAt    string `json:"updated_at"`
+	ID           int64           `json:"id"`
+	Name         string          `json:"name"`
+	Code         string          `json:"code"`
+	Description  string          `json:"description"`
+	Type         int             `json:"type"`
+	Value        decimal.Decimal `json:"value"`
+	MinAmount    decimal.Decimal `json:"min_amount"`
+	MaxDiscount  decimal.Decimal `json:"max_discount"`
+	TotalCount   int             `json:"total_count"`
+	UsedCount    int             `json:"used_count"`
+	PerUserLimit int             `json:"per_user_limit"`
+	Status       int             `json:"status"`
+	StartAt      string          `json:"start_at"`
+	EndAt        string          `json:"end_at"`
+	CreatedAt    string          `json:"created_at"`
+	UpdatedAt    string          `json:"updated_at"`
 }
 
 // CouponListResponse 优惠券列表响应
@@ -164,7 +165,7 @@ func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, 
 	if !req.Type.IsValid() {
 		return nil, code.ErrCouponTypeInvalid
 	}
-	if req.Value <= 0 {
+	if req.Value.IsZero() || req.Value.IsNegative() {
 		return nil, code.ErrCouponValueRequired
 	}
 	if req.StartAt.IsZero() || req.EndAt.IsZero() {

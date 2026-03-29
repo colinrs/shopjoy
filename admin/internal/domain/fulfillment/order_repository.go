@@ -2,11 +2,11 @@ package fulfillment
 
 import (
 	"context"
-	"math"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -121,15 +121,15 @@ type Order struct {
 	Status           OrderStatus          `gorm:"column:status;not null;default:'pending_payment';index"`
 	FulfillmentStatus OrderFulfillmentStatus `gorm:"column:fulfillment_status;not null;default:0;index"`
 	RefundStatus     OrderRefundStatus    `gorm:"column:refund_status;not null;default:0;index"`
-	TotalAmount      int64                `gorm:"column:total_amount;not null"`       // 商品总金额（分）
-	DiscountAmount   int64                `gorm:"column:discount_amount;not null"`    // 优惠金额（分）
-	ShippingFee      int64                `gorm:"column:shipping_fee;not null"`       // 运费（分）
-	PayAmount        int64                `gorm:"column:pay_amount;not null"`         // 实付金额（分）
+	TotalAmount      decimal.Decimal      `gorm:"column:total_amount;type:decimal(19,4);not null"`       // 商品总金额
+	DiscountAmount   decimal.Decimal      `gorm:"column:discount_amount;type:decimal(19,4);not null"`    // 优惠金额
+	ShippingFee      decimal.Decimal      `gorm:"column:shipping_fee;type:decimal(19,4);not null"`       // 运费
+	PayAmount        decimal.Decimal      `gorm:"column:pay_amount;type:decimal(19,4);not null"`         // 实付金额
 	Currency         string               `gorm:"column:currency;not null;default:'CNY'"`
 	MerchantRemark   string               `gorm:"column:merchant_remark;not null;default:''"` // 商家内部备注
 	Remark           string               `gorm:"column:remark;not null;default:''"`          // 用户备注
-	OriginalAmount   int64                `gorm:"column:original_amount;not null;default:0"`  // 改价前原金额（分）
-	AdjustAmount     int64                `gorm:"column:adjust_amount;not null;default:0"`    // 改价金额（分）
+	OriginalAmount   decimal.Decimal      `gorm:"column:original_amount;type:decimal(19,4);not null;default:0"`  // 改价前原金额
+	AdjustAmount     decimal.Decimal      `gorm:"column:adjust_amount;type:decimal(19,4);not null;default:0"`    // 改价金额
 	AdjustReason     string               `gorm:"column:adjust_reason;not null;default:''"`   // 改价原因
 	AdjustedBy       int64                `gorm:"column:adjusted_by;not null;default:0"`      // 改价操作人ID
 	AdjustedAt       *time.Time           `gorm:"column:adjusted_at"`                          // 改价时间
@@ -163,9 +163,9 @@ func (o *Order) CanAdjustPrice() bool {
 }
 
 // AdjustPrice 改价
-// adjustAmount: 改价金额（分），正数为涨价，负数为降价
+// adjustAmount: 改价金额，正数为涨价，负数为降价
 // 规则：|adjustAmount| <= originalAmount * 20%
-func (o *Order) AdjustPrice(adjustAmount int64, reason string, adjustedBy int64) error {
+func (o *Order) AdjustPrice(adjustAmount decimal.Decimal, reason string, adjustedBy int64) error {
 	if !o.CanAdjustPrice() {
 		return code.ErrOrderCannotAdjustPrice
 	}
@@ -175,17 +175,17 @@ func (o *Order) AdjustPrice(adjustAmount int64, reason string, adjustedBy int64)
 	}
 
 	// Check if adjustment exceeds 20% limit
-	maxAdjust := int64(math.Abs(float64(o.OriginalAmount)) * 0.2)
-	if adjustAmount > 0 && adjustAmount > maxAdjust {
+	maxAdjust := o.OriginalAmount.Mul(decimal.NewFromFloat(0.2))
+	if adjustAmount.IsPositive() && adjustAmount.GreaterThan(maxAdjust) {
 		return code.ErrOrderAdjustAmountExceed
 	}
-	if adjustAmount < 0 && -adjustAmount > maxAdjust {
+	if adjustAmount.IsNegative() && adjustAmount.Abs().GreaterThan(maxAdjust) {
 		return code.ErrOrderAdjustAmountExceed
 	}
 
 	// Ensure pay amount doesn't go negative
-	newPayAmount := o.OriginalAmount + adjustAmount
-	if newPayAmount < 0 {
+	newPayAmount := o.OriginalAmount.Add(adjustAmount)
+	if newPayAmount.IsNegative() {
 		return code.ErrOrderAdjustAmountExceed
 	}
 
@@ -227,8 +227,8 @@ type OrderItem struct {
 	SKUName     string          `gorm:"column:sku_name;not null"`
 	Image       string          `gorm:"column:image"`
 	Quantity    int             `gorm:"column:quantity;not null"`
-	UnitPrice   int64           `gorm:"column:unit_price;not null"` // 单价（分）
-	TotalPrice  int64           `gorm:"column:total_price;not null"` // 总价（分）
+	UnitPrice   decimal.Decimal `gorm:"column:unit_price;type:decimal(19,4);not null"` // 单价
+	TotalPrice  decimal.Decimal `gorm:"column:total_price;type:decimal(19,4);not null"` // 总价
 	Currency    string          `gorm:"column:currency;not null;default:'CNY'"`
 	CreatedAt   time.Time       `gorm:"column:created_at;not null"`
 }
@@ -270,7 +270,7 @@ type OrderRepository interface {
 	// CountTodayOrders 统计今日订单数
 	CountTodayOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
 	// SumTodayGMV 统计今日GMV（已支付订单的总金额）
-	SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
+	SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (decimal.Decimal, error)
 	// FindForExport 导出订单（最多10000条）
 	FindForExport(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query OrderQuery) ([]*Order, error)
 }
@@ -291,10 +291,10 @@ type OrderExportRow struct {
 	Status           string
 	FulfillmentStatus string
 	RefundStatus     string
-	TotalAmount      int64
-	DiscountAmount   int64
-	ShippingFee      int64
-	PayAmount        int64
+	TotalAmount      decimal.Decimal
+	DiscountAmount   decimal.Decimal
+	ShippingFee      decimal.Decimal
+	PayAmount        decimal.Decimal
 	ReceiverName     string
 	ReceiverPhone    string
 	ReceiverAddress  string
@@ -305,10 +305,10 @@ type OrderExportRow struct {
 
 // AdjustPriceResponse 改价响应
 type AdjustPriceResponse struct {
-	OrderID       int64  `json:"order_id"`
-	OriginalAmount int64 `json:"original_amount"`
-	AdjustAmount  int64  `json:"adjust_amount"`
-	NewPayAmount  int64  `json:"new_pay_amount"`
-	AdjustReason  string `json:"adjust_reason"`
-	AdjustedAt    string `json:"adjusted_at"`
+	OrderID         int64           `json:"order_id"`
+	OriginalAmount  decimal.Decimal `json:"original_amount"`
+	AdjustAmount    decimal.Decimal `json:"adjust_amount"`
+	NewPayAmount    decimal.Decimal `json:"new_pay_amount"`
+	AdjustReason    string          `json:"adjust_reason"`
+	AdjustedAt      string          `json:"adjusted_at"`
 }

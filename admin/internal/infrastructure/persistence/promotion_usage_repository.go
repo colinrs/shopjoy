@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -19,18 +20,18 @@ func NewPromotionUsageRepository() promotion.PromotionUsageRepository {
 
 // promotionUsageModel represents the database model for PromotionUsage
 type promotionUsageModel struct {
-	ID             int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;index"`
-	PromotionID    int64  `gorm:"column:promotion_id;not null;index"`
-	RuleID         *int64 `gorm:"column:rule_id;index"`
-	OrderID        string `gorm:"column:order_id;size:64;not null;index"`
-	UserID         int64  `gorm:"column:user_id;not null;index"`
-	DiscountAmount int64  `gorm:"column:discount_amount;not null"`
-	Currency       string `gorm:"column:currency;size:10;not null"`
-	OriginalAmount int64  `gorm:"column:original_amount;not null"`
-	FinalAmount    int64  `gorm:"column:final_amount;not null"`
-	CouponID       *int64 `gorm:"column:coupon_id;index"`
-	CreatedAt      int64  `gorm:"column:created_at"`
+	ID             int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID       int64           `gorm:"column:tenant_id;not null;index"`
+	PromotionID    int64           `gorm:"column:promotion_id;not null;index"`
+	RuleID         *int64          `gorm:"column:rule_id;index"`
+	OrderID        string          `gorm:"column:order_id;size:64;not null;index"`
+	UserID         int64           `gorm:"column:user_id;not null;index"`
+	DiscountAmount decimal.Decimal `gorm:"column:discount_amount;type:decimal(19,4);not null"`
+	Currency       string          `gorm:"column:currency;size:10;not null"`
+	OriginalAmount decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null"`
+	FinalAmount    decimal.Decimal `gorm:"column:final_amount;type:decimal(19,4);not null"`
+	CouponID       *int64           `gorm:"column:coupon_id;index"`
+	CreatedAt      int64            `gorm:"column:created_at"`
 }
 
 func (promotionUsageModel) TableName() string {

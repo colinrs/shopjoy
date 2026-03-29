@@ -1,12 +1,10 @@
 package promotions
 
 import (
-	"strconv"
-
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 )
 
 func mapPromotionType(typeStr string) pkgpromotion.Type {
@@ -124,23 +122,23 @@ func mapActionTypeIntToString(actionType int) string {
 	}
 }
 
-func parseMoneyToInt64(s string) int64 {
+func parseMoneyToDecimal(s string) decimal.Decimal {
 	if s == "" {
-		return 0
+		return decimal.Zero
 	}
-	// Try parsing as integer (cents)
-	v, err := strconv.ParseInt(s, 10, 64)
+	// Try parsing as decimal
+	v, err := decimal.NewFromString(s)
 	if err != nil {
-		return 0
+		return decimal.Zero
 	}
 	return v
 }
 
-func formatInt64ToString(v int64) string {
-	if v == 0 {
+func formatDecimalToString(v decimal.Decimal) string {
+	if v.IsZero() {
 		return "0"
 	}
-	return shared.NewMoney(v, "CNY").String()
+	return v.StringFixed(2)
 }
 
 func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.PromotionDetailResp {

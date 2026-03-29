@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 )
 
 // ==================== Coupon Type ====================
@@ -64,9 +65,9 @@ type Coupon struct {
 	Code         string           `json:"code"`
 	Description  string           `json:"description"`
 	Type         CouponType       `json:"type"`
-	Value        int64            `json:"value"`        // Discount value: cents for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
-	MinAmount    int64            `json:"min_amount"`   // Minimum spend threshold (cents)
-	MaxDiscount  int64            `json:"max_discount"` // Maximum discount cap for percentage (cents)
+	Value        decimal.Decimal  `json:"value"`
+	MinAmount    decimal.Decimal  `json:"min_amount"`
+	MaxDiscount  decimal.Decimal  `json:"max_discount"`
 	Currency     string           `json:"currency"`
 	TotalCount   int              `json:"total_count"`
 	UsedCount    int              `json:"used_count"`
@@ -76,7 +77,7 @@ type Coupon struct {
 	EndAt        time.Time        `json:"end_at"`
 	Scope        PromotionScope   `json:"scope"`
 	Audit        shared.AuditInfo `json:"audit"`
-	DeletedAt    *int64          `json:"deleted_at,omitempty"`
+	DeletedAt    *int64           `json:"deleted_at,omitempty"`
 }
 
 func (c *Coupon) TableName() string {
@@ -100,24 +101,24 @@ func (c *Coupon) IsActive() bool {
 
 // CalculateDiscount calculates the discount for a given amount
 // Value interpretation:
-// - CouponTypeFixedAmount: cents (100 = $1.00)
+// - CouponTypeFixedAmount: amount (e.g., 100 = 100.00)
 // - CouponTypePercentage: basis points (100 = 1%, 500 = 5%, 1000 = 10%)
-func (c *Coupon) CalculateDiscount(cartAmount int64) int64 {
-	var discount int64
+func (c *Coupon) CalculateDiscount(cartAmount decimal.Decimal) decimal.Decimal {
+	var discount decimal.Decimal
 
 	switch c.Type {
 	case CouponTypeFixedAmount:
 		discount = c.Value
 	case CouponTypePercentage:
 		// Basis points: 100 = 1%, so divide by 10000
-		discount = cartAmount * c.Value / 10000
+		discount = cartAmount.Mul(c.Value).Div(decimal.NewFromInt(10000))
 	}
 
-	if c.MaxDiscount > 0 && discount > c.MaxDiscount {
+	if c.MaxDiscount.IsPositive() && discount.GreaterThan(c.MaxDiscount) {
 		discount = c.MaxDiscount
 	}
 
-	if discount > cartAmount {
+	if discount.GreaterThan(cartAmount) {
 		discount = cartAmount
 	}
 
@@ -162,18 +163,18 @@ func (uc *UserCoupon) CanUse() bool {
 // ==================== PromotionUsage (Entity) ====================
 
 type PromotionUsage struct {
-	ID             int64           `json:"id"`
-	TenantID       shared.TenantID `json:"tenant_id"`
-	PromotionID    int64           `json:"promotion_id"`
-	RuleID         *int64          `json:"rule_id,omitempty"`
-	OrderID        string          `json:"order_id"`
-	UserID         int64           `json:"user_id"`
-	DiscountAmount int64           `json:"discount_amount"`
-	Currency       string          `json:"currency"`
-	OriginalAmount int64           `json:"original_amount"`
-	FinalAmount    int64           `json:"final_amount"`
-	CouponID       *int64          `json:"coupon_id,omitempty"`
-	CreatedAt      time.Time       `json:"created_at"`
+	ID             int64            `json:"id"`
+	TenantID       shared.TenantID  `json:"tenant_id"`
+	PromotionID    int64            `json:"promotion_id"`
+	RuleID         *int64           `json:"rule_id,omitempty"`
+	OrderID        string           `json:"order_id"`
+	UserID         int64            `json:"user_id"`
+	DiscountAmount decimal.Decimal  `json:"discount_amount"`
+	Currency       string           `json:"currency"`
+	OriginalAmount decimal.Decimal  `json:"original_amount"`
+	FinalAmount    decimal.Decimal  `json:"final_amount"`
+	CouponID       *int64           `json:"coupon_id,omitempty"`
+	CreatedAt      time.Time        `json:"created_at"`
 }
 
 func (pu *PromotionUsage) TableName() string {

@@ -66,13 +66,13 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 			ActionType:    mapDiscountActionType(req.DiscountType),
 		}
 		if req.MinOrderAmount != "" {
-			rule.ConditionValue = parseMoneyToInt64(req.MinOrderAmount)
+			rule.ConditionValue = parseMoneyToDecimal(req.MinOrderAmount)
 		}
 		if req.DiscountValue != "" {
-			rule.ActionValue = parseMoneyToInt64(req.DiscountValue)
+			rule.ActionValue = parseMoneyToDecimal(req.DiscountValue)
 		}
 		if req.MaxDiscount != "" {
-			rule.MaxDiscount = parseMoneyToInt64(req.MaxDiscount)
+			rule.MaxDiscount = parseMoneyToDecimal(req.MaxDiscount)
 		}
 		createReq.Rules = append(createReq.Rules, rule)
 	}

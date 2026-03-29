@@ -6,8 +6,6 @@
 
 1. **NEVER start autonomous codebase exploration** without explicit user request
 2. When asked for implementation plan: FIRST read provided PRD/document → ask clarifying questions if needed → THEN create plan
-3. **Maximum 3 tool calls** before delivering initial plan draft
-4. If planning exceeds 10 minutes, deliver partial plan and ask user preference to continue vs. refine
 
 ## Session Continuity
 
@@ -29,11 +27,7 @@ ALL implementations must pass automated code review before commit:
 3. Verify error handling uses standardized `code` package, not `errors.New()`
 4. **User confirmation required** after review fixes before final commit
 
-## Requirement Development Workflow
-
-> **Full specification:** See [`.claude/skills/requirement/SKILL.md`](.claude/skills/requirement/SKILL.md)
-
-### Process Phases
+## Process Phases
 
 | Phase | Name | Executors | Deliverables |
 |-------|------|-----------|--------------|
@@ -42,7 +36,7 @@ ALL implementations must pass automated code review before commit:
 | 3 | Planning Phase | `writing-plans` | Development Plan |
 | 4 | Implementation Phase | `subagent-driven-development` | Code Implementation |
 
-### Key Principles
+## Key Principles
 
 | Type | Principle |
 |------|-----------|
@@ -53,10 +47,6 @@ ALL implementations must pass automated code review before commit:
 | MUST | User confirmation: Each phase completion must receive explicit user approval |
 | MUST NOT | Start development before documentation approval |
 | MUST NOT | Only consider backend while ignoring frontend/UI |
-
-### Trigger Condition
-
-When user proposes a new feature requirement, use `/requirement` skill to initiate the complete development workflow.
 
 ## Project Directory Convention
 

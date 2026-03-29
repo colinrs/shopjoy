@@ -49,6 +49,6 @@ func (l *GetFulfillmentSummaryLogic) GetFulfillmentSummary(req *types.GetFulfill
 		Refunding:       summary.Refunding,
 		TotalOrders:     summary.TotalOrders,
 		TodayOrders:     summary.TodayOrders,
-		TodayGMV:        formatMoney(summary.TodayGMV),
+		TodayGMV:        formatDecimal(summary.TodayGMV),
 	}, nil
 }

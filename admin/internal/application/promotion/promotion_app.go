@@ -8,6 +8,7 @@ import (
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -27,10 +28,10 @@ type CreatePromotionRequest struct {
 // CreatePromotionRuleRequest 创建促销规则请求
 type CreatePromotionRuleRequest struct {
 	ConditionType  pkgpromotion.ConditionType
-	ConditionValue int64
+	ConditionValue decimal.Decimal
 	ActionType     pkgpromotion.ActionType
-	ActionValue    int64
-	MaxDiscount    int64
+	ActionValue    decimal.Decimal
+	MaxDiscount    decimal.Decimal
 }
 
 // UpdatePromotionRequest 更新促销请求
@@ -58,13 +59,13 @@ type PromotionResponse struct {
 
 // PromotionRuleResponse 促销规则响应
 type PromotionRuleResponse struct {
-	ID             int64 `json:"id"`
-	PromotionID    int64 `json:"promotion_id"`
-	ConditionType  int   `json:"condition_type"`
-	ConditionValue int64 `json:"condition_value"`
-	ActionType     int   `json:"action_type"`
-	ActionValue    int64 `json:"action_value"`
-	MaxDiscount    int64 `json:"max_discount"`
+	ID             int64           `json:"id"`
+	PromotionID    int64           `json:"promotion_id"`
+	ConditionType  int             `json:"condition_type"`
+	ConditionValue decimal.Decimal `json:"condition_value"`
+	ActionType     int             `json:"action_type"`
+	ActionValue    decimal.Decimal `json:"action_value"`
+	MaxDiscount    decimal.Decimal `json:"max_discount"`
 }
 
 // PromotionListResponse 促销列表响应

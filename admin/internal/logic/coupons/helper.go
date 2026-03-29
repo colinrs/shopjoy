@@ -1,12 +1,10 @@
 package coupons
 
 import (
-	"strconv"
-
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	pkgcoupon "github.com/colinrs/shopjoy/pkg/domain/promotion"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 )
 
 func mapCouponType(typeStr string) pkgcoupon.CouponType {
@@ -61,23 +59,23 @@ func mapCouponTypeToString(t pkgcoupon.CouponType) string {
 	}
 }
 
-func parseMoneyToInt64(s string) int64 {
+func parseMoneyToDecimal(s string) decimal.Decimal {
 	if s == "" {
-		return 0
+		return decimal.Zero
 	}
-	// Try parsing as integer (cents)
-	v, err := strconv.ParseInt(s, 10, 64)
+	// Try parsing as decimal
+	v, err := decimal.NewFromString(s)
 	if err != nil {
-		return 0
+		return decimal.Zero
 	}
 	return v
 }
 
-func formatInt64ToMoney(v int64) string {
-	if v == 0 {
+func formatDecimalToString(v decimal.Decimal) string {
+	if v.IsZero() {
 		return "0"
 	}
-	return shared.NewMoney(v, "CNY").String()
+	return v.StringFixed(2)
 }
 
 func convertCouponToDetailResp(c *apppromotion.CouponResponse) *types.CouponDetailResp {
@@ -87,9 +85,9 @@ func convertCouponToDetailResp(c *apppromotion.CouponResponse) *types.CouponDeta
 		Name:           c.Name,
 		Description:    c.Description,
 		Type:           mapCouponTypeToString(pkgcoupon.CouponType(c.Type)),
-		DiscountValue:  formatInt64ToMoney(c.Value),
-		MinOrderAmount: formatInt64ToMoney(c.MinAmount),
-		MaxDiscount:    formatInt64ToMoney(c.MaxDiscount),
+		DiscountValue:  formatDecimalToString(c.Value),
+		MinOrderAmount: formatDecimalToString(c.MinAmount),
+		MaxDiscount:    formatDecimalToString(c.MaxDiscount),
 		StartTime:      c.StartAt,
 		EndTime:        c.EndAt,
 		UsageLimit:     c.TotalCount,

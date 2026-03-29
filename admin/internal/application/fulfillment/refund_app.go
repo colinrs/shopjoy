@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -258,10 +259,10 @@ func (a *refundApp) GetRefundStatistics(ctx context.Context, tenantID shared.Ten
 		return nil, err
 	}
 
-	var totalAmount int64
+	var totalAmount decimal.Decimal
 	reasonMap := make(map[string]int64)
 	for _, r := range refunds {
-		totalAmount += r.Amount
+		totalAmount = totalAmount.Add(r.Amount)
 		reasonMap[r.ReasonType]++
 	}
 
@@ -368,7 +369,14 @@ func getRefundStatusText(s fulfillment.RefundStatus) string {
 }
 
 // formatAmount formats amount in cents to string
-func formatAmount(amount int64) string {
+func formatAmount(amount decimal.Decimal) string {
+	// Convert decimal to int64 (assuming amount is in cents)
+	amountInt := amount.IntPart()
+	return shared.NewMoney(amountInt, "CNY").String()
+}
+
+// formatAmountFromInt64 formats amount in cents to string
+func formatAmountFromInt64(amount int64) string {
 	return shared.NewMoney(amount, "CNY").String()
 }
 

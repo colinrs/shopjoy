@@ -5,52 +5,53 @@ import (
 	"sort"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 // ==================== DTOs ====================
 
 type CartItem struct {
-	ProductID  int64 `json:"product_id"`
-	CategoryID int64 `json:"category_id"`
-	BrandID    int64 `json:"brand_id"`
-	SKU        string `json:"sku"`
-	Quantity   int    `json:"quantity"`
-	UnitPrice  int64  `json:"unit_price"`
-	LineTotal  int64  `json:"line_total"`
+	ProductID  int64           `json:"product_id"`
+	CategoryID int64           `json:"category_id"`
+	BrandID    int64           `json:"brand_id"`
+	SKU        string          `json:"sku"`
+	Quantity   int             `json:"quantity"`
+	UnitPrice  decimal.Decimal `json:"unit_price"`
+	LineTotal  decimal.Decimal `json:"line_total"`
 }
 
 type CalculateRequest struct {
-	TenantID   shared.TenantID `json:"tenant_id"`
-	UserID     int64           `json:"user_id"`
-	CartItems  []CartItem      `json:"cart_items"`
-	Currency   string          `json:"currency"`
-	CouponCode string          `json:"coupon_code,omitempty"`
+	TenantID   shared.TenantID  `json:"tenant_id"`
+	UserID     int64            `json:"user_id"`
+	CartItems  []CartItem       `json:"cart_items"`
+	Currency   string           `json:"currency"`
+	CouponCode string           `json:"coupon_code,omitempty"`
 }
 
 type CalculateResult struct {
-	OriginalTotal     int64              `json:"original_total"`
-	PromotionDiscount int64              `json:"promotion_discount"`
-	CouponDiscount    int64              `json:"coupon_discount"`
-	FinalTotal        int64              `json:"final_total"`
+	OriginalTotal     decimal.Decimal   `json:"original_total"`
+	PromotionDiscount decimal.Decimal   `json:"promotion_discount"`
+	CouponDiscount    decimal.Decimal   `json:"coupon_discount"`
+	FinalTotal        decimal.Decimal   `json:"final_total"`
 	AppliedPromotions []AppliedPromotion `json:"applied_promotions"`
-	AppliedCoupon     *AppliedCoupon     `json:"applied_coupon,omitempty"`
+	AppliedCoupon     *AppliedCoupon    `json:"applied_coupon,omitempty"`
 }
 
 type AppliedPromotion struct {
-	PromotionID    int64  `json:"promotion_id"`
-	PromotionName  string `json:"promotion_name"`
-	RuleID         int64  `json:"rule_id"`
-	DiscountType   string `json:"discount_type"`
-	DiscountAmount int64  `json:"discount_amount"`
+	PromotionID    int64           `json:"promotion_id"`
+	PromotionName  string          `json:"promotion_name"`
+	RuleID         int64           `json:"rule_id"`
+	DiscountType   string          `json:"discount_type"`
+	DiscountAmount decimal.Decimal `json:"discount_amount"`
 }
 
 type AppliedCoupon struct {
-	CouponID       int64  `json:"coupon_id"`
-	CouponName     string `json:"coupon_name"`
-	Code           string `json:"code"`
-	DiscountType   string `json:"discount_type"`
-	DiscountAmount int64  `json:"discount_amount"`
+	CouponID       int64           `json:"coupon_id"`
+	CouponName     string          `json:"coupon_name"`
+	Code           string          `json:"code"`
+	DiscountType   string          `json:"discount_type"`
+	DiscountAmount decimal.Decimal `json:"discount_amount"`
 }
 
 // ==================== CalculationService ====================
@@ -78,20 +79,20 @@ func (s *CalculationService) CalculateDiscount(
 	db *gorm.DB,
 	req *CalculateRequest,
 ) (*CalculateResult, error) {
-	var originalTotal int64
+	var originalTotal decimal.Decimal
 	for _, item := range req.CartItems {
-		originalTotal += item.LineTotal
+		originalTotal = originalTotal.Add(item.LineTotal)
 	}
 
 	result := &CalculateResult{
 		OriginalTotal:     originalTotal,
-		PromotionDiscount: 0,
-		CouponDiscount:    0,
+		PromotionDiscount: decimal.Zero,
+		CouponDiscount:    decimal.Zero,
 		FinalTotal:        originalTotal,
 		AppliedPromotions: []AppliedPromotion{},
 	}
 
-	if originalTotal == 0 {
+	if originalTotal.IsZero() {
 		return result, nil
 	}
 
@@ -127,7 +128,7 @@ func (s *CalculationService) CalculateDiscount(
 		applied := s.applyPromotion(promo, req.CartItems)
 		if applied != nil {
 			result.AppliedPromotions = append(result.AppliedPromotions, *applied)
-			result.PromotionDiscount += applied.DiscountAmount
+			result.PromotionDiscount = result.PromotionDiscount.Add(applied.DiscountAmount)
 		}
 	}
 
@@ -144,11 +145,11 @@ func (s *CalculationService) CalculateDiscount(
 	}
 
 	// Calculate final total
-	totalDiscount := result.PromotionDiscount + result.CouponDiscount
-	if totalDiscount > originalTotal {
+	totalDiscount := result.PromotionDiscount.Add(result.CouponDiscount)
+	if totalDiscount.GreaterThan(originalTotal) {
 		totalDiscount = originalTotal
 	}
-	result.FinalTotal = originalTotal - totalDiscount
+	result.FinalTotal = originalTotal.Sub(totalDiscount)
 
 	return result, nil
 }
@@ -157,16 +158,16 @@ func (s *CalculationService) applyPromotion(
 	promo *Promotion,
 	items []CartItem,
 ) *AppliedPromotion {
-	var matchedAmount int64
+	var matchedAmount decimal.Decimal
 	var matchedQuantity int
 	for _, item := range items {
 		if promo.MatchesProduct(item.ProductID, item.CategoryID, item.BrandID) {
-			matchedAmount += item.LineTotal
+			matchedAmount = matchedAmount.Add(item.LineTotal)
 			matchedQuantity += item.Quantity
 		}
 	}
 
-	if matchedAmount == 0 {
+	if matchedAmount.IsZero() {
 		return nil
 	}
 
@@ -176,7 +177,7 @@ func (s *CalculationService) applyPromotion(
 	}
 
 	discount := rule.CalculateDiscount(matchedAmount)
-	if discount == 0 {
+	if discount.IsZero() {
 		return nil
 	}
 
@@ -207,16 +208,16 @@ func (s *CalculationService) applyCoupon(
 		return nil, nil
 	}
 
-	var cartTotal int64
-	var scopeMatchedTotal int64
+	var cartTotal decimal.Decimal
+	var scopeMatchedTotal decimal.Decimal
 	for _, item := range req.CartItems {
-		cartTotal += item.LineTotal
+		cartTotal = cartTotal.Add(item.LineTotal)
 		if coupon.MatchesProduct(item.ProductID, item.CategoryID, item.BrandID) {
-			scopeMatchedTotal += item.LineTotal
+			scopeMatchedTotal = scopeMatchedTotal.Add(item.LineTotal)
 		}
 	}
 
-	if cartTotal < coupon.MinAmount {
+	if cartTotal.LessThan(coupon.MinAmount) {
 		return nil, nil
 	}
 
@@ -229,12 +230,12 @@ func (s *CalculationService) applyCoupon(
 	}
 
 	discountBase := cartTotal
-	if scopeMatchedTotal > 0 {
+	if scopeMatchedTotal.IsPositive() {
 		discountBase = scopeMatchedTotal
 	}
 
 	discount := coupon.CalculateDiscount(discountBase)
-	if discount == 0 {
+	if discount.IsZero() {
 		return nil, nil
 	}
 

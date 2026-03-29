@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -177,39 +178,39 @@ func (s *PromotionScope) MatchesProduct(productID, categoryID, brandID int64) bo
 // ==================== PromotionRule (Entity) ====================
 
 type PromotionRule struct {
-	ID             int64         `json:"id"`
-	PromotionID    int64         `json:"promotion_id"`
-	ConditionType  ConditionType `json:"condition_type"`
-	ConditionValue int64         `json:"condition_value"` // Threshold: cents for MIN_AMOUNT, count for MIN_QUANTITY
-	ActionType     ActionType    `json:"action_type"`
-	ActionValue    int64         `json:"action_value"`    // Discount: cents for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
-	MaxDiscount    int64         `json:"max_discount"`    // Maximum discount cap for percentage (cents)
-	Currency       string        `json:"currency"`
-	SortOrder      int           `json:"sort_order"`
-	CreatedAt      time.Time     `json:"created_at"`
-	UpdatedAt      time.Time     `json:"updated_at"`
+	ID             int64           `json:"id"`
+	PromotionID    int64           `json:"promotion_id"`
+	ConditionType  ConditionType   `json:"condition_type"`
+	ConditionValue decimal.Decimal `json:"condition_value"` // Threshold: amount for MIN_AMOUNT, count for MIN_QUANTITY
+	ActionType     ActionType      `json:"action_type"`
+	ActionValue    decimal.Decimal `json:"action_value"`    // Discount: amount for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
+	MaxDiscount    decimal.Decimal `json:"max_discount"`    // Maximum discount cap for percentage
+	Currency       string          `json:"currency"`
+	SortOrder      int             `json:"sort_order"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
 }
 
 // CalculateDiscount calculates the discount for a given amount
 // ActionValue interpretation:
-// - ActionFixedAmount: cents (100 = $1.00)
+// - ActionFixedAmount: amount (e.g., 100 = 100.00)
 // - ActionPercentage: basis points (100 = 1%, 500 = 5%, 1000 = 10%)
-func (r *PromotionRule) CalculateDiscount(matchedAmount int64) int64 {
-	var discount int64
+func (r *PromotionRule) CalculateDiscount(matchedAmount decimal.Decimal) decimal.Decimal {
+	var discount decimal.Decimal
 
 	switch r.ActionType {
 	case ActionFixedAmount:
 		discount = r.ActionValue
 	case ActionPercentage:
 		// Basis points: 100 = 1%, so divide by 10000
-		discount = matchedAmount * r.ActionValue / 10000
+		discount = matchedAmount.Mul(r.ActionValue).Div(decimal.NewFromInt(10000))
 	}
 
-	if r.MaxDiscount > 0 && discount > r.MaxDiscount {
+	if r.MaxDiscount.IsPositive() && discount.GreaterThan(r.MaxDiscount) {
 		discount = r.MaxDiscount
 	}
 
-	if discount > matchedAmount {
+	if discount.GreaterThan(matchedAmount) {
 		discount = matchedAmount
 	}
 
@@ -217,12 +218,12 @@ func (r *PromotionRule) CalculateDiscount(matchedAmount int64) int64 {
 }
 
 // MeetsCondition checks if the amount/quantity meets the condition
-func (r *PromotionRule) MeetsCondition(amount int64, quantity int) bool {
+func (r *PromotionRule) MeetsCondition(amount decimal.Decimal, quantity int) bool {
 	switch r.ConditionType {
 	case ConditionMinAmount:
-		return amount >= r.ConditionValue
+		return amount.GreaterThanOrEqual(r.ConditionValue)
 	case ConditionMinQuantity:
-		return int64(quantity) >= r.ConditionValue
+		return decimal.NewFromInt(int64(quantity)).GreaterThanOrEqual(r.ConditionValue)
 	default:
 		return false
 	}
@@ -269,7 +270,7 @@ func (p *Promotion) MatchesProduct(productID, categoryID, brandID int64) bool {
 }
 
 // FindBestRule finds the best applicable rule for given amount
-func (p *Promotion) FindBestRule(matchedAmount int64, quantity int) *PromotionRule {
+func (p *Promotion) FindBestRule(matchedAmount decimal.Decimal, quantity int) *PromotionRule {
 	var bestRule *PromotionRule
 
 	for i := range p.Rules {
@@ -277,7 +278,7 @@ func (p *Promotion) FindBestRule(matchedAmount int64, quantity int) *PromotionRu
 		if !rule.MeetsCondition(matchedAmount, quantity) {
 			continue
 		}
-		if bestRule == nil || rule.ConditionValue > bestRule.ConditionValue {
+		if bestRule == nil || rule.ConditionValue.GreaterThan(bestRule.ConditionValue) {
 			bestRule = rule
 		}
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -21,30 +22,30 @@ func NewCouponRepository() promotion.CouponRepository {
 
 // couponModel represents the database model for Coupon
 type couponModel struct {
-	ID           int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID     int64  `gorm:"column:tenant_id;not null;index"`
-	Name         string `gorm:"column:name;size:200;not null;index"`
-	Code         string `gorm:"column:code;size:50;not null;uniqueIndex"`
-	Description  string `gorm:"column:description;type:text"`
-	Type         int    `gorm:"column:type;not null;index"`
-	Value        int64  `gorm:"column:value;not null"`
-	MinAmount    int64  `gorm:"column:min_amount;not null;default:0"`
-	MaxDiscount  int64  `gorm:"column:max_discount;not null;default:0"`
-	Currency     string `gorm:"column:currency;size:10;not null"`
-	TotalCount   int    `gorm:"column:total_count;not null;default:0"`
-	UsedCount    int    `gorm:"column:used_count;not null;default:0"`
-	PerUserLimit int    `gorm:"column:per_user_limit;not null;default:0"`
-	Status       int    `gorm:"column:status;not null;index"`
-	StartAt      int64  `gorm:"column:start_at;not null;index"`
-	EndAt        int64  `gorm:"column:end_at;not null;index"`
-	ScopeType    string `gorm:"column:scope_type;size:32;not null"`
-	ScopeIDs     string `gorm:"column:scope_ids;type:json"`   // JSON array of int64
-	ExcludeIDs   string `gorm:"column:exclude_ids;type:json"` // JSON array of int64
-	CreatedBy    int64  `gorm:"column:created_by;not null"`
-	UpdatedBy    int64  `gorm:"column:updated_by;not null"`
-	DeletedAt    *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt    int64  `gorm:"column:created_at"`
-	UpdatedAt    int64  `gorm:"column:updated_at"`
+	ID           int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID     int64           `gorm:"column:tenant_id;not null;index"`
+	Name         string          `gorm:"column:name;size:200;not null;index"`
+	Code         string          `gorm:"column:code;size:50;not null;uniqueIndex"`
+	Description  string          `gorm:"column:description;type:text"`
+	Type         int             `gorm:"column:type;not null;index"`
+	Value        decimal.Decimal `gorm:"column:value;type:decimal(19,4);not null"`
+	MinAmount    decimal.Decimal `gorm:"column:min_amount;type:decimal(19,4);not null;default:0"`
+	MaxDiscount  decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
+	Currency     string          `gorm:"column:currency;size:10;not null"`
+	TotalCount   int             `gorm:"column:total_count;not null;default:0"`
+	UsedCount    int             `gorm:"column:used_count;not null;default:0"`
+	PerUserLimit int             `gorm:"column:per_user_limit;not null;default:0"`
+	Status       int             `gorm:"column:status;not null;index"`
+	StartAt      int64            `gorm:"column:start_at;not null;index"`
+	EndAt        int64            `gorm:"column:end_at;not null;index"`
+	ScopeType    string           `gorm:"column:scope_type;size:32;not null"`
+	ScopeIDs     string           `gorm:"column:scope_ids;type:json"`   // JSON array of int64
+	ExcludeIDs   string           `gorm:"column:exclude_ids;type:json"` // JSON array of int64
+	CreatedBy    int64            `gorm:"column:created_by;not null"`
+	UpdatedBy    int64            `gorm:"column:updated_by;not null"`
+	DeletedAt    *int64           `gorm:"column:deleted_at;index"`
+	CreatedAt    int64            `gorm:"column:created_at"`
+	UpdatedAt    int64            `gorm:"column:updated_at"`
 }
 
 func (couponModel) TableName() string {

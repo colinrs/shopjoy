@@ -65,7 +65,7 @@ type OrderFulfillmentItem struct {
 	Quantity    int
 	ShippedQty  int
 	PendingQty  int
-	UnitPrice   int64
+	UnitPrice   decimal.Decimal
 	Currency    string
 }
 
@@ -78,7 +78,7 @@ type OrderFulfillmentDetail struct {
 	FulfillmentText   string
 	RefundStatus      int8
 	RefundText        string
-	TotalAmount       int64
+	TotalAmount       decimal.Decimal
 	Currency          string
 	UserID            int64
 	UserName          string
@@ -131,7 +131,7 @@ type RefundResponse struct {
 	Reason         string
 	Description    string
 	Images         []string
-	Amount         int64
+	Amount         decimal.Decimal
 	Currency       string
 	RejectReason   string
 	ApprovedAt     *time.Time
@@ -141,7 +141,7 @@ type RefundResponse struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	OrderNo        string
-	OrderAmount    int64
+	OrderAmount    decimal.Decimal
 }
 
 // FulfillmentSummary 履约摘要
@@ -154,7 +154,7 @@ type FulfillmentSummary struct {
 	Refunding       int64
 	TotalOrders     int64
 	TodayOrders     int64
-	TodayGMV        int64
+	TodayGMV        decimal.Decimal
 }
 
 // OrderFulfillmentApp 订单履约应用服务接口
@@ -165,7 +165,7 @@ type OrderFulfillmentApp interface {
 	GetFulfillmentSummary(ctx context.Context, tenantID shared.TenantID) (*FulfillmentSummary, error)
 	// New methods
 	UpdateOrderRemark(ctx context.Context, tenantID shared.TenantID, orderID int64, remark string) error
-	AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount int64, reason string) (*fulfillment.AdjustPriceResponse, error)
+	AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error)
 	ExportOrders(ctx context.Context, tenantID shared.TenantID, req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error)
 }
 
@@ -426,7 +426,7 @@ func (a *orderFulfillmentApp) UpdateOrderRemark(ctx context.Context, tenantID sh
 }
 
 // AdjustOrderPrice adjusts the price of an order
-func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount int64, reason string) (*fulfillment.AdjustPriceResponse, error) {
+func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error) {
 	// Get order
 	order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, orderID)
 	if err != nil {

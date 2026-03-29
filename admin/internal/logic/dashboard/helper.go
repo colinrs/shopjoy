@@ -12,6 +12,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -55,22 +56,22 @@ func (h *DashboardHelper) GetOverview(tenantID shared.TenantID) (*types.Dashboar
 	todayGMV, err := h.svcCtx.OrderRepo.SumTodayGMV(h.ctx, h.svcCtx.DB, tenantID)
 	if err != nil {
 		h.Logger.Errorf("failed to get today GMV: %v", err)
-		todayGMV = 0
+		todayGMV = decimal.Zero
 	}
 
 	// Get yesterday's GMV for comparison
 	yesterdayGMV, err := h.getYesterdayGMV(tenantID, yesterdayStart, yesterdayEnd)
 	if err != nil {
 		h.Logger.Errorf("failed to get yesterday GMV: %v", err)
-		yesterdayGMV = 0
+		yesterdayGMV = decimal.Zero
 	}
 
 	// Calculate growth percentage
 	todayGrowth := "0%"
-	if yesterdayGMV > 0 {
-		growth := float64(todayGMV-yesterdayGMV) / float64(yesterdayGMV) * 100
-		todayGrowth = fmt.Sprintf("%.1f%%", growth)
-	} else if todayGMV > 0 {
+	if yesterdayGMV.IsPositive() {
+		growth := todayGMV.Sub(yesterdayGMV).Div(yesterdayGMV).Mul(decimal.NewFromFloat(100))
+		todayGrowth = fmt.Sprintf("%.1f%%", growth.InexactFloat64())
+	} else if todayGMV.IsPositive() {
 		todayGrowth = "+100%"
 	}
 
@@ -207,7 +208,7 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 		ProductName string
 		Image       string
 		Sales       int64
-		Revenue     int64
+		Revenue     decimal.Decimal
 	}
 
 	var results []productSales
@@ -345,8 +346,8 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 
 // Helper methods
 
-func (h *DashboardHelper) getYesterdayGMV(tenantID shared.TenantID, start, end time.Time) (int64, error) {
-	var total int64
+func (h *DashboardHelper) getYesterdayGMV(tenantID shared.TenantID, start, end time.Time) (decimal.Decimal, error) {
+	var total decimal.Decimal
 	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
 		Where("tenant_id = ?", tenantID).
 		Where("status IN ?", []fulfillment.OrderStatus{
@@ -358,7 +359,7 @@ func (h *DashboardHelper) getYesterdayGMV(tenantID shared.TenantID, start, end t
 		Select("COALESCE(SUM(pay_amount), 0)").
 		Scan(&total).Error
 	if err != nil {
-		return 0, err
+		return decimal.Zero, err
 	}
 	return total, nil
 }
@@ -413,7 +414,7 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	// Query daily sales
 	type dailySales struct {
 		Date   time.Time
-		Sales  int64
+		Sales  decimal.Decimal
 		Orders int64
 	}
 
@@ -455,13 +456,10 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	return data, nil
 }
 
-// formatAmount formats amount in cents to currency string
-func formatAmount(amount int64, currency string) string {
-	// Convert cents to decimal string
-	yuan := amount / 100
-	cents := amount % 100
-	if cents < 0 {
-		return fmt.Sprintf("0.00")
+// formatAmount formats amount to currency string
+func formatAmount(amount decimal.Decimal, currency string) string {
+	if amount.IsZero() {
+		return "0.00"
 	}
-	return fmt.Sprintf("%d.%02d", yuan, cents)
+	return amount.StringFixed(2)
 }

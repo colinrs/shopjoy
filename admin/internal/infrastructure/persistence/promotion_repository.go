@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -110,17 +111,17 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 
 // promotionRuleModel represents the database model for PromotionRule
 type promotionRuleModel struct {
-	ID             int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	PromotionID    int64  `gorm:"column:promotion_id;not null;index"`
-	ConditionType  int    `gorm:"column:condition_type;not null"`
-	ConditionValue int64  `gorm:"column:condition_value;not null"`
-	ActionType     int    `gorm:"column:action_type;not null"`
-	ActionValue    int64  `gorm:"column:action_value;not null"`
-	MaxDiscount    int64  `gorm:"column:max_discount;not null;default:0"`
-	Currency       string `gorm:"column:currency;size:10;not null"`
-	SortOrder      int    `gorm:"column:sort_order;not null;default:0"`
-	CreatedAt      int64  `gorm:"column:created_at"`
-	UpdatedAt      int64  `gorm:"column:updated_at"`
+	ID             int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
+	PromotionID    int64           `gorm:"column:promotion_id;not null;index"`
+	ConditionType  int             `gorm:"column:condition_type;not null"`
+	ConditionValue decimal.Decimal `gorm:"column:condition_value;type:decimal(19,4);not null"`
+	ActionType     int             `gorm:"column:action_type;not null"`
+	ActionValue    decimal.Decimal `gorm:"column:action_value;type:decimal(19,4);not null"`
+	MaxDiscount    decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
+	Currency       string          `gorm:"column:currency;size:10;not null"`
+	SortOrder      int             `gorm:"column:sort_order;not null;default:0"`
+	CreatedAt      int64            `gorm:"column:created_at"`
+	UpdatedAt      int64            `gorm:"column:updated_at"`
 }
 
 func (promotionRuleModel) TableName() string {
