@@ -33,12 +33,12 @@ export interface UserDetail extends ExtendedUser {
 export interface UserAddress {
   id: number
   user_id: number
-  recipient_name: string
+  name: string
   phone: string
   province: string
   city: string
   district: string
-  detail_address: string
+  detail: string
   is_default: boolean
   created_at: string
 }

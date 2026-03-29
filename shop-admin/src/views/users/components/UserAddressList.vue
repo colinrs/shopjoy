@@ -7,7 +7,7 @@
     <el-table :data="addresses" v-loading="loading" stripe>
       <el-table-column label="收货人" width="120">
         <template #default="{ row }">
-          <span class="recipient-name">{{ row.recipient_name }}</span>
+          <span class="recipient-name">{{ row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="联系电话" width="140">
@@ -18,7 +18,7 @@
       <el-table-column label="地址" min-width="300">
         <template #default="{ row }">
           <span class="address-text">
-            {{ row.province }} {{ row.city }} {{ row.district }} {{ row.detail_address }}
+            {{ row.province }} {{ row.city }} {{ row.district }} {{ row.detail }}
           </span>
         </template>
       </el-table-column>
@@ -83,24 +83,24 @@ const loadAddresses = async () => {
       {
         id: 1,
         user_id: props.userId,
-        recipient_name: '张三',
+        name: '张三',
         phone: '13800138001',
         province: '广东省',
         city: '深圳市',
         district: '南山区',
-        detail_address: '科技园南区xxx大厦A座1001',
+        detail: '科技园南区xxx大厦A座1001',
         is_default: true,
         created_at: '2024-01-15T10:00:00Z'
       },
       {
         id: 2,
         user_id: props.userId,
-        recipient_name: '张三',
+        name: '张三',
         phone: '13800138002',
         province: '广东省',
         city: '广州市',
         district: '天河区',
-        detail_address: 'xxx路xxx号',
+        detail: 'xxx路xxx号',
         is_default: false,
         created_at: '2024-02-20T14:30:00Z'
       }
