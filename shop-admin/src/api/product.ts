@@ -15,9 +15,9 @@ export interface Product {
   id: number
   name: string
   description: string
-  price: number
+  price: string
   currency: string
-  cost_price: number
+  cost_price: string
   stock: number
   status: string
   category_id: number
@@ -77,9 +77,9 @@ export interface ListProductsResponse {
 export interface CreateProductRequest {
   name: string
   description?: string
-  price: number
+  price: string
   currency?: string
-  cost_price?: number
+  cost_price?: string
   category_id: number
   // New fields
   sku?: string
@@ -106,7 +106,7 @@ export interface UpdateProductRequest {
   id: number
   name: string
   description?: string
-  price: number
+  price: string
   currency?: string
   category_id: number
   // New fields
