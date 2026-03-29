@@ -49,7 +49,7 @@ type (
 		Amount               string `json:"amount"`
 		Currency             string `json:"currency"`
 		TransactionFee       string `json:"transaction_fee"`
-		Status               int8   `json:"status"`
+		Status               int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 		StatusText           string `json:"status_text"`
 		CreatedAt            string `json:"created_at"`
 		PaidAt               string `json:"paid_at,optional"`
@@ -84,7 +84,7 @@ type (
 		Currency          string               `json:"currency"`
 		TransactionFee    string               `json:"transaction_fee"`
 		FeeCurrency       string               `json:"fee_currency"`
-		Status            int8                 `json:"status"`
+		Status            int8                 `json:"status"` // 0=pending, 1=succeeded, 2=failed
 		StatusText        string               `json:"status_text"`
 		PaidAt            string               `json:"paid_at,optional"`
 		RefundedAmount    string               `json:"refunded_amount"`
@@ -96,7 +96,7 @@ type (
 		ChannelRefundID string `json:"channel_refund_id"`
 		Amount          string `json:"amount"`
 		Currency        string `json:"currency"`
-		Status          int8   `json:"status"`
+		Status          int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 		StatusText      string `json:"status_text"`
 		ReasonType      string `json:"reason_type"`
 		Reason          string `json:"reason"`
@@ -116,7 +116,7 @@ type (
 		RefundNo        string `json:"refund_no"`
 		Amount          string `json:"amount"`
 		Currency        string `json:"currency"`
-		Status          int8   `json:"status"`
+		Status          int8   `json:"status"` // 0=pending, 1=succeeded, 2=failed
 		StatusText      string `json:"status_text"`
 		ChannelRefundID string `json:"channel_refund_id,optional"`
 	}

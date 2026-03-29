@@ -130,6 +130,40 @@ When modifying HTTP API definitions:
    - **Only implement the business logic** in the generated logic file (the stub contains `// todo: add your logic here`)
    - Handler files are already complete and should NOT be modified
 
+5. **⚠️ MANDATORY: Frontend Synchronization (DO NOT SKIP)**
+   When backend API definitions change, you MUST also update the corresponding frontend code:
+   - **`src/api/{module}.ts`** - Update TypeScript type definitions to match backend
+   - **`src/views/{module}/**/*.vue`** - Update all enum value comparisons in template logic (v-if, v-show, status checks)
+   - **`src/components/**`** - Update any components that use the affected enum values
+
+   **This step is MANDATORY and MUST NOT be skipped.** Any backend change that omits frontend updates is considered incomplete and will cause runtime bugs.
+
+## Enum Conventions
+
+**枚举定义以后端接口为准，前端必须严格跟随后端定义：**
+
+| Type | Rule | Rationale |
+|------|------|------------|
+| MUST | Enum values must be defined in backend `.api` files with inline comments | Single source of truth, generated types reflect backend |
+| MUST | Frontend TypeScript types must match backend enum values exactly | Avoid runtime mismatches, incorrect filtering/display |
+| MUST | When backend enum changes, frontend must be updated accordingly | Maintain consistency across the full chain |
+| MUST NOT | Frontend define its own enum values independent of backend | Causes inconsistencies, incorrect API calls |
+| MUST NOT | Modify backend enum values to match frontend existing usage | Backend is authoritative source |
+
+**Example of proper enum documentation in `.api` files:**
+```go
+type OrderStatus int // 0=pending_payment, 1=paid, 2=pending_shipment, 3=shipped, 4=completed, 5=cancelled
+```
+
+**Example of incorrect frontend usage:**
+```typescript
+// BAD: Frontend defining its own values
+export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'completed'
+
+// GOOD: Frontend matching backend definition
+export type OrderStatus = 'pending_payment' | 'paid' | 'pending_shipment' | 'shipped' | 'completed' | 'cancelled' | 'refunding' | 'refunded'
+```
+
 ## Middleware Configuration
 
 **Define middleware in `.api` files, NOT by editing `routes.go`:**

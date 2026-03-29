@@ -74,7 +74,7 @@ type (
 type (
 	PageListItem {
 		ID          int64  `json:"id"`
-		PageType    string `json:"page_type"`
+		PageType    string `json:"page_type"` // home, category, product, cart, order, custom
 		Name        string `json:"name"`
 		Slug        string `json:"slug"`
 		IsPublished bool   `json:"is_published"`
@@ -102,7 +102,7 @@ type (
 	}
 	DecorationDTO {
 		ID          int64  `json:"id"`
-		BlockType   string `json:"block_type"`
+		BlockType   string `json:"block_type"` // banner, product_grid, text, image, video, etc
 		BlockConfig string `json:"block_config"` // JSON string
 		SortOrder   int    `json:"sort_order"`
 	}
@@ -123,7 +123,7 @@ type (
 	}
 	AddDecorationRequest {
 		PageID      int64  `path:"id"`
-		BlockType   string `json:"block_type"`
+		BlockType   string `json:"block_type"` // banner, product_grid, text, image, video, etc
 		BlockConfig string `json:"block_config"` // JSON string
 		SortOrder   int    `json:"sort_order,optional"`
 	}

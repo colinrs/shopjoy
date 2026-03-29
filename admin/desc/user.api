@@ -16,7 +16,7 @@ type (
 		Phone     string `json:"phone"`
 		Name      string `json:"name"`
 		Avatar    string `json:"avatar"`
-		Status    int    `json:"status"`
+		Status    int    `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		CreatedAt string `json:"created_at"`
 		LastLogin string `json:"last_login,optional"`
 	}
@@ -25,7 +25,7 @@ type (
 		PageSize int    `form:"page_size,default=20"`
 		Name     string `form:"name,optional"`
 		Email    string `form:"email,optional"`
-		Status   int    `form:"status,optional"`
+		Status   int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		Keyword  string `form:"keyword,optional"`
 	}
 	ListUsersResponse {
@@ -65,7 +65,7 @@ type (
 		Page          int    `form:"page,default=1"`
 		PageSize      int    `form:"page_size,default=20"`
 		Keyword       string `form:"keyword,optional"`
-		Status        int    `form:"status,optional"`
+		Status        int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		RegisterStart string `form:"register_start,optional"`
 		RegisterEnd   string `form:"register_end,optional"`
 	}
@@ -76,7 +76,7 @@ type (
 		Phone         string `json:"phone"`
 		Name          string `json:"name"`
 		Avatar        string `json:"avatar"`
-		Status        int    `json:"status"`
+		Status        int    `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		StatusText    string `json:"status_text"`
 		PointsBalance int64  `json:"points_balance"`
 		OrderCount    int64  `json:"order_count"`
@@ -97,10 +97,10 @@ type (
 		Phone          string               `json:"phone"`
 		Name           string               `json:"name"`
 		Avatar         string               `json:"avatar"`
-		Gender         int                  `json:"gender"`
+		Gender         int                  `json:"gender"` // 0=unknown, 1=male, 2=female, 3=other
 		GenderText     string               `json:"gender_text"`
 		Birthday       string               `json:"birthday"`
-		Status         int                  `json:"status"`
+		Status         int                  `json:"status"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		StatusText     string               `json:"status_text"`
 		PointsBalance  int64                `json:"points_balance"`
 		PointsFrozen   int64                `json:"frozen_points"`
@@ -140,7 +140,7 @@ type (
 	}
 	ExportUsersRequest {
 		Keyword       string `form:"keyword,optional"`
-		Status        int    `form:"status,optional"`
+		Status        int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		RegisterStart string `form:"register_start,optional"`
 		RegisterEnd   string `form:"register_end,optional"`
 	}

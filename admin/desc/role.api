@@ -13,7 +13,7 @@ type (
 		Name        string `json:"name"`
 		Code        string `json:"code"`
 		Description string `json:"description"`
-		Status      int8   `json:"status"`
+		Status      int8   `json:"status"` // 0=disabled, 1=enabled
 		StatusText  string `json:"status_text"`
 		IsSystem    bool   `json:"is_system"`
 		CreatedAt   string `json:"created_at"`
@@ -40,7 +40,7 @@ type (
 		PageSize int    `form:"page_size,default=20"`
 		Name     string `form:"name,optional"`
 		Code     string `form:"code,optional"`
-		Status   int8   `form:"status,optional"`
+		Status   int8   `form:"status,optional"` // 0=disabled, 1=enabled
 	}
 	ListRolesResponse {
 		List     []*RoleInfo `json:"list"`

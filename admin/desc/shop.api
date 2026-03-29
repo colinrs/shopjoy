@@ -32,9 +32,9 @@ type (
 		DefaultLanguage string `json:"default_language"`
 		Timezone        string `json:"timezone"`
 		// Status
-		Status     int8   `json:"status"`
+		Status     int8   `json:"status"` // 0=inactive, 1=active, 2=suspended
 		StatusText string `json:"status_text"`
-		Plan       int8   `json:"plan"`
+		Plan       int8   `json:"plan"` // 0=basic, 1=standard, 2=premium
 		PlanText   string `json:"plan_text"`
 		ExpireAt   string `json:"expire_at,optional"`
 		// Timestamps
