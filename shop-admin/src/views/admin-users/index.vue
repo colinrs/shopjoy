@@ -76,9 +76,8 @@
           </template>
         </el-table-column>
         <el-table-column label="角色" width="100" align="center" v-if="activeTab === 'customer'">
-          <template #default="{ row }">
-            <el-tag type="warning" size="small" v-if="row.is_vip">VIP</el-tag>
-            <el-tag type="info" size="small" v-else>普通</el-tag>
+          <template #default>
+            <el-tag type="info" size="small">普通</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="订单数" width="100" align="center" v-if="activeTab === 'customer'">

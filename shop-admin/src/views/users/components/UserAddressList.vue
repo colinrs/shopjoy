@@ -85,24 +85,30 @@ const loadAddresses = async () => {
         user_id: props.userId,
         name: '张三',
         phone: '13800138001',
+        country: '中国',
         province: '广东省',
         city: '深圳市',
         district: '南山区',
         detail: '科技园南区xxx大厦A座1001',
+        postal_code: '518000',
         is_default: true,
-        created_at: '2024-01-15T10:00:00Z'
+        created_at: '2024-01-15T10:00:00Z',
+        updated_at: '2024-01-15T10:00:00Z'
       },
       {
         id: 2,
         user_id: props.userId,
         name: '张三',
         phone: '13800138002',
+        country: '中国',
         province: '广东省',
         city: '广州市',
         district: '天河区',
         detail: 'xxx路xxx号',
+        postal_code: '510000',
         is_default: false,
-        created_at: '2024-02-20T14:30:00Z'
+        created_at: '2024-02-20T14:30:00Z',
+        updated_at: '2024-02-20T14:30:00Z'
       }
     ]
     total.value = 2

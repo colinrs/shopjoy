@@ -186,8 +186,8 @@ const form = reactive({
   carrier_code: '',
   carrier: '',
   tracking_no: '',
-  shipping_cost: 0,
-  weight: 0,
+  shipping_cost: '0',
+  weight: '0',
   currency: 'CNY',
   remark: '',
   items: [] as { order_item_id: number; quantity: number }[]
@@ -275,7 +275,7 @@ const handleSubmit = async () => {
         carrier_code: form.carrier_code,
         carrier: form.carrier,
         tracking_no: form.tracking_no,
-        shipping_cost: Math.round(form.shipping_cost * 100),
+        shipping_cost: String(Math.round(parseFloat(form.shipping_cost) * 100)),
         shipping_currency: form.currency,
         weight: form.weight,
         remark: form.remark,
@@ -297,8 +297,8 @@ watch(visible, (val) => {
     form.carrier_code = ''
     form.carrier = ''
     form.tracking_no = ''
-    form.shipping_cost = 0
-    form.weight = 0
+    form.shipping_cost = '0'
+    form.weight = '0'
     form.remark = ''
     selectedItems.value = props.shipment.items.map(item => item.id)
     form.items = props.shipment.items.map(item => ({

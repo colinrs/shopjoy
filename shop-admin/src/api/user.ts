@@ -15,9 +15,8 @@ export interface User {
 // Extended user with points and order stats
 export interface ExtendedUser extends User {
   points_balance: number
-  total_orders: number
+  order_count: number
   total_spent: string
-  is_vip: boolean
 }
 
 // User detail with full information
@@ -35,12 +34,15 @@ export interface UserAddress {
   user_id: number
   name: string
   phone: string
+  country: string
   province: string
   city: string
   district: string
   detail: string
+  postal_code: string
   is_default: boolean
   created_at: string
+  updated_at: string
 }
 
 export interface UserStats {

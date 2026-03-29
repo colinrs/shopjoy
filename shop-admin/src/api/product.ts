@@ -62,8 +62,8 @@ export interface ListProductsParams {
   name?: string
   category_id?: number
   status?: string
-  min_price?: number
-  max_price?: number
+  min_price?: string
+  max_price?: string
   market_id?: number
 }
 

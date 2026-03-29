@@ -24,7 +24,7 @@
         </div>
         <div class="user-stats">
           <div class="stat-item">
-            <span class="stat-value">{{ user?.total_orders || 0 }}</span>
+            <span class="stat-value">{{ user?.order_count || 0 }}</span>
             <span class="stat-label">订单数</span>
           </div>
           <div class="stat-item">
@@ -100,9 +100,8 @@ const loadUser = async () => {
       frozen_points: 0,
       total_earned_points: 10000,
       total_redeemed_points: 5000,
-      total_orders: 25,
+      order_count: 25,
       total_spent: '12580.50',
-      is_vip: true,
       last_order_at: '2024-03-20T08:00:00Z',
       default_address: null
     }

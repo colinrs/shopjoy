@@ -199,8 +199,8 @@ const form = reactive({
   carrier_code: '',
   carrier_name: '',
   tracking_no: '',
-  shipping_cost: 0,
-  weight: 0,
+  shipping_cost: '0',
+  weight: '0',
   remark: '',
   items: [] as { order_item_id: number; quantity: number }[]
 })
@@ -280,8 +280,8 @@ const handleSubmit = async () => {
         carrier_code: form.carrier_code,
         carrier_name: form.carrier_code === 'OTHER' ? form.carrier_name : undefined,
         tracking_no: form.tracking_no,
-        shipping_cost: form.shipping_cost ? form.shipping_cost.toFixed(2) : undefined,
-        weight: form.weight ? form.weight.toFixed(2) : undefined,
+        shipping_cost: form.shipping_cost && form.shipping_cost !== '0' ? form.shipping_cost : undefined,
+        weight: form.weight && form.weight !== '0' ? form.weight : undefined,
         remark: form.remark || undefined,
         items: form.items
       })
@@ -302,8 +302,8 @@ watch(visible, (val) => {
     form.carrier_code = ''
     form.carrier_name = ''
     form.tracking_no = ''
-    form.shipping_cost = 0
-    form.weight = 0
+    form.shipping_cost = '0'
+    form.weight = '0'
     form.remark = ''
     selectedItems.value = props.order.items.map(item => item.order_item_id)
     form.items = props.order.items.map(item => ({

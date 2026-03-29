@@ -122,7 +122,7 @@
         <el-table-column label="Amount" width="120" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
-              <p class="refund-amount">{{ row.currency }} {{ (row.amount / 100).toFixed(2) }}</p>
+              <p class="refund-amount">{{ row.currency }} {{ row.amount }}</p>
             </div>
           </template>
         </el-table-column>
@@ -280,7 +280,7 @@ const refundList = ref<Refund[]>([
     reason: 'Product has scratches on screen',
     description: 'Received the product with visible scratches on the display screen. Photos attached.',
     images: [],
-    amount: 29900,
+    amount: "299.00",
     currency: 'CNY',
     reject_reason: '',
     approved_at: null,
@@ -303,7 +303,7 @@ const refundList = ref<Refund[]>([
     reason: 'Received wrong color',
     description: 'Ordered black but received white.',
     images: [],
-    amount: 45600,
+    amount: "456.00",
     currency: 'CNY',
     reject_reason: '',
     approved_at: '2026-03-21 16:00:00',
@@ -326,7 +326,7 @@ const refundList = ref<Refund[]>([
     reason: 'Changed mind',
     description: 'Found a better deal elsewhere.',
     images: [],
-    amount: 12900,
+    amount: "129.00",
     currency: 'CNY',
     reject_reason: 'Refund period has expired for this reason.',
     approved_at: null,
@@ -349,7 +349,7 @@ const refundList = ref<Refund[]>([
     reason: 'Damaged during shipping',
     description: 'Package arrived damaged, product broken.',
     images: [],
-    amount: 59900,
+    amount: "599.00",
     currency: 'CNY',
     reject_reason: '',
     approved_at: '2026-03-19 14:00:00',
@@ -372,7 +372,7 @@ const refundList = ref<Refund[]>([
     reason: 'Product differs from description',
     description: 'The material quality is much lower than shown in photos.',
     images: [],
-    amount: 159900,
+    amount: "1599.00",
     currency: 'CNY',
     reject_reason: '',
     approved_at: null,
@@ -459,7 +459,7 @@ const viewDetail = (row: Refund) => {
 const quickApprove = async (row: Refund) => {
   try {
     await ElMessageBox.confirm(
-      `Approve refund of ${row.currency} ${(row.amount / 100).toFixed(2)}?`,
+      `Approve refund of ${row.currency} ${row.amount}?`,
       'Approve Refund',
       { type: 'success' }
     )

@@ -85,7 +85,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="Shipping Cost">
               <span v-if="shipment?.shipping_cost">
-                {{ shipment.shipping_currency }} {{ (shipment.shipping_cost / 100).toFixed(2) }}
+                {{ shipment.shipping_currency }} {{ shipment.shipping_cost }}
               </span>
               <span v-else class="no-data">-</span>
             </el-descriptions-item>
@@ -284,8 +284,8 @@ const editDialogVisible = ref(false)
 const editForm = reactive({
   carrier_code: '',
   tracking_no: '',
-  shipping_cost: 0,
-  weight: 0,
+  shipping_cost: '0',
+  weight: '0',
   remark: '',
   currency: 'CNY'
 })
@@ -364,9 +364,9 @@ const loadShipment = async () => {
       carrier: 'SF Express',
       carrier_code: 'SF',
       tracking_no: 'SF1234567890',
-      shipping_cost: 1200,
+      shipping_cost: "12.00",
       shipping_currency: 'CNY',
-      weight: 1.5,
+      weight: "1.5",
       shipped_at: '2026-03-22 14:30:25',
       delivered_at: null,
       remark: 'Fragile item - handle with care',
@@ -413,9 +413,9 @@ const openEditLogistics = () => {
   if (shipment.value) {
     editForm.carrier_code = shipment.value.carrier_code
     editForm.tracking_no = shipment.value.tracking_no
-    editForm.shipping_cost = shipment.value.shipping_cost / 100
+    editForm.shipping_cost = shipment.value.shipping_cost
     editForm.weight = shipment.value.weight
-    editForm.remark = shipment.value.remark
+    editForm.remark = shipment.value.remark || ''
     editDialogVisible.value = true
   }
 }
