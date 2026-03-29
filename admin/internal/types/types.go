@@ -951,6 +951,10 @@ type GetOrderShipmentsReq struct {
 	OrderID string `path:"order_id"`
 }
 
+type GetPageBySlugRequest struct {
+	Slug string `path:"slug"`
+}
+
 type GetPageRequest struct {
 	ID int64 `path:"id"`
 }

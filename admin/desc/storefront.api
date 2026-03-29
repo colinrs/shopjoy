@@ -93,6 +93,9 @@ type (
 	GetPageRequest {
 		ID int64 `path:"id"`
 	}
+	GetPageBySlugRequest {
+		Slug string `path:"slug"`
+	}
 	PageDetailResponse {
 		Page        *PageListItem    `json:"page"`
 		Decorations []*DecorationDTO `json:"decorations"`
@@ -260,6 +263,10 @@ service admin-api {
 	@doc "获取页面详情"
 	@handler GetPageHandler
 	get /api/v1/pages/:id (GetPageRequest) returns (PageDetailResponse)
+
+	@doc "根据slug获取页面"
+	@handler GetPageBySlugHandler
+	get /api/v1/pages/slug/:slug (GetPageBySlugRequest) returns (PageDetailResponse)
 
 	@doc "保存草稿"
 	@handler SaveDraftHandler

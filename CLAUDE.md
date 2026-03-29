@@ -118,10 +118,17 @@ When modifying HTTP API definitions:
    cd shop && make api
    ```
 
-3. **DO NOT edit** auto-generated files:
-   - `internal/types/types.go`
-   - `internal/handler/routes.go`
-   - `internal/handler/*.go`
+3. **Auto-generated files (DO NOT edit manually):**
+   - `internal/types/types.go` - request/response types
+   - `internal/handler/routes.go` - route registration
+   - `internal/handler/{module}/*.go` - HTTP handlers (auto-generated with stubs)
+   - `internal/logic/{module}/*.go` - business logic stubs (auto-generated)
+
+4. **Implementation workflow for new API endpoints:**
+   - Add route definition in `.api` file
+   - Run `make api` to generate handler and logic stubs
+   - **Only implement the business logic** in the generated logic file (the stub contains `// todo: add your logic here`)
+   - Handler files are already complete and should NOT be modified
 
 ## Middleware Configuration
 

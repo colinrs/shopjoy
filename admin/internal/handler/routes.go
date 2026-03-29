@@ -591,6 +591,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/v1/pages/:id/unpublish",
 					Handler: pages.UnpublishPageHandler(serverCtx),
 				},
+				{
+					// 根据slug获取页面
+					Method:  http.MethodGet,
+					Path:    "/api/v1/pages/slug/:slug",
+					Handler: pages.GetPageBySlugHandler(serverCtx),
+				},
 			}...,
 		),
 	)
