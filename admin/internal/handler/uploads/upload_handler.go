@@ -22,13 +22,8 @@ func UploadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		category := r.FormValue("category")
 
-		req := &types.UploadRequest{
-			File:     header,
-			Category: category,
-		}
-
 		l := uploads.NewUploadLogic(r.Context(), svcCtx)
-		resp, err := l.Upload(req)
+		resp, err := l.Upload(&types.UploadRequest{Category: category}, file, header)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

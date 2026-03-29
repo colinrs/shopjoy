@@ -33,12 +33,22 @@ func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *t
 	// 平台管理员创建商品时需要指定 tenantID（暂不允许，或后续可扩展）
 	// 目前平台管理员创建的商品归属于自身租户（tenantID = 0 表示平台）
 
+	// 解析价格字符串（单位：元）
+	price, err := appProduct.ToDomainMoneyFromString(req.Price, req.Currency)
+	if err != nil {
+		return nil, err
+	}
+	costPrice, err := appProduct.ToDomainMoneyFromString(req.CostPrice, req.Currency)
+	if err != nil {
+		return nil, err
+	}
+
 	createReq := appProduct.CreateProductRequest{
 		Name:        req.Name,
 		Description: req.Description,
-		Price:       req.Price,
+		Price:       price.Amount,
 		Currency:    req.Currency,
-		CostPrice:   req.CostPrice,
+		CostPrice:   costPrice.Amount,
 		CategoryID:  req.CategoryID,
 	}
 

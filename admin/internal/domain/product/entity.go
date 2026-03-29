@@ -66,16 +66,21 @@ func (s Status) CanTransitionTo(target Status) bool {
 
 // Money 金额（值对象）
 type Money struct {
-	Amount   int64  // 单位为分，避免浮点数精度问题
-	Currency string // 币种，如 CNY
+	Amount   decimal.Decimal // 使用 decimal.Decimal 避免浮点数精度问题
+	Currency string          // 币种，如 CNY, USD
 }
 
 // NewMoney 创建金额
-func NewMoney(amount int64, currency string) Money {
+func NewMoney(amount decimal.Decimal, currency string) Money {
 	if currency == "" {
 		currency = "CNY"
 	}
 	return Money{Amount: amount, Currency: currency}
+}
+
+// NewMoneyFromInt64 从 int64 创建金额（单位为分）
+func NewMoneyFromInt64(amount int64, currency string) Money {
+	return NewMoney(decimal.NewFromInt(amount), currency)
 }
 
 // Add 金额相加
@@ -83,7 +88,7 @@ func (m Money) Add(other Money) (Money, error) {
 	if m.Currency != other.Currency {
 		return Money{}, code.ErrProductCurrencyMismatch
 	}
-	return NewMoney(m.Amount+other.Amount, m.Currency), nil
+	return NewMoney(m.Amount.Add(other.Amount), m.Currency), nil
 }
 
 // Subtract 金额相减
@@ -91,15 +96,25 @@ func (m Money) Subtract(other Money) (Money, error) {
 	if m.Currency != other.Currency {
 		return Money{}, code.ErrProductCurrencyMismatch
 	}
-	if m.Amount < other.Amount {
+	if m.Amount.LessThan(other.Amount) {
 		return Money{}, code.ErrProductInsufficientAmount
 	}
-	return NewMoney(m.Amount-other.Amount, m.Currency), nil
+	return NewMoney(m.Amount.Sub(other.Amount), m.Currency), nil
 }
 
 // Equals 金额相等
 func (m Money) Equals(other Money) bool {
-	return m.Amount == other.Amount && m.Currency == other.Currency
+	return m.Amount.Equal(other.Amount) && m.Currency == other.Currency
+}
+
+// IsZero 金额是否为零
+func (m Money) IsZero() bool {
+	return m.Amount.IsZero()
+}
+
+// IsPositive 金额是否为正
+func (m Money) IsPositive() bool {
+	return m.Amount.IsPositive()
 }
 
 // Dimensions 尺寸（值对象）
@@ -147,7 +162,7 @@ func NewProduct(tenantID shared.TenantID, name, description string, price Money,
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
-	if price.Amount <= 0 {
+	if !price.Amount.IsPositive() {
 		return nil, code.ErrProductInvalidPrice
 	}
 
@@ -167,7 +182,7 @@ func NewProductWithCompliance(tenantID shared.TenantID, name, description, sku s
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
-	if price.Amount <= 0 {
+	if !price.Amount.IsPositive() {
 		return nil, code.ErrProductInvalidPrice
 	}
 
@@ -261,7 +276,7 @@ func (p *Product) UpdatePrice(newPrice Money) error {
 	if p.DeletedAt.Valid {
 		return code.ErrProductDeleted
 	}
-	if newPrice.Amount <= 0 {
+	if !newPrice.Amount.IsPositive() {
 		return code.ErrProductInvalidPrice
 	}
 	p.Price = newPrice
@@ -308,8 +323,8 @@ type Query struct {
 	Name       string
 	CategoryID int64
 	Status     *Status // 使用指针，nil 表示不过滤状态
-	MinPrice   *int64
-	MaxPrice   *int64
+	MinPrice   *decimal.Decimal
+	MaxPrice   *decimal.Decimal
 	MarketID   int64
 	Page       int
 	PageSize   int

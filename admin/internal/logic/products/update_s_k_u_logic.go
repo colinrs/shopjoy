@@ -46,12 +46,17 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 	if req.Code != "" {
 		sku.Code = req.Code
 	}
-	if req.Price > 0 {
+	if req.Price != "" {
 		currency := req.Currency
 		if currency == "" {
 			currency = sku.Price.Currency
 		}
-		sku.Price = shared.Money{Amount: req.Price, Currency: currency}
+		// Parse price from string (yuan)
+		priceAmount, err := shared.ParseMoneyFromString(req.Price)
+		if err != nil {
+			return nil, err
+		}
+		sku.Price = shared.NewMoney(priceAmount, currency)
 	}
 	if req.Stock > 0 {
 		diff := req.Stock - sku.Stock
@@ -79,7 +84,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 		ID:             sku.ID,
 		ProductID:      sku.ProductID,
 		Code:           sku.Code,
-		Price:          sku.Price.Amount,
+		Price:          shared.FormatMoneyToStringOnly(sku.Price.Amount),
 		Currency:       sku.Price.Currency,
 		Stock:          sku.Stock,
 		AvailableStock: sku.AvailableStock,

@@ -51,10 +51,10 @@ type SelectOptDTO struct {
 }
 
 type CurrentThemeDTO struct {
-	Theme     *ThemeDTO     `json:"theme"`
+	Theme     *ThemeDTO      `json:"theme"`
 	Config    ThemeConfigDTO `json:"config"`
-	ChangedAt int64         `json:"changed_at,omitempty"`
-	ChangedBy int64         `json:"changed_by,omitempty"`
+	ChangedAt string         `json:"changed_at,omitempty"` // RFC3339 format
+	ChangedBy int64          `json:"changed_by,omitempty"`
 }
 
 type ThemeAuditLogDTO struct {
@@ -268,7 +268,9 @@ func (s *themeService) GetCurrentTheme(ctx context.Context, tenantID shared.Tena
 			IsPreset:     theme.IsPreset,
 			IsCurrent:    true,
 		},
-		Config: *config,
+		Config:    *config,
+		ChangedAt: shop.Audit.UpdatedAt.UTC().Format(time.RFC3339),
+		ChangedBy: shop.Audit.UpdatedBy,
 	}, nil
 }
 

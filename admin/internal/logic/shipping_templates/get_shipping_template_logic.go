@@ -88,7 +88,7 @@ func buildMappingDetails(mappings []*shipping.ShippingTemplateMapping) []*types.
 	return result
 }
 
-// Helper to convert int64 cents to string
+// formatAmount converts decimal.Decimal to string with 2 decimal places (in yuan)
 func formatAmount(amount decimal.Decimal) string {
 	return amount.StringFixed(2)
 }

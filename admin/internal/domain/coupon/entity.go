@@ -72,8 +72,7 @@ func (c *Coupon) CanUse(userID int64, cartAmount shared.Money) error {
 	if !c.IsActive() {
 		return code.ErrCouponExpired
 	}
-	minAmountInCents := c.MinAmount.Mul(decimal.NewFromInt(100)).IntPart()
-	if cartAmount.Amount < minAmountInCents {
+	if cartAmount.Amount.LessThan(c.MinAmount) {
 		return code.ErrCouponAmountBelowMin
 	}
 	return nil
@@ -83,29 +82,21 @@ func (c *Coupon) CalculateDiscount(cartAmount shared.Money) shared.Money {
 	var discount shared.Money
 	switch c.Type {
 	case TypeFixedAmount:
-		// Convert decimal dollars to cents
-		discount = shared.NewMoney(c.Value.Mul(decimal.NewFromInt(100)).IntPart(), cartAmount.Currency)
+		discount = shared.NewMoney(c.Value, cartAmount.Currency)
 	case TypePercentage:
-		// Use decimal arithmetic to avoid float precision loss
-		// cartAmount.Amount is in cents, c.Value is percentage (e.g., 20.00 = 20%)
+		// c.Value is percentage (e.g., 20.00 = 20%)
 		percentage := c.Value.Div(decimal.NewFromInt(100))
-		// Convert cart cents to decimal, multiply by percentage, convert back to cents
-		cartDecimal := decimal.NewFromInt(cartAmount.Amount)
-		discountDecimal := cartDecimal.Mul(percentage).Div(decimal.NewFromInt(100))
-		discount = shared.NewMoney(discountDecimal.IntPart(), cartAmount.Currency)
+		discountDecimal := cartAmount.Amount.Mul(percentage)
+		discount = shared.NewMoney(discountDecimal, cartAmount.Currency)
 	case TypeFreeShipping:
-		discount = shared.NewMoney(0, cartAmount.Currency)
+		discount = shared.NewMoney(decimal.Zero, cartAmount.Currency)
 	}
 
-	if c.MaxDiscount.IsPositive() {
-		// Convert decimal dollars to cents for comparison
-		maxDiscountInCents := c.MaxDiscount.Mul(decimal.NewFromInt(100)).IntPart()
-		if discount.Amount > maxDiscountInCents {
-			discount = shared.NewMoney(maxDiscountInCents, cartAmount.Currency)
-		}
+	if c.MaxDiscount.IsPositive() && discount.Amount.GreaterThan(c.MaxDiscount) {
+		discount = shared.NewMoney(c.MaxDiscount, cartAmount.Currency)
 	}
 
-	if discount.Amount > cartAmount.Amount {
+	if discount.Amount.GreaterThan(cartAmount.Amount) {
 		discount = cartAmount
 	}
 

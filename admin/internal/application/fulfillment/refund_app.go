@@ -368,21 +368,19 @@ func getRefundStatusText(s fulfillment.RefundStatus) string {
 	}
 }
 
-// formatAmount formats amount in cents to string
+// formatAmount formats amount (in yuan) to string
 func formatAmount(amount decimal.Decimal) string {
-	// Convert decimal to int64 (assuming amount is in cents)
-	amountInt := amount.IntPart()
-	return shared.NewMoney(amountInt, "CNY").String()
+	return shared.NewMoney(amount, "CNY").String()
 }
 
-// formatAmountFromInt64 formats amount in cents to string
+// formatAmountFromInt64 formats amount (in yuan) to string
 func formatAmountFromInt64(amount int64) string {
-	return shared.NewMoney(amount, "CNY").String()
+	return shared.NewMoney(decimal.NewFromInt(amount), "CNY").String()
 }
 
 // formatPercentage formats a percentage value
 func formatPercentage(value float64) string {
-	return shared.NewMoney(int64(value*100), "").String()
+	return shared.NewMoney(decimal.NewFromFloat(value*100), "").String()
 }
 
 // formatTimeToString formats a time.Time pointer to RFC3339 string

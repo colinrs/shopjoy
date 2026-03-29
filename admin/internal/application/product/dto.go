@@ -4,15 +4,16 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/shopspring/decimal"
 )
 
 // CreateProductRequest 创建商品请求
 type CreateProductRequest struct {
 	Name        string
 	Description string
-	Price       int64
+	Price       decimal.Decimal
 	Currency    string
-	CostPrice   int64
+	CostPrice   decimal.Decimal
 	CategoryID  int64
 }
 
@@ -21,7 +22,7 @@ type UpdateProductRequest struct {
 	ID          int64
 	Name        string
 	Description string
-	Price       int64
+	Price       decimal.Decimal
 	Currency    string
 	CategoryID  int64
 }
@@ -40,17 +41,17 @@ type DeductStockRequest struct {
 
 // ProductResponse 商品响应
 type ProductResponse struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int64  `json:"price"`
-	Currency    string `json:"currency"`
-	CostPrice   int64  `json:"cost_price"`
-	Stock       int    `json:"stock"`
-	Status      string `json:"status"`
-	CategoryID  int64  `json:"category_id"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ID          int64           `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Price       decimal.Decimal `json:"price"`
+	Currency    string          `json:"currency"`
+	CostPrice   decimal.Decimal `json:"cost_price"`
+	Stock       int             `json:"stock"`
+	Status      string          `json:"status"`
+	CategoryID  int64           `json:"category_id"`
+	CreatedAt   string          `json:"created_at"`
+	UpdatedAt   string          `json:"updated_at"`
 }
 
 // ProductListResponse 商品列表响应
@@ -66,16 +67,31 @@ type QueryProductRequest struct {
 	Name       string
 	CategoryID int64
 	Status     string
-	MinPrice   *int64
-	MaxPrice   *int64
+	MinPrice   *decimal.Decimal
+	MaxPrice   *decimal.Decimal
 	MarketID   int64
 	Page       int
 	PageSize   int
 }
 
 // ToDomainMoney 转换为领域层的 Money
-func ToDomainMoney(amount int64, currency string) product.Money {
+func ToDomainMoney(amount decimal.Decimal, currency string) product.Money {
 	return product.NewMoney(amount, currency)
+}
+
+// ToDomainMoneyFromString 从字符串（单位：元）转换为领域层的 Money
+// 例如 "1.99" 表示 1.99 元
+func ToDomainMoneyFromString(amountStr, currency string) (product.Money, error) {
+	amount, err := decimal.NewFromString(amountStr)
+	if err != nil {
+		return product.Money{}, err
+	}
+	return product.NewMoney(amount, currency), nil
+}
+
+// ToDomainMoneyFromInt64 从 int64（单位为分）转换为领域层的 Money
+func ToDomainMoneyFromInt64(amount int64, currency string) product.Money {
+	return product.NewMoneyFromInt64(amount, currency)
 }
 
 // FromDomainProduct 从领域实体转换为响应DTO

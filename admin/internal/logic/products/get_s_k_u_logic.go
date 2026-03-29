@@ -46,7 +46,7 @@ func (l *GetSKULogic) GetSKU(req *types.GetSKUReq) (resp *types.SKUDetailResp, e
 		ID:             sku.ID,
 		ProductID:      sku.ProductID,
 		Code:           sku.Code,
-		Price:          sku.Price.Amount,
+		Price:          shared.FormatMoneyToStringOnly(sku.Price.Amount),
 		Currency:       sku.Price.Currency,
 		Stock:          sku.Stock,
 		AvailableStock: sku.AvailableStock,

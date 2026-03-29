@@ -9,25 +9,26 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 type skuModel struct {
-	ID             int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;index:idx_sku_tenant"`
-	ProductID      int64  `gorm:"column:product_id;not null;index:idx_sku_product"`
-	Code           string `gorm:"column:code;size:64;not null;uniqueIndex:idx_sku_code"`
-	PriceAmount    int64  `gorm:"column:price_amount;not null"`
-	PriceCurrency  string `gorm:"column:price_currency;size:3;not null"`
-	Stock          int    `gorm:"column:stock;not null;default:0"`
-	AvailableStock int    `gorm:"column:available_stock;not null;default:0"`
-	LockedStock    int    `gorm:"column:locked_stock;not null;default:0"`
-	SafetyStock    int    `gorm:"column:safety_stock;not null;default:0"`
-	PreSaleEnabled bool   `gorm:"column:pre_sale_enabled;not null;default:false"`
-	Attributes     string `gorm:"column:attributes;type:text"`
-	Status         int    `gorm:"column:status;not null;default:1"`
-	CreatedAt      int64  `gorm:"column:created_at;not null"`
-	UpdatedAt      int64  `gorm:"column:updated_at;not null"`
+	ID             int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID       int64           `gorm:"column:tenant_id;not null;index:idx_sku_tenant"`
+	ProductID      int64           `gorm:"column:product_id;not null;index:idx_sku_product"`
+	Code           string          `gorm:"column:code;size:64;not null;uniqueIndex:idx_sku_code"`
+	PriceAmount    decimal.Decimal `gorm:"column:price_amount;type:decimal(19,4);not null"`
+	PriceCurrency  string          `gorm:"column:price_currency;size:3;not null"`
+	Stock          int             `gorm:"column:stock;not null;default:0"`
+	AvailableStock int             `gorm:"column:available_stock;not null;default:0"`
+	LockedStock    int             `gorm:"column:locked_stock;not null;default:0"`
+	SafetyStock    int             `gorm:"column:safety_stock;not null;default:0"`
+	PreSaleEnabled bool            `gorm:"column:pre_sale_enabled;not null;default:false"`
+	Attributes     string          `gorm:"column:attributes;type:text"`
+	Status         int             `gorm:"column:status;not null;default:1"`
+	CreatedAt      int64           `gorm:"column:created_at;not null"`
+	UpdatedAt      int64           `gorm:"column:updated_at;not null"`
 }
 
 func (m *skuModel) TableName() string {
@@ -44,7 +45,7 @@ func (m *skuModel) toEntity() *product.SKU {
 		TenantID:       shared.TenantID(m.TenantID),
 		ProductID:      m.ProductID,
 		Code:           m.Code,
-		Price:          shared.Money{Amount: m.PriceAmount, Currency: m.PriceCurrency},
+		Price:          shared.NewMoney(m.PriceAmount, m.PriceCurrency),
 		Stock:          m.Stock,
 		AvailableStock: m.AvailableStock,
 		LockedStock:    m.LockedStock,

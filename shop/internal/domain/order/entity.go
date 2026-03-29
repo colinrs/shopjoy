@@ -7,6 +7,7 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -74,7 +75,7 @@ func (o *Order) TableName() string {
 }
 
 func (o *Order) CalculateTotals() {
-	total := shared.NewMoney(0, o.Currency)
+	total := shared.NewMoney(decimal.Zero, o.Currency)
 	for _, item := range o.Items {
 		itemTotal := item.Price.Multiply(item.Quantity)
 		total, _ = total.Add(itemTotal)

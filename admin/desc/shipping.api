@@ -62,9 +62,9 @@ type (
 		Regions             []string `json:"regions"` // City codes
 		FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
 		FirstUnit           int      `json:"first_unit"` // First unit (count or grams)
-		FirstFee            string   `json:"first_fee"` // First fee (cents)
+		FirstFee            string   `json:"first_fee"` // First fee (yuan)
 		AdditionalUnit      int      `json:"additional_unit"` // Additional unit
-		AdditionalFee       string   `json:"additional_fee"` // Additional fee (cents)
+		AdditionalFee       string   `json:"additional_fee"` // Additional fee (yuan)
 		FreeThresholdAmount string   `json:"free_threshold_amount"` // Free shipping threshold amount, 0 = disabled
 		FreeThresholdCount  int      `json:"free_threshold_count"` // Free shipping threshold count, 0 = disabled
 		Sort                int      `json:"sort"`

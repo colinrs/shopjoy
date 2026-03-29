@@ -65,12 +65,17 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 	}
 
 	// Create SKU entity
+	// Parse price from string (yuan)
+	priceAmount, err := shared.ParseMoneyFromString(req.Price)
+	if err != nil {
+		return nil, err
+	}
 	sku := &product.SKU{
 		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:       shared.TenantID(tenantID),
 		ProductID:      req.ProductID,
 		Code:           skuCode,
-		Price:          shared.Money{Amount: req.Price, Currency: currency},
+		Price:          shared.NewMoney(priceAmount, currency),
 		Stock:          req.Stock,
 		AvailableStock: req.Stock,
 		LockedStock:    0,

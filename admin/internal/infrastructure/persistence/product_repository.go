@@ -23,28 +23,28 @@ func NewProductRepository() product.Repository {
 
 type productModel struct {
 	application.Model
-	TenantID        int64  `gorm:"column:tenant_id;not null;index"`
-	SKU             string `gorm:"column:sku;size:64;uniqueIndex"`
-	Name            string `gorm:"column:name;size:200;not null;index"`
-	Description     string `gorm:"column:description;type:text"`
-	Price           int64  `gorm:"column:price;not null"`
-	CostPrice       int64  `gorm:"column:cost_price"`
-	Currency        string `gorm:"column:currency;size:10;default:'CNY'"`
-	Stock           int    `gorm:"column:stock;default:0"`
-	Status          int    `gorm:"column:status;default:0;index"`
-	CategoryID      int64  `gorm:"column:category_id;index"`
-	Brand           string `gorm:"column:brand;size:64"`
-	Tags            string `gorm:"column:tags;type:json"`
-	Images          string `gorm:"column:images;type:json"`
-	IsMatrixProduct bool   `gorm:"column:is_matrix_product;default:false"`
-	HSCode          string `gorm:"column:hs_code;size:20"`
-	COO             string `gorm:"column:coo;size:10"`
-	Weight          string `gorm:"column:weight;type:decimal(10,2)"`
-	WeightUnit      string `gorm:"column:weight_unit;size:10;default:'g'"`
-	Length          string `gorm:"column:length;type:decimal(10,2)"`
-	Width           string `gorm:"column:width;type:decimal(10,2)"`
-	Height          string `gorm:"column:height;type:decimal(10,2)"`
-	DangerousGoods  string `gorm:"column:dangerous_goods;type:json"`
+	TenantID        int64           `gorm:"column:tenant_id;not null;index"`
+	SKU             string          `gorm:"column:sku;size:64;uniqueIndex"`
+	Name            string          `gorm:"column:name;size:200;not null;index"`
+	Description     string          `gorm:"column:description;type:text"`
+	Price           decimal.Decimal `gorm:"column:price;type:decimal(19,4);not null;default:0"`
+	CostPrice       decimal.Decimal `gorm:"column:cost_price;type:decimal(19,4);not null;default:0"`
+	Currency        string          `gorm:"column:currency;size:10;default:'CNY'"`
+	Stock           int             `gorm:"column:stock;default:0"`
+	Status          int             `gorm:"column:status;default:0;index"`
+	CategoryID      int64           `gorm:"column:category_id;index"`
+	Brand           string          `gorm:"column:brand;size:64"`
+	Tags            string          `gorm:"column:tags;type:json"`
+	Images          string          `gorm:"column:images;type:json"`
+	IsMatrixProduct bool            `gorm:"column:is_matrix_product;default:false"`
+	HSCode          string          `gorm:"column:hs_code;size:20"`
+	COO             string          `gorm:"column:coo;size:10"`
+	Weight          string          `gorm:"column:weight;type:decimal(10,2)"`
+	WeightUnit      string          `gorm:"column:weight_unit;size:10;default:'g'"`
+	Length          string          `gorm:"column:length;type:decimal(10,2)"`
+	Width           string          `gorm:"column:width;type:decimal(10,2)"`
+	Height          string          `gorm:"column:height;type:decimal(10,2)"`
+	DangerousGoods  string          `gorm:"column:dangerous_goods;type:json"`
 }
 
 func (productModel) TableName() string {

@@ -375,7 +375,7 @@ type (
 	// Adjust order price request
 	AdjustOrderPriceReq {
 		ID           int64  `path:"id"`
-		AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in cents)
+		AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in yuan)
 		Reason       string `json:"reason"` // Required, max 200 characters
 	}
 	// Adjust order price response

@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -46,13 +47,16 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 		MarketID:   req.MarketID,
 	}
 
-	if req.MinPrice > 0 {
-		minPrice := req.MinPrice
-		queryReq.MinPrice = &minPrice
+	// 解析价格范围（单位：元）
+	if req.MinPrice != "" {
+		if minPrice, err := decimal.NewFromString(req.MinPrice); err == nil {
+			queryReq.MinPrice = &minPrice
+		}
 	}
-	if req.MaxPrice > 0 {
-		maxPrice := req.MaxPrice
-		queryReq.MaxPrice = &maxPrice
+	if req.MaxPrice != "" {
+		if maxPrice, err := decimal.NewFromString(req.MaxPrice); err == nil {
+			queryReq.MaxPrice = &maxPrice
+		}
 	}
 
 	listResp, err := l.svcCtx.ProductService.GetProductList(l.ctx, shared.TenantID(tenantID), queryReq)
@@ -134,9 +138,9 @@ func convertToProductDetailRespWithMarkets(p *appProduct.ProductResponse, pms []
 		ID:          p.ID,
 		Name:        p.Name,
 		Description: p.Description,
-		Price:       p.Price,
+		Price:       p.Price.String(),
 		Currency:    p.Currency,
-		CostPrice:   p.CostPrice,
+		CostPrice:   p.CostPrice.String(),
 		Stock:       p.Stock,
 		Status:      p.Status,
 		CategoryID:  p.CategoryID,

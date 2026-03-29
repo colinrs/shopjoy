@@ -49,7 +49,7 @@ type AddDecorationResponse struct {
 
 type AdjustOrderPriceReq struct {
 	ID           int64  `path:"id"`
-	AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in cents)
+	AdjustAmount string `json:"adjust_amount"` // Positive = increase, Negative = decrease (in yuan)
 	Reason       string `json:"reason"`        // Required, max 200 characters
 }
 
@@ -470,9 +470,9 @@ type CreateProductLocalizationReq struct {
 type CreateProductReq struct {
 	Name            string   `json:"name"`
 	Description     string   `json:"description,optional"`
-	Price           int64    `json:"price"`
+	Price           string   `json:"price"` // 价格，单位：元，如 "1.99" 表示 1.99 元
 	Currency        string   `json:"currency,optional"`
-	CostPrice       int64    `json:"cost_price,optional"`
+	CostPrice       string   `json:"cost_price,optional"` // 成本价，单位：元
 	CategoryID      int64    `json:"category_id"`
 	SKU             string   `json:"sku,optional"`
 	Brand           string   `json:"brand,optional"`
@@ -564,7 +564,7 @@ type CreateRoleResponse struct {
 type CreateSKUReq struct {
 	ProductID      int64             `json:"product_id"`
 	Code           string            `json:"code"`
-	Price          int64             `json:"price"`
+	Price          string            `json:"price"` // SKU价格，单位：元
 	Currency       string            `json:"currency,optional"`
 	Stock          int               `json:"stock,optional"`
 	SafetyStock    int               `json:"safety_stock,optional"`
@@ -638,7 +638,7 @@ type CreateWarehouseResp struct {
 type CurrentThemeResponse struct {
 	Theme     *ThemeItem     `json:"theme"`
 	Config    ThemeConfigDTO `json:"config"`
-	ChangedAt int64          `json:"changed_at,omitempty"`
+	ChangedAt string         `json:"changed_at,omitempty"` // RFC3339 format
 	ChangedBy int64          `json:"changed_by,omitempty"`
 }
 
@@ -1335,8 +1335,8 @@ type ListProductReq struct {
 	Name       string `form:"name,optional"`
 	CategoryID int64  `form:"category_id,optional"`
 	Status     string `form:"status,optional"`
-	MinPrice   int64  `form:"min_price,optional"`
-	MaxPrice   int64  `form:"max_price,optional"`
+	MinPrice   string `form:"min_price,optional"` // 最低价格，单位：元
+	MaxPrice   string `form:"max_price,optional"` // 最高价格，单位：元
 	Page       int    `form:"page,default=1"`
 	PageSize   int    `form:"page_size,default=20"`
 	MarketID   int64  `form:"market_id,optional"`
@@ -1870,9 +1870,9 @@ type ProductDetailResp struct {
 	ID              int64               `json:"id"`
 	Name            string              `json:"name"`
 	Description     string              `json:"description"`
-	Price           int64               `json:"price"`
+	Price           string              `json:"price"` // 价格，单位：元
 	Currency        string              `json:"currency"`
-	CostPrice       int64               `json:"cost_price"`
+	CostPrice       string              `json:"cost_price"` // 成本价，单位：元
 	Stock           int                 `json:"stock"`
 	Status          string              `json:"status"`
 	CategoryID      int64               `json:"category_id"`
@@ -2280,7 +2280,7 @@ type SKUDetailResp struct {
 	ID             int64             `json:"id"`
 	ProductID      int64             `json:"product_id"`
 	Code           string            `json:"code"`
-	Price          int64             `json:"price"`
+	Price          string            `json:"price"` // SKU价格，单位：元
 	Currency       string            `json:"currency"`
 	Stock          int               `json:"stock"`
 	AvailableStock int               `json:"available_stock"`
@@ -2443,9 +2443,9 @@ type ShippingZoneDetail struct {
 	Regions             []string `json:"regions"`               // City codes
 	FeeType             string   `json:"fee_type"`              // fixed, by_count, by_weight, free
 	FirstUnit           int      `json:"first_unit"`            // First unit (count or grams)
-	FirstFee            string   `json:"first_fee"`             // First fee (cents)
+	FirstFee            string   `json:"first_fee"`             // First fee (yuan)
 	AdditionalUnit      int      `json:"additional_unit"`       // Additional unit
-	AdditionalFee       string   `json:"additional_fee"`        // Additional fee (cents)
+	AdditionalFee       string   `json:"additional_fee"`        // Additional fee (yuan)
 	FreeThresholdAmount string   `json:"free_threshold_amount"` // Free shipping threshold amount, 0 = disabled
 	FreeThresholdCount  int      `json:"free_threshold_count"`  // Free shipping threshold count, 0 = disabled
 	Sort                int      `json:"sort"`
@@ -2527,7 +2527,7 @@ type ThemeAuditLog struct {
 	ThemeName string `json:"theme_name"`
 	UserID    int64  `json:"user_id"`
 	UserName  string `json:"user_name"`
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"created_at"` // RFC3339 format
 }
 
 type ThemeConfigDTO struct {
@@ -2793,7 +2793,7 @@ type UpdateProductReq struct {
 	ID              int64    `json:"id"`
 	Name            string   `json:"name"`
 	Description     string   `json:"description,optional"`
-	Price           int64    `json:"price"`
+	Price           string   `json:"price"` // 价格，单位：元
 	Currency        string   `json:"currency,optional"`
 	CategoryID      int64    `json:"category_id"`
 	SKU             string   `json:"sku,optional"`
@@ -2900,7 +2900,7 @@ type UpdateSEOConfigRequest struct {
 type UpdateSKUReq struct {
 	ID             int64             `path:"id"`
 	Code           string            `json:"code,optional"`
-	Price          int64             `json:"price,optional"`
+	Price          string            `json:"price,optional"` // SKU价格，单位：元
 	Currency       string            `json:"currency,optional"`
 	Stock          int               `json:"stock,optional"`
 	SafetyStock    int               `json:"safety_stock,optional"`
@@ -3001,8 +3001,7 @@ type UpdateWarehouseStatusReq struct {
 }
 
 type UploadRequest struct {
-	Category string      `form:"category,optional"`
-	File     interface{} `file:"file"`
+	Category string `form:"category,optional"`
 }
 
 type UploadResponse struct {
@@ -3101,10 +3100,10 @@ type VersionDetailResponse struct {
 }
 
 type VersionListItem struct {
-	ID        int64 `json:"id"`
-	Version   int   `json:"version"`
-	CreatedBy int64 `json:"created_by"`
-	CreatedAt string `json:"created_at"`
+	ID        int64  `json:"id"`
+	Version   int    `json:"version"`
+	CreatedBy int64  `json:"created_by"`
+	CreatedAt string `json:"created_at"` // RFC3339 format
 }
 
 type WarehouseDetailResp struct {

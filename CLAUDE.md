@@ -99,6 +99,7 @@ Examples: `2026032401_create_reviews.sql`, `2026032201_alter_promotions_add_scop
 
 - **VAT/GST rates:** Use `string` type (backend returns strings), implement string↔number conversion in handlers
 - **Timestamps:** 所有时间字段统一使用 `time.Time` 类型，数据库使用 `TIMESTAMP` 类型。详见 [`.claude/rules/golang/time.md`](.claude/rules/golang/time.md)
+- **Money/Price:** API 层使用 `string` 类型表示元（如 `"1.99"` 表示 1.99 元），内部使用 `decimal.Decimal`。详见 [`.claude/rules/golang/price.md`](.claude/rules/golang/price.md)
 - **Migrations:** Merge into schema files, check for duplicate table definitions
 - **Errors:** Always use `code` package for standardized error codes, never `errors.New()`
 

@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -53,7 +54,7 @@ func (p *Promotion) IsActive() bool {
 	return !now.Before(p.StartAt) && !now.After(p.EndAt)
 }
 
-func (p *Promotion) CanApply(cartAmount shared.Money) bool {
+func (p *Promotion) CanApply(cartAmount decimal.Decimal) bool {
 	if !p.IsActive() {
 		return false
 	}
@@ -65,31 +66,31 @@ func (p *Promotion) CanApply(cartAmount shared.Money) bool {
 	return false
 }
 
-func (p *Promotion) Apply(cartAmount shared.Money) (shared.Money, error) {
+func (p *Promotion) Apply(cartAmount decimal.Decimal) (decimal.Decimal, error) {
 	if !p.IsActive() {
 		return cartAmount, code.ErrPromotionExpired
 	}
 
-	bestDiscount := shared.NewMoney(0, cartAmount.Currency)
+	bestDiscount := decimal.Zero
 	for _, rule := range p.Rules {
 		if discount, ok := rule.CalculateDiscount(cartAmount); ok {
-			if discount.Amount > bestDiscount.Amount {
+			if discount.GreaterThan(bestDiscount) {
 				bestDiscount = discount
 			}
 		}
 	}
 
-	return cartAmount.Subtract(bestDiscount)
+	return cartAmount.Sub(bestDiscount), nil
 }
 
 type PromotionRule struct {
 	application.Model
 	PromotionID    int64
 	ConditionType  ConditionType
-	ConditionValue int64
+	ConditionValue decimal.Decimal
 	ActionType     ActionType
-	ActionValue    int64
-	MaxDiscount    shared.Money `gorm:"embedded"`
+	ActionValue    decimal.Decimal
+	MaxDiscount    decimal.Decimal
 }
 
 type ConditionType int
@@ -106,31 +107,35 @@ const (
 	ActionPercentage
 )
 
-func (r *PromotionRule) MeetsCondition(cartAmount shared.Money) bool {
+func (r *PromotionRule) MeetsCondition(cartAmount decimal.Decimal) bool {
 	switch r.ConditionType {
 	case ConditionMinAmount:
-		return cartAmount.Amount >= r.ConditionValue
+		return cartAmount.GreaterThanOrEqual(r.ConditionValue)
 	default:
 		return false
 	}
 }
 
-func (r *PromotionRule) CalculateDiscount(cartAmount shared.Money) (shared.Money, bool) {
+func (r *PromotionRule) CalculateDiscount(cartAmount decimal.Decimal) (decimal.Decimal, bool) {
 	if !r.MeetsCondition(cartAmount) {
-		return shared.Money{}, false
+		return decimal.Zero, false
 	}
 
-	var discount shared.Money
+	var discount decimal.Decimal
 	switch r.ActionType {
 	case ActionFixedAmount:
-		discount = shared.NewMoney(r.ActionValue, cartAmount.Currency)
+		discount = r.ActionValue
 	case ActionPercentage:
-		percentage := float64(r.ActionValue) / 100
-		discount = cartAmount.MultiplyFloat(percentage)
+		// ActionValue is basis points (100 = 1%), so divide by 10000
+		discount = cartAmount.Mul(r.ActionValue).Div(decimal.NewFromInt(10000))
 	}
 
-	if r.MaxDiscount.Amount > 0 && discount.Amount > r.MaxDiscount.Amount {
+	if r.MaxDiscount.IsPositive() && discount.GreaterThan(r.MaxDiscount) {
 		discount = r.MaxDiscount
+	}
+
+	if discount.GreaterThan(cartAmount) {
+		discount = cartAmount
 	}
 
 	return discount, true

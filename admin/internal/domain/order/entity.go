@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -182,7 +183,7 @@ func (o *Order) TableName() string {
 
 // CalculateTotals 计算订单金额
 func (o *Order) CalculateTotals() {
-	total := shared.NewMoney(0, o.Currency)
+	total := shared.NewMoney(decimal.Zero, o.Currency)
 	for _, item := range o.Items {
 		itemTotal := item.Price.Multiply(item.Quantity)
 		total, _ = total.Add(itemTotal)
@@ -254,7 +255,7 @@ func (o *Order) Complete() error {
 }
 
 // AdjustPrice 调整价格
-func (o *Order) AdjustPrice(amount int64, reason string, adjustedBy int64) error {
+func (o *Order) AdjustPrice(amount decimal.Decimal, reason string, adjustedBy int64) error {
 	if o.Status != StatusPendingPayment {
 		return code.ErrOrderInvalidStatus
 	}

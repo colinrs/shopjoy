@@ -11,6 +11,8 @@ Rules for handling prices, amounts, and monetary calculations.
 | 3 | Monetary values must originate from strings or precise types | Prevent float contamination |
 | 4 | Monetary fields must define precision and decimal places | Clear contract, consistent handling |
 | 5 | In multi-market systems, amounts must be bound to currency | Prevent currency mismatch errors |
+| 6 | API monetary values must use string type representing yuan (元) | Frontend should not need to divide by 100; e.g., "1.99" means 1.99元, not 199分 |
+| 7 | Internal monetary calculations may use different units | Convert at API boundary; domain layer uses decimal.Decimal |
 
 ## SHOULD
 
@@ -195,9 +197,10 @@ func (c *CurrencyConverter) Convert(ctx context.Context, amount Money, targetCur
 
 - [ ] Monetary calculations use `decimal.Decimal`
 - [ ] Database monetary fields are DECIMAL/NUMERIC
-- [ ] API monetary values are strings
+- [ ] API monetary values are strings (representing yuan, not cents)
 - [ ] Money type includes currency
 - [ ] No float/double for money anywhere
 - [ ] Monetary comparisons use decimal methods (Equal, GreaterThan)
 - [ ] Currency conversion is centralized
 - [ ] Precision explicitly defined (e.g., DECIMAL(19,4))
+- [ ] API accepts string prices like "1.99" (1.99元), not 199 (cents)

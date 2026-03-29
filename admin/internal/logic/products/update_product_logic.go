@@ -35,11 +35,17 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 		tenantID = 0
 	}
 
+	// 解析价格字符串（单位：元）
+	price, err := appProduct.ToDomainMoneyFromString(req.Price, req.Currency)
+	if err != nil {
+		return nil, err
+	}
+
 	updateReq := appProduct.UpdateProductRequest{
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-		Price:       req.Price,
+		Price:       price.Amount,
 		Currency:    req.Currency,
 		CategoryID:  req.CategoryID,
 	}
@@ -57,9 +63,9 @@ func convertToProductDetailResp(p *appProduct.ProductResponse) *types.ProductDet
 		ID:          p.ID,
 		Name:        p.Name,
 		Description: p.Description,
-		Price:       p.Price,
+		Price:       p.Price.String(),
 		Currency:    p.Currency,
-		CostPrice:   p.CostPrice,
+		CostPrice:   p.CostPrice.String(),
 		Stock:       p.Stock,
 		Status:      p.Status,
 		CategoryID:  p.CategoryID,

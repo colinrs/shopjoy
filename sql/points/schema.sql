@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `earn_rules` (
     `condition_type` VARCHAR(50) NOT NULL DEFAULT 'NONE' COMMENT '条件类型: NONE-无条件, NEW_USER-新用户, FIRST_ORDER-首单, SPECIFIC_PRODUCTS-指定商品, MIN_AMOUNT-最低金额',
     `condition_value` TEXT COMMENT '条件值JSON',
     `expiration_months` INT NOT NULL DEFAULT 12 COMMENT '积分过期月数',
-    `status` VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT '状态: draft-草稿, active-生效, inactive-停用',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-草稿, 1-生效, 2-停用',
     `priority` INT NOT NULL DEFAULT 0 COMMENT '优先级(数字越大优先级越高)',
     `start_at` TIMESTAMP NULL COMMENT '开始时间',
     `end_at` TIMESTAMP NULL COMMENT '结束时间',
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `redeem_rules` (
     `total_stock` BIGINT NOT NULL DEFAULT 0 COMMENT '总库存',
     `used_stock` BIGINT NOT NULL DEFAULT 0 COMMENT '已使用库存',
     `per_user_limit` INT NOT NULL DEFAULT 1 COMMENT '每用户限兑次数',
-    `status` VARCHAR(20) NOT NULL DEFAULT 'inactive' COMMENT '状态: inactive-未激活, active-激活',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未激活, 1-激活',
     `start_at` TIMESTAMP NULL COMMENT '开始时间',
     `end_at` TIMESTAMP NULL COMMENT '结束时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -148,25 +148,25 @@ CREATE TABLE IF NOT EXISTS `points_redemptions` (
 
 -- 积分获取规则数据 (Demo Shop)
 INSERT INTO `earn_rules` (`id`, `tenant_id`, `name`, `description`, `scenario`, `calculation_type`, `fixed_points`, `ratio`, `tiers`, `condition_type`, `condition_value`, `expiration_months`, `status`, `priority`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, '订单支付返积分', '每消费1元获得1积分', 'ORDER_PAYMENT', 'RATIO', 0, '1:1', NULL, 'NONE', NULL, 12, 'active', 10, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, '签到送积分', '每日签到获得5积分', 'SIGN_IN', 'FIXED', 5, '', NULL, 'NONE', NULL, 12, 'active', 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, '商品评价送积分', '评价商品获得10积分', 'PRODUCT_REVIEW', 'FIXED', 10, '', NULL, 'NONE', NULL, 6, 'active', 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, '首单双倍积分', '首单支付获得双倍积分', 'FIRST_ORDER', 'RATIO', 0, '2:1', NULL, 'FIRST_ORDER', NULL, 12, 'active', 15, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(5, 1, '阶梯返积分', '消费满不同金额获得不同比例积分', 'ORDER_PAYMENT', 'TIERED', 0, '', '[{"threshold":10000,"ratio":"1:1"},{"threshold":50000,"ratio":"1.5:1"},{"threshold":100000,"ratio":"2:1"}]', 'MIN_AMOUNT', '{"min_amount":10000}', 12, 'active', 8, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(1, 1, '订单支付返积分', '每消费1元获得1积分', 'ORDER_PAYMENT', 'RATIO', 0, '1:1', NULL, 'NONE', NULL, 12, 1, 10, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(2, 1, '签到送积分', '每日签到获得5积分', 'SIGN_IN', 'FIXED', 5, '', NULL, 'NONE', NULL, 12, 1, 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(3, 1, '商品评价送积分', '评价商品获得10积分', 'PRODUCT_REVIEW', 'FIXED', 10, '', NULL, 'NONE', NULL, 6, 1, 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(4, 1, '首单双倍积分', '首单支付获得双倍积分', 'FIRST_ORDER', 'RATIO', 0, '2:1', NULL, 'FIRST_ORDER', NULL, 12, 1, 15, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(5, 1, '阶梯返积分', '消费满不同金额获得不同比例积分', 'ORDER_PAYMENT', 'TIERED', 0, '', '[{"threshold":10000,"ratio":"1:1"},{"threshold":50000,"ratio":"1.5:1"},{"threshold":100000,"ratio":"2:1"}]', 'MIN_AMOUNT', '{"min_amount":10000}', 12, 1, 8, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 
 -- Enterprise Corp 积分规则
-(6, 3, '企业客户积分', '企业客户每消费1元获得2积分', 'ORDER_PAYMENT', 'RATIO', 0, '2:1', NULL, 'NONE', NULL, 24, 'active', 10, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
-(7, 3, '大额订单奖励', '订单满500元额外获得100积分', 'ORDER_PAYMENT', 'FIXED', 100, '', NULL, 'MIN_AMOUNT', '{"min_amount":50000}', 12, 'active', 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
+(6, 3, '企业客户积分', '企业客户每消费1元获得2积分', 'ORDER_PAYMENT', 'RATIO', 0, '2:1', NULL, 'NONE', NULL, 24, 1, 10, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
+(7, 3, '大额订单奖励', '订单满500元额外获得100积分', 'ORDER_PAYMENT', 'FIXED', 100, '', NULL, 'MIN_AMOUNT', '{"min_amount":50000}', 12, 1, 5, UNIX_TIMESTAMP(NOW()), NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
 
 -- 积分兑换规则数据 (Demo Shop)
 INSERT INTO `redeem_rules` (`id`, `tenant_id`, `name`, `description`, `coupon_id`, `points_required`, `total_stock`, `used_stock`, `per_user_limit`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, '满50减10优惠券', '500积分兑换满50减10优惠券', 3, 500, 1000, 150, 3, 'active', UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, '满100减20优惠券', '800积分兑换满100减20优惠券', 2, 800, 500, 80, 2, 'active', UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, '新用户专享券', '300积分兑换新用户专享50元优惠券', 1, 300, 2000, 300, 1, 'active', UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, '免邮券', '200积分兑换免邮券', 4, 200, 500, 50, 1, 'active', UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 60 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(1, 1, '满50减10优惠券', '500积分兑换满50减10优惠券', 3, 500, 1000, 150, 3, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(2, 1, '满100减20优惠券', '800积分兑换满100减20优惠券', 2, 800, 500, 80, 2, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(3, 1, '新用户专享券', '300积分兑换新用户专享50元优惠券', 1, 300, 2000, 300, 1, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(4, 1, '免邮券', '200积分兑换免邮券', 4, 200, 500, 50, 1, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 60 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 
 -- Enterprise Corp 兑换规则
-(5, 3, '企业专属优惠券', '1000积分兑换企业专属50元优惠券', 6, 1000, 300, 45, 5, 'active', UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
+(5, 3, '企业专属优惠券', '1000积分兑换企业专属50元优惠券', 6, 1000, 300, 45, 5, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
 
 -- 积分账户数据 (Demo Shop 用户)
 INSERT INTO `points_accounts` (`id`, `tenant_id`, `user_id`, `balance`, `frozen_balance`, `total_earned`, `total_redeemed`, `total_expired`, `created_at`, `updated_at`) VALUES

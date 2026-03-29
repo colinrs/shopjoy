@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -88,7 +89,7 @@ func (c *Cart) Clear() {
 }
 
 func (c *Cart) GetTotal() shared.Money {
-	total := shared.NewMoney(0, "CNY")
+	total := shared.NewMoney(decimal.Zero, "CNY")
 	for _, item := range c.Items {
 		total, _ = total.Add(item.TotalAmount)
 	}

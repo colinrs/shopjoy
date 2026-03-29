@@ -13,7 +13,7 @@ type AddToCartRequest struct {
 	ProductID   int64
 	SKUId       int64
 	Quantity    int
-	Price       int64
+	Price       string
 	Currency    string
 	ProductName string
 	SKUName     string
@@ -40,15 +40,15 @@ type CartItemResponse struct {
 	ProductName string
 	SKUName     string
 	Image       string
-	Price       int64
+	Price       string
 	Quantity    int
-	TotalAmount int64
+	TotalAmount string
 	Selected    bool
 }
 
 type CartResponse struct {
 	Items       []CartItemResponse
-	TotalAmount int64
+	TotalAmount string
 	ItemCount   int
 }
 

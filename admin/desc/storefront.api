@@ -40,7 +40,7 @@ type (
 	CurrentThemeResponse {
 		Theme     *ThemeItem     `json:"theme"`
 		Config    ThemeConfigDTO `json:"config"`
-		ChangedAt int64          `json:"changed_at,omitempty"`
+		ChangedAt string         `json:"changed_at,omitempty"` // RFC3339 format
 		ChangedBy int64          `json:"changed_by,omitempty"`
 	}
 	ThemeAuditLog {
@@ -50,7 +50,7 @@ type (
 		ThemeName string `json:"theme_name"`
 		UserID    int64  `json:"user_id"`
 		UserName  string `json:"user_name"`
-		CreatedAt int64  `json:"created_at"`
+		CreatedAt string `json:"created_at"` // RFC3339 format
 	}
 	ListThemeAuditLogsResponse {
 		Logs  []*ThemeAuditLog `json:"logs"`
@@ -155,10 +155,10 @@ type (
 		PageSize int   `form:"page_size,default=20"`
 	}
 	VersionListItem {
-		ID        int64 `json:"id"`
-		Version   int   `json:"version"`
-		CreatedBy int64 `json:"created_by"`
-		CreatedAt int64 `json:"created_at"`
+		ID        int64  `json:"id"`
+		Version   int    `json:"version"`
+		CreatedBy int64  `json:"created_by"`
+		CreatedAt string `json:"created_at"` // RFC3339 format
 	}
 	ListVersionsResponse {
 		Versions []*VersionListItem `json:"versions"`

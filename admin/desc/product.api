@@ -10,9 +10,9 @@ type (
 	CreateProductReq {
 		Name        string `json:"name"`
 		Description string `json:"description,optional"`
-		Price       int64  `json:"price"`
+		Price       string `json:"price"` // 价格，单位：元，如 "1.99" 表示 1.99 元
 		Currency    string `json:"currency,optional"`
-		CostPrice   int64  `json:"cost_price,optional"`
+		CostPrice   string `json:"cost_price,optional"` // 成本价，单位：元
 		CategoryID  int64  `json:"category_id"`
 		// New fields (all optional for backward compatibility)
 		SKU             string   `json:"sku,optional"`
@@ -37,7 +37,7 @@ type (
 		ID          int64  `json:"id"`
 		Name        string `json:"name"`
 		Description string `json:"description,optional"`
-		Price       int64  `json:"price"`
+		Price       string `json:"price"` // 价格，单位：元
 		Currency    string `json:"currency,optional"`
 		CategoryID  int64  `json:"category_id"`
 		// New fields
@@ -63,9 +63,9 @@ type (
 		ID          int64  `json:"id"`
 		Name        string `json:"name"`
 		Description string `json:"description"`
-		Price       int64  `json:"price"`
+		Price       string `json:"price"` // 价格，单位：元
 		Currency    string `json:"currency"`
-		CostPrice   int64  `json:"cost_price"`
+		CostPrice   string `json:"cost_price"` // 成本价，单位：元
 		Stock       int    `json:"stock"`
 		Status      string `json:"status"`
 		CategoryID  int64  `json:"category_id"`
@@ -101,8 +101,8 @@ type (
 		Name       string `form:"name,optional"`
 		CategoryID int64  `form:"category_id,optional"`
 		Status     string `form:"status,optional"`
-		MinPrice   int64  `form:"min_price,optional"`
-		MaxPrice   int64  `form:"max_price,optional"`
+		MinPrice   string `form:"min_price,optional"` // 最低价格，单位：元
+		MaxPrice   string `form:"max_price,optional"` // 最高价格，单位：元
 		Page       int    `form:"page,default=1"`
 		PageSize   int    `form:"page_size,default=20"`
 		// New
@@ -128,7 +128,7 @@ type (
 	CreateSKUReq {
 		ProductID      int64             `json:"product_id"`
 		Code           string            `json:"code"`
-		Price          int64             `json:"price"`
+		Price          string            `json:"price"` // SKU价格，单位：元
 		Currency       string            `json:"currency,optional"`
 		Stock          int               `json:"stock,optional"`
 		SafetyStock    int               `json:"safety_stock,optional"`
@@ -141,7 +141,7 @@ type (
 	UpdateSKUReq {
 		ID             int64             `path:"id"`
 		Code           string            `json:"code,optional"`
-		Price          int64             `json:"price,optional"`
+		Price          string            `json:"price,optional"` // SKU价格，单位：元
 		Currency       string            `json:"currency,optional"`
 		Stock          int               `json:"stock,optional"`
 		SafetyStock    int               `json:"safety_stock,optional"`
@@ -155,7 +155,7 @@ type (
 		ID             int64             `json:"id"`
 		ProductID      int64             `json:"product_id"`
 		Code           string            `json:"code"`
-		Price          int64             `json:"price"`
+		Price          string            `json:"price"` // SKU价格，单位：元
 		Currency       string            `json:"currency"`
 		Stock          int               `json:"stock"`
 		AvailableStock int               `json:"available_stock"`

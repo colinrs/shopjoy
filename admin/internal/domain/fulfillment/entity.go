@@ -225,8 +225,8 @@ type Shipment struct {
 	Carrier        string          `gorm:"column:carrier;not null;default:''"`
 	CarrierCode    string          `gorm:"column:carrier_code;not null;default:''"`
 	TrackingNo     string          `gorm:"column:tracking_no;not null;default:'';index"`
-	ShippingCost   decimal.Decimal `gorm:"column:shipping_cost;type:decimal(19,4);not null;default:0"` // 运费
-	ShippingCurrency string        `gorm:"column:shipping_currency;not null;default:'CNY'"`
+	ShippingCost   decimal.Decimal `gorm:"column:cost_amount;type:decimal(19,4);not null;default:0"`   // 运费成本
+	ShippingCurrency string        `gorm:"column:cost_currency;not null;default:'CNY'"`
 	Weight         decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"` // 重量（kg）
 	ShippedAt      *time.Time     `gorm:"column:shipped_at"`
 	DeliveredAt    *time.Time     `gorm:"column:delivered_at"`

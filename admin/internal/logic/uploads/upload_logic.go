@@ -33,21 +33,19 @@ func NewUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadLogi
 	}
 }
 
-func (l *UploadLogic) Upload(req *types.UploadRequest) (resp *types.UploadResponse, err error) {
+func (l *UploadLogic) Upload(req *types.UploadRequest, file multipart.File, header *multipart.FileHeader) (resp *types.UploadResponse, err error) {
 	// 验证文件
-	if req.File == nil {
+	if file == nil {
 		return nil, code.ErrUploadFailed
 	}
 
-	file := req.File.(*multipart.FileHeader)
-
 	// 验证文件大小
-	if file.Size > maxFileSize {
+	if header.Size > maxFileSize {
 		return nil, code.ErrUploadFileSizeExceeded
 	}
 
 	// 验证文件类型
-	ext := strings.ToLower(filepath.Ext(file.Filename))
+	ext := strings.ToLower(filepath.Ext(header.Filename))
 	if !strings.Contains(allowedExtensions, ext) {
 		return nil, code.ErrUploadUnsupportedFileType
 	}
@@ -59,7 +57,7 @@ func (l *UploadLogic) Upload(req *types.UploadRequest) (resp *types.UploadRespon
 	}
 
 	// 保存文件
-	fileInfo, err := l.svcCtx.Storage.Save(l.ctx, file, category)
+	fileInfo, err := l.svcCtx.Storage.Save(l.ctx, header, category)
 	if err != nil {
 		return nil, code.ErrUploadFailed
 	}

@@ -6,12 +6,15 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '发货ID',
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
+    `shipment_no` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '发货单号',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待发货, 1-已发货, 2-运输中, 3-已送达, 4-配送失败',
     `carrier` VARCHAR(50) DEFAULT '' COMMENT '快递公司',
+    `carrier_code` VARCHAR(20) DEFAULT '' COMMENT '快递公司代码',
     `tracking_no` VARCHAR(100) DEFAULT '' COMMENT '快递单号',
-    `weight` DECIMAL(10,2) DEFAULT 0.00 COMMENT '重量(kg)',
+    `weight` DECIMAL(10,3) DEFAULT 0.000 COMMENT '重量(kg)',
     `cost_amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '运费成本',
     `cost_currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
+    `remark` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '备注',
     `shipped_at` TIMESTAMP NULL COMMENT '发货时间',
     `delivered_at` TIMESTAMP NULL COMMENT '送达时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -22,8 +25,10 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_order_id` (`order_id`),
+    KEY `idx_shipment_no` (`shipment_no`),
     KEY `idx_tracking_no` (`tracking_no`),
     KEY `idx_status` (`status`),
+    UNIQUE KEY `uk_shipment_no` (`tenant_id`, `shipment_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='物流发货表';
 
 -- ============================================
@@ -55,14 +60,19 @@ CREATE TABLE IF NOT EXISTS `refunds` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '退款ID',
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
+    `refund_no` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '退款单号',
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待审核, 1-已批准, 2-已拒绝, 3-已完成',
-    `reason` VARCHAR(500) DEFAULT '' COMMENT '退款原因',
+    `type` TINYINT NOT NULL DEFAULT 1 COMMENT '退款类型: 1-全额退款, 2-部分退款',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待审核, 1-已批准, 2-已拒绝, 3-已完成, 4-已取消',
+    `reason_type` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '退款原因类型',
+    `reason` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '退款原因',
     `description` TEXT COMMENT '详细描述',
     `images` JSON COMMENT '凭证图片',
     `amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '退款金额',
-    `currency` VARCHAR(10) DEFAULT 'CNY' COMMENT '货币',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'CNY' COMMENT '货币',
+    `reject_reason` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '拒绝原因',
     `approved_at` TIMESTAMP NULL COMMENT '批准时间',
+    `approved_by` BIGINT NOT NULL DEFAULT 0 COMMENT '批准人',
     `completed_at` TIMESTAMP NULL COMMENT '完成时间',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -72,8 +82,10 @@ CREATE TABLE IF NOT EXISTS `refunds` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_order_id` (`order_id`),
+    KEY `idx_refund_no` (`refund_no`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_status` (`status`),
+    UNIQUE KEY `uk_refund_no` (`tenant_id`, `refund_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='退款表';
 
 -- ============================================

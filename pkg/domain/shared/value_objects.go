@@ -6,6 +6,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 // ==================== 值对象 ====================
@@ -27,16 +29,26 @@ func (t TenantID) IsValid() bool {
 
 // Money 金额（值对象）
 type Money struct {
-	Amount   int64  // 单位为分，避免浮点数精度问题
-	Currency string // 币种，如 CNY, USD
+	Amount   decimal.Decimal // 单位为元，避免浮点数精度问题
+	Currency string         // 币种，如 CNY, USD
 }
 
 // NewMoney 创建金额
-func NewMoney(amount int64, currency string) Money {
+func NewMoney(amount decimal.Decimal, currency string) Money {
 	if currency == "" {
 		currency = "CNY"
 	}
 	return Money{Amount: amount, Currency: currency}
+}
+
+// NewMoneyFromString 从字符串创建金额（元）
+// 例如 "1.99" -> Money{Amount: decimal.NewFromString("1.99"), Currency: "CNY"}
+func NewMoneyFromString(amountStr string, currency string) (Money, error) {
+	amount, err := decimal.NewFromString(amountStr)
+	if err != nil {
+		return Money{}, fmt.Errorf("invalid amount: %w", err)
+	}
+	return NewMoney(amount, currency), nil
 }
 
 // Add 金额相加
@@ -44,7 +56,7 @@ func (m Money) Add(other Money) (Money, error) {
 	if m.Currency != other.Currency {
 		return Money{}, fmt.Errorf("currency mismatch: %s vs %s", m.Currency, other.Currency)
 	}
-	return NewMoney(m.Amount+other.Amount, m.Currency), nil
+	return NewMoney(m.Amount.Add(other.Amount), m.Currency), nil
 }
 
 // Subtract 金额相减
@@ -52,45 +64,68 @@ func (m Money) Subtract(other Money) (Money, error) {
 	if m.Currency != other.Currency {
 		return Money{}, fmt.Errorf("currency mismatch: %s vs %s", m.Currency, other.Currency)
 	}
-	if m.Amount < other.Amount {
-		return Money{}, fmt.Errorf("insufficient amount: %d < %d", m.Amount, other.Amount)
+	if m.Amount.LessThan(other.Amount) {
+		return Money{}, fmt.Errorf("insufficient amount: %s < %s", m.Amount.String(), other.Amount.String())
 	}
-	return NewMoney(m.Amount-other.Amount, m.Currency), nil
+	return NewMoney(m.Amount.Sub(other.Amount), m.Currency), nil
 }
 
 // Multiply 金额乘以整数
 func (m Money) Multiply(multiplier int) Money {
-	return NewMoney(m.Amount*int64(multiplier), m.Currency)
+	return NewMoney(m.Amount.Mul(decimal.NewFromInt(int64(multiplier))), m.Currency)
 }
 
 // MultiplyFloat 金额乘以浮点数（注意：可能存在精度问题，仅在必要时使用）
 func (m Money) MultiplyFloat(multiplier float64) Money {
-	return NewMoney(int64(float64(m.Amount)*multiplier), m.Currency)
+	return NewMoney(m.Amount.Mul(decimal.NewFromFloat(multiplier)), m.Currency)
 }
 
 // Equals 金额相等
 func (m Money) Equals(other Money) bool {
-	return m.Amount == other.Amount && m.Currency == other.Currency
+	return m.Amount.Equal(other.Amount) && m.Currency == other.Currency
 }
 
 // IsZero 金额是否为零
 func (m Money) IsZero() bool {
-	return m.Amount == 0
+	return m.Amount.IsZero()
 }
 
 // IsPositive 金额是否为正
 func (m Money) IsPositive() bool {
-	return m.Amount > 0
+	return m.Amount.IsPositive()
 }
 
 // IsNegative 金额是否为负
 func (m Money) IsNegative() bool {
-	return m.Amount < 0
+	return m.Amount.IsNegative()
 }
 
 // String 返回格式化字符串
 func (m Money) String() string {
-	return fmt.Sprintf("%.2f %s", float64(m.Amount)/100, m.Currency)
+	return fmt.Sprintf("%s %s", m.Amount.StringFixed(2), m.Currency)
+}
+
+// FormatMoneyOnly 将金额格式化为字符串（元），不带货币单位
+func FormatMoneyOnly(m Money) string {
+	return m.Amount.StringFixed(2)
+}
+
+// ParseMoneyFromString 从字符串解析为 decimal.Decimal（元）
+// 例如 "1.99" -> decimal.NewFromString("1.99")
+func ParseMoneyFromString(amountStr string) (decimal.Decimal, error) {
+	return decimal.NewFromString(amountStr)
+}
+
+// FormatMoneyToStringOnly 将 decimal.Decimal 格式化为字符串（元），不带货币单位
+// 例如 decimal.NewFromString("1.99") -> "1.99"
+func FormatMoneyToStringOnly(amount decimal.Decimal) string {
+	return amount.StringFixed(2)
+}
+
+// FormatMoneyToString 将 decimal.Decimal 格式化为字符串（元），带货币单位
+// 例如 decimal.NewFromString("1.99"), "CNY" -> "1.99 CNY"
+func FormatMoneyToString(amount decimal.Decimal, currency string) string {
+	return fmt.Sprintf("%s %s", amount.StringFixed(2), currency)
 }
 
 // ==================== 状态枚举 ====================

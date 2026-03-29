@@ -49,7 +49,7 @@ func (l *ListSKUsByProductLogic) ListSKUsByProduct(req *types.ListSKUsByProductR
 			ID:             sku.ID,
 			ProductID:      sku.ProductID,
 			Code:           sku.Code,
-			Price:          sku.Price.Amount,
+			Price:          shared.FormatMoneyToStringOnly(sku.Price.Amount),
 			Currency:       sku.Price.Currency,
 			Stock:          sku.Stock,
 			AvailableStock: sku.AvailableStock,
