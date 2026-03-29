@@ -13,6 +13,7 @@ import (
 	coupons "github.com/colinrs/shopjoy/admin/internal/handler/coupons"
 	dashboard "github.com/colinrs/shopjoy/admin/internal/handler/dashboard"
 	fulfillment_orders "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_orders"
+	fulfillment_statistics "github.com/colinrs/shopjoy/admin/internal/handler/fulfillment_statistics"
 	inventory "github.com/colinrs/shopjoy/admin/internal/handler/inventory"
 	markets "github.com/colinrs/shopjoy/admin/internal/handler/markets"
 	pages "github.com/colinrs/shopjoy/admin/internal/handler/pages"
@@ -446,6 +447,20 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/orders/fulfillment-summary",
 					Handler: fulfillment_orders.GetFulfillmentSummaryHandler(serverCtx),
+				},
+			}...,
+		),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Route{
+				{
+					// 综合履约统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/fulfillment/statistics",
+					Handler: fulfillment_statistics.GetFulfillmentStatisticsHandler(serverCtx),
 				},
 			}...,
 		),

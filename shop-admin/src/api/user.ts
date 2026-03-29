@@ -162,6 +162,21 @@ export function getUserStats() {
   })
 }
 
+// Enhanced user stats
+export interface UserStatsEnhanced {
+  total_users: number
+  active_users: number
+  suspended_users: number
+  new_users_today: number
+}
+
+export function getUserStatsEnhanced() {
+  return request<UserStatsEnhanced>({
+    url: '/api/v1/users/stats/enhanced',
+    method: 'get'
+  })
+}
+
 // Get user detail with full information
 export function getUserDetail(id: number) {
   return request<UserDetail>({
@@ -182,7 +197,7 @@ export function getUserAddresses(id: number, params?: { page?: number; page_size
 // Suspend user with reason
 export function suspendUserWithReason(id: number, reason: string) {
   return request<User>({
-    url: `/api/v1/users/${id}/suspend`,
+    url: `/api/v1/users/${id}/suspend-reason`,
     method: 'post',
     data: { reason }
   })

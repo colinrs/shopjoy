@@ -177,6 +177,30 @@ export function updateThemeConfig(data: UpdateThemeConfigRequest) {
   })
 }
 
+// ========== Theme Audit Log API ==========
+
+export interface ThemeAuditLog {
+  id: number
+  action: string
+  theme_id: number
+  theme_name: string
+  user_id: number
+  user_name: string
+  created_at: string
+}
+
+export interface ListThemeAuditLogsResponse {
+  logs: ThemeAuditLog[]
+  total: number
+}
+
+export function getThemeAuditLogs() {
+  return request<ListThemeAuditLogsResponse>({
+    url: '/api/v1/themes/audit-logs',
+    method: 'get'
+  })
+}
+
 // ========== Page API ==========
 
 export function listPages() {
@@ -258,14 +282,6 @@ export function unpublishPage(pageId: number) {
 }
 
 // ========== Decoration API ==========
-
-export async function getDecorations(pageId: number): Promise<DecorationDTO[]> {
-  const res = await request<DecorationDTOAPI[]>({
-    url: `/api/v1/pages/${pageId}/decorations`,
-    method: 'get'
-  })
-  return res?.map(parseDecoration) || []
-}
 
 export async function addDecoration(pageId: number, data: { block_type: string; block_config: Record<string, any>; sort_order: number }): Promise<DecorationDTO> {
   const res = await request<DecorationDTOAPI>({

@@ -50,6 +50,16 @@ export interface CreateShipmentRequest {
   }[]
 }
 
+export interface UpdateShipmentRequest {
+  carrier_code?: string
+  carrier_name?: string
+  tracking_no?: string
+  shipping_cost?: string
+  currency?: string
+  weight?: string
+  remark?: string
+}
+
 export interface ShipmentListParams {
   page?: number
   page_size?: number
@@ -107,12 +117,7 @@ export interface RefundListParams {
   end_time?: string
 }
 
-export interface ApproveRefundRequest {
-  refund_id: number
-}
-
 export interface RejectRefundRequest {
-  refund_id: number
   reject_reason: string
 }
 
@@ -191,6 +196,10 @@ export const updateShipmentStatus = (id: number, status: number) => {
   return request.put(`/api/v1/shipments/${id}/status`, { status })
 }
 
+export const updateShipment = (id: number, data: UpdateShipmentRequest) => {
+  return request.put<Shipment>(`/api/v1/shipments/${id}`, data)
+}
+
 export const getOrderShipments = (orderId: string) => {
   return request.get<Shipment[]>(`/api/v1/orders/${orderId}/shipments`)
 }
@@ -204,12 +213,12 @@ export const getRefundDetail = (id: number) => {
   return request.get<Refund>(`/api/v1/refunds/${id}`)
 }
 
-export const approveRefund = (data: ApproveRefundRequest) => {
-  return request.put(`/api/v1/refunds/${data.refund_id}/approve`)
+export const approveRefund = (refundId: number) => {
+  return request.put(`/api/v1/refunds/${refundId}/approve`)
 }
 
-export const rejectRefund = (data: RejectRefundRequest) => {
-  return request.put(`/api/v1/refunds/${data.refund_id}/reject`, { reject_reason: data.reject_reason })
+export const rejectRefund = (refundId: number, rejectReason: string) => {
+  return request.put(`/api/v1/refunds/${refundId}/reject`, { reject_reason: rejectReason })
 }
 
 // Reference Data
@@ -222,8 +231,19 @@ export const getRefundReasonList = () => {
 }
 
 // Statistics
-export const getFulfillmentStatistics = (params: { start_date?: string; end_date?: string }) => {
-  return request.get<FulfillmentStatistics>('/api/v1/refunds/statistics', { params })
+export const getFulfillmentStatistics = (params: { period?: string; start_date?: string; end_date?: string }) => {
+  // Convert frontend params to backend format
+  const backendParams: Record<string, string> = {}
+  if (params.period) {
+    backendParams.period = params.period
+  }
+  if (params.start_date) {
+    backendParams.start_time = params.start_date
+  }
+  if (params.end_date) {
+    backendParams.end_time = params.end_date
+  }
+  return request.get<FulfillmentStatistics>('/api/v1/fulfillment/statistics', { params: backendParams })
 }
 
 // Fulfillment Summary

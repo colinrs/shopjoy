@@ -69,6 +69,17 @@ type OrderFulfillmentItem struct {
 	Currency    string
 }
 
+// OrderShippingAddress 订单收货地址
+type OrderShippingAddress struct {
+	ReceiverName  string
+	ReceiverPhone string
+	Province      string
+	City          string
+	District      string
+	Address       string
+	FullAddress   string
+}
+
 // OrderFulfillmentDetail 订单履约详情
 type OrderFulfillmentDetail struct {
 	OrderID           string
@@ -83,7 +94,7 @@ type OrderFulfillmentDetail struct {
 	UserID            int64
 	UserName          string
 	UserPhone         string
-	ShippingAddress   string
+	ShippingAddress   *OrderShippingAddress
 	Items             []*OrderFulfillmentItem
 	Shipments         []*ShipmentResponse
 	Refund            *RefundResponse

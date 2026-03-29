@@ -459,7 +459,7 @@ const handleApprove = async () => {
       'Approve Refund',
       { type: 'success' }
     )
-    await approveRefund({ refund_id: refund.value!.id })
+    await approveRefund(refund.value!.id)
     ElMessage.success('Refund approved successfully')
     loadRefund()
   } catch (error) {
@@ -482,10 +482,7 @@ const confirmReject = async () => {
 
     rejecting.value = true
     try {
-      await rejectRefund({
-        refund_id: refund.value!.id,
-        reject_reason: rejectForm.reject_reason
-      })
+      await rejectRefund(refund.value!.id, rejectForm.reject_reason)
       ElMessage.success('Refund rejected')
       rejectDialogVisible.value = false
       loadRefund()

@@ -153,6 +153,16 @@ type (
 		List []*CarrierResp `json:"list"`
 	}
 	// ===================== Refund Types =====================
+	// Refund order item response (for order_items in refund detail)
+	RefundOrderItemResp {
+		ID          int64  `json:"id"`
+		ProductID   int64  `json:"product_id"`
+		ProductName string `json:"product_name"`
+		SKUName     string `json:"sku_name"`
+		Image       string `json:"image"`
+		Quantity    int    `json:"quantity"`
+		Price       string `json:"price"`
+	}
 	// Refund detail response
 	RefundDetailResp {
 		ID             int64    `json:"id"`
@@ -160,6 +170,7 @@ type (
 		OrderID        string   `json:"order_id"`
 		UserID         int64    `json:"user_id"`
 		UserName       string   `json:"user_name,optional"`
+		UserPhone      string   `json:"user_phone,optional"`
 		Type           int8     `json:"type"` // 1=full_refund, 2=partial_refund
 		TypeText       string   `json:"type_text"`
 		Status         int8     `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
@@ -178,8 +189,9 @@ type (
 		CreatedAt      string   `json:"created_at"`
 		UpdatedAt      string   `json:"updated_at"`
 		// Order info
-		OrderNo     string `json:"order_no,optional"`
-		OrderAmount string `json:"order_amount,optional"`
+		OrderNo     string                 `json:"order_no,optional"`
+		OrderAmount string                 `json:"order_amount,optional"`
+		OrderItems  []*RefundOrderItemResp `json:"order_items,optional"`
 	}
 	// Get refund request
 	GetRefundReq {
@@ -267,6 +279,55 @@ type (
 		RefundCount int64  `json:"refund_count"`
 		RefundRate  string `json:"refund_rate"`
 	}
+	// ===================== Fulfillment Statistics Types =====================
+	// Fulfillment overview statistics
+	FulfillmentOverview {
+		TotalShipments      int64  `json:"total_shipments"`
+		PendingShipments    int64  `json:"pending_shipments"`
+		TotalRefunds        int64  `json:"total_refunds"`
+		PendingRefunds      int64  `json:"pending_refunds"`
+		RefundRate          string `json:"refund_rate"`
+		DeliverySuccessRate string `json:"delivery_success_rate"`
+		TotalAmount         string `json:"total_amount"`
+		Currency            string `json:"currency"`
+	}
+	// Refund rate trend
+	RefundRateTrend {
+		Date string `json:"date"`
+		Rate string `json:"rate"`
+	}
+	// Refund reason summary
+	RefundReasonSummary {
+		ReasonType string `json:"reason_type"`
+		ReasonName string `json:"reason_name"`
+		Count      int64  `json:"count"`
+		Percentage string `json:"percentage"`
+	}
+	// Problem product statistics
+	ProblemProductStats {
+		ProductID   int64  `json:"product_id"`
+		ProductName string `json:"product_name"`
+		Image       string `json:"image"`
+		TotalSales  int64  `json:"total_sales"`
+		RefundCount int64  `json:"refund_count"`
+		RefundRate  string `json:"refund_rate"`
+	}
+	// Carrier performance statistics
+	CarrierPerformanceStats {
+		CarrierCode         string `json:"carrier_code"`
+		CarrierName         string `json:"carrier_name"`
+		TotalShipments      int64  `json:"total_shipments"`
+		DeliverySuccessRate string `json:"delivery_success_rate"`
+		AvgDeliveryTime     string `json:"avg_delivery_time"`
+	}
+	// Comprehensive fulfillment statistics response
+	FulfillmentStatisticsResp {
+		Overview           *FulfillmentOverview       `json:"overview"`
+		RefundRateTrend    []*RefundRateTrend         `json:"refund_rate_trend"`
+		RefundReasons      []*RefundReasonSummary     `json:"refund_reasons"`
+		ProblemProducts    []*ProblemProductStats     `json:"problem_products"`
+		CarrierPerformance []*CarrierPerformanceStats `json:"carrier_performance"`
+	}
 	// ===================== Order Fulfillment Types =====================
 	// Order item for fulfillment
 	OrderFulfillmentItemResp {
@@ -282,6 +343,16 @@ type (
 		UnitPrice   string `json:"unit_price"`
 		Currency    string `json:"currency"`
 	}
+	// Order shipping address structure
+	OrderShippingAddress {
+		ReceiverName  string `json:"receiver_name"`
+		ReceiverPhone string `json:"receiver_phone"`
+		Province      string `json:"province"`
+		City          string `json:"city"`
+		District      string `json:"district"`
+		Address       string `json:"address"`
+		FullAddress   string `json:"full_address"`
+	}
 	// Order fulfillment detail response
 	OrderFulfillmentDetailResp {
 		OrderID           string                      `json:"order_id"`
@@ -296,7 +367,7 @@ type (
 		UserID            int64                       `json:"user_id"`
 		UserName          string                      `json:"user_name,optional"`
 		UserPhone         string                      `json:"user_phone,optional"`
-		ShippingAddress   string                      `json:"shipping_address,optional"`
+		ShippingAddress   *OrderShippingAddress       `json:"shipping_address,optional"`
 		Items             []*OrderFulfillmentItemResp `json:"items"`
 		Shipments         []*ShipmentDetailResp       `json:"shipments,optional"`
 		Refund            *RefundDetailResp           `json:"refund,optional"`
@@ -534,5 +605,16 @@ service admin-api {
 	@doc "发送支付提醒"
 	@handler RemindPaymentHandler
 	post /api/v1/orders/:id/remind-payment (RemindPaymentReq) returns (RemindPaymentResp)
+}
+
+// ===================== Fulfillment Statistics API =====================
+@server (
+	group:      fulfillment_statistics
+	middleware: AuthMiddleware
+)
+service admin-api {
+	@doc "综合履约统计"
+	@handler GetFulfillmentStatisticsHandler
+	get /api/v1/fulfillment/statistics (GetRefundStatisticsReq) returns (FulfillmentStatisticsResp)
 }
 

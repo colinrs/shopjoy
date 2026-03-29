@@ -270,6 +270,14 @@ type CancelOrderResp struct {
 	Reason      string `json:"reason"`
 }
 
+type CarrierPerformanceStats struct {
+	CarrierCode         string `json:"carrier_code"`
+	CarrierName         string `json:"carrier_name"`
+	TotalShipments      int64  `json:"total_shipments"`
+	DeliverySuccessRate string `json:"delivery_success_rate"`
+	AvgDeliveryTime     string `json:"avg_delivery_time"`
+}
+
 type CarrierResp struct {
 	ID          int64  `json:"id"`
 	Code        string `json:"code"`
@@ -824,6 +832,25 @@ type FeeCalculationDetail struct {
 	AdditionalFee    string `json:"additional_fee"`
 	CalculatedWeight int    `json:"calculated_weight,optional"`
 	CalculatedUnits  int    `json:"calculated_units,optional"`
+}
+
+type FulfillmentOverview struct {
+	TotalShipments      int64  `json:"total_shipments"`
+	PendingShipments    int64  `json:"pending_shipments"`
+	TotalRefunds        int64  `json:"total_refunds"`
+	PendingRefunds      int64  `json:"pending_refunds"`
+	RefundRate          string `json:"refund_rate"`
+	DeliverySuccessRate string `json:"delivery_success_rate"`
+	TotalAmount         string `json:"total_amount"`
+	Currency            string `json:"currency"`
+}
+
+type FulfillmentStatisticsResp struct {
+	Overview           *FulfillmentOverview       `json:"overview"`
+	RefundRateTrend    []*RefundRateTrend         `json:"refund_rate_trend"`
+	RefundReasons      []*RefundReasonSummary     `json:"refund_reasons"`
+	ProblemProducts    []*ProblemProductStats     `json:"problem_products"`
+	CarrierPerformance []*CarrierPerformanceStats `json:"carrier_performance"`
 }
 
 type FulfillmentSummaryResp struct {
@@ -1671,7 +1698,7 @@ type OrderFulfillmentDetailResp struct {
 	UserID            int64                       `json:"user_id"`
 	UserName          string                      `json:"user_name,optional"`
 	UserPhone         string                      `json:"user_phone,optional"`
-	ShippingAddress   string                      `json:"shipping_address,optional"`
+	ShippingAddress   *OrderShippingAddress       `json:"shipping_address,optional"`
 	Items             []*OrderFulfillmentItemResp `json:"items"`
 	Shipments         []*ShipmentDetailResp       `json:"shipments,optional"`
 	Refund            *RefundDetailResp           `json:"refund,optional"`
@@ -1712,6 +1739,16 @@ type OrderPaymentResp struct {
 	PaidAt            string               `json:"paid_at,optional"`
 	RefundedAmount    string               `json:"refunded_amount"`
 	Refunds           []*PaymentRefundResp `json:"refunds"`
+}
+
+type OrderShippingAddress struct {
+	ReceiverName  string `json:"receiver_name"`
+	ReceiverPhone string `json:"receiver_phone"`
+	Province      string `json:"province"`
+	City          string `json:"city"`
+	District      string `json:"district"`
+	Address       string `json:"address"`
+	FullAddress   string `json:"full_address"`
 }
 
 type OrderStatusDistributionRequest struct {
@@ -1869,6 +1906,15 @@ type PointsTransactionsStats struct {
 type PointsTrendResp struct {
 	Data   []TrendDataPoint `json:"data"`
 	Period string           `json:"period"`
+}
+
+type ProblemProductStats struct {
+	ProductID   int64  `json:"product_id"`
+	ProductName string `json:"product_name"`
+	Image       string `json:"image"`
+	TotalSales  int64  `json:"total_sales"`
+	RefundCount int64  `json:"refund_count"`
+	RefundRate  string `json:"refund_rate"`
 }
 
 type ProductDetailResp struct {
@@ -2050,30 +2096,42 @@ type RefundDailyStats struct {
 }
 
 type RefundDetailResp struct {
-	ID             int64    `json:"id"`
-	RefundNo       string   `json:"refund_no"`
-	OrderID        string   `json:"order_id"`
-	UserID         int64    `json:"user_id"`
-	UserName       string   `json:"user_name,optional"`
-	Type           int8     `json:"type"` // 1=full_refund, 2=partial_refund
-	TypeText       string   `json:"type_text"`
-	Status         int8     `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
-	StatusText     string   `json:"status_text"`
-	ReasonType     string   `json:"reason_type"`
-	Reason         string   `json:"reason"`
-	Description    string   `json:"description,optional"`
-	Images         []string `json:"images,optional"`
-	Amount         string   `json:"amount"`
-	Currency       string   `json:"currency"`
-	RejectReason   string   `json:"reject_reason,optional"`
-	ApprovedAt     string   `json:"approved_at,optional"`
-	ApprovedBy     int64    `json:"approved_by,optional"`
-	ApprovedByName string   `json:"approved_by_name,optional"`
-	CompletedAt    string   `json:"completed_at,optional"`
-	CreatedAt      string   `json:"created_at"`
-	UpdatedAt      string   `json:"updated_at"`
-	OrderNo        string   `json:"order_no,optional"`
-	OrderAmount    string   `json:"order_amount,optional"`
+	ID             int64                  `json:"id"`
+	RefundNo       string                 `json:"refund_no"`
+	OrderID        string                 `json:"order_id"`
+	UserID         int64                  `json:"user_id"`
+	UserName       string                 `json:"user_name,optional"`
+	UserPhone      string                 `json:"user_phone,optional"`
+	Type           int8                   `json:"type"` // 1=full_refund, 2=partial_refund
+	TypeText       string                 `json:"type_text"`
+	Status         int8                   `json:"status"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+	StatusText     string                 `json:"status_text"`
+	ReasonType     string                 `json:"reason_type"`
+	Reason         string                 `json:"reason"`
+	Description    string                 `json:"description,optional"`
+	Images         []string               `json:"images,optional"`
+	Amount         string                 `json:"amount"`
+	Currency       string                 `json:"currency"`
+	RejectReason   string                 `json:"reject_reason,optional"`
+	ApprovedAt     string                 `json:"approved_at,optional"`
+	ApprovedBy     int64                  `json:"approved_by,optional"`
+	ApprovedByName string                 `json:"approved_by_name,optional"`
+	CompletedAt    string                 `json:"completed_at,optional"`
+	CreatedAt      string                 `json:"created_at"`
+	UpdatedAt      string                 `json:"updated_at"`
+	OrderNo        string                 `json:"order_no,optional"`
+	OrderAmount    string                 `json:"order_amount,optional"`
+	OrderItems     []*RefundOrderItemResp `json:"order_items,optional"`
+}
+
+type RefundOrderItemResp struct {
+	ID          int64  `json:"id"`
+	ProductID   int64  `json:"product_id"`
+	ProductName string `json:"product_name"`
+	SKUName     string `json:"sku_name"`
+	Image       string `json:"image"`
+	Quantity    int    `json:"quantity"`
+	Price       string `json:"price"`
 }
 
 type RefundProductStats struct {
@@ -2081,6 +2139,11 @@ type RefundProductStats struct {
 	ProductName string `json:"product_name"`
 	RefundCount int64  `json:"refund_count"`
 	RefundRate  string `json:"refund_rate"`
+}
+
+type RefundRateTrend struct {
+	Date string `json:"date"`
+	Rate string `json:"rate"`
 }
 
 type RefundReasonResp struct {
@@ -2092,6 +2155,13 @@ type RefundReasonResp struct {
 }
 
 type RefundReasonStats struct {
+	ReasonType string `json:"reason_type"`
+	ReasonName string `json:"reason_name"`
+	Count      int64  `json:"count"`
+	Percentage string `json:"percentage"`
+}
+
+type RefundReasonSummary struct {
 	ReasonType string `json:"reason_type"`
 	ReasonName string `json:"reason_name"`
 	Count      int64  `json:"count"`

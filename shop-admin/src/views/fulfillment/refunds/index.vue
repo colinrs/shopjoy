@@ -483,7 +483,7 @@ const quickApprove = async (row: Refund) => {
       'Approve Refund',
       { type: 'success' }
     )
-    await approveRefund({ refund_id: row.id })
+    await approveRefund(row.id)
     ElMessage.success('Refund approved')
     loadData()
     stats.value.pending--
@@ -509,10 +509,7 @@ const confirmReject = async () => {
 
     rejecting.value = true
     try {
-      await rejectRefund({
-        refund_id: currentRefund.value!.id,
-        reject_reason: rejectForm.reject_reason
-      })
+      await rejectRefund(currentRefund.value!.id, rejectForm.reject_reason)
       ElMessage.success('Refund rejected')
       rejectDialogVisible.value = false
       loadData()

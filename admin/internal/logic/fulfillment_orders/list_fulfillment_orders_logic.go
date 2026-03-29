@@ -112,6 +112,19 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		refund = toRefundDetailResp(o.Refund)
 	}
 
+	var shippingAddress *types.OrderShippingAddress
+	if o.ShippingAddress != nil {
+		shippingAddress = &types.OrderShippingAddress{
+			ReceiverName:  o.ShippingAddress.ReceiverName,
+			ReceiverPhone: o.ShippingAddress.ReceiverPhone,
+			Province:      o.ShippingAddress.Province,
+			City:          o.ShippingAddress.City,
+			District:      o.ShippingAddress.District,
+			Address:       o.ShippingAddress.Address,
+			FullAddress:   o.ShippingAddress.FullAddress,
+		}
+	}
+
 	return &types.OrderFulfillmentDetailResp{
 		OrderID:           o.OrderID,
 		OrderNo:           o.OrderNo,
@@ -125,7 +138,7 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		UserID:            o.UserID,
 		UserName:          o.UserName,
 		UserPhone:         o.UserPhone,
-		ShippingAddress:   o.ShippingAddress,
+		ShippingAddress:   shippingAddress,
 		Items:             items,
 		Shipments:         shipments,
 		Refund:            refund,
