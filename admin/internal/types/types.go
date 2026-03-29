@@ -1586,6 +1586,7 @@ type ListUsersRequest struct {
 	Name     string `form:"name,optional"`
 	Email    string `form:"email,optional"`
 	Status   int    `form:"status,optional"`
+	Keyword  string `form:"keyword,optional"`
 }
 
 type ListUsersResponse struct {
