@@ -60,7 +60,7 @@ export interface TopProductsResponse {
 
 // Pending order item
 export interface PendingOrderItem {
-  order_id: number
+  order_id: string
   order_no: string
   pay_amount: string
   status: string

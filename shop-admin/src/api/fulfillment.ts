@@ -7,9 +7,11 @@ export interface Shipment {
   order_id: string
   order_no: string
   status: number // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed
+  status_text: string
   carrier: string
   carrier_code: string
   tracking_no: string
+  tracking_url: string
   shipping_cost: string
   shipping_currency: string
   weight: string
@@ -17,6 +19,9 @@ export interface Shipment {
   delivered_at: string | null
   remark: string
   created_at: string
+  updated_at: string
+  created_by: number
+  created_by_name: string | null
   items: ShipmentItem[]
 }
 
@@ -64,18 +69,22 @@ export interface Refund {
   user_name: string
   user_phone: string
   type: number // 1=full_refund, 2=partial_refund
+  type_text: string
   status: number // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+  status_text: string
   reason_type: string
   reason: string
   description: string
   images: string[]
   amount: string
   currency: string
+  order_amount: string
   reject_reason: string
   approved_at: string | null
   approved_by: string | null
   completed_at: string | null
   created_at: string
+  updated_at: string
   order_items: RefundOrderItem[]
 }
 

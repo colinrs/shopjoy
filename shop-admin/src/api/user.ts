@@ -3,12 +3,19 @@ import request from '@/utils/request'
 // User interface matching backend GetUserResponse
 export interface User {
   id: number
+  tenant_id: number
   email: string
   phone: string
   name: string
   avatar: string
+  gender: number
+  gender_text: string
+  birthday: string | null
   status: number
+  status_text: string
+  review_count: number
   created_at: string
+  updated_at: string
   last_login: string
 }
 

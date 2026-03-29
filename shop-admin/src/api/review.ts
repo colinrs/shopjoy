@@ -9,7 +9,7 @@ export type ReviewStatus = 'pending' | 'approved' | 'hidden'
 
 export interface ReviewListItem {
   id: number
-  order_id: number
+  order_id: string
   product_id: number
   product_name: string
   sku_code: string
@@ -51,7 +51,7 @@ export interface ListReviewsResponse {
 export interface ReviewDetail {
   id: number
   tenant_id: number
-  order_id: number
+  order_id: string
   product_id: number
   product_name: string
   sku_code: string
