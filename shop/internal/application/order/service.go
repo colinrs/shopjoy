@@ -39,10 +39,10 @@ type OrderResponse struct {
 	OrderNo        string
 	UserID         int64
 	Status         int
-	TotalAmount    int64
-	DiscountAmount int64
-	FreightAmount  int64
-	PayAmount      int64
+	TotalAmount    string // API monetary values use string (yuan)
+	DiscountAmount string
+	FreightAmount  string
+	PayAmount      string
 	Currency       string
 	Items          []OrderItemResponse
 	Address        AddressResponse
@@ -59,9 +59,9 @@ type OrderItemResponse struct {
 	SKUId       int64
 	SKUName     string
 	Image       string
-	Price       int64
+	Price       string // API monetary values use string (yuan)
 	Quantity    int
-	TotalAmount int64
+	TotalAmount string
 }
 
 type AddressResponse struct {

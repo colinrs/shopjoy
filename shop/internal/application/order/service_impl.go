@@ -162,10 +162,10 @@ func toOrderResponse(o *order.Order) *OrderResponse {
 		OrderNo:        o.OrderNo,
 		UserID:         o.UserID,
 		Status:         int(o.Status),
-		TotalAmount:    o.TotalAmount.Amount,
-		DiscountAmount: o.DiscountAmount.Amount,
-		FreightAmount:  o.FreightAmount.Amount,
-		PayAmount:      o.PayAmount.Amount,
+		TotalAmount:    o.TotalAmount.Amount.String(),
+		DiscountAmount: o.DiscountAmount.Amount.String(),
+		FreightAmount:  o.FreightAmount.Amount.String(),
+		PayAmount:      o.PayAmount.Amount.String(),
 		Currency:       o.Currency,
 		Remark:         o.Remark,
 		ExpireAt:       o.ExpireAt,
@@ -196,9 +196,9 @@ func toOrderResponse(o *order.Order) *OrderResponse {
 			SKUId:       item.SKUId,
 			SKUName:     item.SKUName,
 			Image:       item.Image,
-			Price:       item.Price.Amount,
+			Price:       item.Price.Amount.String(),
 			Quantity:    item.Quantity,
-			TotalAmount: item.TotalAmount.Amount,
+			TotalAmount: item.TotalAmount.Amount.String(),
 		}
 	}
 
