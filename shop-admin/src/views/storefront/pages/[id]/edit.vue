@@ -455,8 +455,8 @@ const handleRestoreVersion = async (ver: VersionItem & { restoring?: boolean }) 
   }
 }
 
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleString('zh-CN')
+const formatTime = (timestampStr: string) => {
+  return new Date(timestampStr).toLocaleString('zh-CN')
 }
 
 onMounted(() => {

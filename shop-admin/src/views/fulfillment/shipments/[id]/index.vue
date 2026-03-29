@@ -85,7 +85,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="Shipping Cost">
               <span v-if="shipment?.shipping_cost">
-                {{ shipment.shipping_currency }} {{ (shipment.shipping_cost / 100).toFixed(2) }}
+                {{ shipment.shipping_currency }} {{ shipment.shipping_cost }}
               </span>
               <span v-else class="no-data">-</span>
             </el-descriptions-item>
@@ -284,8 +284,8 @@ const editDialogVisible = ref(false)
 const editForm = reactive({
   carrier_code: '',
   tracking_no: '',
-  shipping_cost: 0,
-  weight: 0,
+  shipping_cost: '0',
+  weight: '0',
   remark: '',
   currency: 'CNY'
 })
@@ -361,16 +361,21 @@ const loadShipment = async () => {
       order_id: 'ORD001',
       order_no: 'ORD2026031800100',
       status: 2,
+      status_text: '运输中',
       carrier: 'SF Express',
       carrier_code: 'SF',
       tracking_no: 'SF1234567890',
-      shipping_cost: 1200,
+      tracking_url: 'https://www.sf-express.com/sf-service-ow/f、梁.operation.entrega_ar?trackingNo=SF1234567890',
+      shipping_cost: "12.00",
       shipping_currency: 'CNY',
-      weight: 1.5,
-      shipped_at: '2026-03-22 14:30:25',
+      weight: "1.5",
+      shipped_at: '2026-03-22T14:30:25Z',
       delivered_at: null,
       remark: 'Fragile item - handle with care',
-      created_at: '2026-03-22 10:00:00',
+      created_at: '2026-03-22T10:00:00Z',
+      updated_at: '2026-03-22T10:00:00Z',
+      created_by: 1,
+      created_by_name: '管理员',
       items: [
         { id: 1, product_id: 1, sku_id: 1, product_name: 'Wireless Bluetooth Earphones Pro', sku_name: 'Black - Premium Edition', image: '', quantity: 1 },
         { id: 2, product_id: 2, sku_id: 2, product_name: 'Phone Case', sku_name: 'iPhone 15 Pro Max', image: '', quantity: 2 }
@@ -413,9 +418,9 @@ const openEditLogistics = () => {
   if (shipment.value) {
     editForm.carrier_code = shipment.value.carrier_code
     editForm.tracking_no = shipment.value.tracking_no
-    editForm.shipping_cost = shipment.value.shipping_cost / 100
+    editForm.shipping_cost = shipment.value.shipping_cost
     editForm.weight = shipment.value.weight
-    editForm.remark = shipment.value.remark
+    editForm.remark = shipment.value.remark || ''
     editDialogVisible.value = true
   }
 }

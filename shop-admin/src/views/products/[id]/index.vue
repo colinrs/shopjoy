@@ -341,7 +341,7 @@
               </el-table-column>
               <el-table-column label="价格" width="120" align="right">
                 <template #default="{ row }">
-                  {{ (row.price / 100).toFixed(2) }} {{ row.currency }}
+                  {{ row.currency }} {{ row.price }}
                 </template>
               </el-table-column>
               <el-table-column label="库存" prop="stock" width="100" align="center" />
@@ -841,9 +841,9 @@ const supportedLanguages = [
 const productForm = reactive({
   name: '',
   description: '',
-  price: 0,
+  price: '0',
   currency: 'USD',
-  cost_price: 0,
+  cost_price: '0',
   stock: 0,
   status: 'draft',
   category_id: 0,
@@ -916,13 +916,13 @@ const loadProduct = async () => {
   try {
     const data = await getProduct(productId.value)
     product.value = data
-    // Populate form - convert price from cents to dollars for display
+    // Populate form - price is already in yuan as string from API
     Object.assign(productForm, {
       name: data.name || '',
       description: data.description || '',
-      price: (data.price || 0) / 100, // Convert from cents to dollars
+      price: data.price || '0',
       currency: data.currency || 'USD',
-      cost_price: (data.cost_price || 0) / 100, // Convert from cents to dollars
+      cost_price: data.cost_price || '0',
       stock: data.stock || 0,
       status: data.status || 'draft',
       category_id: data.category_id || 0,
@@ -1013,7 +1013,7 @@ const handleSave = async () => {
           id: productId.value,
           name: productForm.name,
           description: productForm.description,
-          price: Math.round(productForm.price * 100), // Convert dollars to cents
+          price: productForm.price, // Already in yuan as string
           currency: productForm.currency,
           category_id: productForm.category_id,
           sku: productForm.sku,
@@ -1094,7 +1094,7 @@ const handleRemoveFromMarket = async (row: ProductMarket) => {
 // Push to market
 const showPushToMarketDialog = () => {
   pushToMarketForm.selectedMarkets = []
-  pushToMarketForm.price = productForm.price / 100 // Convert from cents
+  pushToMarketForm.price = parseFloat(productForm.price) || 0
   pushToMarketDialogVisible.value = true
 }
 
@@ -1390,7 +1390,7 @@ const showAddVariantDialog = () => {
   isEditVariant.value = false
   variantForm.id = 0
   variantForm.code = ''
-  variantForm.price = productForm.price / 100 // Convert from cents
+  variantForm.price = parseFloat(productForm.price) || 0
   variantForm.currency = productForm.currency
   variantForm.stock = 0
   variantForm.safety_stock = 0
@@ -1405,7 +1405,7 @@ const handleEditVariant = (row: SKU) => {
   isEditVariant.value = true
   variantForm.id = row.id
   variantForm.code = row.code
-  variantForm.price = row.price / 100
+  variantForm.price = parseFloat(row.price) || 0
   variantForm.currency = row.currency
   variantForm.stock = row.stock
   variantForm.safety_stock = row.safety_stock
@@ -1442,7 +1442,7 @@ const handleSaveVariant = async () => {
     const data: CreateSKURequest = {
       product_id: productId.value,
       code: variantForm.code,
-      price: Math.round(variantForm.price * 100), // Convert to cents
+      price: variantForm.price.toFixed(2), // Already in yuan, convert to string
       currency: variantForm.currency,
       stock: variantForm.stock,
       safety_stock: variantForm.safety_stock,

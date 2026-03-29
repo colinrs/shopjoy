@@ -328,8 +328,8 @@ const restoreVersion = async (ver: VersionItem) => {
   }
 }
 
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleString('zh-CN', {
+const formatTime = (timestampStr: string) => {
+  return new Date(timestampStr).toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

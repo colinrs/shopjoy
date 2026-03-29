@@ -41,7 +41,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="Refund Amount">
               <span class="refund-amount-value">
-                {{ refund?.currency }} {{ refund ? (refund.amount / 100).toFixed(2) : '0.00' }}
+                {{ refund?.currency }} {{ refund?.amount || '0.00' }}
               </span>
             </el-descriptions-item>
             <el-descriptions-item label="Refund Type">
@@ -130,7 +130,7 @@
                 <p class="item-sku">SKU: {{ item.sku_name }}</p>
               </div>
               <div class="item-price">
-                <p class="unit-price">{{ refund?.currency }} {{ (item.price / 100).toFixed(2) }}</p>
+                <p class="unit-price">{{ refund?.currency }} {{ item.price }}</p>
                 <p class="quantity">x {{ item.quantity }}</p>
               </div>
             </div>
@@ -385,7 +385,9 @@ const loadRefund = async () => {
       user_name: 'John Doe',
       user_phone: '138****8001',
       type: 1,
+      type_text: '全额退款',
       status: 0,
+      status_text: '待处理',
       reason_type: 'DEFECTIVE',
       reason: 'Product has scratches on screen',
       description: 'Received the product with visible scratches on the display screen. The scratches are clearly visible and affect the user experience. I have attached photos showing the damage.',
@@ -393,13 +395,15 @@ const loadRefund = async () => {
         'https://picsum.photos/400/300?random=1',
         'https://picsum.photos/400/300?random=2'
       ],
-      amount: 29900,
+      amount: "299.00",
       currency: 'CNY',
+      order_amount: "299.00",
       reject_reason: '',
       approved_at: null,
       approved_by: null,
       completed_at: null,
-      created_at: '2026-03-22 14:30:25',
+      created_at: '2026-03-22T14:30:25Z',
+      updated_at: '2026-03-22T14:30:25Z',
       order_items: [
         {
           id: 1,
@@ -408,7 +412,7 @@ const loadRefund = async () => {
           sku_name: 'Black - Premium Edition',
           image: '',
           quantity: 1,
-          price: 29900
+          price: "299.00"
         }
       ]
     }
@@ -451,7 +455,7 @@ const viewOrder = () => {
 const handleApprove = async () => {
   try {
     await ElMessageBox.confirm(
-      `Approve refund of ${refund.value?.currency} ${refund.value ? (refund.value.amount / 100).toFixed(2) : '0.00'}?`,
+      `Approve refund of ${refund.value?.currency} ${refund.value?.amount || '0.00'}?`,
       'Approve Refund',
       { type: 'success' }
     )

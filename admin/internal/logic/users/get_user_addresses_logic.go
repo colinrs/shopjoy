@@ -40,16 +40,18 @@ func (l *GetUserAddressesLogic) GetUserAddresses(req *types.GetUserRequest) (res
 	for _, addr := range addressList.List {
 		addresses = append(addresses, &types.UserAddressResponse{
 			ID:         addr.ID,
+			UserID:     addr.UserID,
 			Name:       addr.Name,
 			Phone:      addr.Phone,
 			Country:    addr.Country,
 			Province:   addr.Province,
 			City:       addr.City,
 			District:   addr.District,
-			Address:    addr.Address,
+			Detail:     addr.Detail,
 			PostalCode: addr.PostalCode,
 			IsDefault:  addr.IsDefault,
 			CreatedAt:  addr.CreatedAt,
+			UpdatedAt:  addr.UpdatedAt,
 		})
 	}
 

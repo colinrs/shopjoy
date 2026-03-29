@@ -3,21 +3,27 @@ import request from '@/utils/request'
 // User interface matching backend GetUserResponse
 export interface User {
   id: number
+  tenant_id: number
   email: string
   phone: string
   name: string
   avatar: string
+  gender: number
+  gender_text: string
+  birthday: string | null
   status: number
+  status_text: string
+  review_count: number
   created_at: string
+  updated_at: string
   last_login: string
 }
 
 // Extended user with points and order stats
 export interface ExtendedUser extends User {
   points_balance: number
-  total_orders: number
+  order_count: number
   total_spent: string
-  is_vip: boolean
 }
 
 // User detail with full information
@@ -33,14 +39,17 @@ export interface UserDetail extends ExtendedUser {
 export interface UserAddress {
   id: number
   user_id: number
-  recipient_name: string
+  name: string
   phone: string
+  country: string
   province: string
   city: string
   district: string
-  detail_address: string
+  detail: string
+  postal_code: string
   is_default: boolean
   created_at: string
+  updated_at: string
 }
 
 export interface UserStats {

@@ -15,9 +15,9 @@ export interface Product {
   id: number
   name: string
   description: string
-  price: number
+  price: string
   currency: string
-  cost_price: number
+  cost_price: string
   stock: number
   status: string
   category_id: number
@@ -62,8 +62,8 @@ export interface ListProductsParams {
   name?: string
   category_id?: number
   status?: string
-  min_price?: number
-  max_price?: number
+  min_price?: string
+  max_price?: string
   market_id?: number
 }
 
@@ -77,9 +77,9 @@ export interface ListProductsResponse {
 export interface CreateProductRequest {
   name: string
   description?: string
-  price: number
+  price: string
   currency?: string
-  cost_price?: number
+  cost_price?: string
   category_id: number
   // New fields
   sku?: string
@@ -106,7 +106,7 @@ export interface UpdateProductRequest {
   id: number
   name: string
   description?: string
-  price: number
+  price: string
   currency?: string
   category_id: number
   // New fields
@@ -236,7 +236,7 @@ export interface SKU {
   id: number
   product_id: number
   code: string
-  price: number
+  price: string
   currency: string
   stock: number
   available_stock: number
@@ -253,7 +253,7 @@ export interface SKU {
 export interface CreateSKURequest {
   product_id: number
   code: string
-  price: number
+  price: string
   currency?: string
   stock?: number
   safety_stock?: number
@@ -264,7 +264,7 @@ export interface CreateSKURequest {
 export interface UpdateSKURequest {
   id: number
   code?: string
-  price?: number
+  price?: string
   currency?: string
   stock?: number
   safety_stock?: number

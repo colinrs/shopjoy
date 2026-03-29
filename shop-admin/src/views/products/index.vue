@@ -567,13 +567,10 @@ const handleSave = async () => {
           sports: 4
         }
 
-        // Price in cents (backend expects int64)
-        const priceInCents = Math.round(productForm.price * 100)
-
         await createProduct({
           name: productForm.name,
           description: productForm.description,
-          price: priceInCents,
+          price: String(productForm.price),
           currency: 'USD',
           category_id: categoryMap[productForm.category] || 1,
           sku: productForm.sku,

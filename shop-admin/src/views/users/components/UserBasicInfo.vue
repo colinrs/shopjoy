@@ -11,9 +11,7 @@
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="会员等级">
-        <el-tag :type="user?.is_vip ? 'warning' : 'info'">
-          {{ user?.is_vip ? 'VIP' : '普通会员' }}
-        </el-tag>
+        <el-tag type="info">普通会员</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="注册时间">{{ formatDateTime(user?.created_at) }}</el-descriptions-item>
       <el-descriptions-item label="最后登录">{{ formatDateTime(user?.last_login) }}</el-descriptions-item>
@@ -37,7 +35,7 @@
 
     <div class="section-title">消费统计</div>
     <el-descriptions :column="3" border>
-      <el-descriptions-item label="订单总数">{{ user?.total_orders || 0 }} 单</el-descriptions-item>
+      <el-descriptions-item label="订单总数">{{ user?.order_count || 0 }} 单</el-descriptions-item>
       <el-descriptions-item label="累计消费">
         <span class="spent-value">¥{{ formatPrice(user?.total_spent) }}</span>
       </el-descriptions-item>

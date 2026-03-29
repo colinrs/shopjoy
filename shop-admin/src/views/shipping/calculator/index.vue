@@ -351,7 +351,7 @@ const handleProductSelect = (item: TestItem, productId: number | null) => {
     const product = products.value.find(p => p.id === productId)
     if (product) {
       item.weight = parseInt(product.weight) || 500
-      item.price = product.price || 0
+      item.price = parseFloat(product.price) || 0
     }
   }
 }

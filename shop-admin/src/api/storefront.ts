@@ -105,7 +105,7 @@ export interface VersionItem {
   id: number
   version: number
   created_by: number
-  created_at: number
+  created_at: string
 }
 
 export interface ListVersionsResponse {

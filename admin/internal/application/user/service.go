@@ -75,16 +75,18 @@ type UserStatsResponse struct {
 // AddressResponse 地址响应
 type AddressResponse struct {
 	ID         int64  `json:"id"`
+	UserID     int64  `json:"user_id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
 	Country    string `json:"country"`
 	Province   string `json:"province"`
 	City       string `json:"city"`
 	District   string `json:"district"`
-	Address    string `json:"address"`
+	Detail     string `json:"detail"`
 	PostalCode string `json:"postal_code"`
 	IsDefault  bool   `json:"is_default"`
 	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type AddressListResponse struct {

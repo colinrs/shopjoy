@@ -122,7 +122,7 @@
         <el-table-column label="Amount" width="120" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
-              <p class="refund-amount">{{ row.currency }} {{ (row.amount / 100).toFixed(2) }}</p>
+              <p class="refund-amount">{{ row.currency }} {{ row.amount }}</p>
             </div>
           </template>
         </el-table-column>
@@ -275,18 +275,22 @@ const refundList = ref<Refund[]>([
     user_name: 'John Doe',
     user_phone: '138****8001',
     type: 1,
+    type_text: '全额退款',
     status: 0,
+    status_text: '待处理',
     reason_type: 'DEFECTIVE',
     reason: 'Product has scratches on screen',
     description: 'Received the product with visible scratches on the display screen. Photos attached.',
     images: [],
-    amount: 29900,
+    amount: "299.00",
     currency: 'CNY',
+    order_amount: "299.00",
     reject_reason: '',
     approved_at: null,
     approved_by: null,
     completed_at: null,
-    created_at: '2026-03-22 14:30:25',
+    created_at: '2026-03-22T14:30:25Z',
+    updated_at: '2026-03-22T14:30:25Z',
     order_items: []
   },
   {
@@ -298,18 +302,22 @@ const refundList = ref<Refund[]>([
     user_name: 'Jane Smith',
     user_phone: '139****9002',
     type: 1,
+    type_text: '全额退款',
     status: 1,
+    status_text: '已通过',
     reason_type: 'WRONG_ITEM',
     reason: 'Received wrong color',
     description: 'Ordered black but received white.',
     images: [],
-    amount: 45600,
+    amount: "456.00",
     currency: 'CNY',
+    order_amount: "456.00",
     reject_reason: '',
-    approved_at: '2026-03-21 16:00:00',
+    approved_at: '2026-03-21T16:00:00Z',
     approved_by: 'Admin',
     completed_at: null,
-    created_at: '2026-03-21 15:00:00',
+    created_at: '2026-03-21T15:00:00Z',
+    updated_at: '2026-03-21T16:00:00Z',
     order_items: []
   },
   {
@@ -321,18 +329,22 @@ const refundList = ref<Refund[]>([
     user_name: 'Mike Johnson',
     user_phone: '137****7003',
     type: 1,
+    type_text: '全额退款',
     status: 2,
+    status_text: '已拒绝',
     reason_type: 'NO_LONGER_NEEDED',
     reason: 'Changed mind',
     description: 'Found a better deal elsewhere.',
     images: [],
-    amount: 12900,
+    amount: "129.00",
     currency: 'CNY',
+    order_amount: "129.00",
     reject_reason: 'Refund period has expired for this reason.',
     approved_at: null,
     approved_by: null,
     completed_at: null,
-    created_at: '2026-03-20 10:00:00',
+    created_at: '2026-03-20T10:00:00Z',
+    updated_at: '2026-03-20T12:00:00Z',
     order_items: []
   },
   {
@@ -344,18 +356,22 @@ const refundList = ref<Refund[]>([
     user_name: 'Sarah Wilson',
     user_phone: '136****6004',
     type: 1,
+    type_text: '全额退款',
     status: 3,
+    status_text: '已完成',
     reason_type: 'DAMAGED',
     reason: 'Damaged during shipping',
     description: 'Package arrived damaged, product broken.',
     images: [],
-    amount: 59900,
+    amount: "599.00",
     currency: 'CNY',
+    order_amount: "599.00",
     reject_reason: '',
-    approved_at: '2026-03-19 14:00:00',
+    approved_at: '2026-03-19T14:00:00Z',
     approved_by: 'Admin',
-    completed_at: '2026-03-19 15:00:00',
-    created_at: '2026-03-19 12:00:00',
+    completed_at: '2026-03-19T15:00:00Z',
+    created_at: '2026-03-19T12:00:00Z',
+    updated_at: '2026-03-19T15:00:00Z',
     order_items: []
   },
   {
@@ -367,18 +383,22 @@ const refundList = ref<Refund[]>([
     user_name: 'Tom Brown',
     user_phone: '135****5005',
     type: 1,
+    type_text: '全额退款',
     status: 0,
+    status_text: '待处理',
     reason_type: 'NOT_AS_DESCRIBED',
     reason: 'Product differs from description',
     description: 'The material quality is much lower than shown in photos.',
     images: [],
-    amount: 159900,
+    amount: "1599.00",
     currency: 'CNY',
+    order_amount: "1599.00",
     reject_reason: '',
     approved_at: null,
     approved_by: null,
     completed_at: null,
-    created_at: '2026-03-18 09:00:00',
+    created_at: '2026-03-18T09:00:00Z',
+    updated_at: '2026-03-18T09:00:00Z',
     order_items: []
   }
 ])
@@ -459,7 +479,7 @@ const viewDetail = (row: Refund) => {
 const quickApprove = async (row: Refund) => {
   try {
     await ElMessageBox.confirm(
-      `Approve refund of ${row.currency} ${(row.amount / 100).toFixed(2)}?`,
+      `Approve refund of ${row.currency} ${row.amount}?`,
       'Approve Refund',
       { type: 'success' }
     )

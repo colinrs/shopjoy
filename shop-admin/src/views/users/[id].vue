@@ -24,7 +24,7 @@
         </div>
         <div class="user-stats">
           <div class="stat-item">
-            <span class="stat-value">{{ user?.total_orders || 0 }}</span>
+            <span class="stat-value">{{ user?.order_count || 0 }}</span>
             <span class="stat-label">订单数</span>
           </div>
           <div class="stat-item">
@@ -89,20 +89,26 @@ const loadUser = async () => {
     // Mock data for development
     user.value = {
       id: userId(),
+      tenant_id: 1,
       email: 'user@example.com',
       phone: '13800138000',
       name: '测试用户',
       avatar: '',
+      gender: 1,
+      gender_text: '男',
+      birthday: '1990-01-01',
       status: 1,
+      status_text: '正常',
+      review_count: 5,
       created_at: '2024-01-15T10:00:00Z',
+      updated_at: '2024-03-24T15:30:00Z',
       last_login: '2024-03-24T15:30:00Z',
       points_balance: 5000,
       frozen_points: 0,
       total_earned_points: 10000,
       total_redeemed_points: 5000,
-      total_orders: 25,
+      order_count: 25,
       total_spent: '12580.50',
-      is_vip: true,
       last_order_at: '2024-03-20T08:00:00Z',
       default_address: null
     }
