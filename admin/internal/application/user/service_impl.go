@@ -575,16 +575,18 @@ func toExtendedUserResponse(u *domain.User) *ExtendedUserResponse {
 func toAddressResponse(addr *domain.UserAddress) *AddressResponse {
 	return &AddressResponse{
 		ID:         addr.ID,
+		UserID:     addr.UserID,
 		Name:       addr.Name,
 		Phone:      addr.Phone,
 		Country:    addr.Country,
 		Province:   addr.Province,
 		City:       addr.City,
 		District:   addr.District,
-		Address:    addr.Address,
+		Detail:     addr.Address,
 		PostalCode: addr.PostalCode,
 		IsDefault:  addr.IsDefault,
 		CreatedAt:  addr.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:  addr.UpdatedAt.Format(time.RFC3339),
 	}
 }
 

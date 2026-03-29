@@ -3023,16 +3023,18 @@ type UserAddressListResponse struct {
 
 type UserAddressResponse struct {
 	ID         int64  `json:"id"`
+	UserID     int64  `json:"user_id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
 	Country    string `json:"country"`
 	Province   string `json:"province"`
 	City       string `json:"city"`
 	District   string `json:"district"`
-	Address    string `json:"address"`
+	Detail     string `json:"detail"`
 	PostalCode string `json:"postal_code"`
 	IsDefault  bool   `json:"is_default"`
 	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type UserCouponDetailResp struct {
@@ -3054,27 +3056,29 @@ type UserCouponDetailResp struct {
 }
 
 type UserDetailResponse struct {
-	ID            int64  `json:"id"`
-	TenantID      int64  `json:"tenant_id"`
-	Email         string `json:"email"`
-	Phone         string `json:"phone"`
-	Name          string `json:"name"`
-	Avatar        string `json:"avatar"`
-	Gender        int    `json:"gender"`
-	GenderText    string `json:"gender_text"`
-	Birthday      string `json:"birthday"`
-	Status        int    `json:"status"`
-	StatusText    string `json:"status_text"`
-	PointsBalance int64  `json:"points_balance"`
-	PointsFrozen  int64  `json:"points_frozen"`
-	TotalEarned   int64  `json:"total_earned"`
-	TotalRedeemed int64  `json:"total_redeemed"`
-	OrderCount    int64  `json:"order_count"`
-	TotalSpent    string `json:"total_spent"`
-	ReviewCount   int64  `json:"review_count"`
-	LastLogin     string `json:"last_login"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
+	ID             int64                `json:"id"`
+	TenantID       int64                `json:"tenant_id"`
+	Email          string               `json:"email"`
+	Phone          string               `json:"phone"`
+	Name           string               `json:"name"`
+	Avatar         string               `json:"avatar"`
+	Gender         int                  `json:"gender"`
+	GenderText     string               `json:"gender_text"`
+	Birthday       string               `json:"birthday"`
+	Status         int                  `json:"status"`
+	StatusText     string               `json:"status_text"`
+	PointsBalance  int64                `json:"points_balance"`
+	PointsFrozen   int64                `json:"frozen_points"`
+	TotalEarned    int64                `json:"total_earned_points"`
+	TotalRedeemed  int64                `json:"total_redeemed_points"`
+	OrderCount     int64                `json:"order_count"`
+	TotalSpent     string               `json:"total_spent"`
+	ReviewCount    int64                `json:"review_count"`
+	LastLogin      string               `json:"last_login"`
+	CreatedAt      string               `json:"created_at"`
+	UpdatedAt      string               `json:"updated_at"`
+	LastOrderAt    string               `json:"last_order_at"`
+	DefaultAddress *UserAddressResponse `json:"default_address"`
 }
 
 type UserStatsEnhancedResponse struct {
