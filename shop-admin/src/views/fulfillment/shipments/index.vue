@@ -15,12 +15,6 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item transit" @click="handleStatusFilter('in_transit')">
-          <p class="stat-number">{{ stats.in_transit }}</p>
-          <p class="stat-label">{{ $t('fulfillment.inTransitShipment') }}</p>
-        </div>
-      </el-col>
-      <el-col :xs="12" :sm="6">
         <div class="stat-item delivered" @click="handleStatusFilter('delivered')">
           <p class="stat-number">{{ stats.delivered }}</p>
           <p class="stat-label">{{ $t('fulfillment.deliveredShipment') }}</p>
@@ -278,7 +272,6 @@ const carriers = ref<Carrier[]>([])
 const stats = ref({
   pending: 0,
   shipped: 0,
-  in_transit: 0,
   delivered: 0
 })
 
@@ -310,7 +303,6 @@ const loadStats = async () => {
     stats.value = {
       pending: res.pending_shipment || 0,
       shipped: res.shipped || 0,
-      in_transit: 0,
       delivered: res.delivered || 0
     }
   } catch (error) {

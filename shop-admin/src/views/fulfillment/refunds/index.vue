@@ -219,7 +219,6 @@ import {
   approveRefund,
   rejectRefund,
   getRefundReasonList,
-  getFulfillmentSummary,
   type Refund,
   type RefundReason,
   type RefundListParams
@@ -281,12 +280,18 @@ const loadRefundReasons = async () => {
 
 const loadStats = async () => {
   try {
-    const res = await getFulfillmentSummary()
+    // Fetch counts for each status via API (parallel calls for efficiency)
+    const [pendingRes, approvedRes, rejectedRes, completedRes] = await Promise.all([
+      getRefundList({ status: 'pending', page_size: 1 }),
+      getRefundList({ status: 'approved', page_size: 1 }),
+      getRefundList({ status: 'rejected', page_size: 1 }),
+      getRefundList({ status: 'completed', page_size: 1 })
+    ])
     stats.value = {
-      pending: res.pending_refund || 0,
-      approved: 0,
-      rejected: 0,
-      completed: 0
+      pending: pendingRes.total,
+      approved: approvedRes.total,
+      rejected: rejectedRes.total,
+      completed: completedRes.total
     }
   } catch (error) {
     ElMessage.error(t('fulfillment.loadStatisticsFailed'))

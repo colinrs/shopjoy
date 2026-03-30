@@ -229,7 +229,7 @@ const stats = ref({
   pending_refunds: 0
 })
 
-const refundRateChange = ref(-0.5)
+const refundRateChange = ref(0)
 
 const problemProducts = ref<{ product_id: number; product_name: string; image: string; total_sales: number; refund_count: number; refund_rate: number }[]>([])
 

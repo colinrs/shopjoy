@@ -250,7 +250,7 @@
                   <el-dropdown-item command="remark">
                     <el-icon><Edit /></el-icon>{{ $t('orders.editRemark') }}
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="row.status === 'pending'" command="adjust">
+                  <el-dropdown-item v-if="row.status === 'pending_payment'" command="adjust">
                     <el-icon><PriceTag /></el-icon>{{ $t('orders.adjustPrice') }}
                   </el-dropdown-item>
                   <el-dropdown-item v-if="canCancel(row)" command="cancel" divided>
