@@ -60,9 +60,9 @@
           </el-select>
           <el-select v-model="paymentMethodFilter" :placeholder="$t('payments.paymentMethod')" clearable class="filter-select">
             <el-option :label="$t('payments.all')" value="" />
-            <el-option label="Stripe" value="stripe_card" />
-            <el-option label="Stripe Alipay" value="stripe_alipay" />
-            <el-option label="Stripe WeChat" value="stripe_wechat" />
+            <el-option :label="$t('payments.stripeCard')" value="stripe_card" />
+            <el-option :label="$t('payments.stripeAlipay')" value="stripe_alipay" />
+            <el-option :label="$t('payments.stripeWechat')" value="stripe_wechat" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -214,9 +214,9 @@ const transactionStats = ref({
 })
 
 const statusTypeMap = {
-  0: { type: 'warning' as const, text: 'Pending' },
-  1: { type: 'success' as const, text: 'Success' },
-  2: { type: 'danger' as const, text: 'Failed' }
+  0: { type: 'warning' as const, text: t('payments.pending') },
+  1: { type: 'success' as const, text: t('payments.success') },
+  2: { type: 'danger' as const, text: t('payments.failed') }
 }
 
 const transactionList = ref<Transaction[]>([])

@@ -329,6 +329,7 @@
     "exportFailed": "导出失败",
     "copiedToClipboard": "商品信息已复制到剪贴板",
     "copyFailed": "复制失败",
+    "copyFormOpened": "商品数据已复制到表单，请编辑后保存",
     "setTopSuccess": "商品已置顶",
     "confirmDelete": "确认删除商品 \"{name}\"？",
     "confirmBatchDelete": "确认删除选中的 {count} 个商品？",
@@ -414,7 +415,17 @@
     "nextStep": "下一步",
     "confirmRefund": "确认退款",
     "refundInitiatedSuccessfully": "退款发起成功",
-    "failedToInitiateRefund": "发起退款失败"
+    "failedToInitiateRefund": "发起退款失败",
+    "stripeCard": "Stripe 信用卡",
+    "stripeAlipay": "Stripe 支付宝",
+    "stripeWechat": "Stripe 微信支付",
+    "refundReasonDefective": "商品缺陷",
+    "refundReasonWrongItem": "错发商品",
+    "refundReasonNotAsDescribed": "与描述不符",
+    "refundReasonDamaged": "运输损坏",
+    "refundReasonNoLongerNeeded": "不需要了",
+    "refundReasonLateDelivery": "配送延迟",
+    "refundReasonOther": "其他"
   },
   "points": {
     "title": "积分管理",

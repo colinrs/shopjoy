@@ -162,7 +162,7 @@
             <el-button type="primary" link size="small" @click="handleEdit(row)">
               {{ $t('common.edit') }}
             </el-button>
-            <el-button type="primary" link size="small" @click="handleView(row)">
+            <el-button type="primary" link size="small" @click="handlePreview(row)">
               {{ $t('products.preview') }}
             </el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
@@ -299,6 +299,109 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- Preview Dialog -->
+    <el-dialog
+      v-model="previewDialogVisible"
+      :title="$t('products.preview')"
+      width="700px"
+      destroy-on-close
+    >
+      <div v-if="previewProduct" class="preview-content">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <div class="preview-image">
+              <el-image
+                v-if="previewProduct.images && previewProduct.images.length > 0"
+                :src="previewProduct.images[0]"
+                fit="cover"
+                class="preview-main-image"
+                :preview-src-list="previewProduct.images"
+              />
+              <div v-else class="preview-image-placeholder">
+                <el-icon><Picture /></el-icon>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="16">
+            <div class="preview-info">
+              <h3 class="preview-title">{{ previewProduct.name }}</h3>
+              <p class="preview-sku">SKU: {{ previewProduct.sku || $t('common.noData') }}</p>
+              <div class="preview-tags">
+                <el-tag v-if="previewProduct.tags?.includes('hot')" size="small" type="danger">{{ $t('products.hot') }}</el-tag>
+                <el-tag v-if="previewProduct.tags?.includes('new')" size="small" type="success">{{ $t('products.new') }}</el-tag>
+              </div>
+              <div class="preview-price">
+                <span class="price-label">{{ $t('products.price') }}:</span>
+                <span class="price-value">{{ previewProduct.currency || 'USD' }} {{ previewProduct.price }}</span>
+              </div>
+              <div class="preview-detail-row">
+                <span class="detail-label">{{ $t('products.stock') }}:</span>
+                <el-tag :type="getStockType(previewProduct.stock)" size="small">{{ previewProduct.stock }}</el-tag>
+              </div>
+              <div class="preview-detail-row">
+                <span class="detail-label">{{ $t('products.status') }}:</span>
+                <el-tag :type="previewProduct.status === 'on_sale' ? 'success' : 'warning'" size="small">
+                  {{ previewProduct.status === 'on_sale' ? $t('products.onSale') : previewProduct.status === 'off_sale' ? $t('products.offSale') : $t('products.draft') }}
+                </el-tag>
+              </div>
+              <div class="preview-detail-row">
+                <span class="detail-label">{{ $t('products.brand') }}:</span>
+                <span>{{ previewProduct.brand || '-' }}</span>
+              </div>
+              <div class="preview-detail-row">
+                <span class="detail-label">{{ $t('products.categoryId') }}:</span>
+                <span>{{ previewProduct.category_id || '-' }}</span>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20" class="preview-description-row">
+          <el-col :span="24">
+            <div class="preview-description">
+              <span class="detail-label">{{ $t('products.productDescription') }}:</span>
+              <p class="description-content">{{ previewProduct.description || $t('common.noData') }}</p>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row v-if="previewProduct.markets && previewProduct.markets.length > 0" :gutter="20">
+          <el-col :span="24">
+            <div class="preview-markets">
+              <span class="detail-label">{{ $t('products.markets') }}:</span>
+              <div class="market-tags">
+                <el-tag
+                  v-for="market in previewProduct.markets"
+                  :key="market.market_id"
+                  :type="market.is_enabled ? 'success' : 'info'"
+                  size="small"
+                  class="market-tag"
+                >
+                  {{ market.market_code }}: {{ market.price }} {{ market.currency }}
+                </el-tag>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20" class="preview-meta-row">
+          <el-col :span="12">
+            <div class="preview-meta">
+              <span class="detail-label">{{ $t('common.createdAt') }}:</span>
+              <span>{{ previewProduct.created_at || '-' }}</span>
+            </div>
+          </el-col>
+          <el-col :span="12">
+            <div class="preview-meta">
+              <span class="detail-label">{{ $t('common.updatedAt') }}:</span>
+              <span>{{ previewProduct.updated_at || '-' }}</span>
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+      <template #footer>
+        <el-button @click="previewDialogVisible = false">{{ $t('common.close') }}</el-button>
+        <el-button type="primary" @click="handlePreviewEdit">{{ $t('common.edit') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -382,7 +485,7 @@ const formRules = {
   name: [{ required: true, message: '', trigger: 'blur' }],
   price: [{ required: true, message: '', trigger: 'blur' }],
   stock: [{ required: true, message: '', trigger: 'blur' }],
-  category: [{ required: true, message: '', trigger: 'change' }]
+  category_id: [{ required: true, message: '', trigger: 'change' }]
 }
 
 const formatPrice = (price: string) => {
@@ -452,20 +555,54 @@ const handleEdit = (row: any) => {
   router.push(`/products/${row.id}`)
 }
 
-const handleView = (row: any) => {
-  router.push(`/products/${row.id}`)
+const previewDialogVisible = ref(false)
+const previewProduct = ref<Product | null>(null)
+
+const handlePreview = (row: Product) => {
+  previewProduct.value = row
+  previewDialogVisible.value = true
 }
 
-const handleCommand = async (cmd: string, row: any) => {
+const handlePreviewEdit = () => {
+  if (previewProduct.value) {
+    previewDialogVisible.value = false
+    router.push(`/products/${previewProduct.value.id}`)
+  }
+}
+
+const handleCommand = async (cmd: string, row: Product) => {
   switch (cmd) {
     case 'copy':
-      try {
-        await navigator.clipboard.writeText(JSON.stringify(row, null, 2))
-        ElMessage.success(t('products.copiedToClipboard'))
-      } catch (error) {
-        console.error('Failed to copy:', error)
-        ElMessage.error(t('products.copyFailed'))
-      }
+      // Pre-fill form with product data for creating a duplicate
+      isEdit.value = false
+      Object.assign(productForm, {
+        id: null,
+        name: `${row.name} (Copy)`,
+        price: parseFloat(row.price) || 0,
+        original_price: parseFloat(row.cost_price) || 0,
+        stock: row.stock || 0,
+        category_id: row.category_id || 0,
+        image: row.images?.[0] || '',
+        images: row.images || [],
+        description: row.description || '',
+        sku: row.sku || '',
+        brand: row.brand || '',
+        tags: row.tags || [],
+        is_matrix_product: row.is_matrix_product || false,
+        hs_code: row.hs_code || '',
+        coo: row.coo || '',
+        weight: row.weight || '',
+        weight_unit: row.weight_unit || 'kg',
+        length: row.length || '',
+        width: row.width || '',
+        height: row.height || '',
+        dangerous_goods: row.dangerous_goods || [],
+        currency: row.currency || 'USD',
+        cost_price: parseFloat(row.cost_price) || 0,
+        status: 'draft'
+      })
+      dialogVisible.value = true
+      ElMessage.success(t('products.copyFormOpened'))
       break
     case 'top':
       ElMessage.success(t('products.setTopSuccess'))
@@ -476,7 +613,7 @@ const handleCommand = async (cmd: string, row: any) => {
   }
 }
 
-const handleDelete = async (row: any) => {
+const handleDelete = async (row: Product) => {
   try {
     await ElMessageBox.confirm(
       t('products.confirmDelete', { name: row.name }),
@@ -492,7 +629,7 @@ const handleDelete = async (row: any) => {
     loadProducts()
   } catch (error) {
     console.error('Failed to delete product:', error)
-    if (error !== 'cancel') {
+    if ((error as any) !== 'cancel') {
       ElMessage.error(t('products.deleteFailed'))
     }
   }
@@ -645,8 +782,8 @@ const handleSave = async () => {
           name: productForm.name,
           description: productForm.description,
           price: String(productForm.price),
-          currency: 'USD',
-          category_id: productForm.category_id || 1,
+          currency: productForm.currency || 'USD',
+          category_id: productForm.category_id,
           sku: productForm.sku,
           brand: productForm.brand,
           tags: productForm.tags,
@@ -1092,5 +1229,131 @@ onMounted(() => {
   .table-card {
     border-radius: 14px;
   }
+}
+
+/* Preview Dialog */
+.preview-content {
+  padding: 10px 0;
+}
+
+.preview-image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F9FAFB;
+}
+
+.preview-main-image {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%);
+  color: #6366F1;
+  font-size: 48px;
+}
+
+.preview-info {
+  padding: 10px 0;
+}
+
+.preview-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1E1B4B;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.preview-sku {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 12px 0;
+  font-family: 'Fira Code', monospace;
+}
+
+.preview-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preview-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.price-label {
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.price-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #EF4444;
+}
+
+.preview-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #6B7280;
+  min-width: 80px;
+}
+
+.preview-description-row {
+  margin-top: 20px;
+}
+
+.preview-description {
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.description-content {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.preview-markets {
+  margin-top: 16px;
+}
+
+.preview-markets .market-tags {
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.preview-meta-row {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6B7280;
 }
 </style>

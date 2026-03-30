@@ -329,6 +329,7 @@
     "exportFailed": "Export failed",
     "copiedToClipboard": "Product info copied to clipboard",
     "copyFailed": "Copy failed",
+    "copyFormOpened": "Product data copied to form, please edit and save",
     "setTopSuccess": "Product set to top",
     "confirmDelete": "Are you sure you want to delete product \"{name}\"?",
     "confirmBatchDelete": "Are you sure you want to delete {count} selected products?",
@@ -414,7 +415,17 @@
     "nextStep": "Next Step",
     "confirmRefund": "Confirm Refund",
     "refundInitiatedSuccessfully": "Refund initiated successfully",
-    "failedToInitiateRefund": "Failed to initiate refund"
+    "failedToInitiateRefund": "Failed to initiate refund",
+    "stripeCard": "Stripe Card",
+    "stripeAlipay": "Stripe Alipay",
+    "stripeWechat": "Stripe WeChat",
+    "refundReasonDefective": "Product Defective",
+    "refundReasonWrongItem": "Wrong Item Received",
+    "refundReasonNotAsDescribed": "Not As Described",
+    "refundReasonDamaged": "Damaged in Transit",
+    "refundReasonNoLongerNeeded": "No Longer Needed",
+    "refundReasonLateDelivery": "Late Delivery",
+    "refundReasonOther": "Other"
   },
   "points": {
     "title": "Points",

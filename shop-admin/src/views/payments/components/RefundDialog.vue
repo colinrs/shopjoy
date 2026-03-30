@@ -218,13 +218,13 @@ const form = reactive({
 })
 
 const refundReasons = [
-  { code: 'DEFECTIVE', name: 'Product Defective' },
-  { code: 'WRONG_ITEM', name: 'Wrong Item Received' },
-  { code: 'NOT_AS_DESCRIBED', name: 'Not As Described' },
-  { code: 'DAMAGED', name: 'Damaged in Transit' },
-  { code: 'NO_LONGER_NEEDED', name: 'No Longer Needed' },
-  { code: 'LATE_DELIVERY', name: 'Late Delivery' },
-  { code: 'OTHER', name: 'Other' }
+  { code: 'DEFECTIVE', name: t('payments.refundReasonDefective') },
+  { code: 'WRONG_ITEM', name: t('payments.refundReasonWrongItem') },
+  { code: 'NOT_AS_DESCRIBED', name: t('payments.refundReasonNotAsDescribed') },
+  { code: 'DAMAGED', name: t('payments.refundReasonDamaged') },
+  { code: 'NO_LONGER_NEEDED', name: t('payments.refundReasonNoLongerNeeded') },
+  { code: 'LATE_DELIVERY', name: t('payments.refundReasonLateDelivery') },
+  { code: 'OTHER', name: t('payments.refundReasonOther') }
 ]
 
 // Computed
