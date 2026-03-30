@@ -1,8 +1,8 @@
 <template>
   <div class="promotion-detail-page" v-loading="loading">
     <PageHeader
-      :title="isEdit ? '编辑促销活动' : '创建促销活动'"
-      :subtitle="promotionForm.name || '配置促销活动信息'"
+      :title="isEdit ? $t('promotions.editPromotion') : $t('promotions.createPromotion')"
+      :subtitle="promotionForm.name || $t('promotions.configurePromotionInfo')"
       @back="handleBack"
     />
 
@@ -17,49 +17,49 @@
             label-position="top"
           >
             <!-- Basic Info -->
-            <div class="section-title">基本信息</div>
+            <div class="section-title">{{ $t('promotions.basicInfo') }}</div>
             <el-row :gutter="20">
               <el-col :xs="24" :sm="12">
-                <el-form-item label="活动名称" prop="name">
-                  <el-input v-model="promotionForm.name" placeholder="请输入活动名称" maxlength="100" show-word-limit />
+                <el-form-item :label="$t('promotions.promotionName')" prop="name">
+                  <el-input v-model="promotionForm.name" :placeholder="$t('promotions.enterPromotionName')" maxlength="100" show-word-limit />
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">
-                <el-form-item label="活动类型" prop="type">
-                  <el-select v-model="promotionForm.type" placeholder="请选择活动类型" style="width: 100%">
-                    <el-option label="折扣" value="discount" />
-                    <el-option label="限时秒杀" value="flash_sale" />
-                    <el-option label="捆绑销售" value="bundle" />
-                    <el-option label="买X送Y" value="buy_x_get_y" />
+                <el-form-item :label="$t('promotions.promotionTypeSelect')" prop="type">
+                  <el-select v-model="promotionForm.type" :placeholder="$t('promotions.selectPromotionType')" style="width: 100%">
+                    <el-option :label="$t('promotions.discount')" value="discount" />
+                    <el-option :label="$t('promotions.flashSale')" value="flash_sale" />
+                    <el-option :label="$t('promotions.bundle')" value="bundle" />
+                    <el-option :label="$t('promotions.buyXGetY')" value="buy_x_get_y" />
                   </el-select>
                 </el-form-item>
               </el-col>
             </el-row>
 
-            <el-form-item label="活动描述">
+            <el-form-item :label="$t('promotions.promotionDescription')">
               <el-input
                 v-model="promotionForm.description"
                 type="textarea"
                 :rows="3"
-                placeholder="请输入活动描述"
+                :placeholder="$t('promotions.enterPromotionDesc')"
                 maxlength="500"
                 show-word-limit
               />
             </el-form-item>
 
             <!-- Discount Settings -->
-            <div class="section-title">优惠设置</div>
+            <div class="section-title">{{ $t('promotions.discountSettings') }}</div>
             <el-row :gutter="20">
               <el-col :xs="24" :sm="8">
-                <el-form-item label="优惠类型" prop="discount_type">
-                  <el-select v-model="promotionForm.discount_type" placeholder="请选择优惠类型" style="width: 100%">
-                    <el-option label="固定金额" value="fixed_amount" />
-                    <el-option label="百分比折扣" value="percentage" />
+                <el-form-item :label="$t('promotions.discountType')" prop="discount_type">
+                  <el-select v-model="promotionForm.discount_type" :placeholder="$t('promotions.selectDiscountType')" style="width: 100%">
+                    <el-option :label="$t('promotions.fixedAmount')" value="fixed_amount" />
+                    <el-option :label="$t('promotions.percentage')" value="percentage" />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="8">
-                <el-form-item :label="promotionForm.discount_type === 'fixed_amount' ? '优惠金额' : '折扣比例'" prop="discount_value">
+                <el-form-item :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')" prop="discount_value">
                   <el-input-number
                     v-model="promotionForm.discount_value_num"
                     :min="0"
@@ -70,7 +70,7 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="8">
-                <el-form-item label="最低消费">
+                <el-form-item :label="$t('promotions.lowestConsume')">
                   <el-input-number
                     v-model="promotionForm.min_order_amount_num"
                     :min="0"
@@ -83,7 +83,7 @@
 
             <el-row :gutter="20" v-if="promotionForm.discount_type === 'percentage'">
               <el-col :xs="24" :sm="12">
-                <el-form-item label="最大优惠金额">
+                <el-form-item :label="$t('promotions.maxDiscountAmount')">
                   <el-input-number
                     v-model="promotionForm.max_discount_num"
                     :min="0"
@@ -95,38 +95,38 @@
             </el-row>
 
             <!-- Time Range -->
-            <div class="section-title">活动时间</div>
-            <el-form-item label="活动有效期" prop="dateRange">
+            <div class="section-title">{{ $t('promotions.activityTime') }}</div>
+            <el-form-item :label="$t('promotions.promotionPeriod')" prop="dateRange">
               <el-date-picker
                 v-model="promotionForm.dateRange"
                 type="datetimerange"
-                range-separator="至"
-                start-placeholder="开始时间"
-                end-placeholder="结束时间"
+                :range-separator="$t('promotions.to')"
+                :start-placeholder="$t('promotions.startPlaceholder')"
+                :end-placeholder="$t('promotions.endPlaceholder')"
                 value-format="YYYY-MM-DDTHH:mm:ss[Z]"
                 style="width: 100%"
               />
             </el-form-item>
 
             <!-- Scope Settings -->
-            <div class="section-title">适用范围</div>
-            <el-form-item label="活动范围">
+            <div class="section-title">{{ $t('promotions.scopeSettings') }}</div>
+            <el-form-item :label="$t('promotions.activityScope')">
               <el-radio-group v-model="promotionForm.scope_type">
-                <el-radio label="storewide">全场</el-radio>
-                <el-radio label="products">指定商品</el-radio>
-                <el-radio label="categories">指定分类</el-radio>
-                <el-radio label="brands">指定品牌</el-radio>
+                <el-radio label="storewide">{{ $t('promotions.storewide') }}</el-radio>
+                <el-radio label="products">{{ $t('promotions.specificProductsScope') }}</el-radio>
+                <el-radio label="categories">{{ $t('promotions.specificCategories') }}</el-radio>
+                <el-radio label="brands">{{ $t('promotions.specificBrands') }}</el-radio>
               </el-radio-group>
             </el-form-item>
 
-            <el-form-item v-if="promotionForm.scope_type === 'products'" label="选择商品">
+            <el-form-item v-if="promotionForm.scope_type === 'products'" :label="$t('promotions.selectProducts')">
               <el-select
                 v-model="promotionForm.product_ids"
                 multiple
                 filterable
                 remote
                 reserve-keyword
-                placeholder="搜索商品"
+                :placeholder="$t('promotions.searchProducts')"
                 :remote-method="searchProducts"
                 style="width: 100%"
               >
@@ -139,8 +139,8 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item v-if="promotionForm.scope_type === 'categories'" label="选择分类">
-              <el-select v-model="promotionForm.category_ids" multiple placeholder="请选择分类" style="width: 100%">
+            <el-form-item v-if="promotionForm.scope_type === 'categories'" :label="$t('promotions.selectCategories')">
+              <el-select v-model="promotionForm.category_ids" multiple :placeholder="$t('promotions.selectCategoryPlaceholder')" style="width: 100%">
                 <el-option
                   v-for="item in categoryOptions"
                   :key="item.id"
@@ -151,18 +151,18 @@
             </el-form-item>
 
             <!-- Usage Limits -->
-            <div class="section-title">使用限制</div>
+            <div class="section-title">{{ $t('promotions.usageLimits') }}</div>
             <el-row :gutter="20">
               <el-col :xs="24" :sm="12">
-                <el-form-item label="总使用次数">
+                <el-form-item :label="$t('promotions.totalUsageLimit')">
                   <el-input-number v-model="promotionForm.usage_limit" :min="0" style="width: 100%" />
-                  <div class="form-tip">0 表示不限制</div>
+                  <div class="form-tip">{{ $t('promotions.zeroUnlimitedUsage') }}</div>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">
-                <el-form-item label="每人限用次数">
+                <el-form-item :label="$t('promotions.perUserUsageLimit')">
                   <el-input-number v-model="promotionForm.per_user_limit" :min="0" style="width: 100%" />
-                  <div class="form-tip">0 表示不限制</div>
+                  <div class="form-tip">{{ $t('promotions.zeroUnlimitedUsage') }}</div>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -174,7 +174,7 @@
         <!-- Status Card -->
         <el-card v-if="isEdit" class="status-card" shadow="never">
           <template #header>
-            <span class="card-title">活动状态</span>
+            <span class="card-title">{{ $t('promotions.activityStatus') }}</span>
           </template>
           <div class="status-info">
             <el-tag :type="getStatusType(promotionForm.status)" size="large">
@@ -187,7 +187,7 @@
                 @click="handleActivate"
                 :loading="activating"
               >
-                激活活动
+                {{ $t('promotions.activateActivity') }}
               </el-button>
               <el-button
                 v-if="promotionForm.status === 'active'"
@@ -195,7 +195,7 @@
                 @click="handleDeactivate"
                 :loading="activating"
               >
-                停用活动
+                {{ $t('promotions.deactivateActivity') }}
               </el-button>
             </div>
           </div>
@@ -204,13 +204,13 @@
         <!-- Preview Card -->
         <el-card class="preview-card" shadow="never">
           <template #header>
-            <span class="card-title">活动预览</span>
+            <span class="card-title">{{ $t('promotions.activityPreview') }}</span>
           </template>
           <div class="preview-content">
-            <h4 class="preview-name">{{ promotionForm.name || '活动名称' }}</h4>
-            <p class="preview-desc">{{ promotionForm.description || '活动描述' }}</p>
+            <h4 class="preview-name">{{ promotionForm.name || $t('promotions.activityName') }}</h4>
+            <p class="preview-desc">{{ promotionForm.description || $t('promotions.activityDesc') }}</p>
             <div class="preview-discount">
-              <span class="discount-label">优惠：</span>
+              <span class="discount-label">{{ $t('promotions.previewDiscount') }}</span>
               <span class="discount-value">
                 <template v-if="promotionForm.discount_type === 'fixed_amount'">
                   ¥{{ promotionForm.discount_value_num || 0 }}
@@ -221,13 +221,13 @@
               </span>
             </div>
             <div class="preview-scope">
-              <span class="scope-label">适用范围：</span>
+              <span class="scope-label">{{ $t('promotions.previewScope') }}</span>
               <span class="scope-value">{{ getScopeText(promotionForm.scope_type) }}</span>
             </div>
             <div class="preview-time" v-if="promotionForm.dateRange?.length === 2">
-              <span class="time-label">活动时间：</span>
+              <span class="time-label">{{ $t('promotions.previewTime') }}</span>
               <span class="time-value">
-                {{ formatDateTime(promotionForm.dateRange[0]) }} 至 {{ formatDateTime(promotionForm.dateRange[1]) }}
+                {{ formatDateTime(promotionForm.dateRange[0]) }} {{ $t('promotions.to') }} {{ formatDateTime(promotionForm.dateRange[1]) }}
               </span>
             </div>
           </div>
@@ -237,9 +237,9 @@
 
     <!-- Footer Actions -->
     <div class="footer-actions">
-      <el-button @click="handleBack">取消</el-button>
+      <el-button @click="handleBack">{{ $t('promotions.cancelAction') }}</el-button>
       <el-button type="primary" @click="handleSave" :loading="saving">
-        {{ isEdit ? '保存修改' : '创建活动' }}
+        {{ isEdit ? $t('promotions.saveChanges') : $t('promotions.createActivity') }}
       </el-button>
     </div>
   </div>
@@ -255,6 +255,7 @@ import {
 import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'
 import PageHeader from '@/components/common/PageHeader.vue'
+import { t } from '@/plugins/i18n'
 
 const router = useRouter()
 const route = useRoute()
@@ -285,10 +286,10 @@ const promotionForm = reactive({
 })
 
 const rules = {
-  name: [{ required: true, message: '请输入活动名称', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择活动类型', trigger: 'change' }],
-  discount_type: [{ required: true, message: '请选择优惠类型', trigger: 'change' }],
-  dateRange: [{ required: true, message: '请选择活动时间', trigger: 'change' }]
+  name: [{ required: true, message: t('promotions.enterPromotionName'), trigger: 'blur' }],
+  type: [{ required: true, message: t('promotions.selectPromotionType'), trigger: 'change' }],
+  discount_type: [{ required: true, message: t('promotions.selectDiscountType'), trigger: 'change' }],
+  dateRange: [{ required: true, message: t('promotions.selectTimePeriod'), trigger: 'change' }]
 }
 
 const productOptions = ref<{ id: number; name: string }[]>([])
@@ -315,7 +316,7 @@ const loadPromotion = async () => {
     promotionForm.status = res.status
   } catch (error) {
     console.error('Failed to load promotion:', error)
-    ElMessage.error('加载促销活动失败')
+    ElMessage.error(t('promotions.loadPromotionFailed'))
   } finally {
     loading.value = false
   }
@@ -327,6 +328,7 @@ const loadCategories = async () => {
     categoryOptions.value = (res.list || []).map(c => ({ id: c.id, name: c.name }))
   } catch (error) {
     console.error('Failed to load categories:', error)
+    ElMessage.error(t('promotions.loadCategoriesFailed'))
   }
 }
 
@@ -337,6 +339,7 @@ const searchProducts = async (query: string) => {
     productOptions.value = (res.list || []).map(p => ({ id: p.id, name: p.name }))
   } catch (error) {
     console.error('Failed to search products:', error)
+    ElMessage.error(t('promotions.searchProductsFailed'))
   }
 }
 
@@ -370,14 +373,15 @@ const handleSave = async () => {
 
       if (isEdit.value) {
         await updatePromotion({ id: promotionId.value, ...data })
-        ElMessage.success('保存成功')
+        ElMessage.success(t('promotions.updateSuccess'))
       } else {
         await createPromotion(data)
-        ElMessage.success('创建成功')
+        ElMessage.success(t('promotions.createSuccess'))
         router.push('/promotions')
       }
     } catch (error) {
       console.error('Failed to save promotion:', error)
+      ElMessage.error(t('promotions.savePromotionFailed'))
     } finally {
       saving.value = false
     }
@@ -388,10 +392,11 @@ const handleActivate = async () => {
   activating.value = true
   try {
     await activatePromotion(promotionId.value)
-    ElMessage.success('激活成功')
+    ElMessage.success(t('promotions.activateSuccess'))
     promotionForm.status = 'active'
   } catch (error) {
     console.error('Failed to activate:', error)
+    ElMessage.error(t('promotions.activatePromotionFailed'))
   } finally {
     activating.value = false
   }
@@ -401,10 +406,11 @@ const handleDeactivate = async () => {
   activating.value = true
   try {
     await deactivatePromotion(promotionId.value)
-    ElMessage.success('停用成功')
+    ElMessage.success(t('promotions.deactivateSuccess'))
     promotionForm.status = 'paused'
   } catch (error) {
     console.error('Failed to deactivate:', error)
+    ElMessage.error(t('promotions.deactivatePromotionFailed'))
   } finally {
     activating.value = false
   }
@@ -434,20 +440,20 @@ const getStatusType = (status: string) => {
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    'active': '进行中',
-    'paused': '已暂停',
-    'pending': '待开始',
-    'ended': '已结束'
+    'active': t('promotions.activeStatus'),
+    'paused': t('promotions.paused'),
+    'pending': t('promotions.pending'),
+    'ended': t('promotions.ended')
   }
   return texts[status] || status
 }
 
 const getScopeText = (scope: string) => {
   const texts: Record<string, string> = {
-    'storewide': '全场商品',
-    'products': '指定商品',
-    'categories': '指定分类',
-    'brands': '指定品牌'
+    'storewide': t('promotions.scopeStorewide'),
+    'products': t('promotions.scopeSpecificProducts'),
+    'categories': t('promotions.scopeSpecificCategories'),
+    'brands': t('promotions.scopeSpecificBrands')
   }
   return texts[scope] || scope
 }

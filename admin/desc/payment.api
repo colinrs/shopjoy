@@ -120,6 +120,15 @@ type (
 		StatusText      string `json:"status_text"`
 		ChannelRefundID string `json:"channel_refund_id,optional"`
 	}
+	// ===================== Export Transactions =====================
+	ExportPaymentTransactionsReq {
+		OrderNo       string `form:"order_no,optional"`
+		TransactionID string `form:"transaction_id,optional"`
+		Status        int8   `form:"status,optional"` // 0=pending, 1=succeeded, 2=failed
+		PaymentMethod string `form:"payment_method,optional"`
+		StartTime     string `form:"start_time,optional"` // RFC3339
+		EndTime       string `form:"end_time,optional"` // RFC3339
+	}
 )
 
 // ===================== Payment API =====================
@@ -135,6 +144,10 @@ service admin-api {
 	@doc "支付流水列表"
 	@handler ListTransactionsHandler
 	get /api/v1/payments/transactions (ListTransactionsReq) returns (ListTransactionsResp)
+
+	@doc "导出支付流水"
+	@handler ExportPaymentTransactionsHandler
+	get /api/v1/payments/transactions/export (ExportPaymentTransactionsReq)
 
 	@doc "支付流水详情"
 	@handler GetTransactionHandler

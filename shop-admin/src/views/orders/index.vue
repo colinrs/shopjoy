@@ -5,25 +5,25 @@
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
           <p class="stat-number">{{ orderStats.pending_payment }}</p>
-          <p class="stat-label">Pending Payment</p>
+          <p class="stat-label">{{ $t('orders.pendingPayment') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
-          <p class="stat-number">{{ orderStats.pending_shipment }}</p>
-          <p class="stat-label">Pending Shipment</p>
+          <p class="stat-number">{{ orderStats.partial_shipped }}</p>
+          <p class="stat-label">{{ $t('orders.partialShipped') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
           <p class="stat-number">{{ orderStats.shipped }}</p>
-          <p class="stat-label">Shipped</p>
+          <p class="stat-label">{{ $t('orders.shipped') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item">
           <p class="stat-number">{{ orderStats.delivered }}</p>
-          <p class="stat-label">Delivered</p>
+          <p class="stat-label">{{ $t('orders.delivered') }}</p>
         </div>
       </el-col>
     </el-row>
@@ -34,7 +34,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="Search order no. / phone"
+            :placeholder="$t('orders.searchPlaceholder')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -44,28 +44,30 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" placeholder="Order Status" clearable class="filter-select" @change="handleSearch">
-            <el-option label="All" value="" />
-            <el-option label="Pending Payment" value="pending_payment" />
-            <el-option label="Paid" value="paid" />
-            <el-option label="To Ship" value="pending_shipment" />
-            <el-option label="Shipped" value="shipped" />
-            <el-option label="Completed" value="completed" />
-            <el-option label="Cancelled" value="cancelled" />
+          <el-select v-model="statusFilter" :placeholder="$t('orders.filterOrderStatus')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('common.all')" value="" />
+            <el-option :label="$t('orders.pendingPayment')" value="pending_payment" />
+            <el-option :label="$t('orders.paid')" value="paid" />
+            <el-option :label="$t('orders.pendingShipment')" value="pending_shipment" />
+            <el-option :label="$t('orders.shipped')" value="shipped" />
+            <el-option :label="$t('orders.completed')" value="completed" />
+            <el-option :label="$t('orders.cancelled')" value="cancelled" />
+            <el-option :label="$t('orders.refunding')" value="refunding" />
+            <el-option :label="$t('orders.refunded')" value="refunded" />
           </el-select>
-          <el-select v-model="fulfillmentFilter" placeholder="Fulfillment" clearable class="filter-select" @change="handleSearch">
-            <el-option label="All" value="" />
-            <el-option label="Unshipped" value="pending" />
-            <el-option label="Partial Shipped" value="partial_shipped" />
-            <el-option label="Shipped" value="shipped" />
-            <el-option label="Delivered" value="delivered" />
+          <el-select v-model="fulfillmentFilter" :placeholder="$t('orders.filterFulfillment')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('common.all')" value="" />
+            <el-option :label="$t('orders.unshipped')" value="pending" />
+            <el-option :label="$t('orders.partialShipped')" value="partial_shipped" />
+            <el-option :label="$t('orders.shipped')" value="shipped" />
+            <el-option :label="$t('orders.delivered')" value="delivered" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="to"
-            start-placeholder="Start Date"
-            end-placeholder="End Date"
+            :range-separator="$t('common.to')"
+            :start-placeholder="$t('orders.startDate')"
+            :end-placeholder="$t('orders.endDate')"
             class="date-picker"
             value-format="YYYY-MM-DD"
             @change="handleSearch"
@@ -74,11 +76,11 @@
         <div class="filter-right">
           <el-button @click="handleExport" :loading="exporting">
             <el-icon><Download /></el-icon>
-            Export
+            {{ $t('common.export') }}
           </el-button>
           <el-button type="primary" @click="handleRefresh">
             <el-icon><Refresh /></el-icon>
-            Refresh
+            {{ $t('common.refresh') }}
           </el-button>
         </div>
       </div>
@@ -89,18 +91,18 @@
       <div v-if="selectedOrders.length > 0" class="batch-actions-bar">
         <div class="batch-info">
           <el-icon><Check /></el-icon>
-          <span>{{ selectedOrders.length }} orders selected</span>
+          <span>{{ $t('orders.ordersSelected', { count: selectedOrders.length }) }}</span>
         </div>
         <div class="batch-buttons">
           <el-button type="primary" @click="handleBatchShip">
             <el-icon><Van /></el-icon>
-            Batch Ship
+            {{ $t('orders.batchShip') }}
           </el-button>
           <el-button @click="handleBatchRemark">
             <el-icon><Edit /></el-icon>
-            Batch Remark
+            {{ $t('orders.batchRemark') }}
           </el-button>
-          <el-button @click="clearSelection">Clear Selection</el-button>
+          <el-button @click="clearSelection">{{ $t('orders.clearSelection') }}</el-button>
         </div>
       </div>
     </transition>
@@ -120,7 +122,7 @@
             <div class="order-detail">
               <el-row :gutter="20">
                 <el-col :span="12">
-                  <h4>Items</h4>
+                  <h4>{{ $t('orders.items') }}</h4>
                   <div v-for="item in row.items" :key="item.order_item_id" class="order-item">
                     <el-image :src="item.image" class="item-image" fit="cover">
                       <template #error>
@@ -139,19 +141,19 @@
                   </div>
                 </el-col>
                 <el-col :span="12">
-                  <h4>Shipping Info</h4>
-                  <p><strong>Receiver:</strong> {{ row.shipping_address?.receiver_name || '-' }}</p>
-                  <p><strong>Phone:</strong> {{ row.shipping_address?.receiver_phone || '-' }}</p>
-                  <p><strong>Address:</strong> {{ row.shipping_address?.full_address || '-' }}</p>
-                  <h4 style="margin-top: 20px">Payment Info</h4>
-                  <p><strong>Method:</strong> {{ row.payment_method_name || '-' }}</p>
-                  <p><strong>Paid At:</strong> {{ formatTime(row.paid_at) }}</p>
+                  <h4>{{ $t('orders.shippingInfo') }}</h4>
+                  <p><strong>{{ $t('orders.receiver') }}:</strong> {{ row.shipping_address?.receiver_name || '-' }}</p>
+                  <p><strong>{{ $t('orders.phone') }}:</strong> {{ row.shipping_address?.receiver_phone || '-' }}</p>
+                  <p><strong>{{ $t('orders.address') }}:</strong> {{ row.shipping_address?.full_address || '-' }}</p>
+                  <h4 style="margin-top: 20px">{{ $t('orders.paymentInfo') }}</h4>
+                  <p><strong>{{ $t('orders.paymentMethod') }}:</strong> {{ row.payment_method_name || '-' }}</p>
+                  <p><strong>{{ $t('orders.paidAt') }}:</strong> {{ formatTime(row.paid_at) }}</p>
                 </el-col>
               </el-row>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" label="Order No." min-width="160">
+        <el-table-column prop="order_no" :label="$t('orders.orderNo')" min-width="160">
           <template #default="{ row }">
             <div class="order-no-cell">
               <span class="order-no" @click="handleDetail(row)">{{ row.order_no }}</span>
@@ -161,7 +163,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Items" min-width="200">
+        <el-table-column :label="$t('orders.items')" min-width="200">
           <template #default="{ row }">
             <div class="goods-preview">
               <el-image
@@ -181,7 +183,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Buyer" min-width="150">
+        <el-table-column :label="$t('orders.buyer')" min-width="150">
           <template #default="{ row }">
             <div class="buyer-info">
               <p class="buyer-name">{{ row.user_name }}</p>
@@ -189,15 +191,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Amount" width="140" align="right">
+        <el-table-column :label="$t('orders.amount')" width="140" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
               <p class="total-amount">{{ row.currency }} {{ formatAmount(row.pay_amount) }}</p>
-              <p class="item-count">{{ row.item_count }} items</p>
+              <p class="item-count">{{ $t('orders.itemsCount', { count: row.item_count }) }}</p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="Status" width="120" align="center">
+        <el-table-column prop="status" :label="$t('common.status')" width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" effect="light" size="small">
               {{ row.status_text }}
@@ -213,12 +215,12 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="Created At" width="160">
+        <el-table-column prop="created_at" :label="$t('common.createdAt')" width="160">
           <template #default="{ row }">
             <span class="time-text">{{ formatTime(row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="200" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="200" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="canShip(row)"
@@ -226,7 +228,7 @@
               size="small"
               @click="handleShip(row)"
             >
-              Ship
+              {{ $t('orders.ship') }}
             </el-button>
             <el-button
               v-if="row.status === 'pending_payment'"
@@ -234,25 +236,25 @@
               size="small"
               @click="handleRemind(row)"
             >
-              Remind
+              {{ $t('orders.remind') }}
             </el-button>
             <el-button type="primary" link size="small" @click="handleDetail(row)">
-              Detail
+              {{ $t('common.detail') }}
             </el-button>
             <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
-                More<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ $t('common.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="remark">
-                    <el-icon><Edit /></el-icon>Edit Remark
+                    <el-icon><Edit /></el-icon>{{ $t('orders.editRemark') }}
                   </el-dropdown-item>
                   <el-dropdown-item v-if="row.status === 'pending'" command="adjust">
-                    <el-icon><PriceTag /></el-icon>Adjust Price
+                    <el-icon><PriceTag /></el-icon>{{ $t('orders.adjustPrice') }}
                   </el-dropdown-item>
                   <el-dropdown-item v-if="canCancel(row)" command="cancel" divided>
-                    <el-icon><Close /></el-icon>Cancel Order
+                    <el-icon><Close /></el-icon>{{ $t('orders.cancelOrder') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -352,6 +354,7 @@ import {
   RemarkDialog,
   BatchShipDialog
 } from './components'
+import { t } from '@/plugins/i18n'
 
 // Loading states
 const loading = ref(false)
@@ -375,11 +378,9 @@ const carriers = ref<Carrier[]>([])
 // Statistics
 const orderStats = ref({
   pending_payment: 0,
-  pending_shipment: 0,
   partial_shipped: 0,
   shipped: 0,
-  delivered: 0,
-  pending_refund: 0
+  delivered: 0
 })
 
 // Selection
@@ -421,7 +422,7 @@ const loadOrders = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load orders:', error)
-    ElMessage.error('Failed to load orders')
+    ElMessage.error(t('orders.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -430,17 +431,21 @@ const loadOrders = async () => {
 // Load statistics
 const loadStats = async () => {
   try {
-    const res = await getFulfillmentSummary()
+    // Fetch fulfillment stats and pending_payment count in parallel
+    const [fulfillmentRes, pendingPaymentRes] = await Promise.all([
+      getFulfillmentSummary(),
+      getOrderList({ status: 'pending_payment', page: 1, page_size: 1 })
+    ])
+
     orderStats.value = {
-      pending_payment: 0,
-      pending_shipment: res.pending_shipment || 0,
-      partial_shipped: res.partial_shipped || 0,
-      shipped: res.shipped || 0,
-      delivered: res.delivered || 0,
-      pending_refund: res.pending_refund || 0
+      pending_payment: pendingPaymentRes.total || 0,
+      partial_shipped: fulfillmentRes.partial_shipped || 0,
+      shipped: fulfillmentRes.shipped || 0,
+      delivered: fulfillmentRes.delivered || 0
     }
   } catch (error) {
     console.error('Failed to load stats:', error)
+    ElMessage.error(t('orders.loadStatsFailed'))
   }
 }
 
@@ -451,6 +456,7 @@ const loadCarriers = async () => {
     carriers.value = res.filter(c => c.is_active)
   } catch (error) {
     console.error('Failed to load carriers:', error)
+    ElMessage.error(t('orders.loadCarriersFailed'))
   }
 }
 
@@ -470,7 +476,7 @@ const getStatusType = (status: OrderStatus) => {
   const types: Record<OrderStatus, string> = {
     pending_payment: 'warning',
     paid: 'success',
-    pending_shipment: 'primary',
+    pending_shipment: 'warning',
     shipped: 'info',
     completed: 'success',
     cancelled: 'danger',
@@ -492,7 +498,7 @@ const getFulfillmentType = (status: string) => {
 
 // Action helpers
 const canShip = (order: Order) => {
-  return ['paid', 'pending_shipment'].includes(order.status) &&
+  return order.status === 'paid' &&
     (order.fulfillment_status === 'pending' || order.fulfillment_status === 'partial_shipped')
 }
 
@@ -551,9 +557,9 @@ const handleExport = async () => {
     link.click()
     document.body.removeChild(link)
 
-    ElMessage.success('Export completed')
+    ElMessage.success(t('orders.exportCompleted'))
   } catch (error) {
-    ElMessage.error('Failed to export orders')
+    ElMessage.error(t('orders.exportFailed'))
   } finally {
     if (url) {
       window.URL.revokeObjectURL(url)
@@ -577,9 +583,9 @@ const handleShip = (row: Order) => {
 const handleRemind = async (row: Order) => {
   try {
     await remindPayment(row.order_id)
-    ElMessage.success(`Payment reminder sent to ${row.user_name}`)
+    ElMessage.success(t('orders.reminderSent', { name: row.user_name }))
   } catch (error) {
-    ElMessage.error('Failed to send reminder')
+    ElMessage.error(t('orders.reminderFailed'))
   }
 }
 
@@ -603,14 +609,18 @@ const handleCommand = (command: string, row: Order) => {
 
 const handleCancel = async (row: Order) => {
   try {
-    const { value } = await ElMessageBox.prompt('Enter cancellation reason', 'Cancel Order', {
-      confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel',
-      inputPattern: /^.{5,200}$/,
-      inputErrorMessage: 'Reason must be 5-200 characters'
-    })
+    const { value } = await ElMessageBox.prompt(
+      t('orders.cancelReasonRequired'),
+      t('orders.cancelOrder'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputPattern: /^.{5,200}$/,
+        inputErrorMessage: t('orders.cancelReasonPlaceholder')
+      }
+    )
     await cancelOrder(row.order_id, value)
-    ElMessage.success('Order cancelled')
+    ElMessage.success(t('orders.orderCancelled'))
     loadOrders()
     loadStats()
   } catch {
@@ -622,39 +632,39 @@ const handleCancel = async (row: Order) => {
 const handleBatchShip = () => {
   const shippableOrders = selectedOrders.value.filter(canShip)
   if (shippableOrders.length === 0) {
-    ElMessage.warning('No shippable orders selected')
+    ElMessage.warning(t('orders.noShippableOrders'))
     return
   }
   if (shippableOrders.length < selectedOrders.value.length) {
-    ElMessage.warning(`${selectedOrders.value.length - shippableOrders.length} orders cannot be shipped`)
+    ElMessage.warning(t('orders.cannotShipCount', { count: selectedOrders.value.length - shippableOrders.length }))
   }
   selectedOrders.value = shippableOrders
   batchShipDialogVisible.value = true
 }
 
 const handleBatchRemark = () => {
-  ElMessage.info('Batch remark feature coming soon')
+  ElMessage.info(t('orders.batchRemarkComing'))
 }
 
 // Success handlers
 const handleShipSuccess = () => {
-  ElMessage.success('Order shipped successfully')
+  ElMessage.success(t('orders.orderShipped'))
   loadOrders()
   loadStats()
 }
 
 const handleRemarkSuccess = () => {
-  ElMessage.success('Remark updated')
+  ElMessage.success(t('orders.remarkUpdated'))
   loadOrders()
 }
 
 const handleAdjustPriceSuccess = () => {
-  ElMessage.success('Price adjusted')
+  ElMessage.success(t('orders.priceAdjusted'))
   loadOrders()
 }
 
 const handleBatchShipSuccess = () => {
-  ElMessage.success('Batch shipment completed')
+  ElMessage.success(t('orders.batchShipCompleted'))
   clearSelection()
   loadOrders()
   loadStats()

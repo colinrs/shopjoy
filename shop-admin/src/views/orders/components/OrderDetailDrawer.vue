@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    title="Order Details"
+    :title="$t('orders.orderDetails')"
     size="720px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -11,7 +11,7 @@
       <div class="status-section">
         <div class="section-header">
           <el-icon><Clock /></el-icon>
-          <span>Order Status</span>
+          <span>{{ $t('orders.orderStatusTimeline') }}</span>
         </div>
         <el-timeline class="status-timeline">
           <el-timeline-item
@@ -31,29 +31,29 @@
       <div class="info-section">
         <div class="section-header">
           <el-icon><Document /></el-icon>
-          <span>Order Information</span>
+          <span>{{ $t('orders.orderInformation') }}</span>
         </div>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="Order No.">
+          <el-descriptions-item :label="$t('orders.orderNo')">
             <span class="order-no-text">{{ order?.order_no }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="Status">
+          <el-descriptions-item :label="$t('common.status')">
             <el-tag :type="getStatusTagType(order?.status)" size="small">
               {{ order?.status_text }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="Fulfillment">
+          <el-descriptions-item :label="$t('orders.fulfillmentStatus')">
             <el-tag :type="getFulfillmentTagType(order?.fulfillment_status)" size="small">
               {{ order?.fulfillment_text }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="Created At">
+          <el-descriptions-item :label="$t('common.createdAt')">
             {{ formatTime(order?.created_at) }}
           </el-descriptions-item>
-          <el-descriptions-item label="Source">
+          <el-descriptions-item :label="$t('orders.source')">
             {{ order?.order_source || '-' }}
           </el-descriptions-item>
-          <el-descriptions-item label="Buyer Remark">
+          <el-descriptions-item :label="$t('orders.buyerRemark')">
             {{ order?.buyer_remark || '-' }}
           </el-descriptions-item>
         </el-descriptions>
@@ -63,8 +63,8 @@
       <div class="items-section">
         <div class="section-header">
           <el-icon><Goods /></el-icon>
-          <span>Order Items</span>
-          <el-tag size="small" type="info">{{ order?.items?.length || 0 }} items</el-tag>
+          <span>{{ $t('orders.orderItems') }}</span>
+          <el-tag size="small" type="info">{{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}</el-tag>
         </div>
         <div class="items-list">
           <div v-for="item in order?.items" :key="item.order_item_id" class="item-row">
@@ -87,8 +87,8 @@
               {{ order?.currency }} {{ formatAmount(item.total_price) }}
             </div>
             <div v-if="item.shipped_qty > 0" class="item-ship-info">
-              <el-tag size="small" type="success">{{ item.shipped_qty }} shipped</el-tag>
-              <el-tag v-if="item.pending_qty > 0" size="small" type="warning">{{ item.pending_qty }} pending</el-tag>
+              <el-tag size="small" type="success">{{ item.shipped_qty }} {{ $t('orders.shippedQty') }}</el-tag>
+              <el-tag v-if="item.pending_qty > 0" size="small" type="warning">{{ item.pending_qty }} {{ $t('orders.pendingQty') }}</el-tag>
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@
       <div class="address-section">
         <div class="section-header">
           <el-icon><Location /></el-icon>
-          <span>Shipping Address</span>
+          <span>{{ $t('orders.shippingAddress') }}</span>
         </div>
         <div class="address-card">
           <p class="receiver">
@@ -113,25 +113,25 @@
       <div class="payment-section">
         <div class="section-header">
           <el-icon><Wallet /></el-icon>
-          <span>Payment Information</span>
+          <span>{{ $t('orders.paymentInformation') }}</span>
         </div>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="Payment Method">
+          <el-descriptions-item :label="$t('orders.paymentMethod')">
             {{ order?.payment_info?.payment_method_name || '-' }}
           </el-descriptions-item>
-          <el-descriptions-item label="Payment No.">
+          <el-descriptions-item :label="$t('orders.paymentNo')">
             {{ order?.payment_info?.payment_no || '-' }}
           </el-descriptions-item>
-          <el-descriptions-item label="Product Amount">
+          <el-descriptions-item :label="$t('orders.productAmount')">
             {{ order?.currency }} {{ formatAmount(order?.total_amount) }}
           </el-descriptions-item>
-          <el-descriptions-item label="Discount">
+          <el-descriptions-item :label="$t('orders.discount')">
             <span class="discount-text">-{{ order?.currency }} {{ formatAmount(order?.discount_amount) }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="Pay Amount">
+          <el-descriptions-item :label="$t('orders.amount')">
             <span class="pay-amount">{{ order?.currency }} {{ formatAmount(order?.pay_amount) }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="Paid At">
+          <el-descriptions-item :label="$t('orders.paidAt')">
             {{ formatTime(order?.payment_info?.paid_at) || '-' }}
           </el-descriptions-item>
         </el-descriptions>
@@ -141,8 +141,8 @@
       <div v-if="order?.shipments?.length" class="shipments-section">
         <div class="section-header">
           <el-icon><Van /></el-icon>
-          <span>Shipments</span>
-          <el-tag size="small" type="info">{{ order.shipments.length }} shipment(s)</el-tag>
+          <span>{{ $t('orders.shipments') }}</span>
+          <el-tag size="small" type="info">{{ $t('orders.shipmentCount', { count: order.shipments.length }) }}</el-tag>
         </div>
         <div class="shipments-list">
           <div v-for="shipment in order.shipments" :key="shipment.shipment_id" class="shipment-card">
@@ -153,9 +153,9 @@
               </el-tag>
             </div>
             <div class="shipment-info">
-              <p><strong>Carrier:</strong> {{ shipment.carrier_name }}</p>
-              <p><strong>Tracking No:</strong> {{ shipment.tracking_no }}</p>
-              <p><strong>Shipped At:</strong> {{ formatTime(shipment.shipped_at) }}</p>
+              <p><strong>{{ $t('orders.carrier') }}:</strong> {{ shipment.carrier_name }}</p>
+              <p><strong>{{ $t('orders.trackingNo') }}:</strong> {{ shipment.tracking_no }}</p>
+              <p><strong>{{ $t('orders.shippedAtStatus') }}:</strong> {{ formatTime(shipment.shipped_at) }}</p>
             </div>
           </div>
         </div>
@@ -165,11 +165,11 @@
       <div class="remark-section">
         <div class="section-header">
           <el-icon><ChatDotSquare /></el-icon>
-          <span>Seller Remark</span>
+          <span>{{ $t('orders.sellerRemark') }}</span>
         </div>
         <div class="remark-content">
           <p v-if="order?.seller_remark">{{ order.seller_remark }}</p>
-          <p v-else class="no-remark">No remark</p>
+          <p v-else class="no-remark">{{ $t('orders.noRemark') }}</p>
         </div>
       </div>
     </div>
@@ -178,15 +178,15 @@
       <div class="drawer-footer">
         <el-button @click="handleRemark">
           <el-icon><Edit /></el-icon>
-          Edit Remark
+          {{ $t('orders.editRemark') }}
         </el-button>
         <el-button v-if="canShip" type="primary" @click="handleShip">
           <el-icon><Van /></el-icon>
-          Ship Order
+          {{ $t('orders.shipOrder') }}
         </el-button>
         <el-button v-if="canAdjustPrice" @click="handleAdjustPrice">
           <el-icon><PriceTag /></el-icon>
-          Adjust Price
+          {{ $t('orders.adjustPrice') }}
         </el-button>
       </div>
     </template>
@@ -244,6 +244,7 @@ import {
 import ShipDialog from './ShipDialog.vue'
 import RemarkDialog from './RemarkDialog.vue'
 import AdjustPriceDialog from './AdjustPriceDialog.vue'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
@@ -294,16 +295,16 @@ const statusTimeline = computed(() => {
 
   // Created
   timeline.push({
-    title: 'Order Created',
+    title: t('orders.orderCreated'),
     time: formatTime(o.created_at),
     type: 'primary' as const,
-    description: `Order No: ${o.order_no}`
+    description: `${t('orders.orderNo')}: ${o.order_no}`
   })
 
   // Paid
   if (o.payment_info?.paid_at) {
     timeline.push({
-      title: 'Payment Received',
+      title: t('orders.paymentReceived'),
       time: formatTime(o.payment_info.paid_at),
       type: 'success' as const,
       description: `${o.payment_info.payment_method_name} - ${o.currency} ${formatAmount(o.pay_amount)}`
@@ -314,7 +315,7 @@ const statusTimeline = computed(() => {
   if (o.shipments?.length) {
     o.shipments.forEach(s => {
       timeline.push({
-        title: 'Order Shipped',
+        title: t('orders.orderShippedStatus'),
         time: formatTime(s.shipped_at),
         type: 'primary' as const,
         description: `${s.carrier_name} - ${s.tracking_no}`
@@ -325,7 +326,7 @@ const statusTimeline = computed(() => {
   // Completed
   if (o.status === 'completed') {
     timeline.push({
-      title: 'Order Completed',
+      title: t('orders.orderCompleted'),
       time: formatTime(o.shipments?.[0]?.delivered_at),
       type: 'success' as const,
       description: ''
@@ -335,7 +336,7 @@ const statusTimeline = computed(() => {
   // Cancelled
   if (o.status === 'cancelled') {
     timeline.push({
-      title: 'Order Cancelled',
+      title: t('orders.orderCancelledStatus'),
       time: '-',
       type: 'danger' as const,
       description: ''
@@ -348,7 +349,7 @@ const statusTimeline = computed(() => {
 // Computed flags for actions
 const canShip = computed(() => {
   if (!order.value) return false
-  return ['paid', 'pending_shipment'].includes(order.value.status) &&
+  return order.value.status === 'paid' &&
     (order.value.fulfillment_status === 'pending' || order.value.fulfillment_status === 'partial_shipped')
 })
 
@@ -366,7 +367,7 @@ const loadOrderDetail = async () => {
     const res = await getOrderDetail(props.orderId)
     order.value = res
   } catch (error) {
-    ElMessage.error('Failed to load order details')
+    ElMessage.error(t('orders.loadDetailFailed'))
   } finally {
     loading.value = false
   }
@@ -379,6 +380,7 @@ const loadCarriers = async () => {
     carriers.value = res.filter(c => c.is_active)
   } catch (error) {
     console.error('Failed to load carriers:', error)
+    ElMessage.error(t('orders.loadCarriersFailed'))
   }
 }
 
@@ -398,7 +400,7 @@ const getStatusTagType = (status: OrderStatus | undefined) => {
   const types: Record<OrderStatus, string> = {
     pending_payment: 'warning',
     paid: 'success',
-    pending_shipment: 'primary',
+    pending_shipment: 'warning',
     shipped: 'info',
     completed: 'success',
     cancelled: 'danger',
@@ -431,13 +433,13 @@ const getShipmentStatusTagType = (status: string) => {
 
 const getShipmentStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    'pending': 'Pending',
-    'shipped': 'Shipped',
-    'in_transit': 'In Transit',
-    'delivered': 'Delivered',
-    'failed': 'Failed'
+    'pending': t('orders.shipmentPending'),
+    'shipped': t('orders.shipmentShipped'),
+    'in_transit': t('orders.shipmentInTransit'),
+    'delivered': t('orders.shipmentDelivered'),
+    'failed': t('orders.shipmentFailed')
   }
-  return texts[status] || 'Unknown'
+  return texts[status] || t('orders.shipmentUnknown')
 }
 
 // Action handlers
@@ -454,19 +456,19 @@ const handleAdjustPrice = () => {
 }
 
 const handleShipSuccess = () => {
-  ElMessage.success('Order shipped successfully')
+  ElMessage.success(t('orders.orderShipped'))
   loadOrderDetail()
   emit('refresh')
 }
 
 const handleRemarkSuccess = () => {
-  ElMessage.success('Remark updated successfully')
+  ElMessage.success(t('orders.remarkSaveSuccess'))
   loadOrderDetail()
   emit('refresh')
 }
 
 const handleAdjustPriceSuccess = () => {
-  ElMessage.success('Price adjusted successfully')
+  ElMessage.success(t('orders.priceAdjustSuccess'))
   loadOrderDetail()
   emit('refresh')
 }

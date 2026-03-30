@@ -2,47 +2,47 @@
   <el-dialog
     :model-value="visible"
     @update:model-value="$emit('update:visible', $event)"
-    :title="isEdit ? '编辑规则' : '创建规则'"
+    :title="isEdit ? $t('points.editRule') : $t('points.createRule')"
     width="700px"
     destroy-on-close
   >
     <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
       <!-- Basic Info -->
-      <el-form-item label="规则名称" prop="name">
-        <el-input v-model="form.name" placeholder="例如: 订单积分奖励" maxlength="100" />
+      <el-form-item :label="$t('points.ruleName')" prop="name">
+        <el-input v-model="form.name" :placeholder="$t('points.orderPoints')" maxlength="100" />
       </el-form-item>
 
-      <el-form-item label="描述">
-        <el-input v-model="form.description" type="textarea" :rows="2" placeholder="规则描述" />
+      <el-form-item :label="$t('points.description')">
+        <el-input v-model="form.description" type="textarea" :rows="2" :placeholder="$t('points.ruleDescPlaceholder')" />
       </el-form-item>
 
       <!-- Scenario -->
-      <el-form-item label="获取场景" prop="scenario">
+      <el-form-item :label="$t('points.scenario')" prop="scenario">
         <el-radio-group v-model="form.scenario">
-          <el-radio value="ORDER_PAYMENT">订单支付</el-radio>
-          <el-radio value="SIGN_IN">每日签到</el-radio>
-          <el-radio value="PRODUCT_REVIEW">商品评价</el-radio>
-          <el-radio value="FIRST_ORDER">首单奖励</el-radio>
+          <el-radio value="ORDER_PAYMENT">{{ $t('points.orderPayment') }}</el-radio>
+          <el-radio value="SIGN_IN">{{ $t('points.signIn') }}</el-radio>
+          <el-radio value="PRODUCT_REVIEW">{{ $t('points.productReview') }}</el-radio>
+          <el-radio value="FIRST_ORDER">{{ $t('points.firstOrder') }}</el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- Calculation Type -->
-      <el-form-item label="计算类型" prop="calculation_type">
+      <el-form-item :label="$t('points.calculationType')" prop="calculation_type">
         <el-radio-group v-model="form.calculation_type">
-          <el-radio value="FIXED">固定积分</el-radio>
-          <el-radio value="RATIO">比例计算</el-radio>
-          <el-radio value="TIERED">阶梯计算</el-radio>
+          <el-radio value="FIXED">{{ $t('points.fixed') }}</el-radio>
+          <el-radio value="RATIO">{{ $t('points.ratio') }}</el-radio>
+          <el-radio value="TIERED">{{ $t('points.tiered') }}</el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- Fixed Points -->
-      <el-form-item v-if="form.calculation_type === 'FIXED'" label="固定积分" prop="fixed_points">
+      <el-form-item v-if="form.calculation_type === 'FIXED'" :label="$t('points.fixedPoints')" prop="fixed_points">
         <el-input-number v-model="form.fixed_points" :min="1" :max="99999" style="width: 200px" />
-        <span class="form-hint">每次获得固定积分数量</span>
+        <span class="form-hint">{{ $t('points.orderPointsReward') }}</span>
       </el-form-item>
 
       <!-- Ratio -->
-      <el-form-item v-if="form.calculation_type === 'RATIO'" label="积分比例" prop="ratio">
+      <el-form-item v-if="form.calculation_type === 'RATIO'" :label="$t('points.ratioPoints')" prop="ratio">
         <el-input-number
           v-model="form.ratio_num"
           :min="0.1"
@@ -51,61 +51,61 @@
           :step="0.5"
           style="width: 200px"
         />
-        <span class="form-hint">每 $1 可获得积分数量</span>
+        <span class="form-hint">{{ $t('points.pointsPerDollar') }}</span>
       </el-form-item>
 
       <!-- Tiered Config -->
-      <el-form-item v-if="form.calculation_type === 'TIERED'" label="阶梯配置">
+      <el-form-item v-if="form.calculation_type === 'TIERED'" :label="$t('points.tieredConfig')">
         <TieredConfig v-model="form.tiers" />
       </el-form-item>
 
       <!-- Condition Type -->
-      <el-form-item label="触发条件">
-        <el-select v-model="form.condition_type" placeholder="选择条件">
-          <el-option label="无条件" value="NONE" />
-          <el-option label="新用户" value="NEW_USER" />
-          <el-option label="首单" value="FIRST_ORDER" />
-          <el-option label="指定商品" value="SPECIFIC_PRODUCTS" />
-          <el-option label="最低金额" value="MIN_AMOUNT" />
+      <el-form-item :label="$t('points.triggerCondition')">
+        <el-select v-model="form.condition_type" :placeholder="$t('points.condition')">
+          <el-option :label="$t('points.unconditional')" value="NONE" />
+          <el-option :label="$t('points.newUser')" value="NEW_USER" />
+          <el-option :label="$t('points.firstPurchase')" value="FIRST_ORDER" />
+          <el-option :label="$t('points.specificProducts')" value="SPECIFIC_PRODUCTS" />
+          <el-option :label="$t('points.minAmount')" value="MIN_AMOUNT" />
         </el-select>
       </el-form-item>
 
       <!-- Condition Value for MIN_AMOUNT -->
-      <el-form-item v-if="form.condition_type === 'MIN_AMOUNT'" label="最低金额">
+      <el-form-item v-if="form.condition_type === 'MIN_AMOUNT'" :label="$t('points.minAmount')">
         <el-input-number v-model="form.min_amount" :min="1" :precision="2" style="width: 200px" />
-        <span class="form-hint">订单最低金额（美元）</span>
+        <span class="form-hint">{{ $t('points.amountDollar') }}</span>
       </el-form-item>
 
       <!-- Expiration -->
-      <el-form-item label="积分有效期">
+      <el-form-item :label="$t('points.pointsExpiration')">
         <el-input-number v-model="form.expiration_months" :min="0" :max="36" style="width: 200px" />
-        <span class="form-hint">0 表示永不过期</span>
+        <span class="form-hint">{{ $t('points.zeroNeverExpires') }}</span>
       </el-form-item>
 
       <!-- Time Range -->
-      <el-form-item label="有效期">
+      <el-form-item :label="$t('points.validPeriod')">
         <el-date-picker
           v-model="form.dateRange"
           type="datetimerange"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :start-placeholder="$t('points.startTime')"
+          :end-placeholder="$t('points.endTime')"
           value-format="YYYY-MM-DDTHH:mm:ss[Z]"
           style="width: 100%"
         />
       </el-form-item>
 
       <!-- Priority -->
-      <el-form-item label="优先级">
+      <el-form-item :label="$t('points.priority')">
         <el-input-number v-model="form.priority" :min="0" :max="100" style="width: 200px" />
-        <span class="form-hint">数值越大优先级越高</span>
+        <span class="form-hint">{{ $t('points.greaterPriority') }}</span>
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">取消</el-button>
-      <el-button @click="handleSaveDraft" :loading="loading">保存草稿</el-button>
+      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
+      <el-button @click="handleSaveDraft" :loading="loading">{{ $t('points.saveDraft') }}</el-button>
       <el-button type="primary" @click="handleSaveAndActivate" :loading="loading">
-        保存并激活
+        {{ $t('points.saveAndActivate') }}
       </el-button>
     </template>
   </el-dialog>
@@ -116,6 +116,7 @@ import { ref, reactive, watch, computed } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import TieredConfig from './TieredConfig.vue'
 import type { EarnRule, TierConfig, CreateEarnRuleParams } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   visible: boolean
@@ -148,9 +149,9 @@ const form = reactive({
 })
 
 const rules: FormRules = {
-  name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
-  scenario: [{ required: true, message: '请选择获取场景', trigger: 'change' }],
-  calculation_type: [{ required: true, message: '请选择计算类型', trigger: 'change' }]
+  name: [{ required: true, message: t('points.ruleName'), trigger: 'blur' }],
+  scenario: [{ required: true, message: t('points.scenario'), trigger: 'change' }],
+  calculation_type: [{ required: true, message: t('points.calculationType'), trigger: 'change' }]
 }
 
 // Watch rule prop to populate form

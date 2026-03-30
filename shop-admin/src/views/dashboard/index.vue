@@ -8,11 +8,11 @@
             <el-icon><ShoppingCart /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">今日订单</p>
+            <p class="stat-label">{{ $t('dashboard.todayOrders') }}</p>
             <p class="stat-value">{{ stats.today_orders }}</p>
             <p class="stat-change" :class="{ positive: isGrowthPositive(stats.today_growth), negative: !isGrowthPositive(stats.today_growth) }">
               <el-icon><ArrowUp v-if="isGrowthPositive(stats.today_growth)" /><ArrowDown v-else /></el-icon>
-              {{ stats.today_growth }} 较昨日
+              {{ stats.today_growth }} {{ $t('dashboard.vsLastPeriod') }}
             </p>
           </div>
         </div>
@@ -23,10 +23,10 @@
             <el-icon><Money /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">今日销售额</p>
+            <p class="stat-label">{{ $t('dashboard.todaySales') }}</p>
             <p class="stat-value">¥{{ formatNumber(stats.today_sales) }}</p>
             <p class="stat-change">
-              <span class="neutral">昨日 ¥{{ formatNumber(stats.yesterday_sales) }}</span>
+              <span class="neutral">{{ $t('dashboard.yesterdaySales') }} ¥{{ formatNumber(stats.yesterday_sales) }}</span>
             </p>
           </div>
         </div>
@@ -37,10 +37,10 @@
             <el-icon><Goods /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">商品总数</p>
+            <p class="stat-label">{{ $t('dashboard.totalProducts') }}</p>
             <p class="stat-value">{{ stats.total_products }}</p>
             <p class="stat-change">
-              <span class="neutral">在售商品</span>
+              <span class="neutral">{{ $t('dashboard.activeProducts') }}</span>
             </p>
           </div>
         </div>
@@ -51,10 +51,10 @@
             <el-icon><User /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">用户总数</p>
+            <p class="stat-label">{{ $t('dashboard.totalUsers') }}</p>
             <p class="stat-value">{{ stats.total_users }}</p>
             <p class="stat-change positive">
-              <el-icon><ArrowUp /></el-icon>+{{ stats.new_users_today }} 新增用户
+              <el-icon><ArrowUp /></el-icon>+{{ stats.new_users_today }} {{ $t('dashboard.newUsersToday') }}
             </p>
           </div>
         </div>
@@ -67,11 +67,11 @@
         <el-card class="chart-card" v-loading="loading.charts">
           <template #header>
             <div class="card-header">
-              <span class="card-title">销售趋势</span>
+              <span class="card-title">{{ $t('dashboard.salesTrend') }}</span>
               <el-radio-group v-model="timeRange" size="small" @change="fetchSalesTrend">
-                <el-radio-button label="week">本周</el-radio-button>
-                <el-radio-button label="month">本月</el-radio-button>
-                <el-radio-button label="year">全年</el-radio-button>
+                <el-radio-button label="week">{{ $t('dashboard.thisWeek') }}</el-radio-button>
+                <el-radio-button label="month">{{ $t('dashboard.thisMonth') }}</el-radio-button>
+                <el-radio-button label="year">{{ $t('dashboard.thisYear') }}</el-radio-button>
               </el-radio-group>
             </div>
           </template>
@@ -82,7 +82,7 @@
         <el-card class="chart-card" v-loading="loading.charts">
           <template #header>
             <div class="card-header">
-              <span class="card-title">订单状态分布</span>
+              <span class="card-title">{{ $t('dashboard.orderStatusDistribution') }}</span>
             </div>
           </template>
           <div ref="orderChart" class="chart-container pie-chart"></div>
@@ -98,33 +98,33 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Bell /></el-icon>
-                待处理订单
+                {{ $t('dashboard.pendingOrders') }}
                 <el-badge :value="pendingOrdersTotal" :max="99" v-if="pendingOrdersTotal > 0" />
               </span>
-              <el-button type="primary" link>查看全部</el-button>
+              <el-button type="primary" link @click="goToOrders">{{ $t('common.viewAll') }}</el-button>
             </div>
           </template>
           <el-table :data="pendingOrders" stripe style="width: 100%" v-loading="loading.pending">
-            <el-table-column prop="order_no" label="订单号" min-width="120">
+            <el-table-column prop="order_no" :label="$t('orders.orderNo')" min-width="120">
               <template #default="{ row }">
                 <span class="order-no">{{ row.order_no }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="pay_amount" label="金额" width="100">
+            <el-table-column prop="pay_amount" :label="$t('orders.amount')" width="100">
               <template #default="{ row }">
                 <span class="amount">¥{{ row.pay_amount }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="status_text" label="状态" width="90">
+            <el-table-column prop="status_text" :label="$t('common.status')" width="90">
               <template #default="{ row }">
                 <el-tag :type="getOrderStatusType(row.status)" size="small">
                   {{ row.status_text }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="80" align="center">
-              <template #default>
-                <el-button type="primary" link size="small">处理</el-button>
+            <el-table-column :label="$t('common.actions')" width="80" align="center">
+              <template #default="{ row }">
+                <el-button type="primary" link size="small" @click="goToOrderDetail(row.id)">{{ $t('dashboard.process') }}</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -136,20 +136,20 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><TrendCharts /></el-icon>
-                热销商品 TOP5
+                {{ $t('dashboard.hotProductsTop5') }}
               </span>
-              <el-button type="primary" link>查看全部</el-button>
+              <el-button type="primary" link @click="goToProducts">{{ $t('common.viewAll') }}</el-button>
             </div>
           </template>
           <el-table :data="hotProducts" stripe style="width: 100%" v-loading="loading.products">
-            <el-table-column type="index" label="排名" width="60" align="center">
+            <el-table-column type="index" :label="$t('dashboard.rank')" width="60" align="center">
               <template #default="{ $index }">
                 <div class="rank" :class="{ 'top3': $index < 3 }">
                   {{ $index + 1 }}
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="product_name" label="商品名称" min-width="150">
+            <el-table-column prop="product_name" :label="$t('dashboard.productName')" min-width="150">
               <template #default="{ row }">
                 <div class="product-name">
                   <el-avatar :size="32" :src="row.image" shape="square" class="product-avatar">
@@ -159,7 +159,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="sales" label="销量" width="100" align="right">
+            <el-table-column prop="sales" :label="$t('dashboard.sales')" width="100" align="right">
               <template #default="{ row }">
                 <span class="sales-num">{{ row.sales }}</span>
               </template>
@@ -177,7 +177,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Timer /></el-icon>
-                最近活动
+                {{ $t('dashboard.recentActivity') }}
               </span>
             </div>
           </template>
@@ -191,7 +191,7 @@
               {{ activity.content }}
             </el-timeline-item>
           </el-timeline>
-          <el-empty v-else description="暂无活动记录" :image-size="80" />
+          <el-empty v-else :description="$t('dashboard.noActivityRecords')" :image-size="80" />
         </el-card>
       </el-col>
     </el-row>
@@ -200,11 +200,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import {
   ShoppingCart, Money, Goods, User, ArrowUp, ArrowDown,
   Bell, TrendCharts, Timer
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { t } from '@/plugins/i18n'
 import {
   getDashboardOverview,
   getSalesTrend,
@@ -220,6 +223,7 @@ import {
   type ActivityItem
 } from '@/api/dashboard'
 
+const router = useRouter()
 const timeRange = ref<'week' | 'month' | 'year'>('week')
 const loading = ref({
   overview: false,
@@ -275,10 +279,9 @@ const getOrderStatusType = (status: string) => {
     'pending_payment': 'warning',
     'paid': 'primary',
     'shipped': 'info',
+    'delivered': 'success',
     'cancelled': 'danger',
-    'refunded': 'danger',
-    'pending_shipment': 'primary',
-    'refunding': 'warning'
+    'refunded': 'danger'
   }
   return types[status] || 'info'
 }
@@ -302,9 +305,9 @@ const formatActivityTime = (time: string) => {
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
 
-  if (minutes < 60) return `${minutes}分钟前`
-  if (hours < 24) return `${hours}小时前`
-  if (days < 7) return `${days}天前`
+  if (minutes < 60) return t('dashboard.minutesAgo', { n: minutes })
+  if (hours < 24) return t('dashboard.hoursAgo', { n: hours })
+  if (days < 7) return t('dashboard.daysAgo', { n: days })
   return date.toLocaleDateString()
 }
 
@@ -315,6 +318,7 @@ const fetchOverview = async () => {
     stats.value = await getDashboardOverview()
   } catch (error) {
     console.error('Failed to fetch overview:', error)
+    ElMessage.error(t('dashboard.loadOverviewFailed'))
   } finally {
     loading.value.overview = false
   }
@@ -329,6 +333,7 @@ const fetchSalesTrend = async () => {
     updateSalesChart()
   } catch (error) {
     console.error('Failed to fetch sales trend:', error)
+    ElMessage.error(t('dashboard.loadSalesTrendFailed'))
   } finally {
     loading.value.charts = false
   }
@@ -342,6 +347,7 @@ const fetchOrderStatus = async () => {
     updateOrderChart()
   } catch (error) {
     console.error('Failed to fetch order status:', error)
+    ElMessage.error(t('dashboard.loadOrderStatusFailed'))
   }
 }
 
@@ -354,6 +360,7 @@ const fetchPendingOrders = async () => {
     pendingOrdersTotal.value = data.total
   } catch (error) {
     console.error('Failed to fetch pending orders:', error)
+    ElMessage.error(t('dashboard.loadPendingOrdersFailed'))
   } finally {
     loading.value.pending = false
   }
@@ -367,6 +374,7 @@ const fetchTopProducts = async () => {
     hotProducts.value = data.list
   } catch (error) {
     console.error('Failed to fetch top products:', error)
+    ElMessage.error(t('dashboard.loadHotProductsFailed'))
   } finally {
     loading.value.products = false
   }
@@ -379,6 +387,7 @@ const fetchRecentActivities = async () => {
     recentActivities.value = data.list
   } catch (error) {
     console.error('Failed to fetch recent activities:', error)
+    ElMessage.error(t('dashboard.loadRecentActivityFailed'))
   }
 }
 
@@ -510,6 +519,19 @@ const updateOrderChart = () => {
 const handleResize = () => {
   salesChartInstance?.resize()
   orderChartInstance?.resize()
+}
+
+// Navigation handlers
+const goToOrders = () => {
+  router.push('/orders')
+}
+
+const goToProducts = () => {
+  router.push('/products')
+}
+
+const goToOrderDetail = (orderId: number | string) => {
+  router.push(`/orders?id=${orderId}`)
 }
 
 // Fetch all dashboard data

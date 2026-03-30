@@ -4,9 +4,9 @@
     <div class="page-header">
       <el-button link @click="goBack">
         <el-icon><ArrowLeft /></el-icon>
-        返回用户列表
+        {{ $t('users.backToUserList') }}
       </el-button>
-      <h2 class="page-title">用户详情</h2>
+      <h2 class="page-title">{{ $t('users.userDetail') }}</h2>
     </div>
 
     <!-- User Summary Card -->
@@ -25,29 +25,29 @@
         <div class="user-stats">
           <div class="stat-item">
             <span class="stat-value">{{ user?.order_count || 0 }}</span>
-            <span class="stat-label">订单数</span>
+            <span class="stat-label">{{ $t('users.orderCount') }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-value">{{ user?.points_balance?.toLocaleString() || 0 }}</span>
-            <span class="stat-label">积分余额</span>
+            <span class="stat-label">{{ $t('users.pointsBalance') }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-value">¥{{ formatPrice(user?.total_spent) }}</span>
-            <span class="stat-label">累计消费</span>
+            <span class="stat-label">{{ $t('users.totalSpent') }}</span>
           </div>
           <div class="stat-item">
             <el-tag :type="user?.status === 1 ? 'success' : 'danger'" size="large">
-              {{ user?.status === 1 ? '正常' : '已禁用' }}
+              {{ user?.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
             </el-tag>
           </div>
         </div>
         <div class="user-actions">
-          <el-button type="primary" @click="handleEdit">编辑</el-button>
+          <el-button type="primary" @click="handleEdit">{{ $t('common.edit') }}</el-button>
           <el-button
             :type="user?.status === 1 ? 'danger' : 'success'"
             @click="handleStatusToggle"
           >
-            {{ user?.status === 1 ? '禁用' : '启用' }}
+            {{ user?.status === 1 ? $t('users.disabled') : $t('users.enabled') }}
           </el-button>
         </div>
       </div>
@@ -63,6 +63,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
+import { t } from '@/plugins/i18n'
 import UserDetailTabs from './components/UserDetailTabs.vue'
 import {
   getUserDetail,
@@ -86,32 +87,7 @@ const loadUser = async () => {
     user.value = res
   } catch (error) {
     console.error('Failed to load user:', error)
-    // Mock data for development
-    user.value = {
-      id: userId(),
-      tenant_id: 1,
-      email: 'user@example.com',
-      phone: '13800138000',
-      name: '测试用户',
-      avatar: '',
-      gender: 1,
-      gender_text: '男',
-      birthday: '1990-01-01',
-      status: 1,
-      status_text: '正常',
-      review_count: 5,
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-03-24T15:30:00Z',
-      last_login: '2024-03-24T15:30:00Z',
-      points_balance: 5000,
-      frozen_points: 0,
-      total_earned_points: 10000,
-      total_redeemed_points: 5000,
-      order_count: 25,
-      total_spent: '12580.50',
-      last_order_at: '2024-03-20T08:00:00Z',
-      default_address: null
-    }
+    ElMessage.error(t('users.loadUserDetailFailed'))
   } finally {
     loading.value = false
   }
@@ -127,26 +103,30 @@ const goBack = () => {
 }
 
 const handleEdit = () => {
-  ElMessage.info('编辑功能开发中')
+  ElMessage.info(t('users.editFunctionComingSoon'))
 }
 
 const handleStatusToggle = async () => {
   if (!user.value) return
 
-  const action = user.value.status === 1 ? '禁用' : '启用'
+  const isDisable = user.value.status === 1
+  const confirmMsg = isDisable 
+    ? t('users.confirmDisableUser')
+    : t('users.confirmEnableUser')
+  
   try {
-    await ElMessageBox.confirm(`确认${action}该用户?`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(confirmMsg, t('common.tips'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
 
-    if (user.value.status === 1) {
+    if (isDisable) {
       await suspendUser(user.value.id)
-      ElMessage.success('已禁用')
+      ElMessage.success(t('users.disabled'))
     } else {
       await activateUser(user.value.id)
-      ElMessage.success('已启用')
+      ElMessage.success(t('users.enabled'))
     }
     loadUser()
   } catch {

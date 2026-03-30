@@ -5,12 +5,12 @@
       <div class="header-left">
         <el-button text @click="goBack">
           <el-icon><ArrowLeft /></el-icon>
-          返回
+          {{ $t('storefront.back') }}
         </el-button>
         <el-divider direction="vertical" />
-        <span class="page-title">{{ pageData?.page?.name || '页面编辑' }}</span>
-        <el-tag v-if="pageData?.page?.is_published" type="success" size="small">已发布</el-tag>
-        <el-tag v-else type="info" size="small">草稿</el-tag>
+        <span class="page-title">{{ pageData?.page?.name || t('storefront.pageEditor') }}</span>
+        <el-tag v-if="pageData?.page?.is_published" type="success" size="small">{{ $t('storefront.published') }}</el-tag>
+        <el-tag v-else type="info" size="small">{{ $t('storefront.draft') }}</el-tag>
       </div>
       <div class="header-center">
         <el-radio-group v-model="viewMode" size="small">
@@ -28,15 +28,15 @@
       <div class="header-right">
         <el-button @click="showVersionHistory">
           <el-icon><Clock /></el-icon>
-          版本历史
+          {{ $t('storefront.versionHistories') }}
         </el-button>
         <el-button @click="handleSaveDraft" :loading="saving">
           <el-icon><Document /></el-icon>
-          保存草稿
+          {{ $t('storefront.saveDraft') }}
         </el-button>
         <el-button type="primary" @click="handlePublish" :loading="publishing">
           <el-icon><Promotion /></el-icon>
-          发布
+          {{ $t('storefront.publishAction') }}
         </el-button>
       </div>
     </div>
@@ -45,7 +45,7 @@
     <div class="editor-main">
       <!-- Block Palette -->
       <div class="block-palette">
-        <h4>区块组件</h4>
+        <h4>{{ $t('storefront.blockComponents') }}</h4>
         <div class="palette-grid">
           <div
             v-for="block in BLOCK_TYPES"
@@ -70,7 +70,7 @@
         >
           <div v-if="blocks.length === 0" class="empty-placeholder">
             <el-icon size="48"><Plus /></el-icon>
-            <p>拖拽左侧区块到此处开始编辑</p>
+            <p>{{ $t('storefront.dragToEdit') }}</p>
           </div>
 
           <div v-else class="blocks-container">
@@ -113,7 +113,7 @@
       <!-- Config Panel -->
       <div class="config-panel" v-if="selectedBlockIndex !== null">
         <div class="panel-header">
-          <h4>{{ getBlockName(blocks[selectedBlockIndex]?.block_type) }} 配置</h4>
+          <h4>{{ getBlockName(blocks[selectedBlockIndex]?.block_type) }} {{ $t('storefront.configuration') }}</h4>
           <el-button text size="small" @click="selectedBlockIndex = null">
             <el-icon><Close /></el-icon>
           </el-button>
@@ -131,7 +131,7 @@
     <!-- Version History Drawer -->
     <el-drawer
       v-model="versionDrawerVisible"
-      title="版本历史"
+      :title="$t('storefront.versionHistory')"
       size="450px"
     >
       <div class="version-drawer-content" v-loading="versionsLoading">
@@ -146,16 +146,17 @@
           </div>
           <div class="version-actions">
             <el-button size="small" text type="primary" @click="viewVersionDetail(ver)">
-              查看
+              {{ $t('storefront.view') }}
             </el-button>
             <el-button
+              v-if="ver.version !== currentVersion"
               size="small"
               text
               type="warning"
               @click="handleRestoreVersion(ver)"
               :loading="ver.restoring"
             >
-              恢复
+              {{ $t('storefront.restore') }}
             </el-button>
           </div>
         </div>
@@ -163,7 +164,7 @@
     </el-drawer>
 
     <!-- Version Detail Dialog -->
-    <el-dialog v-model="versionDetailVisible" :title="`版本详情 v${selectedVersion?.version}`" width="700px">
+    <el-dialog v-model="versionDetailVisible" :title="$t('storefront.versionDetail') + ' v' + selectedVersion?.version" width="700px">
       <div class="version-detail" v-if="versionDetail">
         <div
           v-for="(block, index) in versionDetail.blocks"
@@ -179,7 +180,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, markRaw } from 'vue'
+import { ref, computed, onMounted, markRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -208,6 +210,8 @@ import RichTextPreview from './components/previews/RichTextPreview.vue'
 import DividerPreview from './components/previews/DividerPreview.vue'
 import SpacerPreview from './components/previews/SpacerPreview.vue'
 import DefaultPreview from './components/previews/DefaultPreview.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -258,6 +262,8 @@ const getBlockName = (type: string) => {
   return BLOCK_TYPES.find(b => b.type === type)?.name || type
 }
 
+const currentVersion = computed(() => pageData.value?.page?.version)
+
 const fetchPage = async () => {
   pageLoading.value = true
   try {
@@ -265,7 +271,7 @@ const fetchPage = async () => {
     pageData.value = res
     blocks.value = res.decorations || []
   } catch (error) {
-    ElMessage.error('获取页面数据失败')
+    ElMessage.error(t('storefront.loadPageDataFailed'))
   } finally {
     pageLoading.value = false
   }
@@ -344,9 +350,9 @@ const moveBlock = async (index: number, direction: number) => {
 
 const deleteBlock = async (index: number) => {
   try {
-    await ElMessageBox.confirm('确定要删除此区块吗？', '删除确认', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('storefront.confirmDeleteBlock'), t('storefront.confirmDelete'), {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     })
     const block = blocks.value[index]
@@ -359,10 +365,10 @@ const deleteBlock = async (index: number) => {
     } else if (selectedBlockIndex.value !== null && selectedBlockIndex.value > index) {
       selectedBlockIndex.value--
     }
-    ElMessage.success('区块已删除')
+    ElMessage.success(t('storefront.blockDeleted'))
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败')
+      ElMessage.error(t('storefront.deleteBlockFailed'))
     }
   }
 }
@@ -378,10 +384,10 @@ const handleSaveDraft = async () => {
   saving.value = true
   try {
     await saveDraft(pageId, blocks.value)
-    ElMessage.success('草稿已保存')
+    ElMessage.success(t('storefront.draftSaved'))
     await fetchPage()
   } catch (error: any) {
-    ElMessage.error(error.message || '保存失败')
+    ElMessage.error(error.message || t('storefront.saveFailedAction'))
   } finally {
     saving.value = false
   }
@@ -390,19 +396,19 @@ const handleSaveDraft = async () => {
 const handlePublish = async () => {
   try {
     await ElMessageBox.confirm(
-      '发布后访客将能看到最新内容，确定发布吗？',
-      '发布确认',
-      { confirmButtonText: '发布', cancelButtonText: '取消', type: 'info' }
+      t('storefront.publishAfterConfirm'),
+      t('storefront.confirmPublishAction'),
+      { confirmButtonText: 'Publish', cancelButtonText: 'Cancel', type: 'info' }
     )
     publishing.value = true
     // First save draft, then publish
     await saveDraft(pageId, blocks.value)
     await publishPage(pageId)
-    ElMessage.success('页面已发布')
+    ElMessage.success(t('storefront.pagePublishedAction'))
     await fetchPage()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '发布失败')
+      ElMessage.error(error.message || t('storefront.publishFailedAction'))
     }
   } finally {
     publishing.value = false
@@ -417,7 +423,7 @@ const showVersionHistory = async () => {
     const res = await listVersions(pageId)
     versions.value = res.versions || []
   } catch (error) {
-    ElMessage.error('获取版本历史失败')
+    ElMessage.error(t('storefront.loadVersionHistoryFailedAction'))
   } finally {
     versionsLoading.value = false
   }
@@ -430,25 +436,25 @@ const viewVersionDetail = async (ver: VersionItem) => {
     selectedVersion.value = ver
     versionDetailVisible.value = true
   } catch (error) {
-    ElMessage.error('获取版本详情失败')
+    ElMessage.error(t('storefront.loadVersionDetailFailedAction'))
   }
 }
 
 const handleRestoreVersion = async (ver: VersionItem & { restoring?: boolean }) => {
   try {
     await ElMessageBox.confirm(
-      `恢复到版本 v${ver.version} 将覆盖当前内容，确定恢复吗？`,
-      '恢复版本',
-      { confirmButtonText: '恢复', cancelButtonText: '取消', type: 'warning' }
+      t('storefront.confirmRestoreVersion', { version: ver.version }),
+      t('storefront.restoreVersionAction'),
+      { confirmButtonText: 'Restore', cancelButtonText: 'Cancel', type: 'warning' }
     )
     ver.restoring = true
     await restoreVersion(pageId, { version: ver.version })
-    ElMessage.success('版本已恢复')
+    ElMessage.success(t('storefront.versionRestoredAction'))
     versionDrawerVisible.value = false
     await fetchPage()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '恢复失败')
+      ElMessage.error(error.message || t('storefront.restoreFailedAction'))
     }
   } finally {
     ver.restoring = false
@@ -456,7 +462,7 @@ const handleRestoreVersion = async (ver: VersionItem & { restoring?: boolean }) 
 }
 
 const formatTime = (timestampStr: string) => {
-  return new Date(timestampStr).toLocaleString('zh-CN')
+  return new Date(timestampStr).toLocaleString()
 }
 
 onMounted(() => {

@@ -1,16 +1,16 @@
 <template>
   <div class="seo-page">
-    <page-header title="SEO设置" subtitle="配置店铺的全局和页面级SEO信息">
+    <page-header :title="$t('storefront.seoSettings')" :subtitle="$t('storefront.configureStoreSEO')">
     </page-header>
 
     <el-tabs v-model="activeTab" class="seo-tabs">
       <!-- Global SEO -->
-      <el-tab-pane label="全局SEO" name="global">
+      <el-tab-pane :label="$t('storefront.globalSEO')" name="global">
         <el-card shadow="hover" class="seo-card">
           <template #header>
             <div class="card-header">
-              <span>全局SEO配置</span>
-              <el-tag type="info" size="small">适用于全站</el-tag>
+              <span>{{ $t('storefront.globalSEOConfig') }}</span>
+              <el-tag type="info" size="small">{{ $t('storefront.appliesToAll') }}</el-tag>
             </div>
           </template>
           <el-form
@@ -20,33 +20,33 @@
             label-position="left"
             v-loading="globalLoading"
           >
-            <el-form-item label="网站标题" prop="title">
+            <el-form-item :label="$t('storefront.websiteTitle')" prop="title">
               <el-input
                 v-model="globalSEO.title"
-                placeholder="网站标题，建议不超过60个字符"
+                :placeholder="$t('storefront.websiteTitlePlaceholder')"
                 maxlength="60"
                 show-word-limit
               />
             </el-form-item>
-            <el-form-item label="网站描述" prop="description">
+            <el-form-item :label="$t('storefront.websiteDescription')" prop="description">
               <el-input
                 v-model="globalSEO.description"
                 type="textarea"
                 :rows="4"
-                placeholder="网站描述，建议不超过160个字符"
+                :placeholder="$t('storefront.websiteDescriptionPlaceholder')"
                 maxlength="160"
                 show-word-limit
               />
             </el-form-item>
-            <el-form-item label="关键词" prop="keywords">
+            <el-form-item :label="$t('storefront.keywords')" prop="keywords">
               <el-input
                 v-model="globalSEO.keywords"
-                placeholder="关键词，用英文逗号分隔"
+                :placeholder="$t('storefront.keywordsPlaceholder')"
               />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="saveGlobalSEO" :loading="globalSaving">
-                保存全局配置
+                {{ $t('storefront.saveGlobalConfig') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -54,7 +54,7 @@
       </el-tab-pane>
 
       <!-- Page SEO -->
-      <el-tab-pane label="页面SEO" name="pages">
+      <el-tab-pane :label="$t('storefront.pageSEO')" name="pages">
         <el-card shadow="hover" class="seo-card" v-loading="pageLoading">
           <div class="page-seo-list">
             <div
@@ -84,19 +84,19 @@
                     label-position="left"
                     size="small"
                   >
-                    <el-form-item label="页面标题">
-                      <el-input v-model="item.config.title" placeholder="页面标题" />
+                    <el-form-item :label="$t('storefront.pageTitle')">
+                      <el-input v-model="item.config.title" :placeholder="$t('storefront.pageTitle')" />
                     </el-form-item>
-                    <el-form-item label="页面描述">
+                    <el-form-item :label="$t('storefront.pageDescription')">
                       <el-input
                         v-model="item.config.description"
                         type="textarea"
                         :rows="3"
-                        placeholder="页面描述"
+                        :placeholder="$t('storefront.pageDescription')"
                       />
                     </el-form-item>
-                    <el-form-item label="关键词">
-                      <el-input v-model="item.config.keywords" placeholder="关键词" />
+                    <el-form-item :label="$t('storefront.keywords')">
+                      <el-input v-model="item.config.keywords" :placeholder="$t('storefront.keywords')" />
                     </el-form-item>
                     <el-form-item>
                       <el-button
@@ -105,7 +105,7 @@
                         @click="savePageSEO(item)"
                         :loading="item.saving"
                       >
-                        保存
+                        {{ $t('storefront.save') }}
                       </el-button>
                     </el-form-item>
                   </el-form>
@@ -117,23 +117,23 @@
       </el-tab-pane>
 
       <!-- SEO Preview -->
-      <el-tab-pane label="预览效果" name="preview">
+      <el-tab-pane :label="$t('storefront.previewEffect')" name="preview">
         <el-card shadow="hover" class="seo-card">
           <template #header>
-            <span>搜索引擎预览</span>
+            <span>{{ $t('storefront.searchEnginePreview') }}</span>
           </template>
           <div class="seo-preview">
             <div class="preview-section">
-              <h4>Google 搜索结果预览</h4>
+              <h4>{{ $t('storefront.googleSearchPreview') }}</h4>
               <div class="google-preview">
-                <div class="google-title">{{ globalSEO.title || '您的网站标题' }}</div>
+                <div class="google-title">{{ globalSEO.title || t('storefront.yourWebsiteTitle') }}</div>
                 <div class="google-url">https://yourstore.com</div>
-                <div class="google-desc">{{ globalSEO.description || '您的网站描述将显示在这里...' }}</div>
+                <div class="google-desc">{{ globalSEO.description || t('storefront.yourWebsiteDescription') }}</div>
               </div>
             </div>
             <el-divider />
             <div class="preview-section">
-              <h4>SEO 评分建议</h4>
+              <h4>{{ $t('storefront.seoScoreSuggestions') }}</h4>
               <div class="seo-score">
                 <el-progress
                   :percentage="seoScore"
@@ -159,6 +159,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -170,6 +171,8 @@ import {
   type SEOConfigDTO,
   type PageSEOConfigDTO
 } from '@/api/storefront'
+
+const { t } = useI18n()
 
 const activeTab = ref('global')
 const globalLoading = ref(false)
@@ -193,7 +196,7 @@ const fetchGlobalSEO = async () => {
     globalSEO.description = res.description || ''
     globalSEO.keywords = res.keywords || ''
   } catch (error) {
-    ElMessage.error('获取全局SEO配置失败')
+    ElMessage.error(t('storefront.loadGlobalSEOFailed'))
   } finally {
     globalLoading.value = false
   }
@@ -212,7 +215,7 @@ const fetchPageSEO = async () => {
       }
     }))
   } catch (error) {
-    ElMessage.error('获取页面SEO配置失败')
+    ElMessage.error(t('storefront.loadPageSEOFailed'))
   } finally {
     pageLoading.value = false
   }
@@ -222,9 +225,9 @@ const saveGlobalSEO = async () => {
   globalSaving.value = true
   try {
     await updateGlobalSEO({ ...globalSEO })
-    ElMessage.success('全局SEO配置已保存')
+    ElMessage.success(t('storefront.globalSEOSaved'))
   } catch (error: any) {
-    ElMessage.error(error.message || '保存失败')
+    ElMessage.error(error.message || t('storefront.saveFailed'))
   } finally {
     globalSaving.value = false
   }
@@ -238,9 +241,9 @@ const savePageSEO = async (item: PageSEOConfigDTO & { saving?: boolean }) => {
       description: item.config.description,
       keywords: item.config.keywords
     }, item.page_id)
-    ElMessage.success('页面SEO配置已保存')
+    ElMessage.success(t('storefront.pageSEOConfigSaved'))
   } catch (error: any) {
-    ElMessage.error(error.message || '保存失败')
+    ElMessage.error(error.message || t('storefront.saveFailed'))
   } finally {
     item.saving = false
   }
@@ -297,25 +300,25 @@ const scoreColor = computed(() => {
 const seoTips = computed(() => {
   const tips: { text: string; type: 'success' | 'warning' }[] = []
   if (globalSEO.title.length === 0) {
-    tips.push({ text: '请添加网站标题', type: 'warning' })
+    tips.push({ text: 'storefront.addWebsiteTitle', type: 'warning' })
   } else if (globalSEO.title.length > 60) {
-    tips.push({ text: '标题过长，可能被截断', type: 'warning' })
+    tips.push({ text: 'storefront.titleTooLong', type: 'warning' })
   } else {
-    tips.push({ text: '标题长度合适', type: 'success' })
+    tips.push({ text: 'storefront.titleLengthOk', type: 'success' })
   }
 
   if (globalSEO.description.length === 0) {
-    tips.push({ text: '请添加网站描述', type: 'warning' })
+    tips.push({ text: 'storefront.addWebsiteDescription', type: 'warning' })
   } else if (globalSEO.description.length > 160) {
-    tips.push({ text: '描述过长，可能被截断', type: 'warning' })
+    tips.push({ text: 'storefront.descriptionTooLong', type: 'warning' })
   } else {
-    tips.push({ text: '描述长度合适', type: 'success' })
+    tips.push({ text: 'storefront.descriptionLengthOk', type: 'success' })
   }
 
   if (globalSEO.keywords.length === 0) {
-    tips.push({ text: '建议添加关键词', type: 'warning' })
+    tips.push({ text: 'storefront.suggestAddKeywords', type: 'warning' })
   } else {
-    tips.push({ text: '关键词已设置', type: 'success' })
+    tips.push({ text: 'storefront.keywordsSet', type: 'success' })
   }
 
   return tips

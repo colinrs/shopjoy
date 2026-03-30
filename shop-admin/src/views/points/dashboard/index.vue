@@ -172,6 +172,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import {
   TrendCharts, Present, Star, User, DataLine, Timer, Trophy,
   CircleCheck, Loading
@@ -231,17 +232,7 @@ const loadStats = async () => {
     stats.value = res
   } catch (error) {
     console.error('Failed to load stats:', error)
-    // Use mock data
-    stats.value = {
-      total_issued: 125000,
-      total_redeemed: 45000,
-      total_expired: 5000,
-      outstanding_balance: 75000,
-      redemption_rate: '36.0',
-      active_users: 1250,
-      period_start: '2026-03-01',
-      period_end: '2026-03-24'
-    }
+    ElMessage.error('加载积分统计失败')
   }
 }
 
@@ -252,16 +243,7 @@ const loadTrendData = async () => {
     trendData.value = res.data
   } catch (error) {
     console.error('Failed to load trend:', error)
-    // Use mock data
-    trendData.value = [
-      { date: '2026-03-18', earned: 5200, redeemed: 1800, expired: 0 },
-      { date: '2026-03-19', earned: 4800, redeemed: 2200, expired: 0 },
-      { date: '2026-03-20', earned: 6500, redeemed: 1500, expired: 0 },
-      { date: '2026-03-21', earned: 7200, redeemed: 3000, expired: 0 },
-      { date: '2026-03-22', earned: 5500, redeemed: 2100, expired: 0 },
-      { date: '2026-03-23', earned: 6800, redeemed: 2500, expired: 500 },
-      { date: '2026-03-24', earned: 8100, redeemed: 3200, expired: 0 }
-    ]
+    ElMessage.error('加载积分趋势失败')
   } finally {
     trendLoading.value = false
   }
@@ -274,14 +256,7 @@ const loadTopUsers = async () => {
     topUsers.value = res.list
   } catch (error) {
     console.error('Failed to load top users:', error)
-    // Use mock data
-    topUsers.value = [
-      { user_id: 12345, user_email: 'user1@example.com', points_earned: 5200, created_at: '2026-01-15' },
-      { user_id: 12346, user_email: 'user2@example.com', points_earned: 4800, created_at: '2026-02-01' },
-      { user_id: 12347, user_email: 'user3@example.com', points_earned: 3500, created_at: '2026-02-15' },
-      { user_id: 12348, user_email: 'user4@example.com', points_earned: 3200, created_at: '2026-03-01' },
-      { user_id: 12349, user_email: 'user5@example.com', points_earned: 2900, created_at: '2026-03-10' }
-    ]
+    ElMessage.error('加载积分排行失败')
   } finally {
     topUsersLoading.value = false
   }
@@ -294,12 +269,7 @@ const loadExpiring = async () => {
     expiringList.value = res.list
   } catch (error) {
     console.error('Failed to load expiring:', error)
-    // Use mock data
-    expiringList.value = [
-      { date: '2026-04-15', points: 12500, user_count: 45 },
-      { date: '2026-04-20', points: 8000, user_count: 32 },
-      { date: '2026-04-25', points: 5500, user_count: 28 }
-    ]
+    ElMessage.error('加载即将过期积分失败')
   } finally {
     expiringLoading.value = false
   }

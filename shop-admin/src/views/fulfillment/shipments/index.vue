@@ -5,25 +5,25 @@
       <el-col :xs="12" :sm="6">
         <div class="stat-item pending" @click="handleStatusFilter('pending')">
           <p class="stat-number">{{ stats.pending }}</p>
-          <p class="stat-label">待发货</p>
+          <p class="stat-label">{{ $t('fulfillment.pendingShipment') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item shipped" @click="handleStatusFilter('shipped')">
           <p class="stat-number">{{ stats.shipped }}</p>
-          <p class="stat-label">已发货</p>
+          <p class="stat-label">{{ $t('fulfillment.shippedShipment') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item transit" @click="handleStatusFilter('in_transit')">
           <p class="stat-number">{{ stats.in_transit }}</p>
-          <p class="stat-label">运输中</p>
+          <p class="stat-label">{{ $t('fulfillment.inTransitShipment') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-item delivered" @click="handleStatusFilter('delivered')">
           <p class="stat-number">{{ stats.delivered }}</p>
-          <p class="stat-label">已送达</p>
+          <p class="stat-label">{{ $t('fulfillment.deliveredShipment') }}</p>
         </div>
       </el-col>
     </el-row>
@@ -34,7 +34,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索运单号/发货单号"
+            :placeholder="$t('fulfillment.searchTrackingNo')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -43,34 +43,34 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" placeholder="发货状态" clearable class="filter-select">
-            <el-option label="全部" value="" />
-            <el-option label="待发货" value="pending" />
-            <el-option label="已发货" value="shipped" />
-            <el-option label="运输中" value="in_transit" />
-            <el-option label="已送达" value="delivered" />
-            <el-option label="配送失败" value="failed" />
+          <el-select v-model="statusFilter" :placeholder="$t('fulfillment.status')" clearable class="filter-select">
+            <el-option :label="$t('common.all')" value="" />
+            <el-option :label="$t('fulfillment.pendingShipment')" value="pending" />
+            <el-option :label="$t('fulfillment.shippedShipment')" value="shipped" />
+            <el-option :label="$t('fulfillment.inTransitShipment')" value="in_transit" />
+            <el-option :label="$t('fulfillment.deliveredShipment')" value="delivered" />
+            <el-option :label="$t('fulfillment.failedShipment')" value="failed" />
           </el-select>
-          <el-select v-model="carrierFilter" placeholder="物流公司" clearable class="filter-select">
-            <el-option label="全部" value="" />
+          <el-select v-model="carrierFilter" :placeholder="$t('fulfillment.carrier')" clearable class="filter-select">
+            <el-option :label="$t('common.all')" value="" />
             <el-option v-for="carrier in carriers" :key="carrier.code" :label="carrier.name" :value="carrier.code" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            range-separator="to"
+            :start-placeholder="$t('fulfillment.startDate')"
+            :end-placeholder="$t('fulfillment.endDate')"
             class="date-picker"
             value-format="YYYY-MM-DD"
           />
         </div>
         <div class="filter-right">
           <el-button @click="handleExport">
-            <el-icon><Download /></el-icon>导出
+            <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
           <el-button type="primary" @click="handleRefresh">
-            <el-icon><Refresh /></el-icon>刷新
+            <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
       </div>
@@ -81,13 +81,13 @@
       <div v-if="selectedRows.length > 0" class="batch-actions-bar">
         <div class="batch-info">
           <el-icon><InfoFilled /></el-icon>
-          <span>已选择 <strong>{{ selectedRows.length }}</strong> 条发货单</span>
+          <span>{{ $t('fulfillment.selectedRows', { n: selectedRows.length }) }}</span>
         </div>
         <div class="batch-actions">
           <el-button type="primary" @click="handleBatchShip">
-            <el-icon><Van /></el-icon>批量发货
+            <el-icon><Van /></el-icon>{{ $t('fulfillment.batchShipment') }}
           </el-button>
-          <el-button @click="clearSelection">取消选择</el-button>
+          <el-button @click="clearSelection">{{ $t('fulfillment.clearSelection') }}</el-button>
         </div>
       </div>
     </transition>
@@ -102,21 +102,21 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" :selectable="isSelectable" />
-        <el-table-column prop="shipment_no" label="发货单号" min-width="150">
+        <el-table-column prop="shipment_no" :label="$t('fulfillment.shipmentNo')" min-width="150">
           <template #default="{ row }">
             <div class="shipment-no-cell">
               <span class="shipment-no">{{ row.shipment_no }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" label="订单号" min-width="150">
+        <el-table-column prop="order_no" :label="$t('fulfillment.orderNo')" min-width="150">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewOrder(row.order_id)">
               {{ row.order_no }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="物流信息" min-width="180">
+        <el-table-column :label="$t('fulfillment.logistics')" min-width="180">
           <template #default="{ row }">
             <div class="logistics-info">
               <p class="carrier-name">{{ row.carrier }}</p>
@@ -125,12 +125,12 @@
                 {{ row.tracking_no }}
               </p>
               <p class="tracking-no" v-else>
-                <el-tag type="warning" size="small">待录入</el-tag>
+                <el-tag type="warning" size="small">{{ $t('fulfillment.toBeEntered') }}</el-tag>
               </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="商品" min-width="160">
+        <el-table-column :label="$t('common.items')" min-width="160">
           <template #default="{ row }">
             <div class="items-preview">
               <el-image
@@ -150,20 +150,20 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="110" align="center">
+        <el-table-column prop="status" :label="$t('common.status')" width="110" align="center">
           <template #default="{ row }">
             <status-tag :status="row.status" :type-map="statusTypeMap" />
           </template>
         </el-table-column>
-        <el-table-column label="发货时间" width="160">
+        <el-table-column :label="$t('fulfillment.shipmentTime')" width="160">
           <template #default="{ row }">
             <span class="time-text">{{ row.shipped_at || row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">
-              详情
+              {{ $t('common.detail') }}
             </el-button>
             <el-button
               v-if="row.status === ShipmentStatus.PENDING"
@@ -172,7 +172,7 @@
               size="small"
               @click="openShipDialog(row)"
             >
-              发货
+              {{ $t('orders.ship') }}
             </el-button>
             <el-button
               v-if="row.status === ShipmentStatus.IN_TRANSIT"
@@ -181,7 +181,7 @@
               size="small"
               @click="markDelivered(row)"
             >
-              确认送达
+              {{ $t('fulfillment.confirmDeliveryAction') }}
             </el-button>
             <el-button
               v-if="row.tracking_no"
@@ -190,7 +190,7 @@
               size="small"
               @click="copyTracking(row.tracking_no)"
             >
-              复制单号
+              {{ $t('fulfillment.copyTracking') }}
             </el-button>
           </template>
         </el-table-column>
@@ -236,10 +236,12 @@ import { Search, Download, Refresh, InfoFilled, Van, Location, Goods } from '@el
 import StatusTag from '@/components/common/StatusTag.vue'
 import ShipDialog from '@/components/fulfillment/ShipDialog.vue'
 import BatchShipDialog from '@/components/fulfillment/BatchShipDialog.vue'
+import { t } from '@/plugins/i18n'
 import {
   getShipmentList,
   getCarrierList,
   updateShipmentStatus,
+  getFulfillmentSummary,
   type Shipment,
   type Carrier,
   type ShipmentListParams
@@ -274,150 +276,23 @@ const tableRef = ref()
 const carriers = ref<Carrier[]>([])
 
 const stats = ref({
-  pending: 15,
-  shipped: 42,
-  in_transit: 28,
-  delivered: 156
+  pending: 0,
+  shipped: 0,
+  in_transit: 0,
+  delivered: 0
 })
 
 const statusTypeMap: Record<string, { type: 'warning' | 'primary' | 'info' | 'success' | 'danger', text: string }> = {
-  'pending': { type: 'warning', text: '待发货' },
-  'shipped': { type: 'primary', text: '已发货' },
-  'in_transit': { type: 'info', text: '运输中' },
-  'delivered': { type: 'success', text: '已送达' },
-  'failed': { type: 'danger', text: '配送失败' },
-  'cancelled': { type: 'info', text: '已取消' }
+  'pending': { type: 'warning', text: 'Pending' },
+  'shipped': { type: 'primary', text: 'Shipped' },
+  'in_transit': { type: 'info', text: 'In Transit' },
+  'delivered': { type: 'success', text: 'Delivered' },
+  'failed': { type: 'danger', text: 'Failed' },
+  'cancelled': { type: 'info', text: 'Cancelled' }
 }
 
-// Mock data for development
-const shipmentList = ref<Shipment[]>([
-  {
-    id: 1,
-    shipment_no: 'SHP20260322001',
-    order_id: 'ORD001',
-    order_no: 'ORD2026031800100',
-    status: 'shipped',
-    status_text: '已发货',
-    carrier: 'SF Express',
-    carrier_code: 'SF',
-    tracking_no: 'SF1234567890',
-    tracking_url: 'https://www.sf-express.com/sf-service-ow/f、梁.operation.entrega_ar?trackingNo=SF1234567890',
-    shipping_cost: "12.00",
-    shipping_currency: 'CNY',
-    weight: "1.5",
-    shipped_at: '2026-03-22T14:30:25Z',
-    delivered_at: null,
-    remark: '',
-    created_at: '2026-03-22T10:00:00Z',
-    updated_at: '2026-03-22T10:00:00Z',
-    created_by: 1,
-    created_by_name: '管理员',
-    items: [
-      { id: 1, product_id: 1, sku_id: 1, product_name: 'Wireless Bluetooth Earphones Pro', sku_name: 'Black', image: '', quantity: 1 }
-    ]
-  },
-  {
-    id: 2,
-    shipment_no: 'SHP20260322002',
-    order_id: 'ORD002',
-    order_no: 'ORD2026031800099',
-    status: 'pending',
-    status_text: '待发货',
-    carrier: '',
-    carrier_code: '',
-    tracking_no: '',
-    tracking_url: '',
-    shipping_cost: "0.00",
-    shipping_currency: 'CNY',
-    weight: "0",
-    shipped_at: null,
-    delivered_at: null,
-    remark: '',
-    created_at: '2026-03-22T11:00:00Z',
-    updated_at: '2026-03-22T11:00:00Z',
-    created_by: 1,
-    created_by_name: '管理员',
-    items: [
-      { id: 2, product_id: 2, sku_id: 2, product_name: 'Smart Watch Series 7', sku_name: 'Silver 42mm', image: '', quantity: 1 },
-      { id: 3, product_id: 3, sku_id: 3, product_name: 'Portable Power Bank', sku_name: '20000mAh', image: '', quantity: 2 }
-    ]
-  },
-  {
-    id: 3,
-    shipment_no: 'SHP20260322003',
-    order_id: 'ORD003',
-    order_no: 'ORD2026031800098',
-    status: 'in_transit',
-    status_text: '运输中',
-    carrier: 'ZTO Express',
-    carrier_code: 'ZT',
-    tracking_no: 'ZT9876543210',
-    tracking_url: 'https://www.zto.com/express/express/search?num=ZT9876543210',
-    shipping_cost: "8.00",
-    shipping_currency: 'CNY',
-    weight: "0.8",
-    shipped_at: '2026-03-21T16:45:30Z',
-    delivered_at: null,
-    remark: 'Fragile item',
-    created_at: '2026-03-21T15:00:00Z',
-    updated_at: '2026-03-21T15:00:00Z',
-    created_by: 1,
-    created_by_name: '管理员',
-    items: [
-      { id: 4, product_id: 4, sku_id: 4, product_name: 'Mechanical Keyboard RGB', sku_name: 'Blue Switch', image: '', quantity: 1 }
-    ]
-  },
-  {
-    id: 4,
-    shipment_no: 'SHP20260322004',
-    order_id: 'ORD004',
-    order_no: 'ORD2026031800097',
-    status: 'delivered',
-    status_text: '已送达',
-    carrier: 'SF Express',
-    carrier_code: 'SF',
-    tracking_no: 'SF1122334455',
-    tracking_url: 'https://www.sf-express.com/sf-service-ow/f、梁.operation.entrega_ar?trackingNo=SF1122334455',
-    shipping_cost: "15.00",
-    shipping_currency: 'CNY',
-    weight: "3.2",
-    shipped_at: '2026-03-20T09:00:00Z',
-    delivered_at: '2026-03-22T15:30:00Z',
-    remark: '',
-    created_at: '2026-03-20T08:00:00Z',
-    updated_at: '2026-03-22T15:30:00Z',
-    created_by: 1,
-    created_by_name: '管理员',
-    items: [
-      { id: 5, product_id: 5, sku_id: 5, product_name: '4K HD Monitor 27 inch', sku_name: 'Black', image: '', quantity: 1 }
-    ]
-  },
-  {
-    id: 5,
-    shipment_no: 'SHP20260322005',
-    order_id: 'ORD005',
-    order_no: 'ORD2026031800096',
-    status: 'failed',
-    status_text: '配送失败',
-    carrier: 'YTO Express',
-    carrier_code: 'YT',
-    tracking_no: 'YT5566778899',
-    tracking_url: 'https://www.yto.net.cn/express/express/search?num=YT5566778899',
-    shipping_cost: "6.00",
-    shipping_currency: 'CNY',
-    weight: "0.5",
-    shipped_at: '2026-03-19T14:00:00Z',
-    delivered_at: null,
-    remark: 'Delivery failed - wrong address',
-    created_at: '2026-03-19T13:00:00Z',
-    updated_at: '2026-03-19T14:00:00Z',
-    created_by: 1,
-    created_by_name: '管理员',
-    items: [
-      { id: 6, product_id: 6, sku_id: 6, product_name: 'Phone Case', sku_name: 'iPhone 15 Pro', image: '', quantity: 1 }
-    ]
-  }
-])
+// Shipment list
+const shipmentList = ref<Shipment[]>([])
 
 // Methods
 const loadCarriers = async () => {
@@ -425,17 +300,21 @@ const loadCarriers = async () => {
     const res = await getCarrierList()
     carriers.value = res
   } catch (error) {
-    // Use mock data
-    carriers.value = [
-      { code: 'SF', name: 'SF Express', tracking_url: 'https://www.sf-express.com/track?id={tracking_no}', is_active: true },
-      { code: 'ZT', name: 'ZTO Express', tracking_url: 'https://www.zto.com/track?id={tracking_no}', is_active: true },
-      { code: 'YT', name: 'YTO Express', tracking_url: 'https://www.yto.net.cn/query.html?id={tracking_no}', is_active: true },
-      { code: 'ST', name: 'STO Express', tracking_url: 'https://www.sto.cn/track?id={tracking_no}', is_active: true },
-      { code: 'YD', name: 'Yunda Express', tracking_url: 'https://www.yundaex.com/track?id={tracking_no}', is_active: true },
-      { code: 'EMS', name: 'EMS', tracking_url: 'https://www.ems.com.cn/track?id={tracking_no}', is_active: true },
-      { code: 'JD', name: 'JD Logistics', tracking_url: 'https://www.jdl.com/track?id={tracking_no}', is_active: true },
-      { code: 'OTHER', name: 'Other', tracking_url: '', is_active: true }
-    ]
+    ElMessage.error(t('fulfillment.loadCarriersFailed'))
+  }
+}
+
+const loadStats = async () => {
+  try {
+    const res = await getFulfillmentSummary()
+    stats.value = {
+      pending: res.pending_shipment || 0,
+      shipped: res.shipped || 0,
+      in_transit: 0,
+      delivered: res.delivered || 0
+    }
+  } catch (error) {
+    ElMessage.error(t('fulfillment.loadFailed'))
   }
 }
 
@@ -457,7 +336,7 @@ const loadData = async () => {
     shipmentList.value = res.list
     total.value = res.total
   } catch (error) {
-    // Mock data already set
+    ElMessage.error(t('fulfillment.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -475,7 +354,34 @@ const handleSearch = () => {
 }
 
 const handleExport = () => {
-  ElMessage.success('Export successful')
+  try {
+    // Build export params from current filters
+    const params: Record<string, any> = {
+      page: 1,
+      page_size: 10000
+    }
+    if (searchQuery.value) {
+      params.tracking_no = searchQuery.value
+    }
+    if (statusFilter.value !== '') {
+      params.status = statusFilter.value
+    }
+    if (carrierFilter.value) {
+      params.carrier_code = carrierFilter.value
+    }
+    if (dateRange.value) {
+      params.start_time = dateRange.value[0]
+      params.end_time = dateRange.value[1]
+    }
+
+    // Use window.open for export
+    const queryString = new URLSearchParams(params).toString()
+    const exportUrl = `/api/v1/shipments/export?${queryString}`
+    window.open(exportUrl, '_blank')
+    ElMessage.success(t('common.exporting'))
+  } catch (error) {
+    ElMessage.error(t('common.exportFailed'))
+  }
 }
 
 const handleRefresh = () => {
@@ -514,40 +420,40 @@ const openShipDialog = (row: Shipment) => {
 const handleShipSuccess = () => {
   shipDialogVisible.value = false
   loadData()
-  ElMessage.success('Shipment created successfully')
+  ElMessage.success(t('fulfillment.shipmentConfirmed'))
 }
 
 const handleBatchShipSuccess = () => {
   batchShipDialogVisible.value = false
   clearSelection()
   loadData()
-  ElMessage.success('Batch shipment completed')
+  ElMessage.success(t('fulfillment.batchShipmentCompleted'))
 }
 
 const markDelivered = async (row: Shipment) => {
   try {
     await ElMessageBox.confirm(
-      'Are you sure you want to mark this shipment as delivered?',
-      'Confirm Delivery',
+      t('fulfillment.markDelivered'),
+      t('fulfillment.confirmDelivery'),
       {
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
         type: 'success'
       }
     )
     await updateShipmentStatus(row.id, ShipmentStatus.DELIVERED)
-    ElMessage.success('Shipment marked as delivered')
+    ElMessage.success(t('fulfillment.shipmentMarkedDelivered'))
     loadData()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to update status')
+      ElMessage.error(t('fulfillment.loadFailed'))
     }
   }
 }
 
 const copyTracking = (trackingNo: string) => {
   navigator.clipboard.writeText(trackingNo)
-  ElMessage.success('Tracking number copied')
+  ElMessage.success(t('fulfillment.trackingNumberCopied'))
 }
 
 const handleSizeChange = (val: number) => {
@@ -562,6 +468,7 @@ const handleCurrentChange = (val: number) => {
 
 onMounted(() => {
   loadCarriers()
+  loadStats()
   loadData()
 })
 </script>

@@ -4,9 +4,9 @@
     <div class="page-header">
       <el-button link @click="goBack">
         <el-icon><ArrowLeft /></el-icon>
-        返回用户列表
+        {{ $t('adminUsers.backToUserList') }}
       </el-button>
-      <h2 class="page-title">管理员详情</h2>
+      <h2 class="page-title">{{ $t('adminUsers.adminDetail') }}</h2>
     </div>
 
     <!-- User Summary Card -->
@@ -25,24 +25,24 @@
         <div class="user-meta">
           <div class="meta-item">
             <el-tag :type="getTypeTagType(adminUser?.type)" size="large">
-              {{ adminUser?.type_text || '未知类型' }}
+              {{ adminUser?.type_text || $t('adminUsers.unknownType') }}
             </el-tag>
           </div>
           <div class="meta-item">
             <el-tag :type="adminUser?.status === 1 ? 'success' : 'danger'" size="large">
-              {{ adminUser?.status === 1 ? '正常' : '禁用' }}
+              {{ adminUser?.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
             </el-tag>
           </div>
         </div>
         <div class="user-actions">
-          <el-button type="primary" @click="handleEdit">编辑</el-button>
-          <el-button @click="handleAssignRoles">分配角色</el-button>
-          <el-button type="warning" @click="handleResetPassword">重置密码</el-button>
+          <el-button type="primary" @click="handleEdit">{{ $t('adminUsers.edit') }}</el-button>
+          <el-button @click="handleAssignRoles">{{ $t('adminUsers.assignRoles') }}</el-button>
+          <el-button type="warning" @click="handleResetPassword">{{ $t('adminUsers.resetPassword') }}</el-button>
           <el-button
             :type="adminUser?.status === 1 ? 'danger' : 'success'"
             @click="handleStatusToggle"
           >
-            {{ adminUser?.status === 1 ? '禁用' : '启用' }}
+            {{ adminUser?.status === 1 ? $t('adminUsers.disabled2') : $t('adminUsers.enabled2') }}
           </el-button>
         </div>
       </div>
@@ -51,25 +51,25 @@
     <!-- Info Card -->
     <el-card class="info-card" shadow="never">
       <template #header>
-        <span class="card-title">基本信息</span>
+        <span class="card-title">{{ $t('adminUsers.basicInfo') }}</span>
       </template>
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="用户ID">{{ adminUser?.id }}</el-descriptions-item>
-        <el-descriptions-item label="真实姓名">{{ adminUser?.real_name || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ adminUser?.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="手机号">{{ adminUser?.mobile || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="用户类型">
+        <el-descriptions-item :label="$t('adminUsers.userId')">{{ adminUser?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.realName')">{{ adminUser?.real_name || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.email')">{{ adminUser?.email || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ adminUser?.mobile || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.type')">
           <el-tag :type="getTypeTagType(adminUser?.type)">
             {{ adminUser?.type_text || '-' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="$t('adminUsers.status')">
           <el-tag :type="adminUser?.status === 1 ? 'success' : 'danger'">
-            {{ adminUser?.status === 1 ? '正常' : '禁用' }}
+            {{ adminUser?.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ formatDateTime(adminUser?.created_at) }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ formatDateTime(adminUser?.updated_at) }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.createdAt')">{{ formatDateTime(adminUser?.created_at) }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.updatedAt')">{{ formatDateTime(adminUser?.updated_at) }}</el-descriptions-item>
       </el-descriptions>
     </el-card>
 
@@ -77,8 +77,8 @@
     <el-card class="roles-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <span class="card-title">已分配角色</span>
-          <el-button type="primary" size="small" @click="handleAssignRoles">分配角色</el-button>
+          <span class="card-title">{{ $t('adminUsers.assignedRoles') }}</span>
+          <el-button type="primary" size="small" @click="handleAssignRoles">{{ $t('adminUsers.assignRoles') }}</el-button>
         </div>
       </template>
       <div class="role-list" v-if="adminUser?.roles?.length">
@@ -86,11 +86,11 @@
           {{ role.name }}
         </el-tag>
       </div>
-      <el-empty v-else description="暂未分配角色" />
+      <el-empty v-else :description="$t('adminUsers.noRolesAssigned')" />
     </el-card>
 
     <!-- Edit Dialog -->
-    <el-dialog v-model="editDialogVisible" title="编辑管理员" width="500px" destroy-on-close>
+    <el-dialog v-model="editDialogVisible" :title="$t('adminUsers.editAdmin')" width="500px" destroy-on-close>
       <AdminUserForm
         ref="editFormRef"
         v-model="editFormData"
@@ -98,8 +98,8 @@
         :admin-user="adminUser"
       />
       <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmEdit" :loading="editLoading">确定</el-button>
+        <el-button @click="editDialogVisible = false">{{ $t('adminUsers.cancel') }}</el-button>
+        <el-button type="primary" @click="confirmEdit" :loading="editLoading">{{ $t('adminUsers.confirm') }}</el-button>
       </template>
     </el-dialog>
 
@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import AdminUserForm from './components/AdminUserForm.vue'
@@ -129,6 +130,7 @@ import {
   type UpdateAdminUserParams
 } from '@/api/admin-user'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
@@ -150,23 +152,7 @@ const loadAdminUser = async () => {
     adminUser.value = res
   } catch (error) {
     console.error('Failed to load admin user:', error)
-    // Mock data
-    adminUser.value = {
-      id: userId(),
-      email: 'admin@example.com',
-      mobile: '13800138000',
-      real_name: '管理员',
-      avatar: '',
-      type: 2,
-      type_text: '商家管理员',
-      status: 1,
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-03-24T15:30:00Z',
-      roles: [
-        { id: 1, name: '超级管理员', code: 'super_admin' },
-        { id: 2, name: '运营管理', code: 'operator' }
-      ]
-    }
+    ElMessage.error(t('adminUsers.failedToLoadAdminDetail'))
   } finally {
     loading.value = false
   }
@@ -218,12 +204,12 @@ const confirmEdit = async () => {
   editLoading.value = true
   try {
     await updateAdminUser(userId(), editFormData.value)
-    ElMessage.success('更新成功')
+    ElMessage.success(t('adminUsers.updateSuccess'))
     editDialogVisible.value = false
     loadAdminUser()
   } catch (error) {
     console.error('Failed to update:', error)
-    ElMessage.error('更新失败')
+    ElMessage.error(t('adminUsers.updateFailed'))
   } finally {
     editLoading.value = false
   }
@@ -235,13 +221,13 @@ const handleAssignRoles = () => {
 
 const handleResetPassword = async () => {
   try {
-    await ElMessageBox.confirm('确认重置该管理员的密码?', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('adminUsers.confirmResetPassword'), t('adminUsers.prompt'), {
+      confirmButtonText: t('adminUsers.confirm'),
+      cancelButtonText: t('adminUsers.cancel'),
       type: 'warning'
     })
     const res = await resetAdminPassword(userId())
-    ElMessage.success(`密码重置成功，临时密码: ${res.temporary_password}`)
+    ElMessage.success(t('adminUsers.passwordResetSuccess') + res.temporary_password)
   } catch {
     // User cancelled
   }
@@ -250,20 +236,24 @@ const handleResetPassword = async () => {
 const handleStatusToggle = async () => {
   if (!adminUser.value) return
 
-  const action = adminUser.value.status === 1 ? '禁用' : '启用'
+  const isDisable = adminUser.value.status === 1
   try {
-    await ElMessageBox.confirm(`确认${action}该管理员?`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      isDisable ? t('adminUsers.confirmDisable') : t('adminUsers.confirmEnable'),
+      t('adminUsers.prompt'),
+      {
+        confirmButtonText: t('adminUsers.confirm'),
+        cancelButtonText: t('adminUsers.cancel'),
+        type: 'warning'
+      }
+    )
 
-    if (adminUser.value.status === 1) {
+    if (isDisable) {
       await disableAdminUser(adminUser.value.id)
-      ElMessage.success('已禁用')
+      ElMessage.success(t('adminUsers.disabled') + t('adminUsers.updateSuccess').replace('成功', ''))
     } else {
       await enableAdminUser(adminUser.value.id)
-      ElMessage.success('已启用')
+      ElMessage.success(t('adminUsers.enabled') + t('adminUsers.updateSuccess').replace('成功', ''))
     }
     loadAdminUser()
   } catch {

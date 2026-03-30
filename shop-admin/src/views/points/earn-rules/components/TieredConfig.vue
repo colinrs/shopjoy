@@ -10,19 +10,19 @@
 
         <!-- Threshold -->
         <div class="tier-field">
-          <label>门槛 ($)</label>
+          <label>{{ $t('points.threshold') }}</label>
           <el-input-number
             v-if="tier.threshold !== null"
             v-model="tier.threshold"
             :min="0"
             :step="100"
             :precision="0"
-            placeholder="金额"
+            :placeholder="$t('points.points')"
             style="width: 140px"
           />
           <el-input
             v-else
-            value="无上限"
+            :value="$t('points.noUpperLimit')"
             disabled
             style="width: 140px"
           />
@@ -30,7 +30,7 @@
 
         <!-- Ratio -->
         <div class="tier-field">
-          <label>积分/$1</label>
+          <label>{{ $t('points.pointsPerDollar') }}</label>
           <el-input-number
             :model-value="parseFloat(tier.ratio) || 0"
             @update:model-value="(val: number) => updateRatio(index, val)"
@@ -51,7 +51,7 @@
             size="small"
             @click="removeTier(index)"
           >
-            删除
+            {{ $t('points.delete') }}
           </el-button>
         </div>
       </div>
@@ -59,16 +59,16 @@
 
     <el-button type="primary" link @click="addTier">
       <el-icon><Plus /></el-icon>
-      添加阶梯
+      {{ $t('points.addTier') }}
     </el-button>
 
     <!-- Preview -->
     <div class="preview-section">
-      <div class="preview-title">计算预览</div>
+      <div class="preview-title">{{ $t('points.calculationPreview') }}</div>
       <div class="preview-examples">
         <div v-for="example in previewExamples" :key="example.amount" class="preview-item">
-          <span class="preview-label">订单 ${{ example.amount }}:</span>
-          <span class="preview-value">{{ example.points }} 积分</span>
+          <span class="preview-label">{{ $t('points.orderAmount', { amount: example.amount }) }}</span>
+          <span class="preview-value">{{ example.points }}{{ $t('points.pointsAmount') }}</span>
         </div>
       </div>
     </div>

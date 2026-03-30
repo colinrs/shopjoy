@@ -6,7 +6,7 @@
         <div class="filter-left">
           <el-input
             v-model="userIdInput"
-            placeholder="用户ID"
+            :placeholder="$t('points.searchPlaceholder')"
             clearable
             class="filter-input"
             @keyup.enter="loadTransactions"
@@ -15,21 +15,21 @@
               <el-icon><User /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="searchParams.type" placeholder="交易类型" clearable class="filter-select" @change="loadTransactions">
-            <el-option label="全部" value="" />
-            <el-option label="获得" value="EARN" />
-            <el-option label="兑换" value="REDEEM" />
-            <el-option label="调整" value="ADJUST" />
-            <el-option label="过期" value="EXPIRE" />
-            <el-option label="冻结" value="FREEZE" />
-            <el-option label="解冻" value="UNFREEZE" />
+          <el-select v-model="searchParams.type" :placeholder="$t('points.filterType')" clearable class="filter-select" @change="loadTransactions">
+            <el-option :label="$t('points.all')" value="" />
+            <el-option :label="$t('points.earn')" value="EARN" />
+            <el-option :label="$t('points.redeem')" value="REDEEM" />
+            <el-option :label="$t('points.adjust')" value="ADJUST" />
+            <el-option :label="$t('points.expire')" value="EXPIRE" />
+            <el-option :label="$t('points.freeze')" value="FREEZE" />
+            <el-option :label="$t('points.unfreeze')" value="UNFREEZE" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            range-separator="-"
+            :start-placeholder="$t('points.startDate')"
+            :end-placeholder="$t('points.endDate')"
             value-format="YYYY-MM-DD"
             class="date-picker"
             @change="handleDateChange"
@@ -37,7 +37,7 @@
         </div>
         <el-button @click="handleExport">
           <el-icon><Download /></el-icon>
-          导出CSV
+          {{ $t('points.exportCSV') }}
         </el-button>
       </div>
     </el-card>
@@ -47,13 +47,13 @@
       <el-col :xs="12" :sm="8">
         <div class="stat-item earned">
           <p class="stat-value">{{ transactionStats.total_earned.toLocaleString() }}</p>
-          <p class="stat-label">累计获得</p>
+          <p class="stat-label">{{ $t('points.totalEarned') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8">
         <div class="stat-item redeemed">
           <p class="stat-value">{{ transactionStats.total_redeemed.toLocaleString() }}</p>
-          <p class="stat-label">累计兑换</p>
+          <p class="stat-label">{{ $t('points.totalRedeemed') }}</p>
         </div>
       </el-col>
     </el-row>
@@ -81,6 +81,7 @@ import { ElMessage } from 'element-plus'
 import { User, Download } from '@element-plus/icons-vue'
 import TransactionTable from '../components/TransactionTable.vue'
 import { getTransactions, type PointsTransaction, type ListTransactionsParams } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 // State
 const loading = ref(false)
@@ -125,76 +126,7 @@ const loadTransactions = async () => {
     transactionStats.value = res.stats
   } catch (error) {
     console.error('Failed to load transactions:', error)
-    // Mock data
-    transactionList.value = [
-      {
-        id: 1001,
-        user_id: 12345,
-        account_id: 1,
-        points: 520,
-        balance_after: 5520,
-        type: 'EARN',
-        reference_type: 'ORDER',
-        reference_id: 'ORD20260324001',
-        description: '订单支付积分奖励',
-        expires_at: '2027-03-24T00:00:00Z',
-        created_at: '2026-03-24T10:30:00Z'
-      },
-      {
-        id: 1002,
-        user_id: 12346,
-        account_id: 2,
-        points: -500,
-        balance_after: 3000,
-        type: 'REDEEM',
-        reference_type: 'REDEEM_RULE',
-        reference_id: '1',
-        description: '兑换 $10 优惠券',
-        expires_at: null,
-        created_at: '2026-03-24T09:15:00Z'
-      },
-      {
-        id: 1003,
-        user_id: 12345,
-        account_id: 1,
-        points: 5,
-        balance_after: 5505,
-        type: 'EARN',
-        reference_type: 'SIGN_IN',
-        reference_id: '',
-        description: '每日签到奖励',
-        expires_at: '2026-09-24T00:00:00Z',
-        created_at: '2026-03-24T08:00:00Z'
-      },
-      {
-        id: 1004,
-        user_id: 12347,
-        account_id: 3,
-        points: 100,
-        balance_after: 1300,
-        type: 'ADJUST',
-        reference_type: 'MANUAL',
-        reference_id: '',
-        description: '客服补偿 - 订单发货延迟',
-        expires_at: '2027-03-23T00:00:00Z',
-        created_at: '2026-03-23T16:00:00Z'
-      },
-      {
-        id: 1005,
-        user_id: 12348,
-        account_id: 4,
-        points: -200,
-        balance_after: 500,
-        type: 'EXPIRE',
-        reference_type: 'SYSTEM',
-        reference_id: '',
-        description: '积分过期',
-        expires_at: null,
-        created_at: '2026-03-23T00:00:00Z'
-      }
-    ]
-    total.value = 5
-    transactionStats.value = { total_earned: 625, total_redeemed: 700 }
+    ElMessage.error(t('points.loadTransactionsFailed'))
   } finally {
     loading.value = false
   }
@@ -219,7 +151,31 @@ const handlePageChange = (page: number, pageSize: number) => {
 }
 
 const handleExport = () => {
-  ElMessage.success('导出功能开发中')
+  try {
+    // Build export params from current filters
+    const params: Record<string, any> = {
+      page: 1,
+      page_size: 10000
+    }
+    if (userIdInput.value) {
+      params.user_id = userIdInput.value
+    }
+    if (searchParams.type) {
+      params.type = searchParams.type
+    }
+    if (dateRange.value) {
+      params.start_time = dateRange.value[0]
+      params.end_time = dateRange.value[1]
+    }
+
+    // Use window.open for export
+    const queryString = new URLSearchParams(params).toString()
+    const exportUrl = `/api/v1/points/transactions/export?${queryString}`
+    window.open(exportUrl, '_blank')
+    ElMessage.success(t('points.exporting'))
+  } catch (error) {
+    ElMessage.error(t('points.exportFailed'))
+  }
 }
 
 // Initialize

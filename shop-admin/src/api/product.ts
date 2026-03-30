@@ -358,3 +358,10 @@ export function deleteProductLocalization(id: number) {
     method: 'delete'
   })
 }
+
+export function deleteProduct(id: number) {
+  return request<{ id: number }>({
+    url: `/api/v1/products/${id}`,
+    method: 'delete'
+  })
+}

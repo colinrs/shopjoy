@@ -3,7 +3,7 @@
     <el-select
       :model-value="modelValue"
       @update:model-value="handleSelect"
-      placeholder="选择优惠券"
+      :placeholder="$t('points.selectCoupon')"
       filterable
       remote
       :remote-method="searchCoupons"
@@ -31,10 +31,10 @@
         </div>
         <div class="coupon-preview-info">
           <p class="preview-name">{{ selectedCoupon.name }}</p>
-          <p class="preview-code">优惠码: {{ selectedCoupon.code }}</p>
+          <p class="preview-code">{{ $t('points.couponCode') }} {{ selectedCoupon.code }}</p>
           <div class="preview-details">
             <el-tag size="small" :type="selectedCoupon.type === 'fixed_amount' ? 'success' : 'warning'">
-              {{ selectedCoupon.type === 'fixed_amount' ? '固定金额' : '百分比' }}
+              {{ selectedCoupon.type === 'fixed_amount' ? $t('points.fixedAmountLabel') : $t('points.percentageLabel') }}
             </el-tag>
             <span class="preview-value">
               {{ selectedCoupon.type === 'fixed_amount' ? '$' : '' }}{{ selectedCoupon.discount_value }}{{ selectedCoupon.type === 'percentage' ? '%' : '' }}
@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Ticket } from '@element-plus/icons-vue'
 import { getAvailableCoupons, type AvailableCoupon } from '@/api/points'
 
@@ -79,13 +80,7 @@ const loadCoupons = async (keyword: string = '') => {
     }))
   } catch (error) {
     console.error('Failed to load coupons:', error)
-    // Mock data
-    couponList.value = [
-      { id: 1, name: '$10 优惠券', code: 'SAVE10', type: 'fixed_amount', discount_value: '10', status: 'active', start_time: '', end_time: '' },
-      { id: 2, name: '$20 优惠券', code: 'SAVE20', type: 'fixed_amount', discount_value: '20', status: 'active', start_time: '', end_time: '' },
-      { id: 3, name: '免邮券', code: 'FREESHIP', type: 'fixed_amount', discount_value: '5', status: 'active', start_time: '', end_time: '' },
-      { id: 4, name: '9折券', code: 'DISCOUNT10', type: 'percentage', discount_value: '10', status: 'active', start_time: '', end_time: '' }
-    ]
+    ElMessage.error('加载可用优惠券失败')
   } finally {
     loading.value = false
   }

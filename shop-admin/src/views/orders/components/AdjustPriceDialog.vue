@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="Adjust Order Price"
+    :title="$t('orders.adjustOrderPrice')"
     width="500px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -10,7 +10,7 @@
       <!-- Current Amount Display -->
       <div class="amount-display">
         <div class="amount-row">
-          <span class="amount-label">Current Pay Amount</span>
+          <span class="amount-label">{{ $t('orders.currentPayAmount') }}</span>
           <span class="amount-value">
             <span class="currency">{{ currency }}</span>
             {{ formatAmount(currentAmount) }}
@@ -19,21 +19,21 @@
       </div>
 
       <!-- Adjustment Type -->
-      <el-form-item label="Adjustment Type">
+      <el-form-item :label="$t('orders.adjustmentType')">
         <el-radio-group v-model="form.adjustType">
           <el-radio-button value="decrease">
             <el-icon><Minus /></el-icon>
-            Decrease Price
+            {{ $t('orders.decreasePrice') }}
           </el-radio-button>
           <el-radio-button value="increase">
             <el-icon><Plus /></el-icon>
-            Increase Price
+            {{ $t('orders.increasePrice') }}
           </el-radio-button>
         </el-radio-group>
       </el-form-item>
 
       <!-- Adjustment Amount -->
-      <el-form-item label="Amount" prop="adjustAmount">
+      <el-form-item :label="$t('orders.amount')" prop="adjustAmount">
         <div class="amount-input-wrapper">
           <span class="currency-label">{{ currency }}</span>
           <el-input-number
@@ -43,24 +43,24 @@
             :precision="2"
             :controls="false"
             class="amount-input"
-            placeholder="Enter amount"
+            :placeholder="$t('orders.enterAmount')"
           />
         </div>
         <div v-if="form.adjustType === 'decrease'" class="amount-hint">
           <el-icon><InfoFilled /></el-icon>
-          <span>Maximum: {{ currency }} {{ formatAmount(currentAmount) }}</span>
+          <span>{{ $t('orders.maximum') }} {{ currency }} {{ formatAmount(currentAmount) }}</span>
         </div>
       </el-form-item>
 
       <!-- Preview -->
       <div class="preview-section">
         <div class="preview-row">
-          <span class="preview-label">Original Amount</span>
+          <span class="preview-label">{{ $t('orders.originalAmount') }}</span>
           <span class="preview-value">{{ currency }} {{ formatAmount(currentAmount) }}</span>
         </div>
         <div class="preview-row">
           <span class="preview-label">
-            {{ form.adjustType === 'decrease' ? 'Decrease' : 'Increase' }}
+            {{ form.adjustType === 'decrease' ? $t('orders.decrease') : $t('orders.increase') }}
           </span>
           <span class="preview-value" :class="form.adjustType">
             {{ form.adjustType === 'decrease' ? '-' : '+' }}{{ currency }}
@@ -69,18 +69,18 @@
         </div>
         <el-divider />
         <div class="preview-row total">
-          <span class="preview-label">New Pay Amount</span>
+          <span class="preview-label">{{ $t('orders.newPayAmount') }}</span>
           <span class="preview-value new-amount">{{ currency }} {{ formatAmount(newAmount) }}</span>
         </div>
       </div>
 
       <!-- Reason -->
-      <el-form-item label="Reason" prop="reason">
+      <el-form-item :label="$t('orders.reason')" prop="reason">
         <el-input
           v-model="form.reason"
           type="textarea"
           :rows="3"
-          placeholder="Enter the reason for price adjustment (required)"
+          :placeholder="$t('orders.enterReason')"
           maxlength="200"
           show-word-limit
         />
@@ -89,14 +89,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
+        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
         <el-button
           type="primary"
           :loading="submitting"
           :disabled="!canSubmit"
           @click="handleSubmit"
         >
-          Confirm Adjustment
+          {{ $t('orders.confirmAdjustment') }}
         </el-button>
       </div>
     </template>
@@ -108,6 +108,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Minus, Plus, InfoFilled } from '@element-plus/icons-vue'
 import { adjustOrderPrice } from '@/api/order'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
@@ -137,12 +138,12 @@ const form = reactive({
 
 const rules = {
   adjustAmount: [
-    { required: true, message: 'Please enter amount', trigger: 'blur' },
-    { type: 'number', min: 0.01, message: 'Amount must be greater than 0', trigger: 'blur' }
+    { required: true, message: t('orders.enterAmount'), trigger: 'blur' },
+    { type: 'number', min: 0.01, message: t('orders.amountMustPositive'), trigger: 'blur' }
   ],
   reason: [
-    { required: true, message: 'Please enter reason', trigger: 'blur' },
-    { min: 5, max: 200, message: 'Reason must be 5-200 characters', trigger: 'blur' }
+    { required: true, message: t('orders.enterReason'), trigger: 'blur' },
+    { min: 5, max: 200, message: t('orders.reasonLength'), trigger: 'blur' }
   ]
 }
 
@@ -192,11 +193,11 @@ const handleSubmit = async () => {
         adjust_amount: adjustAmountStr,
         reason: form.reason
       })
-      ElMessage.success('Price adjusted successfully')
+      ElMessage.success(t('orders.priceAdjustSuccess'))
       emit('success')
       visible.value = false
     } catch (error: any) {
-      ElMessage.error(error?.message || 'Failed to adjust price')
+      ElMessage.error(error?.message || t('orders.priceAdjustFailed'))
     } finally {
       submitting.value = false
     }

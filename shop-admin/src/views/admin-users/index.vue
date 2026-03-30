@@ -1,8 +1,8 @@
 <template>
   <div class="admin-users-page">
     <el-tabs v-model="activeTab" class="user-tabs">
-      <el-tab-pane label="管理员" name="admin" v-if="isPlatformAdmin" />
-      <el-tab-pane label="顾客" name="customer" />
+      <el-tab-pane :label="$t('adminUsers.admin')" name="admin" v-if="isPlatformAdmin" />
+      <el-tab-pane :label="$t('adminUsers.customer')" name="customer" />
     </el-tabs>
 
     <el-card class="filter-card" shadow="never">
@@ -10,7 +10,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索用户名/邮箱/手机号"
+            :placeholder="$t('adminUsers.searchPlaceholder')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -21,32 +21,32 @@
           </el-input>
           <el-select
             v-model="filterType"
-            placeholder="用户类型"
+            :placeholder="$t('adminUsers.filterType')"
             clearable
             class="filter-select"
             v-if="activeTab === 'admin' && isPlatformAdmin"
             @change="handleSearch"
           >
-            <el-option label="全部" :value="0" />
-            <el-option label="商家管理员" :value="2" />
-            <el-option label="商家子账号" :value="3" />
+            <el-option :label="$t('adminUsers.all')" :value="0" />
+            <el-option :label="$t('adminUsers.merchantAdmin')" :value="2" />
+            <el-option :label="$t('adminUsers.merchantSubAccount')" :value="3" />
           </el-select>
           <el-select
             v-model="filterStatus"
-            placeholder="状态"
+            :placeholder="$t('adminUsers.filterStatus')"
             clearable
             class="filter-select"
             v-if="activeTab === 'admin'"
             @change="handleSearch"
           >
-            <el-option label="全部" :value="0" />
-            <el-option label="正常" :value="1" />
-            <el-option label="禁用" :value="2" />
+            <el-option :label="$t('adminUsers.all')" :value="0" />
+            <el-option :label="$t('adminUsers.enabled')" :value="1" />
+            <el-option :label="$t('adminUsers.disabled')" :value="2" />
           </el-select>
         </div>
         <div class="filter-right">
           <el-button type="primary" @click="handleAdd" v-if="activeTab === 'admin' && isPlatformAdmin">
-            <el-icon><Plus /></el-icon>新增管理员
+            <el-icon><Plus /></el-icon>{{ $t('adminUsers.addAdmin') }}
           </el-button>
         </div>
       </div>
@@ -54,7 +54,7 @@
 
     <el-card class="table-card" shadow="never">
       <el-table :data="tableData" v-loading="loading" stripe @row-click="handleRowClick">
-        <el-table-column label="用户信息" min-width="250">
+        <el-table-column :label="$t('adminUsers.userInfo')" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
               <el-avatar :size="44" :src="row.avatar" class="user-avatar">
@@ -68,29 +68,29 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="类型" width="130" align="center" v-if="activeTab === 'admin'">
+        <el-table-column :label="$t('adminUsers.type')" width="130" align="center" v-if="activeTab === 'admin'">
           <template #default="{ row }">
             <el-tag :type="getTypeTagType(row.type)" size="small">
               {{ row.type_text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="角色" width="100" align="center" v-if="activeTab === 'customer'">
+        <el-table-column :label="$t('adminUsers.role')" width="100" align="center" v-if="activeTab === 'customer'">
           <template #default>
-            <el-tag type="info" size="small">普通</el-tag>
+            <el-tag type="info" size="small">{{ $t('adminUsers.ordinary') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="订单数" width="100" align="center" v-if="activeTab === 'customer'">
+        <el-table-column :label="$t('adminUsers.orderCount')" width="100" align="center" v-if="activeTab === 'customer'">
           <template #default="{ row }">
             <span class="order-count">{{ row.order_count || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="累计消费" width="120" align="right" v-if="activeTab === 'customer'">
+        <el-table-column :label="$t('adminUsers.totalSpent')" width="120" align="right" v-if="activeTab === 'customer'">
           <template #default="{ row }">
             <span class="total-spent">¥{{ formatPrice(row.total_spent) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="$t('adminUsers.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -100,36 +100,36 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="160">
+        <el-table-column prop="created_at" :label="$t('adminUsers.createdAt')" width="160">
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" v-if="activeTab === 'admin'">
+        <el-table-column :label="$t('adminUsers.actions')" width="180" fixed="right" v-if="activeTab === 'admin'">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click.stop="handleView(row)">
-              详情
+              {{ $t('adminUsers.viewDetail') }}
             </el-button>
             <el-button type="primary" link size="small" @click.stop="handleAssignRoles(row)">
-              角色
+              {{ $t('adminUsers.assignRoles') }}
             </el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
-                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ $t('adminUsers.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">重置密码</el-dropdown-item>
-                  <el-dropdown-item command="delete" style="color: #EF4444;">删除</el-dropdown-item>
+                  <el-dropdown-item command="resetPassword">{{ $t('adminUsers.resetPassword') }}</el-dropdown-item>
+                  <el-dropdown-item command="delete" style="color: #EF4444;">{{ $t('adminUsers.delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right" v-if="activeTab === 'customer'">
+        <el-table-column :label="$t('adminUsers.actions')" width="120" fixed="right" v-if="activeTab === 'customer'">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click.stop="handleViewCustomer(row)">
-              详情
+              {{ $t('adminUsers.viewDetail') }}
             </el-button>
             <el-button
               type="primary"
@@ -137,7 +137,7 @@
               size="small"
               @click.stop="handleEditCustomer(row)"
             >
-              编辑
+              {{ $t('adminUsers.edit') }}
             </el-button>
           </template>
         </el-table-column>
@@ -163,53 +163,53 @@
       destroy-on-close
     >
       <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" placeholder="请输入邮箱" />
+        <el-form-item :label="$t('adminUsers.emailLabel')" prop="email">
+          <el-input v-model="formData.email" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
         </el-form-item>
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="formData.mobile" placeholder="请输入手机号" />
+        <el-form-item :label="$t('adminUsers.mobileLabel')" prop="mobile">
+          <el-input v-model="formData.mobile" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
         </el-form-item>
-        <el-form-item label="真实姓名" prop="real_name">
-          <el-input v-model="formData.real_name" placeholder="请输入真实姓名" />
+        <el-form-item :label="$t('adminUsers.realNameLabel')" prop="real_name">
+          <el-input v-model="formData.real_name" :placeholder="$t('adminUsers.pleaseEnterRealName')" />
         </el-form-item>
-        <el-form-item label="初始密码" prop="password">
-          <el-input v-model="formData.password" type="password" placeholder="请输入初始密码" show-password />
+        <el-form-item :label="$t('adminUsers.initialPassword')" prop="password">
+          <el-input v-model="formData.password" type="password" :placeholder="$t('adminUsers.initialPasswordPlaceholder')" show-password />
         </el-form-item>
-        <el-form-item label="用户类型" prop="type">
-          <el-select v-model="formData.type" placeholder="请选择用户类型" style="width: 100%">
-            <el-option label="商家管理员" :value="2" />
-            <el-option label="商家子账号" :value="3" />
+        <el-form-item :label="$t('adminUsers.userType')" prop="type">
+          <el-select v-model="formData.type" :placeholder="$t('adminUsers.pleaseSelectUserType')" style="width: 100%">
+            <el-option :label="$t('adminUsers.merchantAdmin')" :value="2" />
+            <el-option :label="$t('adminUsers.merchantSubAccount')" :value="3" />
           </el-select>
         </el-form-item>
-        <el-form-item label="租户ID" prop="tenant_id" v-if="isPlatformAdmin">
-          <el-input-number v-model="formData.tenant_id" :min="0" placeholder="创建商家管理员时使用" style="width: 100%" />
+        <el-form-item :label="$t('adminUsers.tenantId')" prop="tenant_id" v-if="isPlatformAdmin">
+          <el-input-number v-model="formData.tenant_id" :min="0" :placeholder="$t('adminUsers.tenantIdPlaceholder')" style="width: 100%" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('adminUsers.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">{{ $t('adminUsers.confirm') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="detailVisible" title="用户详情" width="600px">
+    <el-dialog v-model="detailVisible" :title="$t('adminUsers.userDetail')" width="600px">
       <el-descriptions :column="2" border v-if="currentRow">
-        <el-descriptions-item label="用户ID">{{ currentRow.id }}</el-descriptions-item>
-        <el-descriptions-item label="用户名">{{ currentRow.real_name || currentRow.name || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ currentRow.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="手机号">{{ currentRow.mobile || currentRow.phone || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="类型" v-if="currentRow.type_text">
+        <el-descriptions-item :label="$t('adminUsers.userId')">{{ currentRow.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.username')">{{ currentRow.real_name || currentRow.name || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.email')">{{ currentRow.email || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ currentRow.mobile || currentRow.phone || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.type')" v-if="currentRow.type_text">
           <el-tag :type="getTypeTagType(currentRow.type)">{{ currentRow.type_text }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="$t('adminUsers.status')">
           <el-tag :type="currentRow.status === 1 ? 'success' : 'danger'">
-            {{ currentRow.status === 1 ? '正常' : '禁用' }}
+            {{ currentRow.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow.created_at }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间" v-if="currentRow.updated_at">{{ currentRow.updated_at }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.createdAt')">{{ currentRow.created_at }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.updatedAt')" v-if="currentRow.updated_at">{{ currentRow.updated_at }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button @click="detailVisible = false">{{ $t('adminUsers.close') }}</el-button>
       </template>
     </el-dialog>
 
@@ -225,6 +225,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
@@ -241,6 +242,8 @@ import {
   type AdminUserDetail,
   type CreateAdminUserParams
 } from '@/api/admin-user'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -274,20 +277,20 @@ const formData = reactive<CreateAdminUserParams>({
   tenant_id: undefined
 })
 
-const formRules = {
+const formRules = computed(() => ({
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { required: true, message: t('adminUsers.pleaseEnterEmail'), trigger: 'blur' },
+    { type: 'email', message: t('adminUsers.pleaseEnterValidEmail'), trigger: 'blur' }
   ],
-  real_name: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+  real_name: [{ required: true, message: t('adminUsers.pleaseEnterRealName'), trigger: 'blur' }],
   password: [
-    { required: true, message: '请输入初始密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6位', trigger: 'blur' }
+    { required: true, message: t('adminUsers.pleaseEnterPassword'), trigger: 'blur' },
+    { min: 6, message: t('adminUsers.passwordMinLength'), trigger: 'blur' }
   ],
-  type: [{ required: true, message: '请选择用户类型', trigger: 'change' }]
-}
+  type: [{ required: true, message: t('adminUsers.pleaseSelectUserType'), trigger: 'change' }]
+}))
 
-const dialogTitle = computed(() => '新增管理员')
+const dialogTitle = computed(() => t('adminUsers.addAdmin'))
 
 const getAvatarText = (row: any) => {
   const name = row.real_name || row.name || row.username || ''
@@ -363,13 +366,17 @@ const handleCommand = (command: string, row: AdminUser) => {
 
 const handleResetPassword = async (row: AdminUser) => {
   try {
-    await ElMessageBox.confirm(`确认重置用户 "${row.real_name || row.email}" 的密码?`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      t('adminUsers.confirmResetPassword', { name: row.real_name || row.email }),
+      t('adminUsers.prompt'),
+      {
+        confirmButtonText: t('adminUsers.confirm'),
+        cancelButtonText: t('adminUsers.cancel'),
+        type: 'warning'
+      }
+    )
     const res = await resetAdminPassword(row.id)
-    ElMessage.success(`密码重置成功，临时密码: ${res.temporary_password}`)
+    ElMessage.success(t('adminUsers.passwordResetSuccess') + res.temporary_password)
   } catch {
     // User cancelled
   }
@@ -377,13 +384,17 @@ const handleResetPassword = async (row: AdminUser) => {
 
 const handleDelete = async (row: AdminUser) => {
   try {
-    await ElMessageBox.confirm(`确认删除用户 "${row.real_name || row.email}"? 此操作不可恢复！`, '删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      t('adminUsers.confirmDelete', { name: row.real_name || row.email }),
+      t('adminUsers.deleteConfirmTitle'),
+      {
+        confirmButtonText: t('adminUsers.confirm'),
+        cancelButtonText: t('adminUsers.cancel'),
+        type: 'warning'
+      }
+    )
     await deleteAdminUser(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('adminUsers.deleteSuccess'))
     loadData()
   } catch {
     // User cancelled
@@ -398,12 +409,12 @@ const handleSubmit = async () => {
       submitLoading.value = true
       try {
         await createAdminUser(formData)
-        ElMessage.success('新增成功')
+        ElMessage.success(t('adminUsers.createSuccess'))
         dialogVisible.value = false
         loadData()
       } catch (error) {
         console.error('Failed to create:', error)
-        ElMessage.error('新增失败')
+        ElMessage.error(t('adminUsers.createFailed'))
       } finally {
         submitLoading.value = false
       }
@@ -412,13 +423,17 @@ const handleSubmit = async () => {
 }
 
 const handleStatusChange = async (row: any, val: number) => {
-  const action = val === 1 ? '启用' : '禁用'
+  const action = val === 1 ? t('adminUsers.enabled2') : t('adminUsers.disabled2')
   try {
-    await ElMessageBox.confirm(`确认${action}该用户?`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      action === t('adminUsers.enabled2') ? t('adminUsers.confirmEnable') : t('adminUsers.confirmDisable'),
+      t('adminUsers.prompt'),
+      {
+        confirmButtonText: t('adminUsers.confirm'),
+        cancelButtonText: t('adminUsers.cancel'),
+        type: 'warning'
+      }
+    )
 
     if (activeTab.value === 'admin') {
       if (val === 1) {
@@ -427,7 +442,7 @@ const handleStatusChange = async (row: any, val: number) => {
         await disableAdminUser(row.id)
       }
     }
-    ElMessage.success(`${action}成功`)
+    ElMessage.success(action + t('adminUsers.updateSuccess').replace('成功', ''))
   } catch {
     row.status = val === 1 ? 2 : 1
   }
@@ -474,6 +489,7 @@ const loadData = async () => {
     }
   } catch (e) {
     console.error(e)
+    ElMessage.error(t('adminUsers.loadDataFailed'))
   } finally {
     loading.value = false
   }

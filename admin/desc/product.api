@@ -114,6 +114,14 @@ type (
 		Page     int                  `json:"page"`
 		PageSize int                  `json:"page_size"`
 	}
+	ExportProductsReq {
+		Name       string `form:"name,optional"`
+		CategoryID int64  `form:"category_id,optional"`
+		Status     string `form:"status,optional"` // draft, on_sale, off_sale, deleted
+		MinPrice   string `form:"min_price,optional"` // 最低价格，单位：元
+		MaxPrice   string `form:"max_price,optional"` // 最高价格，单位：元
+		MarketID   int64  `form:"market_id,optional"`
+	}
 	PutOnSaleReq {
 		ID int64 `path:"id"`
 	}
@@ -228,6 +236,10 @@ service admin-api {
 	@doc "获取商品列表"
 	@handler ListProductHandler
 	get /api/v1/products (ListProductReq) returns (ListProductResp)
+
+	@doc "导出商品"
+	@handler ExportProductsHandler
+	get /api/v1/products/export (ExportProductsReq)
 
 	@doc "上架商品"
 	@handler PutOnSaleHandler

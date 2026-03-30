@@ -1,28 +1,28 @@
 <template>
   <el-card class="tabs-card" shadow="never">
     <el-tabs v-model="activeTab" class="detail-tabs">
-      <el-tab-pane label="基本信息" name="basic">
+      <el-tab-pane :label="$t('users.basicInfo')" name="basic">
         <UserBasicInfo :user="user" @refresh="$emit('refresh')" />
       </el-tab-pane>
-      <el-tab-pane label="收货地址" name="addresses">
+      <el-tab-pane :label="$t('users.addresses')" name="addresses">
         <UserAddressList :user-id="user?.id" />
       </el-tab-pane>
-      <el-tab-pane label="订单记录" name="orders">
+      <el-tab-pane :label="$t('users.orderRecords')" name="orders">
         <div class="coming-soon">
-          <el-empty description="订单记录功能开发中" />
+          <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane label="积分记录" name="points">
+      <el-tab-pane :label="$t('users.pointsRecords')" name="points">
         <div class="coming-soon">
-          <el-empty description="积分记录功能开发中" />
+          <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane label="评价记录" name="reviews">
+      <el-tab-pane :label="$t('users.reviewRecords')" name="reviews">
         <div class="coming-soon">
-          <el-empty description="评价记录功能开发中" />
+          <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane label="操作日志" name="logs">
+      <el-tab-pane :label="$t('users.operationLogs')" name="logs">
         <UserOperationLog :user-id="user?.id" />
       </el-tab-pane>
     </el-tabs>

@@ -146,19 +146,7 @@ const loadAccount = async () => {
     account.value = res
   } catch (error) {
     console.error('Failed to load account:', error)
-    // Mock data
-    account.value = {
-      id: id,
-      user_id: 12345,
-      user_email: 'user1@example.com',
-      balance: 5000,
-      frozen_balance: 0,
-      total_earned: 10000,
-      total_redeemed: 4500,
-      total_expired: 500,
-      created_at: '2026-01-15T08:00:00Z',
-      updated_at: '2026-03-24T10:30:00Z'
-    }
+    ElMessage.error('加载积分账户详情失败')
   } finally {
     loading.value = false
   }
@@ -182,49 +170,7 @@ const loadTransactions = async (filters: { type?: string; startDate?: string; en
     transactionTotal.value = res.total || 0
   } catch (error) {
     console.error('Failed to load transactions:', error)
-    // Mock data
-    transactions.value = [
-      {
-        id: 101,
-        user_id: 12345,
-        account_id: 1,
-        points: 150,
-        balance_after: 5000,
-        type: 'EARN',
-        reference_type: 'ORDER',
-        reference_id: 'ORD12345',
-        description: '订单 #ORD12345 积分奖励',
-        expires_at: '2027-03-24T00:00:00Z',
-        created_at: '2026-03-24T10:30:00Z'
-      },
-      {
-        id: 100,
-        user_id: 12345,
-        account_id: 1,
-        points: -500,
-        balance_after: 4850,
-        type: 'REDEEM',
-        reference_type: 'REDEEM_RULE',
-        reference_id: '1',
-        description: '兑换 $10 优惠券',
-        expires_at: null,
-        created_at: '2026-03-23T15:00:00Z'
-      },
-      {
-        id: 99,
-        user_id: 12345,
-        account_id: 1,
-        points: 100,
-        balance_after: 5350,
-        type: 'ADJUST',
-        reference_type: 'MANUAL',
-        reference_id: '',
-        description: '客服补偿 - 订单延迟',
-        expires_at: '2027-03-23T00:00:00Z',
-        created_at: '2026-03-22T14:00:00Z'
-      }
-    ]
-    transactionTotal.value = 3
+    ElMessage.error('加载交易记录失败')
   } finally {
     transactionLoading.value = false
   }

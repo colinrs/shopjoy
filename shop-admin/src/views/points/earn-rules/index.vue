@@ -4,7 +4,7 @@
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="规则总数"
+          :title="$t('points.totalRules')"
           :value="ruleStats.total"
           :icon="Document"
           icon-color="primary"
@@ -12,7 +12,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="已激活"
+          :title="$t('points.activated')"
           :value="ruleStats.active"
           :icon="CircleCheck"
           icon-color="success"
@@ -26,7 +26,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchParams.name"
-            placeholder="搜索规则名称"
+            :placeholder="$t('points.searchRuleName')"
             clearable
             class="search-input"
             @clear="loadRules"
@@ -36,29 +36,29 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="searchParams.status" placeholder="状态" clearable class="filter-select" @change="loadRules">
-            <el-option label="全部" value="" />
-            <el-option label="草稿" value="draft" />
-            <el-option label="已激活" value="active" />
-            <el-option label="已停用" value="inactive" />
+          <el-select v-model="searchParams.status" :placeholder="$t('points.statusFilter')" clearable class="filter-select" @change="loadRules">
+            <el-option :label="$t('points.all')" value="" />
+            <el-option :label="$t('points.draft')" value="draft" />
+            <el-option :label="$t('points.active')" value="active" />
+            <el-option :label="$t('points.inactive')" value="inactive" />
           </el-select>
-          <el-select v-model="searchParams.scenario" placeholder="场景" clearable class="filter-select" @change="loadRules">
-            <el-option label="全部" value="" />
-            <el-option label="订单支付" value="ORDER_PAYMENT" />
-            <el-option label="每日签到" value="SIGN_IN" />
-            <el-option label="商品评价" value="PRODUCT_REVIEW" />
-            <el-option label="首单奖励" value="FIRST_ORDER" />
+          <el-select v-model="searchParams.scenario" :placeholder="$t('points.scenarioFilter')" clearable class="filter-select" @change="loadRules">
+            <el-option :label="$t('points.all')" value="" />
+            <el-option :label="$t('points.orderPayment')" value="ORDER_PAYMENT" />
+            <el-option :label="$t('points.signIn')" value="SIGN_IN" />
+            <el-option :label="$t('points.productReview')" value="PRODUCT_REVIEW" />
+            <el-option :label="$t('points.firstOrder')" value="FIRST_ORDER" />
           </el-select>
-          <el-select v-model="searchParams.calculation_type" placeholder="计算类型" clearable class="filter-select" @change="loadRules">
-            <el-option label="全部" value="" />
-            <el-option label="固定积分" value="FIXED" />
-            <el-option label="比例" value="RATIO" />
-            <el-option label="阶梯" value="TIERED" />
+          <el-select v-model="searchParams.calculation_type" :placeholder="$t('points.calculationTypeFilter')" clearable class="filter-select" @change="loadRules">
+            <el-option :label="$t('points.all')" value="" />
+            <el-option :label="$t('points.fixed')" value="FIXED" />
+            <el-option :label="$t('points.ratio')" value="RATIO" />
+            <el-option :label="$t('points.tiered')" value="TIERED" />
           </el-select>
         </div>
         <el-button type="primary" @click="handleCreate">
           <el-icon><Plus /></el-icon>
-          创建规则
+          {{ $t('points.createRule') }}
         </el-button>
       </div>
     </el-card>
@@ -66,7 +66,7 @@
     <!-- Rules Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="ruleList" v-loading="loading" stripe>
-        <el-table-column label="规则信息" min-width="280">
+        <el-table-column :label="$t('points.ruleName')" min-width="280">
           <template #default="{ row }">
             <div class="rule-cell">
               <div class="rule-icon" :class="getScenarioClass(row.scenario)">
@@ -79,43 +79,43 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="场景" width="120" align="center">
+        <el-table-column :label="$t('points.scenario')" width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getScenarioTagType(row.scenario)" effect="light" size="small">
               {{ getScenarioText(row.scenario) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="计算类型" width="100" align="center">
+        <el-table-column :label="$t('points.calculationType')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getCalcTagType(row.calculation_type)" effect="plain" size="small">
               {{ getCalcText(row.calculation_type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="条件" width="100" align="center">
+        <el-table-column :label="$t('points.condition')" width="100" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.condition_type === 'NONE'" type="info" size="small">无</el-tag>
+            <el-tag v-if="row.condition_type === 'NONE'" type="info" size="small">{{ $t('points.unconditional') }}</el-tag>
             <el-tag v-else type="warning" size="small">{{ getConditionText(row.condition_type) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="过期" width="100" align="center">
+        <el-table-column :label="$t('points.expiration')" width="100" align="center">
           <template #default="{ row }">
-            <span v-if="row.expiration_months === 0" class="no-expire">永不过期</span>
-            <span v-else class="expire-months">{{ row.expiration_months }}个月</span>
+            <span v-if="row.expiration_months === 0" class="no-expire">{{ $t('points.noExpire') }}</span>
+            <span v-else class="expire-months">{{ $t('points.expireMonths', { months: row.expiration_months }) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="$t('points.status')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)" effect="light" size="small">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column :label="$t('points.actions')" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
-              编辑
+              {{ $t('points.edit') }}
             </el-button>
             <el-button
               v-if="row.status === 'draft' || row.status === 'inactive'"
@@ -124,7 +124,7 @@
               size="small"
               @click="handleActivate(row)"
             >
-              激活
+              {{ $t('points.activate') }}
             </el-button>
             <el-button
               v-if="row.status === 'active'"
@@ -133,7 +133,7 @@
               size="small"
               @click="handleDeactivate(row)"
             >
-              停用
+              {{ $t('points.deactivate') }}
             </el-button>
             <el-button
               v-if="row.status !== 'active'"
@@ -142,7 +142,7 @@
               size="small"
               @click="handleDelete(row)"
             >
-              删除
+              {{ $t('points.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -183,6 +183,7 @@ import {
   type EarnRule,
   type CreateEarnRuleParams
 } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 // State
 const loading = ref(false)
@@ -222,72 +223,7 @@ const loadRules = async () => {
     ruleStats.value = res.stats
   } catch (error) {
     console.error('Failed to load earn rules:', error)
-    // Mock data
-    ruleList.value = [
-      {
-        id: 1,
-        name: '订单积分奖励',
-        description: '每笔订单可获得积分奖励',
-        scenario: 'ORDER_PAYMENT',
-        calculation_type: 'TIERED',
-        fixed_points: 0,
-        ratio: '0',
-        tiers: [
-          { threshold: 10000, ratio: '1.0' },
-          { threshold: 50000, ratio: '1.5' },
-          { threshold: null, ratio: '2.0' }
-        ],
-        condition_type: 'NONE',
-        condition_value: null,
-        expiration_months: 12,
-        status: 'active',
-        priority: 10,
-        start_at: '2026-04-01T00:00:00Z',
-        end_at: null,
-        created_at: '2026-03-24T10:00:00Z',
-        updated_at: '2026-03-24T10:00:00Z'
-      },
-      {
-        id: 2,
-        name: '每日签到奖励',
-        description: '每日签到可获得5积分',
-        scenario: 'SIGN_IN',
-        calculation_type: 'FIXED',
-        fixed_points: 5,
-        ratio: '0',
-        tiers: null,
-        condition_type: 'NONE',
-        condition_value: null,
-        expiration_months: 6,
-        status: 'active',
-        priority: 5,
-        start_at: null,
-        end_at: null,
-        created_at: '2026-03-24T10:00:00Z',
-        updated_at: '2026-03-24T10:00:00Z'
-      },
-      {
-        id: 3,
-        name: '商品评价奖励',
-        description: '评价商品可获得10积分',
-        scenario: 'PRODUCT_REVIEW',
-        calculation_type: 'FIXED',
-        fixed_points: 10,
-        ratio: '0',
-        tiers: null,
-        condition_type: 'NONE',
-        condition_value: null,
-        expiration_months: 12,
-        status: 'draft',
-        priority: 3,
-        start_at: null,
-        end_at: null,
-        created_at: '2026-03-24T10:00:00Z',
-        updated_at: '2026-03-24T10:00:00Z'
-      }
-    ]
-    total.value = 3
-    ruleStats.value = { total: 3, active: 2 }
+    ElMessage.error(t('points.loadEarnRulesFailed'))
   } finally {
     loading.value = false
   }
@@ -316,10 +252,10 @@ const getScenarioTagType = (scenario: string) => {
 
 const getScenarioText = (scenario: string) => {
   const texts: Record<string, string> = {
-    'ORDER_PAYMENT': '订单支付',
-    'SIGN_IN': '每日签到',
-    'PRODUCT_REVIEW': '商品评价',
-    'FIRST_ORDER': '首单奖励'
+    'ORDER_PAYMENT': t('points.orderPayment'),
+    'SIGN_IN': t('points.signIn'),
+    'PRODUCT_REVIEW': t('points.productReview'),
+    'FIRST_ORDER': t('points.firstOrder')
   }
   return texts[scenario] || scenario
 }
@@ -335,19 +271,19 @@ const getCalcTagType = (type: string) => {
 
 const getCalcText = (type: string) => {
   const texts: Record<string, string> = {
-    'FIXED': '固定',
-    'RATIO': '比例',
-    'TIERED': '阶梯'
+    'FIXED': t('points.fixed'),
+    'RATIO': t('points.ratio'),
+    'TIERED': t('points.tiered')
   }
   return texts[type] || type
 }
 
 const getConditionText = (type: string) => {
   const texts: Record<string, string> = {
-    'NEW_USER': '新用户',
-    'FIRST_ORDER': '首单',
-    'SPECIFIC_PRODUCTS': '指定商品',
-    'MIN_AMOUNT': '最低金额'
+    'NEW_USER': t('points.newUser'),
+    'FIRST_ORDER': t('points.firstPurchase'),
+    'SPECIFIC_PRODUCTS': t('points.specificProducts'),
+    'MIN_AMOUNT': t('points.minAmount')
   }
   return texts[type] || type
 }
@@ -363,20 +299,20 @@ const getStatusTagType = (status: string) => {
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    'draft': '草稿',
-    'active': '已激活',
-    'inactive': '已停用'
+    'draft': t('points.draft'),
+    'active': t('points.active'),
+    'inactive': t('points.inactive')
   }
   return texts[status] || status
 }
 
 const getCalculationPreview = (rule: EarnRule) => {
   if (rule.calculation_type === 'FIXED') {
-    return `固定 ${rule.fixed_points} 积分`
+    return `${t('points.fixed')} ${rule.fixed_points} ${t('points.points')}`
   } else if (rule.calculation_type === 'RATIO') {
-    return `${rule.ratio} 积分/$1`
+    return `${rule.ratio} ${t('points.pointsPerDollar')}`
   } else if (rule.calculation_type === 'TIERED' && rule.tiers) {
-    return `阶梯: ${rule.tiers.length} 档`
+    return `${t('points.tiered')}: ${rule.tiers.length} tiers`
   }
   return '-'
 }
@@ -399,36 +335,39 @@ const handleEdit = (row: EarnRule) => {
 const handleActivate = async (row: EarnRule) => {
   try {
     await activateEarnRule(row.id)
-    ElMessage.success('激活成功')
+    ElMessage.success(t('points.activateSuccess'))
     loadRules()
   } catch (error) {
     console.error('Failed to activate:', error)
+    ElMessage.error(t('points.activateRuleFailed'))
   }
 }
 
 const handleDeactivate = async (row: EarnRule) => {
   try {
     await deactivateEarnRule(row.id)
-    ElMessage.success('停用成功')
+    ElMessage.success(t('points.deactivateSuccess'))
     loadRules()
   } catch (error) {
     console.error('Failed to deactivate:', error)
+    ElMessage.error(t('points.deactivateRuleFailed'))
   }
 }
 
 const handleDelete = async (row: EarnRule) => {
   try {
-    await ElMessageBox.confirm(`确定要删除规则 "${row.name}" 吗？`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('points.deleteConfirm', { name: row.name }), t('common.warning'), {
+      confirmButtonText: t('points.confirmDelete'),
+      cancelButtonText: t('points.cancelDelete'),
       type: 'warning'
     })
     await deleteEarnRule(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('points.deleteSuccess'))
     loadRules()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to delete:', error)
+      ElMessage.error(t('points.deleteRuleFailed'))
     }
   }
 }
@@ -438,15 +377,16 @@ const handleSave = async (data: CreateEarnRuleParams) => {
   try {
     if (currentRule.value) {
       await updateEarnRule({ id: currentRule.value.id, ...data })
-      ElMessage.success('更新成功')
+      ElMessage.success(t('points.updateRuleSuccess'))
     } else {
       await createEarnRule(data)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('points.createRuleSuccess'))
     }
     formDialogVisible.value = false
     loadRules()
   } catch (error) {
     console.error('Failed to save:', error)
+    ElMessage.error(t('points.saveRuleFailed'))
   } finally {
     saveLoading.value = false
   }

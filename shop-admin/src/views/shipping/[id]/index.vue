@@ -6,24 +6,24 @@
         <div class="header-left">
           <el-button link @click="handleBack">
             <el-icon><ArrowLeft /></el-icon>
-            返回模板列表
+            {{ $t('shipping.returnToList') }}
           </el-button>
           <el-divider direction="vertical" />
           <h2 class="template-title">
-            {{ template?.name || '加载中...' }}
-            <el-tag v-if="template?.is_default" type="success" size="small">默认</el-tag>
+            {{ template?.name || $t('common.loading') }}
+            <el-tag v-if="template?.is_default" type="success" size="small">{{ $t('shipping.default') }}</el-tag>
           </h2>
         </div>
         <div class="header-right">
           <el-switch
             v-model="isActive"
-            active-text="已启用"
-            inactive-text="已禁用"
+            :active-text="$t('shipping.statusEnabled')"
+            :inactive-text="$t('shipping.statusDisabled')"
             @change="handleStatusChange"
           />
           <el-button type="primary" @click="handleSave" :loading="saveLoading">
             <el-icon><Check /></el-icon>
-            保存修改
+            {{ $t('shipping.saveChanges') }}
           </el-button>
         </div>
       </div>
@@ -33,13 +33,13 @@
     <el-card class="tabs-card" shadow="never" v-loading="loading">
       <el-tabs v-model="activeTab">
         <!-- Zones Tab -->
-        <el-tab-pane label="配送区域" name="zones">
+        <el-tab-pane :label="$t('shipping.zones')" name="zones">
           <div class="zones-section">
             <div class="section-header">
-              <h3 class="section-title">配送区域配置</h3>
+              <h3 class="section-title">{{ $t('shipping.deliveryZoneConfig') }}</h3>
               <el-button type="primary" @click="showAddZoneDialog">
                 <el-icon><Plus /></el-icon>
-                添加区域
+                {{ $t('shipping.addZoneBtn') }}
               </el-button>
             </div>
 
@@ -55,54 +55,54 @@
               />
             </div>
 
-            <el-empty v-else description="暂无配送区域">
+            <el-empty v-else :description="$t('shipping.noZones')">
               <el-button type="primary" @click="showAddZoneDialog">
-                添加第一个区域
+                {{ $t('shipping.addFirstZone') }}
               </el-button>
             </el-empty>
           </div>
         </el-tab-pane>
 
         <!-- Associations Tab -->
-        <el-tab-pane label="关联配置" name="associations">
+        <el-tab-pane :label="$t('shipping.mappings')" name="associations">
           <div class="associations-section">
             <!-- Product Associations -->
             <div class="association-block">
               <div class="block-header">
-                <h3 class="block-title">商品关联</h3>
+                <h3 class="block-title">{{ $t('shipping.productAssociation') }}</h3>
                 <el-button type="primary" size="small" @click="showProductSelector">
                   <el-icon><Plus /></el-icon>
-                  添加商品
+                  {{ $t('shipping.addProduct') }}
                 </el-button>
               </div>
               <el-table :data="productMappings" stripe v-if="productMappings.length > 0">
-                <el-table-column label="商品" min-width="300">
+                <el-table-column :label="$t('products.title')" min-width="300">
                   <template #default="{ row }">
                     <div class="product-cell">
                       <div class="product-info">
-                        <p class="product-name">{{ row.target_name || `商品ID: ${row.target_id}` }}</p>
+                        <p class="product-name">{{ row.target_name || $t('shipping.productId', { id: row.target_id }) }}</p>
                       </div>
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="100" align="center">
+                <el-table-column :label="$t('common.actions')" width="100" align="center">
                   <template #default="{ row }">
                     <el-button type="danger" link size="small" @click="removeProductMapping(row)">
-                      移除
+                      {{ $t('shipping.remove') }}
                     </el-button>
                   </template>
                 </el-table-column>
               </el-table>
-              <el-empty v-else description="暂无关联商品" :image-size="80" />
+              <el-empty v-else :description="$t('shipping.noAssociatedProducts')" :image-size="80" />
             </div>
 
             <!-- Category Associations -->
             <div class="association-block">
               <div class="block-header">
-                <h3 class="block-title">分类关联</h3>
+                <h3 class="block-title">{{ $t('shipping.categoryAssociation') }}</h3>
                 <el-button type="primary" size="small" @click="showCategorySelector">
                   <el-icon><Plus /></el-icon>
-                  添加分类
+                  {{ $t('shipping.addCategory') }}
                 </el-button>
               </div>
               <div class="category-tags" v-if="categoryMappings.length > 0">
@@ -113,10 +113,10 @@
                   @close="removeCategoryMapping(cat)"
                   class="category-tag"
                 >
-                  {{ cat.target_name || `分类 #${cat.target_id}` }}
+                  {{ cat.target_name || $t('shipping.categoryId', { id: cat.target_id }) }}
                 </el-tag>
               </div>
-              <el-empty v-else description="暂无关联分类" :image-size="80" />
+              <el-empty v-else :description="$t('shipping.noAssociatedCategories')" :image-size="80" />
             </div>
           </div>
         </el-tab-pane>
@@ -126,7 +126,7 @@
     <!-- Add Zone Dialog -->
     <el-dialog
       v-model="zoneDialogVisible"
-      :title="editingZone ? '编辑配送区域' : '添加配送区域'"
+      :title="editingZone ? $t('shipping.editDeliveryZone') : $t('shipping.addDeliveryZone')"
       width="800px"
       destroy-on-close
       :close-on-click-modal="false"
@@ -142,14 +142,14 @@
     <!-- Product Selector Dialog -->
     <el-dialog
       v-model="productSelectorVisible"
-      title="选择商品"
+      :title="$t('shipping.selectProducts')"
       width="800px"
       destroy-on-close
     >
       <div class="product-selector">
         <el-input
           v-model="productSearch"
-          placeholder="搜索商品名称..."
+          :placeholder="$t('shipping.searchProductName')"
           class="search-input"
           clearable
           @keyup.enter="searchProducts"
@@ -165,7 +165,7 @@
           max-height="400"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column label="商品" min-width="300">
+          <el-table-column :label="$t('products.title')" min-width="300">
             <template #default="{ row }">
               <div class="product-cell">
                 <el-image v-if="row.images && row.images.length > 0" :src="row.images[0]" class="product-thumb" fit="cover" />
@@ -178,9 +178,9 @@
         </el-table>
       </div>
       <template #footer>
-        <el-button @click="productSelectorVisible = false">取消</el-button>
+        <el-button @click="productSelectorVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="confirmProductSelection" :disabled="selectedProducts.length === 0">
-          确认添加 ({{ selectedProducts.length }})
+          {{ $t('shipping.confirmAdd') }} ({{ selectedProducts.length }})
         </el-button>
       </template>
     </el-dialog>
@@ -188,7 +188,7 @@
     <!-- Category Selector Dialog -->
     <el-dialog
       v-model="categorySelectorVisible"
-      title="选择分类"
+      :title="$t('shipping.selectCategories')"
       width="500px"
       destroy-on-close
     >
@@ -202,9 +202,9 @@
         @check="handleCategoryCheck"
       />
       <template #footer>
-        <el-button @click="categorySelectorVisible = false">取消</el-button>
+        <el-button @click="categorySelectorVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="confirmCategorySelection" :disabled="selectedCategories.length === 0">
-          确认添加 ({{ selectedCategories.length }})
+          {{ $t('shipping.confirmAddSelected', { count: selectedCategories.length }) }}
         </el-button>
       </template>
     </el-dialog>
@@ -214,6 +214,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Check, Plus, Search } from '@element-plus/icons-vue'
 import {
@@ -236,6 +237,7 @@ import ZoneConfigForm from '../components/ZoneConfigForm.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // State
 const loading = ref(false)
@@ -286,7 +288,7 @@ const loadTemplate = async () => {
     mappings.value = data.mappings || []
   } catch (error) {
     console.error('Failed to load template:', error)
-    ElMessage.error('加载模板失败')
+    ElMessage.error(t('shipping.loadTemplateFailed'))
   } finally {
     loading.value = false
   }
@@ -299,13 +301,13 @@ const handleBack = () => {
 const handleStatusChange = async (val: boolean) => {
   try {
     await updateShippingTemplate(templateId.value, { is_active: val })
-    ElMessage.success(val ? '已启用' : '已禁用')
+    ElMessage.success(val ? t('shipping.statusEnabled') : t('shipping.statusDisabled'))
     if (template.value) {
       template.value.is_active = val
     }
   } catch (error) {
     console.error('Failed to update status:', error)
-    ElMessage.error('更新状态失败')
+    ElMessage.error(t('shipping.updateStatusFailed'))
   }
 }
 
@@ -313,10 +315,10 @@ const handleSave = async () => {
   saveLoading.value = true
   try {
     // Save zones if needed
-    ElMessage.success('保存成功')
+    ElMessage.success(t('shipping.saveSuccess'))
   } catch (error) {
     console.error('Failed to save:', error)
-    ElMessage.error('保存失败')
+    ElMessage.error(t('shipping.saveFailed'))
   } finally {
     saveLoading.value = false
   }
@@ -333,22 +335,22 @@ const handleZoneUpdate = async (zone: ShippingZone) => {
     if (zone.id) {
       await updateShippingZone(zone.id, zone)
     }
-    ElMessage.success('更新成功')
+    ElMessage.success(t('shipping.updateZoneSuccess'))
     loadTemplate()
   } catch (error) {
     console.error('Failed to update zone:', error)
-    ElMessage.error('更新失败')
+    ElMessage.error(t('shipping.updateZoneFailed'))
   }
 }
 
 const handleZoneDelete = async (zoneId: number) => {
   try {
     await deleteShippingZone(zoneId)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('shipping.deleteZoneSuccess'))
     loadTemplate()
   } catch (error) {
     console.error('Failed to delete zone:', error)
-    ElMessage.error('删除失败')
+    ElMessage.error(t('shipping.deleteZoneFailed'))
   }
 }
 
@@ -359,12 +361,12 @@ const handleZoneSave = async (zoneData: CreateZoneRequest) => {
     } else {
       await createShippingZone(templateId.value, zoneData)
     }
-    ElMessage.success(editingZone.value ? '更新成功' : '添加成功')
+    ElMessage.success(editingZone.value ? t('shipping.updateZoneSuccess') : t('shipping.addZoneSuccess'))
     zoneDialogVisible.value = false
     loadTemplate()
   } catch (error) {
     console.error('Failed to save zone:', error)
-    ElMessage.error('保存失败')
+    ElMessage.error(t('shipping.addZoneFailed'))
   }
 }
 
@@ -403,23 +405,23 @@ const confirmProductSelection = async () => {
         target_id: product.id
       })
     }
-    ElMessage.success('添加成功')
+    ElMessage.success(t('shipping.addProductSuccess'))
     productSelectorVisible.value = false
     loadTemplate()
   } catch (error) {
     console.error('Failed to add mappings:', error)
-    ElMessage.error('添加失败')
+    ElMessage.error(t('shipping.addProductFailed'))
   }
 }
 
 const removeProductMapping = async (mapping: TemplateMapping) => {
   try {
     await deleteTemplateMapping(mapping.id)
-    ElMessage.success('移除成功')
+    ElMessage.success(t('shipping.removeProductSuccess'))
     loadTemplate()
   } catch (error) {
     console.error('Failed to remove mapping:', error)
-    ElMessage.error('移除失败')
+    ElMessage.error(t('shipping.removeProductFailed'))
   }
 }
 
@@ -447,23 +449,23 @@ const confirmCategorySelection = async () => {
         target_id: category.id
       })
     }
-    ElMessage.success('添加成功')
+    ElMessage.success(t('shipping.addCategorySuccess'))
     categorySelectorVisible.value = false
     loadTemplate()
   } catch (error) {
     console.error('Failed to add mappings:', error)
-    ElMessage.error('添加失败')
+    ElMessage.error(t('shipping.addCategoryFailed'))
   }
 }
 
 const removeCategoryMapping = async (mapping: TemplateMapping) => {
   try {
     await deleteTemplateMapping(mapping.id)
-    ElMessage.success('移除成功')
+    ElMessage.success(t('shipping.removeCategorySuccess'))
     loadTemplate()
   } catch (error) {
     console.error('Failed to remove mapping:', error)
-    ElMessage.error('移除失败')
+    ElMessage.error(t('shipping.removeCategoryFailed'))
   }
 }
 

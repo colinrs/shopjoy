@@ -462,6 +462,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/v1/fulfillment/statistics",
 					Handler: fulfillment_statistics.GetFulfillmentStatisticsHandler(serverCtx),
 				},
+				{
+					// 导出履约统计
+					Method:  http.MethodGet,
+					Path:    "/api/v1/fulfillment/statistics/export",
+					Handler: fulfillment_statistics.ExportFulfillmentStatisticsHandler(serverCtx),
+				},
 			}...,
 		),
 	)
@@ -649,6 +655,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/payments/transactions/:id",
 					Handler: payments.GetTransactionHandler(serverCtx),
+				},
+				{
+					// 导出支付流水
+					Method:  http.MethodGet,
+					Path:    "/api/v1/payments/transactions/export",
+					Handler: payments.ExportPaymentTransactionsHandler(serverCtx),
 				},
 			}...,
 		),
@@ -860,6 +872,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/v1/points/transactions/:id",
 					Handler: pointstransactions.GetTransactionHandler(serverCtx),
 				},
+				{
+					// 导出积分交易记录
+					Method:  http.MethodGet,
+					Path:    "/api/v1/points/transactions/export",
+					Handler: pointstransactions.ExportPointsTransactionsHandler(serverCtx),
+				},
 			}...,
 		),
 	)
@@ -977,6 +995,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/products/:product_id/skus",
 					Handler: products.ListSKUsByProductHandler(serverCtx),
+				},
+				{
+					// 导出商品
+					Method:  http.MethodGet,
+					Path:    "/api/v1/products/export",
+					Handler: products.ExportProductsHandler(serverCtx),
 				},
 				{
 					// 创建SKU变体
@@ -1113,6 +1137,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPut,
 					Path:    "/api/v1/refunds/:id/reject",
 					Handler: refunds.RejectRefundHandler(serverCtx),
+				},
+				{
+					// 导出退款
+					Method:  http.MethodGet,
+					Path:    "/api/v1/refunds/export",
+					Handler: refunds.ExportRefundsHandler(serverCtx),
 				},
 				{
 					// 退款统计
@@ -1375,6 +1405,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/shipments/batch",
 					Handler: shipments.BatchCreateShipmentsHandler(serverCtx),
+				},
+				{
+					// 导出发货单
+					Method:  http.MethodGet,
+					Path:    "/api/v1/shipments/export",
+					Handler: shipments.ExportShipmentsHandler(serverCtx),
 				},
 			}...,
 		),

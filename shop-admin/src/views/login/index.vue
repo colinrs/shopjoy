@@ -6,45 +6,45 @@
         <div class="branding-content">
           <div class="logo">
             <el-icon size="48" color="#fff"><ShoppingBag /></el-icon>
-            <h1>ShopJoy</h1>
+            <h1>{{ $t('login.title') }}</h1>
           </div>
-          <p class="tagline">专业的电商管理平台</p>
+          <p class="tagline">{{ $t('login.tagline') }}</p>
           <div class="features">
             <div class="feature-item">
               <el-icon><Check /></el-icon>
-              <span>多店铺统一管理</span>
+              <span>{{ $t('login.feature1') }}</span>
             </div>
             <div class="feature-item">
               <el-icon><Check /></el-icon>
-              <span>智能数据分析</span>
+              <span>{{ $t('login.feature2') }}</span>
             </div>
             <div class="feature-item">
               <el-icon><Check /></el-icon>
-              <span>全渠道订单同步</span>
+              <span>{{ $t('login.feature3') }}</span>
             </div>
           </div>
         </div>
         <div class="branding-footer">
-          <p>© 2024 ShopJoy. All rights reserved.</p>
+          <p>{{ $t('login.copyright') }}</p>
         </div>
       </div>
 
       <!-- Right Side - Login Form -->
       <div class="login-form-section">
         <div class="form-container">
-          <h2 class="form-title">欢迎回来</h2>
-          <p class="form-subtitle">请登录您的管理员账户</p>
+          <h2 class="form-title">{{ $t('login.welcomeBack') }}</h2>
+          <p class="form-subtitle">{{ $t('login.loginSubtitle') }}</p>
 
-          <el-form 
-            :model="loginForm" 
-            :rules="loginRules" 
+          <el-form
+            :model="loginForm"
+            :rules="loginRules"
             ref="loginFormRef"
             class="login-form"
           >
             <el-form-item prop="account">
-              <el-input 
-                v-model="loginForm.account" 
-                placeholder="请输入邮箱/用户名/手机号"
+              <el-input
+                v-model="loginForm.account"
+                :placeholder="$t('login.enterUsername')"
                 size="large"
                 class="custom-input"
               >
@@ -54,10 +54,10 @@
               </el-input>
             </el-form-item>
             <el-form-item prop="password">
-              <el-input 
-                v-model="loginForm.password" 
-                type="password" 
-                placeholder="请输入密码"
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                :placeholder="$t('login.enterPassword')"
                 size="large"
                 class="custom-input"
                 @keyup.enter="handleLogin"
@@ -68,18 +68,18 @@
               </el-input>
             </el-form-item>
             <div class="form-options">
-              <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-              <a href="#" class="forgot-link">忘记密码?</a>
+              <el-checkbox v-model="rememberMe">{{ $t('login.rememberMe') }}</el-checkbox>
+              <a href="#" class="forgot-link">{{ $t('login.forgotPassword') }}</a>
             </div>
             <el-form-item>
-              <el-button 
-                type="primary" 
-                @click="handleLogin" 
-                :loading="loading" 
+              <el-button
+                type="primary"
+                @click="handleLogin"
+                :loading="loading"
                 size="large"
                 class="login-btn"
               >
-                登 录
+                {{ $t('login.login') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -96,6 +96,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { adminLogin } from '@/api/admin-user'
 import { ShoppingBag, Message, Lock, Check } from '@element-plus/icons-vue'
+import { t } from '@/plugins/i18n'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -111,17 +112,17 @@ const loginForm = reactive({
 
 const loginRules = {
   account: [
-    { required: true, message: '请输入邮箱/用户名/手机号', trigger: 'blur' }
+    { required: true, message: t('login.enterUsername'), trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+    { required: true, message: t('login.enterPassword'), trigger: 'blur' },
+    { min: 6, message: t('login.passwordMinLength'), trigger: 'blur' }
   ]
 }
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   await loginFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       loading.value = true
@@ -132,10 +133,10 @@ const handleLogin = async () => {
         })
         userStore.setToken(res.access_token)
         userStore.userInfo = res.user
-        ElMessage.success('登录成功')
+        ElMessage.success(t('login.loginSuccess'))
         router.push('/')
       } catch (error: any) {
-        ElMessage.error(error.message || '登录失败')
+        ElMessage.error(error.message || t('login.loginFailed'))
       } finally {
         loading.value = false
       }

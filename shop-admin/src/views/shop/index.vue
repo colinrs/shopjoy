@@ -8,13 +8,13 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Shop /></el-icon>
-                店铺基本信息
+                {{ $t('shop.basicInfo') }}
               </span>
             </div>
           </template>
 
           <el-form :model="shopForm" label-width="120px" :rules="shopRules" ref="shopFormRef">
-            <el-form-item label="店铺Logo">
+            <el-form-item :label="$t('shop.shopLogo')">
               <el-upload
                 class="logo-uploader"
                 action="#"
@@ -25,57 +25,57 @@
                 <img v-if="shopForm.logo" :src="shopForm.logo" class="logo-preview" />
                 <div v-else class="logo-placeholder">
                   <el-icon size="32"><Plus /></el-icon>
-                  <span>上传Logo</span>
+                  <span>{{ $t('shop.uploadLogo') }}</span>
                 </div>
               </el-upload>
-              <span class="upload-tip">建议尺寸 200x200px，支持 JPG、PNG 格式</span>
+              <span class="upload-tip">{{ $t('shop.logoTip') }}</span>
             </el-form-item>
 
-            <el-form-item label="店铺名称" prop="name">
-              <el-input v-model="shopForm.name" placeholder="请输入店铺名称" maxlength="50" show-word-limit />
+            <el-form-item :label="$t('shop.shopName')" prop="name">
+              <el-input v-model="shopForm.name" :placeholder="$t('shop.shopNamePlaceholder')" maxlength="50" show-word-limit />
             </el-form-item>
 
-            <el-form-item label="店铺简介" prop="description">
+            <el-form-item :label="$t('shop.shopDescription')" prop="description">
               <el-input
                 v-model="shopForm.description"
                 type="textarea"
                 :rows="4"
-                placeholder="请输入店铺简介，这将展示在店铺首页"
+                :placeholder="$t('shop.shopDescPlaceholder')"
                 maxlength="500"
                 show-word-limit
               />
             </el-form-item>
 
-            <el-form-item label="联系人" prop="contact_name">
-              <el-input v-model="shopForm.contact_name" placeholder="请输入联系人姓名" />
+            <el-form-item :label="$t('shop.contactPerson')" prop="contact_name">
+              <el-input v-model="shopForm.contact_name" :placeholder="$t('shop.contactPersonPlaceholder')" />
             </el-form-item>
 
-            <el-form-item label="客服电话" prop="contact_phone">
-              <el-input v-model="shopForm.contact_phone" placeholder="请输入客服电话">
+            <el-form-item :label="$t('shop.customerServicePhone')" prop="contact_phone">
+              <el-input v-model="shopForm.contact_phone" :placeholder="$t('shop.phonePlaceholder')">
                 <template #prefix>
                   <el-icon><Phone /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item label="客服邮箱" prop="contact_email">
-              <el-input v-model="shopForm.contact_email" placeholder="请输入客服邮箱">
+            <el-form-item :label="$t('shop.customerServiceEmail')" prop="contact_email">
+              <el-input v-model="shopForm.contact_email" :placeholder="$t('shop.emailPlaceholder')">
                 <template #prefix>
                   <el-icon><Message /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item label="店铺地址">
-              <el-input v-model="shopForm.address" placeholder="请输入店铺地址">
+            <el-form-item :label="$t('shop.shopAddress')">
+              <el-input v-model="shopForm.address" :placeholder="$t('shop.addressPlaceholder')">
                 <template #prefix>
                   <el-icon><Location /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item label="自定义域名" prop="custom_domain">
-              <el-input v-model="shopForm.custom_domain" placeholder="请输入自定义域名，如 shop.example.com">
+            <el-form-item :label="$t('shop.customDomain')" prop="custom_domain">
+              <el-input v-model="shopForm.custom_domain" :placeholder="$t('shop.domainPlaceholder')">
                 <template #prefix>
                   <el-icon><Link /></el-icon>
                 </template>
@@ -90,7 +90,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Clock /></el-icon>
-                营业时间设置
+                {{ $t('shop.businessHoursSettings') }}
               </span>
             </div>
           </template>
@@ -100,8 +100,8 @@
               <span class="day-name">{{ getDayName(hour.day_of_week) }}</span>
               <el-switch
                 v-model="hour.is_closed"
-                :active-text="'营业'"
-                :inactive-text="'休息'"
+                :active-text="$t('shop.open')"
+                :inactive-text="$t('shop.closed')"
                 :active-value="false"
                 :inactive-value="true"
                 style="margin: 0 16px"
@@ -110,17 +110,17 @@
                 <el-time-select
                   v-model="hour.open_time"
                   :max-time="hour.close_time"
-                  placeholder="开始时间"
+                  :placeholder="$t('shop.startTime')"
                   start="00:00"
                   step="00:30"
                   end="23:30"
                   style="width: 120px"
                 />
-                <span style="margin: 0 8px">至</span>
+                <span style="margin: 0 8px">{{ $t('shop.to') }}</span>
                 <el-time-select
                   v-model="hour.close_time"
                   :min-time="hour.open_time"
-                  placeholder="结束时间"
+                  :placeholder="$t('shop.endTime')"
                   start="00:00"
                   step="00:30"
                   end="23:30"
@@ -137,33 +137,33 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Van /></el-icon>
-                运费设置
+                {{ $t('shop.shippingSettings') }}
               </span>
             </div>
           </template>
 
           <el-form :model="shippingForm" label-width="120px">
-            <el-form-item label="默认运费">
+            <el-form-item :label="$t('shop.defaultShippingFee')">
               <el-input-number
                 v-model="shippingForm.default_shipping_fee"
                 :precision="2"
                 :min="0"
-                placeholder="默认运费"
+                :placeholder="$t('shop.defaultShippingFee')"
                 style="width: 200px"
               />
               <span style="margin-left: 8px; color: #909399">{{ shippingForm.currency || 'CNY' }}</span>
             </el-form-item>
 
-            <el-form-item label="包邮门槛">
+            <el-form-item :label="$t('shop.freeShippingThreshold')">
               <el-input-number
                 v-model="shippingForm.free_shipping_threshold"
                 :precision="2"
                 :min="0"
-                placeholder="满额包邮"
+                :placeholder="$t('shop.freeShippingThreshold')"
                 style="width: 200px"
               />
               <span style="margin-left: 8px; color: #909399">{{ shippingForm.currency || 'CNY' }}</span>
-              <div class="form-tip">订单金额达到此数值时免运费，0 表示不设包邮门槛</div>
+              <div class="form-tip">{{ $t('shop.freeShippingThresholdTip') }}</div>
             </el-form-item>
           </el-form>
         </el-card>
@@ -177,32 +177,32 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><InfoFilled /></el-icon>
-                店铺状态
+                {{ $t('shop.shopStatus') }}
               </span>
             </div>
           </template>
 
           <div class="status-info">
             <div class="info-row">
-              <span class="info-label">店铺状态</span>
+              <span class="info-label">{{ $t('shop.shopStatus') }}</span>
               <el-tag :type="shopSettings?.status === 1 ? 'success' : 'info'">
                 {{ shopSettings?.status_text || '-' }}
               </el-tag>
             </div>
             <div class="info-row">
-              <span class="info-label">当前套餐</span>
+              <span class="info-label">{{ $t('shop.currentPlan') }}</span>
               <el-tag type="warning">{{ shopSettings?.plan_text || '-' }}</el-tag>
             </div>
             <div class="info-row" v-if="shopSettings?.expire_at">
-              <span class="info-label">到期时间</span>
+              <span class="info-label">{{ $t('shop.expireTime') }}</span>
               <span class="info-value">{{ shopSettings?.expire_at }}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">默认货币</span>
+              <span class="info-label">{{ $t('shop.defaultCurrency') }}</span>
               <span class="info-value">{{ shopSettings?.default_currency || '-' }}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">时区</span>
+              <span class="info-label">{{ $t('shop.timezone') }}</span>
               <span class="info-value">{{ shopSettings?.timezone || '-' }}</span>
             </div>
           </div>
@@ -214,34 +214,34 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Bell /></el-icon>
-                通知设置
+                {{ $t('shop.notificationSettings') }}
               </span>
             </div>
           </template>
 
           <el-form :model="notificationForm" label-position="top">
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_created">新订单通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_created">{{ $t('shop.newOrderNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_paid">订单支付通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_paid">{{ $t('shop.orderPaidNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_shipped">订单发货通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_shipped">{{ $t('shop.orderShippedNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_cancelled">订单取消通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_cancelled">{{ $t('shop.orderCancelledNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.refund_requested">退款申请通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.refund_requested">{{ $t('shop.refundRequestNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.new_review">新评价通知</el-checkbox>
+              <el-checkbox v-model="notificationForm.new_review">{{ $t('shop.newReviewNotification') }}</el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.low_stock_alert">低库存预警</el-checkbox>
+              <el-checkbox v-model="notificationForm.low_stock_alert">{{ $t('shop.lowStockAlert') }}</el-checkbox>
             </div>
-            <el-form-item label="库存预警阈值" v-if="notificationForm.low_stock_alert" style="margin-top: 12px">
+            <el-form-item :label="$t('shop.lowStockThreshold')" v-if="notificationForm.low_stock_alert" style="margin-top: 12px">
               <el-input-number v-model="notificationForm.low_stock_threshold" :min="1" :max="1000" style="width: 100%" />
             </el-form-item>
           </el-form>
@@ -253,27 +253,27 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><CreditCard /></el-icon>
-                支付设置
+                {{ $t('shop.paymentSettings') }}
               </span>
             </div>
           </template>
 
           <el-form :model="paymentForm" label-position="top">
             <div class="notify-item">
-              <el-checkbox v-model="paymentForm.stripe_enabled">启用 Stripe 支付</el-checkbox>
+              <el-checkbox v-model="paymentForm.stripe_enabled">{{ $t('shop.enableStripe') }}</el-checkbox>
             </div>
-            <el-form-item label="Stripe Public Key" v-if="paymentForm.stripe_enabled" style="margin-top: 12px">
-              <el-input v-model="paymentForm.stripe_public_key" placeholder="pk_live_xxx 或 pk_test_xxx" />
+            <el-form-item :label="$t('shop.stripePublicKey')" v-if="paymentForm.stripe_enabled" style="margin-top: 12px">
+              <el-input v-model="paymentForm.stripe_public_key" :placeholder="$t('shop.stripePublicKeyPlaceholder')" />
             </el-form-item>
-            <el-form-item label="Stripe Secret Key" v-if="paymentForm.stripe_enabled">
+            <el-form-item :label="$t('shop.stripeSecretKey')" v-if="paymentForm.stripe_enabled">
               <el-input
                 v-model="paymentForm.stripe_secret_key"
                 type="password"
-                placeholder="留空表示不修改现有密钥"
+                :placeholder="$t('shop.stripeSecretKeyPlaceholder')"
                 show-password
                 @change="paymentForm.stripe_secret_key_changed = true"
               />
-              <div class="form-tip">密钥将被加密存储，留空则保持现有密钥不变</div>
+              <div class="form-tip">{{ $t('shop.stripeSecretKeyTip') }}</div>
             </el-form-item>
           </el-form>
         </el-card>
@@ -284,7 +284,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Operation /></el-icon>
-                快捷操作
+                {{ $t('shop.quickActions') }}
               </span>
             </div>
           </template>
@@ -292,11 +292,11 @@
           <div class="quick-actions">
             <el-button plain style="width: 100%; margin-bottom: 12px" @click="viewShopPage">
               <el-icon><Document /></el-icon>
-              查看店铺主页
+              {{ $t('shop.viewShopHomepage') }}
             </el-button>
             <el-button plain style="width: 100%; margin-bottom: 12px" @click="copyShopLink">
               <el-icon><Share /></el-icon>
-              复制店铺链接
+              {{ $t('shop.copyShopLink') }}
             </el-button>
           </div>
         </el-card>
@@ -307,7 +307,7 @@
     <div class="save-bar">
       <el-button type="primary" size="large" @click="handleSave" :loading="saving">
         <el-icon><Check /></el-icon>
-        保存设置
+        {{ $t('shop.saveSettings') }}
       </el-button>
     </div>
   </div>
@@ -315,6 +315,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   Shop, Plus, Phone, Message, Location, Link,
@@ -337,6 +338,8 @@ import {
   type BusinessHours,
   type NotificationSettings
 } from '@/api/shop'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const loading = ref(false)
 const saving = ref(false)
@@ -461,7 +464,7 @@ const loadSettings = async () => {
     shippingForm.currency = shippingData.currency || 'CNY'
   } catch (error) {
     console.error('Failed to load settings:', error)
-    ElMessage.error('加载店铺设置失败')
+    ElMessage.error(t('shop.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -472,10 +475,10 @@ const handleLogoChange = async (file: any) => {
   try {
     const response = await uploadImage(file.raw, 'banner')
     shopForm.logo = response.url
-    ElMessage.success('Logo上传成功')
+    ElMessage.success(t('shop.logoUploadSuccess'))
   } catch (error) {
     console.error('Upload failed:', error)
-    ElMessage.error('Logo上传失败')
+    ElMessage.error(t('shop.logoUploadFailed'))
   }
 }
 

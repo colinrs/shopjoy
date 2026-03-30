@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 // ===================== Types =====================
 
-// Order status
+// Order status (backend: admin/internal/domain/order/entity.go Status)
 export type OrderStatus = 'pending_payment' | 'paid' | 'pending_shipment' | 'shipped' | 'completed' | 'cancelled' | 'refunding' | 'refunded'
 
 // Fulfillment status

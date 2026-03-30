@@ -594,6 +594,7 @@ type ShipmentQuery struct {
 // RefundQuery 退款查询参数
 type RefundQuery struct {
 	shared.PageQuery
+	RefundNo   string
 	OrderID    string
 	UserID     int64
 	Status     RefundStatus

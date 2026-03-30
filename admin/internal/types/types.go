@@ -791,6 +791,12 @@ type ExpiringPointsResp struct {
 	TotalPoints int64            `json:"total_points"`
 }
 
+type ExportFulfillmentStatisticsReq struct {
+	Period    string `form:"period,optional"`     // daily, weekly, monthly
+	StartDate string `form:"start_date,optional"` // RFC3339
+	EndDate   string `form:"end_date,optional"`   // RFC3339
+}
+
 type ExportOrdersReq struct {
 	OrderNo           string `form:"order_no,optional"`
 	UserID            int64  `form:"user_id,optional"`
@@ -799,6 +805,48 @@ type ExportOrdersReq struct {
 	RefundStatus      string `form:"refund_status,optional"`      // 0=none, 1=pending, 2=approved, 3=rejected, 4=completed
 	StartTime         string `form:"start_time,optional"`         // RFC3339
 	EndTime           string `form:"end_time,optional"`           // RFC3339
+}
+
+type ExportPaymentTransactionsReq struct {
+	OrderNo       string `form:"order_no,optional"`
+	TransactionID string `form:"transaction_id,optional"`
+	Status        int8   `form:"status,optional"` // 0=pending, 1=succeeded, 2=failed
+	PaymentMethod string `form:"payment_method,optional"`
+	StartTime     string `form:"start_time,optional"` // RFC3339
+	EndTime       string `form:"end_time,optional"`   // RFC3339
+}
+
+type ExportPointsTransactionsReq struct {
+	UserID    int64  `form:"user_id,optional"`
+	Type      string `form:"type,optional"` // earn, redeem
+	StartTime string `form:"start_time,optional"`
+	EndTime   string `form:"end_time,optional"`
+}
+
+type ExportProductsReq struct {
+	Name       string `form:"name,optional"`
+	CategoryID int64  `form:"category_id,optional"`
+	Status     string `form:"status,optional"`    // draft, on_sale, off_sale, deleted
+	MinPrice   string `form:"min_price,optional"` // 最低价格，单位：元
+	MaxPrice   string `form:"max_price,optional"` // 最高价格，单位：元
+	MarketID   int64  `form:"market_id,optional"`
+}
+
+type ExportRefundsReq struct {
+	OrderNo    string `form:"order_no,optional"`
+	RefundNo   string `form:"refund_no,optional"`
+	Status     string `form:"status,optional"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+	ReasonType string `form:"reason_type,optional"`
+	StartTime  string `form:"start_time,optional"` // RFC3339
+	EndTime    string `form:"end_time,optional"`   // RFC3339
+}
+
+type ExportShipmentsReq struct {
+	TrackingNo  string `form:"tracking_no,optional"`
+	Status      string `form:"status,optional"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
+	CarrierCode string `form:"carrier_code,optional"`
+	StartTime   string `form:"start_time,optional"` // RFC3339
+	EndTime     string `form:"end_time,optional"`   // RFC3339
 }
 
 type ExportUsersRequest struct {
@@ -1203,6 +1251,9 @@ type ListBrandReq struct {
 type ListBrandResp struct {
 	List  []BrandDetailResp `json:"list"`
 	Total int64             `json:"total"`
+}
+
+type ListCarriersReq struct {
 }
 
 type ListCarriersResp struct {
@@ -1998,7 +2049,7 @@ type PromotionDetailResp struct {
 	ID             int64    `json:"id"`
 	Name           string   `json:"name"`
 	Description    string   `json:"description"`
-	Type           string   `json:"type"`   // discount, flash_sale, bundle, buy_x_get_y
+	Type           string   `json:"type"`   // discount, coupon, flash_sale, bundle, buy_x_get_y
 	Status         string   `json:"status"` // pending, active, paused, ended
 	StartTime      string   `json:"start_time"`
 	EndTime        string   `json:"end_time"`
@@ -2304,6 +2355,9 @@ type ReviewReplyResp struct {
 	AdminName string `json:"admin_name"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+type ReviewStatsReq struct {
 }
 
 type ReviewStatsResp struct {

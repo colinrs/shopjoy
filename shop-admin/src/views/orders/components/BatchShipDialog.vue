@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="Batch Ship Orders"
+    :title="$t('orders.batchShipOrders')"
     width="700px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -11,8 +11,8 @@
       <div class="selected-section">
         <div class="section-header">
           <el-icon><List /></el-icon>
-          <span>Selected Orders</span>
-          <el-tag size="small" type="primary">{{ orders.length }} orders</el-tag>
+          <span>{{ $t('orders.selectedOrders') }}</span>
+          <el-tag size="small" type="primary">{{ $t('orders.itemsCount', { count: orders.length }) }}</el-tag>
         </div>
 
         <div class="orders-list">
@@ -22,7 +22,7 @@
               <span class="order-buyer">{{ order.user_name }} - {{ order.user_phone }}</span>
             </div>
             <div class="order-items">
-              <span class="items-count">{{ order.item_count }} items</span>
+              <span class="items-count">{{ $t('orders.itemsCount', { count: order.item_count }) }}</span>
               <span class="items-amount">{{ order.currency }} {{ formatAmount(order.pay_amount) }}</span>
             </div>
           </div>
@@ -33,13 +33,13 @@
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px" class="logistics-form">
         <div class="section-header">
           <el-icon><Van /></el-icon>
-          <span>Logistics Settings</span>
+          <span>{{ $t('orders.logisticsSettings') }}</span>
         </div>
 
-        <el-form-item label="Carrier" prop="carrier_code">
+        <el-form-item :label="$t('orders.carrier')" prop="carrier_code">
           <el-select
             v-model="form.carrier_code"
-            placeholder="Select carrier"
+            :placeholder="$t('orders.selectCarrier')"
             style="width: 100%"
             :loading="loadingCarriers"
           >
@@ -52,11 +52,11 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Tracking No." prop="tracking_no_start">
+        <el-form-item :label="$t('orders.trackingNoStart')" prop="tracking_no_start">
           <div class="tracking-input-group">
             <el-input
               v-model="form.tracking_no_start"
-              placeholder="Enter starting tracking number"
+              :placeholder="$t('orders.enterTrackingNoStart')"
             >
               <template #prefix>
                 <el-icon><Tickets /></el-icon>
@@ -64,19 +64,19 @@
             </el-input>
             <div class="tracking-hint">
               <el-icon><InfoFilled /></el-icon>
-              <span>Tracking numbers will auto-increment for each order</span>
+              <span>{{ $t('orders.trackingAutoIncrement') }}</span>
             </div>
           </div>
         </el-form-item>
 
-        <el-form-item label="Preview">
+        <el-form-item :label="$t('orders.preview')">
           <div class="tracking-preview">
             <div v-for="(preview, index) in trackingPreviews" :key="index" class="preview-item">
               <span class="preview-order">{{ preview.order_no }}</span>
               <span class="preview-tracking">{{ preview.tracking_no }}</span>
             </div>
             <p v-if="trackingPreviews.length < orders.length" class="more-preview">
-              ... and {{ orders.length - trackingPreviews.length }} more
+              {{ $t('orders.moreOrders', { count: orders.length - trackingPreviews.length }) }}
             </p>
           </div>
         </el-form-item>
@@ -85,9 +85,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
+        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
-          Confirm Batch Ship
+          {{ $t('orders.confirmBatchShip') }}
         </el-button>
       </div>
     </template>
@@ -99,6 +99,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { List, Van, Tickets, InfoFilled } from '@element-plus/icons-vue'
 import { batchShipOrders, getCarrierList, type Order, type Carrier } from '@/api/order'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
@@ -126,8 +127,8 @@ const form = reactive({
 })
 
 const rules = {
-  carrier_code: [{ required: true, message: 'Please select a carrier', trigger: 'change' }],
-  tracking_no_start: [{ required: true, message: 'Please enter starting tracking number', trigger: 'blur' }]
+  carrier_code: [{ required: true, message: t('orders.selectCarrier'), trigger: 'change' }],
+  tracking_no_start: [{ required: true, message: t('orders.enterTrackingNoStart'), trigger: 'blur' }]
 }
 
 // Tracking previews
@@ -168,6 +169,7 @@ const loadCarriers = async () => {
     carriers.value = res.filter(c => c.is_active)
   } catch (error) {
     console.error('Failed to load carriers:', error)
+    ElMessage.error(t('orders.loadCarriersFailed'))
   } finally {
     loadingCarriers.value = false
   }
@@ -187,11 +189,11 @@ const handleSubmit = async () => {
         carrier_code: form.carrier_code,
         tracking_no_start: form.tracking_no_start
       })
-      ElMessage.success(`Successfully shipped ${props.orders.length} orders`)
+      ElMessage.success(t('orders.batchShipSuccess', { count: props.orders.length }))
       emit('success')
       visible.value = false
     } catch (error: any) {
-      ElMessage.error(error?.message || 'Failed to batch ship orders')
+      ElMessage.error(error?.message || t('orders.batchShipFailed'))
     } finally {
       submitting.value = false
     }

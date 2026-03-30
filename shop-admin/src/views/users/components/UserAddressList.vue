@@ -1,34 +1,34 @@
 <template>
   <div class="address-list">
     <div class="address-header">
-      <span class="header-title">收货地址列表</span>
+      <span class="header-title">{{ $t('users.addressList') }}</span>
     </div>
 
     <el-table :data="addresses" v-loading="loading" stripe>
-      <el-table-column label="收货人" width="120">
+      <el-table-column :label="$t('users.recipient')" width="120">
         <template #default="{ row }">
           <span class="recipient-name">{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="联系电话" width="140">
+      <el-table-column :label="$t('users.contactPhone')" width="140">
         <template #default="{ row }">
           <span class="phone-text">{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="地址" min-width="300">
+      <el-table-column :label="$t('common.address')" min-width="300">
         <template #default="{ row }">
           <span class="address-text">
             {{ row.province }} {{ row.city }} {{ row.district }} {{ row.detail }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column label="默认" width="80" align="center">
+      <el-table-column :label="$t('users.defaultAddress')" width="80" align="center">
         <template #default="{ row }">
-          <el-tag v-if="row.is_default" type="success" size="small">默认</el-tag>
+          <el-tag v-if="row.is_default" type="success" size="small">{{ $t('users.defaultAddress') }}</el-tag>
           <span v-else class="non-default">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" width="180">
+      <el-table-column :label="$t('users.createdAt')" width="180">
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
@@ -47,12 +47,14 @@
       />
     </div>
 
-    <el-empty v-if="!loading && addresses.length === 0" description="暂无收货地址" />
+    <el-empty v-if="!loading && addresses.length === 0" :description="$t('users.noAddresses')" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { t } from '@/plugins/i18n'
 import { getUserAddresses, type UserAddress } from '@/api/user'
 
 const props = defineProps<{
@@ -78,40 +80,7 @@ const loadAddresses = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load addresses:', error)
-    // Mock data
-    addresses.value = [
-      {
-        id: 1,
-        user_id: props.userId,
-        name: '张三',
-        phone: '13800138001',
-        country: '中国',
-        province: '广东省',
-        city: '深圳市',
-        district: '南山区',
-        detail: '科技园南区xxx大厦A座1001',
-        postal_code: '518000',
-        is_default: true,
-        created_at: '2024-01-15T10:00:00Z',
-        updated_at: '2024-01-15T10:00:00Z'
-      },
-      {
-        id: 2,
-        user_id: props.userId,
-        name: '张三',
-        phone: '13800138002',
-        country: '中国',
-        province: '广东省',
-        city: '广州市',
-        district: '天河区',
-        detail: 'xxx路xxx号',
-        postal_code: '510000',
-        is_default: false,
-        created_at: '2024-02-20T14:30:00Z',
-        updated_at: '2024-02-20T14:30:00Z'
-      }
-    ]
-    total.value = 2
+    ElMessage.error(t('users.loadAddressFailed'))
   } finally {
     loading.value = false
   }

@@ -103,6 +103,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { User, Star, CircleCheck, Search } from '@element-plus/icons-vue'
 import PointsStatsCard from '../components/PointsStatsCard.vue'
 import TablePagination from '@/components/common/TablePagination.vue'
@@ -150,47 +151,7 @@ const loadAccounts = async () => {
     accountStats.value = res.stats
   } catch (error) {
     console.error('Failed to load accounts:', error)
-    // Mock data
-    accountList.value = [
-      {
-        id: 1,
-        user_id: 12345,
-        user_email: 'user1@example.com',
-        balance: 5000,
-        frozen_balance: 0,
-        total_earned: 10000,
-        total_redeemed: 4500,
-        total_expired: 500,
-        created_at: '2026-01-15T08:00:00Z',
-        updated_at: '2026-03-24T10:30:00Z'
-      },
-      {
-        id: 2,
-        user_id: 12346,
-        user_email: 'user2@example.com',
-        balance: 3500,
-        frozen_balance: 0,
-        total_earned: 8000,
-        total_redeemed: 4500,
-        total_expired: 0,
-        created_at: '2026-02-01T10:00:00Z',
-        updated_at: '2026-03-24T09:00:00Z'
-      },
-      {
-        id: 3,
-        user_id: 12347,
-        user_email: 'user3@example.com',
-        balance: 1200,
-        frozen_balance: 500,
-        total_earned: 5000,
-        total_redeemed: 3300,
-        total_expired: 0,
-        created_at: '2026-02-15T14:00:00Z',
-        updated_at: '2026-03-23T16:00:00Z'
-      }
-    ]
-    total.value = 3
-    accountStats.value = { total: 3, total_balance: 9700, active: 3 }
+    ElMessage.error('加载积分账户列表失败')
   } finally {
     loading.value = false
   }

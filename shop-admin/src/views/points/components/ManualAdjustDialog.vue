@@ -2,32 +2,32 @@
   <el-dialog
     :model-value="visible"
     @update:model-value="$emit('update:visible', $event)"
-    title="调整积分"
+    :title="$t('points.adjustPoints')"
     width="500px"
     destroy-on-close
   >
     <div class="adjust-dialog">
       <!-- Current Balance -->
       <div class="current-balance">
-        <span class="label">当前余额:</span>
-        <span class="value">{{ account?.balance?.toLocaleString() || 0 }} 积分</span>
+        <span class="label">{{ $t('points.currentBalance') }}</span>
+        <span class="value">{{ account?.balance?.toLocaleString() || 0 }} {{ $t('points.pointsUnit2') }}</span>
       </div>
 
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <!-- Adjustment Type -->
-        <el-form-item label="调整类型" prop="adjustment_type">
+        <el-form-item :label="$t('points.adjustmentType')" prop="adjustment_type">
           <el-radio-group v-model="form.adjustment_type">
             <el-radio value="ADD">
-              <span class="radio-label add">增加积分</span>
+              <span class="radio-label add">{{ $t('points.addPoints') }}</span>
             </el-radio>
             <el-radio value="DEDUCT">
-              <span class="radio-label deduct">扣减积分</span>
+              <span class="radio-label deduct">{{ $t('points.deductPoints') }}</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
 
         <!-- Points Amount -->
-        <el-form-item label="积分数量" prop="points">
+        <el-form-item :label="$t('points.pointsAmountInput')" prop="points">
           <el-input-number
             v-model="form.points"
             :min="1"
@@ -38,12 +38,12 @@
         </el-form-item>
 
         <!-- Reason -->
-        <el-form-item label="原因" prop="reason">
+        <el-form-item :label="$t('points.reason')" prop="reason">
           <el-input
             v-model="form.reason"
             type="textarea"
             :rows="3"
-            placeholder="请输入调整原因（必填）"
+            :placeholder="$t('points.reasonInput')"
             maxlength="200"
             show-word-limit
           />
@@ -51,18 +51,18 @@
 
         <!-- Preview -->
         <div class="preview-box">
-          <div class="preview-label">调整后余额:</div>
+          <div class="preview-label">{{ $t('points.previewBalanceAfter') }}</div>
           <div class="preview-value" :class="{ negative: previewBalance < 0 }">
-            {{ previewBalance.toLocaleString() }} 积分
+            {{ previewBalance.toLocaleString() }} {{ $t('points.pointsUnit2') }}
           </div>
         </div>
       </el-form>
     </div>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">取消</el-button>
+      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
       <el-button type="primary" @click="handleSubmit" :loading="loading">
-        确认调整
+        {{ $t('points.confirmButton') }}
       </el-button>
     </template>
   </el-dialog>
@@ -72,6 +72,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { PointsAccount } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   visible: boolean
@@ -94,15 +95,15 @@ const form = reactive({
 
 const rules: FormRules = {
   adjustment_type: [
-    { required: true, message: '请选择调整类型', trigger: 'change' }
+    { required: true, message: t('points.selectAdjustmentType'), trigger: 'change' }
   ],
   points: [
-    { required: true, message: '请输入积分数量', trigger: 'blur' },
-    { type: 'number', min: 1, message: '积分数量必须大于0', trigger: 'blur' }
+    { required: true, message: t('points.enterPointsAmount'), trigger: 'blur' },
+    { type: 'number', min: 1, message: t('points.pointsMustBePositive'), trigger: 'blur' }
   ],
   reason: [
-    { required: true, message: '请输入调整原因', trigger: 'blur' },
-    { min: 5, message: '原因至少5个字符', trigger: 'blur' }
+    { required: true, message: t('points.enterPointsAmount'), trigger: 'blur' },
+    { min: 5, message: t('points.enterReasonAtLeast5'), trigger: 'blur' }
   ]
 }
 

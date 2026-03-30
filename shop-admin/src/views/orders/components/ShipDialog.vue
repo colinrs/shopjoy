@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="Ship Order"
+    :title="$t('orders.shipOrder')"
     width="600px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -11,11 +11,11 @@
       <div class="order-info-section">
         <div class="section-header">
           <el-icon><Document /></el-icon>
-          <span>Order Information</span>
+          <span>{{ $t('orders.orderInformation') }}</span>
         </div>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="Order No.">{{ order?.order_no }}</el-descriptions-item>
-          <el-descriptions-item label="Items">{{ order?.items?.length || 0 }} items</el-descriptions-item>
+          <el-descriptions-item :label="$t('orders.orderNo')">{{ order?.order_no }}</el-descriptions-item>
+          <el-descriptions-item :label="$t('orders.items')">{{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}</el-descriptions-item>
         </el-descriptions>
       </div>
 
@@ -23,13 +23,13 @@
       <div class="form-section">
         <div class="section-header">
           <el-icon><Van /></el-icon>
-          <span>Logistics Information</span>
+          <span>{{ $t('orders.logisticsInformation') }}</span>
         </div>
 
-        <el-form-item label="Carrier" prop="carrier_code">
+        <el-form-item :label="$t('orders.carrier')" prop="carrier_code">
           <el-select
             v-model="form.carrier_code"
-            placeholder="Select carrier"
+            :placeholder="$t('orders.selectCarrier')"
             style="width: 100%"
             @change="handleCarrierChange"
           >
@@ -42,12 +42,12 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="form.carrier_code === 'OTHER'" label="Custom Carrier" prop="carrier_name">
-          <el-input v-model="form.carrier_name" placeholder="Enter carrier name" />
+        <el-form-item v-if="form.carrier_code === 'OTHER'" :label="$t('orders.customCarrier')" prop="carrier_name">
+          <el-input v-model="form.carrier_name" :placeholder="$t('orders.enterCarrierName')" />
         </el-form-item>
 
-        <el-form-item label="Tracking No." prop="tracking_no">
-          <el-input v-model="form.tracking_no" placeholder="Enter tracking number">
+        <el-form-item :label="$t('orders.trackingNo')" prop="tracking_no">
+          <el-input v-model="form.tracking_no" :placeholder="$t('orders.enterTrackingNumber')">
             <template #prefix>
               <el-icon><Tickets /></el-icon>
             </template>
@@ -56,24 +56,24 @@
 
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Shipping Cost">
+            <el-form-item :label="$t('orders.shippingCost')">
               <el-input-number
                 v-model="form.shipping_cost"
                 :min="0"
                 :precision="2"
                 style="width: 100%"
-                placeholder="Optional"
+                :placeholder="$t('orders.optional')"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Weight (kg)">
+            <el-form-item :label="$t('orders.weight')">
               <el-input-number
                 v-model="form.weight"
                 :min="0"
                 :precision="2"
                 style="width: 100%"
-                placeholder="Optional"
+                :placeholder="$t('orders.optional')"
               />
             </el-form-item>
           </el-col>
@@ -84,8 +84,8 @@
       <div class="items-section">
         <div class="section-header">
           <el-icon><Goods /></el-icon>
-          <span>Items to Ship</span>
-          <el-tag size="small" type="info">{{ selectedItems.length }} selected</el-tag>
+          <span>{{ $t('orders.itemsToShip') }}</span>
+          <el-tag size="small" type="info">{{ selectedItems.length }} {{ $t('orders.selected') }}</el-tag>
         </div>
 
         <div class="items-list">
@@ -125,18 +125,18 @@
         </div>
 
         <div class="select-actions">
-          <el-button size="small" @click="selectAllItems">Select All</el-button>
-          <el-button size="small" @click="clearItems">Clear</el-button>
+          <el-button size="small" @click="selectAllItems">{{ $t('orders.selectAll') }}</el-button>
+          <el-button size="small" @click="clearItems">{{ $t('orders.clear') }}</el-button>
         </div>
       </div>
 
       <!-- Remark -->
-      <el-form-item label="Remark" class="remark-item">
+      <el-form-item :label="$t('orders.remark')" class="remark-item">
         <el-input
           v-model="form.remark"
           type="textarea"
           :rows="3"
-          placeholder="Optional notes"
+          :placeholder="$t('orders.optionalNotes')"
           maxlength="500"
           show-word-limit
         />
@@ -145,9 +145,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
+        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
-          Confirm Shipment
+          {{ $t('orders.confirmShipment') }}
         </el-button>
       </div>
     </template>
@@ -159,6 +159,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document, Van, Goods, Tickets, Picture } from '@element-plus/icons-vue'
 import { shipOrder, type Carrier } from '@/api/order'
+import { t } from '@/plugins/i18n'
 
 interface OrderItem {
   order_item_id: number
@@ -206,9 +207,9 @@ const form = reactive({
 })
 
 const rules = {
-  carrier_code: [{ required: true, message: 'Please select a carrier', trigger: 'change' }],
-  carrier_name: [{ required: true, message: 'Please enter carrier name', trigger: 'blur' }],
-  tracking_no: [{ required: true, message: 'Please enter tracking number', trigger: 'blur' }]
+  carrier_code: [{ required: true, message: t('orders.selectCarrier'), trigger: 'change' }],
+  carrier_name: [{ required: true, message: t('orders.enterCarrierName'), trigger: 'blur' }],
+  tracking_no: [{ required: true, message: t('orders.enterTrackingNumber'), trigger: 'blur' }]
 }
 
 const availableItems = computed(() => {
@@ -270,7 +271,7 @@ const handleSubmit = async () => {
     if (!valid) return
 
     if (form.items.length === 0) {
-      ElMessage.warning('Please select at least one item')
+      ElMessage.warning(t('orders.pleaseSelectItem'))
       return
     }
 
@@ -285,11 +286,11 @@ const handleSubmit = async () => {
         remark: form.remark || undefined,
         items: form.items
       })
-      ElMessage.success('Order shipped successfully')
+      ElMessage.success(t('orders.shipSuccess'))
       emit('success')
       visible.value = false
     } catch (error: any) {
-      ElMessage.error(error?.message || 'Failed to ship order')
+      ElMessage.error(error?.message || t('orders.shipFailed'))
     } finally {
       submitting.value = false
     }

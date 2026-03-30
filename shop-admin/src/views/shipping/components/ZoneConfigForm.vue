@@ -10,13 +10,13 @@
       <div class="zone-actions">
         <el-button type="primary" link size="small" @click="startEdit">
           <el-icon><Edit /></el-icon>
-          编辑
+          {{ $t('common.edit') }}
         </el-button>
-        <el-popconfirm title="确认删除该配送区域？" @confirm="$emit('delete', zone.id)">
+        <el-popconfirm :title="$t('shipping.confirmDelete')" @confirm="$emit('delete', zone.id)">
           <template #reference>
             <el-button type="danger" link size="small">
               <el-icon><Delete /></el-icon>
-              删除
+              {{ $t('common.delete') }}
             </el-button>
           </template>
         </el-popconfirm>
@@ -25,15 +25,15 @@
 
     <div class="zone-content">
       <div class="zone-row">
-        <span class="label">配送地区：</span>
+        <span class="label">{{ $t('shipping.deliveryArea') }}：</span>
         <span class="value">{{ formatRegions(zone.regions) }}</span>
       </div>
       <div class="zone-row">
-        <span class="label">运费规则：</span>
+        <span class="label">{{ $t('shipping.shippingRule') }}：</span>
         <span class="value">{{ formatFeeConfig(zone) }}</span>
       </div>
       <div class="zone-row" v-if="hasFreeThreshold">
-        <span class="label">包邮条件：</span>
+        <span class="label">{{ $t('shipping.freeShippingCondition') }}：</span>
         <span class="value">{{ formatFreeThreshold(zone) }}</span>
       </div>
     </div>
@@ -41,15 +41,15 @@
 
   <!-- Dialog/Form Mode -->
   <el-form v-else :model="form" :rules="rules" ref="formRef" label-width="100px">
-    <el-form-item label="区域名称" prop="name">
-      <el-input v-model="form.name" placeholder="例如：华东地区、偏远地区" />
+    <el-form-item :label="$t('shipping.zoneName')" prop="name">
+      <el-input v-model="form.name" :placeholder="$t('shipping.enterZoneName')" />
     </el-form-item>
 
-    <el-form-item label="配送地区" prop="regions" required>
+    <el-form-item :label="$t('shipping.deliveryArea')" prop="regions" required>
       <el-input
         v-model="selectedRegionsText"
         readonly
-        placeholder="点击选择配送地区"
+        :placeholder="$t('shipping.selectDeliveryArea')"
         @click="showRegionSelector"
       >
         <template #suffix>
@@ -66,20 +66,20 @@
           {{ region }}
         </el-tag>
         <span v-if="form.regions.length > 10" class="more-regions">
-          等共 {{ form.regions.length }} 个城市
+          {{ $t('shipping.andMoreCount', { count: form.regions.length }) }}
         </span>
       </div>
     </el-form-item>
 
-    <el-form-item label="计费方式" prop="fee_type">
+    <el-form-item :label="$t('shipping.feeType')" prop="fee_type">
       <FeeTypeSelector v-model="form" />
     </el-form-item>
 
-    <el-form-item label="包邮设置">
+    <el-form-item :label="$t('shipping.freeShippingCondition')">
       <el-row :gutter="12">
         <el-col :span="12">
           <el-checkbox v-model="form.enable_amount_threshold">
-            满额包邮
+            {{ $t('shipping.freeShippingAmount') }}
           </el-checkbox>
           <el-input-number
             v-model="form.free_threshold_amount"
@@ -93,7 +93,7 @@
         </el-col>
         <el-col :span="12">
           <el-checkbox v-model="form.enable_count_threshold">
-            满件包邮
+            {{ $t('shipping.freeShippingCount') }}
           </el-checkbox>
           <el-input-number
             v-model="form.free_threshold_count"
@@ -106,9 +106,9 @@
     </el-form-item>
 
     <el-form-item class="form-actions">
-      <el-button @click="$emit('cancel')">取消</el-button>
+      <el-button @click="$emit('cancel')">{{ $t('common.cancel') }}</el-button>
       <el-button type="primary" @click="handleSubmit" :loading="submitting">
-        {{ zone ? '更新区域' : '添加区域' }}
+        {{ zone ? $t('shipping.update') : $t('shipping.add') }}
       </el-button>
     </el-form-item>
   </el-form>
@@ -123,10 +123,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Rank, Edit, Delete, Location } from '@element-plus/icons-vue'
 import type { ShippingZone, CreateZoneRequest } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'
 import RegionSelector from './RegionSelector.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   zone?: ShippingZone
@@ -169,14 +172,14 @@ const form = reactive<ZoneForm>({
 
 const rules = {
   name: [
-    { required: true, message: '请输入区域名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '名称长度为2-50个字符', trigger: 'blur' }
+    { required: true, message: 'shipping.templateNameRequired', trigger: 'blur' },
+    { min: 2, max: 50, message: 'shipping.templateNameLength', trigger: 'blur' }
   ],
   regions: [
     {
       validator: (_rule: any, value: string[], callback: any) => {
         if (!value || value.length === 0) {
-          callback(new Error('请选择配送地区'))
+          callback(new Error('shipping.selectFeeType'))
         } else {
           callback()
         }
@@ -185,7 +188,7 @@ const rules = {
     }
   ],
   fee_type: [
-    { required: true, message: '请选择计费方式', trigger: 'change' }
+    { required: true, message: 'shipping.selectFeeType', trigger: 'change' }
   ]
 }
 
@@ -204,33 +207,33 @@ const displayRegions = computed(() => {
 
 // Methods
 const getFeeTypeLabel = (feeType: string) => {
-  const labels: Record<string, string> = {
-    fixed: '固定运费',
-    by_count: '按件计费',
-    by_weight: '按重量计费',
-    free: '免运费'
+  switch (feeType) {
+    case 'fixed': return t('shipping.fixed')
+    case 'by_count': return t('shipping.byCount')
+    case 'by_weight': return t('shipping.byWeight')
+    case 'free': return t('shipping.free')
+    default: return feeType
   }
-  return labels[feeType] || feeType
 }
 
 const formatRegions = (regions: string[]) => {
-  if (!regions || regions.length === 0) return '未设置'
+  if (!regions || regions.length === 0) return t('shipping.areaNotSet')
   if (regions.length <= 3) {
     return regions.join('、')
   }
-  return `${regions.slice(0, 3).join('、')} 等 ${regions.length} 个城市`
+  return `${regions.slice(0, 3).join('、')} ${t('shipping.andMoreCount', { count: regions.length })}`
 }
 
 const formatFeeConfig = (zone: ShippingZone) => {
   switch (zone.fee_type) {
     case 'fixed':
-      return `固定运费：¥${zone.first_fee}`
+      return t('shipping.feeConfigFixed', { fee: zone.first_fee })
     case 'by_count':
-      return `首${zone.first_unit}件 ¥${zone.first_fee}，续${zone.additional_unit}件 ¥${zone.additional_fee}`
+      return t('shipping.feeConfigByCount', { first: zone.first_unit, fee: zone.first_fee, add: zone.additional_unit, addFee: zone.additional_fee })
     case 'by_weight':
-      return `首${zone.first_unit}g ¥${zone.first_fee}，续${zone.additional_unit}g ¥${zone.additional_fee}`
+      return t('shipping.feeConfigByWeight', { first: zone.first_unit, fee: zone.first_fee, add: zone.additional_unit, addFee: zone.additional_fee })
     case 'free':
-      return '免运费'
+      return t('shipping.free')
     default:
       return zone.fee_type
   }
@@ -242,12 +245,12 @@ const formatFreeThreshold = (zone: ShippingZone) => {
   const count = zone.free_threshold_count || 0
 
   if (amount > 0) {
-    parts.push(`满 ¥${amount}`)
+    parts.push(t('shipping.freeThresholdAmount', { amount }))
   }
   if (count > 0) {
-    parts.push(`满 ${count} 件`)
+    parts.push(t('shipping.freeThresholdCount', { count }))
   }
-  return parts.join(' 或 ') + ' 包邮'
+  return parts.join(' 或 ') + ' ' + t('shipping.freeShippingApplied')
 }
 
 const startEdit = () => {

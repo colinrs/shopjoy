@@ -5,10 +5,10 @@
       <div class="header-left">
         <el-button link @click="goBack">
           <el-icon><ArrowLeft /></el-icon>
-          Back
+          {{ $t('common.back') }}
         </el-button>
         <div class="title-section">
-          <h1 class="page-title">Shipment Details</h1>
+          <h1 class="page-title">{{ $t('fulfillment.shipmentDetails') }}</h1>
           <p class="shipment-no">{{ shipment?.shipment_no }}</p>
         </div>
       </div>
@@ -16,7 +16,7 @@
         <status-tag :status="shipment?.status" :type-map="statusTypeMap" size="large" />
         <el-button v-if="shipment?.tracking_no" type="primary" @click="copyTracking">
           <el-icon><Link /></el-icon>
-          Copy Tracking
+          {{ $t('fulfillment.copyTracking') }}
         </el-button>
       </div>
     </div>
@@ -30,23 +30,23 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Document /></el-icon>
-                Basic Information
+                {{ $t('fulfillment.basicInformation') }}
               </span>
             </div>
           </template>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="Shipment No.">
+            <el-descriptions-item :label="$t('fulfillment.shipmentNo')">
               <span class="value-text">{{ shipment?.shipment_no }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Order No.">
+            <el-descriptions-item :label="$t('fulfillment.orderNo')">
               <el-button type="primary" link @click="viewOrder">
                 {{ shipment?.order_no }}
               </el-button>
             </el-descriptions-item>
-            <el-descriptions-item label="Status">
+            <el-descriptions-item :label="$t('common.status')">
               <status-tag :status="shipment?.status" :type-map="statusTypeMap" />
             </el-descriptions-item>
-            <el-descriptions-item label="Created At">
+            <el-descriptions-item :label="$t('common.createdAt')">
               {{ shipment?.created_at }}
             </el-descriptions-item>
           </el-descriptions>
@@ -58,7 +58,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Van /></el-icon>
-                Logistics Information
+                {{ $t('fulfillment.logisticsInformation') }}
               </span>
               <el-button
                 v-if="shipment?.status === 'pending'"
@@ -66,42 +66,42 @@
                 size="small"
                 @click="openEditLogistics"
               >
-                Edit
+                {{ $t('fulfillment.editLogistics') }}
               </el-button>
             </div>
           </template>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="Carrier">
+            <el-descriptions-item :label="$t('fulfillment.carrier')">
               <span class="value-text">{{ shipment?.carrier || '-' }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Tracking No.">
+            <el-descriptions-item :label="$t('fulfillment.trackingNo')">
               <span v-if="shipment?.tracking_no" class="tracking-value">
                 {{ shipment.tracking_no }}
                 <el-button link size="small" @click="copyTracking">
                   <el-icon><CopyDocument /></el-icon>
                 </el-button>
               </span>
-              <span v-else class="no-data">Not entered</span>
+              <span v-else class="no-data">{{ $t('fulfillment.notEntered') }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Shipping Cost">
+            <el-descriptions-item :label="$t('fulfillment.shippingCost')">
               <span v-if="shipment?.shipping_cost">
                 {{ shipment.shipping_currency }} {{ shipment.shipping_cost }}
               </span>
               <span v-else class="no-data">-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Weight">
-              <span v-if="shipment?.weight">{{ shipment.weight }} kg</span>
+            <el-descriptions-item :label="$t('fulfillment.weight')">
+              <span v-if="shipment?.weight">{{ shipment.weight }} {{ $t('fulfillment.kg') }}</span>
               <span v-else class="no-data">-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Shipped At">
+            <el-descriptions-item :label="$t('fulfillment.shippedAt')">
               {{ shipment?.shipped_at || '-' }}
             </el-descriptions-item>
-            <el-descriptions-item label="Delivered At">
+            <el-descriptions-item :label="$t('fulfillment.deliveredAt')">
               {{ shipment?.delivered_at || '-' }}
             </el-descriptions-item>
           </el-descriptions>
           <div v-if="shipment?.remark" class="remark-section">
-            <span class="remark-label">Remark:</span>
+            <span class="remark-label">{{ $t('fulfillment.remark') }}:</span>
             <span class="remark-text">{{ shipment.remark }}</span>
           </div>
         </el-card>
@@ -112,9 +112,9 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Goods /></el-icon>
-                Shipment Items
+                {{ $t('fulfillment.shipmentItems') }}
               </span>
-              <span class="item-count">Total {{ shipment?.items?.length || 0 }} items</span>
+              <span class="item-count">{{ $t('fulfillment.totalItems', { n: shipment?.items?.length || 0 }) }}</span>
             </div>
           </template>
           <div class="items-list">
@@ -128,7 +128,7 @@
               </el-image>
               <div class="item-info">
                 <p class="item-name">{{ item.product_name }}</p>
-                <p class="item-sku">SKU: {{ item.sku_name }}</p>
+                <p class="item-sku">{{ $t('fulfillment.sku') }}: {{ item.sku_name }}</p>
               </div>
               <div class="item-quantity">
                 x {{ item.quantity }}
@@ -146,7 +146,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Clock /></el-icon>
-                Status Timeline
+                {{ $t('fulfillment.statusTimeline') }}
               </span>
             </div>
           </template>
@@ -173,7 +173,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Operation /></el-icon>
-                Actions
+                {{ $t('fulfillment.actions') }}
               </span>
             </div>
           </template>
@@ -185,7 +185,7 @@
               @click="confirmShip"
             >
               <el-icon><Van /></el-icon>
-              Confirm Shipment
+              {{ $t('fulfillment.confirmShip') }}
             </el-button>
             <el-button
               v-if="shipment?.status === 'in_transit'"
@@ -194,7 +194,7 @@
               @click="markDelivered"
             >
               <el-icon><CircleCheck /></el-icon>
-              Mark as Delivered
+              {{ $t('fulfillment.markAsDelivered') }}
             </el-button>
             <el-button
               v-if="shipment?.tracking_no"
@@ -202,7 +202,7 @@
               @click="trackShipment"
             >
               <el-icon><Location /></el-icon>
-              Track Package
+              {{ $t('fulfillment.trackPackage') }}
             </el-button>
             <el-button
               v-if="shipment?.status === 'pending'"
@@ -211,7 +211,7 @@
               @click="cancelShipment"
             >
               <el-icon><Close /></el-icon>
-              Cancel Shipment
+              {{ $t('fulfillment.cancelShipment') }}
             </el-button>
           </div>
         </el-card>
@@ -219,31 +219,31 @@
     </el-row>
 
     <!-- Edit Logistics Dialog -->
-    <el-dialog v-model="editDialogVisible" title="Edit Logistics Information" width="500px">
+    <el-dialog v-model="editDialogVisible" :title="$t('fulfillment.editLogisticsInformation')" width="500px">
       <el-form :model="editForm" label-width="100px">
-        <el-form-item label="Carrier" required>
-          <el-select v-model="editForm.carrier_code" placeholder="Select carrier" style="width: 100%">
+        <el-form-item :label="$t('fulfillment.carrier')" required>
+          <el-select v-model="editForm.carrier_code" :placeholder="$t('fulfillment.selectCarrier')" style="width: 100%">
             <el-option v-for="carrier in carriers" :key="carrier.code" :label="carrier.name" :value="carrier.code" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Tracking No." required>
-          <el-input v-model="editForm.tracking_no" placeholder="Enter tracking number" />
+        <el-form-item :label="$t('fulfillment.trackingNo')" required>
+          <el-input v-model="editForm.tracking_no" :placeholder="$t('fulfillment.enterTrackingNumber')" />
         </el-form-item>
-        <el-form-item label="Shipping Cost">
+        <el-form-item :label="$t('fulfillment.shippingCost')">
           <el-input-number v-model="editForm.shipping_cost" :min="0" :precision="2" style="width: 100%">
             <template #prefix>{{ editForm.currency }}</template>
           </el-input-number>
         </el-form-item>
-        <el-form-item label="Weight (kg)">
+        <el-form-item :label="$t('fulfillment.weight')">
           <el-input-number v-model="editForm.weight" :min="0" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="editForm.remark" type="textarea" :rows="3" placeholder="Optional" />
+        <el-form-item :label="$t('fulfillment.remark')">
+          <el-input v-model="editForm.remark" type="textarea" :rows="3" :placeholder="$t('fulfillment.optional')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="saveLogistics">Save</el-button>
+        <el-button @click="editDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveLogistics">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -258,6 +258,7 @@ import {
   Link, CopyDocument, CircleCheck, Close, Picture
 } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import { t } from '@/plugins/i18n'
 import {
   getShipmentDetail,
   updateShipmentStatus,
@@ -302,46 +303,46 @@ const timeline = computed<TimelineEvent[]>(() => {
   if (!shipment.value) return []
 
   const events: TimelineEvent[] = [
-    { title: 'Shipment Created', time: shipment.value.created_at, type: 'primary', active: true, description: `Order: ${shipment.value.order_no}` }
+    { title: t('fulfillment.shipmentCreated'), time: shipment.value.created_at, type: 'primary', active: true, description: `${t('fulfillment.orderNo')}: ${shipment.value.order_no}` }
   ]
 
   if (shipment.value.shipped_at) {
     events.push({
-      title: 'Shipped',
+      title: t('fulfillment.shippedStatus'),
       time: shipment.value.shipped_at,
       type: 'primary',
       active: ['shipped', 'in_transit', 'delivered', 'failed'].includes(shipment.value.status),
-      description: `Carrier: ${shipment.value.carrier}, Tracking: ${shipment.value.tracking_no}`
+      description: `${t('fulfillment.carrier')}: ${shipment.value.carrier}, ${t('fulfillment.trackingNo')}: ${shipment.value.tracking_no}`
     })
   }
 
   if (['shipped', 'in_transit', 'delivered'].includes(shipment.value.status) && shipment.value.shipped_at) {
     events.push({
-      title: 'In Transit',
+      title: t('fulfillment.inTransitStatus'),
       time: shipment.value.shipped_at,
       type: 'info',
       active: ['in_transit', 'delivered'].includes(shipment.value.status),
-      description: 'Package is on the way'
+      description: t('fulfillment.packageOnTheWay')
     })
   }
 
   if (shipment.value.delivered_at) {
     events.push({
-      title: 'Delivered',
+      title: t('fulfillment.deliveredStatus'),
       time: shipment.value.delivered_at,
       type: 'success',
       active: shipment.value.status === 'delivered',
-      description: 'Package has been delivered'
+      description: t('fulfillment.packageDelivered')
     })
   }
 
   if (shipment.value.status === 'failed') {
     events.push({
-      title: 'Delivery Failed',
+      title: t('fulfillment.deliveryFailed'),
       time: shipment.value.delivered_at || shipment.value.shipped_at || '',
       type: 'danger',
       active: true,
-      description: shipment.value.remark || 'Delivery failed'
+      description: shipment.value.remark || t('fulfillment.deliveryFailed')
     })
   }
 
@@ -354,33 +355,7 @@ const loadShipment = async () => {
     const res = await getShipmentDetail(Number(id))
     shipment.value = res
   } catch (error) {
-    // Mock data
-    shipment.value = {
-      id: Number(id),
-      shipment_no: 'SHP20260322001',
-      order_id: 'ORD001',
-      order_no: 'ORD2026031800100',
-      status: 'in_transit',
-      status_text: '运输中',
-      carrier: 'SF Express',
-      carrier_code: 'SF',
-      tracking_no: 'SF1234567890',
-      tracking_url: 'https://www.sf-express.com/sf-service-ow/f、梁.operation.entrega_ar?trackingNo=SF1234567890',
-      shipping_cost: "12.00",
-      shipping_currency: 'CNY',
-      weight: "1.5",
-      shipped_at: '2026-03-22T14:30:25Z',
-      delivered_at: null,
-      remark: 'Fragile item - handle with care',
-      created_at: '2026-03-22T10:00:00Z',
-      updated_at: '2026-03-22T10:00:00Z',
-      created_by: 1,
-      created_by_name: '管理员',
-      items: [
-        { id: 1, product_id: 1, sku_id: 1, product_name: 'Wireless Bluetooth Earphones Pro', sku_name: 'Black - Premium Edition', image: '', quantity: 1 },
-        { id: 2, product_id: 2, sku_id: 2, product_name: 'Phone Case', sku_name: 'iPhone 15 Pro Max', image: '', quantity: 2 }
-      ]
-    }
+    ElMessage.error(t('fulfillment.loadShipmentDetailsFailed'))
   }
 }
 
@@ -389,11 +364,7 @@ const loadCarriers = async () => {
     const res = await getCarrierList()
     carriers.value = res
   } catch (error) {
-    carriers.value = [
-      { code: 'SF', name: 'SF Express', tracking_url: '', is_active: true },
-      { code: 'ZT', name: 'ZTO Express', tracking_url: '', is_active: true },
-      { code: 'YT', name: 'YTO Express', tracking_url: '', is_active: true }
-    ]
+    ElMessage.error(t('fulfillment.loadCarriersFailed'))
   }
 }
 
@@ -410,7 +381,7 @@ const viewOrder = () => {
 const copyTracking = () => {
   if (shipment.value?.tracking_no) {
     navigator.clipboard.writeText(shipment.value.tracking_no)
-    ElMessage.success('Tracking number copied')
+    ElMessage.success(t('fulfillment.trackingNumberCopied'))
   }
 }
 
@@ -426,7 +397,7 @@ const openEditLogistics = () => {
 }
 
 const saveLogistics = async () => {
-  ElMessage.success('Logistics information updated')
+  ElMessage.success(t('fulfillment.logisticsUpdated'))
   editDialogVisible.value = false
   loadShipment()
 }
@@ -434,12 +405,12 @@ const saveLogistics = async () => {
 const confirmShip = async () => {
   try {
     await ElMessageBox.confirm(
-      'Confirm to ship this package?',
-      'Confirm Shipment',
+      t('fulfillment.confirmToShip'),
+      t('fulfillment.confirmShip'),
       { type: 'success' }
     )
     await updateShipmentStatus(shipment.value!.id, 'shipped')
-    ElMessage.success('Shipment confirmed')
+    ElMessage.success(t('fulfillment.shipmentConfirmed'))
     loadShipment()
   } catch (error) {
     // Cancelled or error
@@ -449,12 +420,12 @@ const confirmShip = async () => {
 const markDelivered = async () => {
   try {
     await ElMessageBox.confirm(
-      'Mark this shipment as delivered?',
-      'Confirm Delivery',
+      t('fulfillment.markDelivered'),
+      t('fulfillment.confirmDelivery'),
       { type: 'success' }
     )
     await updateShipmentStatus(shipment.value!.id, 'delivered')
-    ElMessage.success('Shipment marked as delivered')
+    ElMessage.success(t('fulfillment.shipmentMarkedDelivered'))
     loadShipment()
   } catch (error) {
     // Cancelled or error
@@ -467,7 +438,7 @@ const trackShipment = () => {
     if (carrier?.tracking_url) {
       window.open(carrier.tracking_url.replace('{tracking_no}', shipment.value.tracking_no), '_blank')
     } else {
-      ElMessage.info(`Tracking No: ${shipment.value.tracking_no}`)
+      ElMessage.info(`${t('fulfillment.trackingNo')}: ${shipment.value.tracking_no}`)
     }
   }
 }
@@ -475,11 +446,11 @@ const trackShipment = () => {
 const cancelShipment = async () => {
   try {
     await ElMessageBox.confirm(
-      'Are you sure you want to cancel this shipment?',
-      'Cancel Shipment',
+      t('fulfillment.cancelThisShipment'),
+      t('fulfillment.cancelShipment'),
       { type: 'warning' }
     )
-    ElMessage.success('Shipment cancelled')
+    ElMessage.success(t('fulfillment.shipmentCancelled'))
     router.push('/fulfillment/shipments')
   } catch (error) {
     // Cancelled

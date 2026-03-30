@@ -6,7 +6,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索品牌名称"
+            :placeholder="$t('brands.searchPlaceholder')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -15,18 +15,18 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filterStatus" placeholder="状态" clearable class="filter-select" @change="handleSearch">
-            <el-option label="全部" value="" />
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+          <el-select v-model="filterStatus" :placeholder="$t('brands.status')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('brands.all')" value="" />
+            <el-option :label="$t('brands.enabled')" :value="1" />
+            <el-option :label="$t('brands.disabled')" :value="0" />
           </el-select>
           <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>查询
+            <el-icon><Search /></el-icon>{{ $t('brands.query') }}
           </el-button>
         </div>
         <div class="filter-right">
           <el-button type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>新增品牌
+            <el-icon><Plus /></el-icon>{{ $t('brands.addBrand') }}
           </el-button>
         </div>
       </div>
@@ -35,7 +35,7 @@
     <!-- Brands Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="brandList" v-loading="loading" stripe>
-        <el-table-column label="品牌信息" min-width="250">
+        <el-table-column :label="$t('brands.brandInfo')" min-width="250">
           <template #default="{ row }">
             <div class="brand-cell">
               <el-image
@@ -60,14 +60,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="product_count" label="商品数量" width="100" align="center">
+        <el-table-column prop="product_count" :label="$t('brands.productCount')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.product_count > 0 ? 'success' : 'info'" size="small">
               {{ row.product_count || 0 }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="enable_page" label="品牌专区" width="100" align="center">
+        <el-table-column prop="enable_page" :label="$t('brands.brandPage')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.enable_page"
@@ -75,8 +75,8 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="sort" label="排序" width="80" align="center" />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="sort" :label="$t('brands.sort')" width="80" align="center" />
+        <el-table-column prop="status" :label="$t('brands.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -86,14 +86,14 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="180" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="created_at" :label="$t('brands.createdAt')" width="180" />
+        <el-table-column :label="$t('common.actions')" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
-              编辑
+              {{ $t('brands.edit') }}
             </el-button>
             <el-button type="danger" link size="small" @click="handleDelete(row)">
-              删除
+              {{ $t('brands.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -116,57 +116,57 @@
     <!-- Add/Edit Dialog -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? '编辑品牌' : '新增品牌'"
+      :title="isEdit ? $t('brands.editBrand') : $t('brands.addBrandTitle')"
       width="700px"
       destroy-on-close
     >
       <el-form :model="brandForm" label-width="120px" :rules="formRules" ref="formRef">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="品牌名称" prop="name">
-              <el-input v-model="brandForm.name" placeholder="请输入品牌名称" />
+            <el-form-item :label="$t('brands.brandName')" prop="name">
+              <el-input v-model="brandForm.name" :placeholder="$t('brands.enterBrandName')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="排序">
+            <el-form-item :label="$t('brands.sort')">
               <el-input-number v-model="brandForm.sort" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="Logo URL">
-              <el-input v-model="brandForm.logo" placeholder="品牌Logo URL" />
+            <el-form-item :label="$t('brands.logoUrl')">
+              <el-input v-model="brandForm.logo" :placeholder="$t('brands.brandLogoUrl')" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="品牌官网">
-              <el-input v-model="brandForm.website" placeholder="品牌官网URL" />
+            <el-form-item :label="$t('brands.brandWebsite')">
+              <el-input v-model="brandForm.website" :placeholder="$t('brands.websiteUrl')" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="品牌描述">
-              <el-input v-model="brandForm.description" type="textarea" rows="3" placeholder="品牌描述" />
+            <el-form-item :label="$t('brands.brandDescription')">
+              <el-input v-model="brandForm.description" type="textarea" rows="3" :placeholder="$t('brands.enterDescription')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="商标号">
-              <el-input v-model="brandForm.trademark_number" placeholder="商标注册号" />
+            <el-form-item :label="$t('brands.trademarkNumber')">
+              <el-input v-model="brandForm.trademark_number" :placeholder="$t('brands.trademarkRegNumber')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="商标注册国">
-              <el-input v-model="brandForm.trademark_country" placeholder="如: CN, US" />
+            <el-form-item :label="$t('brands.trademarkCountry')">
+              <el-input v-model="brandForm.trademark_country" :placeholder="$t('brands.countryExample')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="启用品牌专区">
+            <el-form-item :label="$t('brands.enableBrandPage')">
               <el-switch v-model="brandForm.enable_page" />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('brands.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('brands.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -176,6 +176,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Picture } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import {
   getBrands,
   createBrand,
@@ -185,6 +186,8 @@ import {
   toggleBrandPage,
   type Brand
 } from '@/api/brand'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -211,7 +214,7 @@ const brandForm = reactive({
 })
 
 const formRules = {
-  name: [{ required: true, message: '请输入品牌名称', trigger: 'blur' }]
+  name: [{ required: true, message: t('brands.enterBrandName'), trigger: 'blur' }]
 }
 
 const handleSearch = () => {
@@ -253,22 +256,22 @@ const handleEdit = (row: Brand) => {
 
 const handleDelete = (row: Brand) => {
   if (row.product_count > 0) {
-    ElMessage.warning('该品牌下存在商品，无法删除')
+    ElMessage.warning(t('brands.hasProducts'))
     return
   }
 
-  ElMessageBox.confirm(`确认删除品牌 "${row.name}"?`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(`confirmDelete: "${row.name}"?`, t('brands.confirmDelete'), {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
     type: 'warning'
   }).then(async () => {
     try {
       await deleteBrand(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('brands.deleteSuccess'))
       loadBrands()
     } catch (error) {
       console.error('Failed to delete brand:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(t('brands.deleteFailed'))
     }
   })
 }
@@ -276,10 +279,10 @@ const handleDelete = (row: Brand) => {
 const handleStatusChange = async (row: Brand, status: number) => {
   try {
     await updateBrandStatus(row.id, status)
-    ElMessage.success(status === 1 ? '已启用' : '已禁用')
+    ElMessage.success(status === 1 ? t('brands.enabledSuccess') : t('brands.disabledSuccess'))
   } catch (error) {
     console.error('Failed to update status:', error)
-    ElMessage.error('更新状态失败')
+    ElMessage.error(t('brands.operationFailed'))
     row.status = status === 1 ? 0 : 1
   }
 }
@@ -287,10 +290,10 @@ const handleStatusChange = async (row: Brand, status: number) => {
 const handleTogglePage = async (row: Brand, enabled: boolean) => {
   try {
     await toggleBrandPage(row.id, enabled)
-    ElMessage.success(enabled ? '已启用品牌专区' : '已禁用品牌专区')
+    ElMessage.success(enabled ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
   } catch (error) {
     console.error('Failed to toggle page:', error)
-    ElMessage.error('操作失败')
+    ElMessage.error(t('brands.operationFailed'))
     row.enable_page = !enabled
   }
 }
@@ -314,7 +317,7 @@ const handleSave = async () => {
             enable_page: brandForm.enable_page,
             sort: brandForm.sort
           })
-          ElMessage.success('更新成功')
+          ElMessage.success(t('brands.updateSuccess'))
         } else {
           await createBrand({
             name: brandForm.name,
@@ -326,13 +329,13 @@ const handleSave = async () => {
             enable_page: brandForm.enable_page,
             sort: brandForm.sort
           })
-          ElMessage.success('创建成功')
+          ElMessage.success(t('brands.createSuccess'))
         }
         dialogVisible.value = false
         loadBrands()
       } catch (error) {
         console.error('Failed to save brand:', error)
-        ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
+        ElMessage.error(isEdit.value ? t('brands.updateFailed') : t('brands.createFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -363,7 +366,7 @@ const loadBrands = async () => {
     total.value = response.total || 0
   } catch (error) {
     console.error('Failed to load brands:', error)
-    ElMessage.error('加载品牌失败')
+    ElMessage.error(t('brands.loadFailed'))
   } finally {
     loading.value = false
   }

@@ -2,50 +2,50 @@
   <el-dialog
     :model-value="visible"
     @update:model-value="$emit('update:visible', $event)"
-    :title="isEdit ? '编辑规则' : '创建规则'"
+    :title="isEdit ? $t('points.editRule') : $t('points.createRule')"
     width="600px"
     destroy-on-close
   >
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
       <!-- Basic Info -->
-      <el-form-item label="规则名称" prop="name">
-        <el-input v-model="form.name" placeholder="例如: $10优惠券兑换" maxlength="100" />
+      <el-form-item :label="$t('points.ruleName')" prop="name">
+        <el-input v-model="form.name" :placeholder="$t('points.example10Coupon')" maxlength="100" />
       </el-form-item>
 
-      <el-form-item label="描述">
-        <el-input v-model="form.description" type="textarea" :rows="2" placeholder="规则描述" />
+      <el-form-item :label="$t('points.description')">
+        <el-input v-model="form.description" type="textarea" :rows="2" :placeholder="$t('points.ruleDescPlaceholder')" />
       </el-form-item>
 
       <!-- Coupon Selection -->
-      <el-form-item label="关联优惠券" prop="coupon_id">
+      <el-form-item :label="$t('points.relatedCoupon')" prop="coupon_id">
         <CouponSelector v-model="form.coupon_id" @change="handleCouponChange" />
       </el-form-item>
 
       <!-- Points Required -->
-      <el-form-item label="所需积分" prop="points_required">
+      <el-form-item :label="$t('points.requiredPoints')" prop="points_required">
         <el-input-number v-model="form.points_required" :min="1" :max="999999" style="width: 200px" />
-        <span class="form-hint">兑换所需积分数量</span>
+        <span class="form-hint">{{ $t('points.pointsForExchange') }}</span>
       </el-form-item>
 
       <!-- Stock -->
-      <el-form-item label="兑换总量">
+      <el-form-item :label="$t('points.totalStock')">
         <el-input-number v-model="form.total_stock" :min="0" :max="999999" style="width: 200px" />
-        <span class="form-hint">0 表示不限制</span>
+        <span class="form-hint">{{ $t('points.zeroNoLimit') }}</span>
       </el-form-item>
 
       <!-- Per User Limit -->
-      <el-form-item label="每人限兑">
+      <el-form-item :label="$t('points.perUserLimit')">
         <el-input-number v-model="form.per_user_limit" :min="0" :max="100" style="width: 200px" />
-        <span class="form-hint">0 表示不限制</span>
+        <span class="form-hint">{{ $t('points.zeroNoLimit') }}</span>
       </el-form-item>
 
       <!-- Time Range -->
-      <el-form-item label="有效期">
+      <el-form-item :label="$t('points.validPeriod')">
         <el-date-picker
           v-model="form.dateRange"
           type="datetimerange"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :start-placeholder="$t('points.startTime')"
+          :end-placeholder="$t('points.endTime')"
           value-format="YYYY-MM-DDTHH:mm:ss[Z]"
           style="width: 100%"
         />
@@ -53,9 +53,9 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">取消</el-button>
+      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
       <el-button type="primary" @click="handleSave" :loading="loading">
-        保存
+        {{ $t('common.save') }}
       </el-button>
     </template>
   </el-dialog>
@@ -66,6 +66,7 @@ import { ref, reactive, watch, computed } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import CouponSelector from './CouponSelector.vue'
 import type { RedeemRule, CreateRedeemRuleParams } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   visible: boolean
@@ -94,9 +95,9 @@ const form = reactive({
 })
 
 const rules: FormRules = {
-  name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
-  coupon_id: [{ required: true, message: '请选择优惠券', trigger: 'change' }],
-  points_required: [{ required: true, message: '请输入所需积分', trigger: 'blur' }]
+  name: [{ required: true, message: t('points.ruleName'), trigger: 'blur' }],
+  coupon_id: [{ required: true, message: t('points.selectCoupon'), trigger: 'change' }],
+  points_required: [{ required: true, message: t('points.requiredPoints'), trigger: 'blur' }]
 }
 
 // Watch rule prop to populate form

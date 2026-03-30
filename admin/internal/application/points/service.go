@@ -197,6 +197,7 @@ type Service interface {
 	// Transactions
 	GetTransaction(ctx context.Context, tenantID shared.TenantID, id int64) (*PointsTransactionDTO, error)
 	ListTransactions(ctx context.Context, tenantID shared.TenantID, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, *points.PointsTransactionStats, error)
+	ExportTransactions(ctx context.Context, tenantID shared.TenantID, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error)
 
 	// Redemptions
 	GetRedemption(ctx context.Context, tenantID shared.TenantID, id int64) (*PointsRedemptionDTO, error)
@@ -690,6 +691,23 @@ func (s *service) ListTransactions(ctx context.Context, tenantID shared.TenantID
 	}
 
 	return dtos, total, stats, nil
+}
+
+func (s *service) ExportTransactions(ctx context.Context, tenantID shared.TenantID, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error) {
+	query.Page = 1
+	query.PageSize = 10001 // Max export limit
+
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, tenantID, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	dtos := make([]*PointsTransactionDTO, len(transactions))
+	for i, t := range transactions {
+		dtos[i] = toPointsTransactionDTO(t)
+	}
+
+	return dtos, total, nil
 }
 
 // ==================== Redemptions ====================

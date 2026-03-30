@@ -1,10 +1,10 @@
 <template>
   <div class="themes-page">
-    <page-header title="主题管理" subtitle="选择并自定义您的店铺主题风格">
+    <page-header :title="$t('storefront.themeManagement')" :subtitle="$t('storefront.selectAndCustomizeTheme')">
       <template #extra>
         <el-button type="primary" @click="showCustomThemeDialog">
           <el-icon><Plus /></el-icon>
-          上传自定义主题
+          {{ $t('storefront.uploadCustomTheme') }}
         </el-button>
       </template>
     </page-header>
@@ -13,8 +13,8 @@
     <el-card v-if="currentTheme" class="current-theme-card" shadow="hover">
       <template #header>
         <div class="card-header">
-          <span>当前主题</span>
-          <el-tag type="success" effect="dark" size="small">使用中</el-tag>
+          <span>{{ $t('storefront.currentTheme') }}</span>
+          <el-tag type="success" effect="dark" size="small">{{ $t('storefront.inUse') }}</el-tag>
         </div>
       </template>
       <div class="current-theme-content">
@@ -37,22 +37,22 @@
 
           <!-- Theme Config -->
           <div class="theme-config">
-            <h4>主题配置</h4>
+            <h4>{{ $t('storefront.themeConfig') }}</h4>
             <el-form :model="configForm" label-width="100px" label-position="left">
-              <el-form-item label="主色调">
+              <el-form-item :label="$t('storefront.primaryColor')">
                 <div class="color-picker-wrapper">
                   <el-color-picker v-model="configForm.primary_color" />
                   <span class="color-value">{{ configForm.primary_color }}</span>
                 </div>
               </el-form-item>
-              <el-form-item label="辅助色">
+              <el-form-item :label="$t('storefront.secondaryColor')">
                 <div class="color-picker-wrapper">
                   <el-color-picker v-model="configForm.secondary_color" />
                   <span class="color-value">{{ configForm.secondary_color }}</span>
                 </div>
               </el-form-item>
-              <el-form-item label="字体">
-                <el-select v-model="configForm.font_family" placeholder="选择字体">
+              <el-form-item :label="$t('storefront.font')">
+                <el-select v-model="configForm.font_family" :placeholder="$t('storefront.selectFont')">
                   <el-option label="Inter" value="inter" />
                   <el-option label="Roboto" value="roboto" />
                   <el-option label="Open Sans" value="opensans" />
@@ -60,20 +60,20 @@
                   <el-option label="Noto Sans" value="notosans" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="按钮样式">
-                <el-select v-model="configForm.button_style" placeholder="选择按钮样式">
-                  <el-option label="圆角按钮" value="rounded" />
-                  <el-option label="胶囊按钮" value="pill" />
-                  <el-option label="方角按钮" value="square" />
-                  <el-option label="下划线样式" value="underline" />
+              <el-form-item :label="$t('storefront.buttonStyle')">
+                <el-select v-model="configForm.button_style" :placeholder="$t('storefront.selectButtonStyle')">
+                  <el-option :label="$t('storefront.roundedButton')" value="rounded" />
+                  <el-option :label="$t('storefront.pillButton')" value="pill" />
+                  <el-option :label="$t('storefront.squareButton')" value="square" />
+                  <el-option :label="$t('storefront.underlineButton')" value="underline" />
                 </el-select>
               </el-form-item>
             </el-form>
             <div class="config-actions">
               <el-button type="primary" @click="saveConfig" :loading="configLoading">
-                保存配置
+                {{ $t('storefront.saveConfig') }}
               </el-button>
-              <el-button @click="resetConfig">重置为默认</el-button>
+              <el-button @click="resetConfig">{{ $t('storefront.resetToDefault') }}</el-button>
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@
 
     <!-- Available Themes -->
     <div class="themes-section">
-      <h3 class="section-title">可用主题</h3>
+      <h3 class="section-title">{{ $t('storefront.availableThemes') }}</h3>
       <div class="themes-grid" v-loading="loading">
         <div
           v-for="theme in themes"
@@ -105,14 +105,14 @@
             </el-image>
             <div class="theme-overlay">
               <el-button type="primary" size="small" @click.stop="previewTheme(theme)">
-                预览
+                {{ $t('storefront.preview') }}
               </el-button>
             </div>
             <div v-if="theme.is_current" class="current-badge">
               <el-icon><Check /></el-icon>
-              使用中
+              {{ $t('storefront.inUse') }}
             </div>
-            <div v-if="theme.is_preset" class="preset-badge">官方主题</div>
+            <div v-if="theme.is_preset" class="preset-badge">{{ $t('storefront.officialTheme') }}</div>
           </div>
           <div class="theme-meta">
             <h4>{{ theme.name }}</h4>
@@ -125,7 +125,7 @@
     <!-- Theme Preview Dialog -->
     <el-dialog
       v-model="previewDialogVisible"
-      :title="previewThemeData?.name + ' - 主题预览'"
+      :title="(previewThemeData?.name || '') + ' - ' + $t('storefront.themePreview')"
       width="900px"
       destroy-on-close
     >
@@ -138,7 +138,7 @@
           <template #error>
             <div class="image-placeholder large">
               <el-icon size="64"><Picture /></el-icon>
-              <span>暂无预览图</span>
+              <span>{{ $t('storefront.noPreviewImage') }}</span>
             </div>
           </template>
         </el-image>
@@ -153,9 +153,9 @@
               @click="applyTheme(previewThemeData.id)"
               :loading="switchLoading"
             >
-              应用此主题
+              {{ $t('storefront.applyTheme') }}
             </el-button>
-            <el-tag v-else type="success" size="large">当前使用</el-tag>
+            <el-tag v-else type="success" size="large">{{ $t('storefront.currentlyInUse') }}</el-tag>
           </div>
         </div>
       </div>
@@ -165,6 +165,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Picture, Check } from '@element-plus/icons-vue'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -176,6 +177,8 @@ import {
   type ThemeItem,
   type CurrentThemeResponse
 } from '@/api/storefront'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const configLoading = ref(false)
@@ -198,7 +201,7 @@ const fetchThemes = async () => {
     const res = await listThemes()
     themes.value = res.themes || []
   } catch (error) {
-    ElMessage.error('获取主题列表失败')
+    ElMessage.error(t('storefront.loadThemesFailed'))
   } finally {
     loading.value = false
   }
@@ -215,7 +218,7 @@ const fetchCurrentTheme = async () => {
       configForm.button_style = res.config.button_style || 'rounded'
     }
   } catch (error) {
-    ElMessage.error('获取当前主题失败')
+    ElMessage.error(t('storefront.loadCurrentThemeFailed'))
   }
 }
 
@@ -227,23 +230,23 @@ const previewTheme = (theme: ThemeItem) => {
 const applyTheme = async (themeId: number) => {
   try {
     await ElMessageBox.confirm(
-      '确定要切换到此主题吗？切换后您的自定义配置将被重置。',
-      '切换主题',
+      t('storefront.confirmSwitchTheme'),
+      t('storefront.switchTheme'),
       {
-        confirmButtonText: '确定切换',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     switchLoading.value = true
     await switchTheme({ theme_id: themeId })
-    ElMessage.success('主题切换成功')
+    ElMessage.success(t('storefront.themeSwitchSuccess'))
     previewDialogVisible.value = false
     await fetchThemes()
     await fetchCurrentTheme()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '主题切换失败')
+      ElMessage.error(error.message || t('storefront.themeSwitchFailed'))
     }
   } finally {
     switchLoading.value = false
@@ -254,9 +257,9 @@ const saveConfig = async () => {
   configLoading.value = true
   try {
     await updateThemeConfig({ config: { ...configForm } })
-    ElMessage.success('主题配置已保存')
+    ElMessage.success(t('storefront.themeConfigSaved'))
   } catch (error: any) {
-    ElMessage.error(error.message || '保存配置失败')
+    ElMessage.error(error.message || t('storefront.saveConfigFailed'))
   } finally {
     configLoading.value = false
   }
@@ -284,7 +287,7 @@ const resetConfig = () => {
 }
 
 const showCustomThemeDialog = () => {
-  ElMessage.info('自定义主题功能即将上线')
+  ElMessage.info(t('storefront.customThemeComingSoon'))
 }
 
 onMounted(() => {

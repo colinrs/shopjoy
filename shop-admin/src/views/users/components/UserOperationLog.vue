@@ -1,10 +1,10 @@
 <template>
   <div class="operation-log">
     <div class="log-header">
-      <span class="header-title">操作日志</span>
+      <span class="header-title">{{ $t('users.operationLogs') }}</span>
       <el-button size="small" @click="loadLogs">
         <el-icon><Refresh /></el-icon>
-        刷新
+        {{ $t('common.refresh') }}
       </el-button>
     </div>
 
@@ -19,17 +19,17 @@
         <el-card class="log-card" shadow="never">
           <div class="log-content">
             <span class="log-action">{{ log.action_text }}</span>
-            <span class="log-operator">操作人: {{ log.operator_name || '系统' }}</span>
+            <span class="log-operator">{{ $t('users.operator') }}: {{ log.operator_name || $t('users.system') }}</span>
           </div>
           <div class="log-detail" v-if="log.detail">
-            <span class="detail-label">详情: </span>
+            <span class="detail-label">{{ $t('users.detail') }}: </span>
             <span class="detail-text">{{ log.detail }}</span>
           </div>
         </el-card>
       </el-timeline-item>
     </el-timeline>
 
-    <el-empty v-if="!loading && logs.length === 0" description="暂无操作日志" />
+    <el-empty v-if="!loading && logs.length === 0" :description="$t('users.noLogs')" />
 
     <div class="pagination-wrapper" v-if="total > pageSize">
       <el-pagination
@@ -47,7 +47,9 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import { t } from '@/plugins/i18n'
 import request from '@/utils/request'
 
 interface OperationLog {
@@ -88,50 +90,7 @@ const loadLogs = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load logs:', error)
-    // Mock data
-    logs.value = [
-      {
-        id: 1,
-        user_id: props.userId,
-        action: 'login',
-        action_text: '用户登录',
-        detail: 'IP: 192.168.1.100',
-        operator_id: 0,
-        operator_name: '',
-        created_at: '2024-03-24T15:30:00Z'
-      },
-      {
-        id: 2,
-        user_id: props.userId,
-        action: 'order_create',
-        action_text: '创建订单',
-        detail: '订单号: ORD20240324001',
-        operator_id: 0,
-        operator_name: '',
-        created_at: '2024-03-20T08:00:00Z'
-      },
-      {
-        id: 3,
-        user_id: props.userId,
-        action: 'profile_update',
-        action_text: '更新资料',
-        detail: '修改了用户名',
-        operator_id: 1,
-        operator_name: '管理员',
-        created_at: '2024-03-15T10:00:00Z'
-      },
-      {
-        id: 4,
-        user_id: props.userId,
-        action: 'register',
-        action_text: '用户注册',
-        detail: '通过邮箱注册',
-        operator_id: 0,
-        operator_name: '',
-        created_at: '2024-01-15T10:00:00Z'
-      }
-    ]
-    total.value = 4
+    ElMessage.error(t('users.loadLogsFailed'))
   } finally {
     loading.value = false
   }

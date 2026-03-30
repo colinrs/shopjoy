@@ -4,19 +4,19 @@
     <el-radio-group v-model="localFeeType" class="fee-type-group" @change="handleFeeTypeChange">
       <el-radio-button value="fixed">
         <el-icon><Coin /></el-icon>
-        固定运费
+        {{ $t('shipping.fixed') }}
       </el-radio-button>
       <el-radio-button value="by_count">
         <el-icon><Box /></el-icon>
-        按件计费
+        {{ $t('shipping.byCount') }}
       </el-radio-button>
       <el-radio-button value="by_weight">
         <el-icon><Odometer /></el-icon>
-        按重量计费
+        {{ $t('shipping.byWeight') }}
       </el-radio-button>
       <el-radio-button value="free">
         <el-icon><Present /></el-icon>
-        免运费
+        {{ $t('shipping.free') }}
       </el-radio-button>
     </el-radio-group>
 
@@ -24,7 +24,7 @@
     <div class="fee-config" v-if="localFeeType !== 'free'">
       <!-- Fixed Fee -->
       <template v-if="localFeeType === 'fixed'">
-        <el-form-item label="运费金额">
+        <el-form-item :label="$t('shipping.shippingFee')">
           <el-input-number
             v-model="localForm.first_fee"
             :min="0"
@@ -40,7 +40,7 @@
       <template v-if="localFeeType === 'by_count'">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="首件数量">
+            <el-form-item :label="$t('shipping.firstItemCount')">
               <el-input-number
                 v-model="localForm.first_unit"
                 :min="1"
@@ -49,7 +49,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="首件运费">
+            <el-form-item :label="$t('shipping.firstItemFee')">
               <el-input-number
                 v-model="localForm.first_fee"
                 :min="0"
@@ -63,7 +63,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="续件数量">
+            <el-form-item :label="$t('shipping.additionalItemCount')">
               <el-input-number
                 v-model="localForm.additional_unit"
                 :min="1"
@@ -72,7 +72,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="续件运费">
+            <el-form-item :label="$t('shipping.additionalItemFee')">
               <el-input-number
                 v-model="localForm.additional_fee"
                 :min="0"
@@ -86,8 +86,7 @@
         </el-row>
         <div class="fee-preview">
           <span class="preview-text">
-            计费示例：首{{ localForm.first_unit }}件运费 ¥{{ localForm.first_fee }}，
-            每增加{{ localForm.additional_unit }}件加收 ¥{{ localForm.additional_fee }}
+            {{ $t('shipping.billingExampleCount', { first: localForm.first_unit, fee: localForm.first_fee, add: localForm.additional_unit, addFee: localForm.additional_fee }) }}
           </span>
         </div>
       </template>
@@ -96,7 +95,7 @@
       <template v-if="localFeeType === 'by_weight'">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="首重(克)">
+            <el-form-item :label="$t('shipping.firstWeightGrams')">
               <el-input-number
                 v-model="localForm.first_unit"
                 :min="1"
@@ -105,7 +104,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="首重运费">
+            <el-form-item :label="$t('shipping.firstWeightFee')">
               <el-input-number
                 v-model="localForm.first_fee"
                 :min="0"
@@ -119,7 +118,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="续重(克)">
+            <el-form-item :label="$t('shipping.additionalWeightGrams')">
               <el-input-number
                 v-model="localForm.additional_unit"
                 :min="1"
@@ -128,7 +127,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="续重运费">
+            <el-form-item :label="$t('shipping.additionalWeightFee')">
               <el-input-number
                 v-model="localForm.additional_fee"
                 :min="0"
@@ -142,8 +141,7 @@
         </el-row>
         <div class="fee-preview">
           <span class="preview-text">
-            计费示例：首{{ localForm.first_unit }}克运费 ¥{{ localForm.first_fee }}，
-            每增加{{ localForm.additional_unit }}克加收 ¥{{ localForm.additional_fee }}
+            {{ $t('shipping.billingExampleWeight', { first: localForm.first_unit, fee: localForm.first_fee, add: localForm.additional_unit, addFee: localForm.additional_fee }) }}
           </span>
         </div>
       </template>
@@ -156,7 +154,7 @@
       :closable="false"
       show-icon
     >
-      该区域免运费，无需配置运费规则
+      {{ $t('shipping.freeShippingNote') }}
     </el-alert>
   </div>
 </template>

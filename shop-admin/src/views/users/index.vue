@@ -5,25 +5,25 @@
       <el-col :xs="12" :sm="6">
         <div class="stat-card primary">
           <p class="stat-value">{{ stats.total }}</p>
-          <p class="stat-label">用户总数</p>
+          <p class="stat-label">{{ $t('users.totalUsers') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-card success">
           <p class="stat-value">{{ stats.active }}</p>
-          <p class="stat-label">活跃用户</p>
+          <p class="stat-label">{{ $t('users.activeUsers') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-card warning">
           <p class="stat-value">{{ stats.new_today }}</p>
-          <p class="stat-label">今日新增</p>
+          <p class="stat-label">{{ $t('users.newUsersToday') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
         <div class="stat-card danger">
           <p class="stat-value">{{ stats.suspended }}</p>
-          <p class="stat-label">已禁用</p>
+          <p class="stat-label">{{ $t('users.suspendedUsers') }}</p>
         </div>
       </el-col>
     </el-row>
@@ -34,7 +34,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索用户名/邮箱/手机号"
+            :placeholder="$t('users.searchPlaceholder')"
             class="search-input"
             clearable
             @clear="handleSearch"
@@ -44,18 +44,18 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" placeholder="账号状态" clearable class="filter-select" @change="handleSearch">
-            <el-option label="全部" :value="0" />
-            <el-option label="正常" :value="1" />
-            <el-option label="已禁用" :value="2" />
+          <el-select v-model="statusFilter" :placeholder="$t('users.accountStatus')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('users.all')" :value="0" />
+            <el-option :label="$t('users.normal')" :value="1" />
+            <el-option :label="$t('users.disabled')" :value="2" />
           </el-select>
         </div>
         <div class="filter-right">
           <el-button @click="handleExport" :loading="exportLoading">
-            <el-icon><Download /></el-icon>导出
+            <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
           <el-button type="primary" @click="handleRefresh">
-            <el-icon><Refresh /></el-icon>刷新
+            <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
       </div>
@@ -64,7 +64,7 @@
     <!-- Users Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="userList" v-loading="loading" stripe @row-click="handleRowClick">
-        <el-table-column label="用户信息" min-width="250">
+        <el-table-column :label="$t('users.userInfo')" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
               <el-avatar :size="48" :src="row.avatar" class="user-avatar">
@@ -78,17 +78,17 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="注册时间" width="180">
+        <el-table-column prop="created_at" :label="$t('users.registrationTime')" width="180">
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="last_login" label="最后登录" width="180">
+        <el-table-column prop="last_login" :label="$t('users.lastLogin')" width="180">
           <template #default="{ row }">
             <span class="time-text">{{ row.last_login || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="$t('users.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               :model-value="row.status === 1"
@@ -96,22 +96,22 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click.stop="handleEdit(row)">
-              编辑
+              {{ $t('common.edit') }}
             </el-button>
             <el-button type="primary" link size="small" @click.stop="handleDetail(row)">
-              详情
+              {{ $t('users.viewDetail') }}
             </el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
-                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ $t('users.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">重置密码</el-dropdown-item>
-                  <el-dropdown-item divided command="delete" style="color: #EF4444;">删除账号</el-dropdown-item>
+                  <el-dropdown-item command="resetPassword">{{ $t('users.resetPassword') }}</el-dropdown-item>
+                  <el-dropdown-item divided command="delete" style="color: #EF4444;">{{ $t('users.deleteAccount') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -134,38 +134,38 @@
     </el-card>
 
     <!-- Edit Dialog -->
-    <el-dialog v-model="editDialogVisible" title="编辑用户" width="500px">
+    <el-dialog v-model="editDialogVisible" :title="$t('users.editUser')" width="500px">
       <el-form :model="editForm" label-width="80px">
-        <el-form-item label="用户名">
-          <el-input v-model="editForm.name" placeholder="请输入用户名" />
+        <el-form-item :label="$t('users.username')">
+          <el-input v-model="editForm.name" :placeholder="$t('users.enterUsername')" />
         </el-form-item>
-        <el-form-item label="头像">
-          <el-input v-model="editForm.avatar" placeholder="头像URL（选填）" />
+        <el-form-item :label="$t('common.avatar')">
+          <el-input v-model="editForm.avatar" :placeholder="$t('common.avatarUrl')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmEdit" :loading="editLoading">确定</el-button>
+        <el-button @click="editDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="confirmEdit" :loading="editLoading">{{ $t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- User Detail Dialog -->
-    <el-dialog v-model="detailDialogVisible" title="用户详情" width="600px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('users.userDetail')" width="600px">
       <el-descriptions :column="2" border v-if="currentUser">
-        <el-descriptions-item label="用户ID">{{ currentUser.id }}</el-descriptions-item>
-        <el-descriptions-item label="用户名">{{ currentUser.name }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ currentUser.email }}</el-descriptions-item>
-        <el-descriptions-item label="手机号">{{ currentUser.phone || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="$t('users.userId')">{{ currentUser.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.username')">{{ currentUser.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.email')">{{ currentUser.email }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.mobile')">{{ currentUser.phone || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.status')">
           <el-tag :type="currentUser.status === 1 ? 'success' : 'danger'">
-            {{ currentUser.status === 1 ? '正常' : '已禁用' }}
+            {{ currentUser.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="注册时间">{{ currentUser.created_at }}</el-descriptions-item>
-        <el-descriptions-item label="最后登录">{{ currentUser.last_login || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.createdAt')">{{ currentUser.created_at }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.lastLogin')">{{ currentUser.last_login || '-' }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">{{ $t('common.close') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -176,6 +176,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, ArrowDown, Download } from '@element-plus/icons-vue'
+import { t } from '@/plugins/i18n'
 import {
   getUserList,
   getUserStats,
@@ -231,7 +232,7 @@ const loadUsers = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load users:', error)
-    ElMessage.error('加载用户列表失败')
+    ElMessage.error(t('users.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -244,6 +245,7 @@ const loadStats = async () => {
     stats.value = res
   } catch (error) {
     console.error('Failed to load stats:', error)
+    ElMessage.error(t('users.loadStatsFailed'))
   }
 }
 
@@ -271,12 +273,12 @@ const confirmEdit = async () => {
       name: editForm.name,
       avatar: editForm.avatar || undefined
     })
-    ElMessage.success('更新成功')
+    ElMessage.success(t('users.updateSuccess'))
     editDialogVisible.value = false
     loadUsers()
   } catch (error) {
     console.error('Failed to update user:', error)
-    ElMessage.error('更新失败')
+    ElMessage.error(t('users.updateFailed'))
   } finally {
     editLoading.value = false
   }
@@ -307,10 +309,10 @@ const handleExport = async () => {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    ElMessage.success('导出成功')
+    ElMessage.success(t('users.exportSuccess'))
   } catch (error) {
     console.error('Failed to export users:', error)
-    ElMessage.error('导出失败')
+    ElMessage.error(t('users.exportFailed'))
   } finally {
     exportLoading.value = false
   }
@@ -328,49 +330,57 @@ const handleStatusChange = async (row: User, val: boolean) => {
   try {
     if (val) {
       await activateUser(row.id)
-      ElMessage.success('用户已启用')
+      ElMessage.success(t('users.userEnabled'))
     } else {
       await suspendUser(row.id)
-      ElMessage.success('用户已禁用')
+      ElMessage.success(t('users.userDisabled'))
     }
     loadUsers()
     loadStats()
   } catch (error) {
     console.error('Failed to change status:', error)
-    ElMessage.error('操作失败')
+    ElMessage.error(t('users.operationFailed'))
   }
 }
 
 const handleResetPassword = (row: User) => {
-  ElMessageBox.confirm(`确认重置用户 "${row.name}" 的密码?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    t('users.confirmResetPassword') + ` "${row.name}"?`,
+    t('common.tips'),
+    {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       const res = await resetUserPassword(row.id)
-      ElMessage.success(`密码重置成功，临时密码: ${res.temporary_password}`)
+      ElMessage.success(`${t('users.passwordResetSuccess')}: ${res.temporary_password}`)
     } catch (error) {
       console.error('Failed to reset password:', error)
-      ElMessage.error('密码重置失败')
+      ElMessage.error(t('users.passwordResetFailed'))
     }
   })
 }
 
 const handleDelete = (row: User) => {
-  ElMessageBox.confirm(`确认删除用户 "${row.name}"? 此操作不可恢复！`, '删除确认', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `${t('users.confirmDeleteUser')} "${row.name}"? ${t('users.deleteWarning')}`,
+    t('common.warningConfirm'),
+    {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await deleteUser(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('users.deleteSuccess'))
       loadUsers()
       loadStats()
     } catch (error) {
       console.error('Failed to delete user:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(t('users.deleteFailed'))
     }
   })
 }

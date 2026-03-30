@@ -6,13 +6,13 @@
         <div class="stat-item today">
           <div class="stat-header">
             <el-icon><Calendar /></el-icon>
-            <span class="stat-label">Today Received</span>
+            <span class="stat-label">{{ $t('payments.todayReceived') }}</span>
           </div>
           <p class="stat-amount">{{ currency }} {{ formatAmount(stats.today_received) }}</p>
           <div class="stat-trend" :class="{ up: isPositiveGrowth(stats.today_growth) }">
             <el-icon><TrendCharts /></el-icon>
             <span>{{ formatGrowth(stats.today_growth) }}%</span>
-            <span class="trend-label">vs yesterday</span>
+            <span class="trend-label">{{ $t('payments.vsYesterday') }}</span>
           </div>
         </div>
       </el-col>
@@ -20,7 +20,7 @@
         <div class="stat-item period">
           <div class="stat-header">
             <el-icon><Timer /></el-icon>
-            <span class="stat-label">{{ periodLabel }} Received</span>
+            <span class="stat-label">{{ periodLabel }} {{ $t('payments.received') }}</span>
           </div>
           <p class="stat-amount">{{ currency }} {{ formatAmount(stats.period_received) }}</p>
         </div>
@@ -29,11 +29,11 @@
         <div class="stat-item refund">
           <div class="stat-header">
             <el-icon><RefreshLeft /></el-icon>
-            <span class="stat-label">Refund Amount</span>
+            <span class="stat-label">{{ $t('payments.refundAmount') }}</span>
           </div>
           <p class="stat-amount refund-amount">{{ currency }} {{ formatAmount(stats.refund_amount) }}</p>
           <div class="stat-trend">
-            <span class="refund-rate">Rate: {{ stats.refund_rate }}%</span>
+            <span class="refund-rate">{{ $t('payments.rate') }}: {{ stats.refund_rate }}%</span>
           </div>
         </div>
       </el-col>
@@ -45,7 +45,7 @@
         <div class="card-header">
           <span class="card-title">
             <el-icon><PieChart /></el-icon>
-            Payment Channel Distribution
+            {{ $t('payments.channelDistribution') }}
           </span>
         </div>
       </template>
@@ -70,7 +70,7 @@
               />
               <div class="channel-amount">
                 {{ currency }} {{ formatAmount(channel.amount) }}
-                <span class="channel-count">{{ channel.count }} transactions</span>
+                <span class="channel-count">{{ channel.count }} {{ $t('payments.transactions') }}</span>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@
           <div class="chart-container">
             <div class="chart-placeholder">
               <el-icon :size="48"><PieChart /></el-icon>
-              <p>Channel Distribution</p>
+              <p>{{ $t('payments.channelDistribution') }}</p>
             </div>
           </div>
         </el-col>
@@ -93,6 +93,7 @@
 import { computed } from 'vue'
 import { Calendar, Timer, RefreshLeft, TrendCharts, PieChart } from '@element-plus/icons-vue'
 import type { PaymentStats } from '@/api/payment'
+import { t } from '@/plugins/i18n'
 
 const props = withDefaults(defineProps<{
   stats: PaymentStats
@@ -105,9 +106,9 @@ const currency = computed(() => props.stats.currency || 'USD')
 
 const periodLabel = computed(() => {
   const labels: Record<string, string> = {
-    '7d': '7-Day',
-    '30d': '30-Day',
-    '90d': '90-Day'
+    '7d': t('payments.period7d').replace(' Days', '-Day'),
+    '30d': t('payments.period30d').replace(' Days', '-Day'),
+    '90d': t('payments.period90d').replace(' Days', '-Day')
   }
   return labels[props.period] || '7-Day'
 })

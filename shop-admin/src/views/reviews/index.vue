@@ -7,7 +7,7 @@
           <el-icon class="stat-icon" size="32"><ChatDotRound /></el-icon>
           <div class="stat-info">
             <p class="stat-value">{{ stats.total_reviews }}</p>
-            <p class="stat-label">Total Reviews</p>
+            <p class="stat-label">{{ $t('reviews.totalReviews') }}</p>
           </div>
         </div>
       </el-col>
@@ -16,7 +16,7 @@
           <el-icon class="stat-icon pending" size="32"><Clock /></el-icon>
           <div class="stat-info">
             <p class="stat-value">{{ stats.pending_reviews }}</p>
-            <p class="stat-label">Pending Approval</p>
+            <p class="stat-label">{{ $t('reviews.pendingApproval') }}</p>
           </div>
         </div>
       </el-col>
@@ -25,7 +25,7 @@
           <el-icon class="stat-icon rating" size="32"><Star /></el-icon>
           <div class="stat-info">
             <p class="stat-value">{{ parseFloat(stats.average_rating).toFixed(1) }}</p>
-            <p class="stat-label">Average Rating</p>
+            <p class="stat-label">{{ $t('reviews.averageRating') }}</p>
           </div>
         </div>
       </el-col>
@@ -34,7 +34,7 @@
           <el-icon class="stat-icon images" size="32"><Picture /></el-icon>
           <div class="stat-info">
             <p class="stat-value">{{ stats.with_image_count }}</p>
-            <p class="stat-label">With Images</p>
+            <p class="stat-label">{{ $t('reviews.withImages') }}</p>
           </div>
         </div>
       </el-col>
@@ -44,7 +44,7 @@
     <el-card class="distribution-card" shadow="never">
       <div class="rating-distribution">
         <div class="distribution-item" v-for="star in 5" :key="star">
-          <span class="star-label">{{ 6 - star }} Stars</span>
+          <span class="star-label">{{ 6 - star }} {{ $t('reviews.stars') }}</span>
           <el-progress
             :percentage="getRatingPercentage(6 - star)"
             :stroke-width="10"
@@ -55,7 +55,7 @@
         </div>
       </div>
       <div class="reply-rate">
-        <span class="rate-label">Reply Rate:</span>
+        <span class="rate-label">{{ $t('reviews.replyRate') }}:</span>
         <span class="rate-value">{{ (stats.reply_rate * 100).toFixed(1) }}%</span>
       </div>
     </el-card>
@@ -66,7 +66,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="Search review content..."
+            :placeholder="$t('reviews.searchPlaceholder')"
             class="search-input"
             clearable
             @clear="handleSearch"
@@ -76,27 +76,27 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filters.status" placeholder="Status" clearable class="filter-select" @change="handleSearch">
-            <el-option label="All Status" value="" />
-            <el-option label="Pending" value="pending" />
-            <el-option label="Approved" value="approved" />
-            <el-option label="Hidden" value="hidden" />
+          <el-select v-model="filters.status" :placeholder="$t('reviews.status')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('reviews.allStatus')" value="" />
+            <el-option :label="$t('reviews.pending')" value="pending" />
+            <el-option :label="$t('reviews.approved')" value="approved" />
+            <el-option :label="$t('reviews.hidden')" value="hidden" />
           </el-select>
-          <el-select v-model="filters.rating_min" placeholder="Min Rating" clearable class="filter-select" @change="handleSearch">
-            <el-option label="Any" :value="0" />
-            <el-option label="1+" :value="1" />
-            <el-option label="2+" :value="2" />
-            <el-option label="3+" :value="3" />
-            <el-option label="4+" :value="4" />
-            <el-option label="5" :value="5" />
+          <el-select v-model="filters.rating_min" :placeholder="$t('reviews.minRating')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('reviews.any')" :value="0" />
+            <el-option :label="'1+'" :value="1" />
+            <el-option :label="'2+'" :value="2" />
+            <el-option :label="'3+'" :value="3" />
+            <el-option :label="'4+'" :value="4" />
+            <el-option :label="'5'" :value="5" />
           </el-select>
-          <el-checkbox v-model="filters.has_image" @change="handleSearch">Has Images</el-checkbox>
+          <el-checkbox v-model="filters.has_image" @change="handleSearch">{{ $t('reviews.hasImages') }}</el-checkbox>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="to"
-            start-placeholder="Start Date"
-            end-placeholder="End Date"
+            :range-separator="$t('reviews.startDate')"
+            :start-placeholder="$t('reviews.startDate')"
+            :end-placeholder="$t('reviews.endDate')"
             class="date-picker"
             value-format="YYYY-MM-DDTHH:mm:ss[Z]"
             @change="handleSearch"
@@ -104,13 +104,13 @@
         </div>
         <div class="filter-right">
           <el-button v-if="selectedRows.length > 0" type="success" @click="handleBatchApprove">
-            <el-icon><Check /></el-icon>Batch Approve ({{ selectedRows.length }})
+            <el-icon><Check /></el-icon>{{ $t('reviews.batchApprove') }} ({{ selectedRows.length }})
           </el-button>
           <el-button v-if="selectedRows.length > 0" type="warning" @click="handleBatchHide">
-            <el-icon><Hide /></el-icon>Batch Hide
+            <el-icon><Hide /></el-icon>{{ $t('reviews.batchHide') }}
           </el-button>
           <el-button type="primary" @click="handleRefresh">
-            <el-icon><Refresh /></el-icon>Refresh
+            <el-icon><Refresh /></el-icon>{{ $t('reviews.refresh') }}
           </el-button>
         </div>
       </div>
@@ -126,34 +126,34 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column label="Product" min-width="180">
+        <el-table-column :label="$t('reviews.productInfo')" min-width="180">
           <template #default="{ row }">
             <div class="product-cell">
               <div class="product-info">
                 <p class="product-name">{{ row.product_name }}</p>
-                <p class="product-sku">SKU: {{ row.sku_code }}</p>
+                <p class="product-sku">{{ $t('reviews.sku') }}: {{ row.sku_code }}</p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Reviewer" min-width="120">
+        <el-table-column :label="$t('reviews.reviewer')" min-width="120">
           <template #default="{ row }">
             <div class="reviewer-cell">
               <p class="reviewer-name">
-                {{ row.is_anonymous ? 'Anonymous' : row.user_name }}
+                {{ row.is_anonymous ? $t('reviews.anonymous') : row.user_name }}
               </p>
               <div class="reviewer-badges">
                 <el-tag v-if="row.is_verified" size="small" type="success" effect="plain" class="verified-tag">
-                  <el-icon><CircleCheck /></el-icon>Verified
+                  <el-icon><CircleCheck /></el-icon>{{ $t('reviews.verified') }}
                 </el-tag>
                 <el-tag v-if="row.is_featured" size="small" type="warning" effect="plain">
-                  <el-icon><Star /></el-icon>Featured
+                  <el-icon><Star /></el-icon>{{ $t('reviews.featured') }}
                 </el-tag>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Rating" width="160" align="center">
+        <el-table-column :label="$t('reviews.ratingLabel')" width="160" align="center">
           <template #default="{ row }">
             <div class="rating-cell">
               <div class="rating-stars">
@@ -172,11 +172,11 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Content" min-width="200">
+        <el-table-column :label="$t('reviews.contentLabel')" min-width="200">
           <template #default="{ row }">
             <div class="content-cell">
               <p class="content-text" :class="{ 'is-expanded': expandedRows.has(row.id) }">
-                {{ row.content || 'No content' }}
+                {{ row.content || $t('reviews.noContent') }}
               </p>
               <el-button
                 v-if="row.content && row.content.length > 80"
@@ -185,12 +185,12 @@
                 size="small"
                 @click="toggleContent(row.id)"
               >
-                {{ expandedRows.has(row.id) ? 'Collapse' : 'Expand' }}
+                {{ expandedRows.has(row.id) ? $t('reviews.collapse') : $t('reviews.expand') }}
               </el-button>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Images" width="100" align="center">
+        <el-table-column :label="$t('reviews.images')" width="100" align="center">
           <template #default="{ row }">
             <div v-if="row.images && row.images.length > 0" class="images-cell">
               <el-badge :value="row.images.length" :max="99" class="image-badge">
@@ -211,14 +211,14 @@
             <span v-else class="no-images">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="Status" width="100" align="center">
+        <el-table-column :label="$t('reviews.status')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" effect="light" size="small">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Helpful" width="90" align="center">
+        <el-table-column :label="$t('reviews.helpful')" width="90" align="center">
           <template #default="{ row }">
             <div class="helpful-cell">
               <el-icon><Star /></el-icon>
@@ -226,21 +226,21 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Reply" width="90" align="center">
+        <el-table-column :label="$t('reviews.reply')" width="90" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.has_reply" type="success" effect="plain" size="small">Replied</el-tag>
-            <el-tag v-else type="info" effect="plain" size="small">No Reply</el-tag>
+            <el-tag v-if="row.has_reply" type="success" effect="plain" size="small">{{ $t('reviews.replied') }}</el-tag>
+            <el-tag v-else type="info" effect="plain" size="small">{{ $t('reviews.noReply') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Created" width="160">
+        <el-table-column :label="$t('reviews.createdAt')" width="160">
           <template #default="{ row }">
             <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="200" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleViewDetail(row)">
-              Detail
+              {{ $t('reviews.detail') }}
             </el-button>
             <el-button
               v-if="row.status === 'pending'"
@@ -249,7 +249,7 @@
               size="small"
               @click="handleApprove(row)"
             >
-              Approve
+              {{ $t('reviews.approve') }}
             </el-button>
             <el-button
               v-if="row.status === 'approved'"
@@ -258,7 +258,7 @@
               size="small"
               @click="handleHide(row)"
             >
-              Hide
+              {{ $t('reviews.hide') }}
             </el-button>
             <el-button
               v-if="row.status === 'hidden'"
@@ -267,7 +267,7 @@
               size="small"
               @click="handleShow(row)"
             >
-              Show
+              {{ $t('reviews.show') }}
             </el-button>
             <el-button
               v-if="row.status === 'approved'"
@@ -276,7 +276,7 @@
               size="small"
               @click="handleToggleFeatured(row)"
             >
-              {{ row.is_featured ? 'Unfeature' : 'Feature' }}
+              {{ row.is_featured ? $t('reviews.unfeature') : $t('reviews.feature') }}
             </el-button>
             <el-button
               type="primary"
@@ -284,7 +284,7 @@
               size="small"
               @click="handleReply(row)"
             >
-              Reply
+              {{ $t('reviews.reply') }}
             </el-button>
           </template>
         </el-table-column>
@@ -307,7 +307,7 @@
     <!-- Review Detail Dialog -->
     <el-dialog
       v-model="detailDialogVisible"
-      title="Review Details"
+      :title="$t('reviews.reviewDetails')"
       width="700px"
       destroy-on-close
       class="detail-dialog"
@@ -315,18 +315,18 @@
       <div v-if="currentReview" class="detail-content">
         <!-- Order Info -->
         <div class="detail-section">
-          <h4 class="section-title">Order Information</h4>
+          <h4 class="section-title">{{ $t('reviews.orderInformation') }}</h4>
           <div class="order-info">
             <div class="info-item">
-              <span class="info-label">Order ID:</span>
+              <span class="info-label">{{ $t('reviews.orderId') }}:</span>
               <span class="info-value">{{ currentReview.order_id }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Product:</span>
+              <span class="info-label">{{ $t('reviews.productLabel') }}:</span>
               <span class="info-value">{{ currentReview.product_name }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">SKU:</span>
+              <span class="info-label">{{ $t('reviews.skuCode') }}:</span>
               <span class="info-value">{{ currentReview.sku_code }}</span>
             </div>
           </div>
@@ -334,26 +334,26 @@
 
         <!-- Reviewer Info -->
         <div class="detail-section">
-          <h4 class="section-title">Reviewer</h4>
+          <h4 class="section-title">{{ $t('reviews.reviewerInfo') }}</h4>
           <div class="reviewer-info">
             <div class="reviewer-meta">
               <p class="reviewer-name">
-                {{ currentReview.is_anonymous ? 'Anonymous' : currentReview.user_name }}
+                {{ currentReview.is_anonymous ? $t('reviews.anonymousUser') : currentReview.user_name }}
                 <el-tag v-if="currentReview.is_anonymous" size="small" type="info" effect="plain">
-                  Anonymous
+                  {{ $t('reviews.anonymousUser') }}
                 </el-tag>
                 <el-tag v-if="currentReview.is_verified" size="small" type="success" effect="plain">
-                  <el-icon><CircleCheck /></el-icon>Verified Purchase
+                  <el-icon><CircleCheck /></el-icon>{{ $t('reviews.verifiedPurchase') }}
                 </el-tag>
               </p>
-              <p class="reviewer-date">Reviewed on {{ formatDateTime(currentReview.created_at) }}</p>
+              <p class="reviewer-date">{{ $t('reviews.reviewedOn') }} {{ formatDateTime(currentReview.created_at) }}</p>
             </div>
           </div>
         </div>
 
         <!-- Rating Display -->
         <div class="detail-section">
-          <h4 class="section-title">Ratings</h4>
+          <h4 class="section-title">{{ $t('reviews.ratings') }}</h4>
           <div class="rating-display">
             <div class="overall-rating">
               <span class="rating-score">{{ parseFloat(currentReview.overall_rating).toFixed(1) }}</span>
@@ -361,7 +361,7 @@
             </div>
             <div class="rating-breakdown">
               <div class="rating-bar-item">
-                <span class="bar-label">Quality</span>
+                <span class="bar-label">{{ $t('reviews.quality') }}</span>
                 <el-progress
                   :percentage="currentReview.quality_rating * 20"
                   :stroke-width="10"
@@ -371,7 +371,7 @@
                 <span class="bar-value">{{ currentReview.quality_rating }}/5</span>
               </div>
               <div class="rating-bar-item">
-                <span class="bar-label">Value</span>
+                <span class="bar-label">{{ $t('reviews.value') }}</span>
                 <el-progress
                   :percentage="currentReview.value_rating * 20"
                   :stroke-width="10"
@@ -386,8 +386,8 @@
 
         <!-- Review Content -->
         <div class="detail-section">
-          <h4 class="section-title">Review Content</h4>
-          <p class="review-content">{{ currentReview.content || 'No content' }}</p>
+          <h4 class="section-title">{{ $t('reviews.reviewContent') }}</h4>
+          <p class="review-content">{{ currentReview.content || $t('reviews.noContent') }}</p>
           <div v-if="currentReview.images && currentReview.images.length > 0" class="review-images">
             <el-image
               v-for="(img, idx) in currentReview.images"
@@ -409,35 +409,35 @@
 
         <!-- Statistics -->
         <div class="detail-section">
-          <h4 class="section-title">Statistics</h4>
+          <h4 class="section-title">{{ $t('reviews.statistics') }}</h4>
           <div class="stats-info">
             <div class="stat-item">
-              <span class="stat-label">Helpful Count:</span>
+              <span class="stat-label">{{ $t('reviews.helpfulCount') }}:</span>
               <span class="stat-value">{{ currentReview.helpful_count }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Status:</span>
+              <span class="stat-label">{{ $t('reviews.status') }}:</span>
               <el-tag :type="getStatusType(currentReview.status)" effect="light" size="small">
                 {{ getStatusText(currentReview.status) }}
               </el-tag>
             </div>
             <div class="stat-item" v-if="currentReview.is_featured">
-              <span class="stat-label">Featured:</span>
-              <el-tag type="warning" effect="light" size="small">Yes</el-tag>
+              <span class="stat-label">{{ $t('reviews.featuredLabel') }}:</span>
+              <el-tag type="warning" effect="light" size="small">{{ $t('reviews.yes') }}</el-tag>
             </div>
           </div>
         </div>
 
         <!-- Merchant Reply -->
         <div class="detail-section" v-if="currentReview.reply">
-          <h4 class="section-title">Merchant Reply</h4>
+          <h4 class="section-title">{{ $t('reviews.merchantReply') }}</h4>
           <div class="merchant-reply">
             <div class="reply-header">
               <el-icon class="reply-icon"><ChatLineRound /></el-icon>
-              <span class="reply-label">Shop Response</span>
+              <span class="reply-label">{{ $t('reviews.shopResponse') }}</span>
               <span class="reply-time">{{ formatDateTime(currentReview.reply.created_at) }}</span>
-              <el-button type="primary" link size="small" @click="handleEditReply">Edit</el-button>
-              <el-button type="danger" link size="small" @click="handleDeleteReply">Delete</el-button>
+              <el-button type="primary" link size="small" @click="handleEditReply">{{ $t('reviews.editReply') }}</el-button>
+              <el-button type="danger" link size="small" @click="handleDeleteReply">{{ $t('reviews.deleteReply') }}</el-button>
             </div>
             <p class="reply-content">{{ currentReview.reply.content }}</p>
           </div>
@@ -451,36 +451,36 @@
             type="success"
             @click="handleApproveFromDetail"
           >
-            Approve
+            {{ $t('reviews.approve') }}
           </el-button>
           <el-button
             v-if="currentReview?.status === 'approved'"
             type="warning"
             @click="handleHideFromDetail"
           >
-            Hide
+            {{ $t('reviews.hide') }}
           </el-button>
           <el-button
             v-if="currentReview?.status === 'hidden'"
             type="success"
             @click="handleShowFromDetail"
           >
-            Show
+            {{ $t('reviews.show') }}
           </el-button>
           <el-button
             v-if="currentReview?.status === 'approved'"
             :type="currentReview?.is_featured ? 'warning' : 'primary'"
             @click="handleToggleFeaturedFromDetail"
           >
-            {{ currentReview?.is_featured ? 'Unfeature' : 'Feature' }}
+            {{ currentReview?.is_featured ? $t('reviews.unfeature') : $t('reviews.feature') }}
           </el-button>
           <el-button
             type="primary"
             @click="handleReplyFromDetail"
           >
-            {{ currentReview?.reply ? 'Edit Reply' : 'Reply' }}
+            {{ currentReview?.reply ? $t('reviews.editReply') : $t('reviews.reply') }}
           </el-button>
-          <el-button @click="detailDialogVisible = false">Close</el-button>
+          <el-button @click="detailDialogVisible = false">{{ $t('reviews.close') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -488,7 +488,7 @@
     <!-- Reply Dialog -->
     <el-dialog
       v-model="replyDialogVisible"
-      :title="isEditReply ? 'Edit Reply' : 'Reply to Review'"
+      :title="isEditReply ? $t('reviews.editReply') : $t('reviews.replyToReview')"
       width="500px"
       destroy-on-close
     >
@@ -496,22 +496,22 @@
         <!-- Original Review Preview -->
         <div class="original-review">
           <div class="review-header">
-            <span class="reviewer">{{ replyReview.is_anonymous ? 'Anonymous' : replyReview.user_name }}</span>
+            <span class="reviewer">{{ replyReview.is_anonymous ? $t('reviews.anonymous') : replyReview.user_name }}</span>
             <el-rate :model-value="parseFloat(replyReview.overall_rating)" disabled :max="5" size="small" />
           </div>
-          <p class="review-text">{{ replyReview.content || 'No content' }}</p>
+          <p class="review-text">{{ replyReview.content || $t('reviews.noContent') }}</p>
         </div>
 
         <el-divider />
 
         <!-- Reply Form -->
         <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top">
-          <el-form-item label="Your Reply" prop="content">
+          <el-form-item :label="$t('reviews.yourReply')" prop="content">
             <el-input
               v-model="replyForm.content"
               type="textarea"
               :rows="5"
-              placeholder="Enter your reply to this review..."
+              :placeholder="$t('reviews.enterReply')"
               maxlength="500"
               show-word-limit
             />
@@ -520,9 +520,9 @@
       </div>
 
       <template #footer>
-        <el-button @click="replyDialogVisible = false">Cancel</el-button>
+        <el-button @click="replyDialogVisible = false">{{ $t('reviews.cancel') }}</el-button>
         <el-button type="primary" @click="submitReply" :loading="replyLoading">
-          {{ isEditReply ? 'Update Reply' : 'Submit Reply' }}
+          {{ isEditReply ? $t('reviews.updateReply') : $t('reviews.submitReply') }}
         </el-button>
       </template>
     </el-dialog>
@@ -530,23 +530,23 @@
     <!-- Hide Reason Dialog -->
     <el-dialog
       v-model="hideDialogVisible"
-      title="Hide Review"
+      :title="$t('reviews.hideReview')"
       width="400px"
     >
       <el-form :model="hideForm" label-position="top">
-        <el-form-item label="Reason (optional)">
+        <el-form-item :label="$t('reviews.reasonOptional')">
           <el-input
             v-model="hideForm.reason"
             type="textarea"
             :rows="3"
-            placeholder="Enter reason for hiding..."
+            :placeholder="$t('reviews.enterReason')"
             maxlength="200"
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="hideDialogVisible = false">Cancel</el-button>
-        <el-button type="warning" @click="confirmHide" :loading="hideLoading">Hide</el-button>
+        <el-button @click="hideDialogVisible = false">{{ $t('reviews.cancel') }}</el-button>
+        <el-button type="warning" @click="confirmHide" :loading="hideLoading">{{ $t('reviews.hide') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -567,6 +567,7 @@ import {
   ChatLineRound,
   Hide
 } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
 import {
   getReviewList,
   getReviewDetail,
@@ -585,6 +586,8 @@ import {
   type ReviewStats,
   type ListReviewsParams
 } from '@/api/review'
+
+const { t } = useI18n()
 
 // State
 const loading = ref(false)
@@ -644,9 +647,9 @@ const replyForm = reactive({
 })
 const replyRules = {
   content: [
-    { required: true, message: 'Please enter your reply', trigger: 'blur' },
-    { min: 1, message: 'Reply cannot be empty', trigger: 'blur' },
-    { max: 500, message: 'Reply cannot exceed 500 characters', trigger: 'blur' }
+    { required: true, message: t('reviews.enterReply'), trigger: 'blur' },
+    { min: 1, message: t('reviews.noContent'), trigger: 'blur' },
+    { max: 500, message: t('reviews.submitReplyFailed'), trigger: 'blur' }
   ]
 }
 const isEditReply = ref(false)
@@ -684,9 +687,9 @@ const getStatusType = (status: string) => {
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    'pending': 'Pending',
-    'approved': 'Approved',
-    'hidden': 'Hidden'
+    'pending': t('reviews.pending'),
+    'approved': t('reviews.approved'),
+    'hidden': t('reviews.hidden')
   }
   return texts[status] || status
 }
@@ -728,7 +731,7 @@ const handleSearch = () => {
 const handleRefresh = () => {
   loadReviews()
   loadStats()
-  ElMessage.success('Refreshed successfully')
+  ElMessage.success(t('reviews.refresh') + ' ' + t('common.success'))
 }
 
 const handleSizeChange = (val: number) => {
@@ -747,24 +750,24 @@ const handleViewDetail = async (row: ReviewListItem) => {
     currentReview.value = detail
     detailDialogVisible.value = true
   } catch (error) {
-    ElMessage.error('Failed to load review details')
+    ElMessage.error(t('reviews.loadDetailFailed'))
   }
 }
 
 const handleApprove = async (row: ReviewListItem) => {
   try {
-    await ElMessageBox.confirm('Approve this review?', 'Confirm Approval', {
-      confirmButtonText: 'Approve',
-      cancelButtonText: 'Cancel',
+    await ElMessageBox.confirm(t('reviews.confirmApprove'), t('reviews.confirmApproval'), {
+      confirmButtonText: t('reviews.approveButton'),
+      cancelButtonText: t('reviews.cancelButton'),
       type: 'success'
     })
     await approveReview(row.id)
-    ElMessage.success('Review approved successfully')
+    ElMessage.success(t('reviews.approveSuccess'))
     loadReviews()
     loadStats()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to approve review')
+      ElMessage.error(t('reviews.approveFailed'))
     }
   }
 }
@@ -778,18 +781,18 @@ const handleHide = (row: ReviewListItem) => {
 
 const handleShow = async (row: ReviewListItem) => {
   try {
-    await ElMessageBox.confirm('Show this review?', 'Confirm', {
-      confirmButtonText: 'Show',
-      cancelButtonText: 'Cancel',
+    await ElMessageBox.confirm(t('reviews.confirmShow'), t('reviews.confirmTitle'), {
+      confirmButtonText: t('reviews.showButton'),
+      cancelButtonText: t('reviews.cancelButton'),
       type: 'info'
     })
     await showReview(row.id)
-    ElMessage.success('Review is now visible')
+    ElMessage.success(t('reviews.showSuccess'))
     loadReviews()
     loadStats()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to show review')
+      ElMessage.error(t('reviews.showFailed'))
     }
   }
 }
@@ -802,17 +805,17 @@ const confirmHide = async () => {
     if (isBatchHide.value) {
       const ids = selectedRows.value.map(r => r.id)
       const result = await batchHide({ ids, reason: hideForm.reason || undefined })
-      ElMessage.success(`${result.success_count} reviews hidden successfully`)
+      ElMessage.success(`${result.success_count} ${t('reviews.batchHideSuccess')}`)
       tableRef.value?.clearSelection()
     } else {
       await hideReview(hideReviewId.value, { reason: hideForm.reason || undefined })
-      ElMessage.success('Review hidden successfully')
+      ElMessage.success(t('reviews.hideSuccess'))
     }
     hideDialogVisible.value = false
     loadReviews()
     loadStats()
   } catch (error) {
-    ElMessage.error('Failed to hide review(s)')
+    ElMessage.error(t('reviews.hideFailed'))
   } finally {
     hideLoading.value = false
   }
@@ -822,10 +825,10 @@ const handleToggleFeatured = async (row: ReviewListItem) => {
   try {
     const newFeatured = !row.is_featured
     await toggleFeatured(row.id, { is_featured: newFeatured })
-    ElMessage.success(newFeatured ? 'Review featured' : 'Review unfeatured')
+    ElMessage.success(newFeatured ? t('reviews.featureSuccess') : t('reviews.unfeatureSuccess'))
     loadReviews()
   } catch (error) {
-    ElMessage.error('Failed to update featured status')
+    ElMessage.error(t('reviews.featureFailed'))
   }
 }
 
@@ -849,19 +852,19 @@ const handleDeleteReply = async () => {
   if (!currentReview.value) return
 
   try {
-    await ElMessageBox.confirm('Delete this reply?', 'Confirm Deletion', {
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+    await ElMessageBox.confirm(t('reviews.confirmDeleteReply'), t('reviews.confirmDeletion'), {
+      confirmButtonText: t('reviews.deleteButton'),
+      cancelButtonText: t('reviews.cancelButton'),
       type: 'warning'
     })
     await deleteReply(currentReview.value.id)
-    ElMessage.success('Reply deleted successfully')
+    ElMessage.success(t('reviews.deleteReplySuccess'))
     detailDialogVisible.value = false
     loadReviews()
     loadStats()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to delete reply')
+      ElMessage.error(t('reviews.deleteReplyFailed'))
     }
   }
 }
@@ -878,10 +881,10 @@ const submitReply = async () => {
     try {
       if (isEditReply.value) {
         await updateReply(review.id, { content: replyForm.content })
-        ElMessage.success('Reply updated successfully')
+        ElMessage.success(t('reviews.updateReplySuccess'))
       } else {
         await createReply(review.id, { content: replyForm.content })
-        ElMessage.success('Reply submitted successfully')
+        ElMessage.success(t('reviews.submitReplySuccess'))
       }
       replyDialogVisible.value = false
       loadReviews()
@@ -892,7 +895,7 @@ const submitReply = async () => {
         currentReview.value = detail
       }
     } catch (error) {
-      ElMessage.error(isEditReply.value ? 'Failed to update reply' : 'Failed to submit reply')
+      ElMessage.error(isEditReply.value ? t('reviews.updateReplyFailed') : t('reviews.submitReplyFailed'))
     } finally {
       replyLoading.value = false
     }
@@ -901,20 +904,20 @@ const submitReply = async () => {
 
 const handleBatchApprove = async () => {
   try {
-    await ElMessageBox.confirm(`Approve ${selectedRows.value.length} selected reviews?`, 'Batch Approve', {
-      confirmButtonText: 'Approve',
-      cancelButtonText: 'Cancel',
+    await ElMessageBox.confirm(`${t('reviews.batchApproveConfirm')} (${selectedRows.value.length})`, t('reviews.batchApproveTitle'), {
+      confirmButtonText: t('reviews.approveButton'),
+      cancelButtonText: t('reviews.cancelButton'),
       type: 'success'
     })
     const ids = selectedRows.value.map(r => r.id)
     const result = await batchApprove({ ids })
-    ElMessage.success(`${result.success_count} reviews approved successfully`)
+    ElMessage.success(`${result.success_count} ${t('reviews.batchApproveSuccess')}`)
     tableRef.value?.clearSelection()
     loadReviews()
     loadStats()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to batch approve reviews')
+      ElMessage.error(t('reviews.batchApproveFailed'))
     }
   }
 }
@@ -993,7 +996,7 @@ const loadReviews = async () => {
     pagination.total = res.total || 0
   } catch (error) {
     console.error('Failed to load reviews:', error)
-    ElMessage.error('Failed to load reviews')
+    ElMessage.error(t('reviews.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -1005,6 +1008,7 @@ const loadStats = async () => {
     stats.value = res
   } catch (error) {
     console.error('Failed to load stats:', error)
+    ElMessage.error(t('reviews.loadStatsFailed'))
   }
 }
 

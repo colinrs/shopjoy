@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="选择配送地区"
+    :title="$t('shipping.selectArea')"
     width="600px"
     :close-on-click-modal="false"
   >
@@ -9,7 +9,7 @@
       <!-- Search -->
       <el-input
         v-model="searchText"
-        placeholder="搜索城市名称"
+        :placeholder="$t('shipping.searchCity')"
         clearable
         class="search-input"
       >
@@ -22,13 +22,13 @@
       <div class="region-list" v-loading="loading">
         <div v-if="!searchText" class="region-level">
           <div class="level-header">
-            <span class="level-title">省份/直辖市</span>
+            <span class="level-title">{{ $t('shipping.province') }}</span>
             <el-checkbox
               v-model="allProvincesSelected"
               :indeterminate="provinceIndeterminate"
               @change="handleSelectAllProvinces"
             >
-              全选
+              {{ $t('shipping.selectAll') }}
             </el-checkbox>
           </div>
           <div class="region-grid">
@@ -55,15 +55,15 @@
           <div class="level-header">
             <el-button link @click="expandedProvince = null">
               <el-icon><ArrowLeft /></el-icon>
-              返回省份列表
+              {{ $t('shipping.backToProvinceList') }}
             </el-button>
-            <span class="level-title">{{ expandedProvinceName }} - 城市</span>
+            <span class="level-title">{{ expandedProvinceName }} - {{ $t('shipping.city') }}</span>
             <el-checkbox
               v-model="allCitiesSelected"
               :indeterminate="cityIndeterminate"
               @change="handleSelectAllCities"
             >
-              全选
+              {{ $t('shipping.selectAll') }}
             </el-checkbox>
           </div>
           <div class="region-grid">
@@ -87,7 +87,7 @@
         <!-- Search Results -->
         <div v-if="searchText" class="region-level">
           <div class="level-header">
-            <span class="level-title">搜索结果</span>
+            <span class="level-title">{{ $t('shipping.searchResults') }}</span>
           </div>
           <div class="region-grid">
             <div
@@ -108,15 +108,15 @@
 
       <!-- Selected Summary -->
       <div class="selected-summary" v-if="selectedRegions.length > 0">
-        <span class="summary-text">已选择 {{ selectedRegions.length }} 个城市</span>
-        <el-button type="primary" link size="small" @click="clearSelection">清空</el-button>
+        <span class="summary-text">{{ $t('shipping.selectedCount', { count: selectedRegions.length }) }}</span>
+        <el-button type="primary" link size="small" @click="clearSelection">{{ $t('shipping.clear') }}</el-button>
       </div>
     </div>
 
     <template #footer>
-      <el-button @click="handleCancel">取消</el-button>
+      <el-button @click="handleCancel">{{ $t('shipping.cancel') }}</el-button>
       <el-button type="primary" @click="handleConfirm" :disabled="selectedRegions.length === 0">
-        确认选择
+        {{ $t('shipping.confirmSelection') }}
       </el-button>
     </template>
   </el-dialog>
@@ -124,8 +124,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Search, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { getRegions, type Region } from '@/api/shipping'
+
+const { t } = useI18n()
 
 interface CityWithProvince extends Region {
   provinceName: string
@@ -226,6 +230,7 @@ const loadProvinces = async () => {
     provinces.value = data
   } catch (error) {
     console.error('Failed to load provinces:', error)
+    ElMessage.error(t('shipping.loadProvincesFailed'))
   } finally {
     loading.value = false
   }
@@ -239,6 +244,7 @@ const loadCities = async (provinceCode: string) => {
     citiesMap.value[provinceCode] = data
   } catch (error) {
     console.error('Failed to load cities:', error)
+    ElMessage.error(t('shipping.loadCitiesFailed'))
   }
 }
 

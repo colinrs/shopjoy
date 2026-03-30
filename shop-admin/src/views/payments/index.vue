@@ -6,11 +6,11 @@
     <!-- Period Selector -->
     <el-card class="period-card" shadow="never">
       <div class="period-bar">
-        <span class="period-label">Period:</span>
+        <span class="period-label">{{ $t('payments.period') }}:</span>
         <el-radio-group v-model="selectedPeriod" size="small" @change="handlePeriodChange">
-          <el-radio-button value="7d">7 Days</el-radio-button>
-          <el-radio-button value="30d">30 Days</el-radio-button>
-          <el-radio-button value="90d">90 Days</el-radio-button>
+          <el-radio-button value="7d">{{ $t('payments.period7d') }}</el-radio-button>
+          <el-radio-button value="30d">{{ $t('payments.period30d') }}</el-radio-button>
+          <el-radio-button value="90d">{{ $t('payments.period90d') }}</el-radio-button>
         </el-radio-group>
       </div>
     </el-card>
@@ -20,19 +20,19 @@
       <el-col :xs="12" :sm="8">
         <div class="stat-item success" @click="handleStatusFilter(1)">
           <p class="stat-number">{{ transactionStats.success }}</p>
-          <p class="stat-label">Success</p>
+          <p class="stat-label">{{ $t('payments.success') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8">
         <div class="stat-item pending" @click="handleStatusFilter(0)">
           <p class="stat-number">{{ transactionStats.pending }}</p>
-          <p class="stat-label">Pending</p>
+          <p class="stat-label">{{ $t('payments.pending') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8">
         <div class="stat-item failed" @click="handleStatusFilter(2)">
           <p class="stat-number">{{ transactionStats.failed }}</p>
-          <p class="stat-label">Failed</p>
+          <p class="stat-label">{{ $t('payments.failed') }}</p>
         </div>
       </el-col>
     </el-row>
@@ -43,7 +43,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="Search transaction ID / order no."
+            :placeholder="$t('payments.searchPlaceholder')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -52,14 +52,14 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" placeholder="Status" clearable class="filter-select">
-            <el-option label="All" value="" />
-            <el-option label="Pending" :value="0" />
-            <el-option label="Success" :value="1" />
-            <el-option label="Failed" :value="2" />
+          <el-select v-model="statusFilter" :placeholder="$t('payments.status')" clearable class="filter-select">
+            <el-option :label="$t('payments.all')" value="" />
+            <el-option :label="$t('payments.pending')" :value="0" />
+            <el-option :label="$t('payments.success')" :value="1" />
+            <el-option :label="$t('payments.failed')" :value="2" />
           </el-select>
-          <el-select v-model="paymentMethodFilter" placeholder="Payment Method" clearable class="filter-select">
-            <el-option label="All" value="" />
+          <el-select v-model="paymentMethodFilter" :placeholder="$t('payments.paymentMethod')" clearable class="filter-select">
+            <el-option :label="$t('payments.all')" value="" />
             <el-option label="Stripe" value="stripe_card" />
             <el-option label="Stripe Alipay" value="stripe_alipay" />
             <el-option label="Stripe WeChat" value="stripe_wechat" />
@@ -68,8 +68,8 @@
             v-model="dateRange"
             type="daterange"
             range-separator="to"
-            start-placeholder="Start Date"
-            end-placeholder="End Date"
+            :start-placeholder="$t('payments.startDate')"
+            :end-placeholder="$t('payments.endDate')"
             class="date-picker"
             value-format="YYYY-MM-DD"
           />
@@ -77,11 +77,11 @@
         <div class="filter-right">
           <el-button @click="handleExport">
             <el-icon><Download /></el-icon>
-            Export
+            {{ $t('common.export') }}
           </el-button>
           <el-button type="primary" @click="handleRefresh">
             <el-icon><Refresh /></el-icon>
-            Refresh
+            {{ $t('common.refresh') }}
           </el-button>
         </div>
       </div>
@@ -90,7 +90,7 @@
     <!-- Transactions Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="transactionList" v-loading="loading" stripe>
-        <el-table-column prop="transaction_id" label="Transaction ID" min-width="180">
+        <el-table-column prop="transaction_id" :label="$t('payments.transactionId')" min-width="180">
           <template #default="{ row }">
             <div class="transaction-id-cell">
               <span class="transaction-id" :title="row.transaction_id">
@@ -102,52 +102,52 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" label="Order No." min-width="160">
+        <el-table-column prop="order_no" :label="$t('payments.orderNo')" min-width="160">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewOrder(row.order_id)">
               {{ row.order_no }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="Payment Method" width="140" align="center">
+        <el-table-column :label="$t('payments.paymentMethod')" width="140" align="center">
           <template #default="{ row }">
             <el-tag :type="getPaymentMethodTagType(row.payment_method)" effect="plain" size="small">
               {{ row.payment_method_text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Amount" width="140" align="right">
+        <el-table-column :label="$t('payments.amount')" width="140" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
               <p class="transaction-amount">{{ row.currency }} {{ formatAmount(row.amount) }}</p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Fee" width="100" align="right">
+        <el-table-column :label="$t('payments.fee')" width="100" align="right">
           <template #default="{ row }">
             <span class="fee-amount">{{ row.currency }} {{ formatAmount(row.transaction_fee) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Status" width="100" align="center">
+        <el-table-column :label="$t('payments.status')" width="100" align="center">
           <template #default="{ row }">
             <status-tag :status="row.status" :type-map="statusTypeMap" />
           </template>
         </el-table-column>
-        <el-table-column label="Created At" width="160">
+        <el-table-column :label="$t('payments.createdAt')" width="160">
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Paid At" width="160">
+        <el-table-column :label="$t('payments.paidAt')" width="160">
           <template #default="{ row }">
             <span v-if="row.paid_at" class="time-text">{{ row.paid_at }}</span>
             <span v-else class="no-data">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="100" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">
-              Details
+              {{ $t('payments.details') }}
             </el-button>
           </template>
         </el-table-column>
@@ -182,6 +182,7 @@ import {
   type PaymentStats,
   type Transaction
 } from '@/api/payment'
+import { t } from '@/plugins/i18n'
 
 const router = useRouter()
 
@@ -218,57 +219,7 @@ const statusTypeMap = {
   2: { type: 'danger' as const, text: 'Failed' }
 }
 
-// Mock data
-const transactionList = ref<Transaction[]>([
-  {
-    id: 1,
-    transaction_id: 'txn_abc123def456ghi789',
-    order_id: 'ORD001',
-    order_no: 'ORD2024031800100',
-    payment_method: 'stripe_card',
-    payment_method_text: 'Stripe',
-    channel_transaction_id: 'ch_abc123',
-    amount: '299.00',
-    currency: 'USD',
-    transaction_fee: '8.97',
-    status: 1,
-    status_text: 'Success',
-    created_at: '2024-03-18 14:32:18',
-    paid_at: '2024-03-18 14:32:20'
-  },
-  {
-    id: 2,
-    transaction_id: 'txn_def456ghi789jkl012',
-    order_id: 'ORD002',
-    order_no: 'ORD2024031700099',
-    payment_method: 'stripe_card',
-    payment_method_text: 'Stripe',
-    channel_transaction_id: 'ch_def456',
-    amount: '456.00',
-    currency: 'USD',
-    transaction_fee: '13.68',
-    status: 1,
-    status_text: 'Success',
-    created_at: '2024-03-17 16:45:30',
-    paid_at: '2024-03-17 16:45:35'
-  },
-  {
-    id: 3,
-    transaction_id: 'txn_ghi789jkl012mno345',
-    order_id: 'ORD003',
-    order_no: 'ORD2024031700098',
-    payment_method: 'stripe_alipay',
-    payment_method_text: 'Stripe Alipay',
-    channel_transaction_id: 'ch_ghi789',
-    amount: '129.00',
-    currency: 'USD',
-    transaction_fee: '3.87',
-    status: 0,
-    status_text: 'Pending',
-    created_at: '2024-03-17 12:00:00',
-    paid_at: null
-  }
-])
+const transactionList = ref<Transaction[]>([])
 
 // Methods
 const formatAmount = (amount: string) => {
@@ -293,7 +244,7 @@ const getPaymentMethodTagType = (method: string) => {
 
 const copyTransactionId = (id: string) => {
   navigator.clipboard.writeText(id)
-  ElMessage.success('Transaction ID copied')
+  ElMessage.success(t('payments.transactionCopied'))
 }
 
 const handleStatusFilter = (status: number) => {
@@ -312,7 +263,35 @@ const handleSearch = () => {
 }
 
 const handleExport = () => {
-  ElMessage.success('Export successful')
+  try {
+    // Build export params from current filters
+    const params: Record<string, any> = {
+      page: 1,
+      page_size: 10000
+    }
+    if (searchQuery.value) {
+      params.order_no = searchQuery.value
+      params.transaction_id = searchQuery.value
+    }
+    if (statusFilter.value !== '') {
+      params.status = statusFilter.value
+    }
+    if (paymentMethodFilter.value) {
+      params.payment_method = paymentMethodFilter.value
+    }
+    if (dateRange.value) {
+      params.start_time = dateRange.value[0]
+      params.end_time = dateRange.value[1]
+    }
+
+    // Use window.open for export
+    const queryString = new URLSearchParams(params).toString()
+    const exportUrl = `/api/v1/payments/transactions/export?${queryString}`
+    window.open(exportUrl, '_blank')
+    ElMessage.success(t('common.exporting'))
+  } catch (error) {
+    ElMessage.error(t('common.exportFailed'))
+  }
 }
 
 const handleRefresh = () => {
@@ -343,18 +322,8 @@ const loadStats = async () => {
     const res = await getPaymentStats(selectedPeriod.value)
     paymentStats.value = res
   } catch (error) {
-    // Use mock data on error
-    paymentStats.value = {
-      today_received: '12580.00',
-      today_growth: '15.2',
-      period_received: '89420.00',
-      refund_amount: '1250.00',
-      refund_rate: '1.4',
-      currency: 'USD',
-      channel_distribution: [
-        { name: 'Stripe', percent: '100', amount: '89420.00', count: 156, color: '#635BFF' }
-      ]
-    }
+    ElMessage.error(t('payments.loadFailed'))
+    console.error('loadStats error:', error)
   }
 }
 
@@ -375,13 +344,11 @@ const loadData = async () => {
     total.value = res.total
     transactionStats.value = res.stats
   } catch (error) {
-    // Mock data already set
-    transactionStats.value = {
-      success: 156,
-      pending: 3,
-      failed: 2
-    }
-    total.value = 161
+    ElMessage.error(t('payments.loadFailed'))
+    console.error('loadData error:', error)
+    transactionList.value = []
+    total.value = 0
+    transactionStats.value = { success: 0, pending: 0, failed: 0 }
   } finally {
     loading.value = false
   }

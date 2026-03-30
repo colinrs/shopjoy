@@ -141,6 +141,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Ticket } from '@element-plus/icons-vue'
 import TablePagination from '@/components/common/TablePagination.vue'
 import { getRedemptions, type PointsRedemption, type ListRedemptionsParams } from '@/api/points'
@@ -180,58 +181,7 @@ const loadRedemptions = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load redemptions:', error)
-    // Mock data
-    redemptionList.value = [
-      {
-        id: 101,
-        user_id: 12345,
-        redeem_rule_id: 1,
-        coupon_id: 1,
-        coupon_name: 'SAVE10',
-        user_coupon_id: 10001,
-        points_used: 500,
-        status: 'completed',
-        created_at: '2026-03-24T10:30:00Z',
-        completed_at: '2026-03-24T10:30:05Z'
-      },
-      {
-        id: 102,
-        user_id: 12346,
-        redeem_rule_id: 2,
-        coupon_id: 2,
-        coupon_name: 'SAVE20',
-        user_coupon_id: null,
-        points_used: 1000,
-        status: 'pending',
-        created_at: '2026-03-24T09:15:00Z',
-        completed_at: null
-      },
-      {
-        id: 103,
-        user_id: 12347,
-        redeem_rule_id: 3,
-        coupon_id: 3,
-        coupon_name: 'FREESHIP',
-        user_coupon_id: 10002,
-        points_used: 200,
-        status: 'completed',
-        created_at: '2026-03-23T15:00:00Z',
-        completed_at: '2026-03-23T15:00:05Z'
-      },
-      {
-        id: 104,
-        user_id: 12345,
-        redeem_rule_id: 1,
-        coupon_id: 1,
-        coupon_name: 'SAVE10',
-        user_coupon_id: null,
-        points_used: 500,
-        status: 'cancelled',
-        created_at: '2026-03-22T14:00:00Z',
-        completed_at: null
-      }
-    ]
-    total.value = 4
+    ElMessage.error('加载积分兑换记录失败')
   } finally {
     loading.value = false
   }

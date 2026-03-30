@@ -4,8 +4,8 @@
     <el-card class="header-card" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <h2>运费计算器</h2>
-          <p class="header-desc">测试不同地址的运费计算结果</p>
+          <h2>{{ $t('shipping.shippingCalculatorTitle') }}</h2>
+          <p class="header-desc">{{ $t('shipping.shippingCalculatorDesc') }}</p>
         </div>
       </div>
     </el-card>
@@ -18,14 +18,14 @@
           <div class="address-section">
             <h3 class="section-title">
               <el-icon><Location /></el-icon>
-              收货地址
+              {{ $t('shipping.shippingAddress') }}
             </h3>
 
             <el-form label-width="80px">
-              <el-form-item label="省份">
+              <el-form-item :label="$t('shipping.province')">
                 <el-select
                   v-model="address.province_code"
-                  placeholder="请选择省份"
+                  :placeholder="$t('shipping.selectProvince')"
                   filterable
                   @change="handleProvinceChange"
                 >
@@ -38,10 +38,10 @@
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="城市">
+              <el-form-item :label="$t('shipping.citySelect')">
                 <el-select
                   v-model="address.city_code"
-                  placeholder="请选择城市"
+                  :placeholder="$t('shipping.selectCity')"
                   filterable
                   :disabled="!address.province_code"
                   @change="handleCityChange"
@@ -55,10 +55,10 @@
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="区县">
+              <el-form-item :label="$t('shipping.district')">
                 <el-select
                   v-model="address.district_code"
-                  placeholder="请选择区县"
+                  :placeholder="$t('shipping.selectDistrict')"
                   filterable
                   :disabled="!address.city_code"
                 >
@@ -80,29 +80,29 @@
             <div class="section-header">
               <h3 class="section-title">
                 <el-icon><Goods /></el-icon>
-                测试商品
+                {{ $t('shipping.testProducts') }}
               </h3>
               <el-button type="primary" size="small" @click="addTestItem">
                 <el-icon><Plus /></el-icon>
-                添加商品
+                {{ $t('shipping.addProductBtn') }}
               </el-button>
             </div>
 
             <div class="items-list">
               <div v-for="(item, index) in testItems" :key="index" class="test-item">
                 <div class="item-header">
-                  <span class="item-number">商品 {{ index + 1 }}</span>
+                  <span class="item-number">{{ $t('shipping.product') }} {{ index + 1 }}</span>
                   <el-button type="danger" link size="small" @click="removeTestItem(index)">
-                    移除
+                    {{ $t('shipping.remove') }}
                   </el-button>
                 </div>
 
                 <el-row :gutter="16">
                   <el-col :span="12" :xs="24">
-                    <el-form-item label="商品">
+                    <el-form-item :label="$t('shipping.product')">
                       <el-select
                         v-model="item.product_id"
-                        placeholder="选择商品"
+                        :placeholder="$t('shipping.selectProduct')"
                         filterable
                         clearable
                         @change="(val: number) => handleProductSelect(item, val)"
@@ -117,18 +117,18 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="6" :xs="12">
-                    <el-form-item label="数量">
+                    <el-form-item :label="$t('shipping.quantity')">
                       <el-input-number v-model="item.quantity" :min="1" :max="99" />
                     </el-form-item>
                   </el-col>
                   <el-col :span="6" :xs="12">
-                    <el-form-item label="重量(g)">
+                    <el-form-item :label="$t('shipping.weightG')">
                       <el-input-number v-model="item.weight" :min="1" />
                     </el-form-item>
                   </el-col>
                 </el-row>
 
-                <el-form-item label="单价">
+                <el-form-item :label="$t('shipping.unitPrice')">
                   <el-input-number
                     v-model="item.price"
                     :min="0"
@@ -140,9 +140,9 @@
                 </el-form-item>
               </div>
 
-              <el-empty v-if="testItems.length === 0" description="请添加测试商品" :image-size="80">
+              <el-empty v-if="testItems.length === 0" :description="$t('shipping.pleaseAddProducts')" :image-size="80">
                 <el-button type="primary" @click="addTestItem">
-                  添加商品
+                  {{ $t('shipping.addProductBtn') }}
                 </el-button>
               </el-empty>
             </div>
@@ -160,7 +160,7 @@
           :disabled="!isFormValid"
         >
           <el-icon><Coin /></el-icon>
-          计算运费
+          {{ $t('shipping.calculateShipping') }}
         </el-button>
       </div>
     </el-card>
@@ -169,7 +169,7 @@
     <el-card v-if="result" class="result-card" shadow="never">
       <div class="result-header">
         <div class="fee-display">
-          <span class="fee-label">运费</span>
+          <span class="fee-label">{{ $t('shipping.shippingFee') }}</span>
           <span class="fee-amount">¥ {{ formatAmount(result.shipping_fee) }}</span>
         </div>
       </div>
@@ -178,34 +178,34 @@
 
       <div class="result-details">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="匹配模板">
+          <el-descriptions-item :label="$t('shipping.matchingTemplate')">
             {{ result.template_name }}
           </el-descriptions-item>
-          <el-descriptions-item label="匹配区域">
+          <el-descriptions-item :label="$t('shipping.matchingZone')">
             {{ result.zone_name }}
           </el-descriptions-item>
         </el-descriptions>
 
         <div class="fee-breakdown">
-          <h4 class="breakdown-title">费用明细</h4>
+          <h4 class="breakdown-title">{{ $t('shipping.feeDetails') }}</h4>
           <div class="breakdown-item">
-            <span class="breakdown-label">计费方式：</span>
+            <span class="breakdown-label">{{ $t('shipping.billingMethodLabel') }}</span>
             <span class="breakdown-value">{{ getFeeTypeLabel(result.fee_detail.fee_type) }}</span>
           </div>
           <div class="breakdown-item" v-if="result.fee_detail.fee_type === 'by_weight'">
-            <span class="breakdown-label">计算重量：</span>
+            <span class="breakdown-label">{{ $t('shipping.calculatedWeight') }}</span>
             <span class="breakdown-value">{{ result.fee_detail.calculated_weight }}g</span>
           </div>
           <div class="breakdown-item" v-if="result.fee_detail.fee_type === 'by_count'">
-            <span class="breakdown-label">计算数量：</span>
+            <span class="breakdown-label">{{ $t('shipping.calculatedUnits') }}</span>
             <span class="breakdown-value">{{ result.fee_detail.calculated_units }} 件</span>
           </div>
           <div class="breakdown-item">
-            <span class="breakdown-label">基础运费：</span>
+            <span class="breakdown-label">{{ $t('shipping.baseFee') }}</span>
             <span class="breakdown-value">¥ {{ formatAmount(result.fee_detail.first_fee) }}</span>
           </div>
           <div class="breakdown-item" v-if="getAdditionalUnits > 0">
-            <span class="breakdown-label">续费 ({{ getAdditionalUnits }} 单位)：</span>
+            <span class="breakdown-label">{{ $t('shipping.additionalFee', { units: getAdditionalUnits }) }}：</span>
             <span class="breakdown-value">¥ {{ formatAdditionalFee }}</span>
           </div>
         </div>
@@ -216,11 +216,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Location, Goods, Plus, Coin } from '@element-plus/icons-vue'
 import { calculateShippingFee, getRegions, type CalculateResult, type Region } from '@/api/shipping'
 import { getProductList } from '@/api/product'
 import type { Product } from '@/api/product'
+
+const { t } = useI18n()
 
 // Types
 interface TestItem {
@@ -285,6 +288,7 @@ const loadProducts = async () => {
     products.value = data.list || []
   } catch (error) {
     console.error('Failed to load products:', error)
+    ElMessage.error(t('shipping.loadProductsFailed'))
   }
 }
 
@@ -294,6 +298,7 @@ const loadProvinces = async () => {
     allProvinces.value = data
   } catch (error) {
     console.error('Failed to load provinces:', error)
+    ElMessage.error(t('shipping.loadProvincesListFailed'))
   }
 }
 
@@ -303,6 +308,7 @@ const loadCities = async (provinceCode: string) => {
     allCities.value = data
   } catch (error) {
     console.error('Failed to load cities:', error)
+    ElMessage.error(t('shipping.loadCitiesListFailed'))
   }
 }
 
@@ -312,6 +318,7 @@ const loadDistricts = async (cityCode: string) => {
     allDistricts.value = data
   } catch (error) {
     console.error('Failed to load districts:', error)
+    ElMessage.error(t('shipping.loadDistrictsFailed'))
   }
 }
 
@@ -358,7 +365,7 @@ const handleProductSelect = (item: TestItem, productId: number | null) => {
 
 const calculateShipping = async () => {
   if (!isFormValid.value) {
-    ElMessage.warning('请完整填写地址和商品信息')
+    ElMessage.warning(t('shipping.pleaseCompleteAddressAndProducts'))
     return
   }
 
@@ -378,10 +385,10 @@ const calculateShipping = async () => {
       }))
     })
     result.value = data
-    ElMessage.success('计算完成')
+    ElMessage.success(t('shipping.calculationComplete'))
   } catch (error) {
     console.error('Failed to calculate:', error)
-    ElMessage.error('计算失败，请检查配置')
+    ElMessage.error(t('shipping.calculationFailed'))
   } finally {
     calculating.value = false
   }

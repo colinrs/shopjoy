@@ -4,23 +4,23 @@
     <el-card class="alert-card" shadow="never" v-if="lowStockList.length > 0">
       <template #header>
         <div class="card-header">
-          <span><el-icon><Warning /></el-icon> 库存预警</span>
+          <span><el-icon><Warning /></el-icon> {{ $t('inventory.lowStockAlert') }}</span>
           <el-badge :value="lowStockTotal" type="danger" />
         </div>
       </template>
       <el-table :data="lowStockList" stripe size="small">
-        <el-table-column prop="sku_code" label="SKU编码" width="150" />
-        <el-table-column prop="product_name" label="商品名称" min-width="200" />
-        <el-table-column prop="available_stock" label="可用库存" width="100" align="center">
+        <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
+        <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
+        <el-table-column prop="available_stock" :label="$t('inventory.availableStock')" width="100" align="center">
           <template #default="{ row }">
             <el-tag type="danger" size="small">{{ row.available_stock }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="safety_stock" label="安全库存" width="100" align="center" />
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column prop="safety_stock" :label="$t('inventory.safetyStock')" width="100" align="center" />
+        <el-table-column :label="$t('inventory.actions')" width="120" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleAdjustStock(row)">
-              补货
+              {{ $t('inventory.replenish') }}
             </el-button>
           </template>
         </el-table-column>
@@ -31,43 +31,43 @@
     <el-card class="main-card" shadow="never">
       <el-tabs v-model="activeTab">
         <!-- Inventory Logs Tab -->
-        <el-tab-pane label="库存记录" name="logs">
+        <el-tab-pane :label="$t('inventory.logs')" name="logs">
           <div class="filter-bar">
             <el-input
               v-model="logFilter.sku_code"
-              placeholder="SKU编码"
+              :placeholder="$t('inventory.skuCode')"
               clearable
               style="width: 180px"
             />
-            <el-select v-model="logFilter.type" placeholder="变更类型" clearable style="width: 140px">
-              <el-option label="手动调整" value="manual" />
-              <el-option label="订单扣减" value="order" />
-              <el-option label="退货入库" value="return" />
-              <el-option label="库存盘点" value="adjustment" />
+            <el-select v-model="logFilter.type" :placeholder="$t('inventory.changeType')" clearable style="width: 140px">
+              <el-option :label="$t('inventory.manual')" value="manual" />
+              <el-option :label="$t('inventory.order')" value="order" />
+              <el-option :label="$t('inventory.return')" value="return" />
+              <el-option :label="$t('inventory.adjustment')" value="adjustment" />
             </el-select>
-            <el-button type="primary" @click="loadInventoryLogs">查询</el-button>
+            <el-button type="primary" @click="loadInventoryLogs">{{ $t('inventory.search') }}</el-button>
           </div>
           <el-table :data="logList" v-loading="logLoading" stripe>
-            <el-table-column prop="sku_code" label="SKU编码" width="150" />
-            <el-table-column prop="change_type" label="变更类型" width="100">
+            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
+            <el-table-column prop="change_type" :label="$t('inventory.changeType')" width="100">
               <template #default="{ row }">
                 <el-tag size="small" :type="getChangeTypeTag(row.change_type)">
                   {{ getChangeTypeLabel(row.change_type) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="change_quantity" label="变更数量" width="100" align="center">
+            <el-table-column prop="change_quantity" :label="$t('inventory.changeQuantity')" width="100" align="center">
               <template #default="{ row }">
                 <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
                   {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column prop="before_stock" label="变更前" width="100" align="center" />
-            <el-table-column prop="after_stock" label="变更后" width="100" align="center" />
-            <el-table-column prop="order_no" label="关联订单" width="150" />
-            <el-table-column prop="remark" label="备注" min-width="150" />
-            <el-table-column prop="created_at" label="时间" width="180" />
+            <el-table-column prop="before_stock" :label="$t('inventory.beforeStock')" width="100" align="center" />
+            <el-table-column prop="after_stock" :label="$t('inventory.afterStock')" width="100" align="center" />
+            <el-table-column prop="order_no" :label="$t('inventory.relatedOrder')" width="150" />
+            <el-table-column prop="remark" :label="$t('inventory.remark')" min-width="150" />
+            <el-table-column prop="created_at" :label="$t('inventory.time')" width="180" />
           </el-table>
           <div class="pagination-wrapper">
             <el-pagination
@@ -83,23 +83,23 @@
         </el-tab-pane>
 
         <!-- Warehouses Tab -->
-        <el-tab-pane label="仓库管理" name="warehouses">
+        <el-tab-pane :label="$t('inventory.warehouseManagement')" name="warehouses">
           <div class="filter-bar">
             <el-button type="primary" @click="handleAddWarehouse">
-              <el-icon><Plus /></el-icon>新增仓库
+              <el-icon><Plus /></el-icon>{{ $t('inventory.addWarehouse') }}
             </el-button>
           </div>
           <el-table :data="warehouseList" v-loading="warehouseLoading" stripe>
-            <el-table-column prop="code" label="仓库编码" width="120" />
-            <el-table-column prop="name" label="仓库名称" min-width="150" />
-            <el-table-column prop="country" label="国家" width="100" />
-            <el-table-column prop="address" label="地址" min-width="200" />
-            <el-table-column prop="is_default" label="默认仓库" width="100" align="center">
+            <el-table-column prop="code" :label="$t('inventory.warehouseCode')" width="120" />
+            <el-table-column prop="name" :label="$t('inventory.warehouseName')" min-width="150" />
+            <el-table-column prop="country" :label="$t('inventory.country')" width="100" />
+            <el-table-column prop="address" :label="$t('inventory.address')" min-width="200" />
+            <el-table-column prop="is_default" :label="$t('inventory.defaultWarehouse')" width="100" align="center">
               <template #default="{ row }">
-                <el-tag v-if="row.is_default" type="success" size="small">默认</el-tag>
+                <el-tag v-if="row.is_default" type="success" size="small">{{ $t('inventory.isDefault') }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="100" align="center">
+            <el-table-column prop="status" :label="$t('inventory.status')" width="100" align="center">
               <template #default="{ row }">
                 <el-switch
                   v-model="row.status"
@@ -109,10 +109,10 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="200" fixed="right">
+            <el-table-column :label="$t('inventory.actions')" width="200" fixed="right">
               <template #default="{ row }">
                 <el-button type="primary" link size="small" @click="handleEditWarehouse(row)">
-                  编辑
+                  {{ $t('inventory.edit') }}
                 </el-button>
                 <el-button
                   type="success"
@@ -121,7 +121,7 @@
                   @click="handleSetDefaultWarehouse(row)"
                   v-if="!row.is_default"
                 >
-                  设为默认
+                  {{ $t('inventory.setAsDefault') }}
                 </el-button>
                 <el-button
                   type="danger"
@@ -130,7 +130,7 @@
                   @click="handleDeleteWarehouse(row)"
                   v-if="!row.is_default"
                 >
-                  删除
+                  {{ $t('inventory.delete') }}
                 </el-button>
               </template>
             </el-table-column>
@@ -138,13 +138,13 @@
         </el-tab-pane>
 
         <!-- Stock Adjustment Tab -->
-        <el-tab-pane label="库存调整" name="adjust">
+        <el-tab-pane :label="$t('inventory.stockAdjustment')" name="adjust">
           <el-form :model="adjustForm" label-width="120px" class="adjust-form">
-            <el-form-item label="SKU编码" required>
-              <el-input v-model="adjustForm.sku_code" placeholder="请输入SKU编码" style="width: 300px" />
+            <el-form-item :label="$t('inventory.skuCode')" required>
+              <el-input v-model="adjustForm.sku_code" :placeholder="$t('inventory.skuCode')" style="width: 300px" />
             </el-form-item>
-            <el-form-item label="仓库">
-              <el-select v-model="adjustForm.warehouse_id" placeholder="选择仓库" style="width: 300px">
+            <el-form-item :label="$t('inventory.selectWarehouse')">
+              <el-select v-model="adjustForm.warehouse_id" :placeholder="$t('inventory.selectWarehouse')" style="width: 300px">
                 <el-option
                   v-for="w in warehouseList"
                   :key="w.id"
@@ -153,27 +153,27 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="调整数量" required>
+            <el-form-item :label="$t('inventory.adjustQuantity')" required>
               <el-input-number
                 v-model="adjustForm.quantity"
                 :min="-9999"
                 :max="9999"
                 style="width: 200px"
               />
-              <span class="form-tip">正数增加库存，负数减少库存</span>
+              <span class="form-tip">{{ $t('inventory.quantityPositiveIncrease') }}</span>
             </el-form-item>
-            <el-form-item label="备注">
+            <el-form-item :label="$t('inventory.remark')">
               <el-input
                 v-model="adjustForm.remark"
                 type="textarea"
                 rows="3"
-                placeholder="请输入调整原因"
+                :placeholder="$t('inventory.enterRemark')"
                 style="width: 400px"
               />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleAdjustSubmit" :loading="adjustLoading">
-                确认调整
+                {{ $t('inventory.confirmAdjustment') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -184,52 +184,52 @@
     <!-- Warehouse Dialog -->
     <el-dialog
       v-model="warehouseDialogVisible"
-      :title="isEditWarehouse ? '编辑仓库' : '新增仓库'"
+      :title="isEditWarehouse ? $t('inventory.editWarehouse') : $t('inventory.newWarehouse')"
       width="500px"
       destroy-on-close
     >
       <el-form :model="warehouseForm" label-width="100px" :rules="warehouseRules" ref="warehouseFormRef">
-        <el-form-item label="仓库编码" prop="code" v-if="!isEditWarehouse">
-          <el-input v-model="warehouseForm.code" placeholder="如: WH-001" />
+        <el-form-item :label="$t('inventory.warehouseCode')" prop="code" v-if="!isEditWarehouse">
+          <el-input v-model="warehouseForm.code" :placeholder="$t('inventory.warehouseCode')" />
         </el-form-item>
-        <el-form-item label="仓库名称" prop="name">
-          <el-input v-model="warehouseForm.name" placeholder="请输入仓库名称" />
+        <el-form-item :label="$t('inventory.warehouseName')" prop="name">
+          <el-input v-model="warehouseForm.name" :placeholder="$t('inventory.enterWarehouseName')" />
         </el-form-item>
-        <el-form-item label="国家">
-          <el-input v-model="warehouseForm.country" placeholder="如: CN, US" />
+        <el-form-item :label="$t('inventory.country')">
+          <el-input v-model="warehouseForm.country" :placeholder="$t('inventory.countryPlaceholder')" />
         </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="warehouseForm.address" type="textarea" rows="2" placeholder="详细地址" />
+        <el-form-item :label="$t('inventory.address')">
+          <el-input v-model="warehouseForm.address" type="textarea" rows="2" :placeholder="$t('inventory.addressPlaceholder')" />
         </el-form-item>
-        <el-form-item label="默认仓库">
+        <el-form-item :label="$t('inventory.defaultWarehouse')">
           <el-switch v-model="warehouseForm.is_default" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="warehouseDialogVisible = false">取消</el-button>
+        <el-button @click="warehouseDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
         <el-button type="primary" @click="handleSaveWarehouse" :loading="warehouseSaveLoading">
-          保存
+          {{ $t('inventory.save') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Stock Adjust Dialog (from low stock alert) -->
-    <el-dialog v-model="adjustDialogVisible" title="库存补货" width="400px" destroy-on-close>
+    <el-dialog v-model="adjustDialogVisible" :title="$t('inventory.stockReplenishment')" width="400px" destroy-on-close>
       <el-form :model="quickAdjustForm" label-width="100px">
-        <el-form-item label="SKU编码">
+        <el-form-item :label="$t('inventory.skuCode')">
           <el-input :value="quickAdjustForm.sku_code" disabled />
         </el-form-item>
-        <el-form-item label="补货数量">
+        <el-form-item :label="$t('inventory.replenishQuantity')">
           <el-input-number v-model="quickAdjustForm.quantity" :min="1" :max="9999" />
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="quickAdjustForm.remark" placeholder="补货备注" />
+        <el-form-item :label="$t('inventory.remark')">
+          <el-input v-model="quickAdjustForm.remark" :placeholder="$t('inventory.replenishRemark')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="adjustDialogVisible = false">取消</el-button>
+        <el-button @click="adjustDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
         <el-button type="primary" @click="handleQuickAdjust" :loading="quickAdjustLoading">
-          确认补货
+          {{ $t('inventory.confirmReplenish') }}
         </el-button>
       </template>
     </el-dialog>
@@ -254,6 +254,7 @@ import {
   type InventoryLog,
   type LowStockSKU
 } from '@/api/inventory'
+import { t } from '@/plugins/i18n'
 
 // Low stock alerts
 const lowStockList = ref<LowStockSKU[]>([])
@@ -286,8 +287,8 @@ const warehouseForm = reactive({
   is_default: false
 })
 const warehouseRules = {
-  code: [{ required: true, message: '请输入仓库编码', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入仓库名称', trigger: 'blur' }]
+  code: [{ required: true, message: t('inventory.enterWarehouseCode'), trigger: 'blur' }],
+  name: [{ required: true, message: t('inventory.enterWarehouseName'), trigger: 'blur' }]
 }
 
 // Stock adjustment
@@ -306,7 +307,7 @@ const quickAdjustLoading = ref(false)
 const quickAdjustForm = reactive({
   sku_code: '',
   quantity: 100,
-  remark: '低库存补货'
+  remark: t('inventory.lowStockReplenish')
 })
 
 // Load low stock alerts
@@ -317,6 +318,7 @@ const loadLowStockAlerts = async () => {
     lowStockTotal.value = res.total || 0
   } catch (error) {
     console.error('Failed to load low stock alerts:', error)
+    ElMessage.error(t('inventory.loadLowStockFailed'))
   }
 }
 
@@ -334,7 +336,7 @@ const loadInventoryLogs = async () => {
     logTotal.value = res.total || 0
   } catch (error) {
     console.error('Failed to load inventory logs:', error)
-    ElMessage.error('加载库存记录失败')
+    ElMessage.error(t('inventory.loadLogsFailed'))
   } finally {
     logLoading.value = false
   }
@@ -348,7 +350,7 @@ const loadWarehouses = async () => {
     warehouseList.value = res || []
   } catch (error) {
     console.error('Failed to load warehouses:', error)
-    ElMessage.error('加载仓库失败')
+    ElMessage.error(t('inventory.loadWarehouseFailed'))
   } finally {
     warehouseLoading.value = false
   }
@@ -396,7 +398,7 @@ const handleSaveWarehouse = async () => {
             address: warehouseForm.address,
             is_default: warehouseForm.is_default
           })
-          ElMessage.success('更新成功')
+          ElMessage.success(t('inventory.updateSuccess'))
         } else {
           await createWarehouse({
             code: warehouseForm.code,
@@ -405,13 +407,13 @@ const handleSaveWarehouse = async () => {
             address: warehouseForm.address,
             is_default: warehouseForm.is_default
           })
-          ElMessage.success('创建成功')
+          ElMessage.success(t('inventory.createSuccess'))
         }
         warehouseDialogVisible.value = false
         loadWarehouses()
       } catch (error) {
         console.error('Failed to save warehouse:', error)
-        ElMessage.error(isEditWarehouse.value ? '更新失败' : '创建失败')
+        ElMessage.error(isEditWarehouse.value ? t('inventory.updateFailed') : t('inventory.createFailed'))
       } finally {
         warehouseSaveLoading.value = false
       }
@@ -422,10 +424,10 @@ const handleSaveWarehouse = async () => {
 const handleWarehouseStatusChange = async (row: Warehouse, status: number) => {
   try {
     await updateWarehouseStatus(row.id, status)
-    ElMessage.success(status === 1 ? '已启用' : '已禁用')
+    ElMessage.success(status === 1 ? t('inventory.enabledSuccess') : t('inventory.disabledSuccess'))
   } catch (error) {
     console.error('Failed to update status:', error)
-    ElMessage.error('更新状态失败')
+    ElMessage.error(t('inventory.updateStatusFailed'))
     row.status = status === 1 ? 0 : 1
   }
 }
@@ -433,27 +435,27 @@ const handleWarehouseStatusChange = async (row: Warehouse, status: number) => {
 const handleSetDefaultWarehouse = async (row: Warehouse) => {
   try {
     await setDefaultWarehouse(row.id)
-    ElMessage.success('已设为默认仓库')
+    ElMessage.success(t('inventory.setDefaultSuccess'))
     loadWarehouses()
   } catch (error) {
     console.error('Failed to set default:', error)
-    ElMessage.error('操作失败')
+    ElMessage.error(t('inventory.operationFailed'))
   }
 }
 
 const handleDeleteWarehouse = (row: Warehouse) => {
-  ElMessageBox.confirm(`确认删除仓库 "${row.name}"?`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(t('inventory.confirmDeleteWarehouse', { name: row.name }), t('inventory.warning'), {
+    confirmButtonText: t('inventory.confirm'),
+    cancelButtonText: t('inventory.cancel'),
     type: 'warning'
   }).then(async () => {
     try {
       await deleteWarehouse(row.id)
-      ElMessage.success('删除成功')
+      ElMessage.success(t('inventory.deleteSuccess'))
       loadWarehouses()
     } catch (error) {
       console.error('Failed to delete warehouse:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(t('inventory.deleteFailed'))
     }
   })
 }
@@ -461,7 +463,7 @@ const handleDeleteWarehouse = (row: Warehouse) => {
 // Stock adjustment handlers
 const handleAdjustSubmit = async () => {
   if (!adjustForm.sku_code || !adjustForm.warehouse_id || adjustForm.quantity === 0) {
-    ElMessage.warning('请填写完整信息')
+    ElMessage.warning(t('inventory.fillCompleteInfo'))
     return
   }
 
@@ -473,7 +475,7 @@ const handleAdjustSubmit = async () => {
       quantity: adjustForm.quantity,
       remark: adjustForm.remark
     })
-    ElMessage.success('库存调整成功')
+    ElMessage.success(t('inventory.adjustSuccess'))
     adjustForm.sku_code = ''
     adjustForm.quantity = 0
     adjustForm.remark = ''
@@ -481,7 +483,7 @@ const handleAdjustSubmit = async () => {
     loadLowStockAlerts()
   } catch (error) {
     console.error('Failed to adjust stock:', error)
-    ElMessage.error('调整失败')
+    ElMessage.error(t('inventory.adjustFailed'))
   } finally {
     adjustLoading.value = false
   }
@@ -491,20 +493,20 @@ const handleAdjustSubmit = async () => {
 const handleAdjustStock = (row: LowStockSKU) => {
   quickAdjustForm.sku_code = row.sku_code
   quickAdjustForm.quantity = Math.max(row.safety_stock * 2, 100)
-  quickAdjustForm.remark = '低库存补货'
+  quickAdjustForm.remark = t('inventory.lowStockReplenish')
   adjustDialogVisible.value = true
 }
 
 const handleQuickAdjust = async () => {
   if (!quickAdjustForm.sku_code || quickAdjustForm.quantity <= 0) {
-    ElMessage.warning('请填写有效数量')
+    ElMessage.warning(t('inventory.fillValidQuantity'))
     return
   }
 
   // Use default warehouse
   const defaultWarehouse = warehouseList.value.find(w => w.is_default)
   if (!defaultWarehouse) {
-    ElMessage.warning('请先设置默认仓库')
+    ElMessage.warning(t('inventory.setDefaultWarehouseFirst'))
     return
   }
 
@@ -516,13 +518,13 @@ const handleQuickAdjust = async () => {
       quantity: quickAdjustForm.quantity,
       remark: quickAdjustForm.remark
     })
-    ElMessage.success('补货成功')
+    ElMessage.success(t('inventory.replenishSuccess'))
     adjustDialogVisible.value = false
     loadLowStockAlerts()
     loadInventoryLogs()
   } catch (error) {
     console.error('Failed to quick adjust:', error)
-    ElMessage.error('补货失败')
+    ElMessage.error(t('inventory.replenishFailed'))
   } finally {
     quickAdjustLoading.value = false
   }
@@ -541,10 +543,10 @@ const getChangeTypeTag = (type: string) => {
 
 const getChangeTypeLabel = (type: string) => {
   const map: Record<string, string> = {
-    manual: '手动调整',
-    order: '订单扣减',
-    return: '退货入库',
-    adjustment: '库存盘点'
+    manual: t('inventory.manual'),
+    order: t('inventory.order'),
+    return: t('inventory.return'),
+    adjustment: t('inventory.adjustment')
   }
   return map[type] || type
 }

@@ -4,25 +4,25 @@
     <div v-if="showFilters" class="filter-bar">
       <el-select
         v-model="filterType"
-        placeholder="交易类型"
+        :placeholder="$t('points.filterType')"
         clearable
         class="filter-select"
         @change="handleFilterChange"
       >
-        <el-option label="全部" value="" />
-        <el-option label="获得" value="EARN" />
-        <el-option label="兑换" value="REDEEM" />
-        <el-option label="调整" value="ADJUST" />
-        <el-option label="过期" value="EXPIRE" />
-        <el-option label="冻结" value="FREEZE" />
-        <el-option label="解冻" value="UNFREEZE" />
+        <el-option :label="$t('points.all')" value="" />
+        <el-option :label="$t('points.earn')" value="EARN" />
+        <el-option :label="$t('points.redeem')" value="REDEEM" />
+        <el-option :label="$t('points.adjust')" value="ADJUST" />
+        <el-option :label="$t('points.expire')" value="EXPIRE" />
+        <el-option :label="$t('points.freeze')" value="FREEZE" />
+        <el-option :label="$t('points.unfreeze')" value="UNFREEZE" />
       </el-select>
       <el-date-picker
         v-model="dateRange"
         type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
+        range-separator="-"
+        :start-placeholder="$t('points.startDate')"
+        :end-placeholder="$t('points.endDate')"
         value-format="YYYY-MM-DD"
         class="date-picker"
         @change="handleFilterChange"
@@ -31,19 +31,19 @@
 
     <!-- Table -->
     <el-table :data="transactions" v-loading="loading" stripe>
-      <el-table-column prop="id" label="ID" width="80" align="center">
+      <el-table-column prop="id" :label="$t('points.id')" width="80" align="center">
         <template #default="{ row }">
           <span class="id-text">#{{ row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column v-if="showUser" label="用户" width="100" align="center">
+      <el-table-column v-if="showUser" :label="$t('points.user')" width="100" align="center">
         <template #default="{ row }">
           <span class="user-id">U{{ row.user_id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="类型" width="100" align="center">
+      <el-table-column :label="$t('points.type')" width="100" align="center">
         <template #default="{ row }">
           <el-tag :type="getTypeTagType(row.type)" effect="light" size="small">
             {{ getTypeText(row.type) }}
@@ -51,7 +51,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="积分" width="120" align="right">
+      <el-table-column :label="$t('points.points')" width="120" align="right">
         <template #default="{ row }">
           <span class="points-value" :class="{ positive: row.points > 0, negative: row.points < 0 }">
             {{ row.points > 0 ? '+' : '' }}{{ row.points.toLocaleString() }}
@@ -59,13 +59,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="变动后余额" width="120" align="right">
+      <el-table-column :label="$t('points.balanceAfter')" width="120" align="right">
         <template #default="{ row }">
           <span class="balance-text">{{ row.balance_after.toLocaleString() }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="描述" min-width="200">
+      <el-table-column :label="$t('points.description')" min-width="200">
         <template #default="{ row }">
           <div class="description-cell">
             <p class="description-text">{{ row.description }}</p>
@@ -76,14 +76,14 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="showExpires" label="过期时间" width="160">
+      <el-table-column v-if="showExpires" :label="$t('points.expiresAt')" width="160">
         <template #default="{ row }">
           <span v-if="row.expires_at" class="time-text">{{ formatDateTime(row.expires_at) }}</span>
           <span v-else class="no-data">-</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="时间" width="160">
+      <el-table-column :label="$t('points.time')" width="160">
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
@@ -108,6 +108,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { PointsTransaction } from '@/api/points'
+import { t } from '@/plugins/i18n'
 
 const props = withDefaults(defineProps<{
   transactions: PointsTransaction[]
@@ -165,12 +166,12 @@ const getTypeTagType = (type: string) => {
 
 const getTypeText = (type: string) => {
   const texts: Record<string, string> = {
-    'EARN': '获得',
-    'REDEEM': '兑换',
-    'ADJUST': '调整',
-    'EXPIRE': '过期',
-    'FREEZE': '冻结',
-    'UNFREEZE': '解冻'
+    'EARN': t('points.earn'),
+    'REDEEM': t('points.redeem'),
+    'ADJUST': t('points.adjust'),
+    'EXPIRE': t('points.expire'),
+    'FREEZE': t('points.freeze'),
+    'UNFREEZE': t('points.unfreeze')
   }
   return texts[type] || type
 }

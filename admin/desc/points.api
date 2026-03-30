@@ -298,6 +298,13 @@ type (
 	GetPointsTransactionReq {
 		ID int64 `path:"id"`
 	}
+	// ===================== Export Types =====================
+	ExportPointsTransactionsReq {
+		UserID    int64  `form:"user_id,optional"`
+		Type      string `form:"type,optional"` // earn, redeem
+		StartTime string `form:"start_time,optional"`
+		EndTime   string `form:"end_time,optional"`
+	}
 	// ===================== Manual Adjustment Types =====================
 	AdjustPointsReq {
 		ID             int64  `path:"id"`
@@ -476,6 +483,10 @@ service admin-api {
 	@doc "获取积分交易详情"
 	@handler GetTransactionHandler
 	get /api/v1/points/transactions/:id (GetPointsTransactionReq) returns (PointsTransaction)
+
+	@doc "导出积分交易记录"
+	@handler ExportPointsTransactionsHandler
+	get /api/v1/points/transactions/export (ExportPointsTransactionsReq)
 }
 
 // ===================== Points Redemptions Endpoints =====================

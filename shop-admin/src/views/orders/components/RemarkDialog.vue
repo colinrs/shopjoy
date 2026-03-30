@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="Edit Remark"
+    :title="$t('orders.editRemarkTitle')"
     width="500px"
     :close-on-click-modal="false"
     destroy-on-close
@@ -9,20 +9,20 @@
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
       <!-- Current Remark Display -->
       <div class="current-remark-section">
-        <p class="section-label">Current Remark</p>
+        <p class="section-label">{{ $t('orders.currentRemark') }}</p>
         <div class="current-remark-content">
           <p v-if="currentRemark">{{ currentRemark }}</p>
-          <p v-else class="no-remark">No remark</p>
+          <p v-else class="no-remark">{{ $t('orders.noRemark') }}</p>
         </div>
       </div>
 
       <!-- New Remark Input -->
-      <el-form-item label="New Remark" prop="remark">
+      <el-form-item :label="$t('orders.newRemark')" prop="remark">
         <el-input
           v-model="form.remark"
           type="textarea"
           :rows="4"
-          placeholder="Enter new remark (for internal use only)"
+          :placeholder="$t('orders.quickTags')"
           maxlength="500"
           show-word-limit
         />
@@ -30,7 +30,7 @@
 
       <!-- Quick Tags -->
       <div class="quick-tags-section">
-        <p class="section-label">Quick Tags</p>
+        <p class="section-label">{{ $t('orders.quickTags') }}</p>
         <div class="quick-tags">
           <el-tag
             v-for="tag in quickTags"
@@ -46,9 +46,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
+        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
-          Save Remark
+          {{ $t('orders.saveRemark') }}
         </el-button>
       </div>
     </template>
@@ -59,6 +59,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { updateOrderRemark } from '@/api/order'
+import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
@@ -85,18 +86,18 @@ const form = reactive({
 
 const rules = {
   remark: [
-    { max: 500, message: 'Remark cannot exceed 500 characters', trigger: 'blur' }
+    { max: 500, message: t('orders.remarkTooLong'), trigger: 'blur' }
   ]
 }
 
-const quickTags = [
-  'VIP Customer',
-  'Return Customer',
-  'Large Order',
-  'Urgent',
-  'Gift Package',
-  'Contact Before Ship'
-]
+const quickTags = computed(() => [
+  t('orders.vipCustomer'),
+  t('orders.returnCustomer'),
+  t('orders.largeOrder'),
+  t('orders.urgent'),
+  t('orders.giftPackage'),
+  t('orders.contactBeforeShip')
+])
 
 const appendTag = (tag: string) => {
   if (form.remark) {
@@ -117,11 +118,11 @@ const handleSubmit = async () => {
       await updateOrderRemark(props.orderId, {
         remark: form.remark
       })
-      ElMessage.success('Remark updated successfully')
+      ElMessage.success(t('orders.remarkSaveSuccess'))
       emit('success')
       visible.value = false
     } catch (error: any) {
-      ElMessage.error(error?.message || 'Failed to update remark')
+      ElMessage.error(error?.message || t('orders.remarkSaveFailed'))
     } finally {
       submitting.value = false
     }

@@ -75,6 +75,7 @@ var (
 	ErrProductInsufficientStock       = &Err{HTTPCode: http.StatusBadRequest, Code: 30011, Msg: "库存不足"}
 	ErrProductNotFound                = &Err{HTTPCode: http.StatusNotFound, Code: 30012, Msg: "商品不存在"}
 	ErrProductInvalidID               = &Err{HTTPCode: http.StatusBadRequest, Code: 30013, Msg: "invalid product id"}
+	ErrProductExportLimitExceed      = &Err{HTTPCode: http.StatusBadRequest, Code: 30014, Msg: "export product limit exceeded, maximum 10000 records"}
 
 	//  ErrCategoryNotFound Category errors (30xxx - 31xxx)
 	ErrCategoryNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 30101, Msg: "category not found"}
@@ -127,6 +128,7 @@ var (
 	ErrRefundCurrencyMismatch       = &Err{HTTPCode: http.StatusBadRequest, Code: 50018, Msg: "refund currency must match payment currency"}
 	ErrIdempotencyKeyConflict        = &Err{HTTPCode: http.StatusConflict, Code: 50019, Msg: "duplicate idempotency key"}
 	ErrDisputeCreated                = &Err{HTTPCode: http.StatusConflict, Code: 50020, Msg: "dispute created for this charge"}
+	ErrPaymentExportLimitExceed      = &Err{HTTPCode: http.StatusBadRequest, Code: 50021, Msg: "export payment transactions limit exceeded"}
 
 	// ErrCartItemNotFound ==================== Cart Module (60xxx) ====================
 	ErrCartItemNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 60001, Msg: "cart item not found"}
@@ -248,6 +250,7 @@ var (
 	ErrShipmentItemsRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 120012, Msg: "shipment items are required"}
 	ErrShipmentItemQuantityExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 120013, Msg: "shipment item quantity exceeded order quantity"}
 	ErrShipmentInvalidItems         = &Err{HTTPCode: http.StatusBadRequest, Code: 120014, Msg: "invalid shipment items"}
+	ErrShipmentExportLimitExceed    = &Err{HTTPCode: http.StatusBadRequest, Code: 120015, Msg: "export shipment count exceeds limit of 10000"}
 
 	// Refund errors (1201xx)
 	ErrRefundNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120101, Msg: "refund not found"}
@@ -406,7 +409,8 @@ var (
 	ErrPointsAccountFrozen        = &Err{HTTPCode: http.StatusBadRequest, Code: 250203, Msg: "points are frozen"}
 
 	// PointsTransaction errors (2503xx)
-	ErrPointsTransactionNotFound = &Err{HTTPCode: http.StatusNotFound, Code: 250301, Msg: "points transaction not found"}
+	ErrPointsTransactionNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 250301, Msg: "points transaction not found"}
+	ErrPointsTransactionExportLimitExceed = &Err{HTTPCode: http.StatusBadRequest, Code: 250302, Msg: "export limit exceeded, maximum 10000 records"}
 
 	// PointsRedemption errors (2504xx)
 	ErrPointsRedemptionNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 250401, Msg: "points redemption not found"}

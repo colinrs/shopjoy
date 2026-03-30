@@ -255,6 +255,9 @@ func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 	if query.OrderID != "" {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
 	}
+	if query.RefundNo != "" {
+		dbQuery = dbQuery.Where("refund_no LIKE ?", escapeLikePattern(query.RefundNo))
+	}
 	if query.UserID > 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
 	}

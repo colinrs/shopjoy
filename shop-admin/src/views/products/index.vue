@@ -4,7 +4,7 @@
     <el-card class="market-filter-card" shadow="never">
       <div class="market-filter-bar">
         <el-radio-group v-model="selectedMarket" @change="handleMarketChange">
-          <el-radio-button value="">All Markets</el-radio-button>
+          <el-radio-button value="">{{ $t('common.all') }}</el-radio-button>
           <el-radio-button
             v-for="market in markets"
             :key="market.id"
@@ -22,7 +22,7 @@
         <div class="filter-left">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索商品名称/编号"
+            :placeholder="$t('products.searchPlaceholder')"
             class="search-input"
             clearable
             @keyup.enter="handleSearch"
@@ -31,28 +31,31 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filterStatus" placeholder="商品状态" clearable class="filter-select" @change="handleSearch">
-            <el-option label="全部" value="" />
-            <el-option label="在售" value="on_sale" />
-            <el-option label="下架" value="off_sale" />
-            <el-option label="草稿" value="draft" />
+          <el-select v-model="filterStatus" :placeholder="$t('products.status')" clearable class="filter-select" @change="handleSearch">
+            <el-option :label="$t('common.all')" value="" />
+            <el-option :label="$t('products.onSale')" value="on_sale" />
+            <el-option :label="$t('products.offSale')" value="off_sale" />
+            <el-option :label="$t('products.draft')" value="draft" />
           </el-select>
-          <el-select v-model="filterCategory" placeholder="商品分类" clearable class="filter-select" @change="handleSearch">
-            <el-option label="数码电子" value="electronics" />
-            <el-option label="服装配饰" value="clothing" />
-            <el-option label="家居生活" value="home" />
-            <el-option label="运动户外" value="sports" />
-          </el-select>
+          <el-cascader
+            v-model="filterCategory"
+            :options="categoryOptions"
+            :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
+            :placeholder="$t('products.category')"
+            clearable
+            class="filter-select"
+            @change="handleSearch"
+          />
           <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>查询
+            <el-icon><Search /></el-icon>{{ $t('common.search') }}
           </el-button>
         </div>
         <div class="filter-right">
           <el-button @click="handleExport">
-            <el-icon><Download /></el-icon>导出
+            <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
           <el-button type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>新增商品
+            <el-icon><Plus /></el-icon>{{ $t('products.addProduct') }}
           </el-button>
         </div>
       </div>
@@ -60,11 +63,11 @@
 
     <!-- Bulk Actions -->
     <div class="bulk-actions" v-if="selectedProducts.length > 0">
-      <span class="selected-count">已选择 {{ selectedProducts.length }} 项</span>
-      <el-button size="small" @click="handleBatchOnSale">批量上架</el-button>
-      <el-button size="small" @click="handleBatchOffSale">批量下架</el-button>
-      <el-button size="small" type="success" @click="handleBatchPushToMarket">Push to Market</el-button>
-      <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
+      <span class="selected-count">{{ $t('products.selectedCount', { count: selectedProducts.length }) }}</span>
+      <el-button size="small" @click="handleBatchOnSale">{{ $t('products.batchOnSale') }}</el-button>
+      <el-button size="small" @click="handleBatchOffSale">{{ $t('products.batchOffSale') }}</el-button>
+      <el-button size="small" type="success" @click="handleBatchPushToMarket">{{ $t('products.pushToMarket') }}</el-button>
+      <el-button size="small" type="danger" @click="handleBatchDelete">{{ $t('products.batchDelete') }}</el-button>
     </div>
 
     <!-- Products Table -->
@@ -81,7 +84,7 @@
         stripe
       >
         <el-table-column type="selection" width="50" />
-        <el-table-column label="商品信息" min-width="300">
+        <el-table-column :label="$t('products.productInfo')" min-width="300">
           <template #default="{ row }">
             <div class="product-cell">
               <el-image
@@ -98,30 +101,30 @@
               </el-image>
               <div class="product-details">
                 <p class="product-name">{{ row.name }}</p>
-                <p class="product-sku">SKU: {{ row.sku || '暂无' }}</p>
+                <p class="product-sku">SKU: {{ row.sku || $t('common.noData') }}</p>
                 <div class="product-tags">
-                  <el-tag v-if="row.tags?.includes('hot')" size="small" type="danger" effect="plain">热销</el-tag>
-                  <el-tag v-if="row.tags?.includes('new')" size="small" type="success" effect="plain">新品</el-tag>
+                  <el-tag v-if="row.tags?.includes('hot')" size="small" type="danger" effect="plain">{{ $t('products.hot') }}</el-tag>
+                  <el-tag v-if="row.tags?.includes('new')" size="small" type="success" effect="plain">{{ $t('products.new') }}</el-tag>
                 </div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="价格" width="150" align="right">
+        <el-table-column :label="$t('products.price')" width="150" align="right">
           <template #default="{ row }">
             <div class="price-cell">
               <p class="sale-price">{{ row.currency || 'USD' }}{{ formatPrice(row.price) }}</p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="stock" label="库存" width="120" align="center">
+        <el-table-column prop="stock" :label="$t('products.stock')" width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getStockType(row.stock)" size="small">
               {{ row.stock }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Markets" min-width="150" align="center">
+        <el-table-column :label="$t('products.markets')" min-width="150" align="center">
           <template #default="{ row }">
             <div class="market-tags">
               <el-tag
@@ -134,17 +137,17 @@
                 {{ market.market_code }}
               </el-tag>
               <span v-if="!row.markets || row.markets.length === 0" class="no-markets">
-                No markets
+                {{ $t('products.noMarkets') }}
               </span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="分类ID" width="100" align="center">
+        <el-table-column :label="$t('products.categoryId')" width="100" align="center">
           <template #default="{ row }">
             {{ row.category_id || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" :label="$t('products.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -154,23 +157,23 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
-              编辑
+              {{ $t('common.edit') }}
             </el-button>
             <el-button type="primary" link size="small" @click="handleView(row)">
-              预览
+              {{ $t('products.preview') }}
             </el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
               <el-button type="primary" link size="small">
-                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ $t('common.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="copy">复制</el-dropdown-item>
-                  <el-dropdown-item command="top" divided>置顶</el-dropdown-item>
-                  <el-dropdown-item command="delete" type="danger">删除</el-dropdown-item>
+                  <el-dropdown-item command="copy">{{ $t('products.copy') }}</el-dropdown-item>
+                  <el-dropdown-item command="top" divided>{{ $t('products.setTop') }}</el-dropdown-item>
+                  <el-dropdown-item command="delete" type="danger">{{ $t('common.delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -195,44 +198,45 @@
     <!-- Add/Edit Dialog -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? '编辑商品' : '新增商品'"
+      :title="isEdit ? $t('products.editProduct') : $t('products.addProduct')"
       width="800px"
       destroy-on-close
     >
       <el-form :model="productForm" label-width="100px" :rules="formRules" ref="formRef">
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="商品名称" prop="name">
-              <el-input v-model="productForm.name" placeholder="请输入商品名称" />
+            <el-form-item :label="$t('products.productName')" prop="name">
+              <el-input v-model="productForm.name" :placeholder="$t('products.enterProductName')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="商品价格" prop="price">
+            <el-form-item :label="$t('products.productPrice')" prop="price">
               <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="原始价格">
+            <el-form-item :label="$t('products.originalPrice')">
               <el-input-number v-model="productForm.original_price" :min="0" :precision="2" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="库存数量" prop="stock">
+            <el-form-item :label="$t('products.stockQuantity')" prop="stock">
               <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="商品分类" prop="category">
-              <el-select v-model="productForm.category" placeholder="请选择分类" style="width: 100%">
-                <el-option label="数码电子" value="electronics" />
-                <el-option label="服装配饰" value="clothing" />
-                <el-option label="家居生活" value="home" />
-                <el-option label="运动户外" value="sports" />
-              </el-select>
+            <el-form-item :label="$t('products.productCategory')" prop="category_id">
+              <el-cascader
+                v-model="productForm.category_id"
+                :options="categoryOptions"
+                :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
+                :placeholder="$t('products.selectCategory')"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="商品图片">
+            <el-form-item :label="$t('products.productImage')">
               <el-upload
                 class="avatar-uploader"
                 action="#"
@@ -246,27 +250,27 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="商品描述">
+            <el-form-item :label="$t('products.productDescription')">
               <el-input v-model="productForm.description" type="textarea" rows="4" />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Push to Market Dialog -->
     <el-dialog
       v-model="pushToMarketDialogVisible"
-      title="Push to Market"
+      :title="$t('products.pushToMarket')"
       width="500px"
       destroy-on-close
     >
       <el-form :model="pushToMarketForm" label-width="120px" ref="pushToMarketFormRef">
-        <el-form-item label="Markets" prop="markets" required>
+        <el-form-item :label="$t('products.markets')" prop="markets" required>
           <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">
             <el-checkbox
               v-for="market in availableMarkets"
@@ -278,20 +282,20 @@
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="Price (USD)" prop="price" required>
+        <el-form-item :label="$t('products.priceUSD')" prop="price" required>
           <el-input-number
             v-model="pushToMarketForm.price"
             :min="0"
             :precision="2"
             style="width: 100%"
           />
-          <div class="price-note">Note: The price is in base currency (USD). It will be applied to all selected markets regardless of their local currency.</div>
+          <div class="price-note">{{ $t('products.priceNote') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="pushToMarketDialogVisible = false">Cancel</el-button>
+        <el-button @click="pushToMarketDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleConfirmPushToMarket" :loading="pushToMarketLoading">
-          Push to Market
+          {{ $t('products.pushToMarket') }}
         </el-button>
       </template>
     </el-dialog>
@@ -303,10 +307,12 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
-import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, type Product, type ListProductsParams } from '@/api/product'
+import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
+import { getCategoryTree, type CategoryTree } from '@/api/category'
 import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
+import { t } from '@/plugins/i18n'
 
 const router = useRouter()
 
@@ -318,7 +324,7 @@ const pushToMarketDialogVisible = ref(false)
 const isEdit = ref(false)
 const searchQuery = ref('')
 const filterStatus = ref('')
-const filterCategory = ref('')
+const filterCategory = ref<number | ''>('')
 const selectedMarket = ref<number | ''>('')
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -331,6 +337,9 @@ const defaultImage = 'https://via.placeholder.com/80'
 // Market data
 const markets = ref<Market[]>([])
 const productList = ref<Product[]>([])
+
+// Category data
+const categoryOptions = ref<CategoryTree[]>([])
 
 // Push to market form
 const pushToMarketForm = reactive({
@@ -370,14 +379,14 @@ const productForm = reactive({
 })
 
 const formRules = {
-  name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
-  price: [{ required: true, message: '请输入商品价格', trigger: 'blur' }],
-  stock: [{ required: true, message: '请输入库存数量', trigger: 'blur' }],
-  category: [{ required: true, message: '请选择商品分类', trigger: 'change' }]
+  name: [{ required: true, message: '', trigger: 'blur' }],
+  price: [{ required: true, message: '', trigger: 'blur' }],
+  stock: [{ required: true, message: '', trigger: 'blur' }],
+  category: [{ required: true, message: '', trigger: 'change' }]
 }
 
-const formatPrice = (price: number) => {
-  return (price / 100).toFixed(2)
+const formatPrice = (price: string) => {
+  return price
 }
 
 const getStockType = (stock: number) => {
@@ -391,8 +400,37 @@ const handleSearch = () => {
   loadProducts()
 }
 
-const handleExport = () => {
-  ElMessage.success('导出成功')
+const handleExport = async () => {
+  try {
+    loading.value = true
+    // Build export params from current filters
+    const params: Record<string, any> = {
+      page: 1,
+      page_size: 10000 // Export all matching records
+    }
+    if (searchQuery.value) {
+      params.name = searchQuery.value
+    }
+    if (filterStatus.value) {
+      params.status = filterStatus.value
+    }
+    if (filterCategory.value) {
+      params.category_id = filterCategory.value
+    }
+    if (selectedMarket.value) {
+      params.market_id = selectedMarket.value
+    }
+
+    // Use window.open for export since there's no dedicated export API
+    const queryString = new URLSearchParams(params).toString()
+    const exportUrl = `/api/v1/products/export?${queryString}`
+    window.open(exportUrl, '_blank')
+    ElMessage.success(t('products.exporting'))
+  } catch (error) {
+    ElMessage.error(t('products.exportFailed'))
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleAdd = () => {
@@ -415,16 +453,22 @@ const handleEdit = (row: any) => {
 }
 
 const handleView = (row: any) => {
-  ElMessage.info('预览商品: ' + row.name)
+  router.push(`/products/${row.id}`)
 }
 
-const handleCommand = (cmd: string, row: any) => {
+const handleCommand = async (cmd: string, row: any) => {
   switch (cmd) {
     case 'copy':
-      ElMessage.success('已复制商品')
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(row, null, 2))
+        ElMessage.success(t('products.copiedToClipboard'))
+      } catch (error) {
+        console.error('Failed to copy:', error)
+        ElMessage.error(t('products.copyFailed'))
+      }
       break
     case 'top':
-      ElMessage.success('已置顶商品')
+      ElMessage.success(t('products.setTopSuccess'))
       break
     case 'delete':
       handleDelete(row)
@@ -432,29 +476,42 @@ const handleCommand = (cmd: string, row: any) => {
   }
 }
 
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm(`确认删除商品 "${row.name}"?`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-  })
+const handleDelete = async (row: any) => {
+  try {
+    await ElMessageBox.confirm(
+      t('products.confirmDelete', { name: row.name }),
+      t('common.warning'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning'
+      }
+    )
+    await deleteProduct(row.id)
+    ElMessage.success(t('products.deleteSuccess'))
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to delete product:', error)
+    if (error !== 'cancel') {
+      ElMessage.error(t('products.deleteFailed'))
+    }
+  }
 }
 
 const handleStatusChange = async (row: Product, val: string) => {
-  const statusText = val === 'on_sale' ? '上架' : '下架'
+  const statusKey = val === 'on_sale' ? 'products.onSaleSuccess' : 'products.offSaleSuccess'
   try {
     if (val === 'on_sale') {
       await putOnSale(row.id)
     } else {
       await takeOffSale(row.id)
     }
-    ElMessage.success(`商品已${statusText}`)
+    ElMessage.success(t(statusKey))
     loadProducts()
   } catch (error) {
     console.error('Failed to update status:', error)
-    ElMessage.error(`商品${statusText}失败`)
+    const errorKey = val === 'on_sale' ? 'products.onSaleFailed' : 'products.offSaleFailed'
+    ElMessage.error(t(errorKey))
     // Revert the switch
     row.status = val === 'on_sale' ? 'off_sale' : 'on_sale'
   }
@@ -468,11 +525,11 @@ const handleBatchOnSale = async () => {
   try {
     const promises = selectedProducts.value.map(p => putOnSale(p.id))
     await Promise.all(promises)
-    ElMessage.success(`已批量上架 ${selectedProducts.value.length} 个商品`)
+    ElMessage.success(t('products.batchOnSaleSuccess', { count: selectedProducts.value.length }))
     loadProducts()
   } catch (error) {
     console.error('Failed to batch put on sale:', error)
-    ElMessage.error('批量上架失败')
+    ElMessage.error(t('products.batchOnSaleFailed'))
   }
 }
 
@@ -480,27 +537,51 @@ const handleBatchOffSale = async () => {
   try {
     const promises = selectedProducts.value.map(p => takeOffSale(p.id))
     await Promise.all(promises)
-    ElMessage.success(`已批量下架 ${selectedProducts.value.length} 个商品`)
+    ElMessage.success(t('products.batchOffSaleSuccess', { count: selectedProducts.value.length }))
     loadProducts()
   } catch (error) {
     console.error('Failed to batch take off sale:', error)
-    ElMessage.error('批量下架失败')
+    ElMessage.error(t('products.batchOffSaleFailed'))
   }
 }
 
-const handleBatchDelete = () => {
-  ElMessageBox.confirm(`确认删除选中的 ${selectedProducts.value.length} 个商品?`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    ElMessage.success('批量删除成功')
-  })
+const handleBatchDelete = async () => {
+  try {
+    await ElMessageBox.confirm(
+      t('products.confirmBatchDelete', { count: selectedProducts.value.length }),
+      t('common.warning'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning'
+      }
+    )
+
+    const deletePromises = selectedProducts.value.map(p => deleteProduct(p.id))
+    const results = await Promise.allSettled(deletePromises)
+
+    const failedCount = results.filter(r => r.status === 'rejected').length
+    const successCount = results.filter(r => r.status === 'fulfilled').length
+
+    if (failedCount > 0) {
+      ElMessage.error(t('products.batchDeletePartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('products.batchDeleteSuccess', { count: successCount }))
+    }
+
+    selectedProducts.value = []
+    loadProducts()
+  } catch (error) {
+    console.error('Failed to batch delete:', error)
+    if ((error as any)?.message !== 'cancel') {
+      ElMessage.error(t('products.batchDeleteFailed'))
+    }
+  }
 }
 
 const handleBatchPushToMarket = () => {
   if (selectedProducts.value.length === 0) {
-    ElMessage.warning('Please select at least one product')
+    ElMessage.warning(t('products.selectAtLeastOneProduct'))
     return
   }
 
@@ -512,11 +593,11 @@ const handleBatchPushToMarket = () => {
 
 const handleConfirmPushToMarket = async () => {
   if (pushToMarketForm.selectedMarkets.length === 0) {
-    ElMessage.warning('Please select at least one market')
+    ElMessage.warning(t('products.selectAtLeastOneMarket'))
     return
   }
   if (pushToMarketForm.price <= 0) {
-    ElMessage.warning('Please enter a valid price')
+    ElMessage.warning(t('products.enterValidPrice'))
     return
   }
 
@@ -543,11 +624,11 @@ const handleConfirmPushToMarket = async () => {
     }
 
     pushToMarketDialogVisible.value = false
-    ElMessage.success(`Push to market completed. Success: ${successCount}, Failed: ${failCount}`)
+    ElMessage.success(t('products.pushToMarketSuccess', { success: successCount, failed: failCount }))
     loadProducts()
   } catch (error) {
     console.error('Failed to push to market:', error)
-    ElMessage.error('Failed to push to market')
+    ElMessage.error(t('products.pushToMarketFailed'))
   } finally {
     pushToMarketLoading.value = false
   }
@@ -560,19 +641,12 @@ const handleSave = async () => {
     if (valid) {
       saveLoading.value = true
       try {
-        const categoryMap: Record<string, number> = {
-          electronics: 1,
-          clothing: 2,
-          home: 3,
-          sports: 4
-        }
-
         await createProduct({
           name: productForm.name,
           description: productForm.description,
           price: String(productForm.price),
           currency: 'USD',
-          category_id: categoryMap[productForm.category] || 1,
+          category_id: productForm.category_id || 1,
           sku: productForm.sku,
           brand: productForm.brand,
           tags: productForm.tags,
@@ -588,11 +662,11 @@ const handleSave = async () => {
           dangerous_goods: productForm.dangerous_goods
         })
         dialogVisible.value = false
-        ElMessage.success('添加成功')
+        ElMessage.success(t('products.addSuccess'))
         loadProducts()
       } catch (error) {
         console.error('Failed to create product:', error)
-        ElMessage.error('添加失败')
+        ElMessage.error(t('products.addFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -606,7 +680,7 @@ const handleImageChange = async (file: any) => {
     productForm.image = response.url
   } catch (error) {
     console.error('Upload failed:', error)
-    ElMessage.error('图片上传失败')
+    ElMessage.error(t('products.imageUploadFailed'))
   }
 }
 
@@ -631,7 +705,17 @@ const loadMarkets = async () => {
     markets.value = response.list || []
   } catch (error) {
     console.error('Failed to load markets:', error)
-    ElMessage.error('Failed to load markets')
+    ElMessage.error(t('products.loadMarketsFailed'))
+  }
+}
+
+const loadCategories = async () => {
+  try {
+    const response = await getCategoryTree()
+    categoryOptions.value = response || []
+  } catch (error) {
+    console.error('Failed to load categories:', error)
+    ElMessage.error(t('products.loadCategoriesFailed'))
   }
 }
 
@@ -650,14 +734,7 @@ const loadProducts = async () => {
       params.status = filterStatus.value
     }
     if (filterCategory.value) {
-      // Map category string to ID
-      const categoryMap: Record<string, number> = {
-        electronics: 1,
-        clothing: 2,
-        home: 3,
-        sports: 4
-      }
-      params.category_id = categoryMap[filterCategory.value] || 0
+      params.category_id = filterCategory.value
     }
     if (selectedMarket.value) {
       params.market_id = selectedMarket.value
@@ -668,7 +745,7 @@ const loadProducts = async () => {
     total.value = response.total || 0
   } catch (error) {
     console.error('Failed to load products:', error)
-    ElMessage.error('Failed to load products')
+    ElMessage.error(t('products.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -676,6 +753,7 @@ const loadProducts = async () => {
 
 onMounted(() => {
   loadMarkets()
+  loadCategories()
   loadProducts()
 })
 </script>

@@ -1,14 +1,14 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="Initiate Refund"
+    :title="$t('payments.initiateRefund')"
     width="560px"
     :close-on-click-modal="false"
     destroy-on-close
   >
     <el-steps :active="currentStep" simple class="refund-steps">
-      <el-step title="Select Type" />
-      <el-step title="Confirm" />
+      <el-step :title="$t('payments.selectType')" />
+      <el-step :title="$t('payments.confirm')" />
     </el-steps>
 
     <!-- Step 1: Type & Reason -->
@@ -17,27 +17,27 @@
       <div class="order-info-banner">
         <el-icon><Document /></el-icon>
         <div class="order-info-content">
-          <p class="order-no">Order: {{ order?.order_no }}</p>
-          <p class="order-amount">Paid: {{ order?.currency }} {{ formatAmount(maxRefundable) }}</p>
+          <p class="order-no">{{ $t('payments.order') }}: {{ order?.order_no }}</p>
+          <p class="order-amount">{{ $t('payments.paid') }}: {{ order?.currency }} {{ formatAmount(maxRefundable) }}</p>
         </div>
       </div>
 
       <!-- Refund Type -->
       <div class="refund-type-section">
-        <p class="section-label">Refund Type</p>
+        <p class="section-label">{{ $t('payments.refundType') }}</p>
         <el-radio-group v-model="form.refundType" class="refund-type-group">
           <el-radio-button value="full">
             <div class="type-option">
               <el-icon><FullScreen /></el-icon>
-              <span class="type-title">Full Refund</span>
-              <span class="type-desc">Refund full amount</span>
+              <span class="type-title">{{ $t('payments.fullRefund') }}</span>
+              <span class="type-desc">{{ $t('payments.refundFullAmount') }}</span>
             </div>
           </el-radio-button>
           <el-radio-button value="partial">
             <div class="type-option">
               <el-icon><Compass /></el-icon>
-              <span class="type-title">Partial Refund</span>
-              <span class="type-desc">Refund part of amount</span>
+              <span class="type-title">{{ $t('payments.partialRefund') }}</span>
+              <span class="type-desc">{{ $t('payments.refundPartOfAmount') }}</span>
             </div>
           </el-radio-button>
         </el-radio-group>
@@ -46,7 +46,7 @@
       <!-- Partial Amount Input -->
       <transition name="slide-down">
         <div v-if="form.refundType === 'partial'" class="amount-input-section">
-          <p class="section-label">Refund Amount</p>
+          <p class="section-label">{{ $t('payments.refundAmount') }}</p>
           <div class="amount-input-wrapper">
             <span class="currency-label">{{ order?.currency }}</span>
             <el-input-number
@@ -59,7 +59,7 @@
             />
           </div>
           <div class="amount-hint">
-            <span>Max refundable: {{ order?.currency }} {{ formatAmount(maxRefundable) }}</span>
+            <span>{{ $t('payments.maxRefundable') }}: {{ order?.currency }} {{ formatAmount(maxRefundable) }}</span>
             <el-progress
               :percentage="refundPercentage"
               :stroke-width="4"
@@ -72,8 +72,8 @@
 
       <!-- Reason -->
       <div class="reason-section">
-        <p class="section-label">Refund Reason</p>
-        <el-select v-model="form.reasonType" placeholder="Select refund reason" style="width: 100%">
+        <p class="section-label">{{ $t('payments.refundReason') }}</p>
+        <el-select v-model="form.reasonType" :placeholder="$t('payments.selectRefundReason')" style="width: 100%">
           <el-option
             v-for="reason in refundReasons"
             :key="reason.code"
@@ -85,12 +85,12 @@
 
       <!-- Notes -->
       <div class="notes-section">
-        <p class="section-label">Additional Notes (Optional)</p>
+        <p class="section-label">{{ $t('payments.additionalNotes') }}</p>
         <el-input
           v-model="form.notes"
           type="textarea"
           :rows="3"
-          placeholder="Enter any additional information..."
+          :placeholder="$t('payments.enterAdditionalInfo')"
           maxlength="500"
           show-word-limit
         />
@@ -101,36 +101,36 @@
     <div v-show="currentStep === 1" class="step-content">
       <el-alert type="warning" :closable="false" class="confirm-alert">
         <template #title>
-          Please confirm the refund details below
+          {{ $t('payments.confirmRefundDetails') }}
         </template>
       </el-alert>
 
       <div class="confirm-summary">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="Order No.">
+          <el-descriptions-item :label="$t('payments.orderNo')">
             <span class="value-text">{{ order?.order_no }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="Refund Type">
+          <el-descriptions-item :label="$t('payments.refundType')">
             <el-tag :type="form.refundType === 'full' ? 'primary' : 'warning'" size="small">
-              {{ form.refundType === 'full' ? 'Full Refund' : 'Partial Refund' }}
+              {{ form.refundType === 'full' ? $t('payments.fullRefund') : $t('payments.partialRefund') }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="Refund Amount">
+          <el-descriptions-item :label="$t('payments.refundAmount')">
             <span class="confirm-amount">
               {{ order?.currency }} {{ formatAmount(actualRefundAmount) }}
             </span>
           </el-descriptions-item>
-          <el-descriptions-item label="Reason">
+          <el-descriptions-item :label="$t('payments.reason')">
             {{ getReasonName(form.reasonType) }}
           </el-descriptions-item>
-          <el-descriptions-item v-if="form.notes" label="Notes">
+          <el-descriptions-item v-if="form.notes" :label="$t('payments.notes')">
             {{ form.notes }}
           </el-descriptions-item>
         </el-descriptions>
 
         <div v-if="form.refundType === 'partial'" class="remaining-info">
           <el-icon><InfoFilled /></el-icon>
-          <span>Remaining order amount: {{ order?.currency }} {{ formatAmount(remainingAmount) }}</span>
+          <span>{{ $t('payments.remainingOrderAmount') }}: {{ order?.currency }} {{ formatAmount(remainingAmount) }}</span>
         </div>
       </div>
     </div>
@@ -139,16 +139,16 @@
       <div class="dialog-footer">
         <el-button v-if="currentStep > 0" @click="prevStep">
           <el-icon><ArrowLeft /></el-icon>
-          Back
+          {{ $t('payments.back') }}
         </el-button>
-        <el-button @click="handleCancel">Cancel</el-button>
+        <el-button @click="handleCancel">{{ $t('common.cancel') }}</el-button>
         <el-button
           v-if="currentStep === 0"
           type="primary"
           :disabled="!canProceed"
           @click="nextStep"
         >
-          Next Step
+          {{ $t('payments.nextStep') }}
           <el-icon><ArrowRight /></el-icon>
         </el-button>
         <el-button
@@ -158,7 +158,7 @@
           @click="confirmRefund"
         >
           <el-icon><Check /></el-icon>
-          Confirm Refund
+          {{ $t('payments.confirmRefund') }}
         </el-button>
       </div>
     </template>
@@ -178,6 +178,7 @@ import {
   Check
 } from '@element-plus/icons-vue'
 import { initiateRefund, type OrderPayment } from '@/api/payment'
+import { t } from '@/plugins/i18n'
 
 // Generate UUID for idempotency
 const generateIdempotencyKey = () => {
@@ -283,11 +284,11 @@ const confirmRefund = async () => {
       reason_type: form.reasonType,
       reason: form.notes || undefined
     })
-    ElMessage.success('Refund initiated successfully')
+    ElMessage.success(t('payments.refundInitiatedSuccessfully'))
     emit('success')
     visible.value = false
   } catch (error: any) {
-    ElMessage.error(error?.response?.data?.msg || 'Failed to initiate refund')
+    ElMessage.error(error?.response?.data?.msg || t('payments.failedToInitiateRefund'))
   } finally {
     submitting.value = false
   }

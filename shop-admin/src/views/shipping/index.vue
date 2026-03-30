@@ -4,17 +4,17 @@
     <el-card class="header-card" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <h2>运费模板</h2>
-          <p class="header-desc">管理不同地区的运费规则</p>
+          <h2>{{ $t('shipping.templatesTitle') }}</h2>
+          <p class="header-desc">{{ $t('shipping.templatesDesc') }}</p>
         </div>
         <div class="header-right">
           <el-button @click="goToCalculator">
             <el-icon><Coin /></el-icon>
-            运费计算器
+            {{ $t('shipping.calculatorBtn') }}
           </el-button>
           <el-button type="primary" @click="handleCreate">
             <el-icon><Plus /></el-icon>
-            新建模板
+            {{ $t('shipping.createTemplateBtn') }}
           </el-button>
         </div>
       </div>
@@ -25,7 +25,7 @@
       <div class="filter-bar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索模板名称..."
+          :placeholder="$t('shipping.searchPlaceholder')"
           class="search-input"
           clearable
           @keyup.enter="handleSearch"
@@ -35,24 +35,24 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-select v-model="filterStatus" placeholder="状态" clearable class="filter-select" @change="handleSearch">
-          <el-option label="全部" value="" />
-          <el-option label="已启用" value="true" />
-          <el-option label="已禁用" value="false" />
+        <el-select v-model="filterStatus" :placeholder="$t('shipping.status')" clearable class="filter-select" @change="handleSearch">
+          <el-option :label="$t('shipping.all')" value="" />
+          <el-option :label="$t('shipping.enabled')" value="true" />
+          <el-option :label="$t('shipping.disabled')" value="false" />
         </el-select>
         <el-button type="primary" @click="handleSearch">
           <el-icon><Search /></el-icon>
-          搜索
+          {{ $t('shipping.search') }}
         </el-button>
       </div>
     </el-card>
 
     <!-- Templates Grid -->
     <div class="templates-grid" v-loading="loading">
-      <el-empty v-if="!loading && templates.length === 0" description="暂无运费模板">
+      <el-empty v-if="!loading && templates.length === 0" :description="$t('shipping.noTemplates')">
         <el-button type="primary" @click="handleCreate">
           <el-icon><Plus /></el-icon>
-          创建模板
+          {{ $t('shipping.createTemplate') }}
         </el-button>
       </el-empty>
 
@@ -82,23 +82,23 @@
     <!-- Create Dialog -->
     <el-dialog
       v-model="createDialogVisible"
-      title="新建运费模板"
+      :title="$t('shipping.createDialogTitle')"
       width="500px"
       destroy-on-close
     >
       <el-form :model="createForm" :rules="createRules" ref="createFormRef" label-width="100px">
-        <el-form-item label="模板名称" prop="name">
-          <el-input v-model="createForm.name" placeholder="例如：全国包邮模板" />
+        <el-form-item :label="$t('shipping.templateName')" prop="name">
+          <el-input v-model="createForm.name" :placeholder="$t('shipping.templateNamePlaceholder')" />
         </el-form-item>
-        <el-form-item label="设为默认">
+        <el-form-item :label="$t('shipping.setAsDefault')">
           <el-switch v-model="createForm.is_default" />
-          <div class="form-tip">默认模板将用于未指定模板的商品</div>
+          <div class="form-tip">{{ $t('shipping.defaultTip') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
+        <el-button @click="createDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleConfirmCreate" :loading="createLoading">
-          创建
+          {{ $t('shipping.create') }}
         </el-button>
       </template>
     </el-dialog>
@@ -108,6 +108,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Coin } from '@element-plus/icons-vue'
 import {
@@ -120,6 +121,7 @@ import {
 import TemplateCard from './components/TemplateCard.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // State
 const loading = ref(false)
@@ -140,8 +142,8 @@ const createForm = reactive({
 
 const createRules = {
   name: [
-    { required: true, message: '请输入模板名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '名称长度为2-50个字符', trigger: 'blur' }
+    { required: true, message: 'shipping.templateNameRequired', trigger: 'blur' },
+    { min: 2, max: 50, message: 'shipping.templateNameLength', trigger: 'blur' }
   ]
 }
 
@@ -164,7 +166,7 @@ const loadTemplates = async () => {
     total.value = data.total || 0
   } catch (error) {
     console.error('Failed to load templates:', error)
-    ElMessage.error('加载模板失败')
+    ElMessage.error(t('shipping.loadTemplateFailed'))
   } finally {
     loading.value = false
   }
@@ -192,12 +194,12 @@ const handleConfirmCreate = async () => {
           name: createForm.name,
           is_default: createForm.is_default
         })
-        ElMessage.success('创建成功')
+        ElMessage.success(t('shipping.createSuccess'))
         createDialogVisible.value = false
         loadTemplates()
       } catch (error) {
         console.error('Failed to create template:', error)
-        ElMessage.error('创建失败')
+        ElMessage.error(t('shipping.createFailed'))
       } finally {
         createLoading.value = false
       }
@@ -211,23 +213,23 @@ const handleEdit = (id: number) => {
 
 const handleDelete = async (template: ShippingTemplate) => {
   if (template.is_default) {
-    ElMessage.warning('无法删除默认模板，请先设置其他模板为默认')
+    ElMessage.warning(t('shipping.cannotDeleteDefault'))
     return
   }
 
   try {
-    await ElMessageBox.confirm(`确认删除模板 "${template.name}"？`, '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(t('shipping.confirmDelete', { name: template.name }), t('shipping.warning'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
     await deleteShippingTemplate(template.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('shipping.deleteSuccess'))
     loadTemplates()
   } catch (error: any) {
     if (error !== 'cancel') {
       console.error('Failed to delete template:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(t('shipping.deleteFailed'))
     }
   }
 }
@@ -235,11 +237,11 @@ const handleDelete = async (template: ShippingTemplate) => {
 const handleSetDefault = async (template: ShippingTemplate) => {
   try {
     await setDefaultTemplate(template.id)
-    ElMessage.success('已设置为默认模板')
+    ElMessage.success(t('shipping.setAsDefaultSuccess'))
     loadTemplates()
   } catch (error) {
     console.error('Failed to set default:', error)
-    ElMessage.error('设置失败')
+    ElMessage.error(t('shipping.setAsDefaultFailed'))
   }
 }
 

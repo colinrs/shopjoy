@@ -3,17 +3,17 @@
     <!-- Page Header -->
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">After-Sales Statistics</h1>
-        <p class="page-subtitle">Refund analytics and fulfillment performance insights</p>
+        <h1 class="page-title">{{ $t('fulfillment.afterSalesStatistics') }}</h1>
+        <p class="page-subtitle">{{ $t('fulfillment.refundAnalytics') }}</p>
       </div>
       <div class="header-right">
         <el-radio-group v-model="timeRange" size="default" @change="loadData">
-          <el-radio-button label="7">7 Days</el-radio-button>
-          <el-radio-button label="30">30 Days</el-radio-button>
-          <el-radio-button label="90">90 Days</el-radio-button>
+          <el-radio-button label="7">{{ $t('payments.period7d') }}</el-radio-button>
+          <el-radio-button label="30">{{ $t('payments.period30d') }}</el-radio-button>
+          <el-radio-button label="90">{{ $t('payments.period90d') }}</el-radio-button>
         </el-radio-group>
         <el-button @click="handleExport">
-          <el-icon><Download /></el-icon>Export Report
+          <el-icon><Download /></el-icon>{{ $t('fulfillment.exportReport') }}
         </el-button>
       </div>
     </div>
@@ -26,14 +26,14 @@
             <el-icon><RefreshRight /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">Refund Rate</p>
+            <p class="stat-label">{{ $t('fulfillment.refundRate') }}</p>
             <p class="stat-value">{{ stats.refund_rate.toFixed(1) }}%</p>
             <p class="stat-change" :class="refundRateChange >= 0 ? 'negative' : 'positive'">
               <el-icon>
                 <ArrowUp v-if="refundRateChange >= 0" />
                 <ArrowDown v-else />
               </el-icon>
-              {{ Math.abs(refundRateChange).toFixed(1) }}% vs last period
+              {{ Math.abs(refundRateChange).toFixed(1) }}% {{ $t('dashboard.vsLastPeriod') }}
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@
             <el-icon><Money /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">Total Refunds</p>
+            <p class="stat-label">{{ $t('fulfillment.totalRefunds') }}</p>
             <p class="stat-value">{{ stats.total_refunds }}</p>
             <p class="stat-amount">CNY {{ formatAmount(stats.refund_amount) }}</p>
           </div>
@@ -56,9 +56,9 @@
             <el-icon><Van /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">Delivery Success</p>
+            <p class="stat-label">{{ $t('fulfillment.deliverySuccess') }}</p>
             <p class="stat-value">{{ stats.delivery_success_rate.toFixed(1) }}%</p>
-            <p class="stat-detail">{{ stats.total_shipments }} total shipments</p>
+            <p class="stat-detail">{{ stats.total_shipments }} {{ $t('fulfillment.totalShipments') }}</p>
           </div>
         </div>
       </el-col>
@@ -68,9 +68,9 @@
             <el-icon><Clock /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">Pending Refunds</p>
+            <p class="stat-label">{{ $t('fulfillment.pendingRefunds') }}</p>
             <p class="stat-value highlight">{{ stats.pending_refunds }}</p>
-            <p class="stat-detail">Awaiting review</p>
+            <p class="stat-detail">{{ $t('fulfillment.awaitingReview') }}</p>
           </div>
         </div>
       </el-col>
@@ -85,7 +85,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><TrendCharts /></el-icon>
-                Refund Rate Trend
+                {{ $t('fulfillment.refundRateTrend') }}
               </span>
             </div>
           </template>
@@ -100,7 +100,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><PieChart /></el-icon>
-                Refund Reasons
+                {{ $t('fulfillment.refundReasons') }}
               </span>
             </div>
           </template>
@@ -118,14 +118,14 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Warning /></el-icon>
-                Problem Products
-                <el-tag type="danger" size="small" effect="plain">High Refund Rate</el-tag>
+                {{ $t('fulfillment.problemProducts') }}
+                <el-tag type="danger" size="small" effect="plain">{{ $t('fulfillment.highRefundRate') }}</el-tag>
               </span>
-              <el-button type="primary" link>View All</el-button>
+              <el-button type="primary" link>{{ $t('common.viewAll') }}</el-button>
             </div>
           </template>
           <el-table :data="problemProducts" stripe style="width: 100%">
-            <el-table-column label="Product" min-width="180">
+            <el-table-column :label="$t('fulfillment.product')" min-width="180">
               <template #default="{ row }">
                 <div class="product-cell">
                   <el-avatar :size="40" :src="row.image" shape="square" class="product-avatar">
@@ -138,17 +138,17 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="Sales" width="80" align="right">
+            <el-table-column :label="$t('fulfillment.salesCount')" width="80" align="right">
               <template #default="{ row }">
                 <span class="sales-num">{{ row.total_sales }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="Refunds" width="80" align="right">
+            <el-table-column :label="$t('fulfillment.refundsCount')" width="80" align="right">
               <template #default="{ row }">
                 <span class="refund-num">{{ row.refund_count }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="Rate" width="90" align="center">
+            <el-table-column :label="$t('fulfillment.rateLabel')" width="90" align="center">
               <template #default="{ row }">
                 <el-tag :type="getRefundRateTagType(row.refund_rate)" size="small">
                   {{ row.refund_rate.toFixed(1) }}%
@@ -166,23 +166,23 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Van /></el-icon>
-                Carrier Performance
+                {{ $t('fulfillment.carrierPerformance') }}
               </span>
-              <el-button type="primary" link>View All</el-button>
+              <el-button type="primary" link>{{ $t('common.viewAll') }}</el-button>
             </div>
           </template>
           <el-table :data="carrierPerformance" stripe style="width: 100%">
-            <el-table-column label="Carrier" min-width="120">
+            <el-table-column :label="$t('fulfillment.carrier')" min-width="120">
               <template #default="{ row }">
                 <span class="carrier-name">{{ row.carrier_name }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="Shipments" width="100" align="right">
+            <el-table-column :label="$t('fulfillment.shipmentCount')" width="100" align="right">
               <template #default="{ row }">
                 <span class="shipment-num">{{ row.total_shipments }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="Success Rate" width="120" align="center">
+            <el-table-column :label="$t('fulfillment.successRate')" width="120" align="center">
               <template #default="{ row }">
                 <el-progress
                   :percentage="row.delivery_success_rate"
@@ -191,9 +191,9 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column label="Avg. Time" width="100" align="center">
+            <el-table-column :label="$t('fulfillment.avgDeliveryTime')" width="100" align="center">
               <template #default="{ row }">
-                <span class="time-text">{{ row.avg_delivery_time }}d</span>
+                <span class="time-text">{{ row.avg_delivery_time }}{{ $t('fulfillment.days') }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -211,6 +211,7 @@ import {
   Warning, Goods, ArrowUp, ArrowDown
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
+import { t } from '@/plugins/i18n'
 import { getFulfillmentStatistics } from '@/api/fulfillment'
 
 const timeRange = ref('30')
@@ -220,31 +221,19 @@ let trendChart: echarts.ECharts | null = null
 let reasonChart: echarts.ECharts | null = null
 
 const stats = ref({
-  refund_rate: 3.2,
-  total_refunds: 156,
-  refund_amount: 45800,
-  delivery_success_rate: 98.5,
-  total_shipments: 2340,
-  pending_refunds: 8
+  refund_rate: 0,
+  total_refunds: 0,
+  refund_amount: 0,
+  delivery_success_rate: 0,
+  total_shipments: 0,
+  pending_refunds: 0
 })
 
 const refundRateChange = ref(-0.5)
 
-const problemProducts = ref([
-  { product_id: 101, product_name: 'Wireless Earbuds X1', image: '', total_sales: 45, refund_count: 8, refund_rate: 17.8 },
-  { product_id: 102, product_name: 'Phone Case Pro', image: '', total_sales: 120, refund_count: 15, refund_rate: 12.5 },
-  { product_id: 103, product_name: 'USB-C Cable 2m', image: '', total_sales: 89, refund_count: 9, refund_rate: 10.1 },
-  { product_id: 104, product_name: 'Screen Protector', image: '', total_sales: 200, refund_count: 18, refund_rate: 9.0 },
-  { product_id: 105, product_name: 'Charging Stand', image: '', total_sales: 67, refund_count: 5, refund_rate: 7.5 }
-])
+const problemProducts = ref<{ product_id: number; product_name: string; image: string; total_sales: number; refund_count: number; refund_rate: number }[]>([])
 
-const carrierPerformance = ref([
-  { carrier_code: 'SF', carrier_name: 'SF Express', total_shipments: 856, delivery_success_rate: 99.2, avg_delivery_time: 2.1 },
-  { carrier_code: 'ZT', carrier_name: 'ZTO Express', total_shipments: 623, delivery_success_rate: 98.5, avg_delivery_time: 2.8 },
-  { carrier_code: 'YT', carrier_name: 'YTO Express', total_shipments: 412, delivery_success_rate: 97.8, avg_delivery_time: 3.2 },
-  { carrier_code: 'YD', carrier_name: 'Yunda Express', total_shipments: 289, delivery_success_rate: 97.1, avg_delivery_time: 3.5 },
-  { carrier_code: 'EMS', carrier_name: 'EMS', total_shipments: 160, delivery_success_rate: 96.5, avg_delivery_time: 4.1 }
-])
+const carrierPerformance = ref<{ carrier_code: string; carrier_name: string; total_shipments: number; delivery_success_rate: number; avg_delivery_time: number }[]>([])
 
 const formatAmount = (cents: number) => {
   return (cents / 100).toLocaleString()
@@ -287,7 +276,7 @@ const initTrendChart = () => {
     },
     yAxis: {
       type: 'value',
-      name: 'Refund Rate (%)',
+      name: t('fulfillment.refundRate'),
       min: 0,
       max: 6,
       axisLine: { show: false },
@@ -297,7 +286,7 @@ const initTrendChart = () => {
     },
     series: [
       {
-        name: 'Refund Rate',
+        name: t('fulfillment.refundRate'),
         type: 'line',
         smooth: true,
         symbol: 'circle',
@@ -343,7 +332,7 @@ const initReasonChart = () => {
     },
     series: [
       {
-        name: 'Refund Reason',
+        name: t('fulfillment.refundReason'),
         type: 'pie',
         radius: ['45%', '70%'],
         center: ['35%', '50%'],
@@ -363,12 +352,12 @@ const initReasonChart = () => {
         },
         labelLine: { show: false },
         data: [
-          { value: 45, name: 'Defective', itemStyle: { color: '#EF4444' } },
-          { value: 32, name: 'Wrong Item', itemStyle: { color: '#F59E0B' } },
-          { value: 28, name: 'Damaged', itemStyle: { color: '#8B5CF6' } },
-          { value: 25, name: 'Not As Described', itemStyle: { color: '#6366F1' } },
-          { value: 18, name: 'Late Delivery', itemStyle: { color: '#3B82F6' } },
-          { value: 8, name: 'Other', itemStyle: { color: '#6B7280' } }
+          { value: 45, name: t('fulfillment.defective'), itemStyle: { color: '#EF4444' } },
+          { value: 32, name: t('fulfillment.wrongItem'), itemStyle: { color: '#F59E0B' } },
+          { value: 28, name: t('fulfillment.damaged'), itemStyle: { color: '#8B5CF6' } },
+          { value: 25, name: t('fulfillment.notAsDescribed'), itemStyle: { color: '#6366F1' } },
+          { value: 18, name: t('fulfillment.lateDelivery'), itemStyle: { color: '#3B82F6' } },
+          { value: 8, name: t('fulfillment.otherReason'), itemStyle: { color: '#6B7280' } }
         ]
       }
     ]
@@ -381,17 +370,87 @@ const handleResize = () => {
   reasonChart?.resize()
 }
 
+const updateCharts = (data: {
+  refund_rate_trend: { date: string; rate: number }[]
+  refund_reasons: { reason_type: string; reason_name: string; count: number; percentage: number }[]
+}) => {
+  // Update trend chart
+  if (trendChart && data.refund_rate_trend) {
+    const dates = data.refund_rate_trend.map(d => d.date)
+    const rates = data.refund_rate_trend.map(d => d.rate)
+    trendChart.setOption({
+      xAxis: {
+        data: dates
+      },
+      series: [
+        {
+          data: rates
+        },
+        {
+          data: new Array(dates.length).fill(3.0)
+        }
+      ]
+    })
+  }
+
+  // Update reason chart
+  if (reasonChart && data.refund_reasons) {
+    const reasonData = data.refund_reasons.map((r, index) => {
+      const colors = ['#EF4444', '#F59E0B', '#8B5CF6', '#6366F1', '#3B82F6', '#6B7280']
+      return {
+        value: r.count,
+        name: r.reason_name,
+        itemStyle: { color: colors[index % colors.length] }
+      }
+    })
+    reasonChart.setOption({
+      series: [
+        {
+          data: reasonData
+        }
+      ]
+    })
+  }
+}
+
 const loadData = async () => {
   try {
-    await getFulfillmentStatistics({})
-    // Update stats from API
+    const res = await getFulfillmentStatistics({ period: timeRange.value })
+    // Update overview stats
+    stats.value = {
+      refund_rate: res.overview.refund_rate,
+      total_refunds: res.overview.total_refunds,
+      refund_amount: 0,
+      delivery_success_rate: res.overview.delivery_success_rate,
+      total_shipments: res.overview.total_shipments,
+      pending_refunds: res.overview.pending_refunds
+    }
+    // Update problem products
+    problemProducts.value = res.problem_products || []
+    // Update carrier performance
+    carrierPerformance.value = res.carrier_performance || []
+    // Update charts with API data
+    updateCharts(res)
   } catch (error) {
-    // Mock data already set
+    ElMessage.error(t('fulfillment.loadStatisticsFailed'))
   }
 }
 
 const handleExport = () => {
-  ElMessage.success('Report exported successfully')
+  try {
+    // Build export params from current filters
+    const params: Record<string, any> = {
+      period: timeRange.value
+    }
+
+    // Use window.open for export
+    const queryString = new URLSearchParams(params).toString()
+    const exportUrl = `/api/v1/fulfillment/statistics/export?${queryString}`
+    window.open(exportUrl, '_blank')
+    ElMessage.success(t('common.exporting'))
+  } catch (error) {
+    ElMessage.error(t('common.exportFailed'))
+  }
 }
 
 onMounted(() => {

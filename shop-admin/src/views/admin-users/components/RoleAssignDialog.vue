@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="分配角色"
+    :title="$t('adminUsers.assignRoleTitle')"
     width="500px"
     destroy-on-close
     @close="$emit('update:visible', false)"
@@ -17,19 +17,22 @@
           </el-checkbox>
         </div>
       </el-checkbox-group>
-      <el-empty v-if="!loading && roles.length === 0" description="暂无可分配角色" />
+      <el-empty v-if="!loading && roles.length === 0" :description="$t('adminUsers.noRolesAvailable')" />
     </div>
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" @click="handleAssign" :loading="assigning">确定</el-button>
+      <el-button @click="visible = false">{{ $t('adminUsers.cancel') }}</el-button>
+      <el-button type="primary" @click="handleAssign" :loading="assigning">{{ $t('adminUsers.confirm') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { getAvailableRoles, assignRoles, type AdminRole, type AdminUserDetail } from '@/api/admin-user'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean
@@ -69,7 +72,7 @@ const loadRoles = async () => {
     roles.value = res?.list || []
   } catch (error) {
     console.error('Failed to load roles:', error)
-    ElMessage.error('获取角色列表失败')
+    ElMessage.error(t('adminUsers.failedToLoadRoles'))
     roles.value = []
   } finally {
     loading.value = false
@@ -82,12 +85,12 @@ const handleAssign = async () => {
   assigning.value = true
   try {
     await assignRoles(props.adminUser.id, selectedRoleIds.value)
-    ElMessage.success('角色分配成功')
+    ElMessage.success(t('adminUsers.roleAssignedSuccess'))
     emit('assigned')
     visible.value = false
   } catch (error) {
     console.error('Failed to assign roles:', error)
-    ElMessage.error('角色分配失败')
+    ElMessage.error(t('adminUsers.roleAssignedFailed'))
   } finally {
     assigning.value = false
   }

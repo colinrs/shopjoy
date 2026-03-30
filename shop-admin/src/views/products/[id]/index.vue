@@ -763,6 +763,7 @@ import {
   type InventoryLog,
   type Warehouse
 } from '@/api/inventory'
+import { t } from '@/plugins/i18n'
 
 const route = useRoute()
 const router = useRouter()
@@ -891,12 +892,17 @@ const getStatusType = (status: string) => {
 }
 
 const getStatusText = (status: string) => {
-  const texts: Record<string, string> = {
-    on_sale: '在售',
-    off_sale: '下架',
-    draft: '草稿'
+  const statusKeyMap: Record<string, string> = {
+    on_sale: 'products.onSale',
+    off_sale: 'products.offSale',
+    draft: 'products.draft'
   }
-  return texts[status] || status
+  const key = statusKeyMap[status]
+  if (key) {
+    const translated = t(key)
+    return translated !== key ? translated : status
+  }
+  return status
 }
 
 const formatDate = (dateStr: string) => {
@@ -956,6 +962,7 @@ const loadProductMarkets = async () => {
     productMarkets.value = response.list || []
   } catch (error) {
     console.error('Failed to load product markets:', error)
+    ElMessage.error('加载商品市场信息失败')
   } finally {
     marketsLoading.value = false
   }
@@ -968,6 +975,7 @@ const loadMarkets = async () => {
     markets.value = response.list || []
   } catch (error) {
     console.error('Failed to load markets:', error)
+    ElMessage.error('加载市场列表失败')
   }
 }
 
@@ -1268,6 +1276,7 @@ const loadLocalizations = async () => {
     }
   } catch (error) {
     console.error('Failed to load localizations:', error)
+    ElMessage.error('加载商品本地化信息失败')
   } finally {
     localizationsLoading.value = false
   }
@@ -1381,6 +1390,7 @@ const loadVariants = async () => {
     variants.value = response.list || []
   } catch (error) {
     console.error('Failed to load variants:', error)
+    ElMessage.error('加载商品SKU列表失败')
   } finally {
     variantsLoading.value = false
   }

@@ -4,12 +4,12 @@
     <div class="card-header">
       <div class="header-left">
         <el-tag v-if="template.is_default" type="success" effect="dark" size="small" class="default-badge">
-          默认
+          {{ $t('shipping.default') }}
         </el-tag>
         <h3 class="template-name">{{ template.name }}</h3>
       </div>
       <el-tag :type="template.is_active ? 'success' : 'info'" size="small">
-        {{ template.is_active ? '已启用' : '已禁用' }}
+        {{ template.is_active ? $t('shipping.enabled') : $t('shipping.disabled') }}
       </el-tag>
     </div>
 
@@ -18,17 +18,17 @@
       <div class="stat-item">
         <el-icon><Location /></el-icon>
         <span class="stat-value">{{ template.zone_count }}</span>
-        <span class="stat-label">配送区域</span>
+        <span class="stat-label">{{ $t('shipping.zoneCount') }}</span>
       </div>
       <div class="stat-item">
         <el-icon><Goods /></el-icon>
         <span class="stat-value">{{ template.product_count }}</span>
-        <span class="stat-label">商品</span>
+        <span class="stat-label">{{ $t('shipping.productCount') }}</span>
       </div>
       <div class="stat-item">
         <el-icon><Menu /></el-icon>
         <span class="stat-value">{{ template.category_count }}</span>
-        <span class="stat-label">分类</span>
+        <span class="stat-label">{{ $t('shipping.categoryCount') }}</span>
       </div>
     </div>
 
@@ -36,7 +36,7 @@
     <div class="card-actions" @click.stop>
       <el-button type="primary" link size="small" @click="$emit('edit', template.id)">
         <el-icon><Edit /></el-icon>
-        编辑
+        {{ $t('common.edit') }}
       </el-button>
       <el-button
         v-if="!template.is_default"
@@ -46,17 +46,17 @@
         @click="$emit('set-default', template)"
       >
         <el-icon><Star /></el-icon>
-        设为默认
+        {{ $t('shipping.setAsDefault') }}
       </el-button>
       <el-popconfirm
         v-if="!template.is_default"
-        title="确认删除该模板？"
+        :title="$t('shipping.confirmDelete')"
         @confirm="$emit('delete', template)"
       >
         <template #reference>
           <el-button type="danger" link size="small">
             <el-icon><Delete /></el-icon>
-            删除
+            {{ $t('common.delete') }}
           </el-button>
         </template>
       </el-popconfirm>

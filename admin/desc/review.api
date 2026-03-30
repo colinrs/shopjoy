@@ -198,6 +198,8 @@ type (
 		ReplyRate        float64 `json:"reply_rate"`
 		FeaturedCount    int64   `json:"featured_count"`
 	}
+	// Review Statistics Request (empty - no params needed)
+	ReviewStatsReq  {}
 	// Product Statistics
 	ProductStatsReq {
 		ProductID int64 `path:"product_id"`
@@ -270,7 +272,7 @@ service admin-api {
 
 	@doc "获取评价统计"
 	@handler GetReviewStatsHandler
-	get /api/v1/reviews/stats (ReviewStatsResp) returns (ReviewStatsResp)
+	get /api/v1/reviews/stats (ReviewStatsReq) returns (ReviewStatsResp)
 
 	@doc "获取商品评价统计"
 	@handler GetProductStatsHandler

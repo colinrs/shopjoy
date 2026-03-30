@@ -9,6 +9,18 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus'],
+          'echarts': ['echarts'],
+          'vue-core': ['vue', 'vue-router', 'pinia'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 600
+  },
   server: {
     port: 3000,
     proxy: {

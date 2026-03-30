@@ -148,9 +148,20 @@ type (
 		IsActive    bool   `json:"is_active"`
 		Sort        int    `json:"sort"`
 	}
+	// List carriers request
+	ListCarriersReq  {}
 	// List carriers response
 	ListCarriersResp {
 		List []*CarrierResp `json:"list"`
+	}
+	// ===================== Shipment Export Types =====================
+	// Export shipments request
+	ExportShipmentsReq {
+		TrackingNo  string `form:"tracking_no,optional"`
+		Status      string `form:"status,optional"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
+		CarrierCode string `form:"carrier_code,optional"`
+		StartTime   string `form:"start_time,optional"` // RFC3339
+		EndTime     string `form:"end_time,optional"` // RFC3339
 	}
 	// ===================== Refund Types =====================
 	// Refund order item response (for order_items in refund detail)
@@ -279,6 +290,15 @@ type (
 		RefundCount int64  `json:"refund_count"`
 		RefundRate  string `json:"refund_rate"`
 	}
+	// Export refunds request
+	ExportRefundsReq {
+		OrderNo    string `form:"order_no,optional"`
+		RefundNo   string `form:"refund_no,optional"`
+		Status     string `form:"status,optional"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
+		ReasonType string `form:"reason_type,optional"`
+		StartTime  string `form:"start_time,optional"` // RFC3339
+		EndTime    string `form:"end_time,optional"` // RFC3339
+	}
 	// ===================== Fulfillment Statistics Types =====================
 	// Fulfillment overview statistics
 	FulfillmentOverview {
@@ -327,6 +347,12 @@ type (
 		RefundReasons      []*RefundReasonSummary     `json:"refund_reasons"`
 		ProblemProducts    []*ProblemProductStats     `json:"problem_products"`
 		CarrierPerformance []*CarrierPerformanceStats `json:"carrier_performance"`
+	}
+	// Export fulfillment statistics request
+	ExportFulfillmentStatisticsReq {
+		Period    string `form:"period,optional"` // daily, weekly, monthly
+		StartDate string `form:"start_date,optional"` // RFC3339
+		EndDate   string `form:"end_date,optional"` // RFC3339
 	}
 	// ===================== Order Fulfillment Types =====================
 	// Order item for fulfillment
@@ -530,7 +556,11 @@ service admin-api {
 
 	@doc "物流公司列表"
 	@handler ListCarriersHandler
-	get /api/v1/carriers (ListCarriersResp) returns (ListCarriersResp)
+	get /api/v1/carriers (ListCarriersReq) returns (ListCarriersResp)
+
+	@doc "导出发货单"
+	@handler ExportShipmentsHandler
+	get /api/v1/shipments/export (ExportShipmentsReq)
 }
 
 // ===================== Refund API =====================
@@ -562,6 +592,10 @@ service admin-api {
 	@doc "退款统计"
 	@handler GetRefundStatisticsHandler
 	get /api/v1/refunds/statistics (GetRefundStatisticsReq) returns (RefundStatisticsResp)
+
+	@doc "导出退款"
+	@handler ExportRefundsHandler
+	get /api/v1/refunds/export (ExportRefundsReq)
 }
 
 // ===================== Order Fulfillment API =====================
@@ -616,5 +650,9 @@ service admin-api {
 	@doc "综合履约统计"
 	@handler GetFulfillmentStatisticsHandler
 	get /api/v1/fulfillment/statistics (GetRefundStatisticsReq) returns (FulfillmentStatisticsResp)
+
+	@doc "导出履约统计"
+	@handler ExportFulfillmentStatisticsHandler
+	get /api/v1/fulfillment/statistics/export (ExportFulfillmentStatisticsReq)
 }
 

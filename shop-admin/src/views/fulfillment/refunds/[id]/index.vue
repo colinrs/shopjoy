@@ -5,10 +5,10 @@
       <div class="header-left">
         <el-button link @click="goBack">
           <el-icon><ArrowLeft /></el-icon>
-          Back
+          {{ $t('common.back') }}
         </el-button>
         <div class="title-section">
-          <h1 class="page-title">Refund Details</h1>
+          <h1 class="page-title">{{ $t('fulfillment.refundDetails') }}</h1>
           <p class="refund-no">{{ refund?.refund_no }}</p>
         </div>
       </div>
@@ -26,31 +26,31 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Money /></el-icon>
-                Refund Information
+                {{ $t('fulfillment.refundInformation') }}
               </span>
             </div>
           </template>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="Refund No.">
+            <el-descriptions-item :label="$t('fulfillment.refundNo')">
               <span class="value-text">{{ refund?.refund_no }}</span>
             </el-descriptions-item>
-            <el-descriptions-item label="Order No.">
+            <el-descriptions-item :label="$t('fulfillment.orderNo')">
               <el-button type="primary" link @click="viewOrder">
                 {{ refund?.order_no }}
               </el-button>
             </el-descriptions-item>
-            <el-descriptions-item label="Refund Amount">
+            <el-descriptions-item :label="$t('fulfillment.refundAmount')">
               <span class="refund-amount-value">
                 {{ refund?.currency }} {{ refund?.amount || '0.00' }}
               </span>
             </el-descriptions-item>
-            <el-descriptions-item label="Refund Type">
-              <el-tag size="small">Full Refund</el-tag>
+            <el-descriptions-item :label="$t('fulfillment.refundType')">
+              <el-tag size="small">{{ $t('fulfillment.fullRefund') }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="Status">
+            <el-descriptions-item :label="$t('common.status')">
               <status-tag :status="refund?.status" :type-map="statusTypeMap" />
             </el-descriptions-item>
-            <el-descriptions-item label="Applied At">
+            <el-descriptions-item :label="$t('fulfillment.appliedAt')">
               {{ refund?.created_at }}
             </el-descriptions-item>
           </el-descriptions>
@@ -62,7 +62,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Warning /></el-icon>
-                Refund Reason
+                {{ $t('fulfillment.refundReason') }}
               </span>
             </div>
           </template>
@@ -73,18 +73,18 @@
               </el-tag>
             </div>
             <div class="reason-summary">
-              <p class="summary-label">Summary</p>
+              <p class="summary-label">{{ $t('fulfillment.summary') }}</p>
               <p class="summary-text">{{ refund?.reason }}</p>
             </div>
             <div v-if="refund?.description" class="reason-detail">
-              <p class="detail-label">Description</p>
+              <p class="detail-label">{{ $t('fulfillment.description') }}</p>
               <p class="detail-text">{{ refund.description }}</p>
             </div>
           </div>
 
           <!-- Evidence Images -->
           <div v-if="refund?.images && refund.images.length > 0" class="evidence-section">
-            <p class="evidence-label">Evidence Images</p>
+            <p class="evidence-label">{{ $t('fulfillment.evidenceImages') }}</p>
             <div class="image-gallery">
               <el-image
                 v-for="(img, index) in refund.images"
@@ -111,9 +111,9 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Goods /></el-icon>
-                Order Items
+                {{ $t('fulfillment.orderItems') }}
               </span>
-              <span class="item-count">Total {{ refund?.order_items?.length || 0 }} items</span>
+              <span class="item-count">{{ $t('fulfillment.totalItems', { n: refund?.order_items?.length || 0 }) }}</span>
             </div>
           </template>
           <div class="items-list">
@@ -127,7 +127,7 @@
               </el-image>
               <div class="item-info">
                 <p class="item-name">{{ item.product_name }}</p>
-                <p class="item-sku">SKU: {{ item.sku_name }}</p>
+                <p class="item-sku">{{ $t('fulfillment.sku') }}: {{ item.sku_name }}</p>
               </div>
               <div class="item-price">
                 <p class="unit-price">{{ refund?.currency }} {{ item.price }}</p>
@@ -143,13 +143,13 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><CircleClose /></el-icon>
-                Rejection Reason
+                {{ $t('fulfillment.rejectionReason') }}
               </span>
             </div>
           </template>
           <div class="rejection-content">
             <p class="rejection-text">{{ refund.reject_reason }}</p>
-            <p class="rejected-by">Rejected by: {{ refund.approved_by }}</p>
+            <p class="rejected-by">{{ $t('fulfillment.rejectedBy', { name: refund.approved_by }) }}</p>
           </div>
         </el-card>
       </el-col>
@@ -162,7 +162,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><User /></el-icon>
-                Buyer Information
+                {{ $t('fulfillment.buyerInformation') }}
               </span>
             </div>
           </template>
@@ -186,7 +186,7 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Clock /></el-icon>
-                Status Timeline
+                {{ $t('fulfillment.statusTimeline') }}
               </span>
             </div>
           </template>
@@ -213,18 +213,18 @@
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Operation /></el-icon>
-                Actions
+                {{ $t('fulfillment.actions') }}
               </span>
             </div>
           </template>
           <div class="action-buttons">
             <el-button type="success" class="action-btn" @click="handleApprove">
               <el-icon><CircleCheck /></el-icon>
-              Approve Refund
+              {{ $t('fulfillment.approveRefund') }}
             </el-button>
             <el-button type="danger" class="action-btn" @click="openRejectDialog">
               <el-icon><CircleClose /></el-icon>
-              Reject Refund
+              {{ $t('fulfillment.rejectRefund') }}
             </el-button>
           </div>
         </el-card>
@@ -232,30 +232,30 @@
     </el-row>
 
     <!-- Reject Dialog -->
-    <el-dialog v-model="rejectDialogVisible" title="Reject Refund" width="500px">
+    <el-dialog v-model="rejectDialogVisible" :title="$t('fulfillment.rejectRefund')" width="500px">
       <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" label-width="100px">
         <el-alert
           type="warning"
           :closable="false"
           style="margin-bottom: 16px"
         >
-          Please provide a clear reason for rejection. This will be shown to the buyer.
+          {{ $t('fulfillment.provideClearReason') }}
         </el-alert>
-        <el-form-item label="Reason" prop="reject_reason">
+        <el-form-item :label="$t('fulfillment.rejectReason')" prop="reject_reason">
           <el-input
             v-model="rejectForm.reject_reason"
             type="textarea"
             :rows="4"
-            placeholder="Enter the reason for rejection"
+            :placeholder="$t('fulfillment.enterRejectionReason')"
             maxlength="500"
             show-word-limit
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="rejectDialogVisible = false">Cancel</el-button>
+        <el-button @click="rejectDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="danger" :loading="rejecting" @click="confirmReject">
-          Confirm Reject
+          {{ $t('fulfillment.confirmRejectAction') }}
         </el-button>
       </template>
     </el-dialog>
@@ -271,6 +271,7 @@ import {
   CircleCheck, CircleClose, Phone, Picture
 } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import { t } from '@/plugins/i18n'
 import {
   getRefundDetail,
   approveRefund,
@@ -294,7 +295,7 @@ const rejectForm = reactive({
 })
 
 const rejectRules = {
-  reject_reason: [{ required: true, message: 'Please enter rejection reason', trigger: 'blur' }]
+  reject_reason: [{ required: true, message: t('fulfillment.pleaseEnterRejectionReason'), trigger: 'blur' }]
 }
 
 const statusTypeMap: Record<string, { type: 'warning' | 'success' | 'danger' | 'primary' | 'info', text: string }> = {
@@ -318,27 +319,27 @@ const timeline = computed(() => {
 
   const events: TimelineEvent[] = [
     {
-      title: 'Refund Requested',
+      title: t('fulfillment.refundRequested'),
       time: refund.value.created_at,
       type: 'primary',
       active: true,
-      description: `Reason: ${getReasonName(refund.value.reason_type)}`
+      description: `${t('fulfillment.reasonType')}: ${getReasonName(refund.value.reason_type)}`
     }
   ]
 
   if ((refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed') && refund.value.approved_at) {
     events.push({
-      title: 'Approved',
+      title: t('fulfillment.approvedStatus'),
       time: refund.value.approved_at,
       type: 'success',
       active: refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed',
-      description: refund.value.approved_by ? `By: ${refund.value.approved_by}` : ''
+      description: refund.value.approved_by ? `${t('common.detail')}: ${refund.value.approved_by}` : ''
     })
   }
 
   if (refund.value.status === 'rejected') {
     events.push({
-      title: 'Rejected',
+      title: t('fulfillment.rejectedStatus'),
       time: refund.value.approved_at || refund.value.created_at,
       type: 'danger',
       active: true,
@@ -348,21 +349,21 @@ const timeline = computed(() => {
 
   if (refund.value.status === 'completed' && refund.value.completed_at) {
     events.push({
-      title: 'Refund Completed',
+      title: t('fulfillment.refundCompleted'),
       time: refund.value.completed_at,
       type: 'primary',
       active: true,
-      description: 'Payment has been refunded to buyer'
+      description: t('fulfillment.paymentRefunded')
     })
   }
 
   if (refund.value.status === 'cancelled') {
     events.push({
-      title: 'Cancelled',
+      title: t('fulfillment.cancelledStatus'),
       time: refund.value.completed_at || refund.value.created_at,
       type: 'info',
       active: true,
-      description: 'Request cancelled by buyer'
+      description: t('fulfillment.requestCancelled')
     })
   }
 
@@ -375,47 +376,7 @@ const loadRefund = async () => {
     const res = await getRefundDetail(Number(id))
     refund.value = res
   } catch (error) {
-    // Mock data
-    refund.value = {
-      id: Number(id),
-      refund_no: 'REF20260322001',
-      order_id: 'ORD001',
-      order_no: 'ORD2026031800100',
-      user_id: 101,
-      user_name: 'John Doe',
-      user_phone: '138****8001',
-      type: 'full_refund',
-      type_text: '全额退款',
-      status: 'pending',
-      status_text: '待处理',
-      reason_type: 'DEFECTIVE',
-      reason: 'Product has scratches on screen',
-      description: 'Received the product with visible scratches on the display screen. The scratches are clearly visible and affect the user experience. I have attached photos showing the damage.',
-      images: [
-        'https://picsum.photos/400/300?random=1',
-        'https://picsum.photos/400/300?random=2'
-      ],
-      amount: "299.00",
-      currency: 'CNY',
-      order_amount: "299.00",
-      reject_reason: '',
-      approved_at: null,
-      approved_by: null,
-      completed_at: null,
-      created_at: '2026-03-22T14:30:25Z',
-      updated_at: '2026-03-22T14:30:25Z',
-      order_items: [
-        {
-          id: 1,
-          product_id: 1,
-          product_name: 'Wireless Bluetooth Earphones Pro',
-          sku_name: 'Black - Premium Edition',
-          image: '',
-          quantity: 1,
-          price: "299.00"
-        }
-      ]
-    }
+    ElMessage.error(t('fulfillment.loadRefundDetailsFailed'))
   }
 }
 
@@ -424,15 +385,7 @@ const loadRefundReasons = async () => {
     const res = await getRefundReasonList()
     refundReasons.value = res
   } catch (error) {
-    refundReasons.value = [
-      { code: 'DEFECTIVE', name: 'Product Defective' },
-      { code: 'WRONG_ITEM', name: 'Wrong Item Received' },
-      { code: 'NOT_AS_DESCRIBED', name: 'Not As Described' },
-      { code: 'DAMAGED', name: 'Damaged in Transit' },
-      { code: 'NO_LONGER_NEEDED', name: 'No Longer Needed' },
-      { code: 'LATE_DELIVERY', name: 'Late Delivery' },
-      { code: 'OTHER', name: 'Other' }
-    ]
+    ElMessage.error(t('fulfillment.loadRefundReasonsFailed'))
   }
 }
 
@@ -455,16 +408,16 @@ const viewOrder = () => {
 const handleApprove = async () => {
   try {
     await ElMessageBox.confirm(
-      `Approve refund of ${refund.value?.currency} ${refund.value?.amount || '0.00'}?`,
-      'Approve Refund',
+      t('fulfillment.approveRefundConfirm', { currency: refund.value?.currency || '', amount: refund.value?.amount?.toString() || '0.00' }),
+      t('fulfillment.approveRefund'),
       { type: 'success' }
     )
     await approveRefund(refund.value!.id)
-    ElMessage.success('Refund approved successfully')
+    ElMessage.success(t('fulfillment.refundApproved'))
     loadRefund()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Failed to approve refund')
+      ElMessage.error(t('fulfillment.refundApprovedFailed'))
     }
   }
 }
@@ -483,11 +436,11 @@ const confirmReject = async () => {
     rejecting.value = true
     try {
       await rejectRefund(refund.value!.id, rejectForm.reject_reason)
-      ElMessage.success('Refund rejected')
+      ElMessage.success(t('fulfillment.refundRejected'))
       rejectDialogVisible.value = false
       loadRefund()
     } catch (error) {
-      ElMessage.error('Failed to reject refund')
+      ElMessage.error(t('fulfillment.refundRejectedFailed'))
     } finally {
       rejecting.value = false
     }

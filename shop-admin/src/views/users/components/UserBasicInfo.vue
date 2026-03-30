@@ -1,45 +1,45 @@
 <template>
   <div class="basic-info">
     <el-descriptions :column="2" border>
-      <el-descriptions-item label="用户ID">{{ user?.id }}</el-descriptions-item>
-      <el-descriptions-item label="用户名">{{ user?.name || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="邮箱">{{ user?.email || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="手机号">{{ user?.phone || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="状态">
+      <el-descriptions-item :label="$t('users.userId')">{{ user?.id }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.username')">{{ user?.name || '-' }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.email')">{{ user?.email || '-' }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.mobile')">{{ user?.phone || '-' }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.status')">
         <el-tag :type="user?.status === 1 ? 'success' : 'danger'">
-          {{ user?.status === 1 ? '正常' : '已禁用' }}
+          {{ user?.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
         </el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="会员等级">
-        <el-tag type="info">普通会员</el-tag>
+      <el-descriptions-item :label="$t('users.memberLevel')">
+        <el-tag type="info">{{ $t('users.regularMember') }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="注册时间">{{ formatDateTime(user?.created_at) }}</el-descriptions-item>
-      <el-descriptions-item label="最后登录">{{ formatDateTime(user?.last_login) }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.createdAt')">{{ formatDateTime(user?.created_at) }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.lastLogin')">{{ formatDateTime(user?.last_login) }}</el-descriptions-item>
     </el-descriptions>
 
-    <div class="section-title">积分信息</div>
+    <div class="section-title">{{ $t('users.pointsInfo') }}</div>
     <el-descriptions :column="4" border>
-      <el-descriptions-item label="可用积分">
+      <el-descriptions-item :label="$t('users.availablePoints')">
         <span class="points-value">{{ user?.points_balance?.toLocaleString() || 0 }}</span>
       </el-descriptions-item>
-      <el-descriptions-item label="冻结积分">
+      <el-descriptions-item :label="$t('users.frozenPoints')">
         <span class="frozen-value">{{ user?.frozen_points?.toLocaleString() || 0 }}</span>
       </el-descriptions-item>
-      <el-descriptions-item label="累计获得">
+      <el-descriptions-item :label="$t('users.totalEarnedPoints')">
         <span class="earned-value">{{ user?.total_earned_points?.toLocaleString() || 0 }}</span>
       </el-descriptions-item>
-      <el-descriptions-item label="累计兑换">
+      <el-descriptions-item :label="$t('users.totalRedeemedPoints')">
         <span class="redeemed-value">{{ user?.total_redeemed_points?.toLocaleString() || 0 }}</span>
       </el-descriptions-item>
     </el-descriptions>
 
-    <div class="section-title">消费统计</div>
+    <div class="section-title">{{ $t('users.consumptionStats') }}</div>
     <el-descriptions :column="3" border>
-      <el-descriptions-item label="订单总数">{{ user?.order_count || 0 }} 单</el-descriptions-item>
-      <el-descriptions-item label="累计消费">
+      <el-descriptions-item :label="$t('users.totalOrders')">{{ user?.order_count || 0 }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.totalSpent')">
         <span class="spent-value">¥{{ formatPrice(user?.total_spent) }}</span>
       </el-descriptions-item>
-      <el-descriptions-item label="最后下单">{{ formatDateTime(user?.last_order_at) }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.lastOrder')">{{ formatDateTime(user?.last_order_at) }}</el-descriptions-item>
     </el-descriptions>
   </div>
 </template>

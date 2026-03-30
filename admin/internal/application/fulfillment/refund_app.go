@@ -155,6 +155,7 @@ func (a *refundApp) ListRefunds(ctx context.Context, tenantID shared.TenantID, r
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
+		RefundNo:   req.RefundNo,
 		OrderID:    req.OrderID,
 		UserID:     req.UserID,
 		ReasonType: req.ReasonType,

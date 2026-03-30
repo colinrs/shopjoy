@@ -1,10 +1,10 @@
 <template>
   <div class="pages-page">
-    <page-header title="页面管理" subtitle="管理店铺的所有页面">
+    <page-header :title="$t('storefront.pageManagement')" :subtitle="$t('storefront.manageAllPages')">
       <template #extra>
         <el-button type="primary" @click="createPage">
           <el-icon><Plus /></el-icon>
-          新建页面
+          {{ $t('storefront.createPage') }}
         </el-button>
       </template>
     </page-header>
@@ -12,7 +12,7 @@
     <!-- Pages Table -->
     <el-card shadow="hover" class="pages-card">
       <el-table :data="pages" v-loading="loading" style="width: 100%">
-        <el-table-column prop="name" label="页面名称" min-width="150">
+        <el-table-column prop="name" :label="$t('storefront.pageName')" min-width="150">
           <template #default="{ row }">
             <div class="page-name">
               <el-icon class="page-icon" :class="row.page_type">
@@ -22,40 +22,40 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="page_type" label="页面类型" width="120">
+        <el-table-column prop="page_type" :label="$t('storefront.pageType')" width="120">
           <template #default="{ row }">
             <el-tag size="small" :type="getPageTypeTag(row.page_type)">
               {{ getPageTypeName(row.page_type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="slug" label="URL路径" width="150">
+        <el-table-column prop="slug" :label="$t('storefront.urlPath')" width="150">
           <template #default="{ row }">
             <code class="slug-code">/{{ row.slug }}</code>
           </template>
         </el-table-column>
-        <el-table-column prop="is_published" label="状态" width="100">
+        <el-table-column prop="is_published" :label="$t('storefront.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.is_published ? 'success' : 'info'" effect="light" size="small">
-              {{ row.is_published ? '已发布' : '草稿' }}
+              {{ row.is_published ? $t('storefront.published') : $t('storefront.draft') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="version" label="版本" width="80">
+        <el-table-column prop="version" :label="$t('storefront.version')" width="80">
           <template #default="{ row }">
-            <el-tooltip content="点击查看版本历史">
+            <el-tooltip :content="$t('storefront.viewVersionHistory')">
               <el-button text type="primary" size="small" @click="showVersions(row)">
                 v{{ row.version }}
               </el-button>
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="260" fixed="right">
+        <el-table-column :label="$t('storefront.actions')" width="260" fixed="right">
           <template #default="{ row }">
             <el-button-group>
               <el-button size="small" @click="editPage(row)">
                 <el-icon><Edit /></el-icon>
-                编辑
+                {{ $t('storefront.edit') }}
               </el-button>
               <el-button
                 v-if="!row.is_published"
@@ -64,7 +64,7 @@
                 @click="handlePublish(row)"
                 :loading="row.publishing"
               >
-                发布
+                {{ $t('storefront.publish') }}
               </el-button>
               <el-button
                 v-else
@@ -73,7 +73,7 @@
                 @click="handleUnpublish(row)"
                 :loading="row.unpublishing"
               >
-                下线
+                {{ $t('storefront.unpublish') }}
               </el-button>
               <el-button size="small" @click="previewPage(row)">
                 <el-icon><View /></el-icon>
@@ -87,14 +87,14 @@
     <!-- Version History Drawer -->
     <el-drawer
       v-model="versionDrawerVisible"
-      title="版本历史"
+      :title="$t('storefront.versionHistory')"
       size="450px"
       :with-header="true"
     >
       <div class="version-drawer-content" v-if="currentPage">
         <div class="version-header">
           <span class="page-title">{{ currentPage.name }}</span>
-          <el-tag size="small">当前版本: v{{ currentPage.version }}</el-tag>
+          <el-tag size="small">{{ $t('storefront.currentVersion') }}: v{{ currentPage.version }}</el-tag>
         </div>
 
         <div class="versions-list" v-loading="versionsLoading">
@@ -115,7 +115,7 @@
                 type="primary"
                 @click="viewVersion(ver)"
               >
-                查看
+                {{ $t('storefront.view') }}
               </el-button>
               <el-button
                 v-if="ver.version !== currentPage.version"
@@ -124,9 +124,9 @@
                 type="warning"
                 @click="restoreVersion(ver)"
               >
-                恢复
+                {{ $t('storefront.restore') }}
               </el-button>
-              <el-tag v-else size="small" type="success">当前</el-tag>
+              <el-tag v-else size="small" type="success">{{ $t('storefront.current') }}</el-tag>
             </div>
           </div>
         </div>
@@ -136,12 +136,12 @@
     <!-- Version Detail Dialog -->
     <el-dialog
       v-model="versionDetailVisible"
-      :title="`版本详情 - v${selectedVersion?.version}`"
+      :title="$t('storefront.versionDetail') + ' v' + selectedVersion?.version"
       width="800px"
     >
       <div class="version-detail" v-if="versionDetail">
         <div class="detail-header">
-          <span>创建时间: {{ formatTime(versionDetail.version.created_at) }}</span>
+          <span>{{ $t('storefront.createdTime') }}: {{ formatTime(versionDetail.version.created_at) }}</span>
         </div>
         <div class="blocks-preview">
           <div
@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, View, HomeFilled, Goods, Collection, Document } from '@element-plus/icons-vue'
@@ -177,6 +178,8 @@ import {
   type VersionItem,
   type VersionDetailResponse
 } from '@/api/storefront'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const loading = ref(false)
@@ -195,7 +198,7 @@ const fetchPages = async () => {
     const res = await listPages()
     pages.value = res.pages || []
   } catch (error) {
-    ElMessage.error('获取页面列表失败')
+    ElMessage.error(t('storefront.loadPagesFailed'))
   } finally {
     loading.value = false
   }
@@ -213,12 +216,17 @@ const getPageIcon = (type: string) => {
 
 const getPageTypeName = (type: string) => {
   const names: Record<string, string> = {
-    home: '首页',
-    product: '商品页',
-    collection: '集合页',
-    custom: '自定义页'
+    home: 'storefront.home',
+    product: 'storefront.productPage',
+    collection: 'storefront.collectionPage',
+    custom: 'storefront.customPage'
   }
-  return names[type] || '未知'
+  const key = names[type]
+  if (key === 'storefront.home') return '首页'
+  if (key === 'storefront.productPage') return '商品页'
+  if (key === 'storefront.collectionPage') return '集合页'
+  if (key === 'storefront.customPage') return '自定义页'
+  return 'storefront.unknown'
 }
 
 const getPageTypeTag = (type: string) => {
@@ -240,23 +248,23 @@ const previewPage = (page: PageItem) => {
 }
 
 const createPage = () => {
-  ElMessage.info('新建页面功能即将上线')
+  ElMessage.info(t('storefront.createPageComingSoon'))
 }
 
 const handlePublish = async (page: PageItem & { publishing?: boolean }) => {
   try {
     await ElMessageBox.confirm(
-      '确定要发布此页面吗？发布后访客将能看到最新内容。',
-      '发布页面',
-      { confirmButtonText: '确定发布', cancelButtonText: '取消', type: 'info' }
+      t('storefront.confirmPublishMessage'),
+      t('storefront.confirmPublish'),
+      { confirmButtonText: 'Publish', cancelButtonText: 'Cancel', type: 'info' }
     )
     page.publishing = true
     await publishPage(page.id)
-    ElMessage.success('页面已发布')
+    ElMessage.success(t('storefront.pagePublished'))
     await fetchPages()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '发布失败')
+      ElMessage.error(error.message || t('storefront.publishFailed'))
     }
   } finally {
     page.publishing = false
@@ -266,17 +274,17 @@ const handlePublish = async (page: PageItem & { publishing?: boolean }) => {
 const handleUnpublish = async (page: PageItem & { unpublishing?: boolean }) => {
   try {
     await ElMessageBox.confirm(
-      '确定要下线此页面吗？下线后访客将无法访问。',
-      '下线页面',
-      { confirmButtonText: '确定下线', cancelButtonText: '取消', type: 'warning' }
+      t('storefront.confirmUnpublishMessage'),
+      t('storefront.confirmUnpublish'),
+      { confirmButtonText: 'Unpublish', cancelButtonText: 'Cancel', type: 'warning' }
     )
     page.unpublishing = true
     await unpublishPage(page.id)
-    ElMessage.success('页面已下线')
+    ElMessage.success(t('storefront.pageUnpublished'))
     await fetchPages()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '下线失败')
+      ElMessage.error(error.message || t('storefront.unpublishFailed'))
     }
   } finally {
     page.unpublishing = false
@@ -291,7 +299,7 @@ const showVersions = async (page: PageItem) => {
     const res = await listVersions(page.id)
     versions.value = res.versions || []
   } catch (error) {
-    ElMessage.error('获取版本历史失败')
+    ElMessage.error(t('storefront.loadVersionHistoryFailed'))
   } finally {
     versionsLoading.value = false
   }
@@ -305,7 +313,7 @@ const viewVersion = async (ver: VersionItem) => {
     selectedVersion.value = ver
     versionDetailVisible.value = true
   } catch (error) {
-    ElMessage.error('获取版本详情失败')
+    ElMessage.error(t('storefront.loadVersionDetailFailed'))
   }
 }
 
@@ -313,17 +321,17 @@ const restoreVersion = async (ver: VersionItem) => {
   if (!currentPage.value) return
   try {
     await ElMessageBox.confirm(
-      `确定要恢复到版本 v${ver.version} 吗？当前内容将被替换。`,
-      '恢复版本',
-      { confirmButtonText: '确定恢复', cancelButtonText: '取消', type: 'warning' }
+      t('storefront.confirmRestoreMessage', { version: ver.version }),
+      t('storefront.confirmRestore'),
+      { confirmButtonText: 'Restore', cancelButtonText: 'Cancel', type: 'warning' }
     )
     await restoreVersionApi(currentPage.value.id, { version: ver.version })
-    ElMessage.success('版本已恢复')
+    ElMessage.success(t('storefront.versionRestored'))
     versionDrawerVisible.value = false
     await fetchPages()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '恢复失败')
+      ElMessage.error(error.message || t('storefront.restoreFailed'))
     }
   }
 }
