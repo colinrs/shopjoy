@@ -179,15 +179,18 @@ import PaymentStatsCard from './components/PaymentStatsCard.vue'
 import {
   getPaymentStats,
   getTransactionList,
+  exportPaymentTransactionsUrl,
   type PaymentStats,
   type Transaction
 } from '@/api/payment'
 import { t } from '@/plugins/i18n'
+import { downloadFile } from '@/utils/download'
 
 const router = useRouter()
 
 // State
 const loading = ref(false)
+const statsLoading = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref<number | ''>('')
 const paymentMethodFilter = ref('')
@@ -198,11 +201,11 @@ const pageSize = ref(20)
 const total = ref(0)
 
 const paymentStats = ref<PaymentStats>({
-  today_received: '0',
-  today_growth: '0',
-  period_received: '0',
-  refund_amount: '0',
-  refund_rate: '0',
+  today_received: '',
+  today_growth: '',
+  period_received: '',
+  refund_amount: '',
+  refund_rate: '',
   currency: 'USD',
   channel_distribution: []
 })
@@ -262,35 +265,21 @@ const handleSearch = () => {
   loadData()
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    // Build export params from current filters
-    const params: Record<string, any> = {
-      page: 1,
-      page_size: 10000
-    }
-    if (searchQuery.value) {
-      params.order_no = searchQuery.value
-      params.transaction_id = searchQuery.value
-    }
-    if (statusFilter.value !== '') {
-      params.status = statusFilter.value
-    }
-    if (paymentMethodFilter.value) {
-      params.payment_method = paymentMethodFilter.value
-    }
-    if (dateRange.value) {
-      params.start_time = dateRange.value[0]
-      params.end_time = dateRange.value[1]
-    }
+    const { url, params } = exportPaymentTransactionsUrl({
+      order_no: searchQuery.value || undefined,
+      transaction_id: searchQuery.value || undefined,
+      status: statusFilter.value !== '' ? statusFilter.value : undefined,
+      payment_method: paymentMethodFilter.value || undefined,
+      start_time: dateRange.value?.[0],
+      end_time: dateRange.value?.[1]
+    })
 
-    // Use window.open for export
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/payments/transactions/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('common.exporting'))
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('common.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   }
 }
 
@@ -318,12 +307,25 @@ const handleCurrentChange = (val: number) => {
 }
 
 const loadStats = async () => {
+  statsLoading.value = true
   try {
     const res = await getPaymentStats(selectedPeriod.value)
     paymentStats.value = res
   } catch (error) {
     ElMessage.error(t('payments.loadFailed'))
     console.error('loadStats error:', error)
+    // Reset to empty state on error
+    paymentStats.value = {
+      today_received: '',
+      today_growth: '',
+      period_received: '',
+      refund_amount: '',
+      refund_rate: '',
+      currency: 'USD',
+      channel_distribution: []
+    }
+  } finally {
+    statsLoading.value = false
   }
 }
 
@@ -348,6 +350,7 @@ const loadData = async () => {
     console.error('loadData error:', error)
     transactionList.value = []
     total.value = 0
+    // Do not use mock data on error - keep the previous stats or show empty
     transactionStats.value = { success: 0, pending: 0, failed: 0 }
   } finally {
     loading.value = false

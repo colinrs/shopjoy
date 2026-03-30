@@ -148,3 +148,23 @@ export const getOrderPayment = (orderId: number) => {
 export const initiateRefund = (orderId: number, data: InitiateRefundParams) => {
   return request.post<InitiateRefundResponse>(`/api/v1/orders/${orderId}/refund`, data)
 }
+
+// Export types
+export interface ExportPaymentTransactionsParams {
+  order_no?: string
+  transaction_id?: string
+  status?: number
+  payment_method?: string
+  start_time?: string
+  end_time?: string
+}
+
+/**
+ * Export payment transactions - returns URL and params for download utility
+ */
+export function exportPaymentTransactionsUrl(params: ExportPaymentTransactionsParams): { url: string; params: ExportPaymentTransactionsParams } {
+  return {
+    url: '/api/v1/payments/transactions/export',
+    params
+  }
+}

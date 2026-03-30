@@ -40,13 +40,14 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 		return nil, err
 	}
 
-	// Build rating distribution map
-	ratingDistribution := make(map[string]int)
-	ratingDistribution["1"] = stats.Rating1Count
-	ratingDistribution["2"] = stats.Rating2Count
-	ratingDistribution["3"] = stats.Rating3Count
-	ratingDistribution["4"] = stats.Rating4Count
-	ratingDistribution["5"] = stats.Rating5Count
+	// Build rating distribution
+	ratingDistribution := &types.RatingDistribution{
+		Rating1: stats.Rating1Count,
+		Rating2: stats.Rating2Count,
+		Rating3: stats.Rating3Count,
+		Rating4: stats.Rating4Count,
+		Rating5: stats.Rating5Count,
+	}
 
 	return &types.ProductStatsResp{
 		ProductID:          stats.ProductID,

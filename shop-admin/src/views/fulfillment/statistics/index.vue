@@ -212,7 +212,8 @@ import {
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { t } from '@/plugins/i18n'
-import { getFulfillmentStatistics } from '@/api/fulfillment'
+import { getFulfillmentStatistics, exportFulfillmentStatisticsUrl } from '@/api/fulfillment'
+import { downloadFile } from '@/utils/download'
 
 const timeRange = ref('30')
 const trendChartRef = ref<HTMLElement | null>(null)
@@ -436,20 +437,16 @@ const loadData = async () => {
   }
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    // Build export params from current filters
-    const params: Record<string, any> = {
+    const { url, params } = exportFulfillmentStatisticsUrl({
       period: timeRange.value
-    }
+    })
 
-    // Use window.open for export
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/fulfillment/statistics/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('common.exporting'))
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('common.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   }
 }
 

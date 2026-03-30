@@ -260,12 +260,12 @@ const toggleExpand = (item: PageSEOConfigDTO) => {
 
 const getPageTypeName = (type: string) => {
   const names: Record<string, string> = {
-    global: '全局设置',
-    home: '首页',
-    product: '商品详情页',
-    category: '分类页面',
-    collection: '集合页面',
-    custom: '自定义页面'
+    global: t('storefront.pageTypeGlobal'),
+    home: t('storefront.pageTypeHome'),
+    product: t('storefront.pageTypeProduct'),
+    category: t('storefront.pageTypeCategory'),
+    collection: t('storefront.pageTypeCollection'),
+    custom: t('storefront.pageTypeCustom')
   }
   return names[type] || type
 }

@@ -160,7 +160,7 @@
               {{ $t('common.detail') }}
             </el-button>
             <el-button
-              v-if="row.status === ShipmentStatus.PENDING"
+              v-if="row.status === ShipmentStatusMap.PENDING"
               type="success"
               link
               size="small"
@@ -169,7 +169,7 @@
               {{ $t('orders.ship') }}
             </el-button>
             <el-button
-              v-if="row.status === ShipmentStatus.IN_TRANSIT"
+              v-if="row.status === ShipmentStatusMap.IN_TRANSIT"
               type="primary"
               link
               size="small"
@@ -236,19 +236,13 @@ import {
   getCarrierList,
   updateShipmentStatus,
   getFulfillmentSummary,
+  exportShipmentsUrl,
   type Shipment,
   type Carrier,
-  type ShipmentListParams
+  type ShipmentListParams,
+  ShipmentStatusMap
 } from '@/api/fulfillment'
-
-const ShipmentStatus = {
-  PENDING: 'pending',
-  SHIPPED: 'shipped',
-  IN_TRANSIT: 'in_transit',
-  DELIVERED: 'delivered',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled'
-} as const
+import { downloadFile } from '@/utils/download'
 
 const router = useRouter()
 
@@ -345,34 +339,20 @@ const handleSearch = () => {
   loadData()
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    // Build export params from current filters
-    const params: Record<string, any> = {
-      page: 1,
-      page_size: 10000
-    }
-    if (searchQuery.value) {
-      params.tracking_no = searchQuery.value
-    }
-    if (statusFilter.value !== '') {
-      params.status = statusFilter.value
-    }
-    if (carrierFilter.value) {
-      params.carrier_code = carrierFilter.value
-    }
-    if (dateRange.value) {
-      params.start_time = dateRange.value[0]
-      params.end_time = dateRange.value[1]
-    }
+    const { url, params } = exportShipmentsUrl({
+      tracking_no: searchQuery.value || undefined,
+      status: statusFilter.value !== '' ? statusFilter.value : undefined,
+      carrier_code: carrierFilter.value || undefined,
+      start_time: dateRange.value?.[0],
+      end_time: dateRange.value?.[1]
+    })
 
-    // Use window.open for export
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/shipments/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('common.exporting'))
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('common.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   }
 }
 
@@ -385,7 +365,7 @@ const handleSelectionChange = (rows: Shipment[]) => {
 }
 
 const isSelectable = (row: Shipment) => {
-  return row.status === ShipmentStatus.PENDING
+  return row.status === ShipmentStatusMap.PENDING
 }
 
 const clearSelection = () => {
@@ -433,7 +413,7 @@ const markDelivered = async (row: Shipment) => {
         type: 'success'
       }
     )
-    await updateShipmentStatus(row.id, ShipmentStatus.DELIVERED)
+    await updateShipmentStatus(row.id, ShipmentStatusMap.DELIVERED)
     ElMessage.success(t('fulfillment.shipmentMarkedDelivered'))
     loadData()
   } catch (error) {

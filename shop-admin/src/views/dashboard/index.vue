@@ -410,7 +410,7 @@ const updateSalesChart = () => {
       axisPointer: { type: 'cross' },
       formatter: (params: any) => {
         const point = params[0]
-        return `${point.axisValue}<br/>销售额: ¥${formatNumber(point.value)}`
+        return `${point.axisValue}<br/>${t('dashboard.chartSalesTooltip')}¥${formatNumber(point.value)}`
       }
     },
     grid: {
@@ -434,14 +434,14 @@ const updateSalesChart = () => {
       axisLabel: {
         color: '#6B7280',
         formatter: (value: number) => {
-          if (value >= 10000) return `${(value / 10000).toFixed(1)}万`
+          if (value >= 10000) return `${(value / 10000).toFixed(1)}${t('dashboard.yAxisUnit')}`
           return value.toString()
         }
       }
     },
     series: [
       {
-        name: '销售额',
+        name: t('dashboard.chartSalesSeries'),
         type: 'line',
         smooth: true,
         symbol: 'circle',
@@ -488,7 +488,7 @@ const updateOrderChart = () => {
     },
     series: [
       {
-        name: '订单状态',
+        name: t('dashboard.chartOrderStatusSeries'),
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,

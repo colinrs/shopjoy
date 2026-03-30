@@ -39,7 +39,7 @@
           </el-select>
           <el-cascader
             v-model="filterCategory"
-            :options="categoryOptions"
+            :options="categories"
             :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
             :placeholder="$t('products.category')"
             clearable
@@ -228,7 +228,7 @@
             <el-form-item :label="$t('products.productCategory')" prop="category_id">
               <el-cascader
                 v-model="productForm.category_id"
-                :options="categoryOptions"
+                :options="categories"
                 :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
                 :placeholder="$t('products.selectCategory')"
                 style="width: 100%"
@@ -410,12 +410,13 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
-import { getProductList, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, type Product, type ListProductsParams } from '@/api/product'
+import { getProductList, getProduct, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, exportProductsUrl, type Product, type ListProductsParams } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
 import { getCategoryTree, type CategoryTree } from '@/api/category'
 import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
 import { t } from '@/plugins/i18n'
+import { downloadFile } from '@/utils/download'
 
 const router = useRouter()
 
@@ -442,7 +443,7 @@ const markets = ref<Market[]>([])
 const productList = ref<Product[]>([])
 
 // Category data
-const categoryOptions = ref<CategoryTree[]>([])
+const categories = ref<CategoryTree[]>([])
 
 // Push to market form
 const pushToMarketForm = reactive({
@@ -507,30 +508,17 @@ const handleExport = async () => {
   try {
     loading.value = true
     // Build export params from current filters
-    const params: Record<string, any> = {
-      page: 1,
-      page_size: 10000 // Export all matching records
-    }
-    if (searchQuery.value) {
-      params.name = searchQuery.value
-    }
-    if (filterStatus.value) {
-      params.status = filterStatus.value
-    }
-    if (filterCategory.value) {
-      params.category_id = filterCategory.value
-    }
-    if (selectedMarket.value) {
-      params.market_id = selectedMarket.value
-    }
+    const { url, params } = exportProductsUrl({
+      name: searchQuery.value || undefined,
+      status: filterStatus.value || undefined,
+      category_id: filterCategory.value || undefined,
+      market_id: selectedMarket.value || undefined
+    })
 
-    // Use window.open for export since there's no dedicated export API
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/products/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('products.exporting'))
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('products.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   } finally {
     loading.value = false
   }
@@ -557,10 +545,22 @@ const handleEdit = (row: any) => {
 
 const previewDialogVisible = ref(false)
 const previewProduct = ref<Product | null>(null)
+const previewLoading = ref(false)
 
-const handlePreview = (row: Product) => {
-  previewProduct.value = row
+const handlePreview = async (row: Product) => {
+  previewLoading.value = true
   previewDialogVisible.value = true
+  try {
+    // Fetch fresh product data from API
+    const freshProduct = await getProduct(row.id)
+    previewProduct.value = freshProduct
+  } catch (error) {
+    console.error('Failed to load product for preview:', error)
+    ElMessage.error(t('products.previewLoadFailed'))
+    previewDialogVisible.value = false
+  } finally {
+    previewLoading.value = false
+  }
 }
 
 const handlePreviewEdit = () => {
@@ -573,36 +573,36 @@ const handlePreviewEdit = () => {
 const handleCommand = async (cmd: string, row: Product) => {
   switch (cmd) {
     case 'copy':
-      // Pre-fill form with product data for creating a duplicate
-      isEdit.value = false
-      Object.assign(productForm, {
-        id: null,
-        name: `${row.name} (Copy)`,
-        price: parseFloat(row.price) || 0,
-        original_price: parseFloat(row.cost_price) || 0,
-        stock: row.stock || 0,
-        category_id: row.category_id || 0,
-        image: row.images?.[0] || '',
-        images: row.images || [],
-        description: row.description || '',
-        sku: row.sku || '',
-        brand: row.brand || '',
-        tags: row.tags || [],
-        is_matrix_product: row.is_matrix_product || false,
-        hs_code: row.hs_code || '',
-        coo: row.coo || '',
-        weight: row.weight || '',
-        weight_unit: row.weight_unit || 'kg',
-        length: row.length || '',
-        width: row.width || '',
-        height: row.height || '',
-        dangerous_goods: row.dangerous_goods || [],
-        currency: row.currency || 'USD',
-        cost_price: parseFloat(row.cost_price) || 0,
-        status: 'draft'
-      })
-      dialogVisible.value = true
-      ElMessage.success(t('products.copyFormOpened'))
+      // Call API to create a duplicate product
+      try {
+        const response = await createProduct({
+          name: `${row.name} (Copy)`,
+          description: row.description || '',
+          price: row.price || '0',
+          currency: row.currency || 'USD',
+          cost_price: row.cost_price || '',
+          category_id: row.category_id || 0,
+          sku: row.sku ? `${row.sku}-copy` : '',
+          brand: row.brand || '',
+          tags: row.tags || [],
+          images: row.images || [],
+          is_matrix_product: row.is_matrix_product || false,
+          hs_code: row.hs_code || '',
+          coo: row.coo || '',
+          weight: row.weight || '',
+          weight_unit: row.weight_unit || 'kg',
+          length: row.length || '',
+          width: row.width || '',
+          height: row.height || '',
+          dangerous_goods: row.dangerous_goods || []
+        })
+        ElMessage.success(t('products.copySuccess'))
+        // Navigate to edit the new product
+        router.push(`/products/${response.id}`)
+      } catch (error) {
+        console.error('Failed to copy product:', error)
+        ElMessage.error(t('products.copyFailed'))
+      }
       break
     case 'top':
       ElMessage.success(t('products.setTopSuccess'))
@@ -846,10 +846,10 @@ const loadMarkets = async () => {
   }
 }
 
-const loadCategories = async () => {
+const fetchCategories = async () => {
   try {
     const response = await getCategoryTree()
-    categoryOptions.value = response || []
+    categories.value = response || []
   } catch (error) {
     console.error('Failed to load categories:', error)
     ElMessage.error(t('products.loadCategoriesFailed'))
@@ -890,7 +890,7 @@ const loadProducts = async () => {
 
 onMounted(() => {
   loadMarkets()
-  loadCategories()
+  fetchCategories()
   loadProducts()
 })
 </script>

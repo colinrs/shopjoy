@@ -201,54 +201,54 @@ export type OrderStatus = 'pending_payment' | 'paid' | 'pending_shipment' | 'shi
 
 ### Phase 1: 紧急修复 (Critical Bugs)
 
-| # | 任务 | 改动文件 | 优先级 |
-|---|------|----------|--------|
-| 1.1 | 修复价格格式化 bug | `shop-admin/src/views/products/index.vue:380` | P0 |
-| 1.2 | 修复 Swagger `/api/v1/carriers` 生成问题 | `admin/desc/shipping.api` | P0 |
-| 1.3 | 修复 Swagger `/api/v1/reviews/stats` 生成问题 | `admin/desc/review.api` | P0 |
+| # | 任务 | 改动文件 | 优先级 | 状态 |
+|---|------|----------|--------|------|
+| 1.1 | 修复价格格式化 bug | `shop-admin/src/views/products/index.vue:380` | P0 | ✅ 已完成 |
+| 1.2 | 修复 Swagger `/api/v1/carriers` 生成问题 | `admin/desc/shipping.api` | P0 | ✅ 已完成 |
+| 1.3 | 修复 Swagger `/api/v1/reviews/stats` 生成问题 | `admin/desc/review.api` | P0 | ✅ 已完成 |
 
 ### Phase 2: 后端 API 一致性
 
-| # | 任务 | 改动文件 |
-|---|------|----------|
-| 2.1 | 审查所有 `.api` 文件与 swagger 一致性 | 21 `.api` files |
-| 2.2 | 修复 `.api` 定义中的 swagger 生成问题 | affected `.api` files |
-| 2.3 | 重新生成 swagger 和 types | auto-generated |
+| # | 任务 | 改动文件 | 状态 |
+|---|------|----------|------|
+| 2.1 | 审查所有 `.api` 文件与 swagger 一致性 | 21 `.api` files | ✅ 已完成 |
+| 2.2 | 修复 `.api` 定义中的 swagger 生成问题 | affected `.api` files | ✅ 已完成 |
+| 2.3 | 重新生成 swagger 和 types | auto-generated | ✅ 已完成 |
 
 ### Phase 3: 前端 API 对接 (Mock → Real)
 
-| # | 模块 | 改动文件 |
-|---|------|----------|
-| 3.1 | Payments 模块 | `payments/index.vue`, `api/payment.ts` |
-| 3.2 | Points 模块 | 10+ files in `points/` |
-| 3.3 | Fulfillment 模块 | 6 files in `fulfillment/` |
-| 3.4 | Users 模块 | 4 files in `users/` |
-| 3.5 | Admin Users 模块 | 2 files in `admin-users/` |
+| # | 模块 | 改动文件 | 状态 |
+|---|------|----------|------|
+| 3.1 | Payments 模块 | `payments/index.vue`, `api/payment.ts` | ✅ 已完成 |
+| 3.2 | Points 模块 | 10+ files in `points/` | ✅ 已完成 |
+| 3.3 | Fulfillment 模块 | 6 files in `fulfillment/` | ✅ 已完成 |
+| 3.4 | Users 模块 | 4 files in `users/` | ✅ 已完成 |
+| 3.5 | Admin Users 模块 | 2 files in `admin-users/` | ✅ 已完成 |
 
 ### Phase 4: 前端功能完善
 
-| # | 任务 | 改动文件 |
-|---|------|----------|
-| 4.1 | Dashboard 按钮处理器 | `dashboard/index.vue` |
-| 4.2 | Products 预览/复制/批量删除 | `products/index.vue` |
-| 4.3 | Orders stats API 对接 | `orders/index.vue` |
-| 4.4 | 导出功能实现 | 各模块 |
+| # | 任务 | 改动文件 | 状态 |
+|---|------|----------|------|
+| 4.1 | Dashboard 按钮处理器 | `dashboard/index.vue` | ✅ 已完成 |
+| 4.2 | Products 预览/复制/批量删除 | `products/index.vue` | ✅ 已完成 |
+| 4.3 | Orders stats API 对接 | `orders/index.vue` | ✅ 已完成 |
+| 4.4 | 导出功能实现 | 各模块 | ✅ 已完成 |
 
 ### Phase 5: 前端类型与规范
 
-| # | 任务 | 改动文件 |
-|---|------|----------|
-| 5.1 | 移除硬编码分类 - 改为 API 获取 | `products/index.vue` |
-| 5.2 | 修复枚举不匹配问题 | types + views |
-| 5.3 | 移除重复 `ShipmentStatus` 定义 | use from `fulfillment.ts` |
-| 5.4 | 添加统一错误处理 | catch blocks |
+| # | 任务 | 改动文件 | 状态 |
+|---|------|----------|------|
+| 5.1 | 移除硬编码分类 - 改为 API 获取 | `products/index.vue` | ✅ 已完成 |
+| 5.2 | 修复枚举不匹配问题 | types + views | ✅ 已完成 |
+| 5.3 | 移除重复 `ShipmentStatus` 定义 | use from `fulfillment.ts` | ✅ 已完成 |
+| 5.4 | 添加统一错误处理 | catch blocks | ✅ 已完成 |
 
 ### Phase 6: 语言标准化
 
-| # | 任务 | 说明 |
-|---|------|------|
-| 6.1 | 建立语言标准 | 模块级统一中/英文 |
-| 6.2 | 统一现有页面语言 | 30+ files |
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 6.1 | 建立语言标准 / i18n 集成 | 模块级统一中/英文 | ✅ 已完成 |
+| 6.2 | 统一现有页面语言 | 30+ files | ✅ 已完成 |
 
 ---
 
@@ -286,7 +286,11 @@ Phase 6 (Language consistency)
 
 ## 八、后续行动
 
-- [ ] 用户确认本报告内容
-- [ ] 确定 Phase 1 紧急修复启动时间
-- [ ] 分配 Phase 3 各模块负责人
-- [ ] 建立 i18n 实施标准
+- [x] 用户确认本报告内容
+- [x] Phase 1 紧急修复完成
+- [x] Phase 2 后端 API 一致性完成
+- [x] Phase 3 前端 API 对接完成
+- [x] Phase 4 前端功能完善完成
+- [x] Phase 5 前端类型与规范完成
+- [x] Phase 6 语言标准化完成
+- [ ] ~~所有 Phase 均已完成~~

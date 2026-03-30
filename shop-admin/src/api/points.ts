@@ -502,3 +502,21 @@ export interface AvailableCoupon {
 export const getAvailableCoupons = (params: { page?: number; page_size?: number; name?: string }) => {
   return request.get<{ list: AvailableCoupon[]; total: number }>('/api/v1/coupons', { params })
 }
+
+// Export types
+export interface ExportPointsTransactionsParams {
+  user_id?: number
+  type?: string
+  start_time?: string
+  end_time?: string
+}
+
+/**
+ * Export points transactions - returns URL and params for download utility
+ */
+export function exportPointsTransactionsUrl(params: ExportPointsTransactionsParams): { url: string; params: ExportPointsTransactionsParams } {
+  return {
+    url: '/api/v1/points/transactions/export',
+    params
+  }
+}

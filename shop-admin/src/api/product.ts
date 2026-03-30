@@ -365,3 +365,23 @@ export function deleteProduct(id: number) {
     method: 'delete'
   })
 }
+
+// Export types
+export interface ExportProductsParams {
+  name?: string
+  category_id?: number
+  status?: string
+  min_price?: string
+  max_price?: string
+  market_id?: number
+}
+
+/**
+ * Export products - returns URL and params for download utility
+ */
+export function exportProductsUrl(params: ExportProductsParams): { url: string; params: ExportProductsParams } {
+  return {
+    url: '/api/v1/products/export',
+    params
+  }
+}

@@ -324,7 +324,7 @@ const statusTimeline = computed(() => {
   }
 
   // Completed
-  if (o.status === 'completed') {
+  if (o.status === 'delivered') {
     timeline.push({
       title: t('orders.orderCompleted'),
       time: formatTime(o.shipments?.[0]?.delivered_at),
@@ -400,11 +400,9 @@ const getStatusTagType = (status: OrderStatus | undefined) => {
   const types: Record<OrderStatus, string> = {
     pending_payment: 'warning',
     paid: 'success',
-    pending_shipment: 'warning',
     shipped: 'info',
-    completed: 'success',
+    delivered: 'success',
     cancelled: 'danger',
-    refunding: 'warning',
     refunded: 'info'
   }
   return status ? types[status] : 'info'

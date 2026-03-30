@@ -588,7 +588,7 @@ const handleSave = async () => {
   } catch (error: unknown) {
     console.error('Failed to save settings:', error)
     const err = error as { response?: { data?: { message?: string } } }
-    ElMessage.error(err?.response?.data?.message || '保存失败，请重试')
+    ElMessage.error(err?.response?.data?.message || t('common.actionFailed'))
   } finally {
     saving.value = false
   }

@@ -80,8 +80,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { User, Download } from '@element-plus/icons-vue'
 import TransactionTable from '../components/TransactionTable.vue'
-import { getTransactions, type PointsTransaction, type ListTransactionsParams } from '@/api/points'
+import { getTransactions, exportPointsTransactionsUrl, type PointsTransaction, type ListTransactionsParams } from '@/api/points'
 import { t } from '@/plugins/i18n'
+import { downloadFile } from '@/utils/download'
 
 // State
 const loading = ref(false)
@@ -150,31 +151,24 @@ const handlePageChange = (page: number, pageSize: number) => {
   loadTransactions()
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    // Build export params from current filters
-    const params: Record<string, any> = {
-      page: 1,
-      page_size: 10000
-    }
-    if (userIdInput.value) {
-      params.user_id = userIdInput.value
-    }
-    if (searchParams.type) {
-      params.type = searchParams.type
-    }
-    if (dateRange.value) {
-      params.start_time = dateRange.value[0]
-      params.end_time = dateRange.value[1]
-    }
+    // Parse user_id from string input to number
+    const userId = userIdInput.value && /^\d+$/.test(userIdInput.value.trim())
+      ? parseInt(userIdInput.value.trim(), 10)
+      : undefined
 
-    // Use window.open for export
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/points/transactions/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('points.exporting'))
+    const { url, params } = exportPointsTransactionsUrl({
+      user_id: userId,
+      type: searchParams.type || undefined,
+      start_time: dateRange.value?.[0],
+      end_time: dateRange.value?.[1]
+    })
+
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('points.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   }
 }
 

@@ -3,6 +3,16 @@ import request from '@/utils/request'
 // Types
 export type ShipmentStatus = 'pending' | 'shipped' | 'in_transit' | 'delivered' | 'failed' | 'cancelled'
 
+// Status constants for use in templates
+export const ShipmentStatusMap = {
+  PENDING: 'pending',
+  SHIPPED: 'shipped',
+  IN_TRANSIT: 'in_transit',
+  DELIVERED: 'delivered',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+} as const
+
 export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
 
 export type RefundType = 'full_refund' | 'partial_refund'
@@ -265,4 +275,58 @@ export const getFulfillmentSummary = () => {
     delivered: number
     pending_refund: number
   }>('/api/v1/orders/fulfillment-summary')
+}
+
+// Export types
+export interface ExportRefundsParams {
+  order_no?: string
+  refund_no?: string
+  status?: string
+  reason_type?: string
+  start_time?: string
+  end_time?: string
+}
+
+export interface ExportShipmentsParams {
+  tracking_no?: string
+  status?: string
+  carrier_code?: string
+  start_time?: string
+  end_time?: string
+}
+
+export interface ExportFulfillmentStatisticsParams {
+  period?: string
+  start_date?: string
+  end_date?: string
+}
+
+/**
+ * Export refunds - returns URL and params for download utility
+ */
+export function exportRefundsUrl(params: ExportRefundsParams): { url: string; params: ExportRefundsParams } {
+  return {
+    url: '/api/v1/refunds/export',
+    params
+  }
+}
+
+/**
+ * Export shipments - returns URL and params for download utility
+ */
+export function exportShipmentsUrl(params: ExportShipmentsParams): { url: string; params: ExportShipmentsParams } {
+  return {
+    url: '/api/v1/shipments/export',
+    params
+  }
+}
+
+/**
+ * Export fulfillment statistics - returns URL and params for download utility
+ */
+export function exportFulfillmentStatisticsUrl(params: ExportFulfillmentStatisticsParams): { url: string; params: ExportFulfillmentStatisticsParams } {
+  return {
+    url: '/api/v1/fulfillment/statistics/export',
+    params
+  }
 }

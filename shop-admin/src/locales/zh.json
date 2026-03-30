@@ -24,7 +24,8 @@
     "detail": "详情",
     "close": "关闭",
     "more": "更多",
-    "to": "至"
+    "to": "至",
+    "actionFailed": "操作失败"
   },
   "orders": {
     "title": "订单管理",
@@ -314,7 +315,9 @@
     "selectCategory": "选择分类",
     "enterProductName": "请输入商品名称",
     "preview": "预览",
+    "previewLoadFailed": "加载商品预览失败",
     "copy": "复制",
+    "copySuccess": "商品复制成功",
     "setTop": "置顶",
     "more": "更多",
     "hot": "热销",
@@ -797,7 +800,11 @@
     "vsLastPeriod": "较昨日",
     "minutesAgo": "{n}分钟前",
     "hoursAgo": "{n}小时前",
-    "daysAgo": "{n}天前"
+    "daysAgo": "{n}天前",
+    "chartSalesTooltip": "销售额: ",
+    "chartSalesSeries": "销售额",
+    "chartOrderStatusSeries": "订单状态",
+    "yAxisUnit": "万"
   },
   "fulfillment": {
     "title": "履约管理",
@@ -1664,6 +1671,56 @@
     "productPage": "商品页",
     "collectionPage": "集合页",
     "customPage": "自定义页",
-    "unknown": "未知"
+    "unknown": "未知",
+    "pageTypeGlobal": "全局设置",
+    "pageTypeHome": "首页",
+    "pageTypeProduct": "商品详情页",
+    "pageTypeCategory": "分类页面",
+    "pageTypeCollection": "集合页面",
+    "pageTypeCustom": "自定义页面"
+  },
+  "settings": {
+    "markets": {
+      "title": "市场管理",
+      "pageDesc": "管理多市场配置，包括货币、语言和税务规则",
+      "addMarket": "新增市场",
+      "market": "市场",
+      "currency": "货币",
+      "defaultLanguage": "默认语言",
+      "taxConfig": "税务配置",
+      "status": "状态",
+      "defaultMarket": "主市场",
+      "actions": "操作",
+      "edit": "编辑",
+      "delete": "删除",
+      "marketCode": "市场代码",
+      "marketName": "市场名称",
+      "selectMarket": "请选择市场",
+      "enterMarketName": "请输入市场名称",
+      "selectCurrency": "请选择货币",
+      "selectLanguage": "请选择语言",
+      "vatRate": "VAT 税率",
+      "gstRate": "GST 税率",
+      "iossEnabled": "启用 IOSS",
+      "iossDescription": "欧盟进口一站式申报服务",
+      "priceIncludesTax": "含税价格",
+      "priceTaxDescription": "商品价格是否含税",
+      "loadingFailed": "加载市场列表失败",
+      "getMarketFailed": "获取市场信息失败",
+      "cannotDeleteDefault": "主市场不能删除",
+      "confirmDelete": "确认删除市场 \"{name}\"?",
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败",
+      "enabled": "市场已启用",
+      "disabled": "市场已禁用",
+      "statusUpdateFailed": "状态更新失败",
+      "confirmSetDefault": "确认将 \"{name}\" 设为主市场?",
+      "setAsDefault": "设为主市场",
+      "defaultSetSuccess": "主市场设置成功",
+      "setDefaultFailed": "设置主市场失败",
+      "saveFailed": "保存失败",
+      "updateSuccess": "更新成功",
+      "createSuccess": "创建成功"
+    }
   }
 }

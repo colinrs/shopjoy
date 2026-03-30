@@ -224,6 +224,7 @@ import {
   type CreateMarketRequest,
   type UpdateMarketRequest
 } from '@/api/market'
+import { t } from '@/plugins/i18n'
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -315,7 +316,7 @@ const loadMarkets = async () => {
     marketList.value = response.list || []
     total.value = response.total || 0
   } catch (error: any) {
-    ElMessage.error(error.message || '加载市场列表失败')
+    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.loadingFailed'))
   } finally {
     loading.value = false
   }
@@ -347,29 +348,33 @@ const handleEdit = async (row: Market) => {
     })
     dialogVisible.value = true
   } catch (error: any) {
-    ElMessage.error(error.message || '获取市场信息失败')
+    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.getMarketFailed'))
   }
 }
 
 const handleDelete = async (row: Market) => {
   if (row.is_default) {
-    ElMessage.warning('主市场不能删除')
+    ElMessage.warning(t('settings.markets.cannotDeleteDefault'))
     return
   }
 
   try {
-    await ElMessageBox.confirm(`确认删除市场 "${row.name}"?`, '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    await ElMessageBox.confirm(
+      t('settings.markets.confirmDelete', { name: row.name }),
+      t('common.warning'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning'
+      }
+    )
 
     await deleteMarket(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('settings.markets.deleteSuccess'))
     loadMarkets()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '删除失败')
+      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.deleteFailed'))
     }
   }
 }
@@ -380,20 +385,24 @@ const handleStatusChange = async (row: Market, val: boolean) => {
       id: row.id,
       is_active: val
     })
-    ElMessage.success(val ? '市场已启用' : '市场已禁用')
+    ElMessage.success(val ? t('settings.markets.enabled') : t('settings.markets.disabled'))
   } catch (error: any) {
     row.is_active = !val
-    ElMessage.error(error.message || '状态更新失败')
+    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.statusUpdateFailed'))
   }
 }
 
 const handleSetDefault = async (row: Market) => {
   try {
-    await ElMessageBox.confirm(`确认将 "${row.name}" 设为主市场?`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'info'
-    })
+    await ElMessageBox.confirm(
+      t('settings.markets.confirmSetDefault', { name: row.name }),
+      t('common.warning'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'info'
+      }
+    )
 
     // Update the market to be default
     await updateMarket({
@@ -401,11 +410,11 @@ const handleSetDefault = async (row: Market) => {
       is_default: true
     })
 
-    ElMessage.success('主市场设置成功')
+    ElMessage.success(t('settings.markets.defaultSetSuccess'))
     loadMarkets()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '设置主市场失败')
+      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.setDefaultFailed'))
     }
   }
 }
@@ -432,7 +441,7 @@ const handleSave = async () => {
         }
       }
       await updateMarket(updateData)
-      ElMessage.success('更新成功')
+      ElMessage.success(t('settings.markets.updateSuccess'))
     } else {
       // Create new market
       const createData: CreateMarketRequest = {
@@ -448,14 +457,14 @@ const handleSave = async () => {
         }
       }
       await createMarket(createData)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('settings.markets.createSuccess'))
     }
 
     dialogVisible.value = false
     loadMarkets()
   } catch (error: any) {
     if (error !== false) {
-      ElMessage.error(error.message || '保存失败')
+      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.saveFailed'))
     }
   } finally {
     saveLoading.value = false

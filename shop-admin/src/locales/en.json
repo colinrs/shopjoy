@@ -24,7 +24,8 @@
     "detail": "Detail",
     "close": "Close",
     "more": "More",
-    "to": "to"
+    "to": "to",
+    "actionFailed": "Action failed"
   },
   "orders": {
     "title": "Orders",
@@ -314,7 +315,9 @@
     "selectCategory": "Select Category",
     "enterProductName": "Enter product name",
     "preview": "Preview",
+    "previewLoadFailed": "Failed to load product preview",
     "copy": "Copy",
+    "copySuccess": "Product duplicated successfully",
     "setTop": "Set Top",
     "more": "More",
     "hot": "Hot",
@@ -797,7 +800,11 @@
     "vsLastPeriod": "vs last period",
     "minutesAgo": "{n} minutes ago",
     "hoursAgo": "{n} hours ago",
-    "daysAgo": "{n} days ago"
+    "daysAgo": "{n} days ago",
+    "chartSalesTooltip": "Sales: ",
+    "chartSalesSeries": "Sales",
+    "chartOrderStatusSeries": "Order Status",
+    "yAxisUnit": "10k"
   },
   "fulfillment": {
     "title": "Fulfillment",
@@ -1664,6 +1671,56 @@
     "productPage": "Product Page",
     "collectionPage": "Collection Page",
     "customPage": "Custom Page",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "pageTypeGlobal": "Global Settings",
+    "pageTypeHome": "Home Page",
+    "pageTypeProduct": "Product Detail Page",
+    "pageTypeCategory": "Category Page",
+    "pageTypeCollection": "Collection Page",
+    "pageTypeCustom": "Custom Page"
+  },
+  "settings": {
+    "markets": {
+      "title": "Market Management",
+      "pageDesc": "Manage multi-market configuration including currency, language and tax rules",
+      "addMarket": "Add Market",
+      "market": "Market",
+      "currency": "Currency",
+      "defaultLanguage": "Default Language",
+      "taxConfig": "Tax Configuration",
+      "status": "Status",
+      "defaultMarket": "Default Market",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "marketCode": "Market Code",
+      "marketName": "Market Name",
+      "selectMarket": "Please select a market",
+      "enterMarketName": "Please enter market name",
+      "selectCurrency": "Please select currency",
+      "selectLanguage": "Please select language",
+      "vatRate": "VAT Rate",
+      "gstRate": "GST Rate",
+      "iossEnabled": "Enable IOSS",
+      "iossDescription": "EU Import One-Stop Shop Service",
+      "priceIncludesTax": "Price Includes Tax",
+      "priceTaxDescription": "Whether product price includes tax",
+      "loadingFailed": "Failed to load markets",
+      "getMarketFailed": "Failed to get market info",
+      "cannotDeleteDefault": "Default market cannot be deleted",
+      "confirmDelete": "Confirm deleting market \"{name}\"?",
+      "deleteSuccess": "Deleted successfully",
+      "deleteFailed": "Delete failed",
+      "enabled": "Market enabled",
+      "disabled": "Market disabled",
+      "statusUpdateFailed": "Failed to update status",
+      "confirmSetDefault": "Confirm setting \"{name}\" as default market?",
+      "setAsDefault": "Set as Default",
+      "defaultSetSuccess": "Default market set successfully",
+      "setDefaultFailed": "Failed to set default market",
+      "saveFailed": "Save failed",
+      "updateSuccess": "Updated successfully",
+      "createSuccess": "Created successfully"
+    }
   }
 }

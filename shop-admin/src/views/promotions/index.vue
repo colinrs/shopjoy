@@ -101,7 +101,7 @@
                   <span v-else>{{ row.discount_value }}%</span>
                 </div>
                 <div class="min-order" v-if="row.min_order_amount && parseFloat(row.min_order_amount) > 0">
-                  满¥{{ row.min_order_amount }}可用
+                  {{ $t('promotions.minOrderValue', { min: row.min_order_amount }) }}
                 </div>
               </template>
             </el-table-column>

@@ -219,10 +219,12 @@ import {
   approveRefund,
   rejectRefund,
   getRefundReasonList,
+  exportRefundsUrl,
   type Refund,
   type RefundReason,
   type RefundListParams
 } from '@/api/fulfillment'
+import { downloadFile } from '@/utils/download'
 
 const router = useRouter()
 
@@ -337,35 +339,21 @@ const handleSearch = () => {
   loadData()
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    // Build export params from current filters
-    const params: Record<string, any> = {
-      page: 1,
-      page_size: 10000
-    }
-    if (searchQuery.value) {
-      params.order_no = searchQuery.value
-      params.refund_no = searchQuery.value
-    }
-    if (statusFilter.value !== '') {
-      params.status = statusFilter.value
-    }
-    if (reasonFilter.value) {
-      params.reason_type = reasonFilter.value
-    }
-    if (dateRange.value) {
-      params.start_time = dateRange.value[0]
-      params.end_time = dateRange.value[1]
-    }
+    const { url, params } = exportRefundsUrl({
+      order_no: searchQuery.value || undefined,
+      refund_no: searchQuery.value || undefined,
+      status: statusFilter.value !== '' ? statusFilter.value : undefined,
+      reason_type: reasonFilter.value || undefined,
+      start_time: dateRange.value?.[0],
+      end_time: dateRange.value?.[1]
+    })
 
-    // Use window.open for export
-    const queryString = new URLSearchParams(params).toString()
-    const exportUrl = `/api/v1/refunds/export?${queryString}`
-    window.open(exportUrl, '_blank')
-    ElMessage.success(t('common.exporting'))
+    await downloadFile(url, params)
   } catch (error) {
-    ElMessage.error(t('common.exportFailed'))
+    console.error('Export failed:', error)
+    // Error message is handled by downloadFile utility
   }
 }
 

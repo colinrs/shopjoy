@@ -2034,15 +2034,15 @@ type ProductStatsReq struct {
 }
 
 type ProductStatsResp struct {
-	ProductID          int64          `json:"product_id"`
-	TotalReviews       int            `json:"total_reviews"`
-	AverageRating      string         `json:"average_rating"`
-	QualityAvgRating   string         `json:"quality_avg_rating"`
-	ValueAvgRating     string         `json:"value_avg_rating"`
-	RatingDistribution map[string]int `json:"rating_distribution"`
-	WithImageCount     int            `json:"with_image_count"`
-	ReplyCount         int            `json:"reply_count"`
-	ReplyRate          float64        `json:"reply_rate"`
+	ProductID          int64               `json:"product_id"`
+	TotalReviews       int                 `json:"total_reviews"`
+	AverageRating      string              `json:"average_rating"`
+	QualityAvgRating   string              `json:"quality_avg_rating"`
+	ValueAvgRating     string              `json:"value_avg_rating"`
+	RatingDistribution *RatingDistribution `json:"rating_distribution"`
+	WithImageCount     int                 `json:"with_image_count"`
+	ReplyCount         int                 `json:"reply_count"`
+	ReplyRate          float64             `json:"reply_rate"`
 }
 
 type PromotionDetailResp struct {
@@ -2107,6 +2107,14 @@ type PushToMarketResp struct {
 
 type PutOnSaleReq struct {
 	ID int64 `path:"id"`
+}
+
+type RatingDistribution struct {
+	Rating1 int `json:"1"` // 1 star count
+	Rating2 int `json:"2"` // 2 stars count
+	Rating3 int `json:"3"` // 3 stars count
+	Rating4 int `json:"4"` // 4 stars count
+	Rating5 int `json:"5"` // 5 stars count
 }
 
 type RecentActivitiesRequest struct {

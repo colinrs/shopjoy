@@ -104,7 +104,13 @@ export interface ProductStats {
   average_rating: string
   quality_avg_rating: string
   value_avg_rating: string
-  rating_distribution: Record<string, number>
+  rating_distribution: {
+    "1": number
+    "2": number
+    "3": number
+    "4": number
+    "5": number
+  }
   with_image_count: number
   reply_count: number
   reply_rate: number

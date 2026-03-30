@@ -48,11 +48,9 @@
             <el-option :label="$t('common.all')" value="" />
             <el-option :label="$t('orders.pendingPayment')" value="pending_payment" />
             <el-option :label="$t('orders.paid')" value="paid" />
-            <el-option :label="$t('orders.pendingShipment')" value="pending_shipment" />
             <el-option :label="$t('orders.shipped')" value="shipped" />
-            <el-option :label="$t('orders.completed')" value="completed" />
+            <el-option :label="$t('orders.delivered')" value="delivered" />
             <el-option :label="$t('orders.cancelled')" value="cancelled" />
-            <el-option :label="$t('orders.refunding')" value="refunding" />
             <el-option :label="$t('orders.refunded')" value="refunded" />
           </el-select>
           <el-select v-model="fulfillmentFilter" :placeholder="$t('orders.filterFulfillment')" clearable class="filter-select" @change="handleSearch">
@@ -347,6 +345,7 @@ import {
   type OrderListParams,
   type ExportOrdersParams
 } from '@/api/order'
+import { getOrderStatusDistribution } from '@/api/dashboard'
 import {
   OrderDetailDrawer,
   ShipDialog,
@@ -375,8 +374,18 @@ const dateRange = ref<[string, string] | null>(null)
 const orderList = ref<Order[]>([])
 const carriers = ref<Carrier[]>([])
 
+// Order statistics type
+interface OrderStats {
+  pending_payment: number
+  partial_shipped: number
+  shipped: number
+  delivered: number
+}
+
 // Statistics
-const orderStats = ref({
+// Note: FulfillmentSummary API (getFulfillmentSummary) does not include pending_payment count.
+// pending_payment is fetched separately via getOrderStatusDistribution() API.
+const orderStats = ref<OrderStats>({
   pending_payment: 0,
   partial_shipped: 0,
   shipped: 0,
@@ -429,16 +438,20 @@ const loadOrders = async () => {
 }
 
 // Load statistics
+// Note: FulfillmentSummary API does not return pending_payment count, so we fetch it separately
+// via getOrderStatusDistribution() which provides counts for all order statuses.
 const loadStats = async () => {
   try {
-    // Fetch fulfillment stats and pending_payment count in parallel
-    const [fulfillmentRes, pendingPaymentRes] = await Promise.all([
+    const [fulfillmentRes, statusDistRes] = await Promise.all([
       getFulfillmentSummary(),
-      getOrderList({ status: 'pending_payment', page: 1, page_size: 1 })
+      getOrderStatusDistribution()
     ])
 
+    // Find pending_payment count from status distribution
+    const pendingPaymentItem = statusDistRes.list.find(item => item.status === 'pending_payment')
+
     orderStats.value = {
-      pending_payment: pendingPaymentRes.total || 0,
+      pending_payment: pendingPaymentItem?.count || 0,
       partial_shipped: fulfillmentRes.partial_shipped || 0,
       shipped: fulfillmentRes.shipped || 0,
       delivered: fulfillmentRes.delivered || 0
@@ -476,11 +489,9 @@ const getStatusType = (status: OrderStatus) => {
   const types: Record<OrderStatus, string> = {
     pending_payment: 'warning',
     paid: 'success',
-    pending_shipment: 'warning',
     shipped: 'info',
-    completed: 'success',
+    delivered: 'success',
     cancelled: 'danger',
-    refunding: 'warning',
     refunded: 'info'
   }
   return types[status] || 'info'
