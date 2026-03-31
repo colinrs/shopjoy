@@ -172,6 +172,22 @@ export function getInventoryLogs(params?: {
   })
 }
 
+export interface ExportInventoryLogsParams {
+  sku_code?: string
+  product_id?: number
+  type?: string
+}
+
+/**
+ * Export inventory logs - returns URL and params for download utility
+ */
+export function exportInventoryLogsUrl(params: ExportInventoryLogsParams): { url: string; params: ExportInventoryLogsParams } {
+  return {
+    url: '/api/v1/inventory/logs/export',
+    params
+  }
+}
+
 export function getLowStockSKUs(params?: { page?: number; page_size?: number }) {
   return request<{ list: LowStockSKU[]; total: number }>({
     url: '/api/v1/inventory/low-stock',

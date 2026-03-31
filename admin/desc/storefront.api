@@ -74,11 +74,19 @@ type (
 type (
 	PageListItem {
 		ID          int64  `json:"id"`
-		PageType    string `json:"page_type"` // home, category, product, cart, order, custom
+		PageType    string `json:"page_type"` // home, product, collection, custom
 		Name        string `json:"name"`
 		Slug        string `json:"slug"`
 		IsPublished bool   `json:"is_published"`
 		Version     int    `json:"version"`
+	}
+	CreatePageRequest {
+		Name     string `json:"name"` // Page name (required)
+		Slug     string `json:"slug"` // URL slug, auto-generated if empty (required)
+		PageType string `json:"page_type"` // home, product, collection, custom
+	}
+	CreatePageResponse {
+		PageID int64 `json:"page_id"`
 	}
 	ListPagesRequest {
 		Page     int `form:"page,default=1"`
@@ -256,6 +264,10 @@ service admin-api {
 	middleware: AuthMiddleware
 )
 service admin-api {
+	@doc "创建页面"
+	@handler CreatePageHandler
+	post /api/v1/pages (CreatePageRequest) returns (CreatePageResponse)
+
 	@doc "获取页面列表"
 	@handler ListPagesHandler
 	get /api/v1/pages (ListPagesRequest) returns (ListPagesResponse)

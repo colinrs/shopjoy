@@ -489,6 +489,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: inventory.GetInventoryLogsHandler(serverCtx),
 				},
 				{
+					// 导出库存日志
+					Method:  http.MethodGet,
+					Path:    "/api/v1/inventory/logs/export",
+					Handler: inventory.ExportInventoryLogsHandler(serverCtx),
+				},
+				{
 					// 获取低库存SKU列表
 					Method:  http.MethodGet,
 					Path:    "/api/v1/inventory/low-stock",
@@ -569,6 +575,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/api/v1/decorations/:id",
 					Handler: pages.DeleteDecorationHandler(serverCtx),
+				},
+				{
+					// 创建页面
+					Method:  http.MethodPost,
+					Path:    "/api/v1/pages",
+					Handler: pages.CreatePageHandler(serverCtx),
 				},
 				{
 					// 获取页面列表
@@ -965,6 +977,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/products/:id",
 					Handler: products.GetProductHandler(serverCtx),
+				},
+				{
+					// 删除商品
+					Method:  http.MethodDelete,
+					Path:    "/api/v1/products/:id",
+					Handler: products.DeleteProductHandler(serverCtx),
 				},
 				{
 					// 下架商品

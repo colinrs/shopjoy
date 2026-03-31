@@ -8,7 +8,7 @@ export interface Brand {
   website: string
   trademark_number: string
   trademark_country: string
-  enable_page: boolean
+  enable_page: number // 0=disabled, 1=enabled
   sort: number
   status: number
   product_count: number

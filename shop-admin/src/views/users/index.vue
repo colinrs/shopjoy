@@ -49,6 +49,11 @@
             <el-option :label="$t('users.normal')" :value="1" />
             <el-option :label="$t('users.disabled')" :value="2" />
           </el-select>
+          <el-button @click="showAdvancedFilters = !showAdvancedFilters">
+            <el-icon><Filter /></el-icon>
+            {{ $t('users.advancedFilters') }}
+            <el-icon class="filter-arrow" :class="{ 'is-expanded': showAdvancedFilters }"><ArrowDown /></el-icon>
+          </el-button>
         </div>
         <div class="filter-right">
           <el-button @click="handleExport" :loading="exportLoading">
@@ -58,6 +63,55 @@
             <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
+      </div>
+      <!-- Advanced Filters -->
+      <div v-if="showAdvancedFilters" class="advanced-filters">
+        <el-row :gutter="16">
+          <el-col :span="6">
+            <el-input
+              v-model="pointsMin"
+              :placeholder="$t('users.pointsMin')"
+              type="number"
+              clearable
+              @clear="handleSearch"
+            >
+              <template #prefix>{{ $t('users.points') }}</template>
+            </el-input>
+          </el-col>
+          <el-col :span="6">
+            <el-input
+              v-model="pointsMax"
+              :placeholder="$t('users.pointsMax')"
+              type="number"
+              clearable
+              @clear="handleSearch"
+            >
+              <template #prefix>{{ $t('users.points') }}</template>
+            </el-input>
+          </el-col>
+          <el-col :span="6">
+            <el-input
+              v-model="orderCountMin"
+              :placeholder="$t('users.orderCountMin')"
+              type="number"
+              clearable
+              @clear="handleSearch"
+            >
+              <template #prefix>{{ $t('users.orders') }}</template>
+            </el-input>
+          </el-col>
+          <el-col :span="6">
+            <el-input
+              v-model="orderCountMax"
+              :placeholder="$t('users.orderCountMax')"
+              type="number"
+              clearable
+              @clear="handleSearch"
+            >
+              <template #prefix>{{ $t('users.orders') }}</template>
+            </el-input>
+          </el-col>
+        </el-row>
       </div>
     </el-card>
 
@@ -94,6 +148,21 @@
               :model-value="row.status === 1"
               @change="(val: boolean) => handleStatusChange(row, val)"
             />
+          </template>
+        </el-table-column>
+        <el-table-column v-if="isEnhanced" :label="$t('users.pointsBalance')" width="120" align="center">
+          <template #default="{ row }">
+            <span class="enhanced-value">{{ (row as ExtendedUser).points_balance || 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="isEnhanced" :label="$t('users.orderCount')" width="100" align="center">
+          <template #default="{ row }">
+            <span class="enhanced-value">{{ (row as ExtendedUser).order_count || 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="isEnhanced" :label="$t('users.totalSpent')" width="120" align="center">
+          <template #default="{ row }">
+            <span class="enhanced-value">{{ (row as ExtendedUser).total_spent || '0.00' }}</span>
           </template>
         </el-table-column>
         <el-table-column :label="$t('common.actions')" width="180" fixed="right">
@@ -172,13 +241,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, ArrowDown, Download } from '@element-plus/icons-vue'
+import { Search, Refresh, ArrowDown, Download, Filter } from '@element-plus/icons-vue'
 import { t } from '@/plugins/i18n'
 import {
   getUserList,
+  getUserListEnhanced,
   getUserStats,
   updateUser,
   suspendUser,
@@ -187,7 +257,8 @@ import {
   resetUserPassword,
   exportUsers,
   type User,
-  type UserStats
+  type UserStats,
+  type ExtendedUser
 } from '@/api/user'
 
 const router = useRouter()
@@ -202,6 +273,22 @@ const total = ref(0)
 const editDialogVisible = ref(false)
 const detailDialogVisible = ref(false)
 const currentUser = ref<User | null>(null)
+
+// Advanced filters
+const showAdvancedFilters = ref(false)
+const pointsMin = ref<number | undefined>()
+const pointsMax = ref<number | undefined>()
+const orderCountMin = ref<number | undefined>()
+const orderCountMax = ref<number | undefined>()
+
+// Check if enhanced filters are applied
+const isEnhanced = computed(() => {
+  return showAdvancedFilters.value ||
+    pointsMin.value !== undefined ||
+    pointsMax.value !== undefined ||
+    orderCountMin.value !== undefined ||
+    orderCountMax.value !== undefined
+})
 
 const stats = ref<UserStats>({
   total: 0,
@@ -222,14 +309,27 @@ const editForm = reactive({
 const loadUsers = async () => {
   loading.value = true
   try {
-    const res = await getUserList({
+    const params = {
       page: currentPage.value,
       page_size: pageSize.value,
       keyword: searchQuery.value || undefined,
-      status: statusFilter.value || undefined
-    })
-    userList.value = res.list || []
-    total.value = res.total || 0
+      status: statusFilter.value || undefined,
+      points_min: pointsMin.value,
+      points_max: pointsMax.value,
+      order_count_min: orderCountMin.value,
+      order_count_max: orderCountMax.value
+    }
+
+    // Use enhanced API when advanced filters are applied
+    if (isEnhanced.value) {
+      const res = await getUserListEnhanced(params)
+      userList.value = res.list || []
+      total.value = res.total || 0
+    } else {
+      const res = await getUserList(params)
+      userList.value = res.list || []
+      total.value = res.total || 0
+    }
   } catch (error) {
     console.error('Failed to load users:', error)
     ElMessage.error(t('users.loadFailed'))
@@ -500,6 +600,26 @@ onMounted(() => {
   gap: 12px;
 }
 
+.filter-arrow {
+  transition: transform 0.3s;
+  margin-left: 4px;
+}
+
+.filter-arrow.is-expanded {
+  transform: rotate(180deg);
+}
+
+/* Advanced Filters */
+.advanced-filters {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.advanced-filters :deep(.el-input__wrapper) {
+  border-radius: 12px;
+}
+
 /* Table */
 .table-card {
   margin-bottom: 20px;
@@ -593,6 +713,13 @@ onMounted(() => {
 :deep(.el-descriptions) {
   border-radius: 12px;
   overflow: hidden;
+}
+
+/* Enhanced Values */
+.enhanced-value {
+  font-weight: 600;
+  color: #1E1B4B;
+  font-family: 'Fira Code', monospace;
 }
 
 /* Responsive */

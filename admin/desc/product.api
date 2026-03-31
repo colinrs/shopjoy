@@ -294,5 +294,9 @@ service admin-api {
 	@doc "删除商品本地化"
 	@handler DeleteProductLocalizationHandler
 	delete /api/v1/product-localizations/:id (GetProductLocalizationReq) returns (CreateProductResp)
+
+	@doc "删除商品"
+	@handler DeleteProductHandler
+	delete /api/v1/products/:id (GetProductReq) returns (CreateProductResp)
 }
 

@@ -142,7 +142,7 @@
         >
           <div class="version-info">
             <span class="version-number">v{{ ver.version }}</span>
-            <span class="version-time">{{ formatTime(ver.created_at) }}</span>
+            <span class="version-time">{{ new Date(ver.created_at).toLocaleString() }}</span>
           </div>
           <div class="version-actions">
             <el-button size="small" text type="primary" @click="viewVersionDetail(ver)">
@@ -154,7 +154,6 @@
               text
               type="warning"
               @click="handleRestoreVersion(ver)"
-              :loading="ver.restoring"
             >
               {{ $t('storefront.restore') }}
             </el-button>
@@ -164,18 +163,12 @@
     </el-drawer>
 
     <!-- Version Detail Dialog -->
-    <el-dialog v-model="versionDetailVisible" :title="$t('storefront.versionDetail') + ' v' + selectedVersion?.version" width="700px">
-      <div class="version-detail" v-if="versionDetail">
-        <div
-          v-for="(block, index) in versionDetail.blocks"
-          :key="index"
-          class="version-block"
-        >
-          <el-tag size="small">{{ block.block_type }}</el-tag>
-          <pre>{{ JSON.stringify(block.block_config, null, 2) }}</pre>
-        </div>
-      </div>
-    </el-dialog>
+    <version-restore-dialog
+      v-model="versionDetailVisible"
+      :page-id="pageId"
+      :version="selectedVersion"
+      @restored="handleVersionRestored"
+    />
   </div>
 </template>
 
@@ -194,16 +187,14 @@ import {
   saveDraft,
   publishPage,
   listVersions,
-  getVersion,
-  restoreVersion,
   deleteDecoration,
   BLOCK_TYPES,
   type PageDetailResponse,
   type DecorationDTO,
-  type VersionItem,
-  type VersionDetailResponse as VersionDetailResp
+  type VersionItem
 } from '@/api/storefront'
 import BlockConfigForm from './components/BlockConfigForm.vue'
+import VersionRestoreDialog from './components/VersionRestoreDialog.vue'
 import BannerPreview from './components/previews/BannerPreview.vue'
 import ProductGridPreview from './components/previews/ProductGridPreview.vue'
 import RichTextPreview from './components/previews/RichTextPreview.vue'
@@ -231,7 +222,6 @@ const versionsLoading = ref(false)
 const versions = ref<(VersionItem & { restoring?: boolean })[]>([])
 const versionDetailVisible = ref(false)
 const selectedVersion = ref<VersionItem | null>(null)
-const versionDetail = ref<VersionDetailResp | null>(null)
 
 // Block preview components
 const previewComponents: Record<string, any> = {
@@ -429,40 +419,19 @@ const showVersionHistory = async () => {
   }
 }
 
-const viewVersionDetail = async (ver: VersionItem) => {
-  try {
-    const res = await getVersion(pageId, ver.version)
-    versionDetail.value = res
-    selectedVersion.value = ver
-    versionDetailVisible.value = true
-  } catch (error) {
-    ElMessage.error(t('storefront.loadVersionDetailFailedAction'))
-  }
+const viewVersionDetail = (ver: VersionItem) => {
+  selectedVersion.value = ver
+  versionDetailVisible.value = true
 }
 
-const handleRestoreVersion = async (ver: VersionItem & { restoring?: boolean }) => {
-  try {
-    await ElMessageBox.confirm(
-      t('storefront.confirmRestoreVersion', { version: ver.version }),
-      t('storefront.restoreVersionAction'),
-      { confirmButtonText: 'Restore', cancelButtonText: 'Cancel', type: 'warning' }
-    )
-    ver.restoring = true
-    await restoreVersion(pageId, { version: ver.version })
-    ElMessage.success(t('storefront.versionRestoredAction'))
-    versionDrawerVisible.value = false
-    await fetchPage()
-  } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.restoreFailedAction'))
-    }
-  } finally {
-    ver.restoring = false
-  }
+const handleRestoreVersion = (ver: VersionItem) => {
+  selectedVersion.value = ver
+  versionDetailVisible.value = true
 }
 
-const formatTime = (timestampStr: string) => {
-  return new Date(timestampStr).toLocaleString()
+const handleVersionRestored = async () => {
+  versionDrawerVisible.value = false
+  await fetchPage()
 }
 
 onMounted(() => {

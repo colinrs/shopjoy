@@ -150,19 +150,6 @@ export interface UpdateOrderRemarkRequest {
   remark: string // Max 500 characters
 }
 
-// Fulfillment summary
-export interface FulfillmentSummary {
-  pending_shipment: number
-  partial_shipped: number
-  shipped: number
-  delivered: number
-  pending_refund: number
-  refunding: number
-  total_orders: number
-  today_orders: number
-  today_gmv: string
-}
-
 // Export orders parameters
 export interface ExportOrdersParams {
   order_no?: string
@@ -222,13 +209,6 @@ export const exportOrders = (params: ExportOrdersParams) => {
     params,
     responseType: 'blob'
   })
-}
-
-/**
- * Get fulfillment summary statistics
- */
-export const getFulfillmentSummary = () => {
-  return request.get<FulfillmentSummary>('/api/v1/orders/fulfillment-summary')
 }
 
 /**

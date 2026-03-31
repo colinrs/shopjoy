@@ -141,3 +141,36 @@ func (r *inventoryLogRepo) FindByProduct(ctx context.Context, db *gorm.DB, tenan
 	}
 	return result, total, nil
 }
+
+func (r *inventoryLogRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query product.InventoryLogQuery) ([]*product.InventoryLog, int64, error) {
+	var models []inventoryLogModel
+	var total int64
+
+	dbQuery := db.WithContext(ctx).Model(&inventoryLogModel{}).
+		Where("tenant_id = ?", tenantID.Int64())
+
+	if query.ChangeType != "" {
+		dbQuery = dbQuery.Where("change_type = ?", query.ChangeType)
+	}
+	if !query.StartTime.IsZero() {
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
+	}
+	if !query.EndTime.IsZero() {
+		dbQuery = dbQuery.Where("created_at <= ?", query.EndTime)
+	}
+
+	if err := dbQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (query.Page - 1) * query.PageSize
+	if err := dbQuery.Order("created_at DESC").Offset(offset).Limit(query.PageSize).Find(&models).Error; err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]*product.InventoryLog, len(models))
+	for i, m := range models {
+		result[i] = m.toEntity()
+	}
+	return result, total, nil
+}

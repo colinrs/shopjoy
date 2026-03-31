@@ -110,6 +110,9 @@ export interface VersionItem {
 
 export interface ListVersionsResponse {
   versions: VersionItem[]
+  total: number
+  page: number
+  page_size: number
 }
 
 export interface VersionDetailResponse {
@@ -203,10 +206,28 @@ export function getThemeAuditLogs() {
 
 // ========== Page API ==========
 
+export interface CreatePageRequest {
+  name: string
+  slug: string
+  page_type: string
+}
+
+export interface CreatePageResponse {
+  page_id: number
+}
+
 export function listPages() {
   return request<ListPagesResponse>({
     url: '/api/v1/pages',
     method: 'get'
+  })
+}
+
+export function createPage(data: CreatePageRequest) {
+  return request<CreatePageResponse>({
+    url: '/api/v1/pages',
+    method: 'post',
+    data
   })
 }
 
@@ -323,11 +344,11 @@ export function reorderBlocks(pageId: number, data: ReorderBlocksRequest) {
 
 // ========== Version API ==========
 
-export function listVersions(pageId: number, limit: number = 20) {
+export function listVersions(pageId: number, page: number = 1, pageSize: number = 20) {
   return request<ListVersionsResponse>({
     url: `/api/v1/pages/${pageId}/versions`,
     method: 'get',
-    params: { limit }
+    params: { page, page_size: pageSize }
   })
 }
 

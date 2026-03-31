@@ -2,7 +2,7 @@
   <div class="pages-page">
     <page-header :title="$t('storefront.pageManagement')" :subtitle="$t('storefront.manageAllPages')">
       <template #extra>
-        <el-button type="primary" @click="createPage">
+        <el-button type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon>
           {{ $t('storefront.createPage') }}
         </el-button>
@@ -84,6 +84,52 @@
       </el-table>
     </el-card>
 
+    <!-- Create Page Dialog -->
+    <el-dialog
+      v-model="createDialogVisible"
+      :title="$t('storefront.createPage')"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createFormRules"
+        label-width="100px"
+      >
+        <el-form-item :label="$t('storefront.pageName')" prop="name">
+          <el-input
+            v-model="createForm.name"
+            :placeholder="$t('storefront.pageNamePlaceholder')"
+            maxlength="100"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item :label="$t('storefront.urlPath')" prop="slug">
+          <el-input
+            v-model="createForm.slug"
+            :placeholder="$t('storefront.slugPlaceholder')"
+            maxlength="200"
+          >
+            <template #prepend>/</template>
+          </el-input>
+          <div class="form-tip">{{ $t('storefront.slugTip') }}</div>
+        </el-form-item>
+        <el-form-item :label="$t('storefront.pageType')" prop="page_type">
+          <el-select v-model="createForm.page_type" :placeholder="$t('storefront.selectPageType')" style="width: 100%">
+            <el-option :label="$t('storefront.homePage')" value="home" />
+            <el-option :label="$t('storefront.productPage')" value="product" />
+            <el-option :label="$t('storefront.collectionPage')" value="collection" />
+            <el-option :label="$t('storefront.customPage')" value="custom" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="creating" @click="handleCreate">{{ $t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
+
     <!-- Version History Drawer -->
     <el-drawer
       v-model="versionDrawerVisible"
@@ -161,14 +207,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Edit, View, HomeFilled, Goods, Collection, Document } from '@element-plus/icons-vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import {
   listPages,
+  createPage,
   publishPage,
   unpublishPage,
   listVersions,
@@ -191,6 +238,24 @@ const currentPage = ref<PageItem | null>(null)
 const versions = ref<VersionItem[]>([])
 const selectedVersion = ref<VersionItem | null>(null)
 const versionDetail = ref<VersionDetailResponse | null>(null)
+
+// Create page dialog state
+const createDialogVisible = ref(false)
+const creating = ref(false)
+const createFormRef = ref<FormInstance>()
+const createForm = reactive({
+  name: '',
+  slug: '',
+  page_type: 'custom'
+})
+const createFormRules: FormRules = {
+  name: [
+    { required: true, message: t('storefront.pageNameRequired'), trigger: 'blur' }
+  ],
+  page_type: [
+    { required: true, message: t('storefront.pageTypeRequired'), trigger: 'change' }
+  ]
+}
 
 const fetchPages = async () => {
   loading.value = true
@@ -247,8 +312,48 @@ const previewPage = (page: PageItem) => {
   window.open(`/${page.slug}`, '_blank')
 }
 
-const createPage = () => {
-  ElMessage.info(t('storefront.createPageComingSoon'))
+const openCreateDialog = () => {
+  createForm.name = ''
+  createForm.slug = ''
+  createForm.page_type = 'custom'
+  createDialogVisible.value = true
+}
+
+const handleCreate = async () => {
+  if (!createFormRef.value) return
+
+  try {
+    await createFormRef.value.validate()
+  } catch {
+    return
+  }
+
+  creating.value = true
+  try {
+    const res = await createPage({
+      name: createForm.name,
+      slug: createForm.slug || generateSlug(createForm.name),
+      page_type: createForm.page_type
+    })
+    ElMessage.success(t('storefront.pageCreated'))
+    createDialogVisible.value = false
+    await fetchPages()
+    // Navigate to edit the newly created page
+    router.push(`/storefront/pages/${res.page_id}/edit`)
+  } catch (error: any) {
+    ElMessage.error(error.message || t('storefront.createPageFailed'))
+  } finally {
+    creating.value = false
+  }
+}
+
+const generateSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 const handlePublish = async (page: PageItem & { publishing?: boolean }) => {
@@ -487,5 +592,12 @@ onMounted(() => {
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+.form-tip {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 </style>

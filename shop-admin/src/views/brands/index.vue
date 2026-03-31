@@ -87,8 +87,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" :label="$t('brands.createdAt')" width="180" />
-        <el-table-column :label="$t('common.actions')" width="200" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="240" fixed="right">
           <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+              {{ $t('brands.viewDetail') }}
+            </el-button>
             <el-button type="primary" link size="small" @click="handleEdit(row)">
               {{ $t('brands.edit') }}
             </el-button>
@@ -174,6 +177,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Picture } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
@@ -188,6 +192,7 @@ import {
 } from '@/api/brand'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -236,6 +241,10 @@ const handleAdd = () => {
     sort: 0
   })
   dialogVisible.value = true
+}
+
+const handleViewDetail = (row: Brand) => {
+  router.push(`/brands/${row.id}`)
 }
 
 const handleEdit = (row: Brand) => {
@@ -294,7 +303,7 @@ const handleTogglePage = async (row: Brand, enabled: boolean) => {
   } catch (error) {
     console.error('Failed to toggle page:', error)
     ElMessage.error(t('brands.operationFailed'))
-    row.enable_page = !enabled
+    row.enable_page = enabled ? 0 : 1
   }
 }
 

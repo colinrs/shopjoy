@@ -115,6 +115,7 @@ type InventoryLogRepository interface {
 	Create(ctx context.Context, db *gorm.DB, log *InventoryLog) error
 	FindBySKU(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, skuCode string, query InventoryLogQuery) ([]*InventoryLog, int64, error)
 	FindByProduct(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64, query InventoryLogQuery) ([]*InventoryLog, int64, error)
+	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query InventoryLogQuery) ([]*InventoryLog, int64, error)
 }
 
 // InventoryLogQuery for querying inventory logs

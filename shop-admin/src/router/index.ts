@@ -94,10 +94,22 @@ const router = createRouter({
           meta: { title: '分类管理' }
         },
         {
+          path: 'categories/:id',
+          name: 'category-detail',
+          component: () => import('@/views/categories/[id].vue'),
+          meta: { title: '分类详情' }
+        },
+        {
           path: 'brands',
           name: 'brands',
           component: () => import('@/views/brands/index.vue'),
           meta: { title: '品牌管理' }
+        },
+        {
+          path: 'brands/:id',
+          name: 'brand-detail',
+          component: () => import('@/views/brands/[id].vue'),
+          meta: { title: '品牌详情' }
         },
         {
           path: 'inventory',
@@ -137,6 +149,12 @@ const router = createRouter({
           meta: { title: '售后统计' }
         },
         {
+          path: 'fulfillment/refund-reasons',
+          name: 'refund-reasons',
+          component: () => import('@/views/fulfillment/refund-reasons/index.vue'),
+          meta: { title: '退款原因' }
+        },
+        {
           path: 'reviews',
           name: 'reviews',
           component: () => import('@/views/reviews/index.vue'),
@@ -148,6 +166,12 @@ const router = createRouter({
           name: 'payments',
           component: () => import('@/views/payments/index.vue'),
           meta: { title: '支付管理' }
+        },
+        {
+          path: 'payments/transactions/:id',
+          name: 'payment-transaction-detail',
+          component: () => import('@/views/payments/transactions/[id]/index.vue'),
+          meta: { title: '交易详情' }
         },
         // Points Module Routes
         {

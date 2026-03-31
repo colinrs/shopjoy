@@ -99,7 +99,7 @@ func (l *GetFulfillmentStatisticsLogic) GetFulfillmentStatistics(req *types.GetR
 		PendingRefunds:      refundStats.PendingCount,
 		RefundRate:          refundStats.RefundRate,
 		DeliverySuccessRate: deliverySuccessRate,
-		TotalAmount:         refundStats.TotalAmount,
+		RefundAmount:        refundStats.TotalAmount,
 		Currency:            refundStats.Currency,
 	}
 

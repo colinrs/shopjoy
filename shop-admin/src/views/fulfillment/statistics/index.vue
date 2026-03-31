@@ -27,7 +27,7 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">{{ $t('fulfillment.refundRate') }}</p>
-            <p class="stat-value">{{ stats.refund_rate.toFixed(1) }}%</p>
+            <p class="stat-value">{{ parseFloat(stats.refund_rate).toFixed(1) }}%</p>
             <p class="stat-change" :class="refundRateChange >= 0 ? 'negative' : 'positive'">
               <el-icon>
                 <ArrowUp v-if="refundRateChange >= 0" />
@@ -57,7 +57,7 @@
           </div>
           <div class="stat-info">
             <p class="stat-label">{{ $t('fulfillment.deliverySuccess') }}</p>
-            <p class="stat-value">{{ stats.delivery_success_rate.toFixed(1) }}%</p>
+            <p class="stat-value">{{ parseFloat(stats.delivery_success_rate).toFixed(1) }}%</p>
             <p class="stat-detail">{{ stats.total_shipments }} {{ $t('fulfillment.totalShipments') }}</p>
           </div>
         </div>
@@ -89,7 +89,7 @@
               </span>
             </div>
           </template>
-          <div ref="trendChartRef" class="chart-container"></div>
+          <div ref="trendChartRef" class="chart-container" v-loading="chartLoading"></div>
         </el-card>
       </el-col>
 
@@ -104,7 +104,7 @@
               </span>
             </div>
           </template>
-          <div ref="reasonChartRef" class="chart-container pie-chart"></div>
+          <div ref="reasonChartRef" class="chart-container pie-chart" v-loading="chartLoading"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -216,16 +216,17 @@ import { getFulfillmentStatistics, exportFulfillmentStatisticsUrl } from '@/api/
 import { downloadFile } from '@/utils/download'
 
 const timeRange = ref('30')
+const chartLoading = ref(false)
 const trendChartRef = ref<HTMLElement | null>(null)
 const reasonChartRef = ref<HTMLElement | null>(null)
 let trendChart: echarts.ECharts | null = null
 let reasonChart: echarts.ECharts | null = null
 
 const stats = ref({
-  refund_rate: 0,
+  refund_rate: '0',
   total_refunds: 0,
-  refund_amount: 0,
-  delivery_success_rate: 0,
+  refund_amount: '0',
+  delivery_success_rate: '0',
   total_shipments: 0,
   pending_refunds: 0
 })
@@ -236,8 +237,11 @@ const problemProducts = ref<{ product_id: number; product_name: string; image: s
 
 const carrierPerformance = ref<{ carrier_code: string; carrier_name: string; total_shipments: number; delivery_success_rate: number; avg_delivery_time: number }[]>([])
 
-const formatAmount = (cents: number) => {
-  return (cents / 100).toLocaleString()
+const formatAmount = (amount: string | number) => {
+  if (typeof amount === 'string') {
+    return parseFloat(amount).toLocaleString()
+  }
+  return amount.toLocaleString()
 }
 
 const getRefundRateTagType = (rate: number) => {
@@ -271,7 +275,7 @@ const initTrendChart = () => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['Mar 1', 'Mar 5', 'Mar 10', 'Mar 15', 'Mar 20', 'Mar 25', 'Mar 30'],
+      data: [],
       axisLine: { lineStyle: { color: '#E5E7EB' } },
       axisLabel: { color: '#6B7280' }
     },
@@ -300,7 +304,7 @@ const initTrendChart = () => {
             { offset: 1, color: 'rgba(239, 68, 68, 0.01)' }
           ])
         },
-        data: [3.5, 3.8, 3.2, 2.9, 3.1, 3.4, 3.2]
+        data: []
       },
       {
         name: 'Target',
@@ -308,7 +312,7 @@ const initTrendChart = () => {
         smooth: true,
         symbol: 'none',
         lineStyle: { type: 'dashed', color: '#10B981', width: 2 },
-        data: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
+        data: []
       }
     ]
   }
@@ -352,14 +356,7 @@ const initReasonChart = () => {
           }
         },
         labelLine: { show: false },
-        data: [
-          { value: 45, name: t('fulfillment.defective'), itemStyle: { color: '#EF4444' } },
-          { value: 32, name: t('fulfillment.wrongItem'), itemStyle: { color: '#F59E0B' } },
-          { value: 28, name: t('fulfillment.damaged'), itemStyle: { color: '#8B5CF6' } },
-          { value: 25, name: t('fulfillment.notAsDescribed'), itemStyle: { color: '#6366F1' } },
-          { value: 18, name: t('fulfillment.lateDelivery'), itemStyle: { color: '#3B82F6' } },
-          { value: 8, name: t('fulfillment.otherReason'), itemStyle: { color: '#6B7280' } }
-        ]
+        data: []
       }
     ]
   }
@@ -415,13 +412,14 @@ const updateCharts = (data: {
 }
 
 const loadData = async () => {
+  chartLoading.value = true
   try {
     const res = await getFulfillmentStatistics({ period: timeRange.value })
     // Update overview stats
     stats.value = {
       refund_rate: res.overview.refund_rate,
       total_refunds: res.overview.total_refunds,
-      refund_amount: 0,
+      refund_amount: res.overview.refund_amount,
       delivery_success_rate: res.overview.delivery_success_rate,
       total_shipments: res.overview.total_shipments,
       pending_refunds: res.overview.pending_refunds
@@ -434,6 +432,8 @@ const loadData = async () => {
     updateCharts(res)
   } catch (error) {
     ElMessage.error(t('fulfillment.loadStatisticsFailed'))
+  } finally {
+    chartLoading.value = false
   }
 }
 

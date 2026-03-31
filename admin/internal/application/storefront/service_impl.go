@@ -36,6 +36,55 @@ func NewPageService(
 	}
 }
 
+func (s *pageService) CreatePage(ctx context.Context, tenantID shared.TenantID, name, slug, pageType string) (*PageDTO, error) {
+	// Validate slug uniqueness
+	existingPage, err := s.pageRepo.FindBySlug(ctx, s.db, tenantID, slug)
+	if err != nil {
+		return nil, err
+	}
+	if existingPage != nil {
+		return nil, code.ErrPageSlugDuplicate
+	}
+
+	// Convert page type string to PageType
+	pt := stringToPageType(pageType)
+
+	// Generate ID
+	id, err := s.idGen.NextID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+	page := &storefront.Page{
+		Model:       application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
+		TenantID:    tenantID,
+		Name:        name,
+		Slug:        slug,
+		Type:        pt,
+		Status:      shared.StatusEnabled,
+		Version:     1,
+		IsPublished: false,
+		Audit: shared.AuditInfo{
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+	}
+
+	if err := s.pageRepo.Create(ctx, s.db, page); err != nil {
+		return nil, err
+	}
+
+	return &PageDTO{
+		ID:          page.Model.ID,
+		PageType:    pageTypeToString(page.Type),
+		Name:        page.Name,
+		Slug:        page.Slug,
+		IsPublished: page.IsPublished,
+		Version:     page.Version,
+	}, nil
+}
+
 func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageDTO], error) {
 	pages, total, err := s.pageRepo.FindAll(ctx, s.db, tenantID, page, pageSize)
 	if err != nil {
@@ -247,6 +296,19 @@ func pageTypeToString(t storefront.PageType) string {
 		return "custom"
 	default:
 		return "custom"
+	}
+}
+
+func stringToPageType(s string) storefront.PageType {
+	switch s {
+	case "home":
+		return storefront.PageTypeHome
+	case "product":
+		return storefront.PageTypeProduct
+	case "collection":
+		return storefront.PageTypeCollection
+	default:
+		return storefront.PageTypeCustom
 	}
 }
 

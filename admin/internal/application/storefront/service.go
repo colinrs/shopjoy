@@ -136,6 +136,7 @@ type ThemeService interface {
 }
 
 type PageService interface {
+	CreatePage(ctx context.Context, tenantID shared.TenantID, name, slug, pageType string) (*PageDTO, error)
 	ListPages(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageDTO], error)
 	GetPage(ctx context.Context, tenantID shared.TenantID, pageID int64) (*PageDetailDTO, error)
 	GetPageBySlug(ctx context.Context, tenantID shared.TenantID, slug string) (*PageDetailDTO, error)

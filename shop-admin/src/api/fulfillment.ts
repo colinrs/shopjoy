@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import { downloadFile } from '@/utils/download'
 
 // Types
 export type ShipmentStatus = 'pending' | 'shipped' | 'in_transit' | 'delivered' | 'failed' | 'cancelled'
@@ -149,8 +150,11 @@ export interface Carrier {
 }
 
 export interface RefundReason {
+  id: number
   code: string
   name: string
+  sort: number
+  is_active: boolean
 }
 
 export interface FulfillmentStatistics {
@@ -159,8 +163,10 @@ export interface FulfillmentStatistics {
     pending_shipments: number
     total_refunds: number
     pending_refunds: number
-    refund_rate: number
-    delivery_success_rate: number
+    refund_rate: string
+    delivery_success_rate: string
+    refund_amount: string
+    currency: string
   }
   refund_rate_trend: {
     date: string
@@ -204,11 +210,18 @@ export const createShipment = (data: CreateShipmentRequest) => {
   return request.post<Shipment>('/api/v1/shipments', data)
 }
 
-export const batchCreateShipments = (data: {
-  order_ids: string[]
+export interface BatchCreateShipmentItem {
+  order_id: string
+  tracking_no: string
+}
+
+export interface BatchCreateShipmentsRequest {
   carrier_code: string
-  tracking_no_start: string
-}) => {
+  carrier_name?: string
+  shipments: BatchCreateShipmentItem[]
+}
+
+export const batchCreateShipments = (data: BatchCreateShipmentsRequest) => {
   return request.post<Shipment[]>('/api/v1/shipments/batch', data)
 }
 
@@ -329,4 +342,20 @@ export function exportFulfillmentStatisticsUrl(params: ExportFulfillmentStatisti
     url: '/api/v1/fulfillment/statistics/export',
     params
   }
+}
+
+/**
+ * Export shipments - calls the API and downloads the file
+ */
+export async function exportShipments(params: ExportShipmentsParams): Promise<void> {
+  const { url, params: queryParams } = exportShipmentsUrl(params)
+  await downloadFile(url, queryParams)
+}
+
+/**
+ * Export fulfillment statistics - calls the API and downloads the file
+ */
+export async function exportFulfillmentStatistics(params: ExportFulfillmentStatisticsParams): Promise<void> {
+  const { url, params: queryParams } = exportFulfillmentStatisticsUrl(params)
+  await downloadFile(url, queryParams)
 }

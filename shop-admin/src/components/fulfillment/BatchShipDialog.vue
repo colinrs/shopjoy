@@ -158,10 +158,31 @@ const handleSubmit = async () => {
 
     submitting.value = true
     try {
+      // Generate tracking numbers for each shipment
+      const shipments = props.shipments.map((shipment, index) => {
+        let tracking_no = form.tracking_no_start
+        if (form.tracking_no_start) {
+          const numericPart = form.tracking_no_start.match(/\d+$/)?.[0] || ''
+          const prefix = form.tracking_no_start.replace(/\d+$/, '')
+
+          if (numericPart) {
+            const num = parseInt(numericPart, 10) + index
+            const paddedNum = num.toString().padStart(numericPart.length, '0')
+            tracking_no = prefix + paddedNum
+          } else if (index > 0) {
+            tracking_no = `${form.tracking_no_start}-${index}`
+          }
+        }
+
+        return {
+          order_id: shipment.order_id,
+          tracking_no
+        }
+      })
+
       await batchCreateShipments({
-        order_ids: props.shipments.map(s => s.order_id),
         carrier_code: form.carrier_code,
-        tracking_no_start: form.tracking_no_start
+        shipments
       })
       ElMessage.success(`Successfully shipped ${props.shipments.length} orders`)
       emit('success')

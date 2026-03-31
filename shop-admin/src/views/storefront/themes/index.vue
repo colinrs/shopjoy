@@ -80,47 +80,76 @@
       </div>
     </el-card>
 
-    <!-- Available Themes -->
-    <div class="themes-section">
-      <h3 class="section-title">{{ $t('storefront.availableThemes') }}</h3>
-      <div class="themes-grid" v-loading="loading">
-        <div
-          v-for="theme in themes"
-          :key="theme.id"
-          class="theme-card"
-          :class="{ 'is-current': theme.is_current }"
-          @click="previewTheme(theme)"
-        >
-          <div class="theme-thumbnail">
-            <el-image
-              :src="theme.thumbnail"
-              fit="cover"
-              class="thumbnail-image"
+    <!-- Tabs Section -->
+    <el-card class="tabs-card" shadow="never">
+      <el-tabs v-model="activeTab">
+        <el-tab-pane :label="$t('storefront.availableThemes')" name="themes">
+          <div class="themes-grid" v-loading="loading">
+            <div
+              v-for="theme in themes"
+              :key="theme.id"
+              class="theme-card"
+              :class="{ 'is-current': theme.is_current }"
+              @click="previewTheme(theme)"
             >
-              <template #error>
-                <div class="image-placeholder">
-                  <el-icon size="32"><Picture /></el-icon>
+              <div class="theme-thumbnail">
+                <el-image
+                  :src="theme.thumbnail"
+                  fit="cover"
+                  class="thumbnail-image"
+                >
+                  <template #error>
+                    <div class="image-placeholder">
+                      <el-icon size="32"><Picture /></el-icon>
+                    </div>
+                  </template>
+                </el-image>
+                <div class="theme-overlay">
+                  <el-button type="primary" size="small" @click.stop="previewTheme(theme)">
+                    {{ $t('storefront.preview') }}
+                  </el-button>
                 </div>
+                <div v-if="theme.is_current" class="current-badge">
+                  <el-icon><Check /></el-icon>
+                  {{ $t('storefront.inUse') }}
+                </div>
+                <div v-if="theme.is_preset" class="preset-badge">{{ $t('storefront.officialTheme') }}</div>
+              </div>
+              <div class="theme-meta">
+                <h4>{{ theme.name }}</h4>
+                <p>{{ theme.description }}</p>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane :label="$t('storefront.auditLogs')" name="audit">
+          <el-table :data="auditLogs" v-loading="auditLoading" stripe>
+            <el-table-column :label="$t('storefront.action')" width="150">
+              <template #default="{ row }">
+                {{ getActionText(row.action) }}
               </template>
-            </el-image>
-            <div class="theme-overlay">
-              <el-button type="primary" size="small" @click.stop="previewTheme(theme)">
-                {{ $t('storefront.preview') }}
-              </el-button>
-            </div>
-            <div v-if="theme.is_current" class="current-badge">
-              <el-icon><Check /></el-icon>
-              {{ $t('storefront.inUse') }}
-            </div>
-            <div v-if="theme.is_preset" class="preset-badge">{{ $t('storefront.officialTheme') }}</div>
-          </div>
-          <div class="theme-meta">
-            <h4>{{ theme.name }}</h4>
-            <p>{{ theme.description }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+            </el-table-column>
+            <el-table-column :label="$t('storefront.theme')" width="200">
+              <template #default="{ row }">
+                {{ row.theme_name }}
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('storefront.user')" width="150">
+              <template #default="{ row }">
+                {{ row.user_name }}
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('common.createdAt')">
+              <template #default="{ row }">
+                {{ formatDateTime(row.created_at) }}
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!auditLoading && auditLogs.length === 0" :description="$t('storefront.noAuditLogs')" />
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
 
     <!-- Theme Preview Dialog -->
     <el-dialog
@@ -164,7 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Picture, Check } from '@element-plus/icons-vue'
@@ -174,12 +203,15 @@ import {
   getCurrentTheme,
   switchTheme,
   updateThemeConfig,
+  getThemeAuditLogs,
   type ThemeItem,
-  type CurrentThemeResponse
+  type CurrentThemeResponse,
+  type ThemeAuditLog
 } from '@/api/storefront'
 
 const { t } = useI18n()
 
+const activeTab = ref('themes')
 const loading = ref(false)
 const configLoading = ref(false)
 const switchLoading = ref(false)
@@ -187,6 +219,8 @@ const themes = ref<ThemeItem[]>([])
 const currentTheme = ref<CurrentThemeResponse | null>(null)
 const previewDialogVisible = ref(false)
 const previewThemeData = ref<ThemeItem | null>(null)
+const auditLogs = ref<ThemeAuditLog[]>([])
+const auditLoading = ref(false)
 
 const configForm = reactive({
   primary_color: '#6366F1',
@@ -290,6 +324,45 @@ const showCustomThemeDialog = () => {
   ElMessage.info(t('storefront.customThemeComingSoon'))
 }
 
+const fetchAuditLogs = async () => {
+  auditLoading.value = true
+  try {
+    const res = await getThemeAuditLogs()
+    auditLogs.value = res.logs || []
+  } catch (error) {
+    ElMessage.error(t('storefront.loadAuditLogsFailed'))
+  } finally {
+    auditLoading.value = false
+  }
+}
+
+const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getActionText = (action: string) => {
+  const texts: Record<string, string> = {
+    'switch': t('storefront.actionSwitch'),
+    'update_config': t('storefront.actionUpdateConfig')
+  }
+  return texts[action] || action
+}
+
+// Watch for tab changes to load audit logs
+watch(activeTab, (newTab) => {
+  if (newTab === 'audit' && auditLogs.value.length === 0) {
+    fetchAuditLogs()
+  }
+})
+
 onMounted(() => {
   fetchThemes()
   fetchCurrentTheme()
@@ -303,6 +376,10 @@ onMounted(() => {
 
 .current-theme-card {
   margin-bottom: 24px;
+  border-radius: 12px;
+}
+
+.tabs-card {
   border-radius: 12px;
 }
 

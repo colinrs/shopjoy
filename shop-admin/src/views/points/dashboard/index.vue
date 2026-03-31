@@ -60,31 +60,8 @@
           <el-icon :size="48"><DataLine /></el-icon>
           <p>暂无趋势数据</p>
         </div>
-        <div v-else class="chart-placeholder">
-          <!-- Trend visualization - simple bars for now -->
-          <div class="trend-bars">
-            <div
-              v-for="(item, index) in trendData.slice(-10)"
-              :key="index"
-              class="trend-bar-group"
-            >
-              <div class="bar-container">
-                <div class="bar earned" :style="{ height: getBarHeight(item.earned, maxTrendValue) + '%' }"></div>
-                <div class="bar redeemed" :style="{ height: getBarHeight(item.redeemed, maxTrendValue) + '%' }"></div>
-              </div>
-              <div class="bar-label">{{ formatDateLabel(item.date) }}</div>
-            </div>
-          </div>
-          <div class="chart-legend">
-            <span class="legend-item">
-              <span class="legend-color earned"></span>
-              获得
-            </span>
-            <span class="legend-item">
-              <span class="legend-color redeemed"></span>
-              兑换
-            </span>
-          </div>
+        <div v-else class="chart-wrapper">
+          <PointsTrendChart :data="trendData" />
         </div>
       </div>
     </el-card>
@@ -178,6 +155,7 @@ import {
   CircleCheck, Loading
 } from '@element-plus/icons-vue'
 import PointsStatsCard from '../components/PointsStatsCard.vue'
+import PointsTrendChart from '../components/PointsTrendChart.vue'
 import {
   getPointsStats,
   getPointsTrend,
@@ -205,13 +183,6 @@ const stats = ref<PointsStats>({
 const trendPeriod = ref('7d')
 const trendData = ref<TrendDataPoint[]>([])
 const trendLoading = ref(false)
-
-const maxTrendValue = computed(() => {
-  if (trendData.value.length === 0) return 1
-  return Math.max(
-    ...trendData.value.map(d => Math.max(d.earned, d.redeemed))
-  )
-})
 
 // Top Users
 const topUsers = ref<TopUser[]>([])
@@ -273,16 +244,6 @@ const loadExpiring = async () => {
   } finally {
     expiringLoading.value = false
   }
-}
-
-const getBarHeight = (value: number, max: number) => {
-  if (max === 0) return 0
-  return Math.max(5, (value / max) * 100)
-}
-
-const formatDateLabel = (dateStr: string) => {
-  const date = new Date(dateStr)
-  return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
 const formatDate = (dateStr: string) => {
@@ -359,76 +320,8 @@ onMounted(() => {
   padding: 16px 0;
 }
 
-.trend-bars {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  height: 200px;
-  gap: 8px;
-}
-
-.trend-bar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  max-width: 60px;
-}
-
-.bar-container {
-  display: flex;
-  gap: 4px;
-  align-items: flex-end;
-  height: 180px;
-}
-
-.bar {
-  width: 16px;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.3s ease;
-}
-
-.bar.earned {
-  background: linear-gradient(180deg, #10B981 0%, #34D399 100%);
-}
-
-.bar.redeemed {
-  background: linear-gradient(180deg, #3B82F6 0%, #60A5FA 100%);
-}
-
-.bar-label {
-  font-size: 11px;
-  color: #9CA3AF;
-  margin-top: 8px;
-}
-
-.chart-legend {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin-top: 16px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #6B7280;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.legend-color.earned {
-  background: #10B981;
-}
-
-.legend-color.redeemed {
-  background: #3B82F6;
+.chart-wrapper {
+  padding: 16px 0;
 }
 
 /* Bottom Section */
@@ -592,16 +485,8 @@ onMounted(() => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .trend-bars {
-    height: 160px;
-  }
-
-  .bar-container {
-    height: 140px;
-  }
-
-  .bar {
-    width: 12px;
+  .chart-wrapper {
+    padding: 8px 0;
   }
 }
 </style>

@@ -66,6 +66,15 @@ export interface ListUsersParams {
   email?: string
   status?: number
   keyword?: string
+  // Enhanced filters
+  points_min?: number
+  points_max?: number
+  order_count_min?: number
+  order_count_max?: number
+  total_spent_min?: string
+  total_spent_max?: string
+  created_at_from?: string
+  created_at_to?: string
 }
 
 export interface ListUsersResponse {

@@ -73,6 +73,9 @@
             <el-button type="primary" @click="handleAddCoupon">
               <el-icon><Plus /></el-icon>{{ $t('promotions.createCouponButton') }}
             </el-button>
+            <el-button @click="showBatchGenerateDialog">
+              <el-icon><DocumentCopy /></el-icon>{{ $t('promotions.batchGenerate') }}
+            </el-button>
           </div>
 
           <el-table :data="couponList" v-loading="couponLoading" stripe>
@@ -133,13 +136,16 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.actionsColumn')" width="180" fixed="right">
+            <el-table-column :label="$t('promotions.actionsColumn')" width="240" fixed="right">
               <template #default="{ row }">
                 <el-button type="primary" link size="small" @click="handleEditCoupon(row)">
                   {{ $t('promotions.edit') }}
                 </el-button>
                 <el-button type="primary" link size="small" @click="handleCouponUsage(row)">
                   {{ $t('promotions.data') }}
+                </el-button>
+                <el-button type="success" link size="small" @click="handleIssueToUser(row)">
+                  {{ $t('promotions.issueToUser') }}
                 </el-button>
                 <el-button type="danger" link size="small" @click="handleDeleteCoupon(row)">
                   {{ $t('promotions.delete') }}
@@ -427,6 +433,95 @@
         @change="handleUsagePageChange"
       />
     </el-dialog>
+
+    <!-- Batch Generate Coupons Dialog -->
+    <el-dialog v-model="batchGenerateDialogVisible" :title="$t('promotions.batchGenerateCoupons')" width="600px" destroy-on-close>
+      <el-form :model="batchGenerateForm" label-width="140px">
+        <el-form-item :label="$t('promotions.generateCouponPrefix')">
+          <el-input v-model="batchGenerateForm.prefix" :placeholder="$t('promotions.generateCouponPrefixPlaceholder')" maxlength="10" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.generateCouponQuantity')">
+          <el-input-number v-model="batchGenerateForm.quantity" :min="1" :max="1000" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.generateCouponLength')">
+          <el-input-number v-model="batchGenerateForm.length" :min="4" :max="20" style="width: 100%" />
+        </el-form-item>
+        <el-divider>{{ $t('promotions.generateCouponConfig') }}</el-divider>
+        <el-form-item :label="$t('promotions.couponName')">
+          <el-input v-model="batchGenerateForm.couponName" :placeholder="$t('promotions.enterCouponName')" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.couponType')">
+          <el-radio-group v-model="batchGenerateForm.couponType">
+            <el-radio label="fixed_amount">{{ $t('promotions.fixedAmountType') }}</el-radio>
+            <el-radio label="percentage">{{ $t('promotions.percentageType') }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item :label="batchGenerateForm.couponType === 'fixed_amount' ? $t('promotions.discountAmount') : $t('promotions.discountRatio')">
+          <el-input-number v-model="batchGenerateForm.discountValue" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.minOrderAmount')">
+          <el-input-number v-model="batchGenerateForm.minOrderAmount" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.usageLimit')">
+          <el-input-number v-model="batchGenerateForm.usageLimit" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.validityPeriod')">
+          <el-date-picker
+            v-model="batchGenerateForm.dateRange"
+            type="datetimerange"
+            :start-placeholder="$t('promotions.startPlaceholder')"
+            :end-placeholder="$t('promotions.endPlaceholder')"
+            value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchGenerateDialogVisible = false">{{ $t('promotions.cancel') }}</el-button>
+        <el-button type="primary" @click="handleBatchGenerate" :loading="batchGenerating">
+          {{ $t('promotions.batchGenerate') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Generated Codes Dialog -->
+    <el-dialog v-model="generatedCodesDialogVisible" :title="$t('promotions.generatedCodes')" width="700px">
+      <div class="generated-codes-info">
+        {{ $t('promotions.generatedCodesCount', { count: generatedCodes.length }) }}
+        <el-button type="primary" link @click="handleCopyAllCodes">{{ $t('promotions.copyAllCodes') }}</el-button>
+      </div>
+      <div class="generated-codes-list">
+        <el-tag v-for="code in generatedCodes" :key="code" class="code-tag" type="info">
+          {{ code }}
+        </el-tag>
+      </div>
+      <template #footer>
+        <el-button type="primary" @click="generatedCodesDialogVisible = false">{{ $t('common.close') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Issue Coupon to User Dialog -->
+    <el-dialog v-model="issueDialogVisible" :title="$t('promotions.issueCoupon')" width="500px" destroy-on-close>
+      <el-form :model="issueForm" label-width="100px">
+        <el-form-item :label="$t('promotions.currentCoupon')">
+          <el-input :value="issueForm.coupon_name" disabled />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.userId')" required>
+          <el-input-number
+            v-model="issueForm.user_id"
+            :min="1"
+            :placeholder="$t('promotions.enterUserId')"
+            style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="issueDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleConfirmIssue" :loading="issueLoading">
+          {{ $t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -434,13 +529,15 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Ticket, CircleCheck, User, Search, Plus, Present } from '@element-plus/icons-vue'
+import { Ticket, CircleCheck, User, Search, Plus, Present, DocumentCopy } from '@element-plus/icons-vue'
 import {
   getCouponList, createCoupon, updateCoupon, deleteCoupon,
   getPromotionList, createPromotion, updatePromotion, deletePromotion,
   activatePromotion, deactivatePromotion, getCouponUsage,
+  generateCouponCodes, issueUserCoupon,
   type Coupon, type Promotion, type CouponUsage,
-  type CouponStatus, type CouponType, type PromotionStatus, type PromotionType
+  type CouponStatus, type CouponType, type PromotionStatus, type PromotionType,
+  type GenerateCouponCodesRequest
 } from '@/api/promotion'
 import TablePagination from '@/components/common/TablePagination.vue'
 import { t } from '@/plugins/i18n'
@@ -491,6 +588,34 @@ const usageParams = reactive({
   id: 0,
   page: 1,
   page_size: 10
+})
+
+// Batch generate dialog state
+const batchGenerateDialogVisible = ref(false)
+const batchGenerating = ref(false)
+const batchGenerateForm = reactive({
+  prefix: '',
+  quantity: 10,
+  length: 8,
+  couponName: '',
+  couponType: 'fixed_amount' as 'fixed_amount' | 'percentage',
+  discountValue: 0,
+  minOrderAmount: 0,
+  usageLimit: 100,
+  dateRange: [] as string[]
+})
+
+// Generated codes dialog state
+const generatedCodesDialogVisible = ref(false)
+const generatedCodes = ref<string[]>([])
+
+// Issue coupon dialog state
+const issueDialogVisible = ref(false)
+const issueLoading = ref(false)
+const issueForm = reactive({
+  user_id: 0 as number,
+  coupon_id: 0 as number,
+  coupon_name: ''
 })
 
 // Coupon form state
@@ -758,6 +883,35 @@ const handleDeleteCoupon = async (row: Coupon) => {
   }
 }
 
+const handleIssueToUser = (row: Coupon) => {
+  issueForm.user_id = 0
+  issueForm.coupon_id = row.id
+  issueForm.coupon_name = row.name
+  issueDialogVisible.value = true
+}
+
+const handleConfirmIssue = async () => {
+  if (!issueForm.user_id) {
+    ElMessage.warning(t('promotions.enterUserId'))
+    return
+  }
+
+  issueLoading.value = true
+  try {
+    await issueUserCoupon({
+      user_id: issueForm.user_id,
+      coupon_id: issueForm.coupon_id
+    })
+    ElMessage.success(t('promotions.issueSuccess'))
+    issueDialogVisible.value = false
+  } catch (error) {
+    console.error('Failed to issue coupon:', error)
+    ElMessage.error(t('promotions.issueFailed'))
+  } finally {
+    issueLoading.value = false
+  }
+}
+
 const saveCoupon = async () => {
   if (!couponFormRef.value) return
 
@@ -796,6 +950,72 @@ const saveCoupon = async () => {
       saveLoading.value = false
     }
   })
+}
+
+// Batch generate coupon codes
+const showBatchGenerateDialog = () => {
+  batchGenerateForm.prefix = ''
+  batchGenerateForm.quantity = 10
+  batchGenerateForm.length = 8
+  batchGenerateForm.couponName = ''
+  batchGenerateForm.couponType = 'fixed_amount'
+  batchGenerateForm.discountValue = 0
+  batchGenerateForm.minOrderAmount = 0
+  batchGenerateForm.usageLimit = 100
+  batchGenerateForm.dateRange = []
+  batchGenerateDialogVisible.value = true
+}
+
+const handleBatchGenerate = async () => {
+  if (!batchGenerateForm.couponName) {
+    ElMessage.warning(t('promotions.enterCouponName'))
+    return
+  }
+  if (!batchGenerateForm.dateRange || batchGenerateForm.dateRange.length !== 2) {
+    ElMessage.warning(t('promotions.selectValidityPeriod'))
+    return
+  }
+
+  batchGenerating.value = true
+  try {
+    const couponConfig = {
+      name: batchGenerateForm.couponName,
+      type: batchGenerateForm.couponType,
+      discount_value: String(batchGenerateForm.discountValue),
+      min_order_amount: String(batchGenerateForm.minOrderAmount),
+      usage_limit: batchGenerateForm.usageLimit,
+      start_time: batchGenerateForm.dateRange[0],
+      end_time: batchGenerateForm.dateRange[1]
+    }
+
+    const data: GenerateCouponCodesRequest = {
+      prefix: batchGenerateForm.prefix || undefined,
+      quantity: batchGenerateForm.quantity,
+      length: batchGenerateForm.length,
+      coupon_config: JSON.stringify(couponConfig)
+    }
+
+    const res = await generateCouponCodes(data)
+    generatedCodes.value = res.codes || []
+    batchGenerateDialogVisible.value = false
+    generatedCodesDialogVisible.value = true
+    ElMessage.success(t('promotions.generateSuccess'))
+  } catch (error) {
+    console.error('Failed to generate coupon codes:', error)
+    ElMessage.error(t('promotions.generateFailed'))
+  } finally {
+    batchGenerating.value = false
+  }
+}
+
+const handleCopyAllCodes = async () => {
+  const codesText = generatedCodes.value.join('\n')
+  try {
+    await navigator.clipboard.writeText(codesText)
+    ElMessage.success(t('promotions.codesCopied'))
+  } catch (error) {
+    console.error('Failed to copy codes:', error)
+  }
 }
 
 // Promotion actions
@@ -1121,6 +1341,33 @@ onMounted(() => {
   font-size: 12px;
   color: #9CA3AF;
   margin-top: 4px;
+}
+
+/* Generated Codes */
+.generated-codes-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #F3F4F6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.generated-codes-list {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.code-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  padding: 8px 12px;
 }
 
 /* Dialog */

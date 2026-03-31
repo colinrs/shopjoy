@@ -213,5 +213,9 @@ service admin-api {
 	@doc "批量更新安全库存"
 	@handler BatchUpdateSafetyStockHandler
 	put /api/v1/inventory/safety-stock (BatchUpdateSafetyStockReq) returns (CreateWarehouseResp)
+
+	@doc "导出库存日志"
+	@handler ExportInventoryLogsHandler
+	get /api/v1/inventory/logs/export (GetInventoryLogsReq)
 }
 

@@ -304,6 +304,13 @@ export function deleteSKU(id: number) {
   })
 }
 
+export function getSKU(id: number) {
+  return request<SKU>({
+    url: `/api/v1/skus/${id}`,
+    method: 'get'
+  })
+}
+
 // Product Localization API functions
 
 export interface ProductLocalization {

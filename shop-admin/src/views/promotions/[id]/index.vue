@@ -235,6 +235,112 @@
       </el-col>
     </el-row>
 
+    <!-- Rules Section -->
+    <el-card v-if="isEdit" class="rules-card" shadow="never">
+      <template #header>
+        <div class="rules-header">
+          <span class="card-title">{{ $t('promotions.promotionRules') }}</span>
+          <el-button type="primary" size="small" @click="showAddRuleDialog">
+            <el-icon><Plus /></el-icon>
+            {{ $t('promotions.addRule') }}
+          </el-button>
+        </div>
+      </template>
+      <el-table :data="rulesList" v-loading="rulesLoading" stripe>
+        <el-table-column :label="$t('promotions.ruleType')" width="150">
+          <template #default="{ row }">
+            {{ getRuleTypeText(row.rule_type) }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('promotions.operator')" width="120">
+          <template #default="{ row }">
+            {{ getOperatorText(row.operator) }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('promotions.ruleValue')" width="150">
+          <template #default="{ row }">
+            {{ row.value }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('promotions.ruleDiscountType')" width="150">
+          <template #default="{ row }">
+            {{ row.discount_type ? (row.discount_type === 'percentage' ? $t('promotions.percentage') : $t('promotions.fixedAmount')) : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('promotions.ruleDiscountValue')" width="120">
+          <template #default="{ row }">
+            {{ row.discount_value || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('promotions.rulePriority')" width="100" align="center">
+          <template #default="{ row }">
+            {{ row.priority }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('common.actions')" width="150" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="handleEditRule(row)">
+              {{ $t('common.edit') }}
+            </el-button>
+            <el-button type="danger" link size="small" @click="handleDeleteRule(row)">
+              {{ $t('common.delete') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-if="!rulesLoading && rulesList.length === 0" :description="$t('promotions.noRules')" />
+    </el-card>
+
+    <!-- Add/Edit Rule Dialog -->
+    <el-dialog v-model="ruleDialogVisible" :title="editingRule ? $t('promotions.editRule') : $t('promotions.addRule')" width="500px" destroy-on-close>
+      <el-form :model="ruleForm" label-width="120px">
+        <el-form-item :label="$t('promotions.ruleType')">
+          <el-select v-model="ruleForm.rule_type" style="width: 100%">
+            <el-option :label="$t('promotions.ruleTypeProduct')" value="product" />
+            <el-option :label="$t('promotions.ruleTypeCategory')" value="category" />
+            <el-option :label="$t('promotions.ruleTypeAmount')" value="amount" />
+            <el-option :label="$t('promotions.ruleTypeQuantity')" value="quantity" />
+            <el-option :label="$t('promotions.ruleTypeUserGroup')" value="user_group" />
+            <el-option :label="$t('promotions.ruleTypeMarket')" value="market" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('promotions.operator')">
+          <el-select v-model="ruleForm.operator" style="width: 100%">
+            <el-option :label="$t('promotions.operatorEq')" value="eq" />
+            <el-option :label="$t('promotions.operatorNe')" value="ne" />
+            <el-option :label="$t('promotions.operatorGt')" value="gt" />
+            <el-option :label="$t('promotions.operatorGte')" value="gte" />
+            <el-option :label="$t('promotions.operatorLt')" value="lt" />
+            <el-option :label="$t('promotions.operatorLte')" value="lte" />
+            <el-option :label="$t('promotions.operatorIn')" value="in" />
+            <el-option :label="$t('promotions.operatorNotIn')" value="not_in" />
+            <el-option :label="$t('promotions.operatorContains')" value="contains" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('promotions.ruleValue')">
+          <el-input v-model="ruleForm.value" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.ruleDiscountType')">
+          <el-select v-model="ruleForm.discount_type" style="width: 100%">
+            <el-option :label="$t('promotions.fixedAmount')" value="fixed_amount" />
+            <el-option :label="$t('promotions.percentage')" value="percentage" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('promotions.ruleDiscountValue')">
+          <el-input-number v-model="ruleForm.discount_value_num" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.rulePriority')">
+          <el-input-number v-model="ruleForm.priority" :min="0" :max="100" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="ruleDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSaveRule" :loading="ruleSaving">
+          {{ $t('common.save') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- Footer Actions -->
     <div class="footer-actions">
       <el-button @click="handleBack">{{ $t('promotions.cancelAction') }}</el-button>
@@ -248,9 +354,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import {
-  getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion
+  getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion,
+  getPromotionRules, createPromotionRules, updatePromotionRule, deletePromotionRule,
+  type PromotionRule
 } from '@/api/promotion'
 import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'
@@ -458,10 +567,136 @@ const getScopeText = (scope: string) => {
   return texts[scope] || scope
 }
 
+// Rules section
+const rulesList = ref<PromotionRule[]>([])
+const rulesLoading = ref(false)
+const ruleDialogVisible = ref(false)
+const editingRule = ref<PromotionRule | null>(null)
+const ruleSaving = ref(false)
+const ruleForm = reactive({
+  rule_type: 'product',
+  operator: 'eq',
+  value: '',
+  discount_type: 'fixed_amount',
+  discount_value_num: 0,
+  priority: 0
+})
+
+const loadRules = async () => {
+  if (!isEdit.value) return
+  rulesLoading.value = true
+  try {
+    const res = await getPromotionRules(promotionId.value)
+    rulesList.value = res.list || []
+  } catch (error) {
+    console.error('Failed to load rules:', error)
+    ElMessage.error(t('promotions.loadRulesFailed'))
+  } finally {
+    rulesLoading.value = false
+  }
+}
+
+const showAddRuleDialog = () => {
+  editingRule.value = null
+  ruleForm.rule_type = 'product'
+  ruleForm.operator = 'eq'
+  ruleForm.value = ''
+  ruleForm.discount_type = 'fixed_amount'
+  ruleForm.discount_value_num = 0
+  ruleForm.priority = 0
+  ruleDialogVisible.value = true
+}
+
+const handleEditRule = (rule: PromotionRule) => {
+  editingRule.value = rule
+  ruleForm.rule_type = rule.rule_type
+  ruleForm.operator = rule.operator
+  ruleForm.value = rule.value
+  ruleForm.discount_type = rule.discount_type || 'fixed_amount'
+  ruleForm.discount_value_num = parseFloat(rule.discount_value) || 0
+  ruleForm.priority = rule.priority
+  ruleDialogVisible.value = true
+}
+
+const handleDeleteRule = async (rule: PromotionRule) => {
+  try {
+    await ElMessageBox.confirm(t('promotions.deleteRuleConfirm'), t('common.warning'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning'
+    })
+    await deletePromotionRule(rule.id)
+    ElMessage.success(t('promotions.ruleDeletedSuccess'))
+    loadRules()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Failed to delete rule:', error)
+      ElMessage.error(t('promotions.deleteRuleFailed'))
+    }
+  }
+}
+
+const handleSaveRule = async () => {
+  ruleSaving.value = true
+  try {
+    const data = {
+      rule_type: ruleForm.rule_type,
+      operator: ruleForm.operator,
+      value: ruleForm.value,
+      discount_type: ruleForm.discount_type,
+      discount_value: String(ruleForm.discount_value_num),
+      priority: ruleForm.priority
+    }
+
+    if (editingRule.value) {
+      await updatePromotionRule({ id: editingRule.value.id, ...data })
+      ElMessage.success(t('promotions.ruleUpdatedSuccess'))
+    } else {
+      await createPromotionRules(promotionId.value, [data])
+      ElMessage.success(t('promotions.ruleCreatedSuccess'))
+    }
+    ruleDialogVisible.value = false
+    loadRules()
+  } catch (error) {
+    console.error('Failed to save rule:', error)
+    ElMessage.error(editingRule.value ? t('promotions.updateRuleFailed') : t('promotions.createRuleFailed'))
+  } finally {
+    ruleSaving.value = false
+  }
+}
+
+const getRuleTypeText = (type: string) => {
+  const texts: Record<string, string> = {
+    'product': t('promotions.ruleTypeProduct'),
+    'category': t('promotions.ruleTypeCategory'),
+    'amount': t('promotions.ruleTypeAmount'),
+    'quantity': t('promotions.ruleTypeQuantity'),
+    'user_group': t('promotions.ruleTypeUserGroup'),
+    'market': t('promotions.ruleTypeMarket')
+  }
+  return texts[type] || type
+}
+
+const getOperatorText = (operator: string) => {
+  const texts: Record<string, string> = {
+    'eq': t('promotions.operatorEq'),
+    'ne': t('promotions.operatorNe'),
+    'gt': t('promotions.operatorGt'),
+    'gte': t('promotions.operatorGte'),
+    'lt': t('promotions.operatorLt'),
+    'lte': t('promotions.operatorLte'),
+    'in': t('promotions.operatorIn'),
+    'not_in': t('promotions.operatorNotIn'),
+    'contains': t('promotions.operatorContains')
+  }
+  return texts[operator] || operator
+}
+
 onMounted(() => {
   loadCategories()
   if (isEdit.value) {
     loadPromotion()
+    loadRules()
   }
 })
 </script>
@@ -471,9 +706,15 @@ onMounted(() => {
   padding: 0;
 }
 
-.form-card, .status-card, .preview-card {
+.form-card, .status-card, .preview-card, .rules-card {
   border-radius: 16px;
   margin-bottom: 20px;
+}
+
+.rules-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .section-title {

@@ -333,7 +333,6 @@ import {
 } from '@element-plus/icons-vue'
 import {
   getOrderList,
-  getFulfillmentSummary,
   remindPayment,
   cancelOrder,
   exportOrders,
@@ -345,6 +344,7 @@ import {
   type OrderListParams,
   type ExportOrdersParams
 } from '@/api/order'
+import { getFulfillmentSummary } from '@/api/fulfillment'
 import { getOrderStatusDistribution } from '@/api/dashboard'
 import {
   OrderDetailDrawer,

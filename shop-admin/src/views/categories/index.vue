@@ -7,6 +7,10 @@
           <h2>{{ $t('categories.title') }}</h2>
         </div>
         <div class="header-right">
+          <el-button type="info" @click="handleSaveSort" :loading="sortLoading" :disabled="!hasSortChanges">
+            <el-icon><Rank /></el-icon>
+            {{ $t('categories.saveSort') }}
+          </el-button>
           <el-button type="primary" @click="handleAddRoot">
             <el-icon><Plus /></el-icon>{{ $t('categories.addTopCategory') }}
           </el-button>
@@ -23,7 +27,24 @@
         border
         default-expand-all
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        @cell-mouse-enter="handleMouseEnter"
+        @cell-mouse-leave="handleMouseLeave"
       >
+        <el-table-column label="" width="50" align="center">
+          <template #default="{ row }">
+            <div
+              class="drag-handle"
+              :class="{ 'drag-handle-active': dragState.dragging && dragState.sourceId === row.id }"
+              draggable="true"
+              @dragstart="handleDragStart($event, row)"
+              @dragend="handleDragEnd"
+              @dragover="handleDragOver"
+              @drop="handleDrop($event, row)"
+            >
+              <el-icon><Rank /></el-icon>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" :label="$t('categories.name')" min-width="200" />
         <el-table-column prop="code" :label="$t('categories.categoryCode')" width="120" />
         <el-table-column prop="level" :label="$t('categories.level')" width="80" align="center">
@@ -31,7 +52,12 @@
             <el-tag size="small">L{{ row.level }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="sort" :label="$t('categories.sort')" width="80" align="center" />
+        <el-table-column prop="sort" :label="$t('categories.sort')" width="80" align="center">
+          <template #default="{ row }">
+            <span v-if="!dragState.dragging || dragState.sourceId !== row.id">{{ row.sort }}</span>
+            <span v-else class="sort-placeholder">-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="product_count" :label="$t('categories.productCount')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.product_count > 0 ? 'success' : 'info'" size="small">
@@ -49,8 +75,11 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="280" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="320" fixed="right">
           <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+              {{ $t('categories.viewDetail') }}
+            </el-button>
             <el-button type="primary" link size="small" @click="handleAddChild(row)" v-if="row.level < 3">
               {{ $t('categories.addChildCategory') }}
             </el-button>
@@ -104,9 +133,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Rank } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import {
   getCategoryTree,
@@ -114,18 +144,34 @@ import {
   updateCategory,
   deleteCategory,
   updateCategoryStatus,
+  updateCategorySort,
   type CategoryTree
 } from '@/api/category'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const loading = ref(false)
 const saveLoading = ref(false)
+const sortLoading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const parentCategory = ref<CategoryTree | null>(null)
 const categoryTree = ref<CategoryTree[]>([])
+const originalTree = ref<CategoryTree[]>([])
 const formRef = ref()
+
+// Drag state
+const dragState = reactive({
+  dragging: false,
+  sourceId: null as number | null,
+  targetId: null as number | null
+})
+
+// Check if sort order has changed
+const hasSortChanges = computed(() => {
+  return JSON.stringify(categoryTree.value) !== JSON.stringify(originalTree.value)
+})
 
 const categoryForm = reactive({
   id: 0,
@@ -148,6 +194,7 @@ const loadCategories = async () => {
   try {
     const data = await getCategoryTree()
     categoryTree.value = data || []
+    originalTree.value = JSON.parse(JSON.stringify(data || []))
   } catch (error) {
     console.error('Failed to load categories:', error)
     ElMessage.error(t('categories.loadFailed'))
@@ -188,6 +235,10 @@ const handleAddChild = (row: CategoryTree) => {
     parent_id: row.id
   })
   dialogVisible.value = true
+}
+
+const handleViewDetail = (row: CategoryTree) => {
+  router.push(`/categories/${row.id}`)
 }
 
 const handleEdit = (row: CategoryTree) => {
@@ -237,6 +288,148 @@ const handleStatusChange = async (row: CategoryTree, status: number) => {
     console.error('Failed to update status:', error)
     ElMessage.error(t('categories.updateStatusFailed'))
     row.status = status === 1 ? 0 : 1
+  }
+}
+
+// Drag and drop handlers
+const handleDragStart = (event: DragEvent, row: CategoryTree) => {
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', row.id.toString())
+  }
+  dragState.dragging = true
+  dragState.sourceId = row.id
+}
+
+const handleDragEnd = () => {
+  dragState.dragging = false
+  dragState.sourceId = null
+  dragState.targetId = null
+}
+
+const handleDragOver = (event: DragEvent) => {
+  event.preventDefault()
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+  }
+}
+
+const handleDrop = (event: DragEvent, targetRow: CategoryTree) => {
+  event.preventDefault()
+  if (!dragState.sourceId || dragState.sourceId === targetRow.id) {
+    handleDragEnd()
+    return
+  }
+
+  // Find source and target nodes
+  const sourceNode = findNodeById(categoryTree.value, dragState.sourceId)
+  if (!sourceNode) {
+    handleDragEnd()
+    return
+  }
+
+  // Only allow reordering within the same parent (same level)
+  if (sourceNode.parent_id !== targetRow.parent_id) {
+    ElMessage.warning(t('categories.dragWithinSameLevel'))
+    handleDragEnd()
+    return
+  }
+
+  // Find siblings and reorder
+  const siblings = getSiblings(categoryTree.value, sourceNode.parent_id)
+  const sourceIndex = siblings.findIndex(s => s.id === dragState.sourceId)
+  const targetIndex = siblings.findIndex(s => s.id === targetRow.id)
+
+  if (sourceIndex === -1 || targetIndex === -1) {
+    handleDragEnd()
+    return
+  }
+
+  // Remove source from original position
+  siblings.splice(sourceIndex, 1)
+  // Insert source at new position
+  siblings.splice(targetIndex, 0, sourceNode)
+
+  // Update sort values
+  siblings.forEach((sibling, index) => {
+    sibling.sort = index
+  })
+
+  // Trigger reactivity
+  categoryTree.value = [...categoryTree.value]
+
+  handleDragEnd()
+}
+
+const findNodeById = (nodes: CategoryTree[], id: number): CategoryTree | null => {
+  for (const node of nodes) {
+    if (node.id === id) {
+      return node
+    }
+    if (node.children && node.children.length > 0) {
+      const found = findNodeById(node.children, id)
+      if (found) {
+        return found
+      }
+    }
+  }
+  return null
+}
+
+const getSiblings = (nodes: CategoryTree[], parentId: number): CategoryTree[] => {
+  if (parentId === 0) {
+    return nodes
+  }
+  for (const node of nodes) {
+    if (node.id === parentId) {
+      return node.children || []
+    }
+    if (node.children && node.children.length > 0) {
+      const found = getSiblings(node.children, parentId)
+      if (found.length > 0) {
+        return found
+      }
+    }
+  }
+  return []
+}
+
+const handleMouseEnter = (_row: CategoryTree) => {
+  // Could be used for visual feedback
+}
+
+const handleMouseLeave = (_row: CategoryTree) => {
+  // Could be used for visual feedback
+}
+
+// Save sort order
+const handleSaveSort = async () => {
+  sortLoading.value = true
+  try {
+    // Collect all sort changes
+    const sorts: { id: number; sort: number }[] = []
+    collectSorts(categoryTree.value, sorts)
+
+    if (sorts.length > 0) {
+      await updateCategorySort(sorts)
+      ElMessage.success(t('categories.saveSortSuccess'))
+      // Refresh to get latest data
+      loadCategories()
+    }
+  } catch (error) {
+    console.error('Failed to save sort:', error)
+    ElMessage.error(t('categories.saveSortFailed'))
+  } finally {
+    sortLoading.value = false
+  }
+}
+
+const collectSorts = (nodes: CategoryTree[], result: { id: number; sort: number }[]) => {
+  for (const node of nodes) {
+    result.push({ id: node.id, sort: node.sort })
+    if (node.children && node.children.length > 0) {
+      collectSorts(node.children, result)
+    }
   }
 }
 
@@ -317,6 +510,35 @@ onMounted(() => {
   margin-bottom: 20px;
   border-radius: 16px;
   border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Drag handle */
+.drag-handle {
+  cursor: grab;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drag-handle:hover {
+  opacity: 0.8;
+}
+
+.drag-handle-active {
+  opacity: 1;
+  cursor: grabbing;
+}
+
+.sort-placeholder {
+  color: #9CA3AF;
+}
+
+/* Dragging row style */
+:deep(.el-table__row.dragging) {
+  opacity: 0.5;
+  background-color: #F5F3FF;
 }
 
 /* Table row hover */

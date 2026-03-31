@@ -46,6 +46,10 @@
               <el-option :label="$t('inventory.adjustment')" value="adjustment" />
             </el-select>
             <el-button type="primary" @click="loadInventoryLogs">{{ $t('inventory.search') }}</el-button>
+            <el-button @click="handleExportInventoryLogs" :loading="logExporting">
+              <el-icon v-if="!logExporting"><Download /></el-icon>
+              {{ $t('inventory.exportLogs') }}
+            </el-button>
           </div>
           <el-table :data="logList" v-loading="logLoading" stripe>
             <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
@@ -178,6 +182,27 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
+
+        <!-- Batch Safety Stock Tab -->
+        <el-tab-pane :label="$t('inventory.batchSafetyStock')" name="batchSafetyStock">
+          <div class="filter-bar">
+            <el-button type="primary" @click="showBatchSafetyStockDialog">
+              <el-icon><Plus /></el-icon>{{ $t('inventory.batchUpdateSafetyStock') }}
+            </el-button>
+          </div>
+          <el-table :data="lowStockList" stripe size="small">
+            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
+            <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
+            <el-table-column prop="safety_stock" :label="$t('inventory.safetyStock')" width="100" align="center" />
+            <el-table-column :label="$t('inventory.actions')" width="120" fixed="right">
+              <template #default="{ row }">
+                <el-button type="primary" link size="small" @click="handleEditSafetyStock(row)">
+                  {{ $t('inventory.edit') }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
 
@@ -233,13 +258,91 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- Batch Safety Stock Dialog -->
+    <el-dialog v-model="batchSafetyStockDialogVisible" :title="$t('inventory.batchUpdateSafetyStock')" width="700px" destroy-on-close>
+      <div class="batch-safety-stock-form">
+        <el-form :model="batchSafetyStockForm" label-width="120px">
+          <el-form-item :label="$t('inventory.selectSKU')">
+            <el-select
+              v-model="batchSafetyStockForm.sku_codes"
+              multiple
+              filterable
+              allow-create
+              default-first-option
+              :placeholder="$t('inventory.enterSKUCode')"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="item in lowStockList"
+                :key="item.sku_code"
+                :label="item.sku_code"
+                :value="item.sku_code"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item :label="$t('inventory.safetyStockValue')">
+            <el-input-number
+              v-model="batchSafetyStockForm.safety_stock"
+              :min="0"
+              :max="999999"
+              style="width: 200px"
+            />
+          </el-form-item>
+        </el-form>
+
+        <div class="selected-items" v-if="batchSafetyStockForm.sku_codes.length > 0">
+          <h4>{{ $t('inventory.selectedItems') }} ({{ batchSafetyStockForm.sku_codes.length }})</h4>
+          <el-table :data="getSelectedSkuDetails()" stripe size="small" max-height="200">
+            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
+            <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
+            <el-table-column prop="safety_stock" :label="$t('inventory.currentSafetyStock')" width="120" align="center" />
+          </el-table>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="batchSafetyStockDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
+        <el-button type="primary" @click="handleBatchUpdateSafetyStock" :loading="batchSafetyStockLoading">
+          {{ $t('inventory.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Edit Safety Stock Dialog -->
+    <el-dialog v-model="editSafetyStockDialogVisible" :title="$t('inventory.safetyStock')" width="400px" destroy-on-close>
+      <el-form :model="editSafetyStockForm" label-width="120px">
+        <el-form-item :label="$t('inventory.skuCode')">
+          <el-input :value="editSafetyStockForm.sku_code" disabled />
+        </el-form-item>
+        <el-form-item :label="$t('inventory.productName')">
+          <el-input :value="editSafetyStockForm.product_name" disabled />
+        </el-form-item>
+        <el-form-item :label="$t('inventory.currentSafetyStock')">
+          <el-input :value="editSafetyStockForm.current_safety_stock" disabled />
+        </el-form-item>
+        <el-form-item :label="$t('inventory.newSafetyStock')">
+          <el-input-number
+            v-model="editSafetyStockForm.safety_stock"
+            :min="0"
+            :max="999999"
+            style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editSafetyStockDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
+        <el-button type="primary" @click="handleUpdateSafetyStock" :loading="editSafetyStockLoading">
+          {{ $t('inventory.save') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Warning } from '@element-plus/icons-vue'
+import { Plus, Warning, Download } from '@element-plus/icons-vue'
 import {
   getWarehouses,
   createWarehouse,
@@ -248,12 +351,15 @@ import {
   setDefaultWarehouse,
   deleteWarehouse,
   getInventoryLogs,
+  exportInventoryLogsUrl,
   getLowStockSKUs,
   adjustStock,
+  batchUpdateSafetyStock,
   type Warehouse,
   type InventoryLog,
   type LowStockSKU
 } from '@/api/inventory'
+import { downloadFile } from '@/utils/download'
 import { t } from '@/plugins/i18n'
 
 // Low stock alerts
@@ -263,6 +369,7 @@ const lowStockTotal = ref(0)
 // Inventory logs
 const logList = ref<InventoryLog[]>([])
 const logLoading = ref(false)
+const logExporting = ref(false)
 const logPage = ref(1)
 const logPageSize = ref(20)
 const logTotal = ref(0)
@@ -310,6 +417,98 @@ const quickAdjustForm = reactive({
   remark: t('inventory.lowStockReplenish')
 })
 
+// Batch safety stock dialog
+const batchSafetyStockDialogVisible = ref(false)
+const batchSafetyStockLoading = ref(false)
+const batchSafetyStockForm = reactive({
+  sku_codes: [] as string[],
+  safety_stock: 0
+})
+
+// Edit safety stock dialog
+const editSafetyStockDialogVisible = ref(false)
+const editSafetyStockLoading = ref(false)
+const editSafetyStockForm = reactive({
+  sku_code: '',
+  product_name: '',
+  current_safety_stock: 0,
+  safety_stock: 0
+})
+
+// Show batch safety stock dialog
+const showBatchSafetyStockDialog = () => {
+  batchSafetyStockForm.sku_codes = []
+  batchSafetyStockForm.safety_stock = 0
+  batchSafetyStockDialogVisible.value = true
+}
+
+// Get selected SKU details
+const getSelectedSkuDetails = () => {
+  return lowStockList.value.filter(item => batchSafetyStockForm.sku_codes.includes(item.sku_code))
+}
+
+// Handle batch update safety stock
+const handleBatchUpdateSafetyStock = async () => {
+  if (batchSafetyStockForm.sku_codes.length === 0) {
+    ElMessage.warning(t('inventory.pleaseSelectSKU'))
+    return
+  }
+  if (batchSafetyStockForm.safety_stock < 0) {
+    ElMessage.warning(t('inventory.pleaseEnterValidStock'))
+    return
+  }
+
+  batchSafetyStockLoading.value = true
+  try {
+    const items = batchSafetyStockForm.sku_codes.map(sku_code => ({
+      sku_code,
+      safety_stock: batchSafetyStockForm.safety_stock
+    }))
+    await batchUpdateSafetyStock(items)
+    ElMessage.success(t('inventory.batchUpdateSuccess'))
+    batchSafetyStockDialogVisible.value = false
+    loadLowStockAlerts()
+  } catch (error) {
+    console.error('Failed to batch update safety stock:', error)
+    ElMessage.error(t('inventory.batchUpdateFailed'))
+  } finally {
+    batchSafetyStockLoading.value = false
+  }
+}
+
+// Handle edit safety stock
+const handleEditSafetyStock = (row: LowStockSKU) => {
+  editSafetyStockForm.sku_code = row.sku_code
+  editSafetyStockForm.product_name = row.product_name
+  editSafetyStockForm.current_safety_stock = row.safety_stock
+  editSafetyStockForm.safety_stock = row.safety_stock
+  editSafetyStockDialogVisible.value = true
+}
+
+// Handle single update safety stock
+const handleUpdateSafetyStock = async () => {
+  if (editSafetyStockForm.safety_stock < 0) {
+    ElMessage.warning(t('inventory.pleaseEnterValidStock'))
+    return
+  }
+
+  editSafetyStockLoading.value = true
+  try {
+    await batchUpdateSafetyStock([{
+      sku_code: editSafetyStockForm.sku_code,
+      safety_stock: editSafetyStockForm.safety_stock
+    }])
+    ElMessage.success(t('inventory.batchUpdateSuccess'))
+    editSafetyStockDialogVisible.value = false
+    loadLowStockAlerts()
+  } catch (error) {
+    console.error('Failed to update safety stock:', error)
+    ElMessage.error(t('inventory.batchUpdateFailed'))
+  } finally {
+    editSafetyStockLoading.value = false
+  }
+}
+
 // Load low stock alerts
 const loadLowStockAlerts = async () => {
   try {
@@ -339,6 +538,22 @@ const loadInventoryLogs = async () => {
     ElMessage.error(t('inventory.loadLogsFailed'))
   } finally {
     logLoading.value = false
+  }
+}
+
+// Export inventory logs
+const handleExportInventoryLogs = async () => {
+  logExporting.value = true
+  try {
+    const { url, params } = exportInventoryLogsUrl({
+      sku_code: logFilter.sku_code || undefined,
+      type: logFilter.type || undefined
+    })
+    await downloadFile(url, params)
+  } catch (error) {
+    console.error('Failed to export inventory logs:', error)
+  } finally {
+    logExporting.value = false
   }
 }
 
@@ -630,6 +845,24 @@ onMounted(() => {
   margin-left: 12px;
   color: #6B7280;
   font-size: 12px;
+}
+
+/* Batch Safety Stock Form */
+.batch-safety-stock-form {
+  padding: 10px 0;
+}
+
+.selected-items {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.selected-items h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
 }
 
 .text-success {

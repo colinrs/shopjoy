@@ -22,6 +22,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
+	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
@@ -93,6 +94,12 @@ type ServiceContext struct {
 	PointsAccountRepo      points.PointsAccountRepository
 	PointsTransactionRepo  points.PointsTransactionRepository
 	PointsRedemptionRepo   points.PointsRedemptionRepository
+	// Shop Settings
+	ShopSettingsRepo         shop.ShopSettingsRepository
+	BusinessHoursRepo        shop.BusinessHoursRepository
+	NotificationSettingsRepo shop.NotificationSettingsRepository
+	PaymentSettingsRepo     shop.PaymentSettingsRepository
+	ShippingSettingsRepo     shop.ShippingSettingsRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -209,6 +216,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		idGen,
 	)
 
+	// Shop settings repositories
+	shopSettingsRepo := persistence.NewShopSettingsRepository()
+	businessHoursRepo := persistence.NewBusinessHoursRepository()
+	notificationSettingsRepo := persistence.NewNotificationSettingsRepository()
+	paymentSettingsRepo := persistence.NewPaymentSettingsRepository()
+	shippingSettingsRepo := persistence.NewShippingSettingsRepository()
+
 	return &ServiceContext{
 		Config:                 c,
 		DB:                     db,
@@ -271,5 +285,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PointsAccountRepo:     pointsAccountRepo,
 		PointsTransactionRepo: pointsTransactionRepo,
 		PointsRedemptionRepo:  pointsRedemptionRepo,
+		// Shop settings
+		ShopSettingsRepo:         shopSettingsRepo,
+		BusinessHoursRepo:        businessHoursRepo,
+		NotificationSettingsRepo: notificationSettingsRepo,
+		PaymentSettingsRepo:     paymentSettingsRepo,
+		ShippingSettingsRepo:     shippingSettingsRepo,
 	}
 }

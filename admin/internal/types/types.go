@@ -468,6 +468,16 @@ type CreateMarketReq struct {
 	TaxRules        TaxConfig `json:"tax_rules,optional"`
 }
 
+type CreatePageRequest struct {
+	Name     string `json:"name"`      // Page name (required)
+	Slug     string `json:"slug"`      // URL slug, auto-generated if empty (required)
+	PageType string `json:"page_type"` // home, product, collection, custom
+}
+
+type CreatePageResponse struct {
+	PageID int64 `json:"page_id"`
+}
+
 type CreateProductLocalizationReq struct {
 	ProductID    int64  `json:"product_id"`
 	LanguageCode string `json:"language_code"`
@@ -889,7 +899,7 @@ type FulfillmentOverview struct {
 	PendingRefunds      int64  `json:"pending_refunds"`
 	RefundRate          string `json:"refund_rate"`
 	DeliverySuccessRate string `json:"delivery_success_rate"`
-	TotalAmount         string `json:"total_amount"`
+	RefundAmount        string `json:"refund_amount"` // Total refund amount
 	Currency            string `json:"currency"`
 }
 
@@ -1825,7 +1835,7 @@ type PageDetailResponse struct {
 
 type PageListItem struct {
 	ID          int64  `json:"id"`
-	PageType    string `json:"page_type"` // home, category, product, cart, order, custom
+	PageType    string `json:"page_type"` // home, product, collection, custom
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	IsPublished bool   `json:"is_published"`
