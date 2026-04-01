@@ -53,7 +53,7 @@ func (r *shopSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *shop
 
 	// Update existing
 	settings.ID = existing.ID
-	settings.CreatedAt = time.Unix(existing.CreatedAt, 0).UTC()
+	settings.CreatedAt = existing.CreatedAt
 	settings.UpdatedAt = time.Now().UTC()
 	model := fromShopSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&shopSettingsModel{}).
@@ -104,8 +104,8 @@ type shopSettingsModel struct {
 	Status           int8   `gorm:"column:status;not null;default:1"`
 	Plan             int8   `gorm:"column:plan;not null;default:0"`
 	ExpireAt         string `gorm:"column:expire_at;size:50"`
-	CreatedAt        int64  `gorm:"column:created_at"`
-	UpdatedAt        int64  `gorm:"column:updated_at"`
+	CreatedAt        time.Time `gorm:"column:created_at"`
+	UpdatedAt        time.Time `gorm:"column:updated_at"`
 }
 
 func (m *shopSettingsModel) toEntity() *shop.ShopSettings {
@@ -131,8 +131,8 @@ func (m *shopSettingsModel) toEntity() *shop.ShopSettings {
 		Status:           m.Status,
 		Plan:             m.Plan,
 		ExpireAt:         m.ExpireAt,
-		CreatedAt:        time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt:        time.Unix(m.UpdatedAt, 0).UTC(),
+		CreatedAt:        m.CreatedAt,
+		UpdatedAt:        m.UpdatedAt,
 	}
 }
 
@@ -159,8 +159,8 @@ func fromShopSettingsEntity(s *shop.ShopSettings) *shopSettingsModel {
 		Status:           s.Status,
 		Plan:             s.Plan,
 		ExpireAt:         s.ExpireAt,
-		CreatedAt:        s.CreatedAt.Unix(),
-		UpdatedAt:        s.UpdatedAt.Unix(),
+		CreatedAt:        s.CreatedAt,
+		UpdatedAt:        s.UpdatedAt,
 	}
 }
 
@@ -218,8 +218,8 @@ type businessHoursModel struct {
 	OpenTime  string `gorm:"column:open_time;size:5"`
 	CloseTime string `gorm:"column:close_time;size:5"`
 	IsClosed  bool   `gorm:"column:is_closed;not null;default:false"`
-	CreatedAt int64  `gorm:"column:created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at"`
 }
 
 func (m *businessHoursModel) toEntity() *shop.BusinessHours {
@@ -230,8 +230,8 @@ func (m *businessHoursModel) toEntity() *shop.BusinessHours {
 		OpenTime:  m.OpenTime,
 		CloseTime: m.CloseTime,
 		IsClosed:  m.IsClosed,
-		CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}
 }
 
@@ -243,8 +243,8 @@ func fromBusinessHoursEntity(h *shop.BusinessHours) *businessHoursModel {
 		OpenTime:  h.OpenTime,
 		CloseTime: h.CloseTime,
 		IsClosed:  h.IsClosed,
-		CreatedAt: h.CreatedAt.Unix(),
-		UpdatedAt: h.UpdatedAt.Unix(),
+		CreatedAt: h.CreatedAt,
+		UpdatedAt: h.UpdatedAt,
 	}
 }
 
@@ -291,7 +291,7 @@ func (r *notificationSettingsRepo) Save(ctx context.Context, db *gorm.DB, settin
 
 	// Update existing
 	settings.ID = existing.ID
-	settings.CreatedAt = time.Unix(existing.CreatedAt, 0).UTC()
+	settings.CreatedAt = existing.CreatedAt
 	settings.UpdatedAt = time.Now().UTC()
 	model := fromNotificationSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&notificationSettingsModel{}).
@@ -320,8 +320,8 @@ type notificationSettingsModel struct {
 	LowStockThreshold int   `gorm:"column:low_stock_threshold;not null;default:10"`
 	RefundRequested   bool  `gorm:"column:refund_requested;not null;default:true"`
 	NewReview         bool  `gorm:"column:new_review;not null;default:true"`
-	CreatedAt         int64 `gorm:"column:created_at"`
-	UpdatedAt         int64 `gorm:"column:updated_at"`
+	CreatedAt         time.Time `gorm:"column:created_at"`
+	UpdatedAt         time.Time `gorm:"column:updated_at"`
 }
 
 func (m *notificationSettingsModel) toEntity() *shop.NotificationSettings {
@@ -336,8 +336,8 @@ func (m *notificationSettingsModel) toEntity() *shop.NotificationSettings {
 		LowStockThreshold: m.LowStockThreshold,
 		RefundRequested:   m.RefundRequested,
 		NewReview:         m.NewReview,
-		CreatedAt:         time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt:         time.Unix(m.UpdatedAt, 0).UTC(),
+		CreatedAt:         m.CreatedAt,
+		UpdatedAt:         m.UpdatedAt,
 	}
 }
 
@@ -353,8 +353,8 @@ func fromNotificationSettingsEntity(s *shop.NotificationSettings) *notificationS
 		LowStockThreshold: s.LowStockThreshold,
 		RefundRequested:   s.RefundRequested,
 		NewReview:         s.NewReview,
-		CreatedAt:         s.CreatedAt.Unix(),
-		UpdatedAt:         s.UpdatedAt.Unix(),
+		CreatedAt:         s.CreatedAt,
+		UpdatedAt:         s.UpdatedAt,
 	}
 }
 
@@ -401,7 +401,7 @@ func (r *paymentSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *s
 
 	// Update existing
 	settings.ID = existing.ID
-	settings.CreatedAt = time.Unix(existing.CreatedAt, 0).UTC()
+	settings.CreatedAt = existing.CreatedAt
 	settings.UpdatedAt = time.Now().UTC()
 	model := fromPaymentSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&paymentSettingsModel{}).
@@ -415,13 +415,13 @@ func (r *paymentSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *s
 }
 
 type paymentSettingsModel struct {
-	ID              int64  `gorm:"column:id;primaryKey"`
-	ShopID          int64  `gorm:"column:shop_id;not null;uniqueIndex"`
-	StripeEnabled   bool   `gorm:"column:stripe_enabled;not null;default:false"`
-	StripePublicKey string `gorm:"column:stripe_public_key;size:255"`
-	StripeSecretKey string `gorm:"column:stripe_secret_key;size:255"`
-	CreatedAt       int64  `gorm:"column:created_at"`
-	UpdatedAt       int64  `gorm:"column:updated_at"`
+	ID              int64     `gorm:"column:id;primaryKey"`
+	ShopID          int64     `gorm:"column:shop_id;not null;uniqueIndex"`
+	StripeEnabled   bool      `gorm:"column:stripe_enabled;not null;default:false"`
+	StripePublicKey string    `gorm:"column:stripe_public_key;size:255"`
+	StripeSecretKey string    `gorm:"column:stripe_secret_key;size:255"`
+	CreatedAt       time.Time `gorm:"column:created_at"`
+	UpdatedAt       time.Time `gorm:"column:updated_at"`
 }
 
 func (m *paymentSettingsModel) toEntity() *shop.PaymentSettings {
@@ -431,8 +431,8 @@ func (m *paymentSettingsModel) toEntity() *shop.PaymentSettings {
 		StripeEnabled:   m.StripeEnabled,
 		StripePublicKey: m.StripePublicKey,
 		StripeSecretKey: m.StripeSecretKey,
-		CreatedAt:       time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt:       time.Unix(m.UpdatedAt, 0).UTC(),
+		CreatedAt:       m.CreatedAt,
+		UpdatedAt:       m.UpdatedAt,
 	}
 }
 
@@ -443,8 +443,8 @@ func fromPaymentSettingsEntity(s *shop.PaymentSettings) *paymentSettingsModel {
 		StripeEnabled:   s.StripeEnabled,
 		StripePublicKey: s.StripePublicKey,
 		StripeSecretKey: s.StripeSecretKey,
-		CreatedAt:       s.CreatedAt.Unix(),
-		UpdatedAt:       s.UpdatedAt.Unix(),
+		CreatedAt:       s.CreatedAt,
+		UpdatedAt:       s.UpdatedAt,
 	}
 }
 
@@ -491,7 +491,7 @@ func (r *shippingSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *
 
 	// Update existing
 	settings.ID = existing.ID
-	settings.CreatedAt = time.Unix(existing.CreatedAt, 0).UTC()
+	settings.CreatedAt = existing.CreatedAt
 	settings.UpdatedAt = time.Now().UTC()
 	model := fromShippingSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&shippingSettingsModel{}).
@@ -505,13 +505,13 @@ func (r *shippingSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *
 }
 
 type shippingSettingsModel struct {
-	ID                     int64  `gorm:"column:id;primaryKey"`
-	ShopID                 int64  `gorm:"column:shop_id;not null;uniqueIndex"`
-	FreeShippingThreshold  string `gorm:"column:free_shipping_threshold;type:decimal(19,4);not null"`
-	DefaultShippingFee     string `gorm:"column:default_shipping_fee;type:decimal(19,4);not null"`
-	Currency               string `gorm:"column:currency;size:3;not null"`
-	CreatedAt              int64  `gorm:"column:created_at"`
-	UpdatedAt              int64  `gorm:"column:updated_at"`
+	ID                     int64     `gorm:"column:id;primaryKey"`
+	ShopID                 int64     `gorm:"column:shop_id;not null;uniqueIndex"`
+	FreeShippingThreshold  string    `gorm:"column:free_shipping_threshold;type:decimal(19,4);not null"`
+	DefaultShippingFee     string    `gorm:"column:default_shipping_fee;type:decimal(19,4);not null"`
+	Currency               string    `gorm:"column:currency;size:3;not null"`
+	CreatedAt              time.Time `gorm:"column:created_at"`
+	UpdatedAt              time.Time `gorm:"column:updated_at"`
 }
 
 func (m *shippingSettingsModel) toEntity() *shop.ShippingSettings {
@@ -523,8 +523,8 @@ func (m *shippingSettingsModel) toEntity() *shop.ShippingSettings {
 		FreeShippingThreshold:  threshold,
 		DefaultShippingFee:     fee,
 		Currency:               m.Currency,
-		CreatedAt:              time.Unix(m.CreatedAt, 0).UTC(),
-		UpdatedAt:              time.Unix(m.UpdatedAt, 0).UTC(),
+		CreatedAt:              m.CreatedAt,
+		UpdatedAt:              m.UpdatedAt,
 	}
 }
 
@@ -535,7 +535,7 @@ func fromShippingSettingsEntity(s *shop.ShippingSettings) *shippingSettingsModel
 		FreeShippingThreshold:  s.FreeShippingThreshold.String(),
 		DefaultShippingFee:     s.DefaultShippingFee.String(),
 		Currency:               s.Currency,
-		CreatedAt:              s.CreatedAt.Unix(),
-		UpdatedAt:              s.UpdatedAt.Unix(),
+		CreatedAt:              s.CreatedAt,
+		UpdatedAt:              s.UpdatedAt,
 	}
 }

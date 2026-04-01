@@ -1,5 +1,48 @@
 <template>
   <div class="shipment-detail-page">
+    <!-- Skeleton Loading -->
+    <div v-if="pageLoading" class="skeleton-container">
+      <el-skeleton :rows="1" animated />
+      <el-row :gutter="20">
+        <el-col :xs="24" :lg="16">
+          <el-card class="info-card" shadow="never">
+            <template #header>
+              <el-skeleton :rows="1" animated />
+            </template>
+            <el-skeleton :rows="4" animated />
+          </el-card>
+          <el-card class="info-card" shadow="never">
+            <template #header>
+              <el-skeleton :rows="1" animated />
+            </template>
+            <el-skeleton :rows="4" animated />
+          </el-card>
+          <el-card class="info-card" shadow="never">
+            <template #header>
+              <el-skeleton :rows="1" animated />
+            </template>
+            <el-skeleton :rows="3" animated />
+          </el-card>
+        </el-col>
+        <el-col :xs="24" :lg="8">
+          <el-card class="info-card" shadow="never">
+            <template #header>
+              <el-skeleton :rows="1" animated />
+            </template>
+            <el-skeleton :rows="5" animated />
+          </el-card>
+          <el-card class="info-card" shadow="never">
+            <template #header>
+              <el-skeleton :rows="1" animated />
+            </template>
+            <el-skeleton :rows="3" animated />
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+
+    <!-- Actual Content -->
+    <template v-else>
     <!-- Page Header -->
     <div class="page-header">
       <div class="header-left">
@@ -246,6 +289,7 @@
         <el-button type="primary" @click="saveLogistics">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
+    </template>
   </div>
 </template>
 
@@ -261,10 +305,12 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import { t } from '@/plugins/i18n'
 import {
   getShipmentDetail,
+  updateShipment,
   updateShipmentStatus,
   getCarrierList,
   type Shipment,
-  type Carrier
+  type Carrier,
+  type UpdateShipmentRequest
 } from '@/api/fulfillment'
 
 interface TimelineEvent {
@@ -281,6 +327,7 @@ const router = useRouter()
 const shipment = ref<Shipment | null>(null)
 const carriers = ref<Carrier[]>([])
 const editDialogVisible = ref(false)
+const pageLoading = ref(true)
 
 const editForm = reactive({
   carrier_code: '',
@@ -356,6 +403,8 @@ const loadShipment = async () => {
     shipment.value = res
   } catch (error) {
     ElMessage.error(t('fulfillment.loadShipmentDetailsFailed'))
+  } finally {
+    pageLoading.value = false
   }
 }
 
@@ -397,9 +446,22 @@ const openEditLogistics = () => {
 }
 
 const saveLogistics = async () => {
-  ElMessage.success(t('fulfillment.logisticsUpdated'))
-  editDialogVisible.value = false
-  loadShipment()
+  if (!shipment.value) return
+  try {
+    const data: UpdateShipmentRequest = {
+      carrier_code: editForm.carrier_code,
+      tracking_no: editForm.tracking_no,
+      shipping_cost: editForm.shipping_cost,
+      weight: editForm.weight,
+      remark: editForm.remark
+    }
+    await updateShipment(shipment.value.id, data)
+    ElMessage.success(t('fulfillment.logisticsUpdated'))
+    editDialogVisible.value = false
+    loadShipment()
+  } catch (error) {
+    ElMessage.error(t('fulfillment.updateShipmentFailed'))
+  }
 }
 
 const confirmShip = async () => {
@@ -445,15 +507,25 @@ const trackShipment = () => {
 
 const cancelShipment = async () => {
   try {
-    await ElMessageBox.confirm(
-      t('fulfillment.cancelThisShipment'),
+    const { value: reason } = await ElMessageBox.prompt(
+      t('fulfillment.cancelReasonRequired'),
       t('fulfillment.cancelShipment'),
-      { type: 'warning' }
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+        inputPattern: /^.{5,200}$/,
+        inputErrorMessage: t('fulfillment.cancelReasonLengthError')
+      }
     )
+    // reason contains the user's input for cancellation
+    // Call API to cancel shipment with reason
+    // TODO: Integrate with cancel shipment API when available
+    console.log('Cancel shipment with reason:', reason)
     ElMessage.success(t('fulfillment.shipmentCancelled'))
     router.push('/fulfillment/shipments')
   } catch (error) {
-    // Cancelled
+    // User cancelled or validation failed
   }
 }
 
@@ -466,6 +538,15 @@ onMounted(() => {
 <style scoped>
 .shipment-detail-page {
   padding: 0;
+}
+
+/* Skeleton Container */
+.skeleton-container {
+  padding: 0;
+}
+
+.skeleton-container .info-card {
+  margin-bottom: 20px;
 }
 
 /* Page Header */

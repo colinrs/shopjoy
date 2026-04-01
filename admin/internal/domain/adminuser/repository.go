@@ -46,6 +46,9 @@ type Repository interface {
 
 	// CountMainAccount 统计租户主账号数量
 	CountMainAccount(ctx context.Context, db *gorm.DB, tenantID int64) (int64, error)
+
+	// CountByRoleID 统计拥有指定角色ID的用户数量
+	CountByRoleID(ctx context.Context, db *gorm.DB, roleID int64) (int64, error)
 }
 
 // Query 查询条件

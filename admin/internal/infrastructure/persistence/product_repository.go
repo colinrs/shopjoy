@@ -34,6 +34,7 @@ type productModel struct {
 	Status          int             `gorm:"column:status;default:0;index"`
 	CategoryID      int64           `gorm:"column:category_id;index"`
 	Brand           string          `gorm:"column:brand;size:64"`
+	SKUPrefix       string          `gorm:"column:sku_prefix;size:8;default:''"`
 	Tags            string          `gorm:"column:tags;type:json"`
 	Images          string          `gorm:"column:images;type:json"`
 	IsMatrixProduct bool            `gorm:"column:is_matrix_product;default:false"`
@@ -81,6 +82,7 @@ func (m *productModel) toEntity() *product.Product {
 		Status:          product.Status(m.Status),
 		CategoryID:      m.CategoryID,
 		Brand:           m.Brand,
+		SKUPrefix:       m.SKUPrefix,
 		Tags:            tags,
 		Images:          images,
 		IsMatrixProduct: m.IsMatrixProduct,
@@ -121,6 +123,7 @@ func fromEntity(p *product.Product) *productModel {
 		Status:          int(p.Status),
 		CategoryID:      p.CategoryID,
 		Brand:           p.Brand,
+		SKUPrefix:       p.SKUPrefix,
 		Tags:            string(tagsJSON),
 		Images:          string(imagesJSON),
 		IsMatrixProduct: p.IsMatrixProduct,

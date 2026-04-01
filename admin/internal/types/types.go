@@ -149,6 +149,22 @@ type BatchApproveResp struct {
 	Errors       []string `json:"errors"`
 }
 
+type BatchCancelFail struct {
+	OrderID int64  `json:"order_id"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type BatchCancelOrderReq struct {
+	OrderIDs []int64 `json:"order_ids" binding:"required,min=1,max=100"`
+	Reason   string  `json:"reason" binding:"required,min=5,max=200"`
+}
+
+type BatchCancelOrderResp struct {
+	Success []int64           `json:"success"`
+	Failed  []BatchCancelFail `json:"failed"`
+}
+
 type BatchCreateShipmentsReq struct {
 	CarrierCode string                 `json:"carrier_code"`
 	CarrierName string                 `json:"carrier_name,optional"`
@@ -173,6 +189,19 @@ type BatchHideResp struct {
 	Errors       []string `json:"errors"`
 }
 
+type BatchProductFail struct {
+	ProductID int64  `json:"product_id"`
+	Code      int    `json:"code"`
+	Message   string `json:"message"`
+}
+
+type BatchProductFields struct {
+	Price      *string `json:"price,omitempty"`       // 价格，单位：元，如 "1.99" 表示 1.99 元
+	Stock      *int    `json:"stock,omitempty"`       // 库存
+	Status     *string `json:"status,omitempty"`      // draft, on_sale, off_sale
+	CategoryID *int64  `json:"category_id,omitempty"` // 分类ID
+}
+
 type BatchShipmentItemReq struct {
 	OrderID    string `json:"order_id"`
 	TrackingNo string `json:"tracking_no"`
@@ -186,8 +215,53 @@ type BatchShipmentResultResp struct {
 	Error      string `json:"error,optional"`
 }
 
+type BatchStatusFail struct {
+	UserID  int64  `json:"user_id"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type BatchTrackingFail struct {
+	ShipmentID int64  `json:"shipment_id"`
+	Code       int    `json:"code"`
+	Message    string `json:"message"`
+}
+
+type BatchUpdateProductReq struct {
+	ProductIDs   []int64            `json:"product_ids" binding:"required,min=1,max=100"`
+	UpdateFields BatchProductFields `json:"update_fields"`
+}
+
+type BatchUpdateProductResp struct {
+	Success []int64            `json:"success"`
+	Failed  []BatchProductFail `json:"failed"`
+}
+
 type BatchUpdateSafetyStockReq struct {
 	Items []SafetyStockItem `json:"items"`
+}
+
+type BatchUpdateTrackingReq struct {
+	ShipmentIDs []int64  `json:"shipment_ids" binding:"required,min=1,max=100"`
+	CarrierCode string   `json:"carrier_code" binding:"required"`
+	TrackingNo  string   `json:"tracking_no" binding:"required"`
+	Weight      *float64 `json:"weight,omitempty"`
+}
+
+type BatchUpdateTrackingResp struct {
+	Success []int64             `json:"success"`
+	Failed  []BatchTrackingFail `json:"failed"`
+}
+
+type BatchUpdateUserStatusReq struct {
+	UserIDs []int64 `json:"user_ids" binding:"required,min=1,max=100"`
+	Status  int     `json:"status" binding:"required,oneof=1 2"` // 1=启用, 2=禁用
+	Reason  string  `json:"reason" binding:"omitempty,max=200"`
+}
+
+type BatchUpdateUserStatusResp struct {
+	Success []int64           `json:"success"`
+	Failed  []BatchStatusFail `json:"failed"`
 }
 
 type BlockOrderItem struct {
@@ -2520,7 +2594,6 @@ type ShipmentDetailResp struct {
 	ShipmentNo    string              `json:"shipment_no"`
 	OrderID       string              `json:"order_id"`
 	Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
-	StatusText    string              `json:"status_text"`
 	Carrier       string              `json:"carrier"`
 	CarrierCode   string              `json:"carrier_code"`
 	TrackingNo    string              `json:"tracking_no"`

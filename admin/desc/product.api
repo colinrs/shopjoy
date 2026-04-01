@@ -7,6 +7,26 @@ info (
 )
 
 type (
+	// Batch update types
+	BatchUpdateProductReq {
+		ProductIDs   []int64            `json:"product_ids" binding:"required,min=1,max=100"`
+		UpdateFields BatchProductFields `json:"update_fields"`
+	}
+	BatchProductFields {
+		Price      *string `json:"price,omitempty"` // 价格，单位：元，如 "1.99" 表示 1.99 元
+		Stock      *int    `json:"stock,omitempty"` // 库存
+		Status     *string `json:"status,omitempty"` // draft, on_sale, off_sale
+		CategoryID *int64  `json:"category_id,omitempty"` // 分类ID
+	}
+	BatchUpdateProductResp {
+		Success []int64            `json:"success"`
+		Failed  []BatchProductFail `json:"failed"`
+	}
+	BatchProductFail {
+		ProductID int64  `json:"product_id"`
+		Code      int    `json:"code"`
+		Message   string `json:"message"`
+	}
 	CreateProductReq {
 		Name        string `json:"name"`
 		Description string `json:"description,optional"`
@@ -298,5 +318,9 @@ service admin-api {
 	@doc "删除商品"
 	@handler DeleteProductHandler
 	delete /api/v1/products/:id (GetProductReq) returns (CreateProductResp)
+
+	@doc "批量更新商品"
+	@handler BatchUpdateProductHandler
+	post /api/v1/products/batch-update (BatchUpdateProductReq) returns (BatchUpdateProductResp)
 }
 

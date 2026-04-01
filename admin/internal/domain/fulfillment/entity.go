@@ -656,6 +656,7 @@ type ShipmentRepository interface {
 type ShipmentItemRepository interface {
 	BatchCreate(ctx context.Context, db *gorm.DB, items []ShipmentItem) error
 	FindByShipmentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentID int64) ([]ShipmentItem, error)
+	FindByShipmentIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentIDs []int64) (map[int64][]ShipmentItem, error)
 	FindByOrderItemID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderItemID int64) ([]ShipmentItem, error)
 	DeleteByShipmentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentID int64) error
 }
@@ -679,6 +680,7 @@ type CarrierRepository interface {
 	Create(ctx context.Context, db *gorm.DB, carrier *Carrier) error
 	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Carrier, error)
 	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Carrier, error)
+	FindByCodes(ctx context.Context, db *gorm.DB, codes []string) (map[string]*Carrier, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Carrier, error)
 	FindActive(ctx context.Context, db *gorm.DB) ([]*Carrier, error)
 	Update(ctx context.Context, db *gorm.DB, carrier *Carrier) error

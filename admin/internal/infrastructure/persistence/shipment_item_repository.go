@@ -130,3 +130,30 @@ func (r *shipmentItemRepo) DeleteByShipmentID(ctx context.Context, db *gorm.DB, 
 	}
 	return query.Delete(&shipmentItemModel{}).Error
 }
+
+// FindByShipmentIDs finds all items for multiple shipments with tenant isolation
+// Returns a map keyed by shipment ID
+func (r *shipmentItemRepo) FindByShipmentIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentIDs []int64) (map[int64][]fulfillment.ShipmentItem, error) {
+	if len(shipmentIDs) == 0 {
+		return make(map[int64][]fulfillment.ShipmentItem), nil
+	}
+
+	query := db.WithContext(ctx).Where("shipment_id IN ?", shipmentIDs)
+	// Platform admin (tenantID == 0) can access all tenant data
+	if tenantID != 0 {
+		query = query.Where("tenant_id = ?", tenantID.Int64())
+	}
+
+	var models []shipmentItemModel
+	err := query.Order("id ASC").Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[int64][]fulfillment.ShipmentItem)
+	for _, m := range models {
+		item := m.toEntity()
+		result[m.ShipmentID] = append(result[m.ShipmentID], item)
+	}
+	return result, nil
+}

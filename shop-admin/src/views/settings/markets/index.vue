@@ -4,12 +4,12 @@
     <el-card class="header-card" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <h2 class="page-title">市场管理</h2>
-          <p class="page-desc">管理多市场配置，包括货币、语言和税务规则</p>
+          <h2 class="page-title">{{ t('settings.markets.title') }}</h2>
+          <p class="page-desc">{{ t('settings.markets.pageDesc') }}</p>
         </div>
         <div class="header-right">
           <el-button type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>新增市场
+            <el-icon><Plus /></el-icon>{{ t('settings.markets.addMarket') }}
           </el-button>
         </div>
       </div>
@@ -18,7 +18,7 @@
     <!-- Markets Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="marketList" v-loading="loading" stripe>
-        <el-table-column label="市场" min-width="200">
+        <el-table-column :label="t('settings.markets.market')" min-width="200">
           <template #default="{ row }">
             <div class="market-cell">
               <span class="market-flag">{{ row.flag || getFlagEmoji(row.code) }}</span>
@@ -29,17 +29,17 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="货币" width="100" align="center">
+        <el-table-column :label="t('settings.markets.currency')" width="100" align="center">
           <template #default="{ row }">
             <el-tag size="small">{{ row.currency }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="默认语言" width="120" align="center">
+        <el-table-column :label="t('settings.markets.defaultLanguage')" width="120" align="center">
           <template #default="{ row }">
             {{ getLanguageLabel(row.default_language) }}
           </template>
         </el-table-column>
-        <el-table-column label="税务配置" min-width="180">
+        <el-table-column :label="t('settings.markets.taxConfig')" min-width="180">
           <template #default="{ row }">
             <div class="tax-config">
               <span v-if="row.tax_rules?.vat_rate">VAT: {{ row.tax_rules.vat_rate }}%</span>
@@ -48,7 +48,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="t('settings.markets.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.is_active"
@@ -56,18 +56,18 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="主市场" width="100" align="center">
+        <el-table-column :label="t('settings.markets.defaultMarket')" width="100" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.is_default" type="primary" size="small">主市场</el-tag>
+            <el-tag v-if="row.is_default" type="primary" size="small">{{ t('settings.markets.defaultMarket') }}</el-tag>
             <el-button v-else type="primary" link size="small" @click="handleSetDefault(row)">
-              设为主市场
+              {{ t('settings.markets.setAsDefault') }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column :label="t('common.actions')" width="150" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">
-              编辑
+              {{ t('common.edit') }}
             </el-button>
             <el-button
               type="danger"
@@ -76,7 +76,7 @@
               @click="handleDelete(row)"
               :disabled="row.is_default"
             >
-              删除
+              {{ t('common.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -99,17 +99,17 @@
     <!-- Add/Edit Dialog -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? '编辑市场' : '新增市场'"
+      :title="isEdit ? t('settings.markets.editMarket') : t('settings.markets.addMarket')"
       width="650px"
       destroy-on-close
     >
       <el-form :model="marketForm" label-width="120px" :rules="formRules" ref="formRef">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="市场代码" prop="code">
+            <el-form-item :label="t('settings.markets.marketCode')" prop="code">
               <el-select
                 v-model="marketForm.code"
-                placeholder="请选择市场"
+                :placeholder="t('settings.markets.selectMarket')"
                 style="width: 100%"
                 :disabled="isEdit"
               >
@@ -123,27 +123,27 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="市场名称" prop="name">
-              <el-input v-model="marketForm.name" placeholder="请输入市场名称" />
+            <el-form-item :label="t('settings.markets.marketName')" prop="name">
+              <el-input v-model="marketForm.name" :placeholder="t('settings.markets.enterMarketName')" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="货币" prop="currency">
-              <el-select v-model="marketForm.currency" placeholder="请选择货币" style="width: 100%">
-                <el-option label="CNY - 人民币" value="CNY" />
-                <el-option label="USD - 美元" value="USD" />
-                <el-option label="EUR - 欧元" value="EUR" />
-                <el-option label="GBP - 英镑" value="GBP" />
-                <el-option label="JPY - 日元" value="JPY" />
-                <el-option label="AUD - 澳元" value="AUD" />
-                <el-option label="CAD - 加元" value="CAD" />
-                <el-option label="SGD - 新加坡元" value="SGD" />
+            <el-form-item :label="t('settings.markets.currency')" prop="currency">
+              <el-select v-model="marketForm.currency" :placeholder="t('settings.markets.selectCurrency')" style="width: 100%">
+                <el-option label="CNY - RMB" value="CNY" />
+                <el-option label="USD - US Dollar" value="USD" />
+                <el-option label="EUR - Euro" value="EUR" />
+                <el-option label="GBP - British Pound" value="GBP" />
+                <el-option label="JPY - Japanese Yen" value="JPY" />
+                <el-option label="AUD - Australian Dollar" value="AUD" />
+                <el-option label="CAD - Canadian Dollar" value="CAD" />
+                <el-option label="SGD - Singapore Dollar" value="SGD" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="默认语言" prop="default_language">
-              <el-select v-model="marketForm.default_language" placeholder="请选择语言" style="width: 100%">
+            <el-form-item :label="t('settings.markets.defaultLanguage')" prop="default_language">
+              <el-select v-model="marketForm.default_language" :placeholder="t('settings.markets.selectLanguage')" style="width: 100%">
                 <el-option label="简体中文" value="zh-CN" />
                 <el-option label="English" value="en-US" />
                 <el-option label="日本語" value="ja-JP" />
@@ -154,18 +154,18 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="启用状态">
+            <el-form-item :label="t('settings.markets.status')">
               <el-switch v-model="marketForm.is_active" />
-              <span class="form-hint">关闭后该市场将不对外展示</span>
+              <span class="form-hint">{{ t('settings.markets.disableMarketHint') }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
         <!-- Tax Configuration Section -->
-        <el-divider content-position="left">税务配置</el-divider>
+        <el-divider content-position="left">{{ t('settings.markets.taxConfig') }}</el-divider>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="VAT 税率">
+            <el-form-item :label="t('settings.markets.vatRate')">
               <el-input-number
                 v-model="marketForm.tax_rules.vat_rate"
                 :min="0"
@@ -173,11 +173,11 @@
                 :precision="2"
                 style="width: 100%"
               />
-              <span class="form-hint">增值税税率 (欧盟市场)</span>
+              <span class="form-hint">{{ t('settings.markets.taxRateDescription') }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="GST 税率">
+            <el-form-item :label="t('settings.markets.gstRate')">
               <el-input-number
                 v-model="marketForm.tax_rules.gst_rate"
                 :min="0"
@@ -185,26 +185,26 @@
                 :precision="2"
                 style="width: 100%"
               />
-              <span class="form-hint">商品及服务税税率 (澳洲市场)</span>
+              <span class="form-hint">{{ t('settings.markets.gstRateDescription') }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="启用 IOSS">
+            <el-form-item :label="t('settings.markets.iossEnabled')">
               <el-switch v-model="marketForm.tax_rules.ioss_enabled" />
-              <span class="form-hint">欧盟进口一站式申报服务</span>
+              <span class="form-hint">{{ t('settings.markets.iossDescription') }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="含税价格">
+            <el-form-item :label="t('settings.markets.priceIncludesTax')">
               <el-switch v-model="marketForm.tax_rules.include_tax" />
-              <span class="form-hint">商品价格是否含税</span>
+              <span class="form-hint">{{ t('settings.markets.priceTaxDescription') }}</span>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -252,10 +252,10 @@ const marketForm = reactive({
 })
 
 const formRules = {
-  code: [{ required: true, message: '请选择市场', trigger: 'change' }],
-  name: [{ required: true, message: '请输入市场名称', trigger: 'blur' }],
-  currency: [{ required: true, message: '请选择货币', trigger: 'change' }],
-  default_language: [{ required: true, message: '请选择默认语言', trigger: 'change' }]
+  code: [{ required: true, message: t('settings.markets.selectMarket'), trigger: 'change' }],
+  name: [{ required: true, message: t('settings.markets.enterMarketName'), trigger: 'blur' }],
+  currency: [{ required: true, message: t('settings.markets.selectCurrency'), trigger: 'change' }],
+  default_language: [{ required: true, message: t('settings.markets.selectLanguage'), trigger: 'change' }]
 }
 
 // Available markets for selection

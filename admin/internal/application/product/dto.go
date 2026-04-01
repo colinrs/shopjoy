@@ -19,12 +19,26 @@ type CreateProductRequest struct {
 
 // UpdateProductRequest 更新商品请求
 type UpdateProductRequest struct {
-	ID          int64
-	Name        string
-	Description string
-	Price       decimal.Decimal
-	Currency    string
-	CategoryID  int64
+	ID              int64
+	Name            string
+	Description     string
+	Price           decimal.Decimal
+	Currency        string
+	CostPrice       decimal.Decimal
+	CategoryID      int64
+	SKU             string
+	Brand           string
+	Tags            []string
+	Images          []string
+	IsMatrixProduct bool
+	HSCode          string
+	COO             string
+	Weight          decimal.Decimal
+	WeightUnit      string
+	Length          decimal.Decimal
+	Width           decimal.Decimal
+	Height          decimal.Decimal
+	DangerousGoods  []string
 }
 
 // UpdateStockRequest 更新库存请求
@@ -41,17 +55,41 @@ type DeductStockRequest struct {
 
 // ProductResponse 商品响应
 type ProductResponse struct {
-	ID          int64           `json:"id"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Price       decimal.Decimal `json:"price"`
-	Currency    string          `json:"currency"`
-	CostPrice   decimal.Decimal `json:"cost_price"`
-	Stock       int             `json:"stock"`
-	Status      string          `json:"status"`
-	CategoryID  int64           `json:"category_id"`
-	CreatedAt   string          `json:"created_at"`
-	UpdatedAt   string          `json:"updated_at"`
+	ID              int64             `json:"id"`
+	Name            string            `json:"name"`
+	Description     string            `json:"description"`
+	Price           decimal.Decimal   `json:"price"`
+	Currency        string            `json:"currency"`
+	CostPrice       decimal.Decimal   `json:"cost_price"`
+	Stock           int               `json:"stock"`
+	Status          string            `json:"status"`
+	CategoryID      int64             `json:"category_id"`
+	CreatedAt       string            `json:"created_at"`
+	UpdatedAt       string            `json:"updated_at"`
+	SKU             string            `json:"sku"`
+	Brand           string            `json:"brand"`
+	Tags            []string          `json:"tags"`
+	Images          []string          `json:"images"`
+	IsMatrixProduct bool              `json:"is_matrix_product"`
+	HSCode          string            `json:"hs_code"`
+	COO             string            `json:"coo"`
+	Weight          decimal.Decimal   `json:"weight"`
+	WeightUnit      string            `json:"weight_unit"`
+	Length          decimal.Decimal   `json:"length"`
+	Width           decimal.Decimal   `json:"width"`
+	Height          decimal.Decimal   `json:"height"`
+	DangerousGoods  []string          `json:"dangerous_goods"`
+	Markets         []MarketInfo      `json:"markets"`
+}
+
+// MarketInfo 市场信息
+type MarketInfo struct {
+	MarketID   int64  `json:"market_id"`
+	MarketCode string `json:"market_code"`
+	MarketName string `json:"market_name"`
+	IsEnabled  bool   `json:"is_enabled"`
+	Price      string `json:"price"`
+	Currency   string `json:"currency"`
 }
 
 // ProductListResponse 商品列表响应
@@ -72,6 +110,20 @@ type QueryProductRequest struct {
 	MarketID   int64
 	Page       int
 	PageSize   int
+}
+
+// BatchUpdateProductRequest 批量更新商品请求
+type BatchUpdateProductRequest struct {
+	ProductIDs []int64
+	Fields     BatchProductFields
+}
+
+// BatchProductFields 批量更新字段
+type BatchProductFields struct {
+	Price      *decimal.Decimal
+	Stock      *int
+	Status     *product.Status
+	CategoryID *int64
 }
 
 // ToDomainMoney 转换为领域层的 Money
@@ -97,17 +149,31 @@ func ToDomainMoneyFromInt64(amount int64, currency string) product.Money {
 // FromDomainProduct 从领域实体转换为响应DTO
 func FromDomainProduct(p *product.Product) *ProductResponse {
 	return &ProductResponse{
-		ID:          int64(p.ID),
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price.Amount,
-		Currency:    p.Price.Currency,
-		CostPrice:   p.CostPrice.Amount,
-		Stock:       p.Stock,
-		Status:      p.Status.String(),
-		CategoryID:  p.CategoryID,
-		CreatedAt:   p.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   p.UpdatedAt.Format(time.RFC3339),
+		ID:              int64(p.ID),
+		Name:            p.Name,
+		Description:     p.Description,
+		Price:           p.Price.Amount,
+		Currency:        p.Price.Currency,
+		CostPrice:       p.CostPrice.Amount,
+		Stock:           p.Stock,
+		Status:          p.Status.String(),
+		CategoryID:      p.CategoryID,
+		CreatedAt:       p.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       p.UpdatedAt.Format(time.RFC3339),
+		SKU:             p.SKU,
+		Brand:           p.Brand,
+		Tags:            p.Tags,
+		Images:          p.Images,
+		IsMatrixProduct: p.IsMatrixProduct,
+		HSCode:          p.HSCode,
+		COO:             p.COO,
+		Weight:          p.Weight,
+		WeightUnit:      p.WeightUnit,
+		Length:          p.Dimensions.Length,
+		Width:           p.Dimensions.Width,
+		Height:          p.Dimensions.Height,
+		DangerousGoods:  p.DangerousGoods,
+		Markets:         []MarketInfo{}, // Markets are loaded separately
 	}
 }
 
@@ -129,4 +195,11 @@ func ParseStatus(s string) *product.Status {
 	default:
 		return nil // 空字符串返回 nil，表示不过滤状态
 	}
+}
+
+// BatchProductFail 批量更新失败项
+type BatchProductFail struct {
+	ProductID int64
+	Code      int
+	Message   string
 }

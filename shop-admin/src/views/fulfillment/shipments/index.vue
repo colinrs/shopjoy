@@ -3,22 +3,43 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-item pending" @click="handleStatusFilter('pending')">
+        <el-card class="stat-item pending" shadow="hover" @click="handleStatusFilter('pending')">
+          <template #header>
+            <div class="stat-header">
+              <span>{{ $t('fulfillment.pendingShipment') }}</span>
+              <el-tooltip :content="$t('fulfillment.pendingShipmentTip')">
+                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </div>
+          </template>
           <p class="stat-number">{{ stats.pending }}</p>
-          <p class="stat-label">{{ $t('fulfillment.pendingShipment') }}</p>
-        </div>
+        </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item shipped" @click="handleStatusFilter('shipped')">
+        <el-card class="stat-item shipped" shadow="hover" @click="handleStatusFilter('shipped')">
+          <template #header>
+            <div class="stat-header">
+              <span>{{ $t('fulfillment.shippedShipment') }}</span>
+              <el-tooltip :content="$t('fulfillment.shippedShipmentTip')">
+                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </div>
+          </template>
           <p class="stat-number">{{ stats.shipped }}</p>
-          <p class="stat-label">{{ $t('fulfillment.shippedShipment') }}</p>
-        </div>
+        </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item delivered" @click="handleStatusFilter('delivered')">
+        <el-card class="stat-item delivered" shadow="hover" @click="handleStatusFilter('delivered')">
+          <template #header>
+            <div class="stat-header">
+              <span>{{ $t('fulfillment.deliveredShipment') }}</span>
+              <el-tooltip :content="$t('fulfillment.deliveredShipmentTip')">
+                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </div>
+          </template>
           <p class="stat-number">{{ stats.delivered }}</p>
-          <p class="stat-label">{{ $t('fulfillment.deliveredShipment') }}</p>
-        </div>
+        </el-card>
       </el-col>
     </el-row>
 
@@ -57,6 +78,7 @@
             :end-placeholder="$t('fulfillment.endDate')"
             class="date-picker"
             value-format="YYYY-MM-DD"
+            @change="handleSearch"
           />
         </div>
         <div class="filter-right">
@@ -80,6 +102,12 @@
         <div class="batch-actions">
           <el-button type="primary" @click="handleBatchShip">
             <el-icon><Van /></el-icon>{{ $t('fulfillment.batchShipment') }}
+          </el-button>
+          <el-button type="warning" @click="handleBatchUpdateTracking">
+            <el-icon><Edit /></el-icon>{{ $t('fulfillment.batchUpdateTracking') }}
+          </el-button>
+          <el-button @click="handleImportTracking">
+            <el-icon><Upload /></el-icon>{{ $t('fulfillment.importTracking') }}
           </el-button>
           <el-button @click="clearSelection">{{ $t('fulfillment.clearSelection') }}</el-button>
         </div>
@@ -219,6 +247,12 @@
       :carriers="carriers"
       @success="handleBatchShipSuccess"
     />
+
+    <!-- Import Tracking Dialog -->
+    <import-tracking-dialog
+      v-model="importTrackingDialogVisible"
+      @success="handleImportSuccess"
+    />
   </div>
 </template>
 
@@ -226,10 +260,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Download, Refresh, InfoFilled, Van, Location, Goods } from '@element-plus/icons-vue'
+import { Search, Download, Refresh, InfoFilled, Van, Location, Goods, QuestionFilled, Upload, Edit } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
 import ShipDialog from '@/components/fulfillment/ShipDialog.vue'
 import BatchShipDialog from '@/components/fulfillment/BatchShipDialog.vue'
+import ImportTrackingDialog from '@/components/fulfillment/ImportTrackingDialog.vue'
 import { t } from '@/plugins/i18n'
 import {
   getShipmentList,
@@ -237,10 +272,12 @@ import {
   updateShipmentStatus,
   getFulfillmentSummary,
   exportShipmentsUrl,
+  batchUpdateTracking,
   type Shipment,
   type Carrier,
   type ShipmentListParams,
-  ShipmentStatusMap
+  ShipmentStatusMap,
+  type BatchUpdateTrackingRequest
 } from '@/api/fulfillment'
 import { downloadFile } from '@/utils/download'
 
@@ -257,6 +294,7 @@ const pageSize = ref(20)
 const total = ref(0)
 const shipDialogVisible = ref(false)
 const batchShipDialogVisible = ref(false)
+const importTrackingDialogVisible = ref(false)
 const currentShipment = ref<Shipment | null>(null)
 const selectedRows = ref<Shipment[]>([])
 const tableRef = ref()
@@ -402,6 +440,77 @@ const handleBatchShipSuccess = () => {
   ElMessage.success(t('fulfillment.batchShipmentCompleted'))
 }
 
+const handleImportTracking = () => {
+  importTrackingDialogVisible.value = true
+}
+
+const handleImportSuccess = () => {
+  importTrackingDialogVisible.value = false
+  loadData()
+}
+
+// Batch update tracking for selected shipments
+const handleBatchUpdateTracking = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning(t('fulfillment.selectAtLeastOneShipment'))
+    return
+  }
+
+  try {
+    const { value: trackingNo } = await ElMessageBox.prompt(
+      t('fulfillment.enterTrackingNumber'),
+      t('fulfillment.batchUpdateTracking'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputPattern: /^.{5,50}$/,
+        inputErrorMessage: t('fulfillment.trackingNumberLengthError')
+      }
+    )
+
+    // Use first selected row's carrier as default
+    const defaultCarrier = selectedRows.value[0]?.carrier_code || ''
+
+    const { value: carrierCode } = await ElMessageBox.confirm(
+      t('fulfillment.selectCarrierForBatch'),
+      t('fulfillment.batchUpdateTracking'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+        showInput: true,
+        inputPlaceholder: t('fulfillment.enterCarrierCode'),
+        inputValue: defaultCarrier
+      }
+    )
+
+    const data: BatchUpdateTrackingRequest = {
+      shipment_ids: selectedRows.value.map(s => s.id),
+      carrier_code: carrierCode,
+      tracking_no: trackingNo
+    }
+
+    const res = await batchUpdateTracking(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('fulfillment.batchUpdateTrackingPartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('fulfillment.batchUpdateTrackingSuccess', { count: successCount }))
+    }
+
+    clearSelection()
+    loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Failed to batch update tracking:', error)
+      ElMessage.error(t('fulfillment.batchUpdateTrackingFailed'))
+    }
+  }
+}
+
 const markDelivered = async (row: Shipment) => {
   try {
     await ElMessageBox.confirm(
@@ -456,11 +565,7 @@ onMounted(() => {
 }
 
 .stat-item {
-  background: #fff;
   border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(99, 102, 241, 0.06);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -468,7 +573,6 @@ onMounted(() => {
 
 .stat-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.12);
 }
 
 .stat-item.pending {
@@ -487,6 +591,31 @@ onMounted(() => {
   border-left: 4px solid #10B981;
 }
 
+.stat-item :deep(.el-card__header) {
+  padding: 12px 20px;
+  border-bottom: none;
+}
+
+.stat-item :deep(.el-card__body) {
+  padding: 0 20px 20px;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-tooltip {
+  color: #9CA3AF;
+  cursor: help;
+  transition: color 0.2s;
+}
+
+.stat-tooltip:hover {
+  color: #6366F1;
+}
+
 .stat-number {
   font-size: 32px;
   font-weight: 700;
@@ -494,14 +623,8 @@ onMounted(() => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 6px 0;
-  font-family: 'Fira Sans', sans-serif;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #6B7280;
   margin: 0;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 /* Filter Bar */

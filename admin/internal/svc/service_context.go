@@ -7,6 +7,7 @@ import (
 	"time"
 
 	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
+	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
@@ -83,6 +84,7 @@ type ServiceContext struct {
 	// Role and Permission
 	RoleRepo       role.Repository
 	PermissionRepo role.PermissionRepository
+	AdminUserRepo  adminuser.Repository
 	// Shipping
 	ShippingRepo persistence.ShippingTemplateRepository
 	// Storage
@@ -125,7 +127,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	jwtManager := auth.NewJWTManager(c.JWT.Secret, time.Duration(c.JWT.AccessExpiry)*time.Second, time.Duration(c.JWT.RefreshExpiry)*time.Second)
 
-	authMiddleware := middleware.NewAuthMiddleware(c.JWT.Secret)
+	authMiddleware := middleware.NewAuthMiddleware(c.JWT.Secret, db, adminUserRepo)
 
 	productMarketRepo := persistence.NewProductMarketRepository()
 	marketRepo := persistence.NewMarketRepository()
@@ -178,9 +180,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	paymentRefundRepo := persistence.NewPaymentRefundRepository()
 	paymentTransactionRepo := persistence.NewPaymentTransactionRepository()
 	webhookEventRepo := persistence.NewWebhookEventRepository()
+	paymentSettingsRepo := persistence.NewPaymentSettingsRepository()
 
 	// Payment service
-	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, idGen)
+	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, paymentSettingsRepo, idGen)
 
 	// Storefront repositories
 	themeRepo := persistence.NewThemeRepository()
@@ -220,7 +223,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	shopSettingsRepo := persistence.NewShopSettingsRepository()
 	businessHoursRepo := persistence.NewBusinessHoursRepository()
 	notificationSettingsRepo := persistence.NewNotificationSettingsRepository()
-	paymentSettingsRepo := persistence.NewPaymentSettingsRepository()
 	shippingSettingsRepo := persistence.NewShippingSettingsRepository()
 
 	return &ServiceContext{
@@ -270,6 +272,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		// Role and Permission
 		RoleRepo:       roleRepo,
 		PermissionRepo: permissionRepo,
+		AdminUserRepo:  adminUserRepo,
 		// Shipping
 		ShippingRepo: persistence.NewShippingTemplateRepository(),
 

@@ -34,14 +34,22 @@ func (l *GetCategoryTreeLogic) GetCategoryTree(req *types.CategoryTreeReq) (resp
 		return nil, err
 	}
 
-	return buildCategoryTree(categories, 0), nil
+	// Build a map of product counts for all categories
+	productCountMap := make(map[int64]int64)
+	for _, c := range categories {
+		count, err := l.svcCtx.CategoryRepo.GetProductCount(l.ctx, l.svcCtx.DB, c.ID)
+		if err == nil {
+			productCountMap[c.ID] = count
+		}
+	}
+
+	return buildCategoryTree(categories, 0, productCountMap), nil
 }
 
-func buildCategoryTree(categories []*product.Category, parentID int64) []*types.CategoryTreeResp {
+func buildCategoryTree(categories []*product.Category, parentID int64, productCountMap map[int64]int64) []*types.CategoryTreeResp {
 	var result []*types.CategoryTreeResp
 	for _, c := range categories {
 		if c.ParentID == parentID {
-			productCount, _ := getCategoryProductCount(c.ID)
 			node := &types.CategoryTreeResp{
 				ID:             c.ID,
 				ParentID:       c.ParentID,
@@ -54,19 +62,13 @@ func buildCategoryTree(categories []*product.Category, parentID int64) []*types.
 				SeoTitle:       c.SeoTitle,
 				SeoDescription: c.SeoDescription,
 				Status:         int8(c.Status),
-				ProductCount:   productCount,
+				ProductCount:   productCountMap[c.ID],
 				CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
 				UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),
-				Children:       buildCategoryTree(categories, c.ID),
+				Children:       buildCategoryTree(categories, c.ID, productCountMap),
 			}
 			result = append(result, node)
 		}
 	}
 	return result
-}
-
-// Helper function placeholder - actual implementation would need access to repository
-func getCategoryProductCount(categoryID int64) (int64, error) {
-	// This is a placeholder - in actual implementation, this would call the repository
-	return 0, nil
 }

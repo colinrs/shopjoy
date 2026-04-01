@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/httpy"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/zeromicro/go-zero/rest"
+	"gorm.io/gorm"
 )
 
 type Claims struct {
@@ -21,7 +23,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthMiddleware(jwtSecret string) rest.Middleware {
+func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Repository) rest.Middleware {
 	secret := []byte(jwtSecret)
 
 	return func(next http.HandlerFunc) http.HandlerFunc {
@@ -56,6 +58,14 @@ func NewAuthMiddleware(jwtSecret string) rest.Middleware {
 			ctx = contextx.SetUserID(ctx, claims.UserID)
 			ctx = contextx.SetTenantID(ctx, claims.TenantID)
 			ctx = contextx.SetUserType(ctx, claims.Type)
+
+			// Fetch username from database for audit logging
+			if adminUserRepo != nil && db != nil {
+				adminUser, err := adminUserRepo.FindByID(ctx, db, claims.UserID)
+				if err == nil && adminUser != nil {
+					ctx = contextx.SetUserName(ctx, adminUser.Username)
+				}
+			}
 
 			next(w, r.WithContext(ctx))
 		}

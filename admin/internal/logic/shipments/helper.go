@@ -2,6 +2,7 @@ package shipments
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
@@ -31,7 +32,6 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		ShipmentNo:    s.ShipmentNo,
 		OrderID:       s.OrderID,
 		Status:        fulfillment.ShipmentStatus(s.Status).String(),
-		StatusText:    fulfillment.ShipmentStatus(s.Status).String(),
 		Carrier:       s.Carrier,
 		CarrierCode:   s.CarrierCode,
 		TrackingNo:    s.TrackingNo,
@@ -66,8 +66,6 @@ func formatTimeToRFC3339(t *time.Time) string {
 }
 
 // parseFloat parses a string to float64
-func parseFloat(s string) float64 {
-	var f float64
-	_, _ = fmt.Sscanf(s, "%f", &f)
-	return f
+func parseFloat(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
 }

@@ -230,3 +230,27 @@ export function getUserListEnhanced(params: ListUsersParams) {
     params
   })
 }
+
+// ===================== Batch Operations =====================
+
+// Batch update user status request
+export interface BatchUpdateUserStatusRequest {
+  user_ids: number[]
+  status: 1 | 2  // 1=activate, 2=suspend
+  reason?: string
+}
+
+// Batch update user status response
+export interface BatchUpdateUserStatusResponse {
+  success: number[]
+  failed: { user_id: number; code: number; message: string }[]
+}
+
+// Batch update user status
+export function batchUpdateUserStatus(data: BatchUpdateUserStatusRequest) {
+  return request<BatchUpdateUserStatusResponse>({
+    url: '/api/v1/users/batch-status',
+    method: 'post',
+    data
+  })
+}

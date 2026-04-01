@@ -110,7 +110,7 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 			row.OrderID,
 			row.Carrier,
 			row.TrackingNo,
-			row.StatusText,
+			fulfillment.ShipmentStatus(row.Status).String(),
 			formatTimeToRFC3339(row.ShippedAt),
 			formatTimeToRFC3339(row.DeliveredAt),
 		}

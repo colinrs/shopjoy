@@ -392,3 +392,34 @@ export function exportProductsUrl(params: ExportProductsParams): { url: string; 
     params
   }
 }
+
+// ===================== Batch Operations =====================
+
+// Batch update product fields
+export interface BatchUpdateProductFields {
+  price?: string
+  stock?: number
+  status?: 'on_sale' | 'off_sale'
+  category_id?: number
+}
+
+// Batch update product request
+export interface BatchUpdateProductRequest {
+  product_ids: number[]
+  update_fields: BatchUpdateProductFields
+}
+
+// Batch update product response
+export interface BatchUpdateProductResponse {
+  success: number[]
+  failed: { product_id: number; code: number; message: string }[]
+}
+
+// Batch update products
+export function batchUpdateProducts(data: BatchUpdateProductRequest) {
+  return request<BatchUpdateProductResponse>({
+    url: '/api/v1/products/batch-update',
+    method: 'post',
+    data
+  })
+}

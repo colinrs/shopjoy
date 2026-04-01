@@ -3,6 +3,7 @@ package fulfillment
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -336,7 +337,10 @@ func (a *shipmentApp) GetShipment(ctx context.Context, tenantID shared.TenantID,
 	shipment.Items = items
 
 	// Get carrier for tracking URL
-	carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	carrier, err := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	if err != nil {
+		log.Printf("GetShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
+	}
 
 	return toShipmentResponse(shipment, carrier), nil
 }
@@ -360,14 +364,47 @@ func (a *shipmentApp) ListShipments(ctx context.Context, tenantID shared.TenantI
 		return nil, err
 	}
 
+	if len(shipments) == 0 {
+		return &ShipmentListResponse{
+			List:     []*ShipmentResponse{},
+			Total:    total,
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		}, nil
+	}
+
+	// Batch load items for all shipments (fix N+1 query)
+	shipmentIDs := make([]int64, len(shipments))
+	for i, s := range shipments {
+		shipmentIDs[i] = s.ID
+	}
+	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
+	if err != nil {
+		log.Printf("ListShipments: batch find items error: %v", err)
+		itemsMap = make(map[int64][]fulfillment.ShipmentItem)
+	}
+
+	// Collect carrier codes for batch query
+	carrierCodes := make([]string, 0, len(shipments))
+	seenCodes := make(map[string]bool)
+	for _, s := range shipments {
+		if s.CarrierCode != "" && !seenCodes[s.CarrierCode] {
+			carrierCodes = append(carrierCodes, s.CarrierCode)
+			seenCodes[s.CarrierCode] = true
+		}
+	}
+
+	// Batch load carriers (fix N+1 query)
+	carriersMap, err := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
+	if err != nil {
+		log.Printf("ListShipments: batch find carriers error: %v", err)
+		carriersMap = make(map[string]*fulfillment.Carrier)
+	}
+
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
-		// Load items
-		items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, s.ID)
-		s.Items = items
-
-		// Get carrier for tracking URL
-		carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, s.CarrierCode)
+		s.Items = itemsMap[s.ID]
+		carrier := carriersMap[s.CarrierCode]
 		list[i] = toShipmentResponse(s, carrier)
 	}
 
@@ -418,10 +455,16 @@ func (a *shipmentApp) UpdateShipment(ctx context.Context, tenantID shared.Tenant
 	}
 
 	// Load items
-	items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, shipment.ID)
+	if err != nil {
+		log.Printf("UpdateShipment: find items by shipment ID %d error: %v", shipment.ID, err)
+	}
 	shipment.Items = items
 
-	carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	carrier, err := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	if err != nil {
+		log.Printf("UpdateShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
+	}
 	return toShipmentResponse(shipment, carrier), nil
 }
 
@@ -462,10 +505,16 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.
 	}
 
 	// Load items
-	items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, shipment.ID)
+	if err != nil {
+		log.Printf("UpdateShipmentStatus: find items by shipment ID %d error: %v", shipment.ID, err)
+	}
 	shipment.Items = items
 
-	carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	carrier, err := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	if err != nil {
+		log.Printf("UpdateShipmentStatus: find carrier by code %s error: %v", shipment.CarrierCode, err)
+	}
 	return toShipmentResponse(shipment, carrier), nil
 }
 
@@ -475,13 +524,42 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.Ten
 		return nil, err
 	}
 
+	if len(shipments) == 0 {
+		return []*ShipmentResponse{}, nil
+	}
+
+	// Batch load items for all shipments (fix N+1 query)
+	shipmentIDs := make([]int64, len(shipments))
+	for i, s := range shipments {
+		shipmentIDs[i] = s.ID
+	}
+	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
+	if err != nil {
+		log.Printf("GetOrderShipments: batch find items error: %v", err)
+		itemsMap = make(map[int64][]fulfillment.ShipmentItem)
+	}
+
+	// Collect carrier codes for batch query
+	carrierCodes := make([]string, 0, len(shipments))
+	seenCodes := make(map[string]bool)
+	for _, s := range shipments {
+		if s.CarrierCode != "" && !seenCodes[s.CarrierCode] {
+			carrierCodes = append(carrierCodes, s.CarrierCode)
+			seenCodes[s.CarrierCode] = true
+		}
+	}
+
+	// Batch load carriers (fix N+1 query)
+	carriersMap, err := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
+	if err != nil {
+		log.Printf("GetOrderShipments: batch find carriers error: %v", err)
+		carriersMap = make(map[string]*fulfillment.Carrier)
+	}
+
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
-		// Load items
-		items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, s.ID)
-		s.Items = items
-
-		carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, s.CarrierCode)
+		s.Items = itemsMap[s.ID]
+		carrier := carriersMap[s.CarrierCode]
 		list[i] = toShipmentResponse(s, carrier)
 	}
 

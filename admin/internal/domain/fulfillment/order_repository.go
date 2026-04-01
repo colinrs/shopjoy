@@ -145,6 +145,7 @@ type Order struct {
 	ShippedAt  *time.Time `gorm:"column:shipped_at"`
 	DeliveredAt *time.Time `gorm:"column:delivered_at"`
 	CancelledAt *time.Time `gorm:"column:cancelled_at"`
+	CancelledBy  int64     `gorm:"column:cancelled_by;not null;default:0"` // 取消操作人ID
 	// Audit info
 	Audit     shared.AuditInfo `gorm:"embedded"`
 	DeletedAt *int64         `gorm:"column:deleted_at;index"`

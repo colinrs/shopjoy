@@ -68,6 +68,7 @@
       <el-button size="small" @click="handleBatchOffSale">{{ $t('products.batchOffSale') }}</el-button>
       <el-button size="small" type="success" @click="handleBatchPushToMarket">{{ $t('products.pushToMarket') }}</el-button>
       <el-button size="small" type="danger" @click="handleBatchDelete">{{ $t('products.batchDelete') }}</el-button>
+      <el-button size="small" @click="handleClearSelection">{{ $t('common.clearSelection') }}</el-button>
     </div>
 
     <!-- Products Table -->
@@ -76,14 +77,13 @@
       <TableSkeleton v-if="loading && productList.length === 0" :rows="10" :columns="7" />
 
       <!-- Actual table -->
-      <el-table
+      <Table
         v-else
+        ref="tableRef"
         :data="productList"
-        v-loading="loading"
+        :loading="loading"
         @selection-change="handleSelectionChange"
-        stripe
       >
-        <el-table-column type="selection" width="50" />
         <el-table-column :label="$t('products.productInfo')" min-width="300">
           <template #default="{ row }">
             <div class="product-cell">
@@ -179,7 +179,7 @@
             </el-dropdown>
           </template>
         </el-table-column>
-      </el-table>
+      </Table>
 
       <!-- Pagination -->
       <div class="pagination-wrapper">
@@ -199,63 +199,165 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEdit ? $t('products.editProduct') : $t('products.addProduct')"
-      width="800px"
+      width="900px"
       destroy-on-close
     >
-      <el-form :model="productForm" label-width="100px" :rules="formRules" ref="formRef">
-        <el-row :gutter="20">
-          <el-col :span="24">
-            <el-form-item :label="$t('products.productName')" prop="name">
-              <el-input v-model="productForm.name" :placeholder="$t('products.enterProductName')" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('products.productPrice')" prop="price">
-              <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('products.originalPrice')">
-              <el-input-number v-model="productForm.original_price" :min="0" :precision="2" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('products.stockQuantity')" prop="stock">
-              <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="$t('products.productCategory')" prop="category_id">
-              <el-cascader
-                v-model="productForm.category_id"
-                :options="categories"
-                :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
-                :placeholder="$t('products.selectCategory')"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item :label="$t('products.productImage')">
-              <el-upload
-                class="avatar-uploader"
-                action="#"
-                :show-file-list="false"
-                :auto-upload="false"
-                :on-change="handleImageChange"
-              >
-                <img v-if="productForm.image" :src="productForm.image" class="avatar" />
-                <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-              </el-upload>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item :label="$t('products.productDescription')">
-              <el-input v-model="productForm.description" type="textarea" rows="4" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
+      <el-tabs v-model="activeProductTab" class="product-form-tabs">
+        <el-tab-pane :label="$t('products.basicInfo')" name="basic">
+          <el-form :model="productForm" label-width="100px" :rules="formRules" ref="formRef">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item :label="$t('products.productName')" prop="name">
+                  <el-input v-model="productForm.name" :placeholder="$t('products.enterProductName')" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.productCategory')" prop="category_id">
+                  <el-cascader
+                    v-model="productForm.category_id"
+                    :options="categories"
+                    :props="{ checkStrictly: true, emitPath: false, value: 'id', label: 'name' }"
+                    :placeholder="$t('products.selectCategory')"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.brand')">
+                  <el-input v-model="productForm.brand" :placeholder="$t('products.enterBrand')" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item :label="$t('products.productImage')">
+                  <el-upload
+                    class="avatar-uploader"
+                    action="#"
+                    :show-file-list="false"
+                    :auto-upload="false"
+                    :on-change="handleImageChange"
+                  >
+                    <img v-if="productForm.image" :src="productForm.image" class="avatar" />
+                    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                  </el-upload>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item :label="$t('products.productDescription')">
+                  <el-input v-model="productForm.description" type="textarea" rows="4" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <el-tab-pane :label="$t('products.priceStock')" name="price">
+          <el-form :model="productForm" label-width="100px">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item :label="$t('products.productPrice')" prop="price">
+                  <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.originalPrice')">
+                  <el-input-number v-model="productForm.original_price" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.stockQuantity')" prop="stock">
+                  <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.costPrice')">
+                  <el-input-number v-model="productForm.cost_price" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.currency')">
+                  <el-select v-model="productForm.currency" style="width: 100%">
+                    <el-option label="USD" value="USD" />
+                    <el-option label="EUR" value="EUR" />
+                    <el-option label="GBP" value="GBP" />
+                    <el-option label="CNY" value="CNY" />
+                    <el-option label="JPY" value="JPY" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <el-tab-pane :label="$t('products.logisticsInfo')" name="logistics">
+          <el-form :model="productForm" label-width="100px">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item :label="$t('products.weight')">
+                  <el-input-number v-model="productForm.weight" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.weightUnit')">
+                  <el-select v-model="productForm.weight_unit" style="width: 100%">
+                    <el-option label="kg" value="kg" />
+                    <el-option label="g" value="g" />
+                    <el-option label="lb" value="lb" />
+                    <el-option label="oz" value="oz" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="$t('products.length')">
+                  <el-input-number v-model="productForm.length" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="$t('products.width')">
+                  <el-input-number v-model="productForm.width" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="$t('products.height')">
+                  <el-input-number v-model="productForm.height" :min="0" :precision="2" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <el-tab-pane :label="$t('products.complianceInfo')" name="compliance">
+          <el-form :model="productForm" label-width="100px">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item :label="$t('products.hsCode')">
+                  <el-input v-model="productForm.hs_code" :placeholder="$t('products.enterHsCode')" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item :label="$t('products.coo')">
+                  <el-select v-model="productForm.coo" :placeholder="$t('products.selectCoo')" style="width: 100%">
+                    <el-option label="China" value="CN" />
+                    <el-option label="United States" value="US" />
+                    <el-option label="European Union" value="EU" />
+                    <el-option label="Japan" value="JP" />
+                    <el-option label="South Korea" value="KR" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item :label="$t('products.dangerousGoods')">
+                  <el-checkbox-group v-model="productForm.dangerous_goods">
+                    <el-checkbox label="flammable">{{ $t('products.flammable') }}</el-checkbox>
+                    <el-checkbox label="explosive">{{ $t('products.explosive') }}</el-checkbox>
+                    <el-checkbox label="corrosive">{{ $t('products.corrosive') }}</el-checkbox>
+                    <el-checkbox label="radioactive">{{ $t('products.radioactive') }}</el-checkbox>
+                  </el-checkbox-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
       <template #footer>
         <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('common.save') }}</el-button>
@@ -410,11 +512,12 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
-import { getProductList, getProduct, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, exportProductsUrl, type Product, type ListProductsParams } from '@/api/product'
+import { getProductList, getProduct, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, exportProductsUrl, batchUpdateProducts, type Product, type ListProductsParams, type BatchUpdateProductRequest } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
 import { getCategoryTree, type CategoryTree } from '@/api/category'
 import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
+import Table from '@/components/common/Table.vue'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
 
@@ -434,6 +537,7 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const selectedProducts = ref<Product[]>([])
+const tableRef = ref()
 const formRef = ref()
 const pushToMarketFormRef = ref()
 const defaultImage = 'https://via.placeholder.com/80'
@@ -546,6 +650,7 @@ const handleEdit = (row: any) => {
 const previewDialogVisible = ref(false)
 const previewProduct = ref<Product | null>(null)
 const previewLoading = ref(false)
+const activeProductTab = ref('basic')
 
 const handlePreview = async (row: Product) => {
   previewLoading.value = true
@@ -658,11 +763,32 @@ const handleSelectionChange = (selection: any[]) => {
   selectedProducts.value = selection
 }
 
+const handleClearSelection = () => {
+  tableRef.value?.clearSelection()
+  selectedProducts.value = []
+}
+
 const handleBatchOnSale = async () => {
   try {
-    const promises = selectedProducts.value.map(p => putOnSale(p.id))
-    await Promise.all(promises)
-    ElMessage.success(t('products.batchOnSaleSuccess', { count: selectedProducts.value.length }))
+    const data: BatchUpdateProductRequest = {
+      product_ids: selectedProducts.value.map(p => p.id),
+      update_fields: {
+        status: 'on_sale'
+      }
+    }
+
+    const res = await batchUpdateProducts(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('products.batchOnSalePartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('products.batchOnSaleSuccess', { count: successCount }))
+    }
+
+    selectedProducts.value = []
     loadProducts()
   } catch (error) {
     console.error('Failed to batch put on sale:', error)
@@ -672,9 +798,25 @@ const handleBatchOnSale = async () => {
 
 const handleBatchOffSale = async () => {
   try {
-    const promises = selectedProducts.value.map(p => takeOffSale(p.id))
-    await Promise.all(promises)
-    ElMessage.success(t('products.batchOffSaleSuccess', { count: selectedProducts.value.length }))
+    const data: BatchUpdateProductRequest = {
+      product_ids: selectedProducts.value.map(p => p.id),
+      update_fields: {
+        status: 'off_sale'
+      }
+    }
+
+    const res = await batchUpdateProducts(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('products.batchOffSalePartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('products.batchOffSaleSuccess', { count: successCount }))
+    }
+
+    selectedProducts.value = []
     loadProducts()
   } catch (error) {
     console.error('Failed to batch take off sale:', error)
@@ -685,7 +827,7 @@ const handleBatchOffSale = async () => {
 const handleBatchDelete = async () => {
   try {
     await ElMessageBox.confirm(
-      t('products.confirmBatchDelete', { count: selectedProducts.value.length }),
+      t('products.confirmBatchDeleteWarning', { count: selectedProducts.value.length }),
       t('common.warning'),
       {
         confirmButtonText: t('common.confirm'),
@@ -1117,6 +1259,40 @@ onMounted(() => {
 /* Dialog Styling */
 :deep(.el-dialog) {
   border-radius: 16px;
+}
+
+/* Product Form Tabs */
+.product-form-tabs {
+  margin-bottom: 20px;
+}
+
+.product-form-tabs :deep(.el-tabs__header) {
+  margin-bottom: 20px;
+}
+
+.product-form-tabs :deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+}
+
+.product-form-tabs :deep(.el-tabs__item) {
+  font-weight: 500;
+  color: #6B7280;
+  transition: all 0.2s ease;
+}
+
+.product-form-tabs :deep(.el-tabs__item:hover) {
+  color: #6366F1;
+}
+
+.product-form-tabs :deep(.el-tabs__item.is-active) {
+  color: #6366F1;
+  font-weight: 600;
+}
+
+.product-form-tabs :deep(.el-tabs__active-bar) {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
 }
 
 :deep(.el-dialog__header) {

@@ -49,6 +49,9 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 		Rating5: stats.Rating5Count,
 	}
 
+	// Calculate ReplyCount and ReplyRate
+	replyCount, replyRate := l.calculateReplyStats(shared.TenantID(tenantID), req.ProductID, stats.TotalReviews)
+
 	return &types.ProductStatsResp{
 		ProductID:          stats.ProductID,
 		TotalReviews:       stats.TotalReviews,
@@ -57,9 +60,51 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 		ValueAvgRating:     formatProductRating(stats.ValueAvgRating),
 		RatingDistribution: ratingDistribution,
 		WithImageCount:     stats.WithImageCount,
-		ReplyCount:         0, // TODO: Calculate from replies
-		ReplyRate:          0, // TODO: Calculate reply rate
+		ReplyCount:         replyCount,
+		ReplyRate:          replyRate,
 	}, nil
+}
+
+func (l *GetProductStatsLogic) calculateReplyStats(tenantID shared.TenantID, productID int64, totalReviews int) (replyCount int, replyRate float64) {
+	if totalReviews == 0 {
+		return 0, 0
+	}
+
+	// Get all reviews for this product
+	reviews, err := l.svcCtx.ReviewRepo.FindByProductID(l.ctx, l.svcCtx.DB, tenantID, productID)
+	if err != nil {
+		l.Logger.Errorf("failed to find reviews for product %d: %v", productID, err)
+		return 0, 0
+	}
+
+	if len(reviews) == 0 {
+		return 0, 0
+	}
+
+	// Extract review IDs
+	reviewIDs := make([]int64, len(reviews))
+	for i, r := range reviews {
+		reviewIDs[i] = int64(r.ID)
+	}
+
+	// Get all replies for these reviews
+	replies, err := l.svcCtx.ReplyRepo.FindByReviewIDs(l.ctx, l.svcCtx.DB, reviewIDs)
+	if err != nil {
+		l.Logger.Errorf("failed to find replies for product %d: %v", productID, err)
+		return 0, 0
+	}
+
+	// Count unique review IDs that have replies
+	replyMap := make(map[int64]bool)
+	for _, reply := range replies {
+		replyMap[reply.ReviewID] = true
+	}
+	replyCount = len(replyMap)
+
+	// Calculate reply rate as percentage
+	replyRate = float64(replyCount) / float64(totalReviews) * 100
+
+	return replyCount, replyRate
 }
 
 func formatProductRating(r float64) string {

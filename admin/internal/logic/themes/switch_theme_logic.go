@@ -27,9 +27,7 @@ func NewSwitchThemeLogic(ctx context.Context, svcCtx *svc.ServiceContext) Switch
 func (l *SwitchThemeLogic) SwitchTheme(req *types.SwitchThemeRequest) error {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	userID, _ := contextx.GetUserID(l.ctx)
-	// userName is not available in context, using empty string
-	// TODO: Add GetUserName to contextx or fetch from user service
-	userName := ""
+	userName := contextx.GetCurrentUserName(l.ctx)
 
 	return l.svcCtx.ThemeService.SwitchTheme(l.ctx, shared.TenantID(tenantID), req.ThemeID, userID, userName)
 }

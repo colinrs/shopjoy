@@ -42,8 +42,14 @@ func (l *DeleteRoleLogic) DeleteRole(req *types.RoleIDRequest) error {
 		return code.ErrRoleCannotModifySystem
 	}
 
-	// TODO: Check if role is in use by any users
-	// For now, we'll allow deletion
+	// Check if role is in use by any admin users
+	count, err := l.svcCtx.AdminUserRepo.CountByRoleID(l.ctx, l.svcCtx.DB, req.ID)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return code.ErrRoleInUse
+	}
 
 	// Delete role
 	return l.svcCtx.RoleRepo.Delete(l.ctx, l.svcCtx.DB, tenantID, req.ID)

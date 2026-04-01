@@ -139,3 +139,11 @@ func (r *AdminUserRepository) CountMainAccount(ctx context.Context, db *gorm.DB,
 		Count(&count).Error
 	return count, err
 }
+
+func (r *AdminUserRepository) CountByRoleID(ctx context.Context, db *gorm.DB, roleID int64) (int64, error) {
+	var count int64
+	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
+		Where("role_id = ?", roleID).
+		Count(&count).Error
+	return count, err
+}

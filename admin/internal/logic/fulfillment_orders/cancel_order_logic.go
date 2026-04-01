@@ -12,6 +12,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type CancelOrderLogic struct {
@@ -33,7 +34,10 @@ func (l *CancelOrderLogic) CancelOrder(req *types.CancelOrderReq) (resp *types.C
 	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
 	tenantID := shared.TenantID(tenantIDRaw)
 
-	// Get the order
+	// Get user ID from context for audit
+	userID, _ := contextx.GetUserID(l.ctx)
+
+	// First get the order to validate and capture order info
 	order, err := l.svcCtx.OrderRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
 	if err != nil {
 		return nil, err
@@ -45,14 +49,21 @@ func (l *CancelOrderLogic) CancelOrder(req *types.CancelOrderReq) (resp *types.C
 		return nil, code.ErrOrderCannotCancel
 	}
 
-	// Update order status
-	now := time.Now().UTC()
-	order.Status = fulfillment.OrderStatusCancelled
-	order.CancelledAt = &now
-	order.Remark = req.Reason
+	// Capture order info for response before transaction
+	orderNo := order.OrderNo
 
-	// Save the order
-	err = l.svcCtx.OrderRepo.UpdateWithVersion(l.ctx, l.svcCtx.DB, order)
+	// Use transaction for cancel operation
+	err = l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		// Update order status
+		now := time.Now().UTC()
+		order.Status = fulfillment.OrderStatusCancelled
+		order.CancelledAt = &now
+		order.CancelledBy = userID
+		order.Remark = req.Reason
+
+		// Save the order
+		return l.svcCtx.OrderRepo.UpdateWithVersion(l.ctx, tx, order)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -60,14 +71,14 @@ func (l *CancelOrderLogic) CancelOrder(req *types.CancelOrderReq) (resp *types.C
 	// Restore inventory (if needed)
 	// This would typically be done through an event or a separate service
 	// For now, we'll just log it
-	l.Logger.Infof("Order %s cancelled, inventory should be restored", order.OrderNo)
+	l.Logger.Infof("Order %s cancelled, inventory should be restored", orderNo)
 
 	return &types.CancelOrderResp{
 		OrderID:     order.ID,
-		OrderNo:     order.OrderNo,
-		Status:      string(order.Status),
-		StatusText:  order.Status.Text(),
-		CancelledAt: now.Format(time.RFC3339),
+		OrderNo:     orderNo,
+		Status:      string(fulfillment.OrderStatusCancelled),
+		StatusText:  fulfillment.OrderStatusCancelled.Text(),
+		CancelledAt: time.Now().UTC().Format(time.RFC3339),
 		Reason:      req.Reason,
 	}, nil
 }

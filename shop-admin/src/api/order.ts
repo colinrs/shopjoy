@@ -244,6 +244,25 @@ export const batchShipOrders = (data: {
   )
 }
 
+// ===================== Batch Operations =====================
+
+// Batch cancel order request
+export interface BatchCancelOrderRequest {
+  order_ids: string[]
+  reason: string
+}
+
+// Batch cancel order response
+export interface BatchCancelOrderResponse {
+  success: number[]
+  failed: { order_id: number; code: number; message: string }[]
+}
+
+// Batch cancel orders
+export const batchCancelOrders = (data: BatchCancelOrderRequest) => {
+  return request.post<BatchCancelOrderResponse>('/api/v1/orders/batch-cancel', data)
+}
+
 // Re-export Carrier type and getCarrierList from fulfillment module to avoid duplication
 export type { Carrier } from './fulfillment'
 export { getCarrierList } from './fulfillment'

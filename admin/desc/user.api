@@ -150,6 +150,20 @@ type (
 		SuspendedUsers int64 `json:"suspended_users"`
 		NewUsersToday  int64 `json:"new_users_today"`
 	}
+	BatchUpdateUserStatusReq {
+		UserIDs []int64 `json:"user_ids" binding:"required,min=1,max=100"`
+		Status  int     `json:"status" binding:"required,oneof=1 2"` // 1=启用, 2=禁用
+		Reason  string  `json:"reason" binding:"omitempty,max=200"`
+	}
+	BatchUpdateUserStatusResp {
+		Success []int64           `json:"success"`
+		Failed  []BatchStatusFail `json:"failed"`
+	}
+	BatchStatusFail {
+		UserID  int64  `json:"user_id"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
 )
 
 @server (
@@ -212,5 +226,9 @@ service admin-api {
 	@doc "获取增强版用户列表"
 	@handler ListUsersEnhancedHandler
 	get /api/v1/users/enhanced (ListUsersEnhancedRequest) returns (ListUsersEnhancedResponse)
+
+	@doc "批量更新用户状态"
+	@handler BatchUpdateUserStatusHandler
+	post /api/v1/users/batch-status (BatchUpdateUserStatusReq) returns (BatchUpdateUserStatusResp)
 }
 

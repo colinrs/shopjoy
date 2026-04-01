@@ -7,6 +7,9 @@ import (
 
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,6 +28,20 @@ func NewStripeWebhookLogic(ctx context.Context, svcCtx *svc.ServiceContext) Stri
 }
 
 func (l *StripeWebhookLogic) StripeWebhook(r *http.Request) error {
+	// Get webhook secret from config
+	webhookSecret := l.svcCtx.Config.StripeWebhookSecret
+	if webhookSecret == "" {
+		l.Logger.Errorf("Stripe webhook secret not configured")
+		return code.ErrPaymentWebhookSignatureInvalid
+	}
+
+	// Get signature header
+	stripeSignature := r.Header.Get("Stripe-Signature")
+	if stripeSignature == "" {
+		l.Logger.Errorf("Missing Stripe-Signature header")
+		return code.ErrPaymentWebhookSignatureInvalid
+	}
+
 	// Read the request body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -33,57 +50,58 @@ func (l *StripeWebhookLogic) StripeWebhook(r *http.Request) error {
 	}
 	defer r.Body.Close()
 
-	// TODO: Verify Stripe webhook signature
-	// In production, you would verify the Stripe-Signature header
-	// stripeSignature := r.Header.Get("Stripe-Signature")
-
-	// Parse the webhook event
-	// For now, we'll use a simplified approach
-	// In production, use Stripe's webhook library to parse and verify the event
-	event, err := parseStripeWebhookEvent(body)
+	// Verify Stripe webhook signature
+	event, err := webhook.ConstructEvent(body, stripeSignature, webhookSecret)
 	if err != nil {
-		l.Logger.Errorf("Failed to parse webhook event: %v", err)
-		return err
+		l.Logger.Errorf("Failed to verify webhook signature: %v", err)
+		return code.ErrPaymentWebhookSignatureInvalid
 	}
+
+	// Extract event information
+	eventID := event.ID
+	eventType := string(event.Type)
+	resourceID := extractResourceID(event)
 
 	// Create webhook event for processing
 	webhookEvent := &appPayment.WebhookEvent{
-		EventID:    event.ID,
-		EventType:  event.Type,
-		ResourceID: event.ResourceID,
+		EventID:    eventID,
+		EventType:  eventType,
+		ResourceID: resourceID,
 		RawPayload: string(body),
 	}
 
 	// Process webhook through payment service
 	if err := l.svcCtx.PaymentService.HandleWebhook(l.ctx, webhookEvent); err != nil {
-		l.Logger.Errorf("Failed to handle webhook event %s: %v", event.ID, err)
+		l.Logger.Errorf("Failed to handle webhook event %s: %v", eventID, err)
 		return err
 	}
 
-	l.Logger.Infof("Successfully processed webhook event %s of type %s", event.ID, event.Type)
+	l.Logger.Infof("Successfully processed webhook event %s of type %s", eventID, eventType)
 	return nil
 }
 
-// stripeEvent represents a simplified Stripe webhook event
-type stripeEvent struct {
-	ID         string
-	Type       string
-	ResourceID string
-}
-
-// parseStripeWebhookEvent parses a raw webhook body into a stripe event
-// In production, use Stripe's official library
-func parseStripeWebhookEvent(body []byte) (*stripeEvent, error) {
-	// This is a simplified parser
-	// In production, use stripe-go library to properly parse the event
-	// import "github.com/stripe/stripe-go/v76"
-	// event, err := webhook.ConstructEvent(body, sig, secret)
-
-	// For now, return a basic event structure
-	// This should be replaced with actual Stripe SDK parsing
-	return &stripeEvent{
-		ID:         "", // Parse from body
-		Type:       "", // Parse from body
-		ResourceID: "", // Parse from body
-	}, nil
+// extractResourceID extracts the resource ID from a Stripe event
+func extractResourceID(event stripe.Event) string {
+	switch event.Type {
+	case "payment_intent.succeeded", "payment_intent.payment_failed",
+		"payment_intent.created", "payment_intent.canceled":
+		if event.Data.Object["id"] != nil {
+			if id, ok := event.Data.Object["id"].(string); ok {
+				return id
+			}
+		}
+	case "charge.succeeded", "charge.failed", "charge.refunded":
+		if event.Data.Object["id"] != nil {
+			if id, ok := event.Data.Object["id"].(string); ok {
+				return id
+			}
+		}
+	case "refund.created", "refund.updated":
+		if event.Data.Object["id"] != nil {
+			if id, ok := event.Data.Object["id"].(string); ok {
+				return id
+			}
+		}
+	}
+	return ""
 }

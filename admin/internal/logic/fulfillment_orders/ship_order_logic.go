@@ -81,9 +81,3 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 	}, nil
 }
 
-// parseFloat parses a string to float64
-func parseFloat(s string) float64 {
-	var f float64
-	_, _ = fmt.Sscanf(s, "%f", &f)
-	return f
-}

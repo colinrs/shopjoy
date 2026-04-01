@@ -437,6 +437,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: fulfillment_orders.ShipOrderHandler(serverCtx),
 				},
 				{
+					// 批量取消订单
+					Method:  http.MethodPost,
+					Path:    "/api/v1/orders/batch-cancel",
+					Handler: fulfillment_orders.BatchCancelOrderHandler(serverCtx),
+				},
+				{
 					// 导出订单
 					Method:  http.MethodGet,
 					Path:    "/api/v1/orders/export",
@@ -1015,6 +1021,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: products.ListSKUsByProductHandler(serverCtx),
 				},
 				{
+					// 批量更新商品
+					Method:  http.MethodPost,
+					Path:    "/api/v1/products/batch-update",
+					Handler: products.BatchUpdateProductHandler(serverCtx),
+				},
+				{
 					// 导出商品
 					Method:  http.MethodGet,
 					Path:    "/api/v1/products/export",
@@ -1425,6 +1437,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: shipments.BatchCreateShipmentsHandler(serverCtx),
 				},
 				{
+					// 批量更新追踪号
+					Method:  http.MethodPost,
+					Path:    "/api/v1/shipments/batch-tracking",
+					Handler: shipments.BatchUpdateTrackingHandler(serverCtx),
+				},
+				{
 					// 导出发货单
 					Method:  http.MethodGet,
 					Path:    "/api/v1/shipments/export",
@@ -1759,6 +1777,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/api/v1/users/:id/suspend-reason",
 					Handler: users.SuspendUserWithReasonHandler(serverCtx),
+				},
+				{
+					// 批量更新用户状态
+					Method:  http.MethodPost,
+					Path:    "/api/v1/users/batch-status",
+					Handler: users.BatchUpdateUserStatusHandler(serverCtx),
 				},
 				{
 					// 获取增强版用户列表

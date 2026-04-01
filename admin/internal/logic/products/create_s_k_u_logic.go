@@ -51,12 +51,21 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		skuCode = req.Code
 	} else {
 		// Auto-generate SKU code
-		// TODO: Fetch tenant and product SKU prefix from database
-		// For now, use empty prefixes
+		// Fetch product to get its SKU prefix
+		productSKUPrefix := ""
+		prod, err := l.svcCtx.ProductRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ProductID)
+		if err == nil && prod != nil {
+			productSKUPrefix = prod.SKUPrefix
+		}
+
+		// Tenant SKU prefix is not available (no tenant repo in admin service)
+		// Use empty prefix as fallback
+		tenantSKUPrefix := ""
+
 		skuCode, err = l.svcCtx.SKUGenerator.GenerateWithRetry(
 			tenantID,
-			"", // tenant.SKUPrefix - to be fetched
-			"", // product.SKUPrefix - to be fetched
+			tenantSKUPrefix,
+			productSKUPrefix,
 			3,
 		)
 		if err != nil {

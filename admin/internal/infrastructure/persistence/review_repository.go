@@ -251,3 +251,24 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantI
 	})
 	return result.RowsAffected, result.Error
 }
+
+func (r *reviewRepo) FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*review.Review, error) {
+	dbQuery := db.WithContext(ctx).Model(&reviewModel{}).Where("deleted_at IS NULL")
+
+	if tenantID != 0 {
+		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
+	}
+	dbQuery = dbQuery.Where("product_id = ?", productID)
+
+	var models []reviewModel
+	err := dbQuery.Order("created_at DESC").Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := make([]*review.Review, len(models))
+	for i, m := range models {
+		reviews[i] = m.toEntity()
+	}
+	return reviews, nil
+}

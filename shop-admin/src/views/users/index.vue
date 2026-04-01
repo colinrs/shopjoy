@@ -73,7 +73,7 @@
               :placeholder="$t('users.pointsMin')"
               type="number"
               clearable
-              @clear="handleSearch"
+              @clear="clearAdvancedFilters"
             >
               <template #prefix>{{ $t('users.points') }}</template>
             </el-input>
@@ -84,7 +84,7 @@
               :placeholder="$t('users.pointsMax')"
               type="number"
               clearable
-              @clear="handleSearch"
+              @clear="clearAdvancedFilters"
             >
               <template #prefix>{{ $t('users.points') }}</template>
             </el-input>
@@ -95,7 +95,7 @@
               :placeholder="$t('users.orderCountMin')"
               type="number"
               clearable
-              @clear="handleSearch"
+              @clear="clearAdvancedFilters"
             >
               <template #prefix>{{ $t('users.orders') }}</template>
             </el-input>
@@ -106,7 +106,7 @@
               :placeholder="$t('users.orderCountMax')"
               type="number"
               clearable
-              @clear="handleSearch"
+              @clear="clearAdvancedFilters"
             >
               <template #prefix>{{ $t('users.orders') }}</template>
             </el-input>
@@ -115,9 +115,17 @@
       </div>
     </el-card>
 
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" v-if="selectedUsers.length > 0">
+      <span class="selected-count">{{ $t('users.selectedCount', { count: selectedUsers.length }) }}</span>
+      <el-button size="small" type="success" @click="handleBatchActivate">{{ $t('users.batchActivate') }}</el-button>
+      <el-button size="small" type="warning" @click="handleBatchSuspend">{{ $t('users.batchSuspend') }}</el-button>
+      <el-button size="small" @click="handleClearSelection">{{ $t('common.clearSelection') }}</el-button>
+    </div>
+
     <!-- Users Table -->
     <el-card class="table-card" shadow="never">
-      <el-table :data="userList" v-loading="loading" stripe @row-click="handleRowClick">
+      <Table ref="tableRef" :data="userList" :loading="loading" @selection-change="handleSelectionChange">
         <el-table-column :label="$t('users.userInfo')" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
@@ -146,7 +154,7 @@
           <template #default="{ row }">
             <el-switch
               :model-value="row.status === 1"
-              @change="(val: boolean) => handleStatusChange(row, val)"
+              @change="(val: boolean) => confirmStatusChange(row, val)"
             />
           </template>
         </el-table-column>
@@ -186,7 +194,7 @@
             </el-dropdown>
           </template>
         </el-table-column>
-      </el-table>
+      </Table>
 
       <!-- Pagination -->
       <div class="pagination-wrapper">
@@ -256,10 +264,13 @@ import {
   deleteUser,
   resetUserPassword,
   exportUsers,
+  batchUpdateUserStatus,
   type User,
   type UserStats,
-  type ExtendedUser
+  type ExtendedUser,
+  type BatchUpdateUserStatusRequest
 } from '@/api/user'
+import Table from '@/components/common/Table.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -276,18 +287,32 @@ const currentUser = ref<User | null>(null)
 
 // Advanced filters
 const showAdvancedFilters = ref(false)
-const pointsMin = ref<number | undefined>()
-const pointsMax = ref<number | undefined>()
-const orderCountMin = ref<number | undefined>()
-const orderCountMax = ref<number | undefined>()
+
+// Batch selection
+const selectedUsers = ref<User[]>([])
+const tableRef = ref()
+
+const handleSelectionChange = (selection: User[]) => {
+  selectedUsers.value = selection
+}
+
+const handleClearSelection = () => {
+  tableRef.value?.clearSelection()
+  selectedUsers.value = []
+}
+
+const pointsMin = ref<number | null>(null)
+const pointsMax = ref<number | null>(null)
+const orderCountMin = ref<number | null>(null)
+const orderCountMax = ref<number | null>(null)
 
 // Check if enhanced filters are applied
 const isEnhanced = computed(() => {
   return showAdvancedFilters.value ||
-    pointsMin.value !== undefined ||
-    pointsMax.value !== undefined ||
-    orderCountMin.value !== undefined ||
-    orderCountMax.value !== undefined
+    pointsMin.value != null ||
+    pointsMax.value != null ||
+    orderCountMin.value != null ||
+    orderCountMax.value != null
 })
 
 const stats = ref<UserStats>({
@@ -314,10 +339,10 @@ const loadUsers = async () => {
       page_size: pageSize.value,
       keyword: searchQuery.value || undefined,
       status: statusFilter.value || undefined,
-      points_min: pointsMin.value,
-      points_max: pointsMax.value,
-      order_count_min: orderCountMin.value,
-      order_count_max: orderCountMax.value
+      points_min: pointsMin.value ?? undefined,
+      points_max: pointsMax.value ?? undefined,
+      order_count_min: orderCountMin.value ?? undefined,
+      order_count_max: orderCountMax.value ?? undefined
     }
 
     // Use enhanced API when advanced filters are applied
@@ -354,6 +379,15 @@ const handleSearch = () => {
   loadUsers()
 }
 
+// Clear advanced filters - set to null instead of empty string
+const clearAdvancedFilters = () => {
+  pointsMin.value = null
+  pointsMax.value = null
+  orderCountMin.value = null
+  orderCountMax.value = null
+  handleSearch()
+}
+
 const handleRefresh = () => {
   loadUsers()
   loadStats()
@@ -385,10 +419,6 @@ const confirmEdit = async () => {
 }
 
 const handleDetail = (row: User) => {
-  router.push(`/users/${row.id}`)
-}
-
-const handleRowClick = (row: User) => {
   router.push(`/users/${row.id}`)
 }
 
@@ -424,6 +454,19 @@ const handleCommand = (command: string, row: User) => {
   } else if (command === 'delete') {
     handleDelete(row)
   }
+}
+
+const confirmStatusChange = (row: User, val: boolean) => {
+  const message = val ? t('users.confirmEnableUser') : t('users.confirmDisableUser')
+  ElMessageBox.confirm(message, t('common.tips'), {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
+    type: 'warning'
+  }).then(() => {
+    handleStatusChange(row, val)
+  }).catch(() => {
+    // User cancelled, switch will revert automatically due to :model-value
+  })
 }
 
 const handleStatusChange = async (row: User, val: boolean) => {
@@ -483,6 +526,73 @@ const handleDelete = (row: User) => {
       ElMessage.error(t('users.deleteFailed'))
     }
   })
+}
+
+// Batch activate users
+const handleBatchActivate = async () => {
+  try {
+    const data: BatchUpdateUserStatusRequest = {
+      user_ids: selectedUsers.value.map(u => u.id),
+      status: 1
+    }
+
+    const res = await batchUpdateUserStatus(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('users.batchActivatePartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('users.batchActivateSuccess', { count: successCount }))
+    }
+
+    handleClearSelection()
+    loadUsers()
+    loadStats()
+  } catch (error) {
+    console.error('Failed to batch activate users:', error)
+    ElMessage.error(t('users.batchActivateFailed'))
+  }
+}
+
+// Batch suspend users
+const handleBatchSuspend = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      t('users.suspendReasonRequired'),
+      t('users.batchSuspend'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputPattern: /^.{5,200}$/,
+        inputErrorMessage: t('users.suspendReasonLengthError')
+      }
+    )
+
+    const data: BatchUpdateUserStatusRequest = {
+      user_ids: selectedUsers.value.map(u => u.id),
+      status: 2,
+      reason: value
+    }
+
+    const res = await batchUpdateUserStatus(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('users.batchSuspendPartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('users.batchSuspendSuccess', { count: successCount }))
+    }
+
+    handleClearSelection()
+    loadUsers()
+    loadStats()
+  } catch {
+    // User cancelled
+  }
 }
 
 const handleSizeChange = (val: number) => {
@@ -625,6 +735,24 @@ onMounted(() => {
   margin-bottom: 20px;
   border-radius: 16px;
   border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+/* Bulk Actions */
+.bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.selected-count {
+  font-size: 14px;
+  color: #6366F1;
+  font-weight: 600;
 }
 
 /* Table row hover */

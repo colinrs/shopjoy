@@ -77,7 +77,6 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		ShipmentNo:    s.ShipmentNo,
 		OrderID:       s.OrderID,
 		Status:        fulfillment.ShipmentStatus(s.Status).String(),
-		StatusText:    fulfillment.ShipmentStatus(s.Status).String(),
 		Carrier:       s.Carrier,
 		CarrierCode:   s.CarrierCode,
 		TrackingNo:    s.TrackingNo,

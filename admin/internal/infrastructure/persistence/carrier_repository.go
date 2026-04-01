@@ -138,6 +138,26 @@ func (r *carrierRepo) Update(ctx context.Context, db *gorm.DB, carrier *fulfillm
 		}).Error
 }
 
+// FindByCodes finds carriers by multiple codes
+// Returns a map keyed by carrier code
+func (r *carrierRepo) FindByCodes(ctx context.Context, db *gorm.DB, codes []string) (map[string]*fulfillment.Carrier, error) {
+	if len(codes) == 0 {
+		return make(map[string]*fulfillment.Carrier), nil
+	}
+
+	var models []carrierModel
+	err := db.WithContext(ctx).Where("code IN ?", codes).Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*fulfillment.Carrier)
+	for _, m := range models {
+		result[m.Code] = m.toEntity()
+	}
+	return result, nil
+}
+
 // parseUnixTime is a helper to convert Unix timestamp to time.Time
 func parseUnixTime(ts int64) time.Time {
 	if ts == 0 {

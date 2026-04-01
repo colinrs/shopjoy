@@ -259,12 +259,25 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 		OrderID: orderID,
 	}
 
+	// Batch load shipment items to avoid N+1 queries
+	shipmentIDs := make([]int64, len(shipments))
+	for i, s := range shipments {
+		shipmentIDs[i] = s.Model.ID
+	}
+	itemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
+
+	// Batch load carriers to avoid N+1 queries
+	carrierCodes := make([]string, len(shipments))
+	for i, s := range shipments {
+		carrierCodes[i] = s.CarrierCode
+	}
+	carrierMap, _ := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
+
 	// Convert shipments
 	detail.Shipments = make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
-		items, _ := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, s.Model.ID)
-		s.Items = items
-		carrier, _ := a.carrierRepo.FindByCode(ctx, a.db, s.CarrierCode)
+		s.Items = itemsMap[s.Model.ID]
+		carrier := carrierMap[s.CarrierCode]
 		detail.Shipments[i] = toShipmentResponse(s, carrier)
 	}
 
@@ -291,13 +304,18 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 			return nil, err
 		}
 
+		// If order info is nil, order service is not properly integrated
+		if orderInfo == nil {
+			return nil, code.ErrInternalServer
+		}
+
 		// Validate order is paid (BR-001: Cannot ship unpaid orders)
 		if !orderInfo.IsPaid {
 			return nil, code.ErrRefundOrderNotPaid
 		}
 
 		// Validate order is not already fully shipped
-		if orderInfo.FulfillmentStatus == 2 || orderInfo.FulfillmentStatus == 3 { // shipped or delivered
+		if orderInfo.FulfillmentStatus == int8(fulfillment.OrderFulfillmentStatusShipped) || orderInfo.FulfillmentStatus == int8(fulfillment.OrderFulfillmentStatusDelivered) {
 			return nil, code.ErrShipmentAlreadyShipped
 		}
 

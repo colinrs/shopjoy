@@ -19,6 +19,7 @@ type Service interface {
 	TakeOffSale(ctx context.Context, tenantID shared.TenantID, id int64) (*ProductResponse, error)
 	UpdateStock(ctx context.Context, tenantID shared.TenantID, req UpdateStockRequest) error
 	DeductStock(ctx context.Context, tenantID shared.TenantID, req DeductStockRequest) error
+	BatchUpdateProduct(ctx context.Context, tenantID shared.TenantID, req BatchUpdateProductRequest) ([]int64, []BatchProductFail, error)
 }
 
 type service struct {
@@ -71,6 +72,20 @@ func (s *service) UpdateProduct(ctx context.Context, tenantID shared.TenantID, r
 	p.Name = req.Name
 	p.Description = req.Description
 	p.CategoryID = req.CategoryID
+	p.SKU = req.SKU
+	p.Brand = req.Brand
+	p.Tags = req.Tags
+	p.Images = req.Images
+	p.IsMatrixProduct = req.IsMatrixProduct
+	p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
+	p.HSCode = req.HSCode
+	p.COO = req.COO
+	p.Weight = req.Weight
+	p.WeightUnit = req.WeightUnit
+	p.Dimensions.Length = req.Length
+	p.Dimensions.Width = req.Width
+	p.Dimensions.Height = req.Height
+	p.DangerousGoods = req.DangerousGoods
 
 	if err := s.productRepo.Update(ctx, s.db, p); err != nil {
 		return nil, err
@@ -206,4 +221,92 @@ func (s *service) CreateProductWithTx(ctx context.Context, tenantID shared.Tenan
 	}
 
 	return FromDomainProduct(result), nil
+}
+
+func (s *service) BatchUpdateProduct(ctx context.Context, tenantID shared.TenantID, req BatchUpdateProductRequest) ([]int64, []BatchProductFail, error) {
+	var successIDs []int64
+	var failed []BatchProductFail
+
+	for _, productID := range req.ProductIDs {
+		p, err := s.productRepo.FindByID(ctx, s.db, tenantID, productID)
+		if err != nil {
+			failed = append(failed, BatchProductFail{
+				ProductID: productID,
+				Code:      30012, // ErrProductNotFound code
+				Message:   "商品不存在",
+			})
+			continue
+		}
+
+		// Apply updates
+		if req.Fields.Price != nil {
+			if err := p.UpdatePrice(product.Money{Amount: *req.Fields.Price, Currency: p.Price.Currency}); err != nil {
+				failed = append(failed, BatchProductFail{
+					ProductID: productID,
+					Code:      30002, // ErrProductInvalidPrice code
+					Message:   "商品价格必须大于0",
+				})
+				continue
+			}
+		}
+
+		if req.Fields.Stock != nil {
+			if err := p.UpdateStock(*req.Fields.Stock); err != nil {
+				failed = append(failed, BatchProductFail{
+					ProductID: productID,
+					Code:      30008, // ErrProductNegativeStock code
+					Message:   "库存不能为负数",
+				})
+				continue
+			}
+		}
+
+		if req.Fields.Status != nil {
+			// For status changes, we use the status transition methods
+			switch *req.Fields.Status {
+			case product.StatusOnSale:
+				if err := p.PutOnSale(); err != nil {
+					failed = append(failed, BatchProductFail{
+						ProductID: productID,
+						Code:      30006, // ErrProductInvalidStatusTransition code
+						Message:   "无效的状态转换",
+					})
+					continue
+				}
+			case product.StatusOffSale:
+				if err := p.TakeOffSale(); err != nil {
+					failed = append(failed, BatchProductFail{
+						ProductID: productID,
+						Code:      30006,
+						Message:   "无效的状态转换",
+					})
+					continue
+				}
+			default:
+				failed = append(failed, BatchProductFail{
+					ProductID: productID,
+					Code:      30006,
+					Message:   "无效的状态转换",
+				})
+				continue
+			}
+		}
+
+		if req.Fields.CategoryID != nil {
+			p.CategoryID = *req.Fields.CategoryID
+		}
+
+		if err := s.productRepo.Update(ctx, s.db, p); err != nil {
+			failed = append(failed, BatchProductFail{
+				ProductID: productID,
+				Code:      20002, // ErrDatabase code
+				Message:   "数据库错误",
+			})
+			continue
+		}
+
+		successIDs = append(successIDs, productID)
+	}
+
+	return successIDs, failed, nil
 }

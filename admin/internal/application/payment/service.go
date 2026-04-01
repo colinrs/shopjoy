@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
+	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"github.com/shopspring/decimal"
+	stripego "github.com/stripe/stripe-go/v76"
+	stripeRefund "github.com/stripe/stripe-go/v76/refund"
 	"gorm.io/gorm"
 )
 
@@ -36,6 +39,7 @@ type service struct {
 	refundRepo        payment.PaymentRefundRepository
 	transactionRepo   payment.PaymentTransactionRepository
 	webhookEventRepo  payment.WebhookEventRepository
+	paymentSettingsRepo shop.PaymentSettingsRepository
 	idGen             snowflake.Snowflake
 }
 
@@ -46,6 +50,7 @@ func NewService(
 	refundRepo payment.PaymentRefundRepository,
 	transactionRepo payment.PaymentTransactionRepository,
 	webhookEventRepo payment.WebhookEventRepository,
+	paymentSettingsRepo shop.PaymentSettingsRepository,
 	idGen snowflake.Snowflake,
 ) Service {
 	return &service{
@@ -54,6 +59,7 @@ func NewService(
 		refundRepo:       refundRepo,
 		transactionRepo:  transactionRepo,
 		webhookEventRepo: webhookEventRepo,
+		paymentSettingsRepo: paymentSettingsRepo,
 		idGen:            idGen,
 	}
 }
@@ -397,9 +403,49 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 		return nil, err
 	}
 
-	// TODO: Call Stripe API to initiate refund (actual Stripe integration will be separate)
-	// For now, mark as succeeded directly
-	channelRefundID := "re_stub_" + refund.RefundNo
+	// Get payment settings to check Stripe configuration
+	paymentSettings, err := s.paymentSettingsRepo.FindByShopID(ctx, tx, int64(tenantID))
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to get payment settings: %w", err)
+	}
+
+	// Check if Stripe is enabled and we have a secret key
+	var channelRefundID string
+
+	if paymentSettings != nil && paymentSettings.StripeEnabled && paymentSettings.StripeSecretKey != "" {
+		// Call Stripe API to initiate refund
+		stripego.Key = paymentSettings.StripeSecretKey
+
+		// Convert amount from yuan (decimal) to cents (int64)
+		amountInCents := amount.Mul(decimal.NewFromInt(100)).IntPart()
+
+		// Create Stripe refund params
+		params := &stripego.RefundParams{
+			PaymentIntent: stripego.String(paymentEntity.ChannelIntentID),
+			Amount:        stripego.Int64(amountInCents),
+		}
+
+		// Set idempotency key to ensure idempotent retries
+		params.SetIdempotencyKey(req.IdempotencyKey)
+
+		// Call Stripe API
+		r, err := stripeRefund.New(params)
+		if err != nil {
+			// Stripe API call failed - rollback transaction
+			// The refund record will not be created; admin can retry later
+			tx.Rollback()
+			return nil, fmt.Errorf("stripe refund failed: %w", err)
+		}
+
+		channelRefundID = r.ID
+	} else {
+		// Stripe not configured - keep refund as pending for manual processing
+		// This allows admin to process the refund manually or configure Stripe first
+		tx.Rollback()
+		return nil, code.ErrRefundNotSupported
+	}
+
 	refund.MarkSucceeded(channelRefundID, decimal.Zero)
 	if err := s.refundRepo.Update(ctx, tx, refund); err != nil {
 		tx.Rollback()

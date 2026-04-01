@@ -28,7 +28,6 @@ export interface Shipment {
   order_id: string
   order_no: string
   status: ShipmentStatus
-  status_text: string
   carrier: string
   carrier_code: string
   tracking_no: string
@@ -358,4 +357,21 @@ export async function exportShipments(params: ExportShipmentsParams): Promise<vo
 export async function exportFulfillmentStatistics(params: ExportFulfillmentStatisticsParams): Promise<void> {
   const { url, params: queryParams } = exportFulfillmentStatisticsUrl(params)
   await downloadFile(url, queryParams)
+}
+
+// Batch Update Tracking
+export interface BatchUpdateTrackingRequest {
+  shipment_ids: number[]
+  carrier_code: string
+  tracking_no: string
+  weight?: number
+}
+
+export interface BatchUpdateTrackingResponse {
+  success: number[]
+  failed: { shipment_id: number; code: number; message: string }[]
+}
+
+export const batchUpdateTracking = (data: BatchUpdateTrackingRequest) => {
+  return request.post<BatchUpdateTrackingResponse>('/api/v1/shipments/batch-tracking', data)
 }

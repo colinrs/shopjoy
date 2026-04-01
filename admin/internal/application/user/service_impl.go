@@ -296,9 +296,9 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 
 	// Query points account data
 	type PointsAccountData struct {
-		Balance      int64 `gorm:"column:balance"`
-		Frozen       int64 `gorm:"column:frozen_balance"`
-		TotalEarned  int64 `gorm:"column:total_earned"`
+		Balance       int64 `gorm:"column:balance"`
+		Frozen        int64 `gorm:"column:frozen_balance"`
+		TotalEarned   int64 `gorm:"column:total_earned"`
 		TotalRedeemed int64 `gorm:"column:total_redeemed"`
 	}
 	var pointsAccount PointsAccountData
@@ -312,20 +312,24 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 	resp.TotalEarned = pointsAccount.TotalEarned
 	resp.TotalRedeemed = pointsAccount.TotalRedeemed
 
-	// Query order statistics
+	// Query order statistics and last order time
 	type OrderStatsData struct {
-		Count      int64 `gorm:"column:count"`
-		TotalSpent int64 `gorm:"column:total_spent"`
+		Count      int64  `gorm:"column:count"`
+		TotalSpent int64  `gorm:"column:total_spent"`
+		LastOrder  string `gorm:"column:last_order"`
 	}
 	var orderStats OrderStatsData
 	s.db.WithContext(ctx).
 		Table("orders").
-		Select("COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent").
+		Select("COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent, MAX(created_at) as last_order").
 		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
 		Scan(&orderStats)
 	resp.OrderCount = orderStats.Count
 	// Convert cents to yuan string with 2 decimal places
 	resp.TotalSpent = formatAmountFromCents(orderStats.TotalSpent)
+	if orderStats.LastOrder != "" {
+		resp.LastOrderAt = orderStats.LastOrder
+	}
 
 	// Query review count
 	var reviewCount int64
@@ -334,6 +338,21 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
 		Count(&reviewCount)
 	resp.ReviewCount = reviewCount
+
+	// Query default address
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, tenantID, id)
+	if err == nil && len(addresses) > 0 {
+		for _, addr := range addresses {
+			if addr.IsDefault {
+				resp.DefaultAddress = toAddressResponse(addr)
+				break
+			}
+		}
+		// If no default, use the first one
+		if resp.DefaultAddress == nil && len(addresses) > 0 {
+			resp.DefaultAddress = toAddressResponse(addresses[0])
+		}
+	}
 
 	return resp, nil
 }
@@ -527,18 +546,20 @@ func sanitizeCSVField(field string) string {
 
 func toUserDetailResponse(u *domain.User) *UserDetailResponse {
 	resp := &UserDetailResponse{
-		ID:        u.ID,
-		TenantID:  u.TenantID.Int64(),
-		Email:     u.Email,
-		Phone:     u.Phone,
-		Name:      u.Name,
-		Avatar:    u.Avatar,
-		Gender:    int(u.Gender),
-		GenderText: getGenderText(u.Gender),
-		Status:    int(u.Status),
-		StatusText: getStatusText(u.Status),
-		CreatedAt: u.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: u.Audit.UpdatedAt.Format(time.RFC3339),
+		ID:            u.ID,
+		TenantID:      u.TenantID.Int64(),
+		Email:         u.Email,
+		Phone:         u.Phone,
+		Name:          u.Name,
+		Avatar:        u.Avatar,
+		Gender:        int(u.Gender),
+		GenderText:    getGenderText(u.Gender),
+		Status:        int(u.Status),
+		StatusText:    getStatusText(u.Status),
+		CreatedAt:     u.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:     u.Audit.UpdatedAt.Format(time.RFC3339),
+		LastOrderAt:   "", // Will be set by caller if needed
+		DefaultAddress: nil, // Will be set by caller if needed
 	}
 
 	if u.Birthday != nil {

@@ -13,6 +13,7 @@ const (
 	userIDKey   contextKey = "user_id"
 	tenantIDKey contextKey = "tenant_id"
 	userTypeKey contextKey = "user_type"
+	userNameKey contextKey = "user_name"
 )
 
 // SetUserID 设置用户ID到 context
@@ -77,6 +78,23 @@ func MustGetUserID(ctx context.Context) (int64, error) {
 func GetCurrentUserType(ctx context.Context) int {
 	userType, _ := GetUserType(ctx)
 	return userType
+}
+
+// SetUserName 设置用户名到 context
+func SetUserName(ctx context.Context, userName string) context.Context {
+	return context.WithValue(ctx, userNameKey, userName)
+}
+
+// GetUserName 从 context 获取用户名
+func GetUserName(ctx context.Context) (string, bool) {
+	userName, ok := ctx.Value(userNameKey).(string)
+	return userName, ok
+}
+
+// GetCurrentUserName 获取当前用户名，如果不存在返回空字符串
+func GetCurrentUserName(ctx context.Context) string {
+	userName, _ := GetUserName(ctx)
+	return userName
 }
 
 // IsPlatformAdmin 检查当前用户是否为平台管理员

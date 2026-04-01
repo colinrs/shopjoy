@@ -13,6 +13,7 @@ type JWTConfig struct {
 
 type Config struct {
 	rest.RestConf
-	MySQL infra.DBConfig
-	JWT   JWTConfig
+	MySQL               infra.DBConfig
+	JWT                 JWTConfig
+	StripeWebhookSecret string
 }

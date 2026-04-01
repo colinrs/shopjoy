@@ -28,9 +28,7 @@ func NewUpdateThemeConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *UpdateThemeConfigLogic) UpdateThemeConfig(req *types.UpdateThemeConfigRequest) error {
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	userID, _ := contextx.GetUserID(l.ctx)
-	// userName is not available in context, using empty string
-	// TODO: Add GetUserName to contextx or fetch from user service
-	userName := ""
+	userName := contextx.GetCurrentUserName(l.ctx)
 
 	config := appStorefront.ThemeConfigDTO{
 		PrimaryColor:   req.Config.PrimaryColor,

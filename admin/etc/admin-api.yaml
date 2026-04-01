@@ -23,3 +23,5 @@ JWT:
   Secret: "ncjancjabjkacam"
   AccessExpiry: 3600
   RefreshExpiry: 7200
+
+StripeWebhookSecret: "aaaa"  

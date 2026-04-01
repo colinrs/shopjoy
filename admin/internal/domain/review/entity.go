@@ -83,22 +83,22 @@ func (s Status) CanShow() bool {
 type Review struct {
 	application.Model
 	TenantID      shared.TenantID // 租户ID
-	OrderID       int64          // 订单ID
-	ProductID     int64          // 商品ID
-	SKUCode       string         // SKU代码
-	UserID        int64          // 用户ID
-	UserName      string         // 用户名（用于显示）
-	QualityRating int            // 质量评分 (1-5)
-	ValueRating   int            // 性价比评分 (1-5)
-	OverallRating float64        // 综合评分
-	Content       string         // 评价内容
-	Images        []string       // 图片URL列表
-	Status        Status         // 状态
-	IsAnonymous   bool           // 是否匿名
-	IsVerified    bool           // 是否已验证购买
-	IsFeatured    bool           // 是否精选
-	HelpfulCount  int            // 有帮助数
-	Reply         *ReviewReply   // 商家回复
+	OrderID       int64           // 订单ID
+	ProductID     int64           // 商品ID
+	SKUCode       string          // SKU代码
+	UserID        int64           // 用户ID
+	UserName      string          // 用户名（用于显示）
+	QualityRating int             // 质量评分 (1-5)
+	ValueRating   int             // 性价比评分 (1-5)
+	OverallRating float64         // 综合评分
+	Content       string          // 评价内容
+	Images        []string        // 图片URL列表
+	Status        Status          // 状态
+	IsAnonymous   bool            // 是否匿名
+	IsVerified    bool            // 是否已验证购买
+	IsFeatured    bool            // 是否精选
+	HelpfulCount  int             // 有帮助数
+	Reply         *ReviewReply    // 商家回复
 }
 
 // TableName returns table name
@@ -251,18 +251,18 @@ func (r *ReviewReply) Update(content string) error {
 // ReviewStats 商品评价统计
 type ReviewStats struct {
 	application.Model
-	TenantID          int64    // 租户ID
-	ProductID         int64    // 商品ID
-	TotalReviews      int      // 总评价数
-	AverageRating     float64  // 平均评分
-	QualityAvgRating  float64  // 质量平均分
-	ValueAvgRating    float64  // 性价比平均分
-	Rating1Count      int      // 1星数量
-	Rating2Count      int      // 2星数量
-	Rating3Count      int      // 3星数量
-	Rating4Count      int      // 4星数量
-	Rating5Count      int      // 5星数量
-	WithImageCount    int      // 有图片数量
+	TenantID         int64   // 租户ID
+	ProductID        int64   // 商品ID
+	TotalReviews     int     // 总评价数
+	AverageRating    float64 // 平均评分
+	QualityAvgRating float64 // 质量平均分
+	ValueAvgRating   float64 // 性价比平均分
+	Rating1Count     int     // 1星数量
+	Rating2Count     int     // 2星数量
+	Rating3Count     int     // 3星数量
+	Rating4Count     int     // 4星数量
+	Rating5Count     int     // 5星数量
+	WithImageCount   int     // 有图片数量
 }
 
 // TableName returns table name
@@ -291,17 +291,17 @@ func (s *StringArray) Scan(value interface{}) error {
 
 // Query 查询条件
 type Query struct {
-	TenantID   shared.TenantID
-	ProductID  int64
-	Status     *Status
-	RatingMin  *int
-	RatingMax  *int
-	HasImage   bool
-	Keyword    string
-	StartTime  *time.Time
-	EndTime    *time.Time
-	Page       int
-	PageSize   int
+	TenantID  shared.TenantID
+	ProductID int64
+	Status    *Status
+	RatingMin *int
+	RatingMax *int
+	HasImage  bool
+	Keyword   string
+	StartTime *time.Time
+	EndTime   *time.Time
+	Page      int
+	PageSize  int
 }
 
 // Validate validates query
@@ -332,6 +332,7 @@ type Repository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Review, error)
 	FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*Review, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Review, int64, error)
+	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*Review, error)
 	BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64, status Status, reason string) (int64, error)
 }
 

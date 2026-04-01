@@ -129,6 +129,7 @@ var (
 	ErrIdempotencyKeyConflict        = &Err{HTTPCode: http.StatusConflict, Code: 50019, Msg: "duplicate idempotency key"}
 	ErrDisputeCreated                = &Err{HTTPCode: http.StatusConflict, Code: 50020, Msg: "dispute created for this charge"}
 	ErrPaymentExportLimitExceed      = &Err{HTTPCode: http.StatusBadRequest, Code: 50021, Msg: "export payment transactions limit exceeded"}
+	ErrPaymentWebhookSignatureInvalid = &Err{HTTPCode: http.StatusUnauthorized, Code: 50022, Msg: "invalid stripe webhook signature"}
 
 	// ErrCartItemNotFound ==================== Cart Module (60xxx) ====================
 	ErrCartItemNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 60001, Msg: "cart item not found"}
@@ -350,6 +351,7 @@ var (
 	ErrInventoryTransferFailed       = &Err{HTTPCode: http.StatusBadRequest, Code: 170006, Msg: "stock transfer failed"}
 	ErrInsufficientStockForTransfer  = &Err{HTTPCode: http.StatusBadRequest, Code: 170007, Msg: "insufficient stock for transfer"}
 	ErrSameWarehouseTransfer         = &Err{HTTPCode: http.StatusBadRequest, Code: 170008, Msg: "cannot transfer to same warehouse"}
+	ErrInventoryCannotDeleteDefault  = &Err{HTTPCode: http.StatusBadRequest, Code: 170009, Msg: "cannot delete default warehouse"}
 
 	// ==================== Shipping Module (230xxx) ====================
 	ErrShippingTemplateNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}

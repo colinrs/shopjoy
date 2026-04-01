@@ -39,7 +39,7 @@ func (l *DeleteWarehouseLogic) DeleteWarehouse(req *types.GetWarehouseReq) (resp
 
 	// Cannot delete default warehouse
 	if warehouse.IsDefault {
-		return nil, code.ErrInventoryDuplicateWarehouseCode
+		return nil, code.ErrInventoryCannotDeleteDefault
 	}
 
 	// Delete warehouse

@@ -96,6 +96,10 @@
             <el-icon><Van /></el-icon>
             {{ $t('orders.batchShip') }}
           </el-button>
+          <el-button type="danger" @click="handleBatchCancel">
+            <el-icon><Close /></el-icon>
+            {{ $t('orders.batchCancel') }}
+          </el-button>
           <el-button @click="handleBatchRemark">
             <el-icon><Edit /></el-icon>
             {{ $t('orders.batchRemark') }}
@@ -107,14 +111,12 @@
 
     <!-- Orders Table -->
     <el-card class="table-card" shadow="never">
-      <el-table
+      <Table
         ref="tableRef"
         :data="orderList"
-        v-loading="loading"
-        stripe
+        :loading="loading"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
         <el-table-column type="expand">
           <template #default="{ row }">
             <div class="order-detail">
@@ -259,7 +261,7 @@
             </el-dropdown>
           </template>
         </el-table-column>
-      </el-table>
+      </Table>
 
       <!-- Pagination -->
       <div class="pagination-wrapper">
@@ -337,12 +339,14 @@ import {
   cancelOrder,
   exportOrders,
   getCarrierList,
+  batchCancelOrders,
   type Order,
   type Carrier,
   type OrderStatus,
   type FulfillmentStatus,
   type OrderListParams,
-  type ExportOrdersParams
+  type ExportOrdersParams,
+  type BatchCancelOrderRequest
 } from '@/api/order'
 import { getFulfillmentSummary } from '@/api/fulfillment'
 import { getOrderStatusDistribution } from '@/api/dashboard'
@@ -354,6 +358,7 @@ import {
   BatchShipDialog
 } from './components'
 import { t } from '@/plugins/i18n'
+import Table from '@/components/common/Table.vue'
 
 // Loading states
 const loading = ref(false)
@@ -543,6 +548,7 @@ const handleSelectionChange = (selection: Order[]) => {
 
 const clearSelection = () => {
   tableRef.value?.clearSelection()
+  selectedOrders.value = []
 }
 
 // Export
@@ -627,7 +633,7 @@ const handleCancel = async (row: Order) => {
         confirmButtonText: t('common.confirm'),
         cancelButtonText: t('common.cancel'),
         inputPattern: /^.{5,200}$/,
-        inputErrorMessage: t('orders.cancelReasonPlaceholder')
+        inputErrorMessage: t('orders.cancelReasonLengthError')
       }
     )
     await cancelOrder(row.order_id, value)
@@ -655,6 +661,53 @@ const handleBatchShip = () => {
 
 const handleBatchRemark = () => {
   ElMessage.info(t('orders.batchRemarkComing'))
+}
+
+// Batch cancel orders
+const handleBatchCancel = async () => {
+  const cancellableOrders = selectedOrders.value.filter(canCancel)
+  if (cancellableOrders.length === 0) {
+    ElMessage.warning(t('orders.noCancellableOrders'))
+    return
+  }
+  if (cancellableOrders.length < selectedOrders.value.length) {
+    ElMessage.warning(t('orders.cannotCancelCount', { count: selectedOrders.value.length - cancellableOrders.length }))
+  }
+
+  try {
+    const { value } = await ElMessageBox.prompt(
+      t('orders.cancelReasonRequired'),
+      t('orders.batchCancel'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputPattern: /^.{5,200}$/,
+        inputErrorMessage: t('orders.cancelReasonLengthError')
+      }
+    )
+
+    const data: BatchCancelOrderRequest = {
+      order_ids: cancellableOrders.map(o => o.order_id),
+      reason: value
+    }
+
+    const res = await batchCancelOrders(data)
+
+    const successCount = res.success?.length || 0
+    const failedCount = res.failed?.length || 0
+
+    if (failedCount > 0) {
+      ElMessage.warning(t('orders.batchCancelPartialSuccess', { success: successCount, failed: failedCount }))
+    } else {
+      ElMessage.success(t('orders.batchCancelSuccess', { count: successCount }))
+    }
+
+    clearSelection()
+    loadOrders()
+    loadStats()
+  } catch {
+    // User cancelled
+  }
 }
 
 // Success handlers
