@@ -125,7 +125,12 @@
 
     <!-- Users Table -->
     <el-card class="table-card" shadow="never">
-      <Table ref="tableRef" :data="userList" :loading="loading" @selection-change="handleSelectionChange">
+      <EmptyState
+        v-if="userList.length === 0 && !loading"
+        :title="$t('users.noUsers')"
+        :description="$t('users.noUsersDesc')"
+      />
+      <Table v-else ref="tableRef" :data="userList" :loading="loading" @selection-change="handleSelectionChange">
         <el-table-column :label="$t('users.userInfo')" min-width="250">
           <template #default="{ row }">
             <div class="user-cell">
@@ -272,6 +277,7 @@ import {
   type BatchUpdateUserStatusRequest
 } from '@/api/user'
 import Table from '@/components/common/Table.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
 const router = useRouter()
 const loading = ref(false)

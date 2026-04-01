@@ -96,7 +96,12 @@
 
     <!-- Refunds Table -->
     <el-card class="table-card" shadow="never">
-      <el-table :data="refundList" v-loading="loading" stripe>
+      <EmptyState
+        v-if="refundList.length === 0 && !loading"
+        :title="$t('fulfillment.noRefunds')"
+        :description="$t('fulfillment.noRefundsDesc')"
+      />
+      <el-table v-else :data="refundList" v-loading="loading" stripe>
         <el-table-column prop="refund_no" :label="$t('fulfillment.refundNo')" min-width="150">
           <template #default="{ row }">
             <div class="refund-no-cell">
@@ -213,6 +218,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, Refresh } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import { t } from '@/plugins/i18n'
 import {
   getRefundList,

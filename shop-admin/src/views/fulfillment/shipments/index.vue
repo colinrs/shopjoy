@@ -116,7 +116,13 @@
 
     <!-- Shipments Table -->
     <el-card class="table-card" shadow="never">
+      <EmptyState
+        v-if="shipmentList.length === 0 && !loading"
+        :title="$t('fulfillment.noShipments')"
+        :description="$t('fulfillment.noShipmentsDesc')"
+      />
       <el-table
+        v-else
         ref="tableRef"
         :data="shipmentList"
         v-loading="loading"
@@ -262,6 +268,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, Refresh, InfoFilled, Van, Location, Goods, QuestionFilled, Upload, Edit } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import ShipDialog from '@/components/fulfillment/ShipDialog.vue'
 import BatchShipDialog from '@/components/fulfillment/BatchShipDialog.vue'
 import ImportTrackingDialog from '@/components/fulfillment/ImportTrackingDialog.vue'

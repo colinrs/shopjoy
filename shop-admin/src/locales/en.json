@@ -193,7 +193,9 @@
     "pendingQty": "pending",
     "startDate": "Start Date",
     "endDate": "End Date",
-    "unshipped": "Unshipped"
+    "unshipped": "Unshipped",
+    "noOrders": "No Orders",
+    "noOrdersDesc": "There are no orders at the moment"
   },
   "users": {
     "title": "Users",
@@ -283,7 +285,9 @@
     "pointsMin": "Min",
     "pointsMax": "Max",
     "orders": "Orders",
-    "points": "Points"
+    "points": "Points",
+    "noUsers": "No Users",
+    "noUsersDesc": "There are no users at the moment"
   },
   "products": {
     "title": "Products",
@@ -386,7 +390,9 @@
     "explosive": "Explosive",
     "corrosive": "Corrosive",
     "radioactive": "Radioactive",
-    "enterBrand": "Enter brand"
+    "enterBrand": "Enter brand",
+    "noProducts": "No Products",
+    "noProductsDesc": "There are no products at the moment"
   },
   "payments": {
     "title": "Payments",
@@ -1091,7 +1097,11 @@
     "importFailed": "Failed to import {failed} items",
     "importFormatError": "File format error, please upload CSV file",
     "importEmptyError": "CSV file content is empty",
-    "importTemplate": "Download Template"
+    "importTemplate": "Download Template",
+    "noShipments": "No Shipments",
+    "noShipmentsDesc": "There are no shipments at the moment",
+    "noRefunds": "No Refunds",
+    "noRefundsDesc": "There are no refunds at the moment"
   },
   "refundReasons": {
     "title": "Refund Reasons",

@@ -111,7 +111,13 @@
 
     <!-- Orders Table -->
     <el-card class="table-card" shadow="never">
+      <EmptyState
+        v-if="orderList.length === 0 && !loading"
+        :title="$t('orders.noOrders')"
+        :description="$t('orders.noOrdersDesc')"
+      />
       <Table
+        v-else
         ref="tableRef"
         :data="orderList"
         :loading="loading"
@@ -359,6 +365,7 @@ import {
 } from './components'
 import { t } from '@/plugins/i18n'
 import Table from '@/components/common/Table.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
 // Loading states
 const loading = ref(false)

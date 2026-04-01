@@ -76,9 +76,16 @@
       <!-- Skeleton loading -->
       <TableSkeleton v-if="loading && productList.length === 0" :rows="10" :columns="7" />
 
+      <!-- Empty state -->
+      <EmptyState
+        v-else-if="productList.length === 0"
+        :title="$t('products.noProducts')"
+        :description="$t('products.noProductsDesc')"
+      />
+
       <!-- Actual table -->
       <Table
-        v-else
+        v-if="!loading && productList.length > 0"
         ref="tableRef"
         :data="productList"
         :loading="loading"
@@ -518,6 +525,7 @@ import { getCategoryTree, type CategoryTree } from '@/api/category'
 import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
 import Table from '@/components/common/Table.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
 

@@ -193,7 +193,9 @@
     "pendingQty": "待发",
     "startDate": "开始日期",
     "endDate": "结束日期",
-    "unshipped": "待发货"
+    "unshipped": "待发货",
+    "noOrders": "暂无订单",
+    "noOrdersDesc": "当前没有订单数据"
   },
   "users": {
     "title": "用户管理",
@@ -283,7 +285,9 @@
     "pointsMin": "最小",
     "pointsMax": "最大",
     "orders": "订单",
-    "points": "积分"
+    "points": "积分",
+    "noUsers": "暂无用户",
+    "noUsersDesc": "当前没有用户数据"
   },
   "products": {
     "title": "商品管理",
@@ -386,7 +390,9 @@
     "explosive": "易爆",
     "corrosive": "腐蚀性",
     "radioactive": "放射性",
-    "enterBrand": "请输入品牌"
+    "enterBrand": "请输入品牌",
+    "noProducts": "暂无商品",
+    "noProductsDesc": "当前没有商品数据"
   },
   "payments": {
     "title": "支付管理",
@@ -1091,7 +1097,11 @@
     "importFailed": "导入失败 {failed} 条",
     "importFormatError": "文件格式错误，请上传 CSV 文件",
     "importEmptyError": "CSV 文件内容为空",
-    "importTemplate": "下载模板"
+    "importTemplate": "下载模板",
+    "noShipments": "暂无发货单",
+    "noShipmentsDesc": "当前没有发货单数据",
+    "noRefunds": "暂无退款单",
+    "noRefundsDesc": "当前没有退款单数据"
   },
   "refundReasons": {
     "title": "退款原因",
