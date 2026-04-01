@@ -25,7 +25,7 @@ export type OrderRefundStatus = '0' | '1' | '2' | '3' | '4'
 export interface Shipment {
   id: number
   shipment_no: string
-  order_id: string
+  order_id: number
   order_no: string
   status: ShipmentStatus
   carrier: string
@@ -56,7 +56,7 @@ export interface ShipmentItem {
 }
 
 export interface CreateShipmentRequest {
-  order_id: string
+  order_id: number
   carrier_code: string
   carrier?: string
   tracking_no: string
@@ -93,7 +93,7 @@ export interface ShipmentListParams {
 export interface Refund {
   id: number
   refund_no: string
-  order_id: string
+  order_id: number
   order_no: string
   user_id: number
   user_name: string
@@ -210,7 +210,7 @@ export const createShipment = (data: CreateShipmentRequest) => {
 }
 
 export interface BatchCreateShipmentItem {
-  order_id: string
+  order_id: number
   tracking_no: string
 }
 
@@ -232,7 +232,7 @@ export const updateShipment = (id: number, data: UpdateShipmentRequest) => {
   return request.put<Shipment>(`/api/v1/shipments/${id}`, data)
 }
 
-export const getOrderShipments = (orderId: string) => {
+export const getOrderShipments = (orderId: number) => {
   return request.get<Shipment[]>(`/api/v1/orders/${orderId}/shipments`)
 }
 

@@ -242,7 +242,7 @@ import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
-  orderId: string
+  orderId: number
 }>()
 
 const emit = defineEmits<{

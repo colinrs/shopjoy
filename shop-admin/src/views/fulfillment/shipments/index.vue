@@ -425,7 +425,7 @@ const viewDetail = (row: Shipment) => {
   router.push(`/fulfillment/shipments/${row.id}`)
 }
 
-const viewOrder = (orderId: string) => {
+const viewOrder = (orderId: number) => {
   router.push(`/orders?id=${orderId}`)
 }
 

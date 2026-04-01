@@ -416,7 +416,7 @@ const adjustPriceDialogVisible = ref(false)
 const batchShipDialogVisible = ref(false)
 
 // Current order for actions
-const currentOrderId = ref('')
+const currentOrderId = ref<number>(0)
 const currentOrderForShip = ref<Order | null>(null)
 const currentOrderRemark = ref('')
 const currentOrderAmount = ref('0')

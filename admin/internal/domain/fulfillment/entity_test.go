@@ -23,7 +23,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:     application.Model{ID: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:  shared.TenantID(1),
-				OrderID:   "ORDER001",
+				OrderID:   1,
 				ShipmentNo: "SHP001",
 				Status:    ShipmentStatusPending,
 			},
@@ -50,7 +50,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:      application.Model{ID: 2, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:   shared.TenantID(1),
-				OrderID:    "ORDER002",
+				OrderID:    2,
 				ShipmentNo: "SHP002",
 				Status:     ShipmentStatusShipped,
 				Carrier:    "SF Express",
@@ -76,7 +76,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:      application.Model{ID: 3, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:   shared.TenantID(1),
-				OrderID:    "ORDER003",
+				OrderID:    3,
 				ShipmentNo: "SHP003",
 				Status:     ShipmentStatusInTransit,
 			},
@@ -94,7 +94,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:      application.Model{ID: 4, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:   shared.TenantID(1),
-				OrderID:    "ORDER004",
+				OrderID:    4,
 				ShipmentNo: "SHP004",
 				Status:     ShipmentStatusFailed,
 			},
@@ -112,7 +112,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:         application.Model{ID: 5, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:      shared.TenantID(1),
-				OrderID:       "ORDER005",
+				OrderID:       5,
 				ShipmentNo:    "SHP005",
 				Status:        ShipmentStatusCancelled,
 				CancelledAt:   func() *time.Time { t := time.Now().UTC(); return &t }(),
@@ -138,7 +138,7 @@ func TestShipment_CancelShipment(t *testing.T) {
 			shipment: &Shipment{
 				Model:       application.Model{ID: 6, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 				TenantID:    shared.TenantID(1),
-				OrderID:     "ORDER006",
+				OrderID:     6,
 				ShipmentNo:  "SHP006",
 				Status:      ShipmentStatusDelivered,
 				DeliveredAt: func() *time.Time { t := time.Now().UTC(); return &t }(),
@@ -192,7 +192,7 @@ func TestShipment_CancelShipment_UpdatedAtIsSet(t *testing.T) {
 	shipment := &Shipment{
 		Model:      application.Model{ID: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:   shared.TenantID(1),
-		OrderID:    "ORDER001",
+		OrderID:    1,
 		ShipmentNo: "SHP001",
 		Status:     ShipmentStatusPending,
 	}
@@ -215,7 +215,7 @@ func TestShipment_CancelShipment_CancelledAtIsUTC(t *testing.T) {
 	shipment := &Shipment{
 		Model:      application.Model{ID: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:   shared.TenantID(1),
-		OrderID:    "ORDER001",
+		OrderID:    1,
 		ShipmentNo: "SHP001",
 		Status:     ShipmentStatusPending,
 	}

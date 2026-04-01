@@ -171,7 +171,7 @@ interface OrderItem {
 }
 
 interface Order {
-  order_id: string
+  order_id: number
   order_no: string
   items: OrderItem[]
 }

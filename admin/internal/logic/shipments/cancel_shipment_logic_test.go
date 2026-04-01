@@ -48,7 +48,7 @@ func (m *mockShipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID sha
 	return nil, nil
 }
 
-func (m *mockShipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID string) ([]*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID int64) ([]*fulfillment.ShipmentResponse, error) {
 	return nil, nil
 }
 

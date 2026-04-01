@@ -367,7 +367,7 @@ const handleRefresh = () => {
   loadData()
 }
 
-const viewOrder = (orderId: string) => {
+const viewOrder = (orderId: number) => {
   router.push(`/orders?id=${orderId}`)
 }
 
