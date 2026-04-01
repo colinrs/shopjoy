@@ -121,7 +121,7 @@ type UserCoupon struct {
 	CouponID   int64
 	Status     UserCouponStatus
 	UsedAt     *time.Time
-	OrderID    string
+	OrderID    int64
 	ReceivedAt time.Time
 	ExpireAt   time.Time
 }

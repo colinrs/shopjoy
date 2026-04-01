@@ -23,7 +23,7 @@ export interface ChannelDistribution {
 export interface Transaction {
   id: number
   transaction_id: string
-  order_id: string
+  order_id: number
   order_no: string
   payment_method: string
   payment_method_text: string
@@ -63,7 +63,7 @@ export interface TransactionListResponse {
 export interface OrderPayment {
   payment_id: number
   payment_no: string
-  order_id: string
+  order_id: number
   order_no: string
   payment_method: string
   payment_method_text: string
