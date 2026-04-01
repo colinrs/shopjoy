@@ -25,7 +25,12 @@ func NewPublishPageLogic(ctx context.Context, svcCtx *svc.ServiceContext) Publis
 }
 
 func (l *PublishPageLogic) PublishPage(req *types.PublishPageRequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
+
 	userID, _ := contextx.GetUserID(l.ctx)
 
 	return l.svcCtx.PageService.PublishPage(l.ctx, shared.TenantID(tenantID), req.ID, userID)

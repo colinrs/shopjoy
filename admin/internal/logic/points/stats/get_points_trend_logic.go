@@ -27,9 +27,10 @@ func NewGetPointsTrendLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetPointsTrendLogic) GetPointsTrend(req *types.GetPointsTrendReq) (resp *types.PointsTrendResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	// Calculate time range based on period

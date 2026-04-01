@@ -28,7 +28,11 @@ func NewUpdateBrandLogic(ctx context.Context, svcCtx *svc.ServiceContext) Update
 }
 
 func (l *UpdateBrandLogic) UpdateBrand(req *types.UpdateBrandReq) (resp *types.BrandDetailResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Find existing brand
 	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)

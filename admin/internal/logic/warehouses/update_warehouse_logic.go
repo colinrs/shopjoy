@@ -27,7 +27,11 @@ func NewUpdateWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) Up
 }
 
 func (l *UpdateWarehouseLogic) UpdateWarehouse(req *types.UpdateWarehouseReq) (resp *types.WarehouseDetailResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Find existing warehouse
 	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)

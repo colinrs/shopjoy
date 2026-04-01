@@ -26,7 +26,11 @@ func NewDeleteWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) De
 }
 
 func (l *DeleteWarehouseLogic) DeleteWarehouse(req *types.GetWarehouseReq) (resp *types.CreateWarehouseResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Find warehouse
 	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)

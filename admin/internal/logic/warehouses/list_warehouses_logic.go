@@ -25,7 +25,11 @@ func NewListWarehousesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 }
 
 func (l *ListWarehousesLogic) ListWarehouses(req *types.ListWarehouseReq) (resp *types.ListWarehouseResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	warehouses, err := l.svcCtx.WarehouseRepo.FindAll(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID))
 	if err != nil {

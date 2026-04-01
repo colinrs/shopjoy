@@ -26,7 +26,11 @@ func NewUpdatePageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upda
 }
 
 func (l *UpdatePageSEOLogic) UpdatePageSEO(req *types.UpdatePageSEORequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
 
 	config := appStorefront.SEOConfigDTO{
 		Title:       req.Title,

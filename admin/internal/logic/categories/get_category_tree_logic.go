@@ -27,7 +27,11 @@ func NewGetCategoryTreeLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetCategoryTreeLogic) GetCategoryTree(req *types.CategoryTreeReq) (resp []*types.CategoryTreeResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	categories, err := l.svcCtx.CategoryRepo.FindTree(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID))
 	if err != nil {

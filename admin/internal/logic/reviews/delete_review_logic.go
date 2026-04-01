@@ -28,12 +28,11 @@ func NewDeleteReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) Delet
 }
 
 func (l *DeleteReviewLogic) DeleteReview(req *types.DeleteReviewReq) (resp *types.DeleteReviewResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	// Get tenantID from context with proper validation
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	if err := l.svcCtx.ReviewService.DeleteReview(l.ctx, shared.TenantID(tenantID), req.ID); err != nil {

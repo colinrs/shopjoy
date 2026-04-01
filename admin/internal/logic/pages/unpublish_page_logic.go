@@ -25,7 +25,11 @@ func NewUnpublishPageLogic(ctx context.Context, svcCtx *svc.ServiceContext) Unpu
 }
 
 func (l *UnpublishPageLogic) UnpublishPage(req *types.UnpublishPageRequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
 
 	return l.svcCtx.PageService.UnpublishPage(l.ctx, shared.TenantID(tenantID), req.ID)
 }

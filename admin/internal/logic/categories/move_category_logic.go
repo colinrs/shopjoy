@@ -28,7 +28,11 @@ func NewMoveCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) MoveC
 }
 
 func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *types.CategoryDetailResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Find category
 	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)

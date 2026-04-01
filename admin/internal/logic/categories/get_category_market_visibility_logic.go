@@ -26,7 +26,11 @@ func NewGetCategoryMarketVisibilityLogic(ctx context.Context, svcCtx *svc.Servic
 }
 
 func (l *GetCategoryMarketVisibilityLogic) GetCategoryMarketVisibility(req *types.GetCategoryMarketVisibilityReq) (resp *types.CategoryMarketVisibilityResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Verify category exists
 	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.CategoryID)

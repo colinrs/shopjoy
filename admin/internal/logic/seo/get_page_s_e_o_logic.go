@@ -25,7 +25,11 @@ func NewGetPageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetPage
 }
 
 func (l *GetPageSEOLogic) GetPageSEO(req *types.GetPageSEORequest) (resp *types.PageSEOConfigResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	result, err := l.svcCtx.SEOService.GetPageSEO(l.ctx, shared.TenantID(tenantID), req.PageType, nil)
 	if err != nil {

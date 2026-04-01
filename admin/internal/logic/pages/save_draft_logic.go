@@ -28,7 +28,12 @@ func NewSaveDraftLogic(ctx context.Context, svcCtx *svc.ServiceContext) SaveDraf
 }
 
 func (l *SaveDraftLogic) SaveDraft(req *types.SaveDraftRequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
+
 	userID, _ := contextx.GetUserID(l.ctx)
 
 	blocks := make([]*appStorefront.DecorationDTO, 0, len(req.Blocks))

@@ -26,7 +26,11 @@ func NewAddDecorationLogic(ctx context.Context, svcCtx *svc.ServiceContext) AddD
 }
 
 func (l *AddDecorationLogic) AddDecoration(req *types.AddDecorationRequest) (resp *types.AddDecorationResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	var blockConfig map[string]any
 	if err := json.Unmarshal([]byte(req.BlockConfig), &blockConfig); err != nil {

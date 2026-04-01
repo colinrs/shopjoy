@@ -26,12 +26,10 @@ func NewDeleteCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Delet
 }
 
 func (l *DeleteCouponLogic) DeleteCoupon(req *types.DeleteCouponReq) (resp *types.CreateCouponResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	err = l.svcCtx.CouponApp.DeleteCoupon(l.ctx, shared.TenantID(tenantID), req.ID)

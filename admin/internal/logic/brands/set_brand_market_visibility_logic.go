@@ -29,7 +29,11 @@ func NewSetBrandMarketVisibilityLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *SetBrandMarketVisibilityLogic) SetBrandMarketVisibility(req *types.SetBrandMarketVisibilityReq) (resp *types.CreateBrandResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Verify brand exists
 	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.BrandID)

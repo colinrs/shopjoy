@@ -28,10 +28,10 @@ func NewCreateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZoneReq) (resp *types.ShippingZoneDetail, err error) {
-	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if tenantID == 0 {
-		return nil, code.ErrUnauthorized
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	// Verify template exists and belongs to tenant

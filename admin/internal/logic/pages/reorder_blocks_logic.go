@@ -26,7 +26,11 @@ func NewReorderBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) Reor
 }
 
 func (l *ReorderBlocksLogic) ReorderBlocks(req *types.ReorderBlocksRequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
 
 	orders := make([]appStorefront.BlockOrderDTO, 0, len(req.BlockOrders))
 	for _, o := range req.BlockOrders {

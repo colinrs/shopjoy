@@ -26,12 +26,10 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetCoupo
 }
 
 func (l *GetCouponLogic) GetCoupon(req *types.GetCouponReq) (resp *types.CouponDetailResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	couponResp, err := l.svcCtx.CouponApp.GetCoupon(l.ctx, shared.TenantID(tenantID), req.ID)

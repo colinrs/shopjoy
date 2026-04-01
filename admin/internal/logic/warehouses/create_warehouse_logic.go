@@ -29,7 +29,11 @@ func NewCreateWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 }
 
 func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (resp *types.CreateWarehouseResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Check for duplicate code
 	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Code)

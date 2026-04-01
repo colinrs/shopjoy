@@ -26,7 +26,11 @@ func NewGetBrandProductCountLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *GetBrandProductCountLogic) GetBrandProductCount(req *types.GetBrandProductCountReq) (resp *types.GetBrandProductCountResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Verify brand exists
 	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)

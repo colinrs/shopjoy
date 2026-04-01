@@ -27,7 +27,11 @@ func NewChangeAdminPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *ChangeAdminPasswordLogic) ChangeAdminPassword(req *types.AdminChangePasswordRequest) error {
 	userID := contextx.GetCurrentUserID(l.ctx)
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
 
 	changeReq := adminuser.ChangePasswordRequest{
 		UserID:          userID,

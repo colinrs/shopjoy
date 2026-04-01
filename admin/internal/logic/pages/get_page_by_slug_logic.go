@@ -27,7 +27,11 @@ func NewGetPageBySlugLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetP
 }
 
 func (l *GetPageBySlugLogic) GetPageBySlug(req *types.GetPageBySlugRequest) (resp *types.PageDetailResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	result, err := l.svcCtx.PageService.GetPageBySlug(l.ctx, shared.TenantID(tenantID), req.Slug)
 	if err != nil {

@@ -25,7 +25,11 @@ func NewListPagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPage
 }
 
 func (l *ListPagesLogic) ListPages(req *types.ListPagesRequest) (resp *types.ListPagesResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	result, err := l.svcCtx.PageService.ListPages(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
 	if err != nil {

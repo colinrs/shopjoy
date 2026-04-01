@@ -26,12 +26,10 @@ func NewListUserCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Li
 }
 
 func (l *ListUserCouponsLogic) ListUserCoupons(req *types.ListUserCouponsReq) (resp *types.ListUserCouponsResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	// Map status string to domain type

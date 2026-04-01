@@ -27,12 +27,10 @@ func NewGetRefundStatisticsLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *GetRefundStatisticsLogic) GetRefundStatistics(req *types.GetRefundStatisticsReq) (resp *types.RefundStatisticsResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	// Parse time range

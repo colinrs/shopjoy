@@ -26,7 +26,11 @@ func NewUpdateCategorySortLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateCategorySortLogic) UpdateCategorySort(req *types.UpdateCategorySortReq) (resp *types.CreateCategoryResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Convert to domain type
 	sorts := make([]product.CategorySort, 0, len(req.Sorts))

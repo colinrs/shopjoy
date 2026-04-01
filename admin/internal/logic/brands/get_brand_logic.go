@@ -26,7 +26,11 @@ func NewGetBrandLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetBrandL
 }
 
 func (l *GetBrandLogic) GetBrand(req *types.GetBrandReq) (resp *types.BrandDetailResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
 	if err != nil {

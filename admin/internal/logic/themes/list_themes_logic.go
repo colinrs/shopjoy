@@ -25,7 +25,11 @@ func NewListThemesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListThe
 }
 
 func (l *ListThemesLogic) ListThemes() (resp *types.ListThemesResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	themes, err := l.svcCtx.ThemeService.ListThemes(l.ctx, shared.TenantID(tenantID))
 	if err != nil {

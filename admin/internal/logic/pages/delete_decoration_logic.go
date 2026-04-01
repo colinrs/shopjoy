@@ -25,7 +25,11 @@ func NewDeleteDecorationLogic(ctx context.Context, svcCtx *svc.ServiceContext) D
 }
 
 func (l *DeleteDecorationLogic) DeleteDecoration(req *types.DeleteDecorationRequest) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
+	}
 
 	return l.svcCtx.DecorationService.DeleteDecoration(l.ctx, shared.TenantID(tenantID), req.ID)
 }

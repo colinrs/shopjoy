@@ -25,7 +25,11 @@ func NewListPageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPa
 }
 
 func (l *ListPageSEOLogic) ListPageSEO(req *types.ListPageSEOConfigsRequest) (resp *types.ListPageSEOConfigsResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	result, err := l.svcCtx.SEOService.ListPageSEO(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
 	if err != nil {

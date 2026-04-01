@@ -29,7 +29,11 @@ func NewCreateBrandLogic(ctx context.Context, svcCtx *svc.ServiceContext) Create
 }
 
 func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.CreateBrandResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Check for duplicate brand name
 	existing, err := l.svcCtx.BrandRepo.FindByName(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Name)

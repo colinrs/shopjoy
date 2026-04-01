@@ -26,10 +26,10 @@ func NewReorderZonesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Reord
 }
 
 func (l *ReorderZonesLogic) ReorderZones(req *types.ReorderZonesReq) error {
-	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if tenantID == 0 {
-		return code.ErrUnauthorized
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return err
 	}
 
 	// Verify template exists and belongs to tenant

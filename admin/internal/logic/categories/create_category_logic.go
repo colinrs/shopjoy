@@ -29,7 +29,11 @@ func NewCreateCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cre
 }
 
 func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp *types.CreateCategoryResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Check for duplicate code if provided
 	if req.Code != "" {

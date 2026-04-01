@@ -27,7 +27,11 @@ func NewGetCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetCat
 }
 
 func (l *GetCategoryLogic) GetCategory(req *types.GetCategoryReq) (resp *types.CategoryDetailResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
 	if err != nil {

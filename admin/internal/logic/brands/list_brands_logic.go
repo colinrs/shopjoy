@@ -26,7 +26,11 @@ func NewListBrandsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListBra
 }
 
 func (l *ListBrandsLogic) ListBrands(req *types.ListBrandReq) (resp *types.ListBrandResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	query := product.BrandQuery{
 		PageQuery: shared.PageQuery{

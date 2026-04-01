@@ -27,7 +27,11 @@ func NewListCategoriesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 }
 
 func (l *ListCategoriesLogic) ListCategories(req *types.ListCategoryReq) (resp *types.ListCategoryResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	var categories []*productCategory
 	if req.ParentID > 0 {

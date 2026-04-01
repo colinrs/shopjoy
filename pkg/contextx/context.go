@@ -103,6 +103,34 @@ func IsPlatformAdmin(ctx context.Context) bool {
 	return ok && userType == 1 // 1 = 平台超管
 }
 
+// GetTenantIDWithAdmin 获取租户ID，平台管理员返回0表示可访问所有数据
+// 返回值：tenantID, isPlatformAdmin, error
+// 用于需要区分平台管理员和普通租户管理员的场景
+func GetTenantIDWithAdmin(ctx context.Context) (int64, bool, error) {
+	tenantID, ok := GetTenantID(ctx)
+	isPlatformAdmin := IsPlatformAdmin(ctx)
+
+	// 平台管理员可以访问所有数据
+	if isPlatformAdmin {
+		return 0, true, nil
+	}
+
+	// 非平台管理员必须有有效的租户ID
+	if !ok || tenantID == 0 {
+		return 0, false, code.ErrUnauthorized
+	}
+
+	return tenantID, false, nil
+}
+
+// MustGetTenantIDForLogic 获取租户ID用于 Logic 层
+// 平台管理员返回 tenantID=0，普通用户返回实际租户ID
+// 如果非平台管理员且没有租户ID，返回错误
+func MustGetTenantIDForLogic(ctx context.Context) (int64, error) {
+	tenantID, _, err := GetTenantIDWithAdmin(ctx)
+	return tenantID, err
+}
+
 // Context errors using pkg/code
 var (
 	ErrTenantNotFound = &code.Err{HTTPCode: http.StatusBadRequest, Code: 90001, Msg: "tenant not found in context"}

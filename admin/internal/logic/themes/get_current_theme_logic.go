@@ -25,7 +25,11 @@ func NewGetCurrentThemeLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetCurrentThemeLogic) GetCurrentTheme() (resp *types.CurrentThemeResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	result, err := l.svcCtx.ThemeService.GetCurrentTheme(l.ctx, shared.TenantID(tenantID))
 	if err != nil {

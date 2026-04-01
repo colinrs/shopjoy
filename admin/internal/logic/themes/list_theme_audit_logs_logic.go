@@ -25,7 +25,11 @@ func NewListThemeAuditLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *ListThemeAuditLogsLogic) ListThemeAuditLogs() (resp *types.ListThemeAuditLogsResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Default pagination (API doesn't have request type with pagination yet)
 	result, err := l.svcCtx.ThemeService.ListAuditLogs(l.ctx, shared.TenantID(tenantID), 1, 20)

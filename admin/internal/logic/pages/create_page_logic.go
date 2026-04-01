@@ -27,7 +27,11 @@ func NewCreatePageLogic(ctx context.Context, svcCtx *svc.ServiceContext) CreateP
 }
 
 func (l *CreatePageLogic) CreatePage(req *types.CreatePageRequest) (resp *types.CreatePageResponse, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
 
 	// Validate required fields
 	if strings.TrimSpace(req.Name) == "" {

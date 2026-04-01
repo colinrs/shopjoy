@@ -27,15 +27,14 @@ func NewCreateReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) Create
 }
 
 func (l *CreateReplyLogic) CreateReply(req *types.CreateReplyReq) (resp *types.CreateReplyResp, err error) {
-	// Get tenantID and admin info from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
+	}
+
 	adminID := contextx.GetCurrentUserID(l.ctx)
 	adminName := "Admin" // Default admin name, can be enhanced to get from user service
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
-	}
 
 	reply, err := l.svcCtx.ReviewService.CreateReply(
 		l.ctx,

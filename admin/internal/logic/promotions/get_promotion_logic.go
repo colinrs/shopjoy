@@ -26,12 +26,10 @@ func NewGetPromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetPr
 }
 
 func (l *GetPromotionLogic) GetPromotion(req *types.GetPromotionReq) (resp *types.PromotionDetailResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	promotionResp, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, shared.TenantID(tenantID), req.ID)

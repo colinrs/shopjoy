@@ -26,12 +26,11 @@ func NewGetReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetRevie
 }
 
 func (l *GetReviewLogic) GetReview(req *types.GetReviewReq) (resp *types.ReviewDetailResp, err error) {
-	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+	// Get tenantID from context with proper validation
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	detail, err := l.svcCtx.ReviewService.GetReview(l.ctx, shared.TenantID(tenantID), req.ID)

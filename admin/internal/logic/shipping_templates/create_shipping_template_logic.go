@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -27,10 +26,10 @@ func NewCreateShippingTemplateLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateShippingTemplateReq) (resp *types.CreateShippingTemplateResp, err error) {
-	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if tenantID == 0 {
-		return nil, code.ErrUnauthorized
+	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("failed to get tenant ID: %v", err)
+		return nil, err
 	}
 
 	// Create template entity
