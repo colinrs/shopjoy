@@ -375,3 +375,17 @@ export interface BatchUpdateTrackingResponse {
 export const batchUpdateTracking = (data: BatchUpdateTrackingRequest) => {
   return request.post<BatchUpdateTrackingResponse>('/api/v1/shipments/batch-tracking', data)
 }
+
+// Cancel Shipment
+export interface CancelShipmentResponse {
+  id: number
+  shipment_no: string
+  status: string
+  status_text: string
+  cancelled_at: string
+  reason: string
+}
+
+export const cancelShipment = (id: number, reason: string) => {
+  return request.put<CancelShipmentResponse>(`/api/v1/shipments/${id}/cancel`, { reason })
+}

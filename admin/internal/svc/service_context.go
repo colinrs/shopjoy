@@ -163,8 +163,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// Fulfillment application services
 	shipmentApp := appfulfillment.NewShipmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, idGen)
 	carrierApp := appfulfillment.NewCarrierApp(db, carrierRepo)
-	// Use NopOrderValidator until order service integration is complete
-	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, orderRepo, orderItemRepo, idGen, &appfulfillment.NopOrderValidator{})
+	// Use DefaultOrderValidator until order service integration is complete
+	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, orderRepo, orderItemRepo, idGen, &appfulfillment.DefaultOrderValidator{})
 	refundApp := appfulfillment.NewRefundApp(db, refundRepo, refundReasonRepo, idGen)
 	refundReasonApp := appfulfillment.NewRefundReasonApp(db, refundReasonRepo)
 

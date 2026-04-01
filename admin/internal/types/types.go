@@ -344,6 +344,20 @@ type CancelOrderResp struct {
 	Reason      string `json:"reason"`
 }
 
+type CancelShipmentReq struct {
+	ID     int64  `path:"id"`
+	Reason string `json:"reason" binding:"required,min=5,max=200"`
+}
+
+type CancelShipmentResp struct {
+	ID          int64  `json:"id"`
+	ShipmentNo  string `json:"shipment_no"`
+	Status      string `json:"status"`
+	StatusText  string `json:"status_text"`
+	CancelledAt string `json:"cancelled_at"`
+	Reason      string `json:"reason"`
+}
+
 type CarrierPerformanceStats struct {
 	CarrierCode         string `json:"carrier_code"`
 	CarrierName         string `json:"carrier_name"`

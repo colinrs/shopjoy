@@ -252,6 +252,7 @@ var (
 	ErrShipmentItemQuantityExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 120013, Msg: "shipment item quantity exceeded order quantity"}
 	ErrShipmentInvalidItems         = &Err{HTTPCode: http.StatusBadRequest, Code: 120014, Msg: "invalid shipment items"}
 	ErrShipmentExportLimitExceed    = &Err{HTTPCode: http.StatusBadRequest, Code: 120015, Msg: "export shipment count exceeds limit of 10000"}
+	ErrShipmentAlreadyCancelled     = &Err{HTTPCode: http.StatusBadRequest, Code: 120016, Msg: "shipment already cancelled"}
 
 	// Refund errors (1201xx)
 	ErrRefundNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120101, Msg: "refund not found"}
@@ -274,6 +275,9 @@ var (
 	// RefundReason errors (1203xx)
 	ErrRefundReasonNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 120301, Msg: "refund reason not found"}
 	ErrRefundReasonDuplicate = &Err{HTTPCode: http.StatusConflict, Code: 120302, Msg: "refund reason code already exists"}
+
+	// Order Service errors (1204xx)
+	ErrOrderServiceUnavailable = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 120401, Msg: "order service unavailable"}
 
 	// ErrSharedCurrencyMismatch ==================== Shared Module (200xxx) ====================
 	ErrSharedCurrencyMismatch   = &Err{HTTPCode: http.StatusBadRequest, Code: 200001, Msg: "currency mismatch"}

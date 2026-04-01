@@ -129,6 +129,7 @@ type ShipmentApp interface {
 	UpdateShipment(ctx context.Context, tenantID shared.TenantID, userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error)
 	UpdateShipmentStatus(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error)
 	GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID string) ([]*ShipmentResponse, error)
+	CancelShipment(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*ShipmentResponse, error)
 }
 
 // BatchShipmentItem 批量发货单项
@@ -564,6 +565,39 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.Ten
 	}
 
 	return list, nil
+}
+
+func (a *shipmentApp) CancelShipment(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*ShipmentResponse, error) {
+	// Get the shipment
+	shipment, err := a.shipmentRepo.FindByID(ctx, a.db, tenantID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Call entity method to cancel
+	if err := shipment.CancelShipment(reason, userID); err != nil {
+		return nil, err
+	}
+
+	// Update the shipment
+	if err := a.shipmentRepo.Update(ctx, a.db, shipment); err != nil {
+		return nil, err
+	}
+
+	// Load items
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, tenantID, shipment.ID)
+	if err != nil {
+		log.Printf("CancelShipment: find items by shipment ID %d error: %v", shipment.ID, err)
+	}
+	shipment.Items = items
+
+	// Get carrier for tracking URL
+	carrier, err := a.carrierRepo.FindByCode(ctx, a.db, shipment.CarrierCode)
+	if err != nil {
+		log.Printf("CancelShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
+	}
+
+	return toShipmentResponse(shipment, carrier), nil
 }
 
 // toShipmentResponse 转换为响应DTO

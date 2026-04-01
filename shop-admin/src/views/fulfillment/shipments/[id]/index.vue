@@ -308,6 +308,7 @@ import {
   updateShipment,
   updateShipmentStatus,
   getCarrierList,
+  cancelShipment as cancelShipmentApi,
   type Shipment,
   type Carrier,
   type UpdateShipmentRequest
@@ -518,12 +519,12 @@ const cancelShipment = async () => {
         inputErrorMessage: t('fulfillment.cancelReasonLengthError')
       }
     )
-    // reason contains the user's input for cancellation
-    // Call API to cancel shipment with reason
-    // TODO: Integrate with cancel shipment API when available
-    console.log('Cancel shipment with reason:', reason)
-    ElMessage.success(t('fulfillment.shipmentCancelled'))
-    router.push('/fulfillment/shipments')
+
+    if (shipment.value?.id) {
+      await cancelShipmentApi(shipment.value.id, reason)
+      ElMessage.success(t('fulfillment.shipmentCancelled'))
+      router.push('/fulfillment/shipments')
+    }
   } catch (error) {
     // User cancelled or validation failed
   }

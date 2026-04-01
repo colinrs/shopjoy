@@ -284,20 +284,23 @@ var DefaultRefundReasons = []RefundReason{
 // Shipment 发货单
 type Shipment struct {
 	application.Model
-	TenantID       shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	OrderID        string          `gorm:"column:order_id;not null;index"`
-	ShipmentNo     string          `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
-	Status         ShipmentStatus  `gorm:"column:status;not null;default:0;index"`
-	Carrier        string          `gorm:"column:carrier;not null;default:''"`
-	CarrierCode    string          `gorm:"column:carrier_code;not null;default:''"`
-	TrackingNo     string          `gorm:"column:tracking_no;not null;default:'';index"`
-	ShippingCost   decimal.Decimal `gorm:"column:cost_amount;type:decimal(19,4);not null;default:0"`   // 运费成本
-	ShippingCurrency string        `gorm:"column:cost_currency;not null;default:'CNY'"`
-	Weight         decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"` // 重量（kg）
-	ShippedAt      *time.Time     `gorm:"column:shipped_at"`
-	DeliveredAt    *time.Time     `gorm:"column:delivered_at"`
-	Remark         string          `gorm:"column:remark;not null;default:''"`
-	Items          []ShipmentItem  `gorm:"foreignKey:ShipmentID"`
+	TenantID         shared.TenantID `gorm:"column:tenant_id;not null;index"`
+	OrderID          string          `gorm:"column:order_id;not null;index"`
+	ShipmentNo       string          `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
+	Status           ShipmentStatus  `gorm:"column:status;not null;default:0;index"`
+	Carrier          string          `gorm:"column:carrier;not null;default:''"`
+	CarrierCode      string          `gorm:"column:carrier_code;not null;default:''"`
+	TrackingNo       string          `gorm:"column:tracking_no;not null;default:'';index"`
+	ShippingCost     decimal.Decimal `gorm:"column:cost_amount;type:decimal(19,4);not null;default:0"`   // 运费成本
+	ShippingCurrency string          `gorm:"column:cost_currency;not null;default:'CNY'"`
+	Weight           decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"` // 重量（kg）
+	ShippedAt        *time.Time     `gorm:"column:shipped_at"`
+	DeliveredAt      *time.Time     `gorm:"column:delivered_at"`
+	CancelledAt      *time.Time     `gorm:"column:cancelled_at"`
+	CancelledBy      int64          `gorm:"column:cancelled_by;not null;default:0"`
+	CancelledReason  string         `gorm:"column:cancelled_reason;not null;default:''"`
+	Remark           string          `gorm:"column:remark;not null;default:''"`
+	Items            []ShipmentItem  `gorm:"foreignKey:ShipmentID"`
 }
 
 func (s *Shipment) TableName() string {
@@ -381,6 +384,23 @@ func (s *Shipment) Cancel(reason string, updatedBy int64) error {
 	return nil
 }
 
+// CancelShipment 取消发货单（带原因）
+func (s *Shipment) CancelShipment(reason string, cancelledBy int64) error {
+	if s.Status == ShipmentStatusDelivered {
+		return code.ErrShipmentCannotCancelDelivered
+	}
+	if s.Status == ShipmentStatusCancelled {
+		return code.ErrShipmentAlreadyCancelled
+	}
+	now := time.Now().UTC()
+	s.Status = ShipmentStatusCancelled
+	s.CancelledAt = &now
+	s.CancelledBy = cancelledBy
+	s.CancelledReason = reason
+	s.UpdatedAt = now
+	return nil
+}
+
 // SetShippingCost 设置运费
 func (s *Shipment) SetShippingCost(cost decimal.Decimal, currency string) {
 	s.ShippingCost = cost
@@ -394,11 +414,17 @@ func (s *Shipment) SetWeight(weight decimal.Decimal) {
 	s.Weight = weight
 }
 
+// ShipmentSequenceMod is the modulus for generating shipment sequence numbers
+// This ensures the sequence number fits within 6 digits (000000-999999)
+const ShipmentSequenceMod = 1000000
+
 // GenerateShipmentNo 生成发货单号
 func GenerateShipmentNo(tenantID shared.TenantID, sequence int) string {
 	// Format: SHP{YYYYMMDD}{sequence:06d}
 	dateStr := time.Now().UTC().Format("20060102")
-	return fmt.Sprintf("SHP%s%06d", dateStr, sequence)
+	// Ensure sequence fits in 6 digits
+	seq := sequence % ShipmentSequenceMod
+	return fmt.Sprintf("SHP%s%06d", dateStr, seq)
 }
 
 // IsShipped 是否已发货

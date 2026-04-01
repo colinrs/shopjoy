@@ -1425,6 +1425,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: shipments.UpdateShipmentHandler(serverCtx),
 				},
 				{
+					// 取消发货单
+					Method:  http.MethodPut,
+					Path:    "/api/v1/shipments/:id/cancel",
+					Handler: shipments.CancelShipmentHandler(serverCtx),
+				},
+				{
 					// 更新发货单状态
 					Method:  http.MethodPut,
 					Path:    "/api/v1/shipments/:id/status",

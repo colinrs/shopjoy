@@ -41,17 +41,18 @@ type OrderValidator interface {
 	ValidateShipmentItems(order *OrderValidationInfo, items []CreateShipmentItemRequest) error
 }
 
-// NopOrderValidator is a no-op validator for use when order service is not available
-// In production, this should be replaced with actual order service integration
-type NopOrderValidator struct{}
+// DefaultOrderValidator is the default validator when order service is not available
+// It returns an error indicating order validation is required but not available
+type DefaultOrderValidator struct{}
 
-func (n *NopOrderValidator) GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderValidationInfo, error) {
-	// Return nil to skip validation when order service is not integrated
-	return nil, nil
+// GetOrderForShipment returns error because order service is not integrated
+func (v *DefaultOrderValidator) GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderValidationInfo, error) {
+	return nil, code.ErrOrderServiceUnavailable
 }
 
-func (n *NopOrderValidator) ValidateShipmentItems(order *OrderValidationInfo, items []CreateShipmentItemRequest) error {
-	return nil
+// ValidateShipmentItems returns error
+func (v *DefaultOrderValidator) ValidateShipmentItems(order *OrderValidationInfo, items []CreateShipmentItemRequest) error {
+	return code.ErrOrderServiceUnavailable
 }
 
 // OrderFulfillmentItem 订单履约明细
@@ -357,7 +358,7 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 			return err
 		}
 
-		shipmentNo := fulfillment.GenerateShipmentNo(tenantID, int(shipmentID%1000000))
+		shipmentNo := fulfillment.GenerateShipmentNo(tenantID, int(shipmentID))
 
 		// Create shipment entity
 		shipment := &fulfillment.Shipment{

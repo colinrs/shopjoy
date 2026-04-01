@@ -162,6 +162,21 @@ type (
 		StartTime   string `form:"start_time,optional"` // RFC3339
 		EndTime     string `form:"end_time,optional"` // RFC3339
 	}
+	// ===================== Cancel Shipment Types =====================
+	// Cancel shipment request
+	CancelShipmentReq {
+		ID     int64  `path:"id"`
+		Reason string `json:"reason" binding:"required,min=5,max=200"`
+	}
+	// Cancel shipment response
+	CancelShipmentResp {
+		ID          int64  `json:"id"`
+		ShipmentNo  string `json:"shipment_no"`
+		Status      string `json:"status"`
+		StatusText  string `json:"status_text"`
+		CancelledAt string `json:"cancelled_at"`
+		Reason      string `json:"reason"`
+	}
 	// ===================== Batch Update Tracking Types =====================
 	// Batch update tracking request
 	BatchUpdateTrackingReq {
@@ -597,6 +612,10 @@ service admin-api {
 	@doc "导出发货单"
 	@handler ExportShipmentsHandler
 	get /api/v1/shipments/export (ExportShipmentsReq)
+
+	@doc "取消发货单"
+	@handler CancelShipmentHandler
+	put /api/v1/shipments/:id/cancel (CancelShipmentReq) returns (CancelShipmentResp)
 }
 
 // ===================== Refund API =====================
