@@ -77,7 +77,9 @@ func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq)
 			continue
 		}
 
-		// Log inventory restoration
+		// Restore inventory (if needed)
+		// This would typically be done through an event or a separate service
+		// For now, we'll just log it
 		l.Logger.Infof("Order %s cancelled, inventory should be restored", order.OrderNo)
 
 		success = append(success, orderID)
