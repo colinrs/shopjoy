@@ -55,10 +55,10 @@
           </el-select>
           <el-select v-model="fulfillmentFilter" :placeholder="$t('orders.filterFulfillment')" clearable class="filter-select" @change="handleSearch">
             <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('orders.unshipped')" value="pending" />
-            <el-option :label="$t('orders.partialShipped')" value="partial_shipped" />
-            <el-option :label="$t('orders.shipped')" value="shipped" />
-            <el-option :label="$t('orders.delivered')" value="delivered" />
+            <el-option :label="$t('orders.unshipped')" value="0" />
+            <el-option :label="$t('orders.partialShipped')" value="1" />
+            <el-option :label="$t('orders.shipped')" value="2" />
+            <el-option :label="$t('orders.delivered')" value="3" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -504,10 +504,10 @@ const getStatusType = (status: OrderStatus) => {
 
 const getFulfillmentType = (status: string) => {
   const types: Record<string, string> = {
-    'pending': 'warning',
-    'partial_shipped': 'primary',
-    'shipped': 'info',
-    'delivered': 'success'
+    '0': 'warning',
+    '1': 'primary',
+    '2': 'info',
+    '3': 'success'
   }
   return types[status] || 'info'
 }
@@ -515,7 +515,7 @@ const getFulfillmentType = (status: string) => {
 // Action helpers
 const canShip = (order: Order) => {
   return order.status === 'paid' &&
-    (order.fulfillment_status === 'pending' || order.fulfillment_status === 'partial_shipped')
+    (order.fulfillment_status === '0' || order.fulfillment_status === '1')
 }
 
 const canCancel = (order: Order) => {

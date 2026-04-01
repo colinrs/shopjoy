@@ -1,5 +1,8 @@
 import request from '@/utils/request'
 
+// User status (backend: 0=inactive, 1=active, 2=suspended, 3=deleted)
+export type UserStatus = 0 | 1 | 2 | 3
+
 // User interface matching backend GetUserResponse
 export interface User {
   id: number
@@ -11,7 +14,7 @@ export interface User {
   gender: number
   gender_text: string
   birthday: string | null
-  status: number
+  status: UserStatus
   status_text: string
   review_count: number
   created_at: string
@@ -64,7 +67,7 @@ export interface ListUsersParams {
   page_size: number
   name?: string
   email?: string
-  status?: number
+  status?: UserStatus
   keyword?: string
   // Enhanced filters
   points_min?: number
@@ -236,7 +239,7 @@ export function getUserListEnhanced(params: ListUsersParams) {
 // Batch update user status request
 export interface BatchUpdateUserStatusRequest {
   user_ids: number[]
-  status: 1 | 2  // 1=activate, 2=suspend
+  status: UserStatus  // 1=activate, 2=suspend
   reason?: string
 }
 

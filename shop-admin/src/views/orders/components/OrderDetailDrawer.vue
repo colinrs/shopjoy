@@ -344,7 +344,7 @@ const statusTimeline = computed(() => {
 const canShip = computed(() => {
   if (!order.value) return false
   return order.value.status === 'paid' &&
-    (order.value.fulfillment_status === 'pending' || order.value.fulfillment_status === 'partial_shipped')
+    (order.value.fulfillment_status === '0' || order.value.fulfillment_status === '1')
 })
 
 const canAdjustPrice = computed(() => {
@@ -404,10 +404,10 @@ const getStatusTagType = (status: OrderStatus | undefined) => {
 
 const getFulfillmentTagType = (status: FulfillmentStatus | undefined) => {
   const types: Record<FulfillmentStatus, string> = {
-    'pending': 'warning',
-    'partial_shipped': 'primary',
-    'shipped': 'info',
-    'delivered': 'success'
+    '0': 'warning',
+    '1': 'primary',
+    '2': 'info',
+    '3': 'success'
   }
   return status !== undefined ? types[status] : 'info'
 }

@@ -266,6 +266,7 @@ import {
   exportUsers,
   batchUpdateUserStatus,
   type User,
+  type UserStatus,
   type UserStats,
   type ExtendedUser,
   type BatchUpdateUserStatusRequest
@@ -277,7 +278,7 @@ const loading = ref(false)
 const editLoading = ref(false)
 const exportLoading = ref(false)
 const searchQuery = ref('')
-const statusFilter = ref(0)
+const statusFilter = ref<UserStatus | undefined>(undefined)
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)

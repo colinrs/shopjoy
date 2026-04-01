@@ -2,25 +2,25 @@ import request from '@/utils/request'
 import { downloadFile } from '@/utils/download'
 
 // Types
-export type ShipmentStatus = 'pending' | 'shipped' | 'in_transit' | 'delivered' | 'failed' | 'cancelled'
+export type ShipmentStatus = '0' | '1' | '2' | '3' | '4' | '5'
 
 // Status constants for use in templates
 export const ShipmentStatusMap = {
-  PENDING: 'pending',
-  SHIPPED: 'shipped',
-  IN_TRANSIT: 'in_transit',
-  DELIVERED: 'delivered',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled'
+  PENDING: '0',
+  SHIPPED: '1',
+  IN_TRANSIT: '2',
+  DELIVERED: '3',
+  FAILED: '4',
+  CANCELLED: '5'
 } as const
 
 export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
 
 export type RefundType = 'full_refund' | 'partial_refund'
 
-export type RefundStatus = 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled'
+export type RefundStatus = '0' | '1' | '2' | '3' | '4'
 
-export type OrderRefundStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'completed'
+export type OrderRefundStatus = '0' | '1' | '2' | '3' | '4'
 
 export interface Shipment {
   id: number

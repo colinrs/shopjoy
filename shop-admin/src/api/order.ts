@@ -6,8 +6,8 @@ import request from '@/utils/request'
 // Values: pending_payment, paid, shipped, delivered, cancelled, refunded
 export type OrderStatus = 'pending_payment' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
 
-// Fulfillment status
-export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
+// Fulfillment status (backend: "0"=pending, "1"=partial_shipped, "2"=shipped, "3"=delivered)
+export type FulfillmentStatus = '0' | '1' | '2' | '3'
 
 // Order list query parameters
 export interface OrderListParams {

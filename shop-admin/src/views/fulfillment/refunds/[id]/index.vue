@@ -138,7 +138,7 @@
         </el-card>
 
         <!-- Rejection Info -->
-        <el-card v-if="refund?.status === 'rejected' && refund.reject_reason" class="info-card rejection-card" shadow="never">
+        <el-card v-if="refund?.status === '2' && refund.reject_reason" class="info-card rejection-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -208,7 +208,7 @@
         </el-card>
 
         <!-- Actions Card -->
-        <el-card v-if="refund?.status === 'pending'" class="actions-card" shadow="never">
+        <el-card v-if="refund?.status === '0'" class="actions-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -299,11 +299,11 @@ const rejectRules = {
 }
 
 const statusTypeMap: Record<string, { type: 'warning' | 'success' | 'danger' | 'primary' | 'info', text: string }> = {
-  'pending': { type: 'warning', text: 'Pending' },
-  'approved': { type: 'success', text: 'Approved' },
-  'rejected': { type: 'danger', text: 'Rejected' },
-  'completed': { type: 'primary', text: 'Completed' },
-  'cancelled': { type: 'info', text: 'Cancelled' }
+  '0': { type: 'warning', text: 'Pending' },
+  '1': { type: 'success', text: 'Approved' },
+  '2': { type: 'danger', text: 'Rejected' },
+  '3': { type: 'primary', text: 'Completed' },
+  '4': { type: 'info', text: 'Cancelled' }
 }
 
 const timeline = computed(() => {
@@ -327,17 +327,17 @@ const timeline = computed(() => {
     }
   ]
 
-  if ((refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed') && refund.value.approved_at) {
+  if ((refund.value.status === '1' || refund.value.status === '2' || refund.value.status === '3') && refund.value.approved_at) {
     events.push({
       title: t('fulfillment.approvedStatus'),
       time: refund.value.approved_at,
       type: 'success',
-      active: refund.value.status === 'approved' || refund.value.status === 'rejected' || refund.value.status === 'completed',
+      active: refund.value.status === '1' || refund.value.status === '2' || refund.value.status === '3',
       description: refund.value.approved_by ? `${t('common.detail')}: ${refund.value.approved_by}` : ''
     })
   }
 
-  if (refund.value.status === 'rejected') {
+  if (refund.value.status === '2') {
     events.push({
       title: t('fulfillment.rejectedStatus'),
       time: refund.value.approved_at || refund.value.created_at,
@@ -347,7 +347,7 @@ const timeline = computed(() => {
     })
   }
 
-  if (refund.value.status === 'completed' && refund.value.completed_at) {
+  if (refund.value.status === '3' && refund.value.completed_at) {
     events.push({
       title: t('fulfillment.refundCompleted'),
       time: refund.value.completed_at,
@@ -357,7 +357,7 @@ const timeline = computed(() => {
     })
   }
 
-  if (refund.value.status === 'cancelled') {
+  if (refund.value.status === '4') {
     events.push({
       title: t('fulfillment.cancelledStatus'),
       time: refund.value.completed_at || refund.value.created_at,

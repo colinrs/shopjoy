@@ -3,7 +3,7 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <el-card class="stat-item pending" shadow="hover" @click="handleStatusFilter('pending')">
+        <el-card class="stat-item pending" shadow="hover" @click="handleStatusFilter('0')">
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.pendingShipment') }}</span>
@@ -16,7 +16,7 @@
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <el-card class="stat-item shipped" shadow="hover" @click="handleStatusFilter('shipped')">
+        <el-card class="stat-item shipped" shadow="hover" @click="handleStatusFilter('1')">
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.shippedShipment') }}</span>
@@ -29,7 +29,7 @@
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <el-card class="stat-item delivered" shadow="hover" @click="handleStatusFilter('delivered')">
+        <el-card class="stat-item delivered" shadow="hover" @click="handleStatusFilter('3')">
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.deliveredShipment') }}</span>
@@ -60,11 +60,11 @@
           </el-input>
           <el-select v-model="statusFilter" :placeholder="$t('fulfillment.status')" clearable class="filter-select">
             <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('fulfillment.pendingShipment')" value="pending" />
-            <el-option :label="$t('fulfillment.shippedShipment')" value="shipped" />
-            <el-option :label="$t('fulfillment.inTransitShipment')" value="in_transit" />
-            <el-option :label="$t('fulfillment.deliveredShipment')" value="delivered" />
-            <el-option :label="$t('fulfillment.failedShipment')" value="failed" />
+            <el-option :label="$t('fulfillment.pendingShipment')" value="0" />
+            <el-option :label="$t('fulfillment.shippedShipment')" value="1" />
+            <el-option :label="$t('fulfillment.inTransitShipment')" value="2" />
+            <el-option :label="$t('fulfillment.deliveredShipment')" value="3" />
+            <el-option :label="$t('fulfillment.failedShipment')" value="4" />
           </el-select>
           <el-select v-model="carrierFilter" :placeholder="$t('fulfillment.carrier')" clearable class="filter-select">
             <el-option :label="$t('common.all')" value="" />
@@ -308,12 +308,12 @@ const stats = ref({
 })
 
 const statusTypeMap: Record<string, { type: 'warning' | 'primary' | 'info' | 'success' | 'danger', text: string }> = {
-  'pending': { type: 'warning', text: 'Pending' },
-  'shipped': { type: 'primary', text: 'Shipped' },
-  'in_transit': { type: 'info', text: 'In Transit' },
-  'delivered': { type: 'success', text: 'Delivered' },
-  'failed': { type: 'danger', text: 'Failed' },
-  'cancelled': { type: 'info', text: 'Cancelled' }
+  '0': { type: 'warning', text: 'Pending' },
+  '1': { type: 'primary', text: 'Shipped' },
+  '2': { type: 'info', text: 'In Transit' },
+  '3': { type: 'success', text: 'Delivered' },
+  '4': { type: 'danger', text: 'Failed' },
+  '5': { type: 'info', text: 'Cancelled' }
 }
 
 // Shipment list

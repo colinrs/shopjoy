@@ -3,25 +3,25 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-item pending" @click="handleStatusFilter('pending')">
+        <div class="stat-item pending" @click="handleStatusFilter('0')">
           <p class="stat-number">{{ stats.pending }}</p>
           <p class="stat-label">{{ $t('fulfillment.pendingRefundStatus') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item approved" @click="handleStatusFilter('approved')">
+        <div class="stat-item approved" @click="handleStatusFilter('1')">
           <p class="stat-number">{{ stats.approved }}</p>
           <p class="stat-label">{{ $t('fulfillment.approvedRefundStatus') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item rejected" @click="handleStatusFilter('rejected')">
+        <div class="stat-item rejected" @click="handleStatusFilter('2')">
           <p class="stat-number">{{ stats.rejected }}</p>
           <p class="stat-label">{{ $t('fulfillment.rejectedRefundStatus') }}</p>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item completed" @click="handleStatusFilter('completed')">
+        <div class="stat-item completed" @click="handleStatusFilter('3')">
           <p class="stat-number">{{ stats.completed }}</p>
           <p class="stat-label">{{ $t('fulfillment.completedRefundStatus') }}</p>
         </div>
@@ -45,11 +45,11 @@
           </el-input>
           <el-select v-model="statusFilter" :placeholder="$t('fulfillment.refundStatus')" clearable class="filter-select">
             <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('fulfillment.pendingRefundStatus')" value="pending" />
-            <el-option :label="$t('fulfillment.approvedRefundStatus')" value="approved" />
-            <el-option :label="$t('fulfillment.rejectedRefundStatus')" value="rejected" />
-            <el-option :label="$t('fulfillment.completedRefundStatus')" value="completed" />
-            <el-option :label="$t('fulfillment.cancelledRefundStatus')" value="cancelled" />
+            <el-option :label="$t('fulfillment.pendingRefundStatus')" value="0" />
+            <el-option :label="$t('fulfillment.approvedRefundStatus')" value="1" />
+            <el-option :label="$t('fulfillment.rejectedRefundStatus')" value="2" />
+            <el-option :label="$t('fulfillment.completedRefundStatus')" value="3" />
+            <el-option :label="$t('fulfillment.cancelledRefundStatus')" value="4" />
           </el-select>
           <el-select v-model="reasonFilter" :placeholder="$t('fulfillment.reasonType')" clearable class="filter-select">
             <el-option :label="$t('common.all')" value="" />
@@ -87,7 +87,7 @@
         class="pending-alert"
       >
         <template #action>
-          <el-button type="warning" size="small" @click="handleStatusFilter('pending')">
+          <el-button type="warning" size="small" @click="handleStatusFilter('0')">
             {{ $t('fulfillment.reviewNow') }}
           </el-button>
         </template>
@@ -150,7 +150,7 @@
               {{ $t('fulfillment.detailsAction') }}
             </el-button>
             <el-button
-              v-if="row.status === 'pending'"
+              v-if="row.status === '0'"
               type="success"
               link
               size="small"
@@ -159,7 +159,7 @@
               {{ $t('fulfillment.approveAction') }}
             </el-button>
             <el-button
-              v-if="row.status === 'pending'"
+              v-if="row.status === '0'"
               type="danger"
               link
               size="small"
@@ -260,11 +260,11 @@ const stats = ref({
 })
 
 const statusTypeMap: Record<string, { type: 'warning' | 'success' | 'danger' | 'primary' | 'info', text: string }> = {
-  'pending': { type: 'warning', text: 'Pending' },
-  'approved': { type: 'success', text: 'Approved' },
-  'rejected': { type: 'danger', text: 'Rejected' },
-  'completed': { type: 'primary', text: 'Completed' },
-  'cancelled': { type: 'info', text: 'Cancelled' }
+  '0': { type: 'warning', text: 'Pending' },
+  '1': { type: 'success', text: 'Approved' },
+  '2': { type: 'danger', text: 'Rejected' },
+  '3': { type: 'primary', text: 'Completed' },
+  '4': { type: 'info', text: 'Cancelled' }
 }
 
 // Refund list
@@ -284,10 +284,10 @@ const loadStats = async () => {
   try {
     // Fetch counts for each status via API (parallel calls for efficiency)
     const [pendingRes, approvedRes, rejectedRes, completedRes] = await Promise.all([
-      getRefundList({ status: 'pending', page_size: 1 }),
-      getRefundList({ status: 'approved', page_size: 1 }),
-      getRefundList({ status: 'rejected', page_size: 1 }),
-      getRefundList({ status: 'completed', page_size: 1 })
+      getRefundList({ status: '0', page_size: 1 }),
+      getRefundList({ status: '1', page_size: 1 }),
+      getRefundList({ status: '2', page_size: 1 }),
+      getRefundList({ status: '3', page_size: 1 })
     ])
     stats.value = {
       pending: pendingRes.total,
