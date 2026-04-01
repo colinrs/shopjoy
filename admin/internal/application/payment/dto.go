@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
@@ -61,7 +60,7 @@ type ListTransactionsResponse struct {
 type TransactionDTO struct {
 	ID                   int64  `json:"id"`
 	TransactionID        string `json:"transaction_id"`
-	OrderID              string `json:"order_id"`
+	OrderID              int64  `json:"order_id"`
 	OrderNo              string `json:"order_no"`
 	PaymentMethod        string `json:"payment_method"`
 	PaymentMethodText    string `json:"payment_method_text"`
@@ -143,7 +142,7 @@ func toTransactionDTO(txn *payment.PaymentTransaction) *TransactionDTO {
 	return &TransactionDTO{
 		ID:                   txn.ID,
 		TransactionID:        txn.TransactionID,
-		OrderID:              formatOrderID(txn.OrderID),
+		OrderID:              txn.OrderID,
 		OrderNo:              "", // Would need to fetch from order service
 		PaymentMethod:        string(txn.PaymentMethod),
 		PaymentMethodText:    getPaymentMethodText(txn.PaymentMethod),
@@ -173,9 +172,4 @@ func toPaymentRefundDTO(refund *payment.PaymentRefund) *PaymentRefundDTO {
 		RefundedAt:      timestampToString(refund.RefundedAt),
 		CreatedAt:       timestampToString(&refund.CreatedAt),
 	}
-}
-
-// formatOrderID formats an order ID to string
-func formatOrderID(orderID int64) string {
-	return strconv.FormatInt(orderID, 10)
 }
