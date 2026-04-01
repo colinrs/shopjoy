@@ -337,15 +337,22 @@ INSERT INTO `products` (`id`, `sku`, `name`, `description`, `price`, `cost_price
 
 -- SKU数据 (商品变体)
 INSERT INTO `skus` (`id`, `product_id`, `code`, `price_amount`, `price_currency`, `stock`, `attributes`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+-- Nike Air Max 270 变体
 (1, 1, 'SKU-001-BLK-42', 129900, 'CNY', 30, '{"颜色": "黑色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (2, 1, 'SKU-001-BLK-43', 129900, 'CNY', 25, '{"颜色": "黑色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (3, 1, 'SKU-001-WHT-42', 129900, 'CNY', 25, '{"颜色": "白色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (4, 1, 'SKU-001-WHT-43', 129900, 'CNY', 20, '{"颜色": "白色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+-- Adidas Ultraboost 22 变体
 (5, 2, 'SKU-002-BLK-42', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (6, 2, 'SKU-002-BLK-43', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+-- iPhone 15 手机壳 变体
 (7, 3, 'SKU-003-BLK', 9900, 'CNY', 200, '{"颜色": "黑色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 (8, 3, 'SKU-003-WHT', 9900, 'CNY', 200, '{"颜色": "白色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
+(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+-- MacBook 充电器 (无规格)
+(10, 4, 'SKU-004', 79900, 'CNY', 50, '{}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+-- 简约台灯 (无规格)
+(11, 5, 'SKU-005', 29900, 'CNY', 200, '{}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
 
 -- ============================================
 -- 测试数据

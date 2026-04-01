@@ -161,7 +161,7 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `sku_id`, `product_na
 -- ORD202503010001 商品
 (1, 'ORD202503010001', 1, 1, 'Nike Air Max 270', '黑色 42码', 'https://cdn.example.com/p1-1.jpg', 129900, 1, 129900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))),
 (2, 'ORD202503010001', 3, 7, 'iPhone 15 手机壳', '黑色', 'https://cdn.example.com/p3-1.jpg', 9900, 3, 29700, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))),
-(3, 'ORD202503010001', 5, 0, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 1, 29900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))),
+(3, 'ORD202503010001', 5, 11, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 1, 29900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))),
 
 -- ORD202503100001 商品
 (4, 'ORD202503100001', 2, 5, 'Adidas Ultraboost 22', '黑色 42码', 'https://cdn.example.com/p2-1.jpg', 159900, 1, 159900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 DAY))),
@@ -173,10 +173,10 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `sku_id`, `product_na
 (6, 'ORD202503200001', 1, 1, 'Nike Air Max 270', '黑色 42码', 'https://cdn.example.com/p1-1.jpg', 129900, 1, 129900, UNIX_TIMESTAMP()),
 
 -- ORD202503050001 商品 (已取消)
-(7, 'ORD202503050001', 5, 0, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 1, 29900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY))),
+(7, 'ORD202503050001', 5, 11, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 1, 29900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY))),
 
 -- ORD202503120001 商品
-(8, 'ORD202503120001', 4, 0, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 DAY)));
+(8, 'ORD202503120001', 4, 10, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 DAY)));
 
 -- ============================================
 -- 测试数据
@@ -195,15 +195,15 @@ INSERT INTO `carts` (`id`, `tenant_id`, `user_id`, `session_id`, `updated_at`) V
 INSERT INTO `cart_items` (`id`, `tenant_id`, `user_id`, `cart_id`, `product_id`, `sku_id`, `product_name`, `sku_name`, `image`, `price`, `quantity`, `total_amount`, `selected`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 (1, 1, 1, 1, 1, 2, 'Nike Air Max 270', '黑色 43码', 'https://cdn.example.com/p1-1.jpg', 129900, 1, 129900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
 (2, 1, 1, 1, 3, 7, 'iPhone 15 手机壳', '黑色', 'https://cdn.example.com/p3-1.jpg', 9900, 2, 19800, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
-(3, 1, 1, 1, 4, 0, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
+(3, 1, 1, 1, 4, 10, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
 
 -- 购物车商品数据 (Demo Shop - 用户2)
 (4, 1, 2, 2, 2, 5, 'Adidas Ultraboost 22', '黑色 42码', 'https://cdn.example.com/p2-1.jpg', 159900, 1, 159900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(5, 1, 2, 2, 5, 0, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 2, 59800, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(5, 1, 2, 2, 5, 11, '简约台灯', '', 'https://cdn.example.com/p5-1.jpg', 29900, 2, 59800, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
 
 -- 购物车商品数据 (Demo Shop - 用户3)
 (6, 1, 3, 3, 1, 3, 'Nike Air Max 270', '白色 42码', 'https://cdn.example.com/p1-1.jpg', 129900, 1, 129900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 3, 3),
 
 -- 购物车商品数据 (Enterprise Corp - 用户6)
 (7, 3, 6, 5, 3, 8, 'iPhone 15 手机壳', '白色', 'https://cdn.example.com/p3-1.jpg', 9900, 1, 9900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 6, 6),
-(8, 3, 6, 5, 4, 0, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 6, 6);
+(8, 3, 6, 5, 4, 10, 'MacBook 充电器', '', 'https://cdn.example.com/p4-1.jpg', 79900, 1, 79900, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 6, 6);

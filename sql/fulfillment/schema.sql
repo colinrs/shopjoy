@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS `shipments` (
     `remark` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '备注',
     `shipped_at` TIMESTAMP NULL COMMENT '发货时间',
     `delivered_at` TIMESTAMP NULL COMMENT '送达时间',
+    `cancelled_at` TIMESTAMP NULL COMMENT '取消时间',
+    `cancelled_by` BIGINT NOT NULL DEFAULT 0 COMMENT '取消人',
+    `cancelled_reason` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '取消原因',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `created_by` BIGINT NOT NULL DEFAULT 0 COMMENT '创建人',
@@ -186,14 +189,14 @@ INSERT INTO `shipments` (`id`, `tenant_id`, `order_id`, `status`, `carrier`, `tr
 INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
 (1, 1, 1, 1, 1, 1, 1),
 (2, 1, 1, 2, 3, 7, 3),
-(3, 1, 1, 3, 5, 0, 1),
+(3, 1, 1, 3, 5, 11, 1),
 (4, 1, 2, 4, 2, 5, 1),
-(5, 3, 3, 8, 4, 0, 1);
+(5, 3, 3, 8, 4, 10, 1);
 
 -- 退款数据
-INSERT INTO `refunds` (`id`, `tenant_id`, `order_id`, `user_id`, `status`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT INTO `refunds` (`id`, `tenant_id`, `order_id`, `refund_no`, `user_id`, `type`, `status`, `reason_type`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- ORD202503010001 手机壳退款 (已完成)
-(1, 1, 'ORD202503010001', 1, 3, '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 26 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 27 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), 1, 1),
+(1, 1, 'ORD202503010001', 'REF202503010001', 1, 2, 3, 'quality', '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 26 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 27 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), 1, 1),
 
 -- ORD202503050001 全额退款 (已完成)
-(2, 1, 'ORD202503050001', 1, 3, '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), 1, 1);
+(2, 1, 'ORD202503050001', 'REF202503050001', 1, 1, 3, 'cancel', '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), 1, 1);
