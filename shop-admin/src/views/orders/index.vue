@@ -146,7 +146,7 @@
                   <p><strong>{{ $t('orders.phone') }}:</strong> {{ row.shipping_address?.receiver_phone || '-' }}</p>
                   <p><strong>{{ $t('orders.address') }}:</strong> {{ row.shipping_address?.full_address || '-' }}</p>
                   <h4 style="margin-top: 20px">{{ $t('orders.paymentInfo') }}</h4>
-                  <p><strong>{{ $t('orders.paymentMethod') }}:</strong> {{ row.payment_method_name || '-' }}</p>
+                  <p><strong>{{ $t('orders.paymentMethod') }}:</strong> {{ row.payment_method_text || '-' }}</p>
                   <p><strong>{{ $t('orders.paidAt') }}:</strong> {{ formatTime(row.paid_at) }}</p>
                 </el-col>
               </el-row>

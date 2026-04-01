@@ -84,7 +84,7 @@
               <p class="quantity">x{{ item.quantity }}</p>
             </div>
             <div class="item-total">
-              {{ order?.currency }} {{ formatAmount(item.total_price) }}
+              {{ order?.currency }} {{ formatAmount(String(parseFloat(item.unit_price) * item.quantity)) }}
             </div>
             <div v-if="item.shipped_qty > 0" class="item-ship-info">
               <el-tag size="small" type="success">{{ item.shipped_qty }} {{ $t('orders.shippedQty') }}</el-tag>
@@ -117,22 +117,16 @@
         </div>
         <el-descriptions :column="2" border size="small">
           <el-descriptions-item :label="$t('orders.paymentMethod')">
-            {{ order?.payment_info?.payment_method_name || '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('orders.paymentNo')">
-            {{ order?.payment_info?.payment_no || '-' }}
+            {{ order?.payment_method_text || '-' }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('orders.productAmount')">
             {{ order?.currency }} {{ formatAmount(order?.total_amount) }}
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('orders.discount')">
-            <span class="discount-text">-{{ order?.currency }} {{ formatAmount(order?.discount_amount) }}</span>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('orders.amount')">
             <span class="pay-amount">{{ order?.currency }} {{ formatAmount(order?.pay_amount) }}</span>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('orders.paidAt')">
-            {{ formatTime(order?.payment_info?.paid_at) || '-' }}
+            {{ formatTime(order?.paid_at) || '-' }}
           </el-descriptions-item>
         </el-descriptions>
       </div>
@@ -302,12 +296,12 @@ const statusTimeline = computed(() => {
   })
 
   // Paid
-  if (o.payment_info?.paid_at) {
+  if (o.paid_at) {
     timeline.push({
       title: t('orders.paymentReceived'),
-      time: formatTime(o.payment_info.paid_at),
+      time: formatTime(o.paid_at),
       type: 'success' as const,
-      description: `${o.payment_info.payment_method_name} - ${o.currency} ${formatAmount(o.pay_amount)}`
+      description: `${o.payment_method_text} - ${o.currency} ${formatAmount(o.pay_amount)}`
     })
   }
 

@@ -33,7 +33,7 @@ export interface Shipment {
   tracking_no: string
   tracking_url: string
   shipping_cost: string
-  shipping_currency: string
+  currency: string
   weight: string
   shipped_at: string | null
   delivered_at: string | null
@@ -61,7 +61,7 @@ export interface CreateShipmentRequest {
   carrier?: string
   tracking_no: string
   shipping_cost?: string
-  shipping_currency?: string
+  currency?: string
   weight?: string
   remark?: string
   items: {

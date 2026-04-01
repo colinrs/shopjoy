@@ -128,7 +128,7 @@
             </el-descriptions-item>
             <el-descriptions-item :label="$t('fulfillment.shippingCost')">
               <span v-if="shipment?.shipping_cost">
-                {{ shipment.shipping_currency }} {{ shipment.shipping_cost }}
+                {{ shipment.currency }} {{ shipment.shipping_cost }}
               </span>
               <span v-else class="no-data">-</span>
             </el-descriptions-item>

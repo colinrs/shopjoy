@@ -276,7 +276,7 @@ const handleSubmit = async () => {
         carrier: form.carrier,
         tracking_no: form.tracking_no,
         shipping_cost: String(Math.round(parseFloat(form.shipping_cost) * 100)),
-        shipping_currency: form.currency,
+        currency: form.currency,
         weight: form.weight,
         remark: form.remark,
         items: form.items

@@ -33,7 +33,6 @@ export interface OrderItem {
   shipped_qty: number
   pending_qty: number
   unit_price: string
-  total_price: string
 }
 
 // Shipping address
@@ -47,15 +46,10 @@ export interface ShippingAddress {
   full_address: string
 }
 
-// Payment info
+// Payment info (backend only has payment_method and payment_method_text)
 export interface PaymentInfo {
   payment_method: string
-  payment_method_name: string
-  payment_no: string
-  paid_at: string
-  pay_amount: string
-  discount_amount: string
-  currency: string
+  payment_method_text: string
 }
 
 // Shipment info
@@ -85,11 +79,10 @@ export interface Order {
   user_phone: string
   total_amount: string
   pay_amount: string
-  discount_amount: string
   currency: string
   item_count: number
   payment_method: string
-  payment_method_name: string
+  payment_method_text: string
   order_source: string
   buyer_remark: string
   seller_remark: string
@@ -101,7 +94,6 @@ export interface Order {
 // Order detail
 export interface OrderDetail extends Order {
   shipping_address: ShippingAddress
-  payment_info: PaymentInfo
   shipments: ShipmentInfo[]
 }
 

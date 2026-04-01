@@ -153,7 +153,7 @@ const parseCSV = (content: string): BatchUpdateTrackingRequest[] => {
         shipment_ids: [shipmentId],
         carrier_code: parts[1],
         tracking_no: parts[2],
-        weight: parts[3] ? parseFloat(parts[3]) : undefined
+        weight: parts[3] || undefined
       })
     }
   }
