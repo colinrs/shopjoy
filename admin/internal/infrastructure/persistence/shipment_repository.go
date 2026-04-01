@@ -25,7 +25,7 @@ func NewShipmentRepository() fulfillment.ShipmentRepository {
 type shipmentModel struct {
 	ID               int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
 	TenantID         int64           `gorm:"column:tenant_id;not null;index"`
-	OrderID          string          `gorm:"column:order_id;size:64;not null;index"`
+	OrderID          int64           `gorm:"column:order_id;not null;index"`
 	ShipmentNo       string          `gorm:"column:shipment_no;size:32;not null;uniqueIndex:uk_shipment_no"`
 	Status           int             `gorm:"column:status;not null;default:0;index"`
 	Carrier          string          `gorm:"column:carrier;size:50;not null;default:''"`
@@ -162,7 +162,7 @@ func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB, tenant
 }
 
 // FindByOrderID finds all shipments for an order
-func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("order_id = ? AND deleted_at IS NULL", orderID)
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -207,7 +207,7 @@ func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
 	}
 
-	if query.OrderID != "" {
+	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
 	}
 	if query.Status.IsValid() {

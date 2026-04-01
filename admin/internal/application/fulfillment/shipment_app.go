@@ -18,7 +18,7 @@ import (
 
 // CreateShipmentRequest 创建发货单请求
 type CreateShipmentRequest struct {
-	OrderID       string
+	OrderID       int64
 	CarrierCode   string
 	CarrierName   string
 	TrackingNo    string
@@ -57,7 +57,7 @@ type QueryShipmentRequest struct {
 	Page         int
 	PageSize     int
 	ShipmentNo   string
-	OrderID      string
+	OrderID      int64
 	TrackingNo   string
 	Status       fulfillment.ShipmentStatus
 	CarrierCode  string
@@ -70,7 +70,7 @@ type QueryShipmentRequest struct {
 type ShipmentResponse struct {
 	ID            int64                        `json:"id"`
 	ShipmentNo    string                       `json:"shipment_no"`
-	OrderID       string                       `json:"order_id"`
+	OrderID       int64                        `json:"order_id"`
 	Status        int                          `json:"status"`
 	StatusText    string                       `json:"status_text"`
 	Carrier       string                       `json:"carrier"`
@@ -128,13 +128,13 @@ type ShipmentApp interface {
 	ListShipments(ctx context.Context, tenantID shared.TenantID, req QueryShipmentRequest) (*ShipmentListResponse, error)
 	UpdateShipment(ctx context.Context, tenantID shared.TenantID, userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error)
 	UpdateShipmentStatus(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error)
-	GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID string) ([]*ShipmentResponse, error)
+	GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID int64) ([]*ShipmentResponse, error)
 	CancelShipment(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*ShipmentResponse, error)
 }
 
 // BatchShipmentItem 批量发货单项
 type BatchShipmentItem struct {
-	OrderID    string
+	OrderID    int64
 	TrackingNo string
 }
 
@@ -148,7 +148,7 @@ type BatchShipmentResult struct {
 
 // BatchShipmentResultItem 批量发货结果项
 type BatchShipmentResultItem struct {
-	OrderID    string
+	OrderID    int64
 	ShipmentID int64
 	ShipmentNo string
 	Success    bool
@@ -519,7 +519,7 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.
 	return toShipmentResponse(shipment, carrier), nil
 }
 
-func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID string) ([]*ShipmentResponse, error) {
+func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID int64) ([]*ShipmentResponse, error) {
 	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
 	if err != nil {
 		return nil, err

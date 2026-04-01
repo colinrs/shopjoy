@@ -44,16 +44,7 @@ func convertUserCouponToDetailResp(uc *apppromotion.UserCouponResponse) *types.U
 		StartTime:    "", // Not available in response
 		EndTime:      uc.ExpireAt,
 		UsedAt:       uc.UsedAt,
-		OrderID:      parseOrderID(uc.OrderID),
+		OrderID:      uc.OrderID,
 		CreatedAt:    uc.ReceivedAt,
 	}
-}
-
-func parseOrderID(orderID string) int64 {
-	if orderID == "" {
-		return 0
-	}
-	var id int64
-	// Simple conversion - in production, parse the orderID properly
-	return id
 }

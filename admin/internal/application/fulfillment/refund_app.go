@@ -17,7 +17,7 @@ import (
 type RefundDetailResponse struct {
 	ID             int64    `json:"id"`
 	RefundNo       string   `json:"refund_no"`
-	OrderID        string   `json:"order_id"`
+	OrderID        int64    `json:"order_id"`
 	UserID         int64    `json:"user_id"`
 	Type           int8     `json:"type"`
 	TypeText       string   `json:"type_text"`
@@ -50,7 +50,7 @@ type QueryRefundRequest struct {
 	Page       int
 	PageSize   int
 	RefundNo   string
-	OrderID    string
+	OrderID    int64
 	UserID     int64
 	Status     fulfillment.RefundStatus
 	ReasonType string

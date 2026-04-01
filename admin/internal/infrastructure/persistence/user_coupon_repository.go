@@ -25,7 +25,7 @@ type userCouponModel struct {
 	CouponID   int64  `gorm:"column:coupon_id;not null;index"`
 	Status     int    `gorm:"column:status;not null;index"`
 	UsedAt     *int64 `gorm:"column:used_at"`
-	OrderID    string `gorm:"column:order_id;size:64"`
+	OrderID    int64  `gorm:"column:order_id"`
 	ReceivedAt int64  `gorm:"column:received_at;not null"`
 	ExpireAt   int64  `gorm:"column:expire_at;not null;index"`
 	CreatedAt  int64  `gorm:"column:created_at"`
@@ -144,7 +144,7 @@ func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB, t
 }
 
 // MarkUsed marks a user coupon as used
-func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID string) error {
+func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID int64) error {
 	now := time.Now().UTC()
 	result := db.WithContext(ctx).
 		Model(&userCouponModel{}).

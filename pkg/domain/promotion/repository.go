@@ -24,14 +24,14 @@ type UserCouponRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*UserCoupon, error)
 	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, status *UserCouponStatus) ([]*UserCoupon, error)
 	FindByUserAndCoupon(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) ([]*UserCoupon, error)
-	MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID string) error
+	MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID int64) error
 	CountUsageByUser(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) (int, error)
 }
 
 // PromotionUsageRepository defines the interface for promotion usage persistence
 type PromotionUsageRepository interface {
 	Create(ctx context.Context, db *gorm.DB, usage *PromotionUsage) error
-	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*PromotionUsage, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*PromotionUsage, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query PromotionUsageQuery) ([]*PromotionUsage, int64, error)
 }
 
@@ -42,5 +42,5 @@ type PromotionUsageQuery struct {
 	PromotionID *int64
 	CouponID    *int64
 	UserID      *int64
-	OrderID     string
+	OrderID     int64
 }

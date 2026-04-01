@@ -110,7 +110,7 @@ type UserCouponResponse struct {
 	CouponCode string `json:"coupon_code"`
 	Status     int    `json:"status"`
 	UsedAt     string `json:"used_at,omitempty"`
-	OrderID    string `json:"order_id,omitempty"`
+	OrderID    int64  `json:"order_id,omitempty"`
 	ReceivedAt string `json:"received_at"`
 	ExpireAt   string `json:"expire_at"`
 }

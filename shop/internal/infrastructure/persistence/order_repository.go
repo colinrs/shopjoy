@@ -35,7 +35,7 @@ func (r *OrderRepository) Update(ctx context.Context, db *gorm.DB, o *order.Orde
 	return db.WithContext(ctx).Save(o).Error
 }
 
-func (r *OrderRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id string) (*order.Order, error) {
+func (r *OrderRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*order.Order, error) {
 	var o order.Order
 	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&o).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -70,8 +70,8 @@ func (r *OrderRepository) FindByUserID(ctx context.Context, db *gorm.DB, tenantI
 	dbQuery := db.WithContext(ctx).Model(&order.Order{}).
 		Where("tenant_id = ? AND user_id = ?", tenantID.Int64(), userID)
 
-	if query.Status != 0 {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil {
+		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}
 
 	if err := dbQuery.Count(&total).Error; err != nil {
@@ -88,8 +88,8 @@ func (r *OrderRepository) FindList(ctx context.Context, db *gorm.DB, tenantID sh
 
 	dbQuery := db.WithContext(ctx).Model(&order.Order{}).Where("tenant_id = ?", tenantID.Int64())
 
-	if query.Status != 0 {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil {
+		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}
 
 	if err := dbQuery.Count(&total).Error; err != nil {
@@ -100,7 +100,7 @@ func (r *OrderRepository) FindList(ctx context.Context, db *gorm.DB, tenantID sh
 	return orders, total, err
 }
 
-func (r *OrderRepository) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id string, status order.Status) error {
+func (r *OrderRepository) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status order.Status) error {
 	return db.WithContext(ctx).Model(&order.Order{}).
 		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
 		Update("status", status).Error

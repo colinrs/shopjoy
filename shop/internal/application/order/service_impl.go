@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -38,13 +39,20 @@ func (s *ServiceImpl) CreateOrder(ctx context.Context, req CreateOrderRequest) (
 		return nil, code.ErrOrderCartEmpty
 	}
 
-	orderID := order.GenerateOrderNo(req.TenantID)
+	// Generate order ID using snowflake
+	id, err := s.idGen.NextID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate order number
+	orderNo := order.GenerateOrderNo(req.TenantID)
 
 	o := &order.Order{
-		ID:       orderID,
+		ID:       id,
 		TenantID: req.TenantID,
 		UserID:   req.UserID,
-		OrderNo:  orderID,
+		OrderNo:  orderNo,
 		Status:   order.StatusPendingPayment,
 		Currency: "CNY",
 		ExpireAt: time.Now().Add(30 * time.Minute),
@@ -54,7 +62,7 @@ func (s *ServiceImpl) CreateOrder(ctx context.Context, req CreateOrderRequest) (
 			Province: req.Address.Province,
 			City:     req.Address.City,
 			District: req.Address.District,
-			Address:  req.Address.Address,
+			Detail:   req.Address.Address,
 			ZipCode:  req.Address.ZipCode,
 		},
 		Remark: req.Remark,
@@ -88,7 +96,7 @@ func (s *ServiceImpl) CreateOrder(ctx context.Context, req CreateOrderRequest) (
 	return toOrderResponse(o), nil
 }
 
-func (s *ServiceImpl) GetOrder(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderResponse, error) {
+func (s *ServiceImpl) GetOrder(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderResponse, error) {
 	o, err := s.orderRepo.FindByID(ctx, s.db, tenantID, orderID)
 	if err != nil {
 		return nil, err
@@ -107,7 +115,7 @@ func (s *ServiceImpl) GetOrderByNo(ctx context.Context, tenantID shared.TenantID
 func (s *ServiceImpl) GetUserOrders(ctx context.Context, tenantID shared.TenantID, userID int64, query QueryRequest) (*OrderListResponse, error) {
 	oQuery := order.Query{
 		PageQuery: query.PageQuery,
-		Status:    query.Status,
+		Status:    &query.Status,
 	}
 	oQuery.PageQuery.Validate()
 
@@ -130,7 +138,7 @@ func (s *ServiceImpl) GetUserOrders(ctx context.Context, tenantID shared.TenantI
 	return resp, nil
 }
 
-func (s *ServiceImpl) CancelOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID string, reason string) error {
+func (s *ServiceImpl) CancelOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, reason string) error {
 	o, err := s.orderRepo.FindByID(ctx, s.db, tenantID, orderID)
 	if err != nil {
 		return err
@@ -143,13 +151,13 @@ func (s *ServiceImpl) CancelOrder(ctx context.Context, tenantID shared.TenantID,
 	return o.Cancel(reason)
 }
 
-func (s *ServiceImpl) PayOrder(ctx context.Context, tenantID shared.TenantID, orderID string, paymentID string) error {
+func (s *ServiceImpl) PayOrder(ctx context.Context, tenantID shared.TenantID, orderID int64, paymentID string) error {
 	o, err := s.orderRepo.FindByID(ctx, s.db, tenantID, orderID)
 	if err != nil {
 		return err
 	}
 
-	if err := o.Pay(paymentID); err != nil {
+	if err := o.Pay(); err != nil {
 		return err
 	}
 
@@ -158,7 +166,7 @@ func (s *ServiceImpl) PayOrder(ctx context.Context, tenantID shared.TenantID, or
 
 func toOrderResponse(o *order.Order) *OrderResponse {
 	resp := &OrderResponse{
-		ID:             o.ID,
+		ID:             fmt.Sprintf("%d", o.ID),
 		OrderNo:        o.OrderNo,
 		UserID:         o.UserID,
 		Status:         int(o.Status),
@@ -176,7 +184,7 @@ func toOrderResponse(o *order.Order) *OrderResponse {
 			Province: o.Address.Province,
 			City:     o.Address.City,
 			District: o.Address.District,
-			Address:  o.Address.Address,
+			Address:  o.Address.Detail,
 			ZipCode:  o.Address.ZipCode,
 		},
 		Items: make([]OrderItemResponse, len(o.Items)),

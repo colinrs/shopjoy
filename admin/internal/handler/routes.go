@@ -1397,7 +1397,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					// 获取订单的发货单列表
 					Method:  http.MethodGet,
-					Path:    "/api/v1/orders/:order_id/shipments",
+					Path:    "/api/v1/orders/:id/shipments",
 					Handler: shipments.GetOrderShipmentsHandler(serverCtx),
 				},
 				{

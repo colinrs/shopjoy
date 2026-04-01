@@ -84,11 +84,11 @@ type OrderListResponse struct {
 // Service 订单应用服务接口
 type Service interface {
 	CreateOrder(ctx context.Context, req CreateOrderRequest) (*OrderResponse, error)
-	GetOrder(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderResponse, error)
+	GetOrder(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderResponse, error)
 	GetOrderByNo(ctx context.Context, tenantID shared.TenantID, orderNo string) (*OrderResponse, error)
 	GetUserOrders(ctx context.Context, tenantID shared.TenantID, userID int64, query QueryRequest) (*OrderListResponse, error)
-	CancelOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID string, reason string) error
-	PayOrder(ctx context.Context, tenantID shared.TenantID, orderID string, paymentID string) error
+	CancelOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, reason string) error
+	PayOrder(ctx context.Context, tenantID shared.TenantID, orderID int64, paymentID string) error
 }
 
 type QueryRequest struct {

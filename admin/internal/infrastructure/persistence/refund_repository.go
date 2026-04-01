@@ -23,7 +23,7 @@ func NewRefundRepository() fulfillment.RefundRepository {
 type refundModel struct {
 	ID           int64           `gorm:"column:id;primaryKey;autoIncrement:false"`
 	TenantID     int64           `gorm:"column:tenant_id;not null;index"`
-	OrderID      string          `gorm:"column:order_id;size:64;not null;index"`
+	OrderID      int64           `gorm:"column:order_id;not null;index"`
 	RefundNo     string          `gorm:"column:refund_no;size:32;not null;uniqueIndex:uk_refund_no"`
 	UserID       int64           `gorm:"column:user_id;not null;index"`
 	Type         int              `gorm:"column:type;not null;default:1"`
@@ -164,7 +164,7 @@ func (r *refundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID s
 }
 
 // FindByOrderID finds all refunds for an order
-func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*fulfillment.Refund, error) {
+func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).Where("order_id = ? AND deleted_at IS NULL", orderID)
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -183,7 +183,7 @@ func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID sh
 }
 
 // FindPendingByOrderID finds the pending refund for an order
-func (r *refundRepo) FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*fulfillment.Refund, error) {
+func (r *refundRepo) FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).
 		Where("order_id = ? AND status = ? AND deleted_at IS NULL", orderID, fulfillment.RefundStatusPending)
 	if tenantID != 0 {
@@ -252,7 +252,7 @@ func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
 	}
 
-	if query.OrderID != "" {
+	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
 	}
 	if query.RefundNo != "" {

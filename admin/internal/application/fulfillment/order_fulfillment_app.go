@@ -16,7 +16,7 @@ import (
 
 // OrderValidationInfo represents order information needed for shipment validation
 type OrderValidationInfo struct {
-	OrderID           string
+	OrderID           int64
 	Status            string        // Order status: pending_payment, paid, shipped, etc.
 	FulfillmentStatus int8          // Fulfillment status: pending, partial_shipped, shipped, delivered
 	IsPaid            bool          // Whether order is paid
@@ -36,7 +36,7 @@ type OrderItemInfo struct {
 // This interface should be implemented by the Order service client
 type OrderValidator interface {
 	// GetOrderForShipment retrieves order info for shipment validation
-	GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderValidationInfo, error)
+	GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderValidationInfo, error)
 	// ValidateShipmentItems validates that shipment items match order items and quantities
 	ValidateShipmentItems(order *OrderValidationInfo, items []CreateShipmentItemRequest) error
 }
@@ -46,7 +46,7 @@ type OrderValidator interface {
 type DefaultOrderValidator struct{}
 
 // GetOrderForShipment returns error because order service is not integrated
-func (v *DefaultOrderValidator) GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderValidationInfo, error) {
+func (v *DefaultOrderValidator) GetOrderForShipment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderValidationInfo, error) {
 	return nil, code.ErrOrderServiceUnavailable
 }
 
@@ -83,7 +83,7 @@ type OrderShippingAddress struct {
 
 // OrderFulfillmentDetail 订单履约详情
 type OrderFulfillmentDetail struct {
-	OrderID           string
+	OrderID           int64
 	OrderNo           string
 	Status            string
 	FulfillmentStatus int8
@@ -132,7 +132,7 @@ type OrderListResponse struct {
 type RefundResponse struct {
 	ID             int64
 	RefundNo       string
-	OrderID        string
+	OrderID        int64
 	UserID         int64
 	UserName       string
 	Type           int
@@ -172,8 +172,8 @@ type FulfillmentSummary struct {
 // OrderFulfillmentApp 订单履约应用服务接口
 type OrderFulfillmentApp interface {
 	ListOrders(ctx context.Context, tenantID shared.TenantID, req QueryOrderRequest) (*OrderListResponse, error)
-	GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderFulfillmentDetail, error)
-	ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID string, req ShipOrderRequest) (*ShipmentResponse, error)
+	GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderFulfillmentDetail, error)
+	ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error)
 	GetFulfillmentSummary(ctx context.Context, tenantID shared.TenantID) (*FulfillmentSummary, error)
 	// New methods
 	UpdateOrderRemark(ctx context.Context, tenantID shared.TenantID, orderID int64, remark string) error
@@ -242,7 +242,7 @@ func (a *orderFulfillmentApp) ListOrders(ctx context.Context, tenantID shared.Te
 	}, nil
 }
 
-func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID string) (*OrderFulfillmentDetail, error) {
+func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderFulfillmentDetail, error) {
 	// Get shipments for the order
 	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
 	if err != nil {
@@ -297,7 +297,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID 
 	return detail, nil
 }
 
-func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID string, req ShipOrderRequest) (*ShipmentResponse, error) {
+func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error) {
 	// Validate order exists and can be shipped
 	if a.orderValidator != nil {
 		orderInfo, err := a.orderValidator.GetOrderForShipment(ctx, tenantID, orderID)

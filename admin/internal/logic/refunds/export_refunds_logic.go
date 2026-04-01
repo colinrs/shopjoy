@@ -3,6 +3,7 @@ package refunds
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -52,11 +53,11 @@ func (l *ExportRefundsLogic) ExportRefunds(req *types.ExportRefundsReq) error {
 	}
 
 	// Build query request - use large page size for export
+	// Note: OrderNo is the external order number (string) and cannot be used for OrderID (int64) filtering
 	queryReq := appfulfillment.QueryRefundRequest{
 		Page:       1,
 		PageSize:   10001, // Check if exceeds limit
 		RefundNo:   req.RefundNo,
-		OrderID:    req.OrderNo, // Note: API uses order_no as filter
 		Status:     fulfillment.ParseRefundStatus(req.Status),
 		ReasonType: req.ReasonType,
 		StartTime:  startTime,
@@ -97,7 +98,7 @@ func (l *ExportRefundsLogic) ExportRefunds(req *types.ExportRefundsReq) error {
 	for _, r := range listResp.List {
 		record := []string{
 			r.RefundNo,
-			r.OrderID,
+			fmt.Sprintf("%d", r.OrderID),
 			r.Amount,
 			r.Currency,
 			r.Reason,

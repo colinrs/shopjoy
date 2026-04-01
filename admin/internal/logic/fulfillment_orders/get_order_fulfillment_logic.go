@@ -2,7 +2,6 @@ package fulfillment_orders
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -35,12 +34,8 @@ func (l *GetOrderFulfillmentLogic) GetOrderFulfillment(req *types.GetOrderFulfil
 		tenantID = 0
 	}
 
-	// For now, we use the ID as the order ID string
-	// In a real implementation, you would look up the order by ID
-	orderID := fmt.Sprintf("%d", req.ID)
-
 	// Get order fulfillment detail
-	detail, err := l.svcCtx.OrderFulfillmentApp.GetOrderFulfillment(l.ctx, shared.TenantID(tenantID), orderID)
+	detail, err := l.svcCtx.OrderFulfillmentApp.GetOrderFulfillment(l.ctx, shared.TenantID(tenantID), req.ID)
 	if err != nil {
 		return nil, err
 	}

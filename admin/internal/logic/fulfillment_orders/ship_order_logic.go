@@ -2,7 +2,6 @@ package fulfillment_orders
 
 import (
 	"context"
-	"fmt"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -66,11 +65,8 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 		}
 	}
 
-	// Convert order ID to string
-	orderID := fmt.Sprintf("%d", req.ID)
-
 	// Ship order
-	shipmentResp, err := l.svcCtx.OrderFulfillmentApp.ShipOrder(l.ctx, shared.TenantID(tenantID), userID, orderID, shipReq)
+	shipmentResp, err := l.svcCtx.OrderFulfillmentApp.ShipOrder(l.ctx, shared.TenantID(tenantID), userID, req.ID, shipReq)
 	if err != nil {
 		return nil, err
 	}

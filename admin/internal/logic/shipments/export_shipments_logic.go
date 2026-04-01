@@ -3,6 +3,7 @@ package shipments
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -107,7 +108,7 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 	for _, row := range listResp.List {
 		record := []string{
 			row.ShipmentNo,
-			row.OrderID,
+			fmt.Sprintf("%d", row.OrderID),
 			row.Carrier,
 			row.TrackingNo,
 			fulfillment.ShipmentStatus(row.Status).String(),

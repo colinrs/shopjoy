@@ -24,7 +24,7 @@ type promotionUsageModel struct {
 	TenantID       int64           `gorm:"column:tenant_id;not null;index"`
 	PromotionID    int64           `gorm:"column:promotion_id;not null;index"`
 	RuleID         *int64          `gorm:"column:rule_id;index"`
-	OrderID        string          `gorm:"column:order_id;size:64;not null;index"`
+	OrderID        int64           `gorm:"column:order_id;not null;index"`
 	UserID         int64           `gorm:"column:user_id;not null;index"`
 	DiscountAmount decimal.Decimal `gorm:"column:discount_amount;type:decimal(19,4);not null"`
 	Currency       string          `gorm:"column:currency;size:10;not null"`
@@ -79,7 +79,7 @@ func (r *promotionUsageRepo) Create(ctx context.Context, db *gorm.DB, usage *pro
 }
 
 // FindByOrderID finds a promotion usage record by order ID
-func (r *promotionUsageRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*promotion.PromotionUsage, error) {
+func (r *promotionUsageRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*promotion.PromotionUsage, error) {
 	var model promotionUsageModel
 	err := db.WithContext(ctx).
 		Where("tenant_id = ?", tenantID.Int64()).
@@ -110,7 +110,7 @@ func (r *promotionUsageRepo) FindList(ctx context.Context, db *gorm.DB, tenantID
 	if query.UserID != nil {
 		dbQuery = dbQuery.Where("user_id = ?", *query.UserID)
 	}
-	if query.OrderID != "" {
+	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
 	}
 
