@@ -374,6 +374,7 @@ func (s *Shipment) MarkFailed(reason string, updatedBy int64) error {
 }
 
 // Cancel 取消发货
+// Deprecated: Use CancelShipment() instead which properly sets CancelledAt, CancelledBy, and CancelledReason
 func (s *Shipment) Cancel(reason string, updatedBy int64) error {
 	if s.Status == ShipmentStatusDelivered {
 		return code.ErrShipmentCannotCancelDelivered

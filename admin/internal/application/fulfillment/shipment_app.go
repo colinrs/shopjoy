@@ -494,7 +494,7 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.
 			return nil, err
 		}
 	case fulfillment.ShipmentStatusCancelled:
-		if err := shipment.Cancel("", userID); err != nil {
+		if err := shipment.CancelShipment("", userID); err != nil {
 			return nil, err
 		}
 	default:
