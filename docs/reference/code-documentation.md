@@ -87,14 +87,14 @@ func (s Status) IsValid() bool
 func (s Status) CanTransitionTo(target Status) bool
 
 // Money represents a monetary value with currency binding.
-// Amount is stored as int64 in cents to avoid floating-point precision issues.
+// Amount is stored as decimal.Decimal in yuan to avoid floating-point precision issues.
 // All monetary calculations should use this type.
 //
 // # Precision
 //
-// Amount is in smallest currency unit (cents):
-//   - 129900 cents = $1,299.00 USD
-//   - 129900 cents = ¥1,299.00 CNY
+// Amount is in yuan:
+//   - "29.99" = ¥29.99 or $29.99
+//   - "1299.00" = ¥1,299.00 CNY
 //
 // # Currency Validation
 //
@@ -102,9 +102,9 @@ func (s Status) CanTransitionTo(target Status) bool
 //
 //	total, err := price1.Add(price2) // Returns error if currencies differ
 type Money struct {
-	// Amount in smallest currency unit (cents).
-	// For $99.99, use 9999.
-	Amount int64
+	// Amount in yuan (decimal.Decimal for precision).
+	// For ¥99.99, use decimal.NewFromString("99.99").
+	Amount decimal.Decimal
 
 	// Currency is the ISO 4217 currency code.
 	// Examples: "CNY", "USD", "EUR", "GBP", "AUD"
@@ -116,8 +116,8 @@ type Money struct {
 //
 // Example:
 //
-//	price := product.NewMoney(9900, "USD") // $99.00 USD
-func NewMoney(amount int64, currency string) Money
+//	price := NewMoney(decimal.NewFromString("99.99"), "USD") // $99.99 USD
+func NewMoney(amount decimal.Decimal, currency string) Money
 
 // Add returns the sum of two money values.
 // Returns an error if currencies don't match.

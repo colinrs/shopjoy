@@ -1,5 +1,7 @@
 # ShopJoy 文档中心
 
+> **Last Updated:** 2026-04-01
+
 ## 文档结构
 
 ```
@@ -81,20 +83,19 @@ docs/
 
 ### API文档
 - [API设计规范](cross-cutting/api/README.md)
-- [API参考文档](cross-cutting/api/2026-03-27-api-reference.md)
+- [API参考文档](cross-cutting/api/api-reference.md)
 - [OpenAPI规范](cross-cutting/api/openapi.yaml)
 - [缺失API设计](cross-cutting/api/2026-03-25-missing-apis-design.md)
 
 ### 开发指南
-- [入职指南](guides/2026-03-18-onboarding.md)
-- [开发者指南](guides/2026-03-27-developer-guide.md)
-- [用户指南](guides/2026-03-22-user-guide.md)
+- [入职指南](guides/onboarding.md)
+- [开发者指南](guides/developer-guide.md)
+- [用户指南](guides/user-guide.md)
 
 ### 参考资料
-- [错误码](reference/2026-03-21-error-codes.md)
-- [数据库概览](reference/2026-03-27-database-overview.md)
-- [代码文档规范](reference/2026-03-27-code-documentation.md)
-- [架构图](reference/2026-03-22-architecture-diagrams.md)
+- [错误码](reference/error-codes.md)
+- [数据库概览](reference/database-overview.md)
+- [代码文档规范](reference/code-documentation.md)
 
 ### 技术设计
 - [促销设计](cross-cutting/tech-design/2026-03-22-promotion-design.md)

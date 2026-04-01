@@ -1,7 +1,7 @@
 # ShopJoy API Reference
 
-> **Version:** 1.0
-> **Last Updated:** 2026-03-27
+> **Version:** 1.1
+> **Last Updated:** 2026-04-01
 > **API Base URL:** `http://localhost:8888/api/v1` (Admin API)
 
 ---
@@ -44,7 +44,7 @@ All errors follow a consistent format:
 }
 ```
 
-See [Error Codes Reference](../reference/2026-03-22-error-codes.md) for complete list.
+See [Error Codes Reference](../reference/error-codes.md) for complete list.
 
 ---
 
@@ -271,7 +271,7 @@ Authentication endpoints do not require authorization.
 {
   "name": "Premium T-Shirt",
   "description": "High quality cotton t-shirt",
-  "price": 2999,
+  "price": "29.99",
   "currency": "USD",
   "category_id": 1,
   "sku": "TSHIRT-001",
@@ -296,9 +296,9 @@ Authentication endpoints do not require authorization.
   "id": 1,
   "name": "Premium T-Shirt",
   "description": "High quality cotton t-shirt",
-  "price": 2999,
+  "price": "29.99",
   "currency": "USD",
-  "cost_price": 1500,
+  "cost_price": "15.00",
   "stock": 100,
   "status": "on_sale",
   "category_id": 1,
@@ -349,7 +349,7 @@ Authentication endpoints do not require authorization.
   "id": 1,
   "product_id": 1,
   "code": "TSHIRT-001-RED-L",
-  "price": 2999,
+  "price": "29.99",
   "currency": "USD",
   "stock": 50,
   "available_stock": 45,
@@ -1013,14 +1013,14 @@ For date-only filters:
 
 ## Monetary Values
 
-Monetary values in API are integers representing the smallest currency unit (cents):
+Monetary values in API use **string format** representing yuan (元):
 
 | Value | Represents |
 |-------|------------|
-| 2999 | $29.99 |
-| 1000 | $10.00 |
+| "29.99" | ¥29.99 or $29.99 |
+| "10.00" | ¥10.00 or $10.00 |
 
-Some APIs use string format for decimal precision (see specific endpoint docs).
+**Note:** Frontend should not need to divide by 100. A value of "1.99" means 1.99元, not 199分.
 
 ---
 
@@ -1057,3 +1057,4 @@ All endpoints are prefixed with `/api/v1/`.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-03-27 | Technical Team | Initial comprehensive API reference |
+| 1.1 | 2026-04-01 | Technical Team | Fix monetary values format (string yuan), update broken doc links |

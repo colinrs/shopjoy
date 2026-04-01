@@ -1,7 +1,7 @@
 # ShopJoy Developer Guide
 
-> **Version:** 1.0
-> **Last Updated:** 2026-03-27
+> **Version:** 1.1
+> **Last Updated:** 2026-04-01
 > **Audience:** Backend and Frontend Developers
 
 ---
@@ -388,15 +388,15 @@ func (p *Product) PutOnSale() error {
 ```go
 // Money value object
 type Money struct {
-    Amount   int64   // In cents
-    Currency string  // ISO 4217
+    Amount   decimal.Decimal // 单位为元 (yuan)
+    Currency string          // ISO 4217
 }
 
 func (m Money) Add(other Money) (Money, error) {
     if m.Currency != other.Currency {
-        return Money{}, code.ErrProductCurrencyMismatch
+        return Money{}, code.ErrCurrencyMismatch
     }
-    return Money{Amount: m.Amount + other.Amount, Currency: m.Currency}, nil
+    return NewMoney(m.Amount.Add(other.Amount), m.Currency), nil
 }
 
 // TenantID value object
@@ -799,9 +799,9 @@ curl http://localhost:8888/routes
 ## References
 
 - [Architecture Documentation](../ARCHITECTURE.md)
-- [API Reference](../cross-cutting/api/2026-03-27-api-reference.md)
-- [Error Codes Reference](../reference/2026-03-22-error-codes.md)
-- [Database Overview](../reference/2026-03-22-database-overview.md)
+- [API Reference](../cross-cutting/api/api-reference.md)
+- [Error Codes Reference](../reference/error-codes.md)
+- [Database Overview](../reference/database-overview.md)
 - [go-zero Documentation](https://go-zero.dev/)
 - [GORM Documentation](https://gorm.io/docs/)
 
@@ -812,3 +812,4 @@ curl http://localhost:8888/routes
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-03-27 | Technical Team | Initial developer guide |
+| 1.1 | 2026-04-01 | Technical Team | Fix broken doc links |
