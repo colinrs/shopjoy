@@ -43,6 +43,6 @@ func (l *HideReviewLogic) HideReview(req *types.HideReviewReq) (resp *types.Hide
 	return &types.HideReviewResp{
 		ID:        req.ID,
 		Status:    review.StatusHidden.String(),
-		UpdatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	}, nil
 }

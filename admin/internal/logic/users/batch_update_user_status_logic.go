@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"errors"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -46,7 +47,7 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 		default:
 			resp.Failed = append(resp.Failed, types.BatchStatusFail{
 				UserID:  userID,
-				Code:    40000, // Bad Request
+				Code:    code.ErrParam.Code,
 				Message: "invalid status, must be 1 (activate) or 2 (suspend)",
 			})
 			continue
@@ -56,7 +57,7 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 			resp.Failed = append(resp.Failed, types.BatchStatusFail{
 				UserID:  userID,
 				Code:    getUserErrorCode(updateErr),
-				Message: updateErr.Error(),
+				Message: getUserErrorMessage(updateErr),
 			})
 			continue
 		}
@@ -75,13 +76,32 @@ func getUserErrorCode(err error) int {
 
 	// Check for known user errors using errors.Is
 	switch {
-	case err == code.ErrUserNotFound:
+	case errors.Is(err, code.ErrUserNotFound):
 		return code.ErrUserNotFound.Code
-	case err == code.ErrUserAlreadyDeleted:
+	case errors.Is(err, code.ErrUserAlreadyDeleted):
 		return code.ErrUserAlreadyDeleted.Code
-	case err == code.ErrUserSuspended:
+	case errors.Is(err, code.ErrUserSuspended):
 		return code.ErrUserSuspended.Code
 	default:
 		return code.ErrInternalServer.Code
+	}
+}
+
+// getUserErrorMessage extracts the error message from an error
+func getUserErrorMessage(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	// Check for known user errors using errors.Is
+	switch {
+	case errors.Is(err, code.ErrUserNotFound):
+		return code.ErrUserNotFound.Msg
+	case errors.Is(err, code.ErrUserAlreadyDeleted):
+		return code.ErrUserAlreadyDeleted.Msg
+	case errors.Is(err, code.ErrUserSuspended):
+		return code.ErrUserSuspended.Msg
+	default:
+		return code.ErrInternalServer.Msg
 	}
 }

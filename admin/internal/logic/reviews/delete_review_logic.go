@@ -43,6 +43,6 @@ func (l *DeleteReviewLogic) DeleteReview(req *types.DeleteReviewReq) (resp *type
 	return &types.DeleteReviewResp{
 		ID:        req.ID,
 		Status:    review.StatusDeleted.String(),
-		DeletedAt: time.Now().Format(time.RFC3339),
+		DeletedAt: time.Now().UTC().Format(time.RFC3339),
 	}, nil
 }

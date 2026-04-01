@@ -30,7 +30,10 @@ func NewBatchCancelOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) B
 
 func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq) (resp *types.BatchCancelOrderResp, err error) {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
+	tenantIDRaw, ok := contextx.GetTenantID(l.ctx)
+	if !ok {
+		return nil, code.ErrTenantInvalidID
+	}
 	tenantID := shared.TenantID(tenantIDRaw)
 
 	var success []int64
@@ -64,11 +67,12 @@ func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq)
 		order.Status = fulfillment.OrderStatusCancelled
 		order.CancelledAt = &now
 		order.Remark = req.Reason
+		order.Audit.Update(0)
 
 		err = l.svcCtx.OrderRepo.UpdateWithVersion(l.ctx, l.svcCtx.DB, order)
 		if err != nil {
 			failEntry.Code = code.ErrInternalServer.Code
-			failEntry.Message = err.Error()
+			failEntry.Message = code.ErrInternalServer.Msg
 			failed = append(failed, failEntry)
 			continue
 		}

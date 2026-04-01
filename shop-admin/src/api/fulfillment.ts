@@ -364,7 +364,7 @@ export interface BatchUpdateTrackingRequest {
   shipment_ids: number[]
   carrier_code: string
   tracking_no: string
-  weight?: number
+  weight?: string
 }
 
 export interface BatchUpdateTrackingResponse {

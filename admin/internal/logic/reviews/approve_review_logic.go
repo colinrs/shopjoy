@@ -43,6 +43,6 @@ func (l *ApproveReviewLogic) ApproveReview(req *types.ApproveReviewReq) (resp *t
 	return &types.ApproveReviewResp{
 		ID:        req.ID,
 		Status:    review.StatusApproved.String(),
-		UpdatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	}, nil
 }

@@ -242,10 +242,10 @@ type BatchUpdateSafetyStockReq struct {
 }
 
 type BatchUpdateTrackingReq struct {
-	ShipmentIDs []int64  `json:"shipment_ids" binding:"required,min=1,max=100"`
-	CarrierCode string   `json:"carrier_code" binding:"required"`
-	TrackingNo  string   `json:"tracking_no" binding:"required"`
-	Weight      *float64 `json:"weight,omitempty"`
+	ShipmentIDs []int64 `json:"shipment_ids" binding:"required,min=1,max=100"`
+	CarrierCode string  `json:"carrier_code" binding:"required"`
+	TrackingNo  string  `json:"tracking_no" binding:"required"`
+	Weight      *string `json:"weight,omitempty"`
 }
 
 type BatchUpdateTrackingResp struct {

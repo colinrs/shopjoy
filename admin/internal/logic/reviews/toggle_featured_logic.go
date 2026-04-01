@@ -42,6 +42,6 @@ func (l *ToggleFeaturedLogic) ToggleFeatured(req *types.ToggleFeaturedReq) (resp
 	return &types.ToggleFeaturedResp{
 		ID:         req.ID,
 		IsFeatured: req.IsFeatured,
-		UpdatedAt:  time.Now().Format(time.RFC3339),
+		UpdatedAt:  time.Now().UTC().Format(time.RFC3339),
 	}, nil
 }

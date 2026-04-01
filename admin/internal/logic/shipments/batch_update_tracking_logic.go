@@ -57,7 +57,16 @@ func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTra
 		// Build update request
 		var weight decimal.Decimal
 		if req.Weight != nil {
-			weight = decimal.NewFromFloat(*req.Weight)
+			var err error
+			weight, err = decimal.NewFromString(*req.Weight)
+			if err != nil {
+				resp.Failed = append(resp.Failed, types.BatchTrackingFail{
+					ShipmentID: shipmentID,
+					Code:       code.ErrSharedInvalidParam.Code,
+					Message:    "invalid weight format",
+				})
+				continue
+			}
 		}
 
 		updateReq := appfulfillment.UpdateShipmentRequest{
