@@ -285,7 +285,7 @@ var DefaultRefundReasons = []RefundReason{
 type Shipment struct {
 	application.Model
 	TenantID         shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	OrderID          string          `gorm:"column:order_id;not null;index"`
+	OrderID          int64           `gorm:"column:order_id;not null;index"`
 	ShipmentNo       string          `gorm:"column:shipment_no;not null;uniqueIndex:uk_shipment_no"`
 	Status           ShipmentStatus  `gorm:"column:status;not null;default:0;index"`
 	Carrier          string          `gorm:"column:carrier;not null;default:''"`
@@ -308,7 +308,7 @@ func (s *Shipment) TableName() string {
 }
 
 // NewShipment 创建发货单
-func NewShipment(tenantID shared.TenantID, orderID string, items []ShipmentItem, createdBy int64) *Shipment {
+func NewShipment(tenantID shared.TenantID, orderID int64, items []ShipmentItem, createdBy int64) *Shipment {
 	return &Shipment{
 		TenantID:         tenantID,
 		OrderID:          orderID,
@@ -489,7 +489,7 @@ func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int
 type Refund struct {
 	application.Model
 	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	OrderID      string         `gorm:"column:order_id;not null;index"`
+	OrderID      int64         `gorm:"column:order_id;not null;index"`
 	RefundNo     string         `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
 	UserID       int64          `gorm:"column:user_id;not null;index"`
 	Type         RefundType     `gorm:"column:type;not null;default:1"`
@@ -511,7 +511,7 @@ func (r *Refund) TableName() string {
 }
 
 // NewRefund 创建退款申请
-func NewRefund(tenantID shared.TenantID, orderID string, userID int64,
+func NewRefund(tenantID shared.TenantID, orderID int64, userID int64,
 	reasonType, reason, description string, images []string, amount decimal.Decimal, currency string) *Refund {
 	return &Refund{
 		TenantID:    tenantID,
@@ -610,7 +610,7 @@ func (r *Refund) CanCancel() bool {
 // ShipmentQuery 发货单查询参数
 type ShipmentQuery struct {
 	shared.PageQuery
-	OrderID    string
+	OrderID    int64
 	Status     ShipmentStatus
 	CarrierCode string
 	TrackingNo string
@@ -622,7 +622,7 @@ type ShipmentQuery struct {
 type RefundQuery struct {
 	shared.PageQuery
 	RefundNo   string
-	OrderID    string
+	OrderID    int64
 	UserID     int64
 	Status     RefundStatus
 	ReasonType string
@@ -672,7 +672,7 @@ type ShipmentRepository interface {
 	Update(ctx context.Context, db *gorm.DB, shipment *Shipment) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Shipment, error)
 	FindByShipmentNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentNo string) (*Shipment, error)
-	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*Shipment, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*Shipment, error)
 	FindByTrackingNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, trackingNo string) (*Shipment, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query ShipmentQuery) ([]*Shipment, int64, error)
 	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
@@ -694,8 +694,8 @@ type RefundRepository interface {
 	Update(ctx context.Context, db *gorm.DB, refund *Refund) error
 	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Refund, error)
 	FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, refundNo string) (*Refund, error)
-	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) ([]*Refund, error)
-	FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID string) (*Refund, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*Refund, error)
+	FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*Refund, error)
 	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query RefundQuery) ([]*Refund, int64, error)
 	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query RefundQuery) ([]*Refund, int64, error)
 	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error

@@ -431,7 +431,7 @@ func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantI
 		if uc.UsedAt != nil {
 			userCouponResp.UsedAt = uc.UsedAt.Format(time.RFC3339)
 		}
-		if uc.OrderID != "" {
+		if uc.OrderID != 0 {
 			userCouponResp.OrderID = uc.OrderID
 		}
 

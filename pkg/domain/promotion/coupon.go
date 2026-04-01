@@ -139,7 +139,7 @@ type UserCoupon struct {
 	CouponID   int64            `json:"coupon_id"`
 	Status     UserCouponStatus `json:"status"`
 	UsedAt     *time.Time       `json:"used_at,omitempty"`
-	OrderID    string           `json:"order_id"`
+	OrderID    int64            `json:"order_id"`
 	ReceivedAt time.Time        `json:"received_at"`
 	ExpireAt   time.Time        `json:"expire_at"`
 	CreatedAt  time.Time        `json:"created_at"`
@@ -167,7 +167,7 @@ type PromotionUsage struct {
 	TenantID       shared.TenantID  `json:"tenant_id"`
 	PromotionID    int64            `json:"promotion_id"`
 	RuleID         *int64           `json:"rule_id,omitempty"`
-	OrderID        string           `json:"order_id"`
+	OrderID        int64            `json:"order_id"`
 	UserID         int64            `json:"user_id"`
 	DiscountAmount decimal.Decimal  `json:"discount_amount"`
 	Currency       string           `json:"currency"`
