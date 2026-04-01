@@ -203,12 +203,12 @@ type BatchProductFields struct {
 }
 
 type BatchShipmentItemReq struct {
-	OrderID    string `json:"order_id"`
+	OrderID    int64  `json:"order_id"`
 	TrackingNo string `json:"tracking_no"`
 }
 
 type BatchShipmentResultResp struct {
-	OrderID    string `json:"order_id"`
+	OrderID    int64  `json:"order_id"`
 	ShipmentID int64  `json:"shipment_id,optional"`
 	ShipmentNo string `json:"shipment_no,optional"`
 	Success    bool   `json:"success"`
@@ -683,7 +683,7 @@ type CreateSKUResp struct {
 }
 
 type CreateShipmentReq struct {
-	OrderID      string            `json:"order_id"`
+	OrderID      int64             `json:"order_id"`
 	CarrierCode  string            `json:"carrier_code"`
 	CarrierName  string            `json:"carrier_name,optional"` // For custom carrier
 	TrackingNo   string            `json:"tracking_no"`
@@ -1121,7 +1121,7 @@ type GetOrderPaymentReq struct {
 }
 
 type GetOrderShipmentsReq struct {
-	OrderID string `path:"order_id"`
+	OrderID int64 `path:"id"`
 }
 
 type GetPageBySlugRequest struct {
@@ -1592,7 +1592,7 @@ type ListRefundsReq struct {
 	Page       int    `form:"page,default=1"`
 	PageSize   int    `form:"page_size,default=20"`
 	RefundNo   string `form:"refund_no,optional"`
-	OrderID    string `form:"order_id,optional"`
+	OrderID    int64  `form:"order_id,optional"`
 	UserID     int64  `form:"user_id,optional"`
 	Status     string `form:"status,optional"` // 0=pending, 1=approved, 2=rejected, 3=completed, 4=cancelled
 	ReasonType string `form:"reason_type,optional"`
@@ -1663,7 +1663,7 @@ type ListShipmentsReq struct {
 	Page              int    `form:"page,default=1"`
 	PageSize          int    `form:"page_size,default=20"`
 	ShipmentNo        string `form:"shipment_no,optional"`
-	OrderID           string `form:"order_id,optional"`
+	OrderID           int64  `form:"order_id,optional"`
 	TrackingNo        string `form:"tracking_no,optional"`
 	Status            string `form:"status,optional"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	CarrierCode       string `form:"carrier_code,optional"`
@@ -1835,7 +1835,7 @@ type NotificationSettings struct {
 }
 
 type OrderFulfillmentDetailResp struct {
-	OrderID           string                      `json:"order_id"`
+	OrderID           int64                       `json:"order_id"`
 	OrderNo           string                      `json:"order_no"`
 	Status            string                      `json:"status"`
 	FulfillmentStatus string                      `json:"fulfillment_status"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
@@ -2255,7 +2255,7 @@ type RefundDailyStats struct {
 type RefundDetailResp struct {
 	ID             int64                  `json:"id"`
 	RefundNo       string                 `json:"refund_no"`
-	OrderID        string                 `json:"order_id"`
+	OrderID        int64                  `json:"order_id"`
 	UserID         int64                  `json:"user_id"`
 	UserName       string                 `json:"user_name,optional"`
 	UserPhone      string                 `json:"user_phone,optional"`
@@ -2606,7 +2606,7 @@ type ShipOrderResp struct {
 type ShipmentDetailResp struct {
 	ID            int64               `json:"id"`
 	ShipmentNo    string              `json:"shipment_no"`
-	OrderID       string              `json:"order_id"`
+	OrderID       int64               `json:"order_id"`
 	Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	Carrier       string              `json:"carrier"`
 	CarrierCode   string              `json:"carrier_code"`
