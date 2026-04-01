@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS `shipments` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '发货ID',
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
-    `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
+    `order_id` BIGINT NOT NULL COMMENT '订单ID',
     `shipment_no` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '发货单号',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-待发货, 1-已发货, 2-运输中, 3-已送达, 4-配送失败',
     `carrier` VARCHAR(50) DEFAULT '' COMMENT '快递公司',
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `shipment_items` (
 CREATE TABLE IF NOT EXISTS `refunds` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '退款ID',
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
-    `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
+    `order_id` BIGINT NOT NULL COMMENT '订单ID',
     `refund_no` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '退款单号',
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `type` TINYINT NOT NULL DEFAULT 1 COMMENT '退款类型: 1-全额退款, 2-部分退款',
@@ -176,14 +176,14 @@ CREATE TABLE IF NOT EXISTS `shipping_zone_regions` (
 
 -- 发货数据
 INSERT INTO `shipments` (`id`, `tenant_id`, `order_id`, `status`, `carrier`, `tracking_no`, `weight`, `cost_amount`, `cost_currency`, `shipped_at`, `delivered_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
--- ORD202503010001 发货
-(1, 1, 'ORD202503010001', 3, '顺丰速运', 'SF1234567890', 1.50, 1200, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 28 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), 2, 2),
+-- Order 1 发货
+(1, 1, 1, 3, '顺丰速运', 'SF1234567890', 1.50, 1200, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 28 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), 2, 2),
 
--- ORD202503100001 发货
-(2, 1, 'ORD202503100001', 2, '圆通快递', 'YT9876543210', 0.45, 800, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), NULL, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), 2, 2),
+-- Order 2 发货
+(2, 1, 2, 2, '圆通快递', 'YT9876543210', 0.45, 800, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), NULL, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), 2, 2),
 
--- ORD202503120001 发货 (Enterprise)
-(3, 3, 'ORD202503120001', 3, 'EMS', 'EMS2025031201', 0.55, 1500, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), 5, 5);
+-- Order 6 发货 (Enterprise)
+(3, 3, 6, 3, 'EMS', 'EMS2025031201', 0.55, 1500, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), 5, 5);
 
 -- 发货商品数据
 INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
@@ -195,8 +195,8 @@ INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`,
 
 -- 退款数据
 INSERT INTO `refunds` (`id`, `tenant_id`, `order_id`, `refund_no`, `user_id`, `type`, `status`, `reason_type`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
--- ORD202503010001 手机壳退款 (已完成)
-(1, 1, 'ORD202503010001', 'REF202503010001', 1, 2, 3, 'quality', '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 26 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 27 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), 1, 1),
+-- Order 1 手机壳退款 (已完成)
+(1, 1, 1, 'REF202503010001', 1, 2, 3, 'quality', '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 26 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 27 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), 1, 1),
 
--- ORD202503050001 全额退款 (已完成)
-(2, 1, 'ORD202503050001', 'REF202503050001', 1, 1, 3, 'cancel', '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), 1, 1);
+-- Order 5 全额退款 (已完成)
+(2, 1, 5, 'REF202503050001', 1, 1, 3, 'cancel', '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), 1, 1);
