@@ -8,6 +8,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/utils"
 )
 
 // toShipmentDetailResp converts ShipmentResponse to types.ShipmentDetailResp
@@ -39,8 +40,8 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		ShippingCost:  s.ShippingCost,
 		Currency:      s.Currency,
 		Weight:        s.Weight,
-		ShippedAt:     formatTimeToRFC3339(s.ShippedAt),
-		DeliveredAt:   formatTimeToRFC3339(s.DeliveredAt),
+		ShippedAt:     utils.FormatTimeToRFC3339(s.ShippedAt),
+		DeliveredAt:   utils.FormatTimeToRFC3339(s.DeliveredAt),
 		Remark:        s.Remark,
 		Items:         items,
 		CreatedAt:     s.CreatedAt.Format(time.RFC3339),
@@ -55,14 +56,6 @@ func formatWeight(w float64) string {
 		return "0"
 	}
 	return fmt.Sprintf("%.2f", w)
-}
-
-// formatTimeToRFC3339 formats time to RFC3339 string
-func formatTimeToRFC3339(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.Format(time.RFC3339)
 }
 
 // parseFloat parses a string to float64

@@ -11,6 +11,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -109,7 +110,7 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 			Quantity:    item.Quantity,
 			ShippedQty:  item.ShippedQty,
 			PendingQty:  item.PendingQty,
-			UnitPrice:   formatAmount(item.UnitPrice),
+			UnitPrice:   utils.FormatAmount(item.UnitPrice),
 			Currency:    item.Currency,
 		}
 	}
@@ -145,7 +146,7 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		FulfillmentText:   o.FulfillmentText,
 		RefundStatus:      fulfillment.RefundStatus(o.RefundStatus).String(),
 		RefundText:        o.RefundText,
-		TotalAmount:       formatAmount(o.TotalAmount),
+		TotalAmount:       utils.FormatAmount(o.TotalAmount),
 		Currency:          o.Currency,
 		UserID:            o.UserID,
 		UserName:          o.UserName,
@@ -154,9 +155,9 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		Items:             items,
 		Shipments:         shipments,
 		Refund:            refund,
-		PaidAt:            formatTimeToRFC3339(o.PaidAt),
-		ShippedAt:         formatTimeToRFC3339(o.ShippedAt),
-		DeliveredAt:       formatTimeToRFC3339(o.DeliveredAt),
+		PaidAt:            utils.FormatTimeToRFC3339(o.PaidAt),
+		ShippedAt:         utils.FormatTimeToRFC3339(o.ShippedAt),
+		DeliveredAt:       utils.FormatTimeToRFC3339(o.DeliveredAt),
 		CreatedAt:         o.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:         o.UpdatedAt.Format(time.RFC3339),
 	}

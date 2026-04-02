@@ -3,28 +3,32 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-item">
-          <p class="stat-number">{{ orderStats.pending_payment }}</p>
-          <p class="stat-label">{{ $t('orders.pendingPayment') }}</p>
-        </div>
+        <StatsCard color="warning">
+          <template #icon><PriceTag /></template>
+          <template #value>{{ orderStats.pending_payment }}</template>
+          <template #label>{{ $t('orders.pendingPayment') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item">
-          <p class="stat-number">{{ orderStats.partial_shipped }}</p>
-          <p class="stat-label">{{ $t('orders.partialShipped') }}</p>
-        </div>
+        <StatsCard color="info">
+          <template #icon><Edit /></template>
+          <template #value>{{ orderStats.partial_shipped }}</template>
+          <template #label>{{ $t('orders.partialShipped') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item">
-          <p class="stat-number">{{ orderStats.shipped }}</p>
-          <p class="stat-label">{{ $t('orders.shipped') }}</p>
-        </div>
+        <StatsCard color="primary">
+          <template #icon><Van /></template>
+          <template #value>{{ orderStats.shipped }}</template>
+          <template #label>{{ $t('orders.shipped') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-item">
-          <p class="stat-number">{{ orderStats.delivered }}</p>
-          <p class="stat-label">{{ $t('orders.delivered') }}</p>
-        </div>
+        <StatsCard color="success">
+          <template #icon><Check /></template>
+          <template #value>{{ orderStats.delivered }}</template>
+          <template #label>{{ $t('orders.delivered') }}</template>
+        </StatsCard>
       </el-col>
     </el-row>
 
@@ -366,6 +370,7 @@ import {
 import { t } from '@/plugins/i18n'
 import Table from '@/components/common/Table.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import StatsCard from '@/components/common/StatsCard.vue'
 
 // Loading states
 const loading = ref(false)

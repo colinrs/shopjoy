@@ -8,7 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/shopspring/decimal"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -63,10 +63,10 @@ func buildZoneDetails(zones []*shipping.ShippingZone) []*types.ShippingZoneDetai
 			Regions:             z.Regions,
 			FeeType:             string(z.FeeType),
 			FirstUnit:           z.FirstUnit,
-			FirstFee:            formatAmount(z.FirstFee),
+			FirstFee:            utils.FormatAmount(z.FirstFee),
 			AdditionalUnit:      z.AdditionalUnit,
-			AdditionalFee:       formatAmount(z.AdditionalFee),
-			FreeThresholdAmount: formatAmount(z.FreeThresholdAmount),
+			AdditionalFee:       utils.FormatAmount(z.AdditionalFee),
+			FreeThresholdAmount: utils.FormatAmount(z.FreeThresholdAmount),
 			FreeThresholdCount:  z.FreeThresholdCount,
 			Sort:                z.Sort,
 		})
@@ -85,9 +85,4 @@ func buildMappingDetails(mappings []*shipping.ShippingTemplateMapping) []*types.
 		})
 	}
 	return result
-}
-
-// formatAmount converts decimal.Decimal to string with 2 decimal places (in yuan)
-func formatAmount(amount decimal.Decimal) string {
-	return amount.StringFixed(2)
 }

@@ -3,40 +3,32 @@
     <!-- Stats Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon" size="32"><Ticket /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.totalCoupons }}</p>
-            <p class="stat-label">{{ $t('promotions.totalCoupons') }}</p>
-          </div>
-        </div>
+        <StatsCard color="primary">
+          <template #icon><Ticket /></template>
+          <template #value>{{ stats.totalCoupons }}</template>
+          <template #label>{{ $t('promotions.totalCoupons') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon active" size="32"><CircleCheck /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.activeCoupons }}</p>
-            <p class="stat-label">{{ $t('promotions.activeCoupons') }}</p>
-          </div>
-        </div>
+        <StatsCard color="success">
+          <template #icon><CircleCheck /></template>
+          <template #value>{{ stats.activeCoupons }}</template>
+          <template #label>{{ $t('promotions.activeCoupons') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon used" size="32"><User /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.totalUsed }}</p>
-            <p class="stat-label">{{ $t('promotions.totalUsed') }}</p>
-          </div>
-        </div>
+        <StatsCard color="info">
+          <template #icon><User /></template>
+          <template #value>{{ stats.totalUsed }}</template>
+          <template #label>{{ $t('promotions.totalUsed') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon promotions" size="32"><Present /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.totalPromotions }}</p>
-            <p class="stat-label">{{ $t('promotions.totalPromotions') }}</p>
-          </div>
-        </div>
+        <StatsCard color="warning">
+          <template #icon><Present /></template>
+          <template #value>{{ stats.totalPromotions }}</template>
+          <template #label>{{ $t('promotions.totalPromotions') }}</template>
+        </StatsCard>
       </el-col>
     </el-row>
 
@@ -540,6 +532,7 @@ import {
   type GenerateCouponCodesRequest
 } from '@/api/promotion'
 import TablePagination from '@/components/common/TablePagination.vue'
+import StatsCard from '@/components/common/StatsCard.vue'
 import { t } from '@/plugins/i18n'
 
 const router = useRouter()

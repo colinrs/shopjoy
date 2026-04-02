@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
@@ -294,7 +295,7 @@ func (a *refundApp) GetRefundStatistics(ctx context.Context, tenantID shared.Ten
 
 	return &RefundStatisticsResponse{
 		TotalRefunds:    totalRefunds,
-		TotalAmount:     formatAmount(totalAmount),
+		TotalAmount:     utils.FormatAmount(totalAmount),
 		Currency:        "CNY",
 		RefundRate:      refundRate,
 		PendingCount:    pendingCount,
@@ -328,12 +329,12 @@ func toRefundDetailResponse(r *fulfillment.Refund) *RefundDetailResponse {
 		Reason:       r.Reason,
 		Description:  r.Description,
 		Images:       images,
-		Amount:       formatAmount(r.Amount),
+		Amount:       utils.FormatAmount(r.Amount),
 		Currency:     r.Currency,
 		RejectReason: r.RejectReason,
-		ApprovedAt:   formatTimeToString(r.ApprovedAt),
+		ApprovedAt:   utils.FormatTimeToRFC3339(r.ApprovedAt),
 		ApprovedBy:   r.ApprovedBy,
-		CompletedAt:  formatTimeToString(r.CompletedAt),
+		CompletedAt:  utils.FormatTimeToRFC3339(r.CompletedAt),
 		CreatedAt:    r.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:    r.UpdatedAt.Format(time.RFC3339),
 	}
@@ -369,11 +370,6 @@ func getRefundStatusText(s fulfillment.RefundStatus) string {
 	}
 }
 
-// formatAmount formats amount (in yuan) to string
-func formatAmount(amount decimal.Decimal) string {
-	return shared.NewMoney(amount, "CNY").String()
-}
-
 // formatAmountFromInt64 formats amount (in yuan) to string
 func formatAmountFromInt64(amount int64) string {
 	return shared.NewMoney(decimal.NewFromInt(amount), "CNY").String()
@@ -382,12 +378,4 @@ func formatAmountFromInt64(amount int64) string {
 // formatPercentage formats a percentage value
 func formatPercentage(value float64) string {
 	return shared.NewMoney(decimal.NewFromFloat(value*100), "").String()
-}
-
-// formatTimeToString formats a time.Time pointer to RFC3339 string
-func formatTimeToString(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.Format(time.RFC3339)
 }

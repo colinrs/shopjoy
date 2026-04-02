@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -49,6 +50,6 @@ func (l *GetFulfillmentSummaryLogic) GetFulfillmentSummary(req *types.GetFulfill
 		Refunding:       summary.Refunding,
 		TotalOrders:     summary.TotalOrders,
 		TodayOrders:     summary.TodayOrders,
-		TodayGMV:        formatDecimal(summary.TodayGMV),
+		TodayGMV:        utils.FormatDecimal(summary.TodayGMV),
 	}, nil
 }

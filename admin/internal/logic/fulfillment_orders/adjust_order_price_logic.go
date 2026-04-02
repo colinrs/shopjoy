@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -65,9 +66,9 @@ func (l *AdjustOrderPriceLogic) AdjustOrderPrice(req *types.AdjustOrderPriceReq)
 
 	return &types.AdjustOrderPriceResp{
 		OrderID:        result.OrderID,
-		OriginalAmount: formatDecimal(result.OriginalAmount),
-		AdjustAmount:   formatDecimal(result.AdjustAmount),
-		NewPayAmount:   formatDecimal(result.NewPayAmount),
+		OriginalAmount: utils.FormatDecimal(result.OriginalAmount),
+		AdjustAmount:   utils.FormatDecimal(result.AdjustAmount),
+		NewPayAmount:   utils.FormatDecimal(result.NewPayAmount),
 		AdjustReason:   result.AdjustReason,
 		AdjustedAt:     result.AdjustedAt,
 	}, nil

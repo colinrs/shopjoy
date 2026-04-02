@@ -14,7 +14,6 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -125,19 +124,6 @@ func (l *ExportPaymentTransactionsLogic) ExportPaymentTransactions(req *types.Ex
 	}
 
 	return nil
-}
-
-// formatTimeForExport formats time pointer to string for CSV export
-func formatTimeForExport(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.Format(time.RFC3339)
-}
-
-// formatDecimal formats decimal.Decimal to string for export
-func formatDecimal(d decimal.Decimal) string {
-	return d.String()
 }
 
 // parseTime parses time string to *time.Time

@@ -14,6 +14,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -112,8 +113,8 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 			row.Carrier,
 			row.TrackingNo,
 			fulfillment.ShipmentStatus(row.Status).String(),
-			formatTimeToRFC3339(row.ShippedAt),
-			formatTimeToRFC3339(row.DeliveredAt),
+			utils.FormatTimeToRFC3339(row.ShippedAt),
+			utils.FormatTimeToRFC3339(row.DeliveredAt),
 		}
 		if err := writer.Write(record); err != nil {
 			return err

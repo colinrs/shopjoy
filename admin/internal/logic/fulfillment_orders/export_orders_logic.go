@@ -13,6 +13,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -120,16 +121,16 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 			row.Status,
 			row.FulfillmentStatus,
 			row.RefundStatus,
-			formatDecimal(row.TotalAmount),
-			formatDecimal(row.DiscountAmount),
-			formatDecimal(row.ShippingFee),
-			formatDecimal(row.PayAmount),
+			utils.FormatDecimal(row.TotalAmount),
+			utils.FormatDecimal(row.DiscountAmount),
+			utils.FormatDecimal(row.ShippingFee),
+			utils.FormatDecimal(row.PayAmount),
 			row.ReceiverName,
 			row.ReceiverPhone,
 			row.ReceiverAddress,
 			row.PaymentMethod,
 			row.CreatedAt.Format(time.RFC3339),
-			formatTimeForExport(row.PaidAt),
+			utils.FormatTimeForExport(row.PaidAt),
 		}
 		if err := writer.Write(record); err != nil {
 			return err
@@ -137,12 +138,4 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 	}
 
 	return nil
-}
-
-// formatTimeForExport formats time pointer to string for CSV export
-func formatTimeForExport(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.Format(time.RFC3339)
 }

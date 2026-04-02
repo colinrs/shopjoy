@@ -14,6 +14,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -105,8 +106,8 @@ func (l *ExportRefundsLogic) ExportRefunds(req *types.ExportRefundsReq) error {
 			r.ReasonType,
 			r.StatusText,
 			r.CreatedAt,
-			formatTimeForExport(r.CompletedAt),
-			formatTimeForExport(r.ApprovedAt),
+			utils.FormatTimeStringForExport(r.CompletedAt),
+			utils.FormatTimeStringForExport(r.ApprovedAt),
 			r.RejectReason,
 		}
 		if err := writer.Write(record); err != nil {
@@ -115,12 +116,4 @@ func (l *ExportRefundsLogic) ExportRefunds(req *types.ExportRefundsReq) error {
 	}
 
 	return nil
-}
-
-// formatTimeForExport formats time string for CSV export
-func formatTimeForExport(t string) string {
-	if t == "" {
-		return ""
-	}
-	return t
 }

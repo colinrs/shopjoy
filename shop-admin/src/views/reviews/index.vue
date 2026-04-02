@@ -3,40 +3,32 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon" size="32"><ChatDotRound /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.total_reviews }}</p>
-            <p class="stat-label">{{ $t('reviews.totalReviews') }}</p>
-          </div>
-        </div>
+        <StatsCard color="primary">
+          <template #icon><ChatDotRound /></template>
+          <template #value>{{ stats.total_reviews }}</template>
+          <template #label>{{ $t('reviews.totalReviews') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon pending" size="32"><Clock /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.pending_reviews }}</p>
-            <p class="stat-label">{{ $t('reviews.pendingApproval') }}</p>
-          </div>
-        </div>
+        <StatsCard color="warning">
+          <template #icon><Clock /></template>
+          <template #value>{{ stats.pending_reviews }}</template>
+          <template #label>{{ $t('reviews.pendingApproval') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon rating" size="32"><Star /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ parseFloat(stats.average_rating).toFixed(1) }}</p>
-            <p class="stat-label">{{ $t('reviews.averageRating') }}</p>
-          </div>
-        </div>
+        <StatsCard color="success">
+          <template #icon><Star /></template>
+          <template #value>{{ parseFloat(stats.average_rating).toFixed(1) }}</template>
+          <template #label>{{ $t('reviews.averageRating') }}</template>
+        </StatsCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <el-icon class="stat-icon images" size="32"><Picture /></el-icon>
-          <div class="stat-info">
-            <p class="stat-value">{{ stats.with_image_count }}</p>
-            <p class="stat-label">{{ $t('reviews.withImages') }}</p>
-          </div>
-        </div>
+        <StatsCard color="info">
+          <template #icon><Picture /></template>
+          <template #value>{{ stats.with_image_count }}</template>
+          <template #label>{{ $t('reviews.withImages') }}</template>
+        </StatsCard>
       </el-col>
     </el-row>
 
@@ -555,6 +547,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import StatsCard from '@/components/common/StatsCard.vue'
 import {
   ChatDotRound,
   Clock,

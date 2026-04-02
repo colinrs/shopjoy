@@ -12,6 +12,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -98,9 +99,9 @@ func (h *DashboardHelper) GetOverview(tenantID shared.TenantID) (*types.Dashboar
 
 	return &types.DashboardOverviewResponse{
 		TodayOrders:    todayOrders,
-		TodaySales:     formatAmount(todayGMV, "CNY"),
+		TodaySales:     utils.FormatAmountWithCurrency(todayGMV, "CNY"),
 		TodayGrowth:    todayGrowth,
-		YesterdaySales: formatAmount(yesterdayGMV, "CNY"),
+		YesterdaySales: utils.FormatAmountWithCurrency(yesterdayGMV, "CNY"),
 		TotalProducts:  totalProducts,
 		TotalUsers:     totalUsers,
 		NewUsersToday:  newUsersToday,
@@ -241,7 +242,7 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 			ProductName: r.ProductName,
 			Image:       r.Image,
 			Sales:       r.Sales,
-			Revenue:     formatAmount(r.Revenue, "CNY"),
+			Revenue:     utils.FormatAmountWithCurrency(r.Revenue, "CNY"),
 		})
 	}
 
@@ -276,7 +277,7 @@ func (h *DashboardHelper) GetPendingOrders(tenantID shared.TenantID, limit int) 
 		list = append(list, &types.PendingOrderItem{
 			OrderID:    o.ID,
 			OrderNo:    o.OrderNo,
-			PayAmount:  formatAmount(o.PayAmount, o.Currency),
+			PayAmount:  utils.FormatAmountWithCurrency(o.PayAmount, o.Currency),
 			Status:     string(o.Status),
 			StatusText: o.Status.Text(),
 			CreatedAt:  o.Audit.CreatedAt.Format(time.RFC3339),
@@ -305,7 +306,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 			activities = append(activities, &types.ActivityItem{
 				ID:      o.ID,
 				Type:    "order_created",
-				Content: fmt.Sprintf("新订单 %s，金额 %s", o.OrderNo, formatAmount(o.PayAmount, o.Currency)),
+				Content: fmt.Sprintf("新订单 %s，金额 %s", o.OrderNo, utils.FormatAmountWithCurrency(o.PayAmount, o.Currency)),
 				Time:    o.Audit.CreatedAt.Format(time.RFC3339),
 			})
 		}
@@ -324,7 +325,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 			activities = append(activities, &types.ActivityItem{
 				ID:      o.ID,
 				Type:    "payment_received",
-				Content: fmt.Sprintf("订单 %s 已支付 %s", o.OrderNo, formatAmount(o.PayAmount, o.Currency)),
+				Content: fmt.Sprintf("订单 %s 已支付 %s", o.OrderNo, utils.FormatAmountWithCurrency(o.PayAmount, o.Currency)),
 				Time:    o.PaidAt.Format(time.RFC3339),
 			})
 		}
@@ -448,18 +449,10 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 		sales := salesMap[dateStr]
 		data[i] = &types.SalesTrendData{
 			Date:   dateStr,
-			Sales:  formatAmount(sales.Sales, "CNY"),
+			Sales:  utils.FormatAmountWithCurrency(sales.Sales, "CNY"),
 			Orders: sales.Orders,
 		}
 	}
 
 	return data, nil
-}
-
-// formatAmount formats amount to currency string
-func formatAmount(amount decimal.Decimal, currency string) string {
-	if amount.IsZero() {
-		return "0.00"
-	}
-	return amount.StringFixed(2)
 }

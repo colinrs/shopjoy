@@ -8,6 +8,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 )
 
@@ -20,19 +21,6 @@ func parseMoneyToDecimal(s string) (decimal.Decimal, error) {
 	return v, err
 }
 
-// formatDecimal formats decimal to string
-func formatDecimal(v decimal.Decimal) string {
-	if v.IsZero() {
-		return "0"
-	}
-	return v.StringFixed(2)
-}
-
-// formatAmount is alias for formatDecimal
-func formatAmount(amount decimal.Decimal) string {
-	return formatDecimal(amount)
-}
-
 // truncateString truncates a string to maxChars characters (UTF-8 safe)
 func truncateString(s string, maxChars int) string {
 	if utf8.RuneCountInString(s) <= maxChars {
@@ -40,14 +28,6 @@ func truncateString(s string, maxChars int) string {
 	}
 	runes := []rune(s)
 	return string(runes[:maxChars])
-}
-
-// formatTimeToRFC3339 formats time to RFC3339 string
-func formatTimeToRFC3339(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.Format(time.RFC3339)
 }
 
 // formatFloatToString formats a float64 to string
@@ -84,8 +64,8 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		ShippingCost:  s.ShippingCost,
 		Currency:      s.Currency,
 		Weight:        s.Weight,
-		ShippedAt:     formatTimeToRFC3339(s.ShippedAt),
-		DeliveredAt:   formatTimeToRFC3339(s.DeliveredAt),
+		ShippedAt:     utils.FormatTimeToRFC3339(s.ShippedAt),
+		DeliveredAt:   utils.FormatTimeToRFC3339(s.DeliveredAt),
 		Remark:        s.Remark,
 		Items:         items,
 		CreatedAt:     s.CreatedAt.Format(time.RFC3339),
@@ -118,13 +98,13 @@ func toRefundDetailResp(r *appfulfillment.RefundResponse) *types.RefundDetailRes
 		Reason:         r.Reason,
 		Description:    r.Description,
 		Images:         r.Images,
-		Amount:         formatAmount(r.Amount),
+		Amount:         utils.FormatAmount(r.Amount),
 		Currency:       r.Currency,
 		RejectReason:   r.RejectReason,
-		ApprovedAt:     formatTimeToRFC3339(r.ApprovedAt),
+		ApprovedAt:     utils.FormatTimeToRFC3339(r.ApprovedAt),
 		ApprovedBy:     r.ApprovedBy,
 		ApprovedByName: r.ApprovedByName,
-		CompletedAt:    formatTimeToRFC3339(r.CompletedAt),
+		CompletedAt:    utils.FormatTimeToRFC3339(r.CompletedAt),
 		CreatedAt:      r.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:      r.UpdatedAt.Format(time.RFC3339),
 	}
