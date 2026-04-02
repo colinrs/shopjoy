@@ -198,7 +198,7 @@
           </div>
           <div class="breakdown-item" v-if="result.fee_detail.fee_type === 'by_count'">
             <span class="breakdown-label">{{ $t('shipping.calculatedUnits') }}</span>
-            <span class="breakdown-value">{{ result.fee_detail.calculated_units }} 件</span>
+            <span class="breakdown-value">{{ result.fee_detail.calculated_units }} {{ $t('shipping.itemsUnit') }}</span>
           </div>
           <div class="breakdown-item">
             <span class="breakdown-label">{{ $t('shipping.baseFee') }}</span>
@@ -400,13 +400,14 @@ const formatAmount = (amount: string | number) => {
 }
 
 const getFeeTypeLabel = (feeType: string) => {
-  const labels: Record<string, string> = {
-    fixed: '固定运费',
-    by_count: '按件计费',
-    by_weight: '按重量计费',
-    free: '免运费'
+  const keyMap: Record<string, string> = {
+    fixed: 'shipping.feeTypeFixed',
+    by_count: 'shipping.feeTypeByCount',
+    by_weight: 'shipping.feeTypeByWeight',
+    free: 'shipping.feeTypeFree'
   }
-  return labels[feeType] || feeType
+  const key = keyMap[feeType]
+  return key ? t(key) : feeType
 }
 
 // Lifecycle

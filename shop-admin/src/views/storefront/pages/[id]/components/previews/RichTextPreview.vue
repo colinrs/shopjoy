@@ -3,7 +3,7 @@
     <div v-if="config?.content" class="content" v-html="config.content"></div>
     <div v-else class="placeholder">
       <el-icon size="24"><Document /></el-icon>
-      <span>富文本区块</span>
+      <span>{{ $t('storefront.richTextBlock') }}</span>
     </div>
   </div>
 </template>

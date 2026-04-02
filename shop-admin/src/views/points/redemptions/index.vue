@@ -4,18 +4,18 @@
     <el-card class="filter-card" shadow="never">
       <div class="filter-bar">
         <div class="filter-left">
-          <el-select v-model="searchParams.status" placeholder="兑换状态" clearable class="filter-select" @change="loadRedemptions">
-            <el-option label="全部" value="" />
-            <el-option label="待处理" value="pending" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="已取消" value="cancelled" />
+          <el-select v-model="searchParams.status" :placeholder="$t('points.exchangeStatus')" clearable class="filter-select" @change="loadRedemptions">
+            <el-option :label="$t('common.all')" value="" />
+            <el-option :label="$t('points.pending')" value="pending" />
+            <el-option :label="$t('points.completed')" value="completed" />
+            <el-option :label="$t('points.cancelled')" value="cancelled" />
           </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            :range-separator="$t('points.rangeSeparator')"
+            :start-placeholder="$t('points.startDate')"
+            :end-placeholder="$t('points.endDate')"
             value-format="YYYY-MM-DD"
             class="date-picker"
             @change="handleDateChange"
@@ -27,19 +27,19 @@
     <!-- Redemptions Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="redemptionList" v-loading="loading" stripe>
-        <el-table-column prop="id" label="ID" width="80" align="center">
+        <el-table-column prop="id" :label="$t('points.id')" width="80" align="center">
           <template #default="{ row }">
             <span class="id-text">#{{ row.id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="用户" width="100" align="center">
+        <el-table-column :label="$t('points.user')" width="100" align="center">
           <template #default="{ row }">
             <span class="user-id">U{{ row.user_id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="优惠券" min-width="150">
+        <el-table-column :label="$t('points.coupon')" min-width="150">
           <template #default="{ row }">
             <div class="coupon-cell">
               <div class="coupon-icon">
@@ -50,13 +50,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="使用积分" width="100" align="right">
+        <el-table-column :label="$t('points.pointsUsed')" width="100" align="right">
           <template #default="{ row }">
             <span class="points-value">{{ row.points_used.toLocaleString() }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="$t('common.status')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)" effect="light" size="small">
               {{ getStatusText(row.status) }}
@@ -64,23 +64,23 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="兑换时间" width="180">
+        <el-table-column :label="$t('points.exchangeTime')" width="180">
           <template #default="{ row }">
             <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="完成时间" width="180">
+        <el-table-column :label="$t('points.completionTime')" width="180">
           <template #default="{ row }">
             <span v-if="row.completed_at" class="time-text">{{ formatDateTime(row.completed_at) }}</span>
             <span v-else class="no-data">-</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">
-              详情
+              {{ $t('common.detail') }}
             </el-button>
           </template>
         </el-table-column>
@@ -95,45 +95,45 @@
     </el-card>
 
     <!-- Detail Dialog -->
-    <el-dialog v-model="detailDialogVisible" title="兑换详情" width="500px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('points.exchangeDetail')" width="500px">
       <div v-if="currentRedemption" class="detail-content">
         <div class="detail-row">
-          <span class="detail-label">兑换ID:</span>
+          <span class="detail-label">{{ $t('points.exchangeId') }}:</span>
           <span class="detail-value">#{{ currentRedemption.id }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">用户ID:</span>
+          <span class="detail-label">{{ $t('points.userId') }}:</span>
           <span class="detail-value">U{{ currentRedemption.user_id }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">优惠券:</span>
+          <span class="detail-label">{{ $t('points.couponName') }}:</span>
           <span class="detail-value">{{ currentRedemption.coupon_name }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">使用积分:</span>
+          <span class="detail-label">{{ $t('points.pointsUsed') }}:</span>
           <span class="detail-value points">{{ currentRedemption.points_used.toLocaleString() }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">状态:</span>
+          <span class="detail-label">{{ $t('common.status') }}:</span>
           <el-tag :type="getStatusTagType(currentRedemption.status)" size="small">
             {{ getStatusText(currentRedemption.status) }}
           </el-tag>
         </div>
         <div class="detail-row">
-          <span class="detail-label">兑换时间:</span>
+          <span class="detail-label">{{ $t('points.exchangeTime') }}:</span>
           <span class="detail-value">{{ formatDateTime(currentRedemption.created_at) }}</span>
         </div>
         <div v-if="currentRedemption.completed_at" class="detail-row">
-          <span class="detail-label">完成时间:</span>
+          <span class="detail-label">{{ $t('points.completionTime') }}:</span>
           <span class="detail-value">{{ formatDateTime(currentRedemption.completed_at) }}</span>
         </div>
         <div v-if="currentRedemption.user_coupon_id" class="detail-row">
-          <span class="detail-label">用户优惠券ID:</span>
+          <span class="detail-label">{{ $t('points.userCouponId') }}:</span>
           <span class="detail-value">{{ currentRedemption.user_coupon_id }}</span>
         </div>
       </div>
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">{{ $t('common.close') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -141,10 +141,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Ticket } from '@element-plus/icons-vue'
 import TablePagination from '@/components/common/TablePagination.vue'
 import { getRedemptions, type PointsRedemption, type ListRedemptionsParams } from '@/api/points'
+
+const { t } = useI18n()
 
 // State
 const loading = ref(false)
@@ -181,7 +184,7 @@ const loadRedemptions = async () => {
     total.value = res.total || 0
   } catch (error) {
     console.error('Failed to load redemptions:', error)
-    ElMessage.error('加载积分兑换记录失败')
+    ElMessage.error(t('points.loadRedemptionsFailed'))
   } finally {
     loading.value = false
   }
@@ -199,9 +202,9 @@ const getStatusTagType = (status: string) => {
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    'pending': '待处理',
-    'completed': '已完成',
-    'cancelled': '已取消'
+    'pending': t('points.pending'),
+    'completed': t('points.completed'),
+    'cancelled': t('points.cancelled')
   }
   return texts[status] || status
 }

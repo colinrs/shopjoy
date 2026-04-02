@@ -4,9 +4,9 @@
     <div class="page-header">
       <el-button link @click="goBack">
         <el-icon><ArrowLeft /></el-icon>
-        返回账户列表
+        {{ $t('points.backToAccountList') }}
       </el-button>
-      <h2 class="page-title">用户 #{{ account?.user_id }} 的积分账户</h2>
+      <h2 class="page-title">{{ $t('points.userPointsAccount', { userId: account?.user_id }) }}</h2>
     </div>
 
     <!-- Account Summary Card -->
@@ -15,11 +15,11 @@
         <div class="card-header">
           <span class="card-title">
             <el-icon><Wallet /></el-icon>
-            账户概览
+            {{ $t('points.accountOverview') }}
           </span>
           <el-button type="primary" @click="openAdjustDialog">
             <el-icon><Edit /></el-icon>
-            调整积分
+            {{ $t('points.adjustPoints') }}
           </el-button>
         </div>
       </template>
@@ -31,7 +31,7 @@
               <el-icon><Star /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">可用余额</p>
+              <p class="summary-label">{{ $t('points.availableBalance') }}</p>
               <p class="summary-value">{{ account?.balance?.toLocaleString() || 0 }}</p>
             </div>
           </div>
@@ -42,7 +42,7 @@
               <el-icon><Lock /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">冻结积分</p>
+              <p class="summary-label">{{ $t('points.frozenPoints') }}</p>
               <p class="summary-value">{{ account?.frozen_balance?.toLocaleString() || 0 }}</p>
             </div>
           </div>
@@ -53,7 +53,7 @@
               <el-icon><TrendCharts /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">累计获得</p>
+              <p class="summary-label">{{ $t('points.cumulativeEarned') }}</p>
               <p class="summary-value">{{ account?.total_earned?.toLocaleString() || 0 }}</p>
             </div>
           </div>
@@ -64,7 +64,7 @@
               <el-icon><Present /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">累计兑换</p>
+              <p class="summary-label">{{ $t('points.cumulativeRedeemed') }}</p>
               <p class="summary-value">{{ account?.total_redeemed?.toLocaleString() || 0 }}</p>
             </div>
           </div>
@@ -77,7 +77,7 @@
       <template #header>
         <span class="card-title">
           <el-icon><List /></el-icon>
-          交易记录
+          {{ $t('points.transactionRecords') }}
         </span>
       </template>
 
@@ -106,6 +106,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Wallet, Edit, Star, Lock, TrendCharts, Present, List } from '@element-plus/icons-vue'
@@ -118,6 +119,8 @@ import {
   type PointsAccount,
   type PointsTransaction
 } from '@/api/points'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -146,7 +149,7 @@ const loadAccount = async () => {
     account.value = res
   } catch (error) {
     console.error('Failed to load account:', error)
-    ElMessage.error('加载积分账户详情失败')
+    ElMessage.error(t('points.loadAccountDetailFailed'))
   } finally {
     loading.value = false
   }
@@ -170,7 +173,7 @@ const loadTransactions = async (filters: { type?: string; startDate?: string; en
     transactionTotal.value = res.total || 0
   } catch (error) {
     console.error('Failed to load transactions:', error)
-    ElMessage.error('加载交易记录失败')
+    ElMessage.error(t('points.loadTransactionRecordsFailed'))
   } finally {
     transactionLoading.value = false
   }
@@ -202,14 +205,14 @@ const handleAdjust = async (data: { adjustment_type: 'ADD' | 'DEDUCT'; points: n
   adjustLoading.value = true
   try {
     await adjustPoints(account.value.id, data)
-    ElMessage.success('调整成功')
+    ElMessage.success(t('points.adjustSuccess'))
     adjustDialogVisible.value = false
     // Reload account and transactions
     await loadAccount()
     await loadTransactions()
   } catch (error) {
     console.error('Failed to adjust:', error)
-    ElMessage.error('调整失败')
+    ElMessage.error(t('points.adjustFailed'))
   } finally {
     adjustLoading.value = false
   }

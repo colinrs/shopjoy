@@ -219,9 +219,9 @@ const getFeeTypeLabel = (feeType: string) => {
 const formatRegions = (regions: string[]) => {
   if (!regions || regions.length === 0) return t('shipping.areaNotSet')
   if (regions.length <= 3) {
-    return regions.join('、')
+    return regions.join(', ')
   }
-  return `${regions.slice(0, 3).join('、')} ${t('shipping.andMoreCount', { count: regions.length })}`
+  return `${regions.slice(0, 3).join(', ')} ${t('shipping.andMoreCount', { count: regions.length })}`
 }
 
 const formatFeeConfig = (zone: ShippingZone) => {
@@ -250,7 +250,7 @@ const formatFreeThreshold = (zone: ShippingZone) => {
   if (count > 0) {
     parts.push(t('shipping.freeThresholdCount', { count }))
   }
-  return parts.join(' 或 ') + ' ' + t('shipping.freeShippingApplied')
+  return parts.join(' or ') + ' ' + t('shipping.freeShippingApplied')
 }
 
 const startEdit = () => {

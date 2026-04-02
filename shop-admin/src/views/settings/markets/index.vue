@@ -144,12 +144,12 @@
           <el-col :span="12">
             <el-form-item :label="t('settings.markets.defaultLanguage')" prop="default_language">
               <el-select v-model="marketForm.default_language" :placeholder="t('settings.markets.selectLanguage')" style="width: 100%">
-                <el-option label="简体中文" value="zh-CN" />
-                <el-option label="English" value="en-US" />
-                <el-option label="日本語" value="ja-JP" />
-                <el-option label="Deutsch" value="de-DE" />
-                <el-option label="Français" value="fr-FR" />
-                <el-option label="Español" value="es-ES" />
+                <el-option :label="t('settings.markets.langZhCN')" value="zh-CN" />
+                <el-option :label="t('settings.markets.langEnUS')" value="en-US" />
+                <el-option :label="t('settings.markets.langJaJP')" value="ja-JP" />
+                <el-option :label="t('settings.markets.langDeDE')" value="de-DE" />
+                <el-option :label="t('settings.markets.langFrFR')" value="fr-FR" />
+                <el-option :label="t('settings.markets.langEsES')" value="es-ES" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -211,7 +211,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import {
@@ -258,37 +258,63 @@ const formRules = {
   default_language: [{ required: true, message: t('settings.markets.selectLanguage'), trigger: 'change' }]
 }
 
-// Available markets for selection
-const availableMarkets = [
-  { code: 'CN', name: '中国', flag: '🇨🇳' },
-  { code: 'US', name: '美国', flag: '🇺🇸' },
-  { code: 'GB', name: '英国', flag: '🇬🇧' },
-  { code: 'DE', name: '德国', flag: '🇩🇪' },
-  { code: 'FR', name: '法国', flag: '🇫🇷' },
-  { code: 'JP', name: '日本', flag: '🇯🇵' },
-  { code: 'AU', name: '澳大利亚', flag: '🇦🇺' },
-  { code: 'CA', name: '加拿大', flag: '🇨🇦' },
-  { code: 'SG', name: '新加坡', flag: '🇸🇬' },
-  { code: 'ES', name: '西班牙', flag: '🇪🇸' },
-  { code: 'IT', name: '意大利', flag: '🇮🇹' },
-  { code: 'NL', name: '荷兰', flag: '🇳🇱' }
+// Available markets for selection (code and flag only, name is translated)
+const availableMarketsRaw = [
+  { code: 'CN', flag: '🇨🇳' },
+  { code: 'US', flag: '🇺🇸' },
+  { code: 'GB', flag: '🇬🇧' },
+  { code: 'DE', flag: '🇩🇪' },
+  { code: 'FR', flag: '🇫🇷' },
+  { code: 'JP', flag: '🇯🇵' },
+  { code: 'AU', flag: '🇦🇺' },
+  { code: 'CA', flag: '🇨🇦' },
+  { code: 'SG', flag: '🇸🇬' },
+  { code: 'ES', flag: '🇪🇸' },
+  { code: 'IT', flag: '🇮🇹' },
+  { code: 'NL', flag: '🇳🇱' }
 ]
 
-const languageLabels: Record<string, string> = {
-  'zh-CN': '简体中文',
-  'en-US': 'English',
-  'ja-JP': '日本語',
-  'de-DE': 'Deutsch',
-  'fr-FR': 'Français',
-  'es-ES': 'Español'
+// Language code to translation key mapping
+const languageKeys: Record<string, string> = {
+  'zh-CN': 'settings.markets.langZhCN',
+  'en-US': 'settings.markets.langEnUS',
+  'ja-JP': 'settings.markets.langJaJP',
+  'de-DE': 'settings.markets.langDeDE',
+  'fr-FR': 'settings.markets.langFrFR',
+  'es-ES': 'settings.markets.langEsES'
 }
 
 const getLanguageLabel = (lang: string) => {
-  return languageLabels[lang] || lang
+  const key = languageKeys[lang]
+  return key ? t(key) : lang
 }
 
+// Market code to translation key mapping
+const marketNameKeys: Record<string, string> = {
+  'CN': 'settings.markets.marketCN',
+  'US': 'settings.markets.marketUS',
+  'GB': 'settings.markets.marketGB',
+  'DE': 'settings.markets.marketDE',
+  'FR': 'settings.markets.marketFR',
+  'JP': 'settings.markets.marketJP',
+  'AU': 'settings.markets.marketAU',
+  'CA': 'settings.markets.marketCA',
+  'SG': 'settings.markets.marketSG',
+  'ES': 'settings.markets.marketES',
+  'IT': 'settings.markets.marketIT',
+  'NL': 'settings.markets.marketNL'
+}
+
+// Computed available markets with translated names
+const availableMarkets = computed(() => {
+  return availableMarketsRaw.map(m => ({
+    ...m,
+    name: t(marketNameKeys[m.code] || 'settings.markets.market', { code: m.code })
+  }))
+})
+
 const getFlagEmoji = (code: string) => {
-  const market = availableMarkets.find(m => m.code === code)
+  const market = availableMarketsRaw.find(m => m.code === code)
   return market?.flag || '🌐'
 }
 

@@ -249,7 +249,6 @@ const handleDelete = async (row: Role) => {
 }
 
 const handleStatusChange = async (row: Role, val: number) => {
-  const action = val === 1 ? t('roles.enabled2') : t('roles.disabled2')
   try {
     await ElMessageBox.confirm(
       val === 1 ? t('roles.confirmEnable') : t('roles.confirmDisable'),
@@ -261,7 +260,7 @@ const handleStatusChange = async (row: Role, val: number) => {
       }
     )
     await updateRoleStatus(row.id, { status: val })
-    ElMessage.success(action + t('roles.statusUpdateSuccess').replace('更新成功', ''))
+    ElMessage.success(t('roles.statusUpdateSuccess'))
   } catch {
     // User cancelled or error - revert switch
     row.status = val === 1 ? 2 : 1

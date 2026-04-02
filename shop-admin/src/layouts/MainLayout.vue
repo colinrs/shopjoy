@@ -20,62 +20,62 @@
         <el-menu-item index="/dashboard">
           <el-icon><DataLine /></el-icon>
           <template #title>
-            <span>数据概览</span>
+            <span>{{ $t('dashboard.title') }}</span>
             <el-tag v-if="hasNewData" size="small" type="danger" effect="dark" class="menu-badge">NEW</el-tag>
           </template>
         </el-menu-item>
-        
+
         <el-sub-menu index="/products">
           <template #title>
             <el-icon><Goods /></el-icon>
-            <span>商品管理</span>
+            <span>{{ $t('products.title') }}</span>
           </template>
           <el-menu-item index="/products">
-            <span>商品列表</span>
+            <span>{{ $t('products.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/categories">
-            <span>商品分类</span>
+            <span>{{ $t('categories.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/brands">
-            <span>品牌管理</span>
+            <span>{{ $t('brands.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/inventory">
-            <span>库存管理</span>
+            <span>{{ $t('inventory.title') }}</span>
           </el-menu-item>
         </el-sub-menu>
-        
+
         <el-sub-menu index="/orders">
           <template #title>
             <el-icon><List /></el-icon>
-            <span>订单管理</span>
+            <span>{{ $t('orders.title') }}</span>
           </template>
           <el-menu-item index="/orders">
-            <span>全部订单</span>
+            <span>{{ $t('orders.title') }}</span>
             <el-badge :value="pendingOrders" v-if="pendingOrders > 0" class="menu-badge" />
           </el-menu-item>
           <el-menu-item index="/fulfillment/shipments">
-            <span>发货管理</span>
+            <span>{{ $t('fulfillment.shipments') }}</span>
           </el-menu-item>
           <el-menu-item index="/fulfillment/refunds">
-            <span>退款管理</span>
+            <span>{{ $t('fulfillment.refunds') }}</span>
             <el-badge :value="pendingRefunds" v-if="pendingRefunds > 0" class="menu-badge" type="warning" />
           </el-menu-item>
           <el-menu-item index="/fulfillment/statistics">
-            <span>售后统计</span>
+            <span>{{ $t('fulfillment.statistics') }}</span>
           </el-menu-item>
         </el-sub-menu>
-        
+
         <el-menu-item index="/users">
           <el-icon><User /></el-icon>
           <template #title>
-            <span>顾客管理</span>
+            <span>{{ $t('users.title') }}</span>
           </template>
         </el-menu-item>
 
         <el-menu-item index="/reviews">
           <el-icon><ChatDotRound /></el-icon>
           <template #title>
-            <span>评价管理</span>
+            <span>{{ $t('reviews.title') }}</span>
             <el-badge :value="pendingReviews" v-if="pendingReviews > 0" class="menu-badge" type="warning" />
           </template>
         </el-menu-item>
@@ -83,49 +83,49 @@
         <el-menu-item index="/admin-users">
           <el-icon><UserFilled /></el-icon>
           <template #title>
-            <span>用户管理</span>
+            <span>{{ $t('adminUsers.title') }}</span>
           </template>
         </el-menu-item>
-        
+
         <el-menu-item index="/promotions">
           <el-icon><Ticket /></el-icon>
           <template #title>
-            <span>营销推广</span>
+            <span>{{ $t('promotions.title') }}</span>
           </template>
         </el-menu-item>
-        
+
         <el-sub-menu index="/shop">
           <template #title>
             <el-icon><Shop /></el-icon>
-            <span>店铺设置</span>
+            <span>{{ $t('shop.title') }}</span>
           </template>
           <el-menu-item index="/shop">
-            <span>基本设置</span>
+            <span>{{ $t('shop.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/settings/markets">
-            <span>市场管理</span>
+            <span>{{ $t('settings.markets.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/storefront/themes">
-            <span>主题管理</span>
+            <span>{{ $t('storefront.themes') }}</span>
           </el-menu-item>
           <el-menu-item index="/storefront/pages">
-            <span>页面装修</span>
+            <span>{{ $t('storefront.pages') }}</span>
           </el-menu-item>
           <el-menu-item index="/storefront/seo">
-            <span>SEO设置</span>
+            <span>{{ $t('storefront.seo') }}</span>
           </el-menu-item>
           <el-menu-item index="/shipping">
-            <span>物流配置</span>
+            <span>{{ $t('shipping.title') }}</span>
           </el-menu-item>
           <el-menu-item index="/payment">
-            <span>支付设置</span>
+            <span>{{ $t('payments.title') }}</span>
           </el-menu-item>
         </el-sub-menu>
-        
+
         <el-menu-item index="/analytics">
           <el-icon><TrendCharts /></el-icon>
           <template #title>
-            <span>数据分析</span>
+            <span>{{ $t('dashboard.title') }}</span>
           </template>
         </el-menu-item>
       </el-menu>
@@ -134,11 +134,11 @@
       <div class="sidebar-footer">
         <div class="storage-info">
           <div class="storage-header">
-            <span>存储空间</span>
+            <span>{{ $t('common.storageSpace') }}</span>
             <span>75%</span>
           </div>
           <el-progress :percentage="75" :stroke-width="6" :show-text="false" color="#10B981" />
-          <p class="storage-detail">7.5GB / 10GB 已使用</p>
+          <p class="storage-detail">7.5GB / 10GB {{ $t('common.used') }}</p>
         </div>
       </div>
     </el-aside>
@@ -161,7 +161,7 @@
           <div class="header-search">
             <el-input
               v-model="searchQuery"
-              placeholder="搜索..."
+              :placeholder="$t('common.search')"
               prefix-icon="Search"
               clearable
               class="search-input"
@@ -169,7 +169,7 @@
           </div>
           
           <!-- Quick Actions -->
-          <el-tooltip :content="isDarkMode ? '切换到浅色模式' : '切换到深色模式'" placement="bottom">
+          <el-tooltip :content="isDarkMode ? $t('common.switchToLightMode') : $t('common.switchToDarkMode')" placement="bottom">
             <el-button text @click="toggleTheme" class="theme-toggle-btn">
               <el-icon size="18">
                 <Sunny v-if="isDarkMode" />
@@ -178,15 +178,28 @@
             </el-button>
           </el-tooltip>
 
-          <el-tooltip content="全屏" placement="bottom">
+          <el-tooltip :content="$t('common.fullscreen')" placement="bottom">
             <el-button text :icon="FullScreen" @click="toggleFullscreen" />
           </el-tooltip>
           
-          <el-tooltip content="通知" placement="bottom">
+          <el-tooltip :content="$t('common.notifications')" placement="bottom">
             <el-badge :value="3" class="notification-badge">
               <el-button text :icon="Bell" @click="showNotifications" />
             </el-badge>
           </el-tooltip>
+
+          <!-- Language Switcher -->
+          <el-dropdown trigger="click" @command="handleLocaleChange">
+            <div class="locale-switch">
+              <span class="locale-text">{{ $t(locale === 'en' ? 'common.languageEN' : 'common.languageZH') }}</span>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="en" :disabled="locale === 'en'">{{ $t('common.languageEN') }}</el-dropdown-item>
+                <el-dropdown-item command="zh" :disabled="locale === 'zh'">{{ $t('common.languageZH') }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           
           <!-- User Menu -->
           <el-dropdown trigger="click" class="user-dropdown">
@@ -195,21 +208,21 @@
                 {{ userStore.userInfo?.name?.charAt(0) || 'A' }}
               </el-avatar>
               <div class="user-meta">
-                <span class="user-name">{{ userStore.userInfo?.name || 'Admin' }}</span>
-                <span class="user-role">超级管理员</span>
+                <span class="user-name">{{ userStore.userInfo?.name || $t('common.defaultAdmin') }}</span>
+                <span class="user-role">{{ $t('common.superAdmin') }}</span>
               </div>
               <el-icon><ArrowDown /></el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="goToProfile">
-                  <el-icon><User /></el-icon>个人中心
+                  <el-icon><User /></el-icon>{{ $t('common.profile') }}
                 </el-dropdown-item>
                 <el-dropdown-item @click="goToSettings">
-                  <el-icon><Setting /></el-icon>账号设置
+                  <el-icon><Setting /></el-icon>{{ $t('common.accountSettings') }}
                 </el-dropdown-item>
                 <el-dropdown-item divided @click="logout">
-                  <el-icon><SwitchButton /></el-icon>退出登录
+                  <el-icon><SwitchButton /></el-icon>{{ $t('common.logout') }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -231,7 +244,7 @@
   <!-- Notification Drawer -->
   <el-drawer
     v-model="notificationVisible"
-    title="通知中心"
+    :title="$t('notifications.title')"
     size="400px"
     :with-header="true"
   >
@@ -243,9 +256,9 @@
           </el-icon>
         </div>
         <div class="notice-content">
-          <h4 class="notice-title">{{ notice.title }}</h4>
-          <p class="notice-desc">{{ notice.content }}</p>
-          <span class="notice-time">{{ notice.time }}</span>
+          <h4 class="notice-title">{{ $t(notice.titleKey) }}</h4>
+          <p class="notice-desc">{{ $t(notice.contentKey) }}</p>
+          <span class="notice-time">{{ $t(notice.timeKey, notice.timeParams) }}</span>
         </div>
       </div>
     </div>
@@ -263,6 +276,14 @@ import {
   TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
   Setting, SwitchButton, Moon, Sunny, ChatDotRound
 } from '@element-plus/icons-vue'
+import { useLocale, t } from '@/plugins/i18n'
+
+const { locale } = useLocale()
+
+const handleLocaleChange = (lang: string) => {
+  locale.value = lang
+  localStorage.setItem('locale', lang)
+}
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -278,33 +299,37 @@ const isDarkMode = ref(false)
 
 const notifications = ref([
   {
-    title: '新订单提醒',
-    content: '您有一个新订单 #ORD20240318010 待处理',
-    time: '10分钟前',
+    titleKey: 'notifications.newOrderTitle',
+    contentKey: 'notifications.newOrderContent',
+    timeKey: 'notifications.minutesAgo',
+    timeParams: { n: 10 },
     type: 'order',
     icon: 'Box',
     read: false
   },
   {
-    title: '库存预警',
-    content: '商品 "无线蓝牙耳机 Pro" 库存不足，请及时补货',
-    time: '30分钟前',
+    titleKey: 'notifications.lowStockTitle',
+    contentKey: 'notifications.lowStockContent',
+    timeKey: 'notifications.minutesAgo',
+    timeParams: { n: 30 },
     type: 'warning',
     icon: 'Goods',
     read: false
   },
   {
-    title: '支付成功',
-    content: '用户 张三 已完成支付，订单金额 ¥299.00',
-    time: '1小时前',
+    titleKey: 'notifications.paymentSuccessTitle',
+    contentKey: 'notifications.paymentSuccessContent',
+    timeKey: 'notifications.hoursAgo',
+    timeParams: { n: 1 },
     type: 'success',
     icon: 'CreditCard',
     read: false
   },
   {
-    title: '系统通知',
-    content: '系统将于今晚 02:00 进行例行维护',
-    time: '2小时前',
+    titleKey: 'notifications.systemNoticeTitle',
+    contentKey: 'notifications.systemNoticeContent',
+    timeKey: 'notifications.hoursAgo',
+    timeParams: { n: 2 },
     type: 'info',
     icon: 'Setting',
     read: true
@@ -347,17 +372,17 @@ const showNotifications = () => {
 }
 
 const goToProfile = () => {
-  ElMessage.info('个人中心')
+  ElMessage.info(t('common.profile'))
 }
 
 const goToSettings = () => {
-  ElMessage.info('账号设置')
+  ElMessage.info(t('common.accountSettings'))
 }
 
 const logout = () => {
   userStore.clearToken()
   router.push('/login')
-  ElMessage.success('退出登录成功')
+  ElMessage.success(t('common.logoutSuccess'))
 }
 
 onMounted(() => {
@@ -568,6 +593,33 @@ onMounted(() => {
   top: 8px;
   right: 8px;
   background-color: var(--color-primary);
+}
+
+/* Language Switcher */
+.locale-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary);
+}
+
+.locale-switch:hover {
+  background: #F5F3FF;
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .locale-switch:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary-light);
+}
+
+.locale-text {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* User Dropdown */

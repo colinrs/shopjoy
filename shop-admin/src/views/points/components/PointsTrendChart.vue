@@ -4,8 +4,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as echarts from 'echarts'
 import type { TrendDataPoint } from '@/api/points'
+
+const { t } = useI18n()
 
 interface Props {
   data: TrendDataPoint[]
@@ -62,7 +65,7 @@ const updateChart = () => {
       }
     },
     legend: {
-      data: ['获得', '兑换', '过期'],
+      data: [t('points.earned'), t('points.redeemed2'), t('points.expired')],
       bottom: 0,
       textStyle: {
         color: '#6B7280'
@@ -104,7 +107,7 @@ const updateChart = () => {
     },
     series: [
       {
-        name: '获得',
+        name: t('points.earned'),
         type: 'line',
         smooth: true,
         symbol: 'circle',
@@ -125,7 +128,7 @@ const updateChart = () => {
         }
       },
       {
-        name: '兑换',
+        name: t('points.redeemed2'),
         type: 'line',
         smooth: true,
         symbol: 'circle',
@@ -146,7 +149,7 @@ const updateChart = () => {
         }
       },
       {
-        name: '过期',
+        name: t('points.expired'),
         type: 'line',
         smooth: true,
         symbol: 'circle',

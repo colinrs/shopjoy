@@ -4,7 +4,7 @@
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="账户总数"
+          :title="$t('points.totalAccounts')"
           :value="accountStats.total"
           :icon="User"
           icon-color="primary"
@@ -12,7 +12,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="总余额"
+          :title="$t('points.totalBalance')"
           :value="accountStats.total_balance"
           :icon="Star"
           icon-color="warning"
@@ -20,7 +20,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="活跃用户"
+          :title="$t('points.activeUsers')"
           :value="accountStats.active"
           :icon="CircleCheck"
           icon-color="success"
@@ -33,7 +33,7 @@
       <div class="filter-bar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索用户ID或邮箱"
+          :placeholder="$t('points.searchUserIdOrEmail')"
           clearable
           class="search-input"
           @keyup.enter="handleSearch"
@@ -43,7 +43,7 @@
           </template>
         </el-input>
         <el-button type="primary" @click="handleSearch">
-          搜索
+          {{ $t('common.search') }}
         </el-button>
       </div>
     </el-card>
@@ -51,40 +51,40 @@
     <!-- Accounts Table -->
     <el-card class="table-card" shadow="never">
       <el-table :data="accountList" v-loading="loading" stripe @row-click="handleRowClick">
-        <el-table-column label="用户ID" width="100" align="center">
+        <el-table-column :label="$t('points.userId')" width="100" align="center">
           <template #default="{ row }">
             <span class="user-id">U{{ row.user_id }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="邮箱" min-width="200">
+        <el-table-column :label="$t('users.email')" min-width="200">
           <template #default="{ row }">
             <span class="email-text">{{ row.user_email || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="可用余额" width="120" align="right">
+        <el-table-column :label="$t('points.availableBalance')" width="120" align="right">
           <template #default="{ row }">
             <span class="balance-value">{{ row.balance.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="冻结积分" width="100" align="right">
+        <el-table-column :label="$t('points.frozenPoints')" width="100" align="right">
           <template #default="{ row }">
             <span class="frozen-value">{{ row.frozen_balance.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="累计获得" width="120" align="right">
+        <el-table-column :label="$t('points.cumulativeEarned')" width="120" align="right">
           <template #default="{ row }">
             <span class="earned-value">{{ row.total_earned.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="累计兑换" width="120" align="right">
+        <el-table-column :label="$t('points.cumulativeRedeemed')" width="120" align="right">
           <template #default="{ row }">
             <span class="redeemed-value">{{ row.total_redeemed.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click.stop="viewDetail(row)">
-              详情
+              {{ $t('common.detail') }}
             </el-button>
           </template>
         </el-table-column>
@@ -102,12 +102,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Star, CircleCheck, Search } from '@element-plus/icons-vue'
 import PointsStatsCard from '../components/PointsStatsCard.vue'
 import TablePagination from '@/components/common/TablePagination.vue'
 import { getPointsAccounts, type PointsAccount } from '@/api/points'
+
+const { t } = useI18n()
 
 const router = useRouter()
 
@@ -151,7 +154,7 @@ const loadAccounts = async () => {
     accountStats.value = res.stats
   } catch (error) {
     console.error('Failed to load accounts:', error)
-    ElMessage.error('加载积分账户列表失败')
+    ElMessage.error(t('points.loadAccountsFailed'))
   } finally {
     loading.value = false
   }

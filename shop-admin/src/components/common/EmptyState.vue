@@ -5,7 +5,7 @@
         <component :is="icon" />
       </el-icon>
     </div>
-    <h3 class="empty-title">{{ title }}</h3>
+    <h3 class="empty-title">{{ displayTitle }}</h3>
     <p v-if="description" class="empty-description">{{ description }}</p>
     <div v-if="$slots.action" class="empty-action">
       <slot name="action"></slot>
@@ -15,16 +15,20 @@
 
 <script setup lang="ts">
 import { FolderOpened } from '@element-plus/icons-vue'
+import { computed } from 'vue'
+import { t } from '@/plugins/i18n'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   title?: string
   description?: string
   icon?: any
 }>(), {
-  title: '暂无数据',
+  title: '',
   description: '',
   icon: FolderOpened
 })
+
+const displayTitle = computed(() => props.title || t('common.noData'))
 </script>
 
 <style scoped>

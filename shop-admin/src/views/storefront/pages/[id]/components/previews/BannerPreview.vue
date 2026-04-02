@@ -2,7 +2,7 @@
   <div class="banner-preview">
     <div v-if="!config?.images?.length" class="preview-placeholder">
       <el-icon size="32"><Picture /></el-icon>
-      <span>轮播图预览 ({{ config?.images?.length || 0 }} 张图片)</span>
+      <span>{{ $t('storefront.bannerPreview') }} ({{ config?.images?.length || 0 }} {{ $t('points.images') }})</span>
     </div>
     <div v-else class="preview-carousel">
       <el-carousel
@@ -14,7 +14,7 @@
         <el-carousel-item v-for="(img, idx) in config.images.slice(0, 3)" :key="idx">
           <div class="carousel-image" :style="{ backgroundImage: `url(${img})` }">
             <span v-if="config.images.length > 3 && idx === 2" class="more-overlay">
-              +{{ config.images.length - 3 }} 张
+              +{{ config.images.length - 3 }} {{ $t('points.images') }}
             </span>
           </div>
         </el-carousel-item>

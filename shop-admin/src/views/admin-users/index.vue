@@ -442,7 +442,7 @@ const handleStatusChange = async (row: any, val: number) => {
         await disableAdminUser(row.id)
       }
     }
-    ElMessage.success(action + t('adminUsers.updateSuccess').replace('成功', ''))
+    ElMessage.success(t('adminUsers.updateSuccess'))
   } catch {
     row.status = val === 1 ? 2 : 1
   }

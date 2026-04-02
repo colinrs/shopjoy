@@ -6,11 +6,11 @@
         <div class="header-left">
           <el-button link @click="handleBack">
             <el-icon><ArrowLeft /></el-icon>
-            返回商品列表
+            {{ $t('products.backToList') }}
           </el-button>
           <el-divider direction="vertical" />
           <h2 class="product-title">
-            {{ product?.name || '加载中...' }}
+            {{ product?.name || $t('common.loading') }}
             <el-tag v-if="product" :type="getStatusType(product.status)" size="small">
               {{ getStatusText(product.status) }}
             </el-tag>
@@ -23,7 +23,7 @@
             :loading="statusLoading"
           >
             <el-icon><Hide /></el-icon>
-            下架
+            {{ $t('products.offSale') }}
           </el-button>
           <el-button
             v-else-if="product?.status === 'off_sale' || product?.status === 'draft'"
@@ -32,11 +32,11 @@
             :loading="statusLoading"
           >
             <el-icon><View /></el-icon>
-            上架
+            {{ $t('products.onSale') }}
           </el-button>
           <el-button @click="handleSave" type="primary" :loading="saveLoading">
             <el-icon><Check /></el-icon>
-            保存修改
+            {{ $t('products.saveChanges') }}
           </el-button>
         </div>
       </div>
@@ -49,44 +49,44 @@
     <el-card v-else class="tabs-card" shadow="never">
       <el-tabs v-model="activeTab" class="product-tabs">
         <!-- Basic Info Tab -->
-        <el-tab-pane label="基本信息" name="basic">
+        <el-tab-pane :label="$t('products.basicInfo')" name="basic">
           <el-form :model="productForm" label-width="140px" :rules="formRules" ref="formRef">
             <!-- Basic Information Section -->
             <div class="form-section">
-              <h3 class="section-title">基本信息</h3>
+              <h3 class="section-title">{{ $t('products.basicInfo') }}</h3>
               <el-row :gutter="20">
                 <el-col :span="12">
-                  <el-form-item label="商品名称" prop="name">
-                    <el-input v-model="productForm.name" placeholder="请输入商品名称" />
+                  <el-form-item :label="$t('products.productName')" prop="name">
+                    <el-input v-model="productForm.name" :placeholder="$t('products.enterProductName')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="SKU" prop="sku">
-                    <el-input v-model="productForm.sku" placeholder="请输入SKU" />
+                    <el-input v-model="productForm.sku" :placeholder="$t('products.enterSKU')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="品牌">
-                    <el-input v-model="productForm.brand" placeholder="请输入品牌名称" />
+                  <el-form-item :label="$t('products.brand')">
+                    <el-input v-model="productForm.brand" :placeholder="$t('products.enterBrand')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="分类ID">
+                  <el-form-item :label="$t('products.categoryId')">
                     <el-input-number v-model="productForm.category_id" :min="0" style="width: 100%" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="24">
-                  <el-form-item label="描述">
-                    <el-input v-model="productForm.description" type="textarea" :rows="4" placeholder="请输入商品描述" />
+                  <el-form-item :label="$t('products.productDescription')">
+                    <el-input v-model="productForm.description" type="textarea" :rows="4" :placeholder="$t('products.enterProductDescription')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="价格" prop="price">
+                  <el-form-item :label="$t('products.price')" prop="price">
                     <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="货币">
+                  <el-form-item :label="$t('products.currency')">
                     <el-select v-model="productForm.currency" style="width: 100%">
                       <el-option label="USD" value="USD" />
                       <el-option label="EUR" value="EUR" />
@@ -96,26 +96,26 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="成本价">
+                  <el-form-item :label="$t('products.costPrice')">
                     <el-input-number v-model="productForm.cost_price" :min="0" :precision="2" style="width: 100%" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="库存">
+                  <el-form-item :label="$t('products.stock')">
                     <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="状态">
+                  <el-form-item :label="$t('common.status')">
                     <el-select v-model="productForm.status" style="width: 100%">
-                      <el-option label="草稿" value="draft" />
-                      <el-option label="在售" value="on_sale" />
-                      <el-option label="下架" value="off_sale" />
+                      <el-option :label="$t('products.draft')" value="draft" />
+                      <el-option :label="$t('products.onSale')" value="on_sale" />
+                      <el-option :label="$t('products.offSale')" value="off_sale" />
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="是否矩阵商品">
+                  <el-form-item :label="$t('products.isMatrixProduct')">
                     <el-switch v-model="productForm.is_matrix_product" />
                   </el-form-item>
                 </el-col>
@@ -124,21 +124,21 @@
 
             <!-- Compliance Section -->
             <div class="form-section">
-              <h3 class="section-title">跨境合规</h3>
+              <h3 class="section-title">{{ $t('products.complianceInfo') }}</h3>
               <el-row :gutter="20">
                 <el-col :span="12">
-                  <el-form-item label="HS编码">
-                    <el-input v-model="productForm.hs_code" placeholder="请输入HS编码" />
+                  <el-form-item :label="$t('products.hsCode')">
+                    <el-input v-model="productForm.hs_code" :placeholder="$t('products.enterHsCode')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="原产国">
-                    <el-input v-model="productForm.coo" placeholder="请输入国家代码（如：CN, US）" />
+                  <el-form-item :label="$t('products.coo')">
+                    <el-input v-model="productForm.coo" :placeholder="$t('products.enterCoo')" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
-                  <el-form-item label="重量">
-                    <el-input v-model="productForm.weight" placeholder="如：1.5">
+                  <el-form-item :label="$t('products.weight')">
+                    <el-input v-model="productForm.weight" :placeholder="$t('products.weightPlaceholder')">
                       <template #append>
                         <el-select v-model="productForm.weight_unit" style="width: 80px">
                           <el-option label="kg" value="kg" />
@@ -150,20 +150,20 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="16">
-                  <el-form-item label="尺寸（长 x 宽 x 高）">
+                  <el-form-item :label="$t('products.dimensions')">
                     <el-row :gutter="8">
                       <el-col :span="8">
-                        <el-input v-model="productForm.length" placeholder="长">
+                        <el-input v-model="productForm.length" :placeholder="$t('products.length')">
                           <template #append>cm</template>
                         </el-input>
                       </el-col>
                       <el-col :span="8">
-                        <el-input v-model="productForm.width" placeholder="宽">
+                        <el-input v-model="productForm.width" :placeholder="$t('products.width')">
                           <template #append>cm</template>
                         </el-input>
                       </el-col>
                       <el-col :span="8">
-                        <el-input v-model="productForm.height" placeholder="高">
+                        <el-input v-model="productForm.height" :placeholder="$t('products.height')">
                           <template #append>cm</template>
                         </el-input>
                       </el-col>
@@ -171,13 +171,13 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="24">
-                  <el-form-item label="危险品">
+                  <el-form-item :label="$t('products.dangerousGoods')">
                     <el-checkbox-group v-model="productForm.dangerous_goods">
-                      <el-checkbox label="battery">电池</el-checkbox>
-                      <el-checkbox label="liquid">液体</el-checkbox>
-                      <el-checkbox label="flammable">易燃</el-checkbox>
-                      <el-checkbox label="magnetic">磁性</el-checkbox>
-                      <el-checkbox label="fragile">易碎</el-checkbox>
+                      <el-checkbox label="battery">{{ $t('products.battery') }}</el-checkbox>
+                      <el-checkbox label="liquid">{{ $t('products.liquid') }}</el-checkbox>
+                      <el-checkbox label="flammable">{{ $t('products.flammable') }}</el-checkbox>
+                      <el-checkbox label="magnetic">{{ $t('products.magnetic') }}</el-checkbox>
+                      <el-checkbox label="fragile">{{ $t('products.fragile') }}</el-checkbox>
                     </el-checkbox-group>
                   </el-form-item>
                 </el-col>
@@ -186,8 +186,8 @@
 
             <!-- Images Section -->
             <div class="form-section">
-              <h3 class="section-title">商品图片</h3>
-              <el-form-item label="图片URL">
+              <h3 class="section-title">{{ $t('products.productImage') }}</h3>
+              <el-form-item :label="$t('products.imageUrl')">
                 <div class="image-list">
                   <div v-for="(img, index) in productForm.images" :key="index" class="image-item">
                     <el-image :src="img" fit="cover" class="product-image">
@@ -209,7 +209,7 @@
                   </div>
                   <div class="add-image" @click="addImage">
                     <el-icon><Plus /></el-icon>
-                    <span>添加图片</span>
+                    <span>{{ $t('products.addImage') }}</span>
                   </div>
                 </div>
               </el-form-item>
@@ -218,18 +218,18 @@
         </el-tab-pane>
 
         <!-- Markets Tab -->
-        <el-tab-pane label="市场" name="markets">
+        <el-tab-pane :label="$t('products.markets')" name="markets">
           <div class="markets-section">
             <div class="section-header">
-              <h3 class="section-title">市场可用性</h3>
+              <h3 class="section-title">{{ $t('products.marketAvailability') }}</h3>
               <el-button type="primary" @click="showPushToMarketDialog">
                 <el-icon><Plus /></el-icon>
-                推送到市场
+                {{ $t('products.pushToMarket') }}
               </el-button>
             </div>
 
             <el-table :data="productMarkets" v-loading="marketsLoading" stripe>
-              <el-table-column label="市场" min-width="150">
+              <el-table-column :label="$t('products.market')" min-width="150">
                 <template #default="{ row }">
                   <div class="market-cell">
                     <span class="market-code">{{ row.market_code }}</span>
@@ -237,7 +237,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="状态" width="120" align="center">
+              <el-table-column :label="$t('common.status')" width="120" align="center">
                 <template #default="{ row }">
                   <el-switch
                     v-model="row.is_enabled"
@@ -245,7 +245,7 @@
                   />
                 </template>
               </el-table-column>
-              <el-table-column label="价格" width="180" align="right">
+              <el-table-column :label="$t('products.price')" width="180" align="right">
                 <template #default="{ row }">
                   <div class="price-cell">
                     <el-input-number
@@ -261,7 +261,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="对比价格" width="180" align="right">
+              <el-table-column :label="$t('products.compareAtPrice')" width="180" align="right">
                 <template #default="{ row }">
                   <div class="price-cell">
                     <el-input-number
@@ -277,7 +277,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="库存预警" width="120" align="center">
+              <el-table-column :label="$t('products.stockAlert')" width="120" align="center">
                 <template #default="{ row }">
                   <el-input-number
                     v-model="row.stock_alert_threshold"
@@ -289,13 +289,13 @@
                   />
                 </template>
               </el-table-column>
-              <el-table-column label="发布时间" width="120" align="center">
+              <el-table-column :label="$t('products.publishedAt')" width="120" align="center">
                 <template #default="{ row }">
                   <span v-if="row.published_at">{{ formatDate(row.published_at) }}</span>
-                  <span v-else class="text-muted">未发布</span>
+                  <span v-else class="text-muted">{{ $t('products.notPublished') }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="100" align="center">
+              <el-table-column :label="$t('common.actions')" width="100" align="center">
                 <template #default="{ row }">
                   <el-button
                     type="danger"
@@ -303,33 +303,33 @@
                     size="small"
                     @click="handleRemoveFromMarket(row)"
                   >
-                    移除
+                    {{ $t('common.remove') }}
                   </el-button>
                 </template>
               </el-table-column>
             </el-table>
 
             <div v-if="productMarkets.length === 0 && !marketsLoading" class="empty-markets">
-              <el-empty description="该商品尚未在任何市场上架">
-                <el-button type="primary" @click="showPushToMarketDialog">推送到市场</el-button>
+              <el-empty :description="$t('products.notOnAnyMarket')">
+                <el-button type="primary" @click="showPushToMarketDialog">{{ $t('products.pushToMarket') }}</el-button>
               </el-empty>
             </div>
           </div>
         </el-tab-pane>
 
         <!-- Variants Tab -->
-        <el-tab-pane label="变体" name="variants">
+        <el-tab-pane :label="$t('products.variants')" name="variants">
           <div class="variants-section" v-loading="variantsLoading">
             <div class="section-header">
-              <h3 class="section-title">商品变体 (SKU)</h3>
+              <h3 class="section-title">{{ $t('products.productVariants') }}</h3>
               <el-button type="primary" size="small" @click="showAddVariantDialog">
                 <el-icon><Plus /></el-icon>
-                添加变体
+                {{ $t('products.addVariant') }}
               </el-button>
             </div>
             <el-table :data="variants" stripe>
-              <el-table-column label="SKU编码" prop="code" min-width="150" />
-              <el-table-column label="属性" min-width="200">
+              <el-table-column :label="$t('products.skuCode')" prop="code" min-width="150" />
+              <el-table-column :label="$t('products.attributes')" min-width="200">
                 <template #default="{ row }">
                   <div class="attribute-tags">
                     <el-tag v-for="(value, key) in row.attributes" :key="key" size="small" class="attribute-tag">
@@ -339,52 +339,52 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="价格" width="120" align="right">
+              <el-table-column :label="$t('products.price')" width="120" align="right">
                 <template #default="{ row }">
                   {{ row.currency }} {{ row.price }}
                 </template>
               </el-table-column>
-              <el-table-column label="库存" prop="stock" width="100" align="center" />
-              <el-table-column label="可用库存" prop="available_stock" width="100" align="center" />
-              <el-table-column label="安全库存" prop="safety_stock" width="100" align="center" />
-              <el-table-column label="状态" width="100" align="center">
+              <el-table-column :label="$t('products.stock')" prop="stock" width="100" align="center" />
+              <el-table-column :label="$t('products.availableStock')" prop="available_stock" width="100" align="center" />
+              <el-table-column :label="$t('products.safetyStock')" prop="safety_stock" width="100" align="center" />
+              <el-table-column :label="$t('common.status')" width="100" align="center">
                 <template #default="{ row }">
                   <el-tag :type="row.status === 'enabled' ? 'success' : 'info'" size="small">
-                    {{ row.status === 'enabled' ? '启用' : '禁用' }}
+                    {{ row.status === 'enabled' ? $t('common.enabled') : $t('common.disabled') }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="库存预警" width="100" align="center">
+              <el-table-column :label="$t('products.stockAlert')" width="100" align="center">
                 <template #default="{ row }">
-                  <el-tag v-if="row.is_low_stock" type="danger" size="small">低库存</el-tag>
+                  <el-tag v-if="row.is_low_stock" type="danger" size="small">{{ $t('products.lowStock') }}</el-tag>
                   <span v-else class="text-muted">-</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="120" align="center">
+              <el-table-column :label="$t('common.actions')" width="120" align="center">
                 <template #default="{ row }">
-                  <el-button type="primary" link size="small" @click="handleEditVariant(row)">编辑</el-button>
-                  <el-button type="danger" link size="small" @click="handleDeleteVariant(row)">删除</el-button>
+                  <el-button type="primary" link size="small" @click="handleEditVariant(row)">{{ $t('common.edit') }}</el-button>
+                  <el-button type="danger" link size="small" @click="handleDeleteVariant(row)">{{ $t('common.delete') }}</el-button>
                 </template>
               </el-table-column>
             </el-table>
-            <el-empty v-if="variants.length === 0 && !variantsLoading" description="暂无变体数据">
-              <el-button type="primary" @click="showAddVariantDialog">添加变体</el-button>
+            <el-empty v-if="variants.length === 0 && !variantsLoading" :description="$t('products.noVariants')">
+              <el-button type="primary" @click="showAddVariantDialog">{{ $t('products.addVariant') }}</el-button>
             </el-empty>
           </div>
         </el-tab-pane>
 
         <!-- Pricing Tab -->
-        <el-tab-pane label="定价" name="pricing">
+        <el-tab-pane :label="$t('products.pricing')" name="pricing">
           <div class="pricing-section" v-loading="marketsLoading">
             <div class="section-header">
-              <h3 class="section-title">市场价格</h3>
+              <h3 class="section-title">{{ $t('products.marketPrice') }}</h3>
               <el-button type="primary" size="small" @click="handleSavePricing" :loading="pricingSaveLoading">
                 <el-icon><Check /></el-icon>
-                保存定价
+                {{ $t('products.savePricing') }}
               </el-button>
             </div>
             <el-table :data="pricingData" stripe>
-              <el-table-column label="市场" min-width="150">
+              <el-table-column :label="$t('products.market')" min-width="150">
                 <template #default="{ row }">
                   <div class="market-cell">
                     <span class="market-code">{{ row.market_code }}</span>
@@ -392,12 +392,12 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="货币" width="80" align="center">
+              <el-table-column :label="$t('products.currency')" width="80" align="center">
                 <template #default="{ row }">
                   <el-tag size="small">{{ row.currency }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="基础价格" width="150" align="right">
+              <el-table-column :label="$t('products.basePrice')" width="150" align="right">
                 <template #default="{ row }">
                   <el-input-number
                     v-model="row.price_value"
@@ -409,7 +409,7 @@
                   />
                 </template>
               </el-table-column>
-              <el-table-column label="对比价格" width="150" align="right">
+              <el-table-column :label="$t('products.compareAtPrice')" width="150" align="right">
                 <template #default="{ row }">
                   <el-input-number
                     v-model="row.compare_at_price_value"
@@ -421,7 +421,7 @@
                   />
                 </template>
               </el-table-column>
-              <el-table-column label="折扣" width="100" align="center">
+              <el-table-column :label="$t('products.discount')" width="100" align="center">
                 <template #default="{ row }">
                   <span v-if="row.compare_at_price_value > row.price_value && row.compare_at_price_value > 0" class="discount-badge">
                     -{{ Math.round((1 - row.price_value / row.compare_at_price_value) * 100) }}%
@@ -429,24 +429,24 @@
                   <span v-else class="text-muted">-</span>
                 </template>
               </el-table-column>
-              <el-table-column label="状态" width="100" align="center">
+              <el-table-column :label="$t('common.status')" width="100" align="center">
                 <template #default="{ row }">
                   <el-switch v-model="row.is_enabled" size="small" />
                 </template>
               </el-table-column>
             </el-table>
-            <el-empty v-if="pricingData.length === 0 && !marketsLoading" description="该商品尚未在任何市场上架" />
+            <el-empty v-if="pricingData.length === 0 && !marketsLoading" :description="$t('products.notOnAnyMarket')" />
           </div>
         </el-tab-pane>
 
         <!-- Localization Tab -->
-        <el-tab-pane label="本地化" name="localization">
+        <el-tab-pane :label="$t('products.localization')" name="localization">
           <div class="localization-section" v-loading="localizationsLoading">
             <div class="section-header">
-              <h3 class="section-title">多语言内容</h3>
+              <h3 class="section-title">{{ $t('products.multilingualContent') }}</h3>
               <el-button type="primary" size="small" @click="handleAddLocalization">
                 <el-icon><Plus /></el-icon>
-                添加语言
+                {{ $t('products.addLanguage') }}
               </el-button>
             </div>
 
@@ -460,33 +460,33 @@
               >
                 <div v-if="getLocalizationByLang(lang.code)" class="localization-content">
                   <el-form label-width="100px">
-                    <el-form-item label="商品名称">
+                    <el-form-item :label="$t('products.productName')">
                       <el-input
                         v-model="getLocalizationByLang(lang.code)!.name"
-                        placeholder="请输入本地化名称"
+                        :placeholder="$t('products.enterLocalizedName')"
                         @change="handleUpdateLocalization(getLocalizationByLang(lang.code)!)"
                       />
                     </el-form-item>
-                    <el-form-item label="商品描述">
+                    <el-form-item :label="$t('products.productDescription')">
                       <el-input
                         v-model="getLocalizationByLang(lang.code)!.description"
                         type="textarea"
                         :rows="4"
-                        placeholder="请输入本地化描述"
+                        :placeholder="$t('products.enterLocalizedDescription')"
                         @change="handleUpdateLocalization(getLocalizationByLang(lang.code)!)"
                       />
                     </el-form-item>
                     <el-form-item>
                       <el-button type="danger" size="small" @click="handleDeleteLocalization(getLocalizationByLang(lang.code)!)">
-                        删除此语言
+                        {{ $t('products.deleteThisLanguage') }}
                       </el-button>
                     </el-form-item>
                   </el-form>
                 </div>
                 <div v-else class="no-localization">
-                  <el-empty :description="`暂无${lang.name}内容`">
+                  <el-empty :description="$t('products.noContentForLang', { name: lang.name })">
                     <el-button type="primary" size="small" @click="handleCreateLocalization(lang.code)">
-                      创建{{ lang.name }}内容
+                      {{ $t('products.createContentForLang', { name: lang.name }) }}
                     </el-button>
                   </el-empty>
                 </div>
@@ -496,22 +496,22 @@
         </el-tab-pane>
 
         <!-- Inventory Tab -->
-        <el-tab-pane label="库存" name="inventory">
+        <el-tab-pane :label="$t('products.stock')" name="inventory">
           <div class="inventory-section" v-loading="inventoryLoading">
             <!-- Inventory Overview -->
             <div class="inventory-overview">
               <el-row :gutter="20">
                 <el-col :span="6">
-                  <el-statistic title="总库存" :value="product?.stock || 0" />
+                  <el-statistic :title="$t('products.totalStock')" :value="product?.stock || 0" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="可用库存" :value="skuInventory?.available_stock || 0" />
+                  <el-statistic :title="$t('products.availableStock')" :value="skuInventory?.available_stock || 0" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="锁定库存" :value="skuInventory?.locked_stock || 0" />
+                  <el-statistic :title="$t('products.lockedStock')" :value="skuInventory?.locked_stock || 0" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="安全库存" :value="skuInventory?.safety_stock || 0" />
+                  <el-statistic :title="$t('products.safetyStock')" :value="skuInventory?.safety_stock || 0" />
                 </el-col>
               </el-row>
             </div>
@@ -519,55 +519,55 @@
             <!-- Warehouse Inventory -->
             <div class="warehouse-inventory">
               <div class="section-header">
-                <h3 class="section-title">仓库库存</h3>
+                <h3 class="section-title">{{ $t('products.warehouseInventory') }}</h3>
                 <el-button type="primary" size="small" @click="showAdjustStockDialog">
                   <el-icon><Edit /></el-icon>
-                  调整库存
+                  {{ $t('products.adjustStock') }}
                 </el-button>
               </div>
               <el-table :data="skuInventory?.warehouses || []" stripe>
-                <el-table-column label="仓库" min-width="150">
+                <el-table-column :label="$t('products.warehouse')" min-width="150">
                   <template #default="{ row }">
-                    <span>{{ row.warehouse_name || `仓库 ${row.warehouse_id}` }}</span>
+                    <span>{{ row.warehouse_name || `${$t('products.warehouse')} ${row.warehouse_id}` }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="可用库存" prop="available_stock" width="120" align="center" />
-                <el-table-column label="锁定库存" prop="locked_stock" width="120" align="center" />
-                <el-table-column label="总库存" width="120" align="center">
+                <el-table-column :label="$t('products.availableStock')" prop="available_stock" width="120" align="center" />
+                <el-table-column :label="$t('products.lockedStock')" prop="locked_stock" width="120" align="center" />
+                <el-table-column :label="$t('products.totalStock')" width="120" align="center">
                   <template #default="{ row }">
                     {{ row.available_stock + row.locked_stock }}
                   </template>
                 </el-table-column>
               </el-table>
-              <el-empty v-if="!skuInventory?.warehouses?.length" description="暂无仓库库存数据" />
+              <el-empty v-if="!skuInventory?.warehouses?.length" :description="$t('products.noWarehouseInventory')" />
             </div>
 
             <!-- Inventory Logs -->
             <div class="inventory-logs">
-              <h3 class="section-title">库存变动记录</h3>
+              <h3 class="section-title">{{ $t('products.inventoryChangeLog') }}</h3>
               <el-table :data="inventoryLogs" stripe>
-                <el-table-column label="时间" width="180">
+                <el-table-column :label="$t('products.time')" width="180">
                   <template #default="{ row }">
                     {{ row.created_at }}
                   </template>
                 </el-table-column>
-                <el-table-column label="类型" width="100">
+                <el-table-column :label="$t('products.type')" width="100">
                   <template #default="{ row }">
                     <el-tag :type="getLogTypeStyle(row.change_type)" size="small">
                       {{ getLogTypeText(row.change_type) }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="变动数量" width="120" align="right">
+                <el-table-column :label="$t('products.changeQuantity')" width="120" align="right">
                   <template #default="{ row }">
                     <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
                       {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
                     </span>
                   </template>
                 </el-table-column>
-                <el-table-column label="变动前" prop="before_stock" width="100" align="center" />
-                <el-table-column label="变动后" prop="after_stock" width="100" align="center" />
-                <el-table-column label="备注" prop="remark" min-width="150" />
+                <el-table-column :label="$t('products.beforeChange')" prop="before_stock" width="100" align="center" />
+                <el-table-column :label="$t('products.afterChange')" prop="after_stock" width="100" align="center" />
+                <el-table-column :label="$t('products.remark')" prop="remark" min-width="150" />
               </el-table>
               <el-pagination
                 v-if="inventoryLogsTotal > 0"
@@ -584,24 +584,24 @@
         </el-tab-pane>
 
         <!-- Reviews Tab -->
-        <el-tab-pane label="评价统计" name="reviews">
+        <el-tab-pane :label="$t('products.reviewStats')" name="reviews">
           <div class="reviews-section" v-loading="reviewsLoading">
             <!-- Review Stats Overview -->
             <div class="review-stats-overview">
               <el-row :gutter="20">
                 <el-col :span="6">
-                  <el-statistic title="总评价数" :value="productStats?.total_reviews || 0" />
+                  <el-statistic :title="$t('products.totalReviews')" :value="productStats?.total_reviews || 0" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="平均评分" :value="productStats?.average_rating || '0'" suffix="星" />
+                  <el-statistic :title="$t('products.averageRating')" :value="productStats?.average_rating || '0'" :suffix="$t('products.stars')" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="带图评价" :value="productStats?.with_image_count || 0" />
+                  <el-statistic :title="$t('products.reviewsWithImages')" :value="productStats?.with_image_count || 0" />
                 </el-col>
                 <el-col :span="6">
-                  <el-statistic title="回复率" :value="productStats?.reply_rate || 0" suffix="%">
+                  <el-statistic :title="$t('products.replyRate')" :value="productStats?.reply_rate || 0" :suffix="$t('products.replyRateUnit')">
                     <template #suffix>
-                      <span style="font-size: 14px">%</span>
+                      <span style="font-size: 14px">{{ $t('products.replyRateUnit') }}</span>
                     </template>
                   </el-statistic>
                 </el-col>
@@ -610,10 +610,10 @@
 
             <!-- Rating Distribution -->
             <div class="rating-distribution">
-              <h3 class="section-title">评分分布</h3>
+              <h3 class="section-title">{{ $t('products.ratingDistribution') }}</h3>
               <div class="rating-bars">
                 <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="rating-bar-item">
-                  <span class="star-label">{{ star }}星</span>
+                  <span class="star-label">{{ star }}{{ $t('products.stars') }}</span>
                   <div class="bar-container">
                     <div
                       class="bar-fill"
@@ -630,19 +630,19 @@
               <el-row :gutter="20">
                 <el-col :span="8">
                   <div class="rating-card">
-                    <div class="rating-card-title">质量评分</div>
+                    <div class="rating-card-title">{{ $t('products.qualityRating') }}</div>
                     <div class="rating-card-value">{{ productStats?.quality_avg_rating || '0' }}</div>
                   </div>
                 </el-col>
                 <el-col :span="8">
                   <div class="rating-card">
-                    <div class="rating-card-title">价值评分</div>
+                    <div class="rating-card-title">{{ $t('products.valueRating') }}</div>
                     <div class="rating-card-value">{{ productStats?.value_avg_rating || '0' }}</div>
                   </div>
                 </el-col>
                 <el-col :span="8">
                   <div class="rating-card">
-                    <div class="rating-card-title">回复数</div>
+                    <div class="rating-card-title">{{ $t('products.replyCount') }}</div>
                     <div class="rating-card-value">{{ productStats?.reply_count || 0 }}</div>
                   </div>
                 </el-col>
@@ -656,12 +656,12 @@
     <!-- Push to Market Dialog -->
     <el-dialog
       v-model="pushToMarketDialogVisible"
-      title="推送到市场"
+      :title="$t('products.pushToMarket')"
       width="500px"
       destroy-on-close
     >
       <el-form :model="pushToMarketForm" label-width="120px" ref="pushToMarketFormRef">
-        <el-form-item label="市场" prop="markets" required>
+        <el-form-item :label="$t('products.market')" prop="markets" required>
           <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">
             <el-checkbox
               v-for="market in availableMarketsForPush"
@@ -673,38 +673,38 @@
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="价格 (USD)" prop="price" required>
+        <el-form-item :label="$t('products.priceUSD')" prop="price" required>
           <el-input-number
             v-model="pushToMarketForm.price"
             :min="0"
             :precision="2"
             style="width: 100%"
           />
-          <div class="price-note">注意：价格以基础货币（USD）计。将应用于所有选定的市场。</div>
+          <div class="price-note">{{ $t('products.priceNote') }}</div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="pushToMarketDialogVisible = false">取消</el-button>
+        <el-button @click="pushToMarketDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleConfirmPushToMarket" :loading="pushToMarketLoading">
-          推送到市场
+          {{ $t('products.pushToMarket') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Add Image Dialog -->
-    <el-dialog v-model="addImageDialogVisible" title="添加图片URL" width="400px">
-      <el-input v-model="newImageUrl" placeholder="请输入图片URL" />
+    <el-dialog v-model="addImageDialogVisible" :title="$t('products.addImageUrl')" width="400px">
+      <el-input v-model="newImageUrl" :placeholder="$t('products.enterImageUrl')" />
       <template #footer>
-        <el-button @click="addImageDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmAddImage">添加</el-button>
+        <el-button @click="addImageDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="confirmAddImage">{{ $t('common.add') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Adjust Stock Dialog -->
-    <el-dialog v-model="adjustStockDialogVisible" title="调整库存" width="450px">
+    <el-dialog v-model="adjustStockDialogVisible" :title="$t('products.adjustStock')" width="450px">
       <el-form :model="adjustStockForm" label-width="100px">
-        <el-form-item label="仓库">
-          <el-select v-model="adjustStockForm.warehouse_id" placeholder="选择仓库" style="width: 100%">
+        <el-form-item :label="$t('products.warehouse')">
+          <el-select v-model="adjustStockForm.warehouse_id" :placeholder="$t('products.selectWarehouse')" style="width: 100%">
             <el-option
               v-for="warehouse in warehouses"
               :key="warehouse.id"
@@ -713,38 +713,38 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="调整数量">
+        <el-form-item :label="$t('products.adjustQuantity')">
           <el-input-number
             v-model="adjustStockForm.quantity"
             :step="1"
             style="width: 100%"
           />
-          <div class="adjust-tip">正数为入库，负数为出库</div>
+          <div class="adjust-tip">{{ $t('products.stockInOutTip') }}</div>
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="adjustStockForm.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-form-item :label="$t('products.remark')">
+          <el-input v-model="adjustStockForm.remark" type="textarea" :rows="2" :placeholder="$t('products.enterRemark')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="adjustStockDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleAdjustStock">确认调整</el-button>
+        <el-button @click="adjustStockDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleAdjustStock">{{ $t('products.confirmAdjustment') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Variant Dialog -->
-    <el-dialog v-model="variantDialogVisible" :title="isEditVariant ? '编辑变体' : '添加变体'" width="550px">
+    <el-dialog v-model="variantDialogVisible" :title="isEditVariant ? $t('products.editVariant') : $t('products.addVariant')" width="550px">
       <el-form :model="variantForm" label-width="100px" ref="variantFormRef">
-        <el-form-item label="SKU编码" required>
-          <el-input v-model="variantForm.code" placeholder="请输入SKU编码" />
+        <el-form-item :label="$t('products.skuCode')" required>
+          <el-input v-model="variantForm.code" :placeholder="$t('products.enterSkuCode')" />
         </el-form-item>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="价格">
+            <el-form-item :label="$t('products.price')">
               <el-input-number v-model="variantForm.price" :min="0" :precision="2" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="货币">
+            <el-form-item :label="$t('products.currency')">
               <el-select v-model="variantForm.currency" style="width: 100%">
                 <el-option label="USD" value="USD" />
                 <el-option label="EUR" value="EUR" />
@@ -756,20 +756,20 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="库存">
+            <el-form-item :label="$t('products.stock')">
               <el-input-number v-model="variantForm.stock" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="安全库存">
+            <el-form-item :label="$t('products.safetyStock')">
               <el-input-number v-model="variantForm.safety_stock" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="开启预售">
+        <el-form-item :label="$t('products.enablePreSale')">
           <el-switch v-model="variantForm.pre_sale_enabled" />
         </el-form-item>
-        <el-form-item label="属性">
+        <el-form-item :label="$t('products.attributes')">
           <div class="attributes-section">
             <div v-for="(value, key) in variantForm.attributes" :key="key" class="attribute-item">
               <span class="attribute-text">{{ key }}: {{ value }}</span>
@@ -778,16 +778,16 @@
               </el-button>
             </div>
             <div class="add-attribute-row">
-              <el-input v-model="newAttributeKey" placeholder="属性名" style="width: 120px" />
-              <el-input v-model="newAttributeValue" placeholder="属性值" style="width: 120px" />
-              <el-button type="primary" size="small" @click="handleAddAttribute">添加</el-button>
+              <el-input v-model="newAttributeKey" :placeholder="$t('products.attributeName')" style="width: 120px" />
+              <el-input v-model="newAttributeValue" :placeholder="$t('products.attributeValue')" style="width: 120px" />
+              <el-button type="primary" size="small" @click="handleAddAttribute">{{ $t('common.add') }}</el-button>
             </div>
           </div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="variantDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveVariant">保存</el-button>
+        <el-button @click="variantDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSaveVariant">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -903,13 +903,22 @@ const newAttributeValue = ref('')
 const localizationsLoading = ref(false)
 const localizations = ref<ProductLocalization[]>([])
 const activeLanguage = ref('en')
-const supportedLanguages = [
-  { code: 'en', name: 'English' },
-  { code: 'zh-CN', name: '简体中文' },
-  { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' },
-  { code: 'es', name: 'Español' }
-]
+// Language code to translation key mapping
+const languageNameKeys: Record<string, string> = {
+  'en': 'products.langEn',
+  'zh-CN': 'products.langZhCN',
+  'ja': 'products.langJa',
+  'ko': 'products.langKo',
+  'es': 'products.langEs'
+}
+
+const supportedLanguages = computed(() => [
+  { code: 'en', name: t(languageNameKeys['en']) },
+  { code: 'zh-CN', name: t(languageNameKeys['zh-CN']) },
+  { code: 'ja', name: t(languageNameKeys['ja']) },
+  { code: 'ko', name: t(languageNameKeys['ko']) },
+  { code: 'es', name: t(languageNameKeys['es']) }
+])
 
 // Form
 const productForm = reactive({
@@ -950,8 +959,8 @@ const availableMarketsForPush = computed(() => {
 
 // Form rules
 const formRules = {
-  name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
-  price: [{ required: true, message: '请输入价格', trigger: 'blur' }]
+  name: [{ required: true, message: () => t('products.enterProductName'), trigger: 'blur' }],
+  price: [{ required: true, message: () => t('products.enterPrice'), trigger: 'blur' }]
 }
 
 // Helper functions
@@ -1021,7 +1030,7 @@ const loadProduct = async () => {
     })
   } catch (error) {
     console.error('Failed to load product:', error)
-    ElMessage.error('加载商品失败')
+    ElMessage.error(t('products.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -1035,7 +1044,7 @@ const loadProductMarkets = async () => {
     productMarkets.value = response.list || []
   } catch (error) {
     console.error('Failed to load product markets:', error)
-    ElMessage.error('加载商品市场信息失败')
+    ElMessage.error(t('products.loadMarketsFailed'))
   } finally {
     marketsLoading.value = false
   }
@@ -1048,7 +1057,7 @@ const loadMarkets = async () => {
     markets.value = response.list || []
   } catch (error) {
     console.error('Failed to load markets:', error)
-    ElMessage.error('加载市场列表失败')
+    ElMessage.error(t('products.loadMarketsFailed'))
   }
 }
 
@@ -1057,11 +1066,11 @@ const handlePutOnSale = async () => {
   statusLoading.value = true
   try {
     await putOnSale(productId.value)
-    ElMessage.success('商品已上架')
+    ElMessage.success(t('products.onSaleSuccess'))
     loadProduct()
   } catch (error) {
     console.error('Failed to put on sale:', error)
-    ElMessage.error('上架失败')
+    ElMessage.error(t('products.onSaleFailed'))
   } finally {
     statusLoading.value = false
   }
@@ -1072,11 +1081,11 @@ const handleTakeOffSale = async () => {
   statusLoading.value = true
   try {
     await takeOffSale(productId.value)
-    ElMessage.success('商品已下架')
+    ElMessage.success(t('products.offSaleSuccess'))
     loadProduct()
   } catch (error) {
     console.error('Failed to take off sale:', error)
-    ElMessage.error('下架失败')
+    ElMessage.error(t('products.offSaleFailed'))
   } finally {
     statusLoading.value = false
   }
@@ -1111,11 +1120,11 @@ const handleSave = async () => {
           height: productForm.height,
           dangerous_goods: productForm.dangerous_goods
         })
-        ElMessage.success('商品更新成功')
+        ElMessage.success(t('products.updateSuccess'))
         loadProduct()
       } catch (error) {
         console.error('Failed to update product:', error)
-        ElMessage.error('更新商品失败')
+        ElMessage.error(t('products.updateFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -1127,11 +1136,11 @@ const handleSave = async () => {
 const handleMarketEnableChange = async (row: ProductMarket, enabled: boolean) => {
   try {
     await updateProductMarket(productId.value, row.market_id, { is_enabled: enabled })
-    ElMessage.success(`市场已${enabled ? '启用' : '禁用'}`)
+    ElMessage.success(enabled ? t('products.marketEnabled') : t('products.marketDisabled'))
     loadProductMarkets()
   } catch (error) {
     console.error('Failed to update market:', error)
-    ElMessage.error('更新市场状态失败')
+    ElMessage.error(t('products.updateMarketStatusFailed'))
     row.is_enabled = !enabled // Revert
   }
 }
@@ -1143,31 +1152,31 @@ const handleMarketPriceChange = async (row: ProductMarket) => {
       compare_at_price: row.compare_at_price,
       stock_alert_threshold: row.stock_alert_threshold
     })
-    ElMessage.success('市场价格已更新')
+    ElMessage.success(t('products.marketPriceUpdated'))
   } catch (error) {
     console.error('Failed to update market price:', error)
-    ElMessage.error('更新市场价格失败')
+    ElMessage.error(t('products.updateMarketPriceFailed'))
   }
 }
 
 const handleRemoveFromMarket = async (row: ProductMarket) => {
   try {
     await ElMessageBox.confirm(
-      `确定要从${row.market_name}移除此商品吗？`,
-      '警告',
+      t('products.confirmRemoveFromMarket', { name: row.market_name }),
+      t('common.warning'),
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
         type: 'warning'
       }
     )
     await removeFromMarket(productId.value, row.market_id)
-    ElMessage.success('商品已从市场移除')
+    ElMessage.success(t('products.removedFromMarket'))
     loadProductMarkets()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to remove from market:', error)
-      ElMessage.error('从市场移除失败')
+      ElMessage.error(t('products.removeFromMarketFailed'))
     }
   }
 }
@@ -1181,11 +1190,11 @@ const showPushToMarketDialog = () => {
 
 const handleConfirmPushToMarket = async () => {
   if (pushToMarketForm.selectedMarkets.length === 0) {
-    ElMessage.warning('请至少选择一个市场')
+    ElMessage.warning(t('products.selectAtLeastOneMarket'))
     return
   }
   if (pushToMarketForm.price <= 0) {
-    ElMessage.warning('请输入有效价格')
+    ElMessage.warning(t('products.enterValidPrice'))
     return
   }
 
@@ -1202,12 +1211,12 @@ const handleConfirmPushToMarket = async () => {
 
     pushToMarketDialogVisible.value = false
     ElMessage.success(
-      `推送市场完成。成功：${result.success?.length || 0}，失败：${result.failed?.length || 0}`
+      t('products.pushToMarketSuccess', { success: result.success?.length || 0, failed: result.failed?.length || 0 })
     )
     loadProductMarkets()
   } catch (error) {
     console.error('Failed to push to market:', error)
-    ElMessage.error('推送到市场失败')
+    ElMessage.error(t('products.pushToMarketFailed'))
   } finally {
     pushToMarketLoading.value = false
   }
@@ -1278,11 +1287,11 @@ const showAdjustStockDialog = () => {
 
 const handleAdjustStock = async () => {
   if (!productForm.sku) {
-    ElMessage.warning('商品SKU不存在')
+    ElMessage.warning(t('products.skuNotExist'))
     return
   }
   if (adjustStockForm.quantity === 0) {
-    ElMessage.warning('请输入调整数量')
+    ElMessage.warning(t('products.enterAdjustQuantity'))
     return
   }
 
@@ -1293,13 +1302,13 @@ const handleAdjustStock = async () => {
       quantity: adjustStockForm.quantity,
       remark: adjustStockForm.remark
     })
-    ElMessage.success('库存调整成功')
+    ElMessage.success(t('products.adjustSuccess'))
     adjustStockDialogVisible.value = false
     loadInventoryData()
     loadProduct() // Refresh product stock
   } catch (error) {
     console.error('Failed to adjust stock:', error)
-    ElMessage.error('库存调整失败')
+    ElMessage.error(t('products.adjustFailed'))
   }
 }
 
@@ -1315,10 +1324,10 @@ const getLogTypeStyle = (type: string) => {
 
 const getLogTypeText = (type: string) => {
   const texts: Record<string, string> = {
-    manual: '手动',
-    order: '订单',
-    return: '退货',
-    adjustment: '调整'
+    manual: t('products.manual'),
+    order: t('products.order'),
+    return: t('products.return'),
+    adjustment: t('products.adjustment')
   }
   return texts[type] || type
 }
@@ -1331,7 +1340,7 @@ const loadProductStats = async () => {
     productStats.value = stats
   } catch (error) {
     console.error('Failed to load product stats:', error)
-    ElMessage.error('加载商品评价统计失败')
+    ElMessage.error(t('products.loadReviewStatsFailed'))
   } finally {
     reviewsLoading.value = false
   }
@@ -1379,7 +1388,7 @@ const loadLocalizations = async () => {
     }
   } catch (error) {
     console.error('Failed to load localizations:', error)
-    ElMessage.error('加载商品本地化信息失败')
+    ElMessage.error(t('products.loadLocalizationsFailed'))
   } finally {
     localizationsLoading.value = false
   }
@@ -1392,7 +1401,7 @@ const getLocalizationByLang = (langCode: string) => {
 const handleAddLocalization = () => {
   // Find first language without localization
   const existingLangs = localizations.value.map(loc => loc.language_code)
-  const missingLang = supportedLanguages.find(lang => !existingLangs.includes(lang.code))
+  const missingLang = supportedLanguages.value.find(lang => !existingLangs.includes(lang.code))
   if (missingLang) {
     activeLanguage.value = missingLang.code
   }
@@ -1406,11 +1415,11 @@ const handleCreateLocalization = async (langCode: string) => {
       name: productForm.name,
       description: productForm.description
     })
-    ElMessage.success('创建成功')
+    ElMessage.success(t('products.createSuccess'))
     loadLocalizations()
   } catch (error) {
     console.error('Failed to create localization:', error)
-    ElMessage.error('创建失败')
+    ElMessage.error(t('products.createFailed'))
   }
 }
 
@@ -1421,10 +1430,10 @@ const handleUpdateLocalization = async (loc: ProductLocalization) => {
       name: loc.name,
       description: loc.description
     })
-    ElMessage.success('更新成功')
+    ElMessage.success(t('products.updateSuccess'))
   } catch (error) {
     console.error('Failed to update localization:', error)
-    ElMessage.error('更新失败')
+    ElMessage.error(t('products.updateFailed'))
     loadLocalizations() // Reload to reset
   }
 }
@@ -1432,21 +1441,21 @@ const handleUpdateLocalization = async (loc: ProductLocalization) => {
 const handleDeleteLocalization = async (loc: ProductLocalization) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除${supportedLanguages.find(l => l.code === loc.language_code)?.name || loc.language_code}内容吗？`,
-      '警告',
+      t('products.confirmDeleteLocalization', { name: supportedLanguages.value.find(l => l.code === loc.language_code)?.name || loc.language_code }),
+      t('common.warning'),
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
         type: 'warning'
       }
     )
     await deleteProductLocalization(loc.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('products.deleteSuccess'))
     loadLocalizations()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to delete localization:', error)
-      ElMessage.error('删除失败')
+      ElMessage.error(t('products.deleteFailed'))
     }
   }
 }
@@ -1475,11 +1484,11 @@ const handleSavePricing = async () => {
         })
       }
     }
-    ElMessage.success('定价保存成功')
+    ElMessage.success(t('products.savePricingSuccess'))
     loadProductMarkets()
   } catch (error) {
     console.error('Failed to save pricing:', error)
-    ElMessage.error('保存定价失败')
+    ElMessage.error(t('products.savePricingFailed'))
   } finally {
     pricingSaveLoading.value = false
   }
@@ -1493,7 +1502,7 @@ const loadVariants = async () => {
     variants.value = response.list || []
   } catch (error) {
     console.error('Failed to load variants:', error)
-    ElMessage.error('加载商品SKU列表失败')
+    ElMessage.error(t('products.loadSKUsFailed'))
   } finally {
     variantsLoading.value = false
   }
@@ -1543,11 +1552,11 @@ const handleRemoveAttribute = (key: string) => {
 
 const handleSaveVariant = async () => {
   if (!variantForm.code) {
-    ElMessage.warning('请输入SKU编码')
+    ElMessage.warning(t('products.enterSkuCode'))
     return
   }
   if (variantForm.price <= 0) {
-    ElMessage.warning('请输入有效价格')
+    ElMessage.warning(t('products.enterValidPrice'))
     return
   }
 
@@ -1565,38 +1574,38 @@ const handleSaveVariant = async () => {
 
     if (isEditVariant.value) {
       await updateSKU({ ...data, id: variantForm.id })
-      ElMessage.success('变体更新成功')
+      ElMessage.success(t('products.variantUpdateSuccess'))
     } else {
       await createSKU(data)
-      ElMessage.success('变体创建成功')
+      ElMessage.success(t('products.variantCreateSuccess'))
     }
 
     variantDialogVisible.value = false
     loadVariants()
   } catch (error) {
     console.error('Failed to save variant:', error)
-    ElMessage.error(isEditVariant.value ? '更新变体失败' : '创建变体失败')
+    ElMessage.error(isEditVariant.value ? t('products.variantUpdateFailed') : t('products.variantCreateFailed'))
   }
 }
 
 const handleDeleteVariant = async (row: SKU) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除变体 "${row.code}" 吗？`,
-      '警告',
+      t('products.confirmDeleteVariant', { code: row.code }),
+      t('common.warning'),
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
         type: 'warning'
       }
     )
     await deleteSKU(row.id)
-    ElMessage.success('变体删除成功')
+    ElMessage.success(t('products.variantDeleteSuccess'))
     loadVariants()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to delete variant:', error)
-      ElMessage.error('删除变体失败')
+      ElMessage.error(t('products.variantDeleteFailed'))
     }
   }
 }

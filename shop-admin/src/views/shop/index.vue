@@ -388,32 +388,32 @@ const shippingForm = reactive({
 
 const shopRules = {
   name: [
-    { required: true, message: '请输入店铺名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+    { required: true, message: t('shop.validationNameRequired'), trigger: 'blur' },
+    { min: 2, max: 50, message: t('shop.validationNameLength'), trigger: 'blur' }
   ],
   description: [
-    { max: 500, message: '最多 500 个字符', trigger: 'blur' }
+    { max: 500, message: t('shop.validationDescLength'), trigger: 'blur' }
   ],
   contact_phone: [
-    { pattern: /^$|^1[3-9]\d{9}$|^400-\d{3}-\d{4}$/, message: '请输入正确的电话号码', trigger: 'blur' }
+    { pattern: /^$|^1[3-9]\d{9}$|^400-\d{3}-\d{4}$/, message: t('shop.validationPhone'), trigger: 'blur' }
   ],
   contact_email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: t('shop.validationEmail'), trigger: 'blur' }
   ],
   custom_domain: [
     {
       pattern: /^$|^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/,
-      message: '请输入有效的域名，如 shop.example.com',
+      message: t('shop.validationDomain'),
       trigger: 'blur'
     }
   ]
 }
 
 // Day names mapping
-const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+const dayKeys = ['daySunday', 'dayMonday', 'dayTuesday', 'dayWednesday', 'dayThursday', 'dayFriday', 'daySaturday']
 
 const getDayName = (dayOfWeek: number): string => {
-  return dayNames[dayOfWeek] || ''
+  return dayKeys[dayOfWeek] ? t(`shop.${dayKeys[dayOfWeek]}`) : ''
 }
 
 // Load all settings
@@ -438,7 +438,7 @@ const loadSettings = async () => {
       businessHours.value = hoursData.sort((a, b) => a.day_of_week - b.day_of_week)
     } else {
       // Initialize default business hours
-      businessHours.value = dayNames.map((_, index) => ({
+      businessHours.value = dayKeys.map((_, index) => ({
         day_of_week: index,
         open_time: '09:00',
         close_time: '18:00',
@@ -489,7 +489,7 @@ const viewShopPage = () => {
   } else if (shopSettings.value?.custom_domain) {
     window.open(`https://${shopSettings.value.custom_domain}`, '_blank')
   } else {
-    ElMessage.warning('店铺域名未配置')
+    ElMessage.warning(t('shop.domainNotConfigured'))
   }
 }
 
@@ -499,12 +499,12 @@ const copyShopLink = async () => {
   if (link) {
     try {
       await navigator.clipboard.writeText(`https://${link}`)
-      ElMessage.success('店铺链接已复制到剪贴板')
+      ElMessage.success(t('shop.linkCopied'))
     } catch {
-      ElMessage.error('复制失败')
+      ElMessage.error(t('shop.copyFailed'))
     }
   } else {
-    ElMessage.warning('店铺域名未配置')
+    ElMessage.warning(t('shop.domainNotConfigured'))
   }
 }
 
@@ -513,11 +513,11 @@ const validateBusinessHours = (hours: BusinessHours[]): boolean => {
   for (const hour of hours) {
     if (!hour.is_closed) {
       if (!hour.open_time || !hour.close_time) {
-        ElMessage.error(`${getDayName(hour.day_of_week)} 营业时间未设置`)
+        ElMessage.error(`${getDayName(hour.day_of_week)}${t('shop.businessHoursNotSet')}`)
         return false
       }
       if (hour.open_time >= hour.close_time) {
-        ElMessage.error(`${getDayName(hour.day_of_week)} 结束时间必须晚于开始时间`)
+        ElMessage.error(`${getDayName(hour.day_of_week)}${t('shop.endTimeMustBeAfterStart')}`)
         return false
       }
     }
@@ -532,7 +532,7 @@ const handleSave = async () => {
   try {
     await shopFormRef.value.validate()
   } catch {
-    ElMessage.warning('请检查表单填写是否正确')
+    ElMessage.warning(t('shop.pleaseCheckForm'))
     return
   }
 
@@ -578,7 +578,7 @@ const handleSave = async () => {
       default_shipping_fee: shippingForm.default_shipping_fee.toString()
     })
 
-    ElMessage.success('店铺设置保存成功')
+    ElMessage.success(t('shop.settingsSaved'))
 
     // Reset secret key change flag
     paymentForm.stripe_secret_key_changed = false

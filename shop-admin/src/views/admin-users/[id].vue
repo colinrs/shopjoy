@@ -175,7 +175,7 @@ const getTypeTagType = (type: number | undefined) => {
 const formatDateTime = (dateStr: string | undefined) => {
   if (!dateStr) return '-'
   const date = new Date(dateStr)
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString(undefined, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -250,10 +250,10 @@ const handleStatusToggle = async () => {
 
     if (isDisable) {
       await disableAdminUser(adminUser.value.id)
-      ElMessage.success(t('adminUsers.disabled') + t('adminUsers.updateSuccess').replace('成功', ''))
+      ElMessage.success(t('adminUsers.updateSuccess'))
     } else {
       await enableAdminUser(adminUser.value.id)
-      ElMessage.success(t('adminUsers.enabled') + t('adminUsers.updateSuccess').replace('成功', ''))
+      ElMessage.success(t('adminUsers.updateSuccess'))
     }
     loadAdminUser()
   } catch {

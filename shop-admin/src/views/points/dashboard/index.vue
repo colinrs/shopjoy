@@ -4,7 +4,7 @@
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="已发放积分"
+          :title="$t('points.issuedPoints')"
           :value="stats.total_issued"
           :icon="TrendCharts"
           icon-color="primary"
@@ -12,7 +12,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="已兑换积分"
+          :title="$t('points.redeemedPoints')"
           :value="stats.total_redeemed"
           :icon="Present"
           icon-color="success"
@@ -20,7 +20,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="活跃余额"
+          :title="$t('points.activeBalance')"
           :value="stats.outstanding_balance"
           :icon="Star"
           icon-color="warning"
@@ -28,7 +28,7 @@
       </el-col>
       <el-col :xs="12" :sm="6">
         <PointsStatsCard
-          title="活跃用户"
+          :title="$t('points.activeUsers')"
           :value="stats.active_users"
           :icon="User"
           icon-color="primary"
@@ -42,12 +42,12 @@
         <div class="card-header">
           <span class="card-title">
             <el-icon><DataLine /></el-icon>
-            积分趋势
+            {{ $t('points.pointsTrend') }}
           </span>
           <div class="card-actions">
             <el-radio-group v-model="trendPeriod" size="small" @change="loadTrendData">
-              <el-radio-button value="7d">7天</el-radio-button>
-              <el-radio-button value="30d">30天</el-radio-button>
+              <el-radio-button value="7d">{{ $t('points.sevenDays') }}</el-radio-button>
+              <el-radio-button value="30d">{{ $t('points.thirtyDays') }}</el-radio-button>
             </el-radio-group>
           </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
         <div v-else-if="trendData.length === 0" class="chart-empty">
           <el-icon :size="48"><DataLine /></el-icon>
-          <p>暂无趋势数据</p>
+          <p>{{ $t('points.noTrendData') }}</p>
         </div>
         <div v-else class="chart-wrapper">
           <PointsTrendChart :data="trendData" />
@@ -74,7 +74,7 @@
           <template #header>
             <span class="card-title">
               <el-icon><Timer /></el-icon>
-              即将过期
+              {{ $t('points.expiringSoon') }}
             </span>
           </template>
           <div v-if="expiringLoading" class="loading-state">
@@ -82,7 +82,7 @@
           </div>
           <div v-else-if="expiringList.length === 0" class="empty-state">
             <el-icon :size="32"><CircleCheck /></el-icon>
-            <p>暂无即将过期的积分</p>
+            <p>{{ $t('points.noExpiringPoints') }}</p>
           </div>
           <div v-else class="expiring-list">
             <div
@@ -92,16 +92,16 @@
             >
               <div class="expiring-date">
                 <span class="date">{{ formatDate(item.date) }}</span>
-                <span class="days">{{ getDaysUntil(item.date) }}天后</span>
+                <span class="days">{{ getDaysUntil(item.date) }} {{ $t('points.daysRemaining') }}</span>
               </div>
               <div class="expiring-points">
                 <span class="points">{{ item.points.toLocaleString() }}</span>
-                <span class="users">{{ item.user_count }} 用户</span>
+                <span class="users">{{ item.user_count }} {{ $t('points.users') }}</span>
               </div>
             </div>
             <div class="expiring-total">
-              <span>总计:</span>
-              <span class="total-points">{{ totalExpiringPoints.toLocaleString() }} 积分</span>
+              <span>{{ $t('points.totalLabel') }}:</span>
+              <span class="total-points">{{ totalExpiringPoints.toLocaleString() }} {{ $t('points.pointsLabel') }}</span>
             </div>
           </div>
         </el-card>
@@ -113,7 +113,7 @@
           <template #header>
             <span class="card-title">
               <el-icon><Trophy /></el-icon>
-              积分排行
+              {{ $t('points.ranking') }}
             </span>
           </template>
           <div v-if="topUsersLoading" class="loading-state">
@@ -121,7 +121,7 @@
           </div>
           <div v-else-if="topUsers.length === 0" class="empty-state">
             <el-icon :size="32"><User /></el-icon>
-            <p>暂无用户数据</p>
+            <p>{{ $t('points.noUserData') }}</p>
           </div>
           <div v-else class="top-users-list">
             <div
@@ -137,7 +137,7 @@
                 <span v-if="user.user_email" class="user-email">{{ user.user_email }}</span>
               </div>
               <div class="user-points">
-                {{ user.points_earned.toLocaleString() }} 积分
+                {{ user.points_earned.toLocaleString() }} {{ $t('points.pointsLabel') }}
               </div>
             </div>
           </div>
@@ -149,6 +149,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   TrendCharts, Present, Star, User, DataLine, Timer, Trophy,
@@ -166,6 +167,8 @@ import {
   type TopUser,
   type ExpiringPoints
 } from '@/api/points'
+
+const { t } = useI18n()
 
 // Stats
 const stats = ref<PointsStats>({
@@ -203,7 +206,7 @@ const loadStats = async () => {
     stats.value = res
   } catch (error) {
     console.error('Failed to load stats:', error)
-    ElMessage.error('加载积分统计失败')
+    ElMessage.error(t('points.loadStatsFailed'))
   }
 }
 
@@ -214,7 +217,7 @@ const loadTrendData = async () => {
     trendData.value = res.data
   } catch (error) {
     console.error('Failed to load trend:', error)
-    ElMessage.error('加载积分趋势失败')
+    ElMessage.error(t('points.loadTrendFailed'))
   } finally {
     trendLoading.value = false
   }
@@ -227,7 +230,7 @@ const loadTopUsers = async () => {
     topUsers.value = res.list
   } catch (error) {
     console.error('Failed to load top users:', error)
-    ElMessage.error('加载积分排行失败')
+    ElMessage.error(t('points.loadRankingFailed'))
   } finally {
     topUsersLoading.value = false
   }
@@ -240,7 +243,7 @@ const loadExpiring = async () => {
     expiringList.value = res.list
   } catch (error) {
     console.error('Failed to load expiring:', error)
-    ElMessage.error('加载即将过期积分失败')
+    ElMessage.error(t('points.loadExpiringFailed'))
   } finally {
     expiringLoading.value = false
   }

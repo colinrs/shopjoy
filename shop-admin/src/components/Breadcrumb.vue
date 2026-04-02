@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { t } from '@/plugins/i18n'
 
 const route = useRoute()
 
@@ -22,13 +23,13 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
   const result: BreadcrumbItem[] = []
 
   // Add home
-  result.push({ title: '首页', path: '/dashboard' })
+  result.push({ title: t('common.home'), path: '/dashboard' })
 
   // Add matched routes
   matched.forEach(item => {
     if (item.meta?.title) {
       result.push({
-        title: item.meta.title as string,
+        title: t(item.meta.title as string),
         path: item.path !== route.path ? item.path : undefined
       })
     }

@@ -287,11 +287,8 @@ const getPageTypeName = (type: string) => {
     custom: 'storefront.customPage'
   }
   const key = names[type]
-  if (key === 'storefront.home') return '首页'
-  if (key === 'storefront.productPage') return '商品页'
-  if (key === 'storefront.collectionPage') return '集合页'
-  if (key === 'storefront.customPage') return '自定义页'
-  return 'storefront.unknown'
+  if (key) return t(key)
+  return t('storefront.unknown')
 }
 
 const getPageTypeTag = (type: string) => {

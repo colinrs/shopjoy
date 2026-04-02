@@ -7,7 +7,7 @@
           <el-icon size="24"><Goods /></el-icon>
         </div>
         <div class="product-info">
-          <span class="product-name">商品 {{ i }}</span>
+          <span class="product-name">{{ $t('storefront.product') }} {{ i }}</span>
           <span class="product-price">¥99.00</span>
         </div>
       </div>

@@ -6,8 +6,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 type StatusType = 'success' | 'warning' | 'danger' | 'info' | 'primary'
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   status?: string | number
@@ -18,24 +21,24 @@ const props = withDefaults(defineProps<{
   size: 'small',
   effect: 'light',
   typeMap: () => ({
-    // Default status mappings
-    'success': { type: 'success', text: '成功' },
-    'warning': { type: 'warning', text: '警告' },
-    'danger': { type: 'danger', text: '危险' },
-    'error': { type: 'danger', text: '错误' },
-    'info': { type: 'info', text: '信息' },
-    'pending': { type: 'warning', text: '待处理' },
-    'processing': { type: 'primary', text: '处理中' },
-    'completed': { type: 'success', text: '已完成' },
-    'failed': { type: 'danger', text: '失败' },
-    'active': { type: 'success', text: '启用' },
-    'inactive': { type: 'info', text: '禁用' },
-    'on_sale': { type: 'success', text: '在售' },
-    'off_sale': { type: 'info', text: '下架' },
-    'draft': { type: 'warning', text: '草稿' },
-    1: { type: 'success', text: '正常' },
-    0: { type: 'info', text: '禁用' },
-    2: { type: 'danger', text: '异常' }
+    // Default status mappings with translation keys
+    'success': { type: 'success', text: 'status.success' },
+    'warning': { type: 'warning', text: 'status.warning' },
+    'danger': { type: 'danger', text: 'status.danger' },
+    'error': { type: 'danger', text: 'status.danger' },
+    'info': { type: 'info', text: 'status.info' },
+    'pending': { type: 'warning', text: 'status.pending' },
+    'processing': { type: 'primary', text: 'status.processing' },
+    'completed': { type: 'success', text: 'status.completed' },
+    'failed': { type: 'danger', text: 'status.failed' },
+    'active': { type: 'success', text: 'status.active' },
+    'inactive': { type: 'info', text: 'status.inactive' },
+    'on_sale': { type: 'success', text: 'status.onSale' },
+    'off_sale': { type: 'info', text: 'status.offSale' },
+    'draft': { type: 'warning', text: 'status.draft' },
+    1: { type: 'success', text: 'status.normal' },
+    0: { type: 'info', text: 'status.disabled' },
+    2: { type: 'danger', text: 'status.abnormal' }
   })
 })
 
@@ -46,7 +49,12 @@ const tagType = computed(() => {
 
 const displayText = computed(() => {
   const mapping = props.typeMap[props.status as string | number]
-  return mapping?.text || String(props.status)
+  const text = mapping?.text || String(props.status)
+  // Check if text looks like a translation key (contains dot notation)
+  if (text.includes('.')) {
+    return t(text)
+  }
+  return text
 })
 </script>
 

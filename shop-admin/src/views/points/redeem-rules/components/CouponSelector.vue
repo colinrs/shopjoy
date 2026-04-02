@@ -48,9 +48,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Ticket } from '@element-plus/icons-vue'
 import { getAvailableCoupons, type AvailableCoupon } from '@/api/points'
+
+const { t } = useI18n()
 
 type Coupon = AvailableCoupon & {
   type: 'fixed_amount' | 'percentage'
@@ -80,7 +83,7 @@ const loadCoupons = async (keyword: string = '') => {
     }))
   } catch (error) {
     console.error('Failed to load coupons:', error)
-    ElMessage.error('加载可用优惠券失败')
+    ElMessage.error(t('points.loadCouponsFailed'))
   } finally {
     loading.value = false
   }

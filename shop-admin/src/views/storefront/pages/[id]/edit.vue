@@ -312,10 +312,10 @@ const onBlockReorder = (_event: DragEvent, targetIndex: number) => {
 const getDefaultConfig = (type: string): Record<string, any> => {
   const configs: Record<string, Record<string, any>> = {
     banner: { images: [], autoplay: true, interval: 5000 },
-    product_grid: { title: '商品推荐', product_ids: [], columns: 4 },
-    rich_text: { content: '<p>点击编辑内容...</p>' },
+    product_grid: { title: t('storefront.productGridDefaultTitle'), product_ids: [], columns: 4 },
+    rich_text: { content: `<p>${t('storefront.clickToEditContent')}</p>` },
     image_carousel: { images: [] },
-    featured_products: { title: '热门商品', count: 8 },
+    featured_products: { title: t('storefront.hotProductsDefaultTitle'), count: 8 },
     categories: { show_all: true, columns: 4 },
     divider: { style: 'solid', color: '#E5E7EB' },
     video: { url: '', autoplay: false },
