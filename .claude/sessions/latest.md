@@ -1,1 +1,0 @@
-/Users/dengyichuan/workspace/go/src/github.com/colinrs/shopjoy/.claude/sessions/2026-04-01-admin-code-review.md

@@ -51,4 +51,5 @@ node_modules
 docs/plans
 docs/superpowers
 .claude/settings.local.json
+.claude/sessions
 tests
