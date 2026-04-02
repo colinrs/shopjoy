@@ -56,10 +56,10 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 	// Parse JSON arrays for scope
 	var scopeIDs, excludeIDs []int64
 	if m.ScopeIDs != "" {
-		json.Unmarshal([]byte(m.ScopeIDs), &scopeIDs)
+		_ = json.Unmarshal([]byte(m.ScopeIDs), &scopeIDs)
 	}
 	if m.ExcludeIDs != "" {
-		json.Unmarshal([]byte(m.ExcludeIDs), &excludeIDs)
+		_ = json.Unmarshal([]byte(m.ExcludeIDs), &excludeIDs)
 	}
 
 	return &promotion.Coupon{

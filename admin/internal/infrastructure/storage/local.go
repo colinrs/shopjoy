@@ -50,12 +50,26 @@ func (s *localStorage) Save(ctx context.Context, file *multipart.FileHeader, cat
 	dir := filepath.Join(s.basePath, string(category), fmt.Sprintf("%d", now.Year()), fmt.Sprintf("%02d", now.Month()), fmt.Sprintf("%02d", now.Day()))
 
 	// 创建目录
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return nil, fmt.Errorf("create directory failed: %w", err)
 	}
 
 	// 文件完整路径
 	filePath := filepath.Join(dir, id+ext)
+
+	// 安全检查：确保文件路径在基础目录内，防止路径遍历攻击
+	// #nosec G304 - filePath 由系统生成的 id+ext 构造，dir 由 basePath 和 category 组装，均无法用户控制
+	absBasePath, err := filepath.Abs(s.basePath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base path: %w", err)
+	}
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file path: %w", err)
+	}
+	if !strings.HasPrefix(absFilePath, absBasePath) {
+		return nil, fmt.Errorf("invalid file path: path traversal detected")
+	}
 
 	// 打开上传文件
 	src, err := file.Open()
@@ -72,10 +86,13 @@ func (s *localStorage) Save(ctx context.Context, file *multipart.FileHeader, cat
 			width, height = img.Width, img.Height
 		}
 		// 重新打开文件
-		src.Seek(0, 0)
+		if _, err := src.Seek(0, 0); err != nil {
+			return nil, fmt.Errorf("reset file position failed: %w", err)
+		}
 	}
 
 	// 保存文件
+	// #nosec G304
 	dst, err := os.Create(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("create file failed: %w", err)

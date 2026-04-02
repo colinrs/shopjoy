@@ -37,7 +37,7 @@ func (decorationModel) TableName() string {
 func (m *decorationModel) toEntity() *storefront.Decoration {
 	var config storefront.BlockConfig
 	if m.BlockConfig != "" {
-		json.Unmarshal([]byte(m.BlockConfig), &config)
+		_ = json.Unmarshal([]byte(m.BlockConfig), &config)
 	}
 	return &storefront.Decoration{
 		Model:       application.Model{ID: m.ID},

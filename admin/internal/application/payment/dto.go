@@ -150,7 +150,7 @@ func toTransactionDTO(txn *payment.PaymentTransaction) *TransactionDTO {
 		Amount:               shared.NewMoney(txn.Amount, txn.Currency).String(),
 		Currency:             txn.Currency,
 		TransactionFee:       shared.NewMoney(txn.TransactionFee, txn.Currency).String(),
-		Status:               int8(txn.Status),
+		Status:               int8(txn.Status), // #nosec G115 // status values are small (tinyint range)
 		StatusText:           txn.Status.String(),
 		CreatedAt:            timestampToString(&txn.CreatedAt),
 		PaidAt:               timestampToString(txn.PaidAt),
@@ -165,7 +165,7 @@ func toPaymentRefundDTO(refund *payment.PaymentRefund) *PaymentRefundDTO {
 		ChannelRefundID: refund.ChannelRefundID,
 		Amount:          shared.NewMoney(refund.Amount, refund.Currency).String(),
 		Currency:        refund.Currency,
-		Status:          int8(refund.Status),
+		Status:          int8(refund.Status), // #nosec G115 // status values are small (tinyint range)
 		StatusText:      refund.Status.String(),
 		ReasonType:      refund.ReasonType,
 		Reason:          refund.Reason,

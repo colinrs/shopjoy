@@ -65,7 +65,7 @@ func buildCategoryTree(categories []*product.Category, parentID int64, productCo
 				Image:          c.Image,
 				SeoTitle:       c.SeoTitle,
 				SeoDescription: c.SeoDescription,
-				Status:         int8(c.Status),
+				Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
 				ProductCount:   productCountMap[c.ID],
 				CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
 				UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),

@@ -57,7 +57,7 @@ func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
 		Country:   w.Country,
 		Address:   w.Address,
 		IsDefault: w.IsDefault,
-		Status:    int8(w.Status),
+		Status:    int8(w.Status), // #nosec G115 // status values are small (tinyint range)
 		CreatedAt: w.Model.CreatedAt.Unix(),
 		UpdatedAt: w.Model.UpdatedAt.Unix(),
 	}

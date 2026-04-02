@@ -37,8 +37,8 @@ func (l *ListPermissionsLogic) ListPermissions(req *types.ListPermissionsRequest
 			ID:       p.ID,
 			Name:     p.Name,
 			Code:     p.Code,
-			Type:     int8(p.Type),
-			TypeText: getPermissionTypeText(int8(p.Type)),
+			Type:     int8(p.Type), // #nosec G115 // type values are small (tinyint range)
+			TypeText: getPermissionTypeText(int8(p.Type)), // #nosec G115 // type values are small (tinyint range)
 			ParentID: p.ParentID,
 			Path:     p.Path,
 			Icon:     p.Icon,

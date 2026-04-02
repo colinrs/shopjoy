@@ -72,7 +72,7 @@ func fromBrandEntity(b *product.Brand) *brandModel {
 		EnablePage:       b.EnablePage,
 		TrademarkNumber:  b.TrademarkNumber,
 		TrademarkCountry: b.TrademarkCountry,
-		Status:           int8(b.Status),
+		Status:           int8(b.Status), // #nosec G115 // status values are small (tinyint range)
 		CreatedAt:        b.Audit.CreatedAt.Unix(),
 		UpdatedAt:        b.Audit.UpdatedAt.Unix(),
 		CreatedBy:        b.Audit.CreatedBy,

@@ -293,7 +293,7 @@ func (s *service) GetOrderPayment(ctx context.Context, tenantID shared.TenantID,
 		Currency:          paymentEntity.Currency,
 		TransactionFee:    shared.NewMoney(paymentEntity.TransactionFee, paymentEntity.FeeCurrency).String(),
 		FeeCurrency:       paymentEntity.FeeCurrency,
-		Status:            int8(paymentEntity.Status),
+		Status:            int8(paymentEntity.Status), // #nosec G115 // status values are small (tinyint range)
 		StatusText:        paymentEntity.Status.String(),
 		PaidAt:            timestampToString(paymentEntity.PaidAt),
 		RefundedAmount:    shared.NewMoney(totalRefunded, paymentEntity.Currency).String(),
@@ -327,7 +327,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 			RefundNo:        existingRefund.RefundNo,
 			Amount:          shared.NewMoney(existingRefund.Amount, existingRefund.Currency).String(),
 			Currency:        existingRefund.Currency,
-			Status:          int8(existingRefund.Status),
+			Status:          int8(existingRefund.Status), // #nosec G115 // status values are small (tinyint range)
 			StatusText:      existingRefund.Status.String(),
 			ChannelRefundID: existingRefund.ChannelRefundID,
 		}, nil
@@ -446,7 +446,10 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 		return nil, code.ErrRefundNotSupported
 	}
 
-	refund.MarkSucceeded(channelRefundID, decimal.Zero)
+	if err := refund.MarkSucceeded(channelRefundID, decimal.Zero); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	if err := s.refundRepo.Update(ctx, tx, refund); err != nil {
 		tx.Rollback()
 		return nil, err
@@ -454,7 +457,10 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 
 	// Update payment status
 	isPartial := amount.LessThan(refundableAmount)
-	paymentEntity.MarkRefunded(isPartial)
+	if err := paymentEntity.MarkRefunded(isPartial); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	if err := s.paymentRepo.Update(ctx, tx, paymentEntity); err != nil {
 		tx.Rollback()
 		return nil, err
@@ -470,7 +476,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 		RefundNo:        refund.RefundNo,
 		Amount:          shared.NewMoney(refund.Amount, refund.Currency).String(),
 		Currency:        refund.Currency,
-		Status:          int8(refund.Status),
+		Status:          int8(refund.Status), // #nosec G115 // status values are small (tinyint range)
 		StatusText:      refund.Status.String(),
 		ChannelRefundID: refund.ChannelRefundID,
 	}, nil
@@ -519,7 +525,9 @@ func (s *service) HandleWebhook(ctx context.Context, event *WebhookEvent) error 
 
 	if processErr != nil {
 		// Mark as failed
-		s.webhookEventRepo.MarkProcessed(ctx, s.db, webhookEvent.ID, 2, processErr.Error())
+		if err := s.webhookEventRepo.MarkProcessed(ctx, s.db, webhookEvent.ID, 2, processErr.Error()); err != nil {
+			return err
+		}
 		return processErr
 	}
 
@@ -536,7 +544,9 @@ func (s *service) handlePaymentIntentSucceeded(ctx context.Context, paymentInten
 
 	// Mark payment as succeeded
 	// Fee calculation would come from webhook payload in real implementation
-	paymentEntity.MarkSuccess(paymentIntentID, decimal.Zero, paymentEntity.Currency)
+	if err := paymentEntity.MarkSuccess(paymentIntentID, decimal.Zero, paymentEntity.Currency); err != nil {
+		return err
+	}
 	return s.paymentRepo.Update(ctx, s.db, paymentEntity)
 }
 
@@ -548,7 +558,9 @@ func (s *service) handlePaymentIntentFailed(ctx context.Context, paymentIntentID
 	}
 
 	// Mark payment as failed
-	paymentEntity.MarkFailed("Payment failed via webhook")
+	if err := paymentEntity.MarkFailed("Payment failed via webhook"); err != nil {
+		return err
+	}
 	return s.paymentRepo.Update(ctx, s.db, paymentEntity)
 }
 
@@ -562,7 +574,9 @@ func (s *service) handleChargeRefunded(ctx context.Context, chargeID string, raw
 	// Find refund by channel refund ID
 	// In real implementation, would parse webhook payload to get refund details
 	// For now, just update payment status to partially refunded
-	paymentEntity.MarkRefunded(true)
+	if err := paymentEntity.MarkRefunded(true); err != nil {
+		return err
+	}
 	return s.paymentRepo.Update(ctx, s.db, paymentEntity)
 }
 

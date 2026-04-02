@@ -84,7 +84,9 @@ func (l *ExportProductsLogic) ExportProducts(req *types.ExportProductsReq) error
 	l.w.Header().Set("Content-Disposition", "attachment; filename=products_"+time.Now().Format("20060102150405")+".csv")
 
 	// Write UTF-8 BOM for Excel compatibility
-	l.w.Write([]byte{0xEF, 0xBB, 0xBF})
+	if _, err := l.w.Write([]byte{0xEF, 0xBB, 0xBF}); err != nil {
+		return err
+	}
 
 	// Create CSV writer
 	writer := csv.NewWriter(l.w)

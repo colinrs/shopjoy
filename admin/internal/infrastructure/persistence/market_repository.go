@@ -37,7 +37,7 @@ func (marketModel) TableName() string {
 func (m *marketModel) toEntity() *market.Market {
 	var taxRules market.TaxConfig
 	if m.TaxRules != "" {
-		json.Unmarshal([]byte(m.TaxRules), &taxRules)
+		_ = json.Unmarshal([]byte(m.TaxRules), &taxRules)
 	}
 
 	entity := &market.Market{

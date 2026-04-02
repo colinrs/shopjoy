@@ -49,7 +49,7 @@ func (reviewModel) TableName() string {
 func (m *reviewModel) toEntity() *review.Review {
 	var images []string
 	if m.Images != "" {
-		json.Unmarshal([]byte(m.Images), &images)
+		_ = json.Unmarshal([]byte(m.Images), &images)
 	}
 
 	return &review.Review{

@@ -91,7 +91,9 @@ func (s *ServiceImpl) CreateOrder(ctx context.Context, req CreateOrderRequest) (
 		return nil, err
 	}
 
-	s.cartRepo.Clear(ctx, s.db, req.TenantID, req.UserID)
+	if err := s.cartRepo.Clear(ctx, s.db, req.TenantID, req.UserID); err != nil {
+		return nil, err
+	}
 
 	return toOrderResponse(o), nil
 }

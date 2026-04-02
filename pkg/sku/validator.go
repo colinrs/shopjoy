@@ -36,10 +36,12 @@ func ValidatePrefix(prefix string) error {
 	return nil
 }
 
-// NormalizePrefix converts prefix to uppercase
+// NormalizePrefix converts prefix to uppercase (ASCII only)
+// The input is guaranteed to be ASCII-only by ValidatePrefix, so byte conversion is safe
 func NormalizePrefix(prefix string) string {
 	result := make([]byte, len(prefix))
 	for i, c := range prefix {
+		// #nosec G115 - c is guaranteed to be ASCII (< 128) by ValidatePrefix
 		if c >= 'a' && c <= 'z' {
 			result[i] = byte(c - 32) // Convert to uppercase
 		} else {

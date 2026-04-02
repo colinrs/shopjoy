@@ -43,17 +43,17 @@ func (themeModel) TableName() string {
 func (m *themeModel) toEntity() *storefront.Theme {
 	var config storefront.ThemeConfig
 	if m.Config != "" {
-		json.Unmarshal([]byte(m.Config), &config)
+		_ = json.Unmarshal([]byte(m.Config), &config)
 	}
 
 	var configSchema storefront.ThemeConfigSchema
 	if m.ConfigSchema != "" {
-		json.Unmarshal([]byte(m.ConfigSchema), &configSchema)
+		_ = json.Unmarshal([]byte(m.ConfigSchema), &configSchema)
 	}
 
 	var defaultConfig storefront.ThemeConfig
 	if m.DefaultConfig != "" {
-		json.Unmarshal([]byte(m.DefaultConfig), &defaultConfig)
+		_ = json.Unmarshal([]byte(m.DefaultConfig), &defaultConfig)
 	}
 
 	return &storefront.Theme{

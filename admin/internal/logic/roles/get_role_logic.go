@@ -52,8 +52,8 @@ func (l *GetRoleLogic) GetRole(req *types.RoleIDRequest) (resp *types.RoleWithPe
 			ID:       p.ID,
 			Name:     p.Name,
 			Code:     p.Code,
-			Type:     int8(p.Type),
-			TypeText: getPermissionTypeText(int8(p.Type)),
+			Type:     int8(p.Type), // #nosec G115 // type values are small (tinyint range)
+			TypeText: getPermissionTypeText(int8(p.Type)), // #nosec G115 // type values are small (tinyint range)
 			ParentID: p.ParentID,
 			Path:     p.Path,
 			Icon:     p.Icon,
@@ -67,7 +67,7 @@ func (l *GetRoleLogic) GetRole(req *types.RoleIDRequest) (resp *types.RoleWithPe
 			Name:        r.Name,
 			Code:        r.Code,
 			Description: r.Description,
-			Status:      int8(r.Status),
+			Status:      int8(r.Status), // #nosec G115 // status values are small (tinyint range)
 			StatusText:  getStatusText(r.Status),
 			IsSystem:    r.IsSystem,
 			CreatedAt:   r.Audit.CreatedAt.Format(time.RFC3339),

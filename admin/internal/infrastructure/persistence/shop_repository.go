@@ -45,7 +45,7 @@ func (shopModel) TableName() string {
 func (m *shopModel) toEntity() *storefront.Shop {
 	var socialLinks map[string]string
 	if m.SocialLinks != "" {
-		json.Unmarshal([]byte(m.SocialLinks), &socialLinks)
+		_ = json.Unmarshal([]byte(m.SocialLinks), &socialLinks)
 	}
 
 	var themeConfig *storefront.ThemeConfig
@@ -102,7 +102,7 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 		SEOTitle:       s.SEO.Title,
 		SEODescription: s.SEO.Description,
 		SEOKeywords:    keywordsToString(s.SEO.Keywords),
-		Status:         int8(s.Status),
+		Status:         int8(s.Status), // #nosec G115 // status values are small (tinyint range)
 		CurrentThemeID: s.CurrentThemeID,
 		ThemeConfig:    themeConfig,
 		CreatedAt:      s.CreatedAt.Unix(),

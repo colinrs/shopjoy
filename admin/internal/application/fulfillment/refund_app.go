@@ -313,7 +313,7 @@ func toRefundDetailResponse(r *fulfillment.Refund) *RefundDetailResponse {
 	// Parse images from JSON
 	var images []string
 	if r.Images != "" {
-		json.Unmarshal([]byte(r.Images), &images)
+		_ = json.Unmarshal([]byte(r.Images), &images)
 	}
 
 	return &RefundDetailResponse{
@@ -321,9 +321,9 @@ func toRefundDetailResponse(r *fulfillment.Refund) *RefundDetailResponse {
 		RefundNo:     r.RefundNo,
 		OrderID:      r.OrderID,
 		UserID:       r.UserID,
-		Type:         int8(r.Type),
+		Type:         int8(r.Type), // #nosec G115 // status values are small (tinyint range)
 		TypeText:     getRefundTypeText(r.Type),
-		Status:       int8(r.Status),
+		Status:       int8(r.Status), // #nosec G115 // status values are small (tinyint range)
 		StatusText:   getRefundStatusText(r.Status),
 		ReasonType:   r.ReasonType,
 		Reason:       r.Reason,

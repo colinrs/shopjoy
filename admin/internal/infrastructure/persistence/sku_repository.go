@@ -38,7 +38,7 @@ func (m *skuModel) TableName() string {
 func (m *skuModel) toEntity() *product.SKU {
 	var attributes map[string]string
 	if m.Attributes != "" {
-		json.Unmarshal([]byte(m.Attributes), &attributes)
+		_ = json.Unmarshal([]byte(m.Attributes), &attributes)
 	}
 
 	return &product.SKU{

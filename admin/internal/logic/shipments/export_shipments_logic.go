@@ -90,7 +90,9 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 	l.w.Header().Set("Content-Disposition", "attachment; filename=shipments_export_"+time.Now().Format("20060102")+".csv")
 
 	// Write UTF-8 BOM for Excel compatibility
-	l.w.Write([]byte{0xEF, 0xBB, 0xBF})
+	if _, err := l.w.Write([]byte{0xEF, 0xBB, 0xBF}); err != nil {
+		return err
+	}
 
 	// Create CSV writer
 	writer := csv.NewWriter(l.w)

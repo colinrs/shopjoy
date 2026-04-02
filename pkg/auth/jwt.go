@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -60,7 +61,7 @@ func (j *JWTManager) generateAccessToken(userID int64, tenantID shared.TenantID,
 
 func (j *JWTManager) generateRefreshToken(userID int64, tenantID shared.TenantID) (string, error) {
 	claims := jwt.RegisteredClaims{
-		Subject:   string(rune(userID)),
+		Subject:   strconv.FormatInt(userID, 10),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.refreshExpiry)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}

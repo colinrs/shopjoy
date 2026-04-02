@@ -56,13 +56,13 @@ func (m *productModel) toEntity() *product.Product {
 	// Parse JSON arrays
 	var tags, images, dangerousGoods []string
 	if m.Tags != "" {
-		json.Unmarshal([]byte(m.Tags), &tags)
+		_ = json.Unmarshal([]byte(m.Tags), &tags)
 	}
 	if m.Images != "" {
-		json.Unmarshal([]byte(m.Images), &images)
+		_ = json.Unmarshal([]byte(m.Images), &images)
 	}
 	if m.DangerousGoods != "" {
-		json.Unmarshal([]byte(m.DangerousGoods), &dangerousGoods)
+		_ = json.Unmarshal([]byte(m.DangerousGoods), &dangerousGoods)
 	}
 
 	// Parse decimals
@@ -240,7 +240,9 @@ func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Query) ([]*product.Product, int64, error) {
-	query.Validate()
+	if err := query.Validate(); err != nil {
+		return nil, 0, err
+	}
 
 	dbQuery := db.WithContext(ctx).Model(&productModel{}).Where("deleted_at IS NULL")
 

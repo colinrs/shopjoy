@@ -807,7 +807,7 @@ type pointsRedemptionModel struct {
 	application.Model
 	TenantID     int64      `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
 	UserID       int64      `gorm:"column:user_id;not null;index:idx_tenant_user"`
-	RedeemRuleID int64      `gorm="column:redeem_rule_id;not null;index:idx_redeem_rule"`
+	RedeemRuleID int64      `gorm:"column:redeem_rule_id;not null;index:idx_redeem_rule"`
 	CouponID     int64      `gorm:"column:coupon_id;type:bigint;not null"`
 	UserCouponID int64      `gorm:"column:user_coupon_id;type:bigint"`
 	PointsUsed   int64      `gorm:"column:points_used;type:bigint;not null"`

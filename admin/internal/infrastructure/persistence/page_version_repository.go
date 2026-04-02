@@ -35,7 +35,7 @@ func (pageVersionModel) TableName() string {
 func (m *pageVersionModel) toEntity() *storefront.PageVersion {
 	var blocks []storefront.BlockSnapshot
 	if m.Blocks != "" {
-		json.Unmarshal([]byte(m.Blocks), &blocks)
+		_ = json.Unmarshal([]byte(m.Blocks), &blocks)
 	}
 	return &storefront.PageVersion{
 		Model:     application.Model{ID: m.ID},

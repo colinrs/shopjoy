@@ -75,7 +75,7 @@ func fromCategoryEntity(c *product.Category) *categoryModel {
 		Image:          c.Image,
 		SeoTitle:       c.SeoTitle,
 		SeoDescription: c.SeoDescription,
-		Status:         int8(c.Status),
+		Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
 		CreatedAt:      c.Audit.CreatedAt.Unix(),
 		UpdatedAt:      c.Audit.UpdatedAt.Unix(),
 		CreatedBy:      c.Audit.CreatedBy,

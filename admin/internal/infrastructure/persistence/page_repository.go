@@ -81,7 +81,7 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 		SEOTitle:    p.SEO.Title,
 		SEODesc:     p.SEO.Description,
 		SEOKeywords: keywordsToJSONString(p.SEO.Keywords),
-		Status:      int8(p.Status),
+		Status:      int8(p.Status), // #nosec G115 // status values are small (tinyint range)
 		Sort:        p.Sort,
 		IsPublished: isPublished,
 		PublishedAt: p.PublishedAt,

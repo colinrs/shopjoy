@@ -81,7 +81,7 @@ func (l *CreateShipmentLogic) CreateShipment(req *types.CreateShipmentReq) (resp
 
 // mapShipmentStatusToInt maps shipment status to int8
 func mapShipmentStatusToInt(status fulfillment.ShipmentStatus) int8 {
-	return int8(status)
+	return int8(status) // #nosec G115 // status values are small (tinyint range)
 }
 
 // mapShipmentStatusToString maps shipment status to string

@@ -68,7 +68,7 @@ func (l *UpdateCategoryStatusLogic) UpdateCategoryStatus(req *types.UpdateCatego
 		Image:          category.Image,
 		SeoTitle:       category.SeoTitle,
 		SeoDescription: category.SeoDescription,
-		Status:         int8(category.Status),
+		Status:         int8(category.Status), // #nosec G115 // status values are small (tinyint range)
 		ProductCount:   productCount,
 		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),

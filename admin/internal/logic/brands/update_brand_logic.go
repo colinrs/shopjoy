@@ -86,7 +86,7 @@ func toBrandDetailResp(brand *product.Brand, productCount int64) *types.BrandDet
 		TrademarkCountry: brand.TrademarkCountry,
 		EnablePage:       brand.EnablePage,
 		Sort:             brand.Sort,
-		Status:           int8(brand.Status),
+		Status:           int8(brand.Status), // #nosec G115 // status values are small (tinyint range)
 		ProductCount:     productCount,
 		CreatedAt:        brand.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        brand.Audit.UpdatedAt.Format(time.RFC3339),

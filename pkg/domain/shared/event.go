@@ -2,9 +2,10 @@
 package shared
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"time"
 )
 
@@ -131,9 +132,11 @@ type EventBus interface {
 	EventSubscriber
 }
 
-// GenerateEventID 生成事件ID（简单实现，生产环境可使用UUID）
+// GenerateEventID 生成事件ID（使用crypto/rand生成安全随机数）
 func GenerateEventID() string {
-	return fmt.Sprintf("evt_%d_%d", time.Now().UnixNano(), rand.Int63())
+	var b [8]byte
+	_, _ = rand.Read(b[:])
+	return fmt.Sprintf("evt_%d_%d", time.Now().UnixNano(), binary.BigEndian.Uint64(b[:]))
 }
 
 // ==================== 具体事件定义 ====================

@@ -57,7 +57,7 @@ func (l *ListCategoriesLogic) ListCategories(req *types.ListCategoryReq) (resp *
 			Image:          c.Image,
 			SeoTitle:       c.SeoTitle,
 			SeoDescription: c.SeoDescription,
-			Status:         int8(c.Status),
+			Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
 			ProductCount:   productCount,
 			CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),
