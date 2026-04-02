@@ -41,7 +41,6 @@ cover.out
 bin
 swagger
 vendor
-*.sh
 node_modules
 
 # Worktrees

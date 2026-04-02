@@ -14,16 +14,43 @@
 -- 10. review/     - 评价表
 -- ============================================
 
--- 使用方法:
--- 方式一: 在MySQL客户端中逐个执行
+-- ============================================
+-- 推荐使用方式: init.sh 脚本 (自动连接数据库并初始化)
+-- ============================================
+
+-- 方式一: 使用 init.sh 脚本 (推荐)
+-- cd sql
+-- chmod +x init.sh
+-- ./init.sh
+
+-- 或设置环境变量后执行:
+-- export MYSQL_HOST=localhost
+-- export MYSQL_PORT=3306
+-- export MYSQL_USER=root
+-- export MYSQL_PASSWORD=your_password
+-- export MYSQL_DATABASE=shopjoy
+-- ./init.sh
+
+-- 方式二: 使用命令行参数:
+-- ./init.sh -h localhost -P 3306 -u root -p your_password -d shopjoy
+
+-- 方式三: 在MySQL客户端中逐个执行 (手动方式)
 -- source sql/user/schema.sql;
 -- source sql/product/schema.sql;
 -- ...
 
--- 方式二: 使用命令行一次性导入
+-- 方式四: 使用命令行一次性导入 (手动方式)
 -- mysql -u username -p database_name < sql/user/schema.sql
 -- mysql -u username -p database_name < sql/product/schema.sql
 -- ...
+
+-- init.sh 高级选项:
+--   --only=user,product    仅初始化指定模块
+--   --skip=points,review   跳过指定模块
+--   --tables-only          仅创建表，不插入数据
+--   --data-only            仅插入数据，不创建表 (需表已存在)
+--   --all                  创建表并插入数据 (默认)
+--   --dry-run              模拟运行
 
 -- ============================================
 -- Schema 文件路径（按领域组织）
