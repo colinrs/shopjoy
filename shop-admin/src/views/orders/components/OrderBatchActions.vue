@@ -1,16 +1,25 @@
 <template>
   <transition name="slide-down">
-    <div v-if="selectedCount > 0" class="batch-actions-bar">
+    <div
+      v-if="selectedCount > 0"
+      class="batch-actions-bar"
+    >
       <div class="batch-info">
         <el-icon><Check /></el-icon>
         <span>{{ $t('orders.ordersSelected', { count: selectedCount }) }}</span>
       </div>
       <div class="batch-buttons">
-        <el-button type="primary" @click="handleBatchShip">
+        <el-button
+          type="primary"
+          @click="handleBatchShip"
+        >
           <el-icon><Van /></el-icon>
           {{ $t('orders.batchShip') }}
         </el-button>
-        <el-button type="danger" @click="handleBatchCancel">
+        <el-button
+          type="danger"
+          @click="handleBatchCancel"
+        >
           <el-icon><Close /></el-icon>
           {{ $t('orders.batchCancel') }}
         </el-button>
@@ -18,7 +27,9 @@
           <el-icon><Edit /></el-icon>
           {{ $t('orders.batchRemark') }}
         </el-button>
-        <el-button @click="handleClearSelection">{{ $t('orders.clearSelection') }}</el-button>
+        <el-button @click="handleClearSelection">
+          {{ $t('orders.clearSelection') }}
+        </el-button>
       </div>
     </div>
   </transition>

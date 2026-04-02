@@ -1,7 +1,10 @@
 <template>
   <div class="transaction-table">
     <!-- Filters -->
-    <div v-if="showFilters" class="filter-bar">
+    <div
+      v-if="showFilters"
+      class="filter-bar"
+    >
       <el-select
         v-model="filterType"
         :placeholder="$t('points.filterType')"
@@ -9,13 +12,34 @@
         class="filter-select"
         @change="handleFilterChange"
       >
-        <el-option :label="$t('points.all')" value="" />
-        <el-option :label="$t('points.earn')" value="EARN" />
-        <el-option :label="$t('points.redeem')" value="REDEEM" />
-        <el-option :label="$t('points.adjust')" value="ADJUST" />
-        <el-option :label="$t('points.expire')" value="EXPIRE" />
-        <el-option :label="$t('points.freeze')" value="FREEZE" />
-        <el-option :label="$t('points.unfreeze')" value="UNFREEZE" />
+        <el-option
+          :label="$t('points.all')"
+          value=""
+        />
+        <el-option
+          :label="$t('points.earn')"
+          value="EARN"
+        />
+        <el-option
+          :label="$t('points.redeem')"
+          value="REDEEM"
+        />
+        <el-option
+          :label="$t('points.adjust')"
+          value="ADJUST"
+        />
+        <el-option
+          :label="$t('points.expire')"
+          value="EXPIRE"
+        />
+        <el-option
+          :label="$t('points.freeze')"
+          value="FREEZE"
+        />
+        <el-option
+          :label="$t('points.unfreeze')"
+          value="UNFREEZE"
+        />
       </el-select>
       <el-date-picker
         v-model="dateRange"
@@ -30,60 +54,114 @@
     </div>
 
     <!-- Table -->
-    <el-table :data="transactions" v-loading="loading" stripe>
-      <el-table-column prop="id" :label="$t('points.id')" width="80" align="center">
+    <el-table
+      v-loading="loading"
+      :data="transactions"
+      stripe
+    >
+      <el-table-column
+        prop="id"
+        :label="$t('points.id')"
+        width="80"
+        align="center"
+      >
         <template #default="{ row }">
           <span class="id-text">#{{ row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column v-if="showUser" :label="$t('points.user')" width="100" align="center">
+      <el-table-column
+        v-if="showUser"
+        :label="$t('points.user')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
           <span class="user-id">U{{ row.user_id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column :label="$t('points.type')" width="100" align="center">
+      <el-table-column
+        :label="$t('points.type')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getTypeTagType(row.type)" effect="light" size="small">
+          <el-tag
+            :type="getTypeTagType(row.type)"
+            effect="light"
+            size="small"
+          >
             {{ getTypeText(row.type) }}
           </el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column :label="$t('points.points')" width="120" align="right">
+      <el-table-column
+        :label="$t('points.points')"
+        width="120"
+        align="right"
+      >
         <template #default="{ row }">
-          <span class="points-value" :class="{ positive: row.points > 0, negative: row.points < 0 }">
+          <span
+            class="points-value"
+            :class="{ positive: row.points > 0, negative: row.points < 0 }"
+          >
             {{ row.points > 0 ? '+' : '' }}{{ row.points.toLocaleString() }}
           </span>
         </template>
       </el-table-column>
 
-      <el-table-column :label="$t('points.balanceAfter')" width="120" align="right">
+      <el-table-column
+        :label="$t('points.balanceAfter')"
+        width="120"
+        align="right"
+      >
         <template #default="{ row }">
           <span class="balance-text">{{ row.balance_after.toLocaleString() }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column :label="$t('points.description')" min-width="200">
+      <el-table-column
+        :label="$t('points.description')"
+        min-width="200"
+      >
         <template #default="{ row }">
           <div class="description-cell">
-            <p class="description-text">{{ row.description }}</p>
-            <p v-if="row.reference_type" class="reference-text">
+            <p class="description-text">
+              {{ row.description }}
+            </p>
+            <p
+              v-if="row.reference_type"
+              class="reference-text"
+            >
               {{ row.reference_type }}: {{ row.reference_id }}
             </p>
           </div>
         </template>
       </el-table-column>
 
-      <el-table-column v-if="showExpires" :label="$t('points.expiresAt')" width="160">
+      <el-table-column
+        v-if="showExpires"
+        :label="$t('points.expiresAt')"
+        width="160"
+      >
         <template #default="{ row }">
-          <span v-if="row.expires_at" class="time-text">{{ formatDateTime(row.expires_at) }}</span>
-          <span v-else class="no-data">-</span>
+          <span
+            v-if="row.expires_at"
+            class="time-text"
+          >{{ formatDateTime(row.expires_at) }}</span>
+          <span
+            v-else
+            class="no-data"
+          >-</span>
         </template>
       </el-table-column>
 
-      <el-table-column :label="$t('points.time')" width="160">
+      <el-table-column
+        :label="$t('points.time')"
+        width="160"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
@@ -91,7 +169,10 @@
     </el-table>
 
     <!-- Pagination -->
-    <div v-if="showPagination && total > 0" class="pagination-wrapper">
+    <div
+      v-if="showPagination && total > 0"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"

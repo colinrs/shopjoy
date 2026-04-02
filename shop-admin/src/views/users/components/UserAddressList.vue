@@ -4,38 +4,70 @@
       <span class="header-title">{{ $t('users.addressList') }}</span>
     </div>
 
-    <el-table :data="addresses" v-loading="loading" stripe>
-      <el-table-column :label="$t('users.recipient')" width="120">
+    <el-table
+      v-loading="loading"
+      :data="addresses"
+      stripe
+    >
+      <el-table-column
+        :label="$t('users.recipient')"
+        width="120"
+      >
         <template #default="{ row }">
           <span class="recipient-name">{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.contactPhone')" width="140">
+      <el-table-column
+        :label="$t('users.contactPhone')"
+        width="140"
+      >
         <template #default="{ row }">
           <span class="phone-text">{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.address')" min-width="300">
+      <el-table-column
+        :label="$t('common.address')"
+        min-width="300"
+      >
         <template #default="{ row }">
           <span class="address-text">
             {{ row.province }} {{ row.city }} {{ row.district }} {{ row.detail }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.defaultAddress')" width="80" align="center">
+      <el-table-column
+        :label="$t('users.defaultAddress')"
+        width="80"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag v-if="row.is_default" type="success" size="small">{{ $t('users.defaultAddress') }}</el-tag>
-          <span v-else class="non-default">-</span>
+          <el-tag
+            v-if="row.is_default"
+            type="success"
+            size="small"
+          >
+            {{ $t('users.defaultAddress') }}
+          </el-tag>
+          <span
+            v-else
+            class="non-default"
+          >-</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.createdAt')" width="180">
+      <el-table-column
+        :label="$t('users.createdAt')"
+        width="180"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
     </el-table>
 
-    <div class="pagination-wrapper" v-if="total > pageSize">
+    <div
+      v-if="total > pageSize"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -47,7 +79,10 @@
       />
     </div>
 
-    <el-empty v-if="!loading && addresses.length === 0" :description="$t('users.noAddresses')" />
+    <el-empty
+      v-if="!loading && addresses.length === 0"
+      :description="$t('users.noAddresses')"
+    />
   </div>
 </template>
 

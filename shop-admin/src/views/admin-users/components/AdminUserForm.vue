@@ -1,25 +1,80 @@
 <template>
-  <el-form :model="formData" :rules="rules" ref="formRef" label-width="100px">
-    <el-form-item :label="$t('adminUsers.emailLabel')" prop="email">
-      <el-input v-model="formData.email" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
+  <el-form
+    ref="formRef"
+    :model="formData"
+    :rules="rules"
+    label-width="100px"
+  >
+    <el-form-item
+      :label="$t('adminUsers.emailLabel')"
+      prop="email"
+    >
+      <el-input
+        v-model="formData.email"
+        :placeholder="$t('adminUsers.pleaseEnterEmail')"
+      />
     </el-form-item>
-    <el-form-item :label="$t('adminUsers.mobileLabel')" prop="mobile">
-      <el-input v-model="formData.mobile" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
+    <el-form-item
+      :label="$t('adminUsers.mobileLabel')"
+      prop="mobile"
+    >
+      <el-input
+        v-model="formData.mobile"
+        :placeholder="$t('adminUsers.pleaseEnterEmail')"
+      />
     </el-form-item>
-    <el-form-item :label="$t('adminUsers.realNameLabel')" prop="real_name">
-      <el-input v-model="formData.real_name" :placeholder="$t('adminUsers.pleaseEnterRealName')" />
+    <el-form-item
+      :label="$t('adminUsers.realNameLabel')"
+      prop="real_name"
+    >
+      <el-input
+        v-model="formData.real_name"
+        :placeholder="$t('adminUsers.pleaseEnterRealName')"
+      />
     </el-form-item>
-    <el-form-item :label="$t('adminUsers.initialPassword')" prop="password" v-if="!isEdit">
-      <el-input v-model="formData.password" type="password" :placeholder="$t('adminUsers.initialPasswordPlaceholder')" show-password />
+    <el-form-item
+      v-if="!isEdit"
+      :label="$t('adminUsers.initialPassword')"
+      prop="password"
+    >
+      <el-input
+        v-model="formData.password"
+        type="password"
+        :placeholder="$t('adminUsers.initialPasswordPlaceholder')"
+        show-password
+      />
     </el-form-item>
-    <el-form-item :label="$t('adminUsers.userType')" prop="type" v-if="showTypeSelect">
-      <el-select v-model="formData.type" :placeholder="$t('adminUsers.pleaseSelectUserType')" style="width: 100%">
-        <el-option :label="$t('adminUsers.merchantAdmin')" :value="2" />
-        <el-option :label="$t('adminUsers.merchantSubAccount')" :value="3" />
+    <el-form-item
+      v-if="showTypeSelect"
+      :label="$t('adminUsers.userType')"
+      prop="type"
+    >
+      <el-select
+        v-model="formData.type"
+        :placeholder="$t('adminUsers.pleaseSelectUserType')"
+        style="width: 100%"
+      >
+        <el-option
+          :label="$t('adminUsers.merchantAdmin')"
+          :value="2"
+        />
+        <el-option
+          :label="$t('adminUsers.merchantSubAccount')"
+          :value="3"
+        />
       </el-select>
     </el-form-item>
-    <el-form-item :label="$t('adminUsers.tenantId')" prop="tenant_id" v-if="showTenantId">
-      <el-input-number v-model="formData.tenant_id" :min="0" :placeholder="$t('adminUsers.tenantIdPlaceholder')" style="width: 100%" />
+    <el-form-item
+      v-if="showTenantId"
+      :label="$t('adminUsers.tenantId')"
+      prop="tenant_id"
+    >
+      <el-input-number
+        v-model="formData.tenant_id"
+        :min="0"
+        :placeholder="$t('adminUsers.tenantIdPlaceholder')"
+        style="width: 100%"
+      />
     </el-form-item>
   </el-form>
 </template>

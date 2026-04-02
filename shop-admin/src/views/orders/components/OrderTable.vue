@@ -1,5 +1,8 @@
 <template>
-  <el-card class="table-card" shadow="never">
+  <el-card
+    class="table-card"
+    shadow="never"
+  >
     <EmptyState
       v-if="orderList.length === 0 && !loading"
       :title="$t('orders.noOrders')"
@@ -18,8 +21,16 @@
             <el-row :gutter="20">
               <el-col :span="12">
                 <h4>{{ $t('orders.items') }}</h4>
-                <div v-for="item in row.items" :key="item.order_item_id" class="order-item">
-                  <el-image :src="item.image" class="item-image" fit="cover">
+                <div
+                  v-for="item in row.items"
+                  :key="item.order_item_id"
+                  class="order-item"
+                >
+                  <el-image
+                    :src="item.image"
+                    class="item-image"
+                    fit="cover"
+                  >
                     <template #error>
                       <div class="image-placeholder">
                         <el-icon><Picture /></el-icon>
@@ -27,8 +38,12 @@
                     </template>
                   </el-image>
                   <div class="item-info">
-                    <p class="item-name">{{ item.product_name }}</p>
-                    <p class="item-sku">{{ item.sku_name }}</p>
+                    <p class="item-name">
+                      {{ item.product_name }}
+                    </p>
+                    <p class="item-sku">
+                      {{ item.sku_name }}
+                    </p>
                     <p class="item-price">
                       {{ row.currency }} {{ formatAmount(item.unit_price) }} x {{ item.quantity }}
                     </p>
@@ -40,7 +55,9 @@
                 <p><strong>{{ $t('orders.receiver') }}:</strong> {{ row.shipping_address?.receiver_name || '-' }}</p>
                 <p><strong>{{ $t('orders.phone') }}:</strong> {{ row.shipping_address?.receiver_phone || '-' }}</p>
                 <p><strong>{{ $t('orders.address') }}:</strong> {{ row.shipping_address?.full_address || '-' }}</p>
-                <h4 style="margin-top: 20px">{{ $t('orders.paymentInfo') }}</h4>
+                <h4 style="margin-top: 20px">
+                  {{ $t('orders.paymentInfo') }}
+                </h4>
                 <p><strong>{{ $t('orders.paymentMethod') }}:</strong> {{ row.payment_method_text || '-' }}</p>
                 <p><strong>{{ $t('orders.paidAt') }}:</strong> {{ formatTime(row.paid_at) }}</p>
               </el-col>
@@ -48,10 +65,17 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="order_no" :label="$t('orders.orderNo')" min-width="160">
+      <el-table-column
+        prop="order_no"
+        :label="$t('orders.orderNo')"
+        min-width="160"
+      >
         <template #default="{ row }">
           <div class="order-no-cell">
-            <span class="order-no" @click="handleDetail(row)">{{ row.order_no }}</span>
+            <span
+              class="order-no"
+              @click="handleDetail(row)"
+            >{{ row.order_no }}</span>
             <el-tag
               v-if="row.refund_status !== 'none' && row.refund_status !== undefined"
               size="small"
@@ -63,7 +87,10 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('orders.items')" min-width="200">
+      <el-table-column
+        :label="$t('orders.items')"
+        min-width="200"
+      >
         <template #default="{ row }">
           <div class="goods-preview">
             <el-image
@@ -79,29 +106,56 @@
                 </div>
               </template>
             </el-image>
-            <span v-if="row.items.length > 3" class="more-goods">+{{ row.items.length - 3 }}</span>
+            <span
+              v-if="row.items.length > 3"
+              class="more-goods"
+            >+{{ row.items.length - 3 }}</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('orders.buyer')" min-width="150">
+      <el-table-column
+        :label="$t('orders.buyer')"
+        min-width="150"
+      >
         <template #default="{ row }">
           <div class="buyer-info">
-            <p class="buyer-name">{{ row.user_name }}</p>
-            <p class="buyer-phone">{{ row.user_phone }}</p>
+            <p class="buyer-name">
+              {{ row.user_name }}
+            </p>
+            <p class="buyer-phone">
+              {{ row.user_phone }}
+            </p>
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('orders.amount')" width="140" align="right">
+      <el-table-column
+        :label="$t('orders.amount')"
+        width="140"
+        align="right"
+      >
         <template #default="{ row }">
           <div class="amount-cell">
-            <p class="total-amount">{{ row.currency }} {{ formatAmount(row.pay_amount) }}</p>
-            <p class="item-count">{{ $t('orders.itemsCount', { count: row.item_count }) }}</p>
+            <p class="total-amount">
+              {{ row.currency }} {{ formatAmount(row.pay_amount) }}
+            </p>
+            <p class="item-count">
+              {{ $t('orders.itemsCount', { count: row.item_count }) }}
+            </p>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="status" :label="$t('common.status')" width="120" align="center">
+      <el-table-column
+        prop="status"
+        :label="$t('common.status')"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)" effect="light" size="small">
+          <el-tag
+            :type="getStatusType(row.status)"
+            effect="light"
+            size="small"
+          >
             {{ row.status_text }}
           </el-tag>
           <el-tag
@@ -115,12 +169,20 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created_at" :label="$t('common.createdAt')" width="160">
+      <el-table-column
+        prop="created_at"
+        :label="$t('common.createdAt')"
+        width="160"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.actions')" width="200" fixed="right">
+      <el-table-column
+        :label="$t('common.actions')"
+        width="200"
+        fixed="right"
+      >
         <template #default="{ row }">
           <el-button
             v-if="canShip(row)"
@@ -138,22 +200,40 @@
           >
             {{ $t('orders.remind') }}
           </el-button>
-          <el-button type="primary" link size="small" @click="handleDetail(row)">
+          <el-button
+            type="primary"
+            link
+            size="small"
+            @click="handleDetail(row)"
+          >
             {{ $t('common.detail') }}
           </el-button>
           <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
-            <el-button type="primary" link size="small">
-              {{ $t('common.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-button
+              type="primary"
+              link
+              size="small"
+            >
+              {{ $t('common.more') }}<el-icon class="el-icon--right">
+                <ArrowDown />
+              </el-icon>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="remark">
                   <el-icon><Edit /></el-icon>{{ $t('orders.editRemark') }}
                 </el-dropdown-item>
-                <el-dropdown-item v-if="row.status === 'pending_payment'" command="adjust">
+                <el-dropdown-item
+                  v-if="row.status === 'pending_payment'"
+                  command="adjust"
+                >
                   <el-icon><PriceTag /></el-icon>{{ $t('orders.adjustPrice') }}
                 </el-dropdown-item>
-                <el-dropdown-item v-if="canCancel(row)" command="cancel" divided>
+                <el-dropdown-item
+                  v-if="canCancel(row)"
+                  command="cancel"
+                  divided
+                >
                   <el-icon><Close /></el-icon>{{ $t('orders.cancelOrder') }}
                 </el-dropdown-item>
               </el-dropdown-menu>

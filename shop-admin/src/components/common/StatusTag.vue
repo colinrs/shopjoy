@@ -1,5 +1,10 @@
 <template>
-  <el-tag :type="tagType" :size="size" :effect="effect" class="status-tag">
+  <el-tag
+    :type="tagType"
+    :size="size"
+    :effect="effect"
+    class="status-tag"
+  >
     <slot>{{ displayText }}</slot>
   </el-tag>
 </template>

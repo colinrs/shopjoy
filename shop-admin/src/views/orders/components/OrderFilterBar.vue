@@ -1,5 +1,8 @@
 <template>
-  <el-card class="filter-card" shadow="never">
+  <el-card
+    class="filter-card"
+    shadow="never"
+  >
     <div class="filter-bar">
       <div class="filter-left">
         <el-input
@@ -21,13 +24,34 @@
           class="filter-select"
           @change="handleSearch"
         >
-          <el-option :label="$t('common.all')" value="" />
-          <el-option :label="$t('orders.pendingPayment')" value="pending_payment" />
-          <el-option :label="$t('orders.paid')" value="paid" />
-          <el-option :label="$t('orders.shipped')" value="shipped" />
-          <el-option :label="$t('orders.delivered')" value="delivered" />
-          <el-option :label="$t('orders.cancelled')" value="cancelled" />
-          <el-option :label="$t('orders.refunded')" value="refunded" />
+          <el-option
+            :label="$t('common.all')"
+            value=""
+          />
+          <el-option
+            :label="$t('orders.pendingPayment')"
+            value="pending_payment"
+          />
+          <el-option
+            :label="$t('orders.paid')"
+            value="paid"
+          />
+          <el-option
+            :label="$t('orders.shipped')"
+            value="shipped"
+          />
+          <el-option
+            :label="$t('orders.delivered')"
+            value="delivered"
+          />
+          <el-option
+            :label="$t('orders.cancelled')"
+            value="cancelled"
+          />
+          <el-option
+            :label="$t('orders.refunded')"
+            value="refunded"
+          />
         </el-select>
         <el-select
           v-model="localFulfillmentFilter"
@@ -36,11 +60,26 @@
           class="filter-select"
           @change="handleSearch"
         >
-          <el-option :label="$t('common.all')" value="" />
-          <el-option :label="$t('orders.unshipped')" value="0" />
-          <el-option :label="$t('orders.partialShipped')" value="1" />
-          <el-option :label="$t('orders.shipped')" value="2" />
-          <el-option :label="$t('orders.delivered')" value="3" />
+          <el-option
+            :label="$t('common.all')"
+            value=""
+          />
+          <el-option
+            :label="$t('orders.unshipped')"
+            value="0"
+          />
+          <el-option
+            :label="$t('orders.partialShipped')"
+            value="1"
+          />
+          <el-option
+            :label="$t('orders.shipped')"
+            value="2"
+          />
+          <el-option
+            :label="$t('orders.delivered')"
+            value="3"
+          />
         </el-select>
         <el-date-picker
           v-model="localDateRange"
@@ -54,11 +93,17 @@
         />
       </div>
       <div class="filter-right">
-        <el-button @click="handleExport" :loading="exporting">
+        <el-button
+          :loading="exporting"
+          @click="handleExport"
+        >
           <el-icon><Download /></el-icon>
           {{ $t('common.export') }}
         </el-button>
-        <el-button type="primary" @click="handleRefresh">
+        <el-button
+          type="primary"
+          @click="handleRefresh"
+        >
           <el-icon><Refresh /></el-icon>
           {{ $t('common.refresh') }}
         </el-button>

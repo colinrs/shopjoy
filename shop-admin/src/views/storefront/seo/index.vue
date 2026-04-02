@@ -1,26 +1,45 @@
 <template>
   <div class="seo-page">
-    <page-header :title="$t('storefront.seoSettings')" :subtitle="$t('storefront.configureStoreSEO')">
-    </page-header>
+    <page-header
+      :title="$t('storefront.seoSettings')"
+      :subtitle="$t('storefront.configureStoreSEO')"
+    />
 
-    <el-tabs v-model="activeTab" class="seo-tabs">
+    <el-tabs
+      v-model="activeTab"
+      class="seo-tabs"
+    >
       <!-- Global SEO -->
-      <el-tab-pane :label="$t('storefront.globalSEO')" name="global">
-        <el-card shadow="hover" class="seo-card">
+      <el-tab-pane
+        :label="$t('storefront.globalSEO')"
+        name="global"
+      >
+        <el-card
+          shadow="hover"
+          class="seo-card"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('storefront.globalSEOConfig') }}</span>
-              <el-tag type="info" size="small">{{ $t('storefront.appliesToAll') }}</el-tag>
+              <el-tag
+                type="info"
+                size="small"
+              >
+                {{ $t('storefront.appliesToAll') }}
+              </el-tag>
             </div>
           </template>
           <el-form
             ref="globalFormRef"
+            v-loading="globalLoading"
             :model="globalSEO"
             label-width="100px"
             label-position="left"
-            v-loading="globalLoading"
           >
-            <el-form-item :label="$t('storefront.websiteTitle')" prop="title">
+            <el-form-item
+              :label="$t('storefront.websiteTitle')"
+              prop="title"
+            >
               <el-input
                 v-model="globalSEO.title"
                 :placeholder="$t('storefront.websiteTitlePlaceholder')"
@@ -28,7 +47,10 @@
                 show-word-limit
               />
             </el-form-item>
-            <el-form-item :label="$t('storefront.websiteDescription')" prop="description">
+            <el-form-item
+              :label="$t('storefront.websiteDescription')"
+              prop="description"
+            >
               <el-input
                 v-model="globalSEO.description"
                 type="textarea"
@@ -38,14 +60,21 @@
                 show-word-limit
               />
             </el-form-item>
-            <el-form-item :label="$t('storefront.keywords')" prop="keywords">
+            <el-form-item
+              :label="$t('storefront.keywords')"
+              prop="keywords"
+            >
               <el-input
                 v-model="globalSEO.keywords"
                 :placeholder="$t('storefront.keywordsPlaceholder')"
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="saveGlobalSEO" :loading="globalSaving">
+              <el-button
+                type="primary"
+                :loading="globalSaving"
+                @click="saveGlobalSEO"
+              >
                 {{ $t('storefront.saveGlobalConfig') }}
               </el-button>
             </el-form-item>
@@ -54,22 +83,38 @@
       </el-tab-pane>
 
       <!-- Page SEO -->
-      <el-tab-pane :label="$t('storefront.pageSEO')" name="pages">
-        <el-card shadow="hover" class="seo-card" v-loading="pageLoading">
+      <el-tab-pane
+        :label="$t('storefront.pageSEO')"
+        name="pages"
+      >
+        <el-card
+          v-loading="pageLoading"
+          shadow="hover"
+          class="seo-card"
+        >
           <div class="page-seo-list">
             <div
               v-for="item in pageSEOList"
               :key="`${item.page_type}-${item.page_id || 'default'}`"
               class="page-seo-item"
             >
-              <div class="item-header" @click="toggleExpand(item)">
+              <div
+                class="item-header"
+                @click="toggleExpand(item)"
+              >
                 <div class="item-info">
                   <span class="page-name">{{ getPageTypeName(item.page_type) }}</span>
-                  <el-tag size="small" :type="getPageTypeTag(item.page_type)">
+                  <el-tag
+                    size="small"
+                    :type="getPageTypeTag(item.page_type)"
+                  >
                     {{ item.page_type }}
                   </el-tag>
                 </div>
-                <el-icon class="expand-icon" :class="{ 'is-expanded': expandedItems.has(`${item.page_type}-${item.page_id || 'default'}`) }">
+                <el-icon
+                  class="expand-icon"
+                  :class="{ 'is-expanded': expandedItems.has(`${item.page_type}-${item.page_id || 'default'}`) }"
+                >
                   <ArrowDown />
                 </el-icon>
               </div>
@@ -85,7 +130,10 @@
                     size="small"
                   >
                     <el-form-item :label="$t('storefront.pageTitle')">
-                      <el-input v-model="item.config.title" :placeholder="$t('storefront.pageTitle')" />
+                      <el-input
+                        v-model="item.config.title"
+                        :placeholder="$t('storefront.pageTitle')"
+                      />
                     </el-form-item>
                     <el-form-item :label="$t('storefront.pageDescription')">
                       <el-input
@@ -96,14 +144,17 @@
                       />
                     </el-form-item>
                     <el-form-item :label="$t('storefront.keywords')">
-                      <el-input v-model="item.config.keywords" :placeholder="$t('storefront.keywords')" />
+                      <el-input
+                        v-model="item.config.keywords"
+                        :placeholder="$t('storefront.keywords')"
+                      />
                     </el-form-item>
                     <el-form-item>
                       <el-button
                         type="primary"
                         size="small"
-                        @click="savePageSEO(item)"
                         :loading="item.saving"
+                        @click="savePageSEO(item)"
                       >
                         {{ $t('storefront.save') }}
                       </el-button>
@@ -117,8 +168,14 @@
       </el-tab-pane>
 
       <!-- SEO Preview -->
-      <el-tab-pane :label="$t('storefront.previewEffect')" name="preview">
-        <el-card shadow="hover" class="seo-card">
+      <el-tab-pane
+        :label="$t('storefront.previewEffect')"
+        name="preview"
+      >
+        <el-card
+          shadow="hover"
+          class="seo-card"
+        >
           <template #header>
             <span>{{ $t('storefront.searchEnginePreview') }}</span>
           </template>
@@ -126,9 +183,15 @@
             <div class="preview-section">
               <h4>{{ $t('storefront.googleSearchPreview') }}</h4>
               <div class="google-preview">
-                <div class="google-title">{{ globalSEO.title || t('storefront.yourWebsiteTitle') }}</div>
-                <div class="google-url">https://yourstore.com</div>
-                <div class="google-desc">{{ globalSEO.description || t('storefront.yourWebsiteDescription') }}</div>
+                <div class="google-title">
+                  {{ globalSEO.title || t('storefront.yourWebsiteTitle') }}
+                </div>
+                <div class="google-url">
+                  https://yourstore.com
+                </div>
+                <div class="google-desc">
+                  {{ globalSEO.description || t('storefront.yourWebsiteDescription') }}
+                </div>
               </div>
             </div>
             <el-divider />
@@ -141,7 +204,12 @@
                   :stroke-width="12"
                 />
                 <div class="score-tips">
-                  <div v-for="tip in seoTips" :key="tip.text" class="tip-item" :class="tip.type">
+                  <div
+                    v-for="tip in seoTips"
+                    :key="tip.text"
+                    class="tip-item"
+                    :class="tip.type"
+                  >
                     <el-icon>
                       <component :is="tip.type === 'success' ? 'CircleCheck' : 'Warning'" />
                     </el-icon>

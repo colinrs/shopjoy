@@ -6,17 +6,37 @@
         <el-switch v-model="localConfig.autoplay" />
       </el-form-item>
       <el-form-item :label="$t('storefront.playInterval')">
-        <el-input-number v-model="localConfig.interval" :min="1000" :max="10000" :step="500" />
+        <el-input-number
+          v-model="localConfig.interval"
+          :min="1000"
+          :max="10000"
+          :step="500"
+        />
       </el-form-item>
       <el-form-item :label="$t('storefront.imageList')">
         <div class="image-list">
-          <div v-for="(_img, idx) in localConfig.images" :key="idx" class="image-item">
-            <el-input v-model="localConfig.images[idx]" :placeholder="$t('storefront.imageUrl')" />
-            <el-button text type="danger" @click="removeImage(idx)">
+          <div
+            v-for="(_img, idx) in localConfig.images"
+            :key="idx"
+            class="image-item"
+          >
+            <el-input
+              v-model="localConfig.images[idx]"
+              :placeholder="$t('storefront.imageUrl')"
+            />
+            <el-button
+              text
+              type="danger"
+              @click="removeImage(idx)"
+            >
               <el-icon><Delete /></el-icon>
             </el-button>
           </div>
-          <el-button type="primary" text @click="addImage">
+          <el-button
+            type="primary"
+            text
+            @click="addImage"
+          >
             <el-icon><Plus /></el-icon> {{ $t('storefront.addImage') }}
           </el-button>
         </div>
@@ -26,20 +46,45 @@
     <!-- Product Grid Config -->
     <template v-else-if="blockType === 'product_grid' || blockType === 'featured_products'">
       <el-form-item :label="$t('storefront.title')">
-        <el-input v-model="localConfig.title" :placeholder="$t('storefront.blockTitle')" />
+        <el-input
+          v-model="localConfig.title"
+          :placeholder="$t('storefront.blockTitle')"
+        />
       </el-form-item>
       <el-form-item :label="$t('storefront.columns')">
         <el-select v-model="localConfig.columns">
-          <el-option :value="2" :label="$t('storefront.column2')" />
-          <el-option :value="3" :label="$t('storefront.column3')" />
-          <el-option :value="4" :label="$t('storefront.column4')" />
-          <el-option :value="5" :label="$t('storefront.column5')" />
+          <el-option
+            :value="2"
+            :label="$t('storefront.column2')"
+          />
+          <el-option
+            :value="3"
+            :label="$t('storefront.column3')"
+          />
+          <el-option
+            :value="4"
+            :label="$t('storefront.column4')"
+          />
+          <el-option
+            :value="5"
+            :label="$t('storefront.column5')"
+          />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="blockType === 'featured_products'" :label="$t('storefront.displayCount')">
-        <el-input-number v-model="localConfig.count" :min="4" :max="20" />
+      <el-form-item
+        v-if="blockType === 'featured_products'"
+        :label="$t('storefront.displayCount')"
+      >
+        <el-input-number
+          v-model="localConfig.count"
+          :min="4"
+          :max="20"
+        />
       </el-form-item>
-      <el-form-item v-else :label="$t('storefront.productId')">
+      <el-form-item
+        v-else
+        :label="$t('storefront.productId')"
+      >
         <el-select
           v-model="localConfig.product_ids"
           multiple
@@ -84,9 +129,18 @@
     <template v-else-if="blockType === 'divider'">
       <el-form-item :label="$t('storefront.style')">
         <el-select v-model="localConfig.style">
-          <el-option value="solid" :label="$t('storefront.solidLine')" />
-          <el-option value="dashed" :label="$t('storefront.dashedLine')" />
-          <el-option value="dotted" :label="$t('storefront.dottedLine')" />
+          <el-option
+            value="solid"
+            :label="$t('storefront.solidLine')"
+          />
+          <el-option
+            value="dashed"
+            :label="$t('storefront.dashedLine')"
+          />
+          <el-option
+            value="dotted"
+            :label="$t('storefront.dottedLine')"
+          />
         </el-select>
       </el-form-item>
       <el-form-item :label="$t('storefront.color')">
@@ -97,14 +151,22 @@
     <!-- Spacer Config -->
     <template v-else-if="blockType === 'spacer'">
       <el-form-item :label="$t('storefront.heightPx')">
-        <el-slider v-model="localConfig.height" :min="10" :max="200" show-input />
+        <el-slider
+          v-model="localConfig.height"
+          :min="10"
+          :max="200"
+          show-input
+        />
       </el-form-item>
     </template>
 
     <!-- Video Config -->
     <template v-else-if="blockType === 'video'">
       <el-form-item :label="$t('storefront.videoUrl')">
-        <el-input v-model="localConfig.url" :placeholder="$t('storefront.videoUrl')" />
+        <el-input
+          v-model="localConfig.url"
+          :placeholder="$t('storefront.videoUrl')"
+        />
       </el-form-item>
       <el-form-item :label="$t('storefront.autoplay')">
         <el-switch v-model="localConfig.autoplay" />
@@ -118,9 +180,18 @@
       </el-form-item>
       <el-form-item :label="$t('storefront.columns')">
         <el-select v-model="localConfig.columns">
-          <el-option :value="2" :label="$t('storefront.column2')" />
-          <el-option :value="3" :label="$t('storefront.column3')" />
-          <el-option :value="4" :label="$t('storefront.column4')" />
+          <el-option
+            :value="2"
+            :label="$t('storefront.column2')"
+          />
+          <el-option
+            :value="3"
+            :label="$t('storefront.column3')"
+          />
+          <el-option
+            :value="4"
+            :label="$t('storefront.column4')"
+          />
         </el-select>
       </el-form-item>
     </template>
@@ -139,7 +210,10 @@
 
     <!-- Default Config -->
     <template v-else>
-      <el-alert type="info" :closable="false">
+      <el-alert
+        type="info"
+        :closable="false"
+      >
         {{ $t('storefront.noConfigurableOptions') }}
       </el-alert>
     </template>

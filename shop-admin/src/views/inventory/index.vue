@@ -1,25 +1,68 @@
 <template>
   <div class="inventory-page">
     <!-- Low Stock Alert Card -->
-    <el-card class="alert-card" shadow="never" v-if="lowStockList.length > 0">
+    <el-card
+      v-if="lowStockList.length > 0"
+      class="alert-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span><el-icon><Warning /></el-icon> {{ $t('inventory.lowStockAlert') }}</span>
-          <el-badge :value="lowStockTotal" type="danger" />
+          <el-badge
+            :value="lowStockTotal"
+            type="danger"
+          />
         </div>
       </template>
-      <el-table :data="lowStockList" stripe size="small">
-        <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
-        <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
-        <el-table-column prop="available_stock" :label="$t('inventory.availableStock')" width="100" align="center">
+      <el-table
+        :data="lowStockList"
+        stripe
+        size="small"
+      >
+        <el-table-column
+          prop="sku_code"
+          :label="$t('inventory.skuCode')"
+          width="150"
+        />
+        <el-table-column
+          prop="product_name"
+          :label="$t('inventory.productName')"
+          min-width="200"
+        />
+        <el-table-column
+          prop="available_stock"
+          :label="$t('inventory.availableStock')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag type="danger" size="small">{{ row.available_stock }}</el-tag>
+            <el-tag
+              type="danger"
+              size="small"
+            >
+              {{ row.available_stock }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="safety_stock" :label="$t('inventory.safetyStock')" width="100" align="center" />
-        <el-table-column :label="$t('inventory.actions')" width="120" fixed="right">
+        <el-table-column
+          prop="safety_stock"
+          :label="$t('inventory.safetyStock')"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('inventory.actions')"
+          width="120"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleAdjustStock(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleAdjustStock(row)"
+            >
               {{ $t('inventory.replenish') }}
             </el-button>
           </template>
@@ -28,10 +71,16 @@
     </el-card>
 
     <!-- Main Content Tabs -->
-    <el-card class="main-card" shadow="never">
+    <el-card
+      class="main-card"
+      shadow="never"
+    >
       <el-tabs v-model="activeTab">
         <!-- Inventory Logs Tab -->
-        <el-tab-pane :label="$t('inventory.logs')" name="logs">
+        <el-tab-pane
+          :label="$t('inventory.logs')"
+          name="logs"
+        >
           <div class="filter-bar">
             <el-input
               v-model="logFilter.sku_code"
@@ -39,39 +88,108 @@
               clearable
               style="width: 180px"
             />
-            <el-select v-model="logFilter.type" :placeholder="$t('inventory.changeType')" clearable style="width: 140px">
-              <el-option :label="$t('inventory.manual')" value="manual" />
-              <el-option :label="$t('inventory.order')" value="order" />
-              <el-option :label="$t('inventory.return')" value="return" />
-              <el-option :label="$t('inventory.adjustment')" value="adjustment" />
+            <el-select
+              v-model="logFilter.type"
+              :placeholder="$t('inventory.changeType')"
+              clearable
+              style="width: 140px"
+            >
+              <el-option
+                :label="$t('inventory.manual')"
+                value="manual"
+              />
+              <el-option
+                :label="$t('inventory.order')"
+                value="order"
+              />
+              <el-option
+                :label="$t('inventory.return')"
+                value="return"
+              />
+              <el-option
+                :label="$t('inventory.adjustment')"
+                value="adjustment"
+              />
             </el-select>
-            <el-button type="primary" @click="loadInventoryLogs">{{ $t('inventory.search') }}</el-button>
-            <el-button @click="handleExportInventoryLogs" :loading="logExporting">
-              <el-icon v-if="!logExporting"><Download /></el-icon>
+            <el-button
+              type="primary"
+              @click="loadInventoryLogs"
+            >
+              {{ $t('inventory.search') }}
+            </el-button>
+            <el-button
+              :loading="logExporting"
+              @click="handleExportInventoryLogs"
+            >
+              <el-icon v-if="!logExporting">
+                <Download />
+              </el-icon>
               {{ $t('inventory.exportLogs') }}
             </el-button>
           </div>
-          <el-table :data="logList" v-loading="logLoading" stripe>
-            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
-            <el-table-column prop="change_type" :label="$t('inventory.changeType')" width="100">
+          <el-table
+            v-loading="logLoading"
+            :data="logList"
+            stripe
+          >
+            <el-table-column
+              prop="sku_code"
+              :label="$t('inventory.skuCode')"
+              width="150"
+            />
+            <el-table-column
+              prop="change_type"
+              :label="$t('inventory.changeType')"
+              width="100"
+            >
               <template #default="{ row }">
-                <el-tag size="small" :type="getChangeTypeTag(row.change_type)">
+                <el-tag
+                  size="small"
+                  :type="getChangeTypeTag(row.change_type)"
+                >
                   {{ getChangeTypeLabel(row.change_type) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="change_quantity" :label="$t('inventory.changeQuantity')" width="100" align="center">
+            <el-table-column
+              prop="change_quantity"
+              :label="$t('inventory.changeQuantity')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
                 <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
                   {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column prop="before_stock" :label="$t('inventory.beforeStock')" width="100" align="center" />
-            <el-table-column prop="after_stock" :label="$t('inventory.afterStock')" width="100" align="center" />
-            <el-table-column prop="order_no" :label="$t('inventory.relatedOrder')" width="150" />
-            <el-table-column prop="remark" :label="$t('inventory.remark')" min-width="150" />
-            <el-table-column prop="created_at" :label="$t('inventory.time')" width="180" />
+            <el-table-column
+              prop="before_stock"
+              :label="$t('inventory.beforeStock')"
+              width="100"
+              align="center"
+            />
+            <el-table-column
+              prop="after_stock"
+              :label="$t('inventory.afterStock')"
+              width="100"
+              align="center"
+            />
+            <el-table-column
+              prop="order_no"
+              :label="$t('inventory.relatedOrder')"
+              width="150"
+            />
+            <el-table-column
+              prop="remark"
+              :label="$t('inventory.remark')"
+              min-width="150"
+            />
+            <el-table-column
+              prop="created_at"
+              :label="$t('inventory.time')"
+              width="180"
+            />
           </el-table>
           <div class="pagination-wrapper">
             <el-pagination
@@ -87,23 +205,65 @@
         </el-tab-pane>
 
         <!-- Warehouses Tab -->
-        <el-tab-pane :label="$t('inventory.warehouseManagement')" name="warehouses">
+        <el-tab-pane
+          :label="$t('inventory.warehouseManagement')"
+          name="warehouses"
+        >
           <div class="filter-bar">
-            <el-button type="primary" @click="handleAddWarehouse">
+            <el-button
+              type="primary"
+              @click="handleAddWarehouse"
+            >
               <el-icon><Plus /></el-icon>{{ $t('inventory.addWarehouse') }}
             </el-button>
           </div>
-          <el-table :data="warehouseList" v-loading="warehouseLoading" stripe>
-            <el-table-column prop="code" :label="$t('inventory.warehouseCode')" width="120" />
-            <el-table-column prop="name" :label="$t('inventory.warehouseName')" min-width="150" />
-            <el-table-column prop="country" :label="$t('inventory.country')" width="100" />
-            <el-table-column prop="address" :label="$t('inventory.address')" min-width="200" />
-            <el-table-column prop="is_default" :label="$t('inventory.defaultWarehouse')" width="100" align="center">
+          <el-table
+            v-loading="warehouseLoading"
+            :data="warehouseList"
+            stripe
+          >
+            <el-table-column
+              prop="code"
+              :label="$t('inventory.warehouseCode')"
+              width="120"
+            />
+            <el-table-column
+              prop="name"
+              :label="$t('inventory.warehouseName')"
+              min-width="150"
+            />
+            <el-table-column
+              prop="country"
+              :label="$t('inventory.country')"
+              width="100"
+            />
+            <el-table-column
+              prop="address"
+              :label="$t('inventory.address')"
+              min-width="200"
+            />
+            <el-table-column
+              prop="is_default"
+              :label="$t('inventory.defaultWarehouse')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag v-if="row.is_default" type="success" size="small">{{ $t('inventory.isDefault') }}</el-tag>
+                <el-tag
+                  v-if="row.is_default"
+                  type="success"
+                  size="small"
+                >
+                  {{ $t('inventory.isDefault') }}
+                </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" :label="$t('inventory.status')" width="100" align="center">
+            <el-table-column
+              prop="status"
+              :label="$t('inventory.status')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
                 <el-switch
                   v-model="row.status"
@@ -113,26 +273,35 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column :label="$t('inventory.actions')" width="200" fixed="right">
+            <el-table-column
+              :label="$t('inventory.actions')"
+              width="200"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="handleEditWarehouse(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="handleEditWarehouse(row)"
+                >
                   {{ $t('inventory.edit') }}
                 </el-button>
                 <el-button
+                  v-if="!row.is_default"
                   type="success"
                   link
                   size="small"
                   @click="handleSetDefaultWarehouse(row)"
-                  v-if="!row.is_default"
                 >
                   {{ $t('inventory.setAsDefault') }}
                 </el-button>
                 <el-button
+                  v-if="!row.is_default"
                   type="danger"
                   link
                   size="small"
                   @click="handleDeleteWarehouse(row)"
-                  v-if="!row.is_default"
                 >
                   {{ $t('inventory.delete') }}
                 </el-button>
@@ -142,13 +311,31 @@
         </el-tab-pane>
 
         <!-- Stock Adjustment Tab -->
-        <el-tab-pane :label="$t('inventory.stockAdjustment')" name="adjust">
-          <el-form :model="adjustForm" label-width="120px" class="adjust-form">
-            <el-form-item :label="$t('inventory.skuCode')" required>
-              <el-input v-model="adjustForm.sku_code" :placeholder="$t('inventory.skuCode')" style="width: 300px" />
+        <el-tab-pane
+          :label="$t('inventory.stockAdjustment')"
+          name="adjust"
+        >
+          <el-form
+            :model="adjustForm"
+            label-width="120px"
+            class="adjust-form"
+          >
+            <el-form-item
+              :label="$t('inventory.skuCode')"
+              required
+            >
+              <el-input
+                v-model="adjustForm.sku_code"
+                :placeholder="$t('inventory.skuCode')"
+                style="width: 300px"
+              />
             </el-form-item>
             <el-form-item :label="$t('inventory.selectWarehouse')">
-              <el-select v-model="adjustForm.warehouse_id" :placeholder="$t('inventory.selectWarehouse')" style="width: 300px">
+              <el-select
+                v-model="adjustForm.warehouse_id"
+                :placeholder="$t('inventory.selectWarehouse')"
+                style="width: 300px"
+              >
                 <el-option
                   v-for="w in warehouseList"
                   :key="w.id"
@@ -157,7 +344,10 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item :label="$t('inventory.adjustQuantity')" required>
+            <el-form-item
+              :label="$t('inventory.adjustQuantity')"
+              required
+            >
               <el-input-number
                 v-model="adjustForm.quantity"
                 :min="-9999"
@@ -176,7 +366,11 @@
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleAdjustSubmit" :loading="adjustLoading">
+              <el-button
+                type="primary"
+                :loading="adjustLoading"
+                @click="handleAdjustSubmit"
+              >
                 {{ $t('inventory.confirmAdjustment') }}
               </el-button>
             </el-form-item>
@@ -184,19 +378,51 @@
         </el-tab-pane>
 
         <!-- Batch Safety Stock Tab -->
-        <el-tab-pane :label="$t('inventory.batchSafetyStock')" name="batchSafetyStock">
+        <el-tab-pane
+          :label="$t('inventory.batchSafetyStock')"
+          name="batchSafetyStock"
+        >
           <div class="filter-bar">
-            <el-button type="primary" @click="showBatchSafetyStockDialog">
+            <el-button
+              type="primary"
+              @click="showBatchSafetyStockDialog"
+            >
               <el-icon><Plus /></el-icon>{{ $t('inventory.batchUpdateSafetyStock') }}
             </el-button>
           </div>
-          <el-table :data="lowStockList" stripe size="small">
-            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
-            <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
-            <el-table-column prop="safety_stock" :label="$t('inventory.safetyStock')" width="100" align="center" />
-            <el-table-column :label="$t('inventory.actions')" width="120" fixed="right">
+          <el-table
+            :data="lowStockList"
+            stripe
+            size="small"
+          >
+            <el-table-column
+              prop="sku_code"
+              :label="$t('inventory.skuCode')"
+              width="150"
+            />
+            <el-table-column
+              prop="product_name"
+              :label="$t('inventory.productName')"
+              min-width="200"
+            />
+            <el-table-column
+              prop="safety_stock"
+              :label="$t('inventory.safetyStock')"
+              width="100"
+              align="center"
+            />
+            <el-table-column
+              :label="$t('inventory.actions')"
+              width="120"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="handleEditSafetyStock(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="handleEditSafetyStock(row)"
+                >
                   {{ $t('inventory.edit') }}
                 </el-button>
               </template>
@@ -213,56 +439,120 @@
       width="500px"
       destroy-on-close
     >
-      <el-form :model="warehouseForm" label-width="100px" :rules="warehouseRules" ref="warehouseFormRef">
-        <el-form-item :label="$t('inventory.warehouseCode')" prop="code" v-if="!isEditWarehouse">
-          <el-input v-model="warehouseForm.code" :placeholder="$t('inventory.warehouseCode')" />
+      <el-form
+        ref="warehouseFormRef"
+        :model="warehouseForm"
+        label-width="100px"
+        :rules="warehouseRules"
+      >
+        <el-form-item
+          v-if="!isEditWarehouse"
+          :label="$t('inventory.warehouseCode')"
+          prop="code"
+        >
+          <el-input
+            v-model="warehouseForm.code"
+            :placeholder="$t('inventory.warehouseCode')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('inventory.warehouseName')" prop="name">
-          <el-input v-model="warehouseForm.name" :placeholder="$t('inventory.enterWarehouseName')" />
+        <el-form-item
+          :label="$t('inventory.warehouseName')"
+          prop="name"
+        >
+          <el-input
+            v-model="warehouseForm.name"
+            :placeholder="$t('inventory.enterWarehouseName')"
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.country')">
-          <el-input v-model="warehouseForm.country" :placeholder="$t('inventory.countryPlaceholder')" />
+          <el-input
+            v-model="warehouseForm.country"
+            :placeholder="$t('inventory.countryPlaceholder')"
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.address')">
-          <el-input v-model="warehouseForm.address" type="textarea" rows="2" :placeholder="$t('inventory.addressPlaceholder')" />
+          <el-input
+            v-model="warehouseForm.address"
+            type="textarea"
+            rows="2"
+            :placeholder="$t('inventory.addressPlaceholder')"
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.defaultWarehouse')">
           <el-switch v-model="warehouseForm.is_default" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="warehouseDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSaveWarehouse" :loading="warehouseSaveLoading">
+        <el-button @click="warehouseDialogVisible = false">
+          {{ $t('inventory.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="warehouseSaveLoading"
+          @click="handleSaveWarehouse"
+        >
           {{ $t('inventory.save') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Stock Adjust Dialog (from low stock alert) -->
-    <el-dialog v-model="adjustDialogVisible" :title="$t('inventory.stockReplenishment')" width="400px" destroy-on-close>
-      <el-form :model="quickAdjustForm" label-width="100px">
+    <el-dialog
+      v-model="adjustDialogVisible"
+      :title="$t('inventory.stockReplenishment')"
+      width="400px"
+      destroy-on-close
+    >
+      <el-form
+        :model="quickAdjustForm"
+        label-width="100px"
+      >
         <el-form-item :label="$t('inventory.skuCode')">
-          <el-input :value="quickAdjustForm.sku_code" disabled />
+          <el-input
+            :value="quickAdjustForm.sku_code"
+            disabled
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.replenishQuantity')">
-          <el-input-number v-model="quickAdjustForm.quantity" :min="1" :max="9999" />
+          <el-input-number
+            v-model="quickAdjustForm.quantity"
+            :min="1"
+            :max="9999"
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.remark')">
-          <el-input v-model="quickAdjustForm.remark" :placeholder="$t('inventory.replenishRemark')" />
+          <el-input
+            v-model="quickAdjustForm.remark"
+            :placeholder="$t('inventory.replenishRemark')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="adjustDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
-        <el-button type="primary" @click="handleQuickAdjust" :loading="quickAdjustLoading">
+        <el-button @click="adjustDialogVisible = false">
+          {{ $t('inventory.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="quickAdjustLoading"
+          @click="handleQuickAdjust"
+        >
           {{ $t('inventory.confirmReplenish') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Batch Safety Stock Dialog -->
-    <el-dialog v-model="batchSafetyStockDialogVisible" :title="$t('inventory.batchUpdateSafetyStock')" width="700px" destroy-on-close>
+    <el-dialog
+      v-model="batchSafetyStockDialogVisible"
+      :title="$t('inventory.batchUpdateSafetyStock')"
+      width="700px"
+      destroy-on-close
+    >
       <div class="batch-safety-stock-form">
-        <el-form :model="batchSafetyStockForm" label-width="120px">
+        <el-form
+          :model="batchSafetyStockForm"
+          label-width="120px"
+        >
           <el-form-item :label="$t('inventory.selectSKU')">
             <el-select
               v-model="batchSafetyStockForm.sku_codes"
@@ -291,34 +581,78 @@
           </el-form-item>
         </el-form>
 
-        <div class="selected-items" v-if="batchSafetyStockForm.sku_codes.length > 0">
+        <div
+          v-if="batchSafetyStockForm.sku_codes.length > 0"
+          class="selected-items"
+        >
           <h4>{{ $t('inventory.selectedItems') }} ({{ batchSafetyStockForm.sku_codes.length }})</h4>
-          <el-table :data="getSelectedSkuDetails()" stripe size="small" max-height="200">
-            <el-table-column prop="sku_code" :label="$t('inventory.skuCode')" width="150" />
-            <el-table-column prop="product_name" :label="$t('inventory.productName')" min-width="200" />
-            <el-table-column prop="safety_stock" :label="$t('inventory.currentSafetyStock')" width="120" align="center" />
+          <el-table
+            :data="getSelectedSkuDetails()"
+            stripe
+            size="small"
+            max-height="200"
+          >
+            <el-table-column
+              prop="sku_code"
+              :label="$t('inventory.skuCode')"
+              width="150"
+            />
+            <el-table-column
+              prop="product_name"
+              :label="$t('inventory.productName')"
+              min-width="200"
+            />
+            <el-table-column
+              prop="safety_stock"
+              :label="$t('inventory.currentSafetyStock')"
+              width="120"
+              align="center"
+            />
           </el-table>
         </div>
       </div>
       <template #footer>
-        <el-button @click="batchSafetyStockDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
-        <el-button type="primary" @click="handleBatchUpdateSafetyStock" :loading="batchSafetyStockLoading">
+        <el-button @click="batchSafetyStockDialogVisible = false">
+          {{ $t('inventory.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="batchSafetyStockLoading"
+          @click="handleBatchUpdateSafetyStock"
+        >
           {{ $t('inventory.confirm') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Edit Safety Stock Dialog -->
-    <el-dialog v-model="editSafetyStockDialogVisible" :title="$t('inventory.safetyStock')" width="400px" destroy-on-close>
-      <el-form :model="editSafetyStockForm" label-width="120px">
+    <el-dialog
+      v-model="editSafetyStockDialogVisible"
+      :title="$t('inventory.safetyStock')"
+      width="400px"
+      destroy-on-close
+    >
+      <el-form
+        :model="editSafetyStockForm"
+        label-width="120px"
+      >
         <el-form-item :label="$t('inventory.skuCode')">
-          <el-input :value="editSafetyStockForm.sku_code" disabled />
+          <el-input
+            :value="editSafetyStockForm.sku_code"
+            disabled
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.productName')">
-          <el-input :value="editSafetyStockForm.product_name" disabled />
+          <el-input
+            :value="editSafetyStockForm.product_name"
+            disabled
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.currentSafetyStock')">
-          <el-input :value="editSafetyStockForm.current_safety_stock" disabled />
+          <el-input
+            :value="editSafetyStockForm.current_safety_stock"
+            disabled
+          />
         </el-form-item>
         <el-form-item :label="$t('inventory.newSafetyStock')">
           <el-input-number
@@ -330,8 +664,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editSafetyStockDialogVisible = false">{{ $t('inventory.cancel') }}</el-button>
-        <el-button type="primary" @click="handleUpdateSafetyStock" :loading="editSafetyStockLoading">
+        <el-button @click="editSafetyStockDialogVisible = false">
+          {{ $t('inventory.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="editSafetyStockLoading"
+          @click="handleUpdateSafetyStock"
+        >
           {{ $t('inventory.save') }}
         </el-button>
       </template>

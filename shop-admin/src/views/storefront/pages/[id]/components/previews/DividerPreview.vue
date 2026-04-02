@@ -1,6 +1,6 @@
 <template>
   <div class="divider-preview">
-    <hr :style="{ borderStyle: config?.style || 'solid', borderColor: config?.color || '#E5E7EB' }" />
+    <hr :style="{ borderStyle: config?.style || 'solid', borderColor: config?.color || '#E5E7EB' }">
   </div>
 </template>
 

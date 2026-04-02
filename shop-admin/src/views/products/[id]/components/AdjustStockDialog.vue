@@ -1,13 +1,20 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="emit('update:visible', $event)"
     :title="$t('products.adjustStock')"
     width="450px"
+    @update:model-value="emit('update:visible', $event)"
   >
-    <el-form :model="adjustStockForm" label-width="100px">
+    <el-form
+      :model="adjustStockForm"
+      label-width="100px"
+    >
       <el-form-item :label="$t('products.warehouse')">
-        <el-select v-model="adjustStockForm.warehouse_id" :placeholder="$t('products.selectWarehouse')" style="width: 100%">
+        <el-select
+          v-model="adjustStockForm.warehouse_id"
+          :placeholder="$t('products.selectWarehouse')"
+          style="width: 100%"
+        >
           <el-option
             v-for="warehouse in warehouses"
             :key="warehouse.id"
@@ -22,15 +29,30 @@
           :step="1"
           style="width: 100%"
         />
-        <div class="adjust-tip">{{ $t('products.stockInOutTip') }}</div>
+        <div class="adjust-tip">
+          {{ $t('products.stockInOutTip') }}
+        </div>
       </el-form-item>
       <el-form-item :label="$t('products.remark')">
-        <el-input v-model="adjustStockForm.remark" type="textarea" :rows="2" :placeholder="$t('products.enterRemark')" />
+        <el-input
+          v-model="adjustStockForm.remark"
+          type="textarea"
+          :rows="2"
+          :placeholder="$t('products.enterRemark')"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleConfirm" :loading="loading">{{ $t('products.confirmAdjustment') }}</el-button>
+      <el-button @click="handleClose">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleConfirm"
+      >
+        {{ $t('products.confirmAdjustment') }}
+      </el-button>
     </template>
   </el-dialog>
 </template>

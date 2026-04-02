@@ -6,7 +6,10 @@
     :close-on-click-modal="false"
     destroy-on-close
   >
-    <div v-loading="loading" class="order-detail-drawer">
+    <div
+      v-loading="loading"
+      class="order-detail-drawer"
+    >
       <!-- Order Status Timeline -->
       <div class="status-section">
         <div class="section-header">
@@ -21,8 +24,15 @@
             :timestamp="step.time"
             placement="top"
           >
-            <p class="timeline-title">{{ step.title }}</p>
-            <p v-if="step.description" class="timeline-desc">{{ step.description }}</p>
+            <p class="timeline-title">
+              {{ step.title }}
+            </p>
+            <p
+              v-if="step.description"
+              class="timeline-desc"
+            >
+              {{ step.description }}
+            </p>
           </el-timeline-item>
         </el-timeline>
       </div>
@@ -33,17 +43,27 @@
           <el-icon><Document /></el-icon>
           <span>{{ $t('orders.orderInformation') }}</span>
         </div>
-        <el-descriptions :column="2" border size="small">
+        <el-descriptions
+          :column="2"
+          border
+          size="small"
+        >
           <el-descriptions-item :label="$t('orders.orderNo')">
             <span class="order-no-text">{{ order?.order_no }}</span>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('common.status')">
-            <el-tag :type="getStatusTagType(order?.status)" size="small">
+            <el-tag
+              :type="getStatusTagType(order?.status)"
+              size="small"
+            >
               {{ order?.status_text }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('orders.fulfillmentStatus')">
-            <el-tag :type="getFulfillmentTagType(order?.fulfillment_status)" size="small">
+            <el-tag
+              :type="getFulfillmentTagType(order?.fulfillment_status)"
+              size="small"
+            >
               {{ order?.fulfillment_text }}
             </el-tag>
           </el-descriptions-item>
@@ -64,11 +84,24 @@
         <div class="section-header">
           <el-icon><Goods /></el-icon>
           <span>{{ $t('orders.orderItems') }}</span>
-          <el-tag size="small" type="info">{{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}</el-tag>
+          <el-tag
+            size="small"
+            type="info"
+          >
+            {{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}
+          </el-tag>
         </div>
         <div class="items-list">
-          <div v-for="item in order?.items" :key="item.order_item_id" class="item-row">
-            <el-image :src="item.image" class="item-image" fit="cover">
+          <div
+            v-for="item in order?.items"
+            :key="item.order_item_id"
+            class="item-row"
+          >
+            <el-image
+              :src="item.image"
+              class="item-image"
+              fit="cover"
+            >
               <template #error>
                 <div class="image-placeholder">
                   <el-icon><Picture /></el-icon>
@@ -76,19 +109,41 @@
               </template>
             </el-image>
             <div class="item-info">
-              <p class="item-name">{{ item.product_name }}</p>
-              <p class="item-sku">{{ item.sku_name }}</p>
+              <p class="item-name">
+                {{ item.product_name }}
+              </p>
+              <p class="item-sku">
+                {{ item.sku_name }}
+              </p>
             </div>
             <div class="item-price">
-              <p class="unit-price">{{ order?.currency }} {{ formatAmount(item.unit_price) }}</p>
-              <p class="quantity">x{{ item.quantity }}</p>
+              <p class="unit-price">
+                {{ order?.currency }} {{ formatAmount(item.unit_price) }}
+              </p>
+              <p class="quantity">
+                x{{ item.quantity }}
+              </p>
             </div>
             <div class="item-total">
               {{ order?.currency }} {{ formatAmount(String(parseFloat(item.unit_price) * item.quantity)) }}
             </div>
-            <div v-if="item.shipped_qty > 0" class="item-ship-info">
-              <el-tag size="small" type="success">{{ item.shipped_qty }} {{ $t('orders.shippedQty') }}</el-tag>
-              <el-tag v-if="item.pending_qty > 0" size="small" type="warning">{{ item.pending_qty }} {{ $t('orders.pendingQty') }}</el-tag>
+            <div
+              v-if="item.shipped_qty > 0"
+              class="item-ship-info"
+            >
+              <el-tag
+                size="small"
+                type="success"
+              >
+                {{ item.shipped_qty }} {{ $t('orders.shippedQty') }}
+              </el-tag>
+              <el-tag
+                v-if="item.pending_qty > 0"
+                size="small"
+                type="warning"
+              >
+                {{ item.pending_qty }} {{ $t('orders.pendingQty') }}
+              </el-tag>
             </div>
           </div>
         </div>
@@ -105,7 +160,9 @@
             <span class="name">{{ order?.shipping_address?.receiver_name }}</span>
             <span class="phone">{{ order?.shipping_address?.receiver_phone }}</span>
           </p>
-          <p class="address">{{ order?.shipping_address?.full_address }}</p>
+          <p class="address">
+            {{ order?.shipping_address?.full_address }}
+          </p>
         </div>
       </div>
 
@@ -115,7 +172,11 @@
           <el-icon><Wallet /></el-icon>
           <span>{{ $t('orders.paymentInformation') }}</span>
         </div>
-        <el-descriptions :column="2" border size="small">
+        <el-descriptions
+          :column="2"
+          border
+          size="small"
+        >
           <el-descriptions-item :label="$t('orders.paymentMethod')">
             {{ order?.payment_method_text || '-' }}
           </el-descriptions-item>
@@ -132,17 +193,32 @@
       </div>
 
       <!-- Shipments -->
-      <div v-if="order?.shipments?.length" class="shipments-section">
+      <div
+        v-if="order?.shipments?.length"
+        class="shipments-section"
+      >
         <div class="section-header">
           <el-icon><Van /></el-icon>
           <span>{{ $t('orders.shipments') }}</span>
-          <el-tag size="small" type="info">{{ $t('orders.shipmentCount', { count: order.shipments.length }) }}</el-tag>
+          <el-tag
+            size="small"
+            type="info"
+          >
+            {{ $t('orders.shipmentCount', { count: order.shipments.length }) }}
+          </el-tag>
         </div>
         <div class="shipments-list">
-          <div v-for="shipment in order.shipments" :key="shipment.shipment_id" class="shipment-card">
+          <div
+            v-for="shipment in order.shipments"
+            :key="shipment.shipment_id"
+            class="shipment-card"
+          >
             <div class="shipment-header">
               <span class="shipment-no">{{ shipment.shipment_no }}</span>
-              <el-tag :type="getShipmentStatusTagType(shipment.status)" size="small">
+              <el-tag
+                :type="getShipmentStatusTagType(shipment.status)"
+                size="small"
+              >
                 {{ getShipmentStatusText(shipment.status) }}
               </el-tag>
             </div>
@@ -162,8 +238,15 @@
           <span>{{ $t('orders.sellerRemark') }}</span>
         </div>
         <div class="remark-content">
-          <p v-if="order?.seller_remark">{{ order.seller_remark }}</p>
-          <p v-else class="no-remark">{{ $t('orders.noRemark') }}</p>
+          <p v-if="order?.seller_remark">
+            {{ order.seller_remark }}
+          </p>
+          <p
+            v-else
+            class="no-remark"
+          >
+            {{ $t('orders.noRemark') }}
+          </p>
         </div>
       </div>
     </div>
@@ -174,11 +257,18 @@
           <el-icon><Edit /></el-icon>
           {{ $t('orders.editRemark') }}
         </el-button>
-        <el-button v-if="canShip" type="primary" @click="handleShip">
+        <el-button
+          v-if="canShip"
+          type="primary"
+          @click="handleShip"
+        >
           <el-icon><Van /></el-icon>
           {{ $t('orders.shipOrder') }}
         </el-button>
-        <el-button v-if="canAdjustPrice" @click="handleAdjustPrice">
+        <el-button
+          v-if="canAdjustPrice"
+          @click="handleAdjustPrice"
+        >
           <el-icon><PriceTag /></el-icon>
           {{ $t('orders.adjustPrice') }}
         </el-button>

@@ -1,17 +1,29 @@
 <template>
   <div class="template-detail-page">
     <!-- Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="page-header">
         <div class="header-left">
-          <el-button link @click="handleBack">
+          <el-button
+            link
+            @click="handleBack"
+          >
             <el-icon><ArrowLeft /></el-icon>
             {{ $t('shipping.returnToList') }}
           </el-button>
           <el-divider direction="vertical" />
           <h2 class="template-title">
             {{ template?.name || $t('common.loading') }}
-            <el-tag v-if="template?.is_default" type="success" size="small">{{ $t('shipping.default') }}</el-tag>
+            <el-tag
+              v-if="template?.is_default"
+              type="success"
+              size="small"
+            >
+              {{ $t('shipping.default') }}
+            </el-tag>
           </h2>
         </div>
         <div class="header-right">
@@ -21,7 +33,11 @@
             :inactive-text="$t('shipping.statusDisabled')"
             @change="handleStatusChange"
           />
-          <el-button type="primary" @click="handleSave" :loading="saveLoading">
+          <el-button
+            type="primary"
+            :loading="saveLoading"
+            @click="handleSave"
+          >
             <el-icon><Check /></el-icon>
             {{ $t('shipping.saveChanges') }}
           </el-button>
@@ -30,21 +46,36 @@
     </el-card>
 
     <!-- Tabs -->
-    <el-card class="tabs-card" shadow="never" v-loading="loading">
+    <el-card
+      v-loading="loading"
+      class="tabs-card"
+      shadow="never"
+    >
       <el-tabs v-model="activeTab">
         <!-- Zones Tab -->
-        <el-tab-pane :label="$t('shipping.zones')" name="zones">
+        <el-tab-pane
+          :label="$t('shipping.zones')"
+          name="zones"
+        >
           <div class="zones-section">
             <div class="section-header">
-              <h3 class="section-title">{{ $t('shipping.deliveryZoneConfig') }}</h3>
-              <el-button type="primary" @click="showAddZoneDialog">
+              <h3 class="section-title">
+                {{ $t('shipping.deliveryZoneConfig') }}
+              </h3>
+              <el-button
+                type="primary"
+                @click="showAddZoneDialog"
+              >
                 <el-icon><Plus /></el-icon>
                 {{ $t('shipping.addZoneBtn') }}
               </el-button>
             </div>
 
             <!-- Zones List -->
-            <div class="zones-list" v-if="zones.length > 0">
+            <div
+              v-if="zones.length > 0"
+              class="zones-list"
+            >
               <ZoneConfigForm
                 v-for="(zone, index) in zones"
                 :key="zone.id || `new-${index}`"
@@ -55,8 +86,14 @@
               />
             </div>
 
-            <el-empty v-else :description="$t('shipping.noZones')">
-              <el-button type="primary" @click="showAddZoneDialog">
+            <el-empty
+              v-else
+              :description="$t('shipping.noZones')"
+            >
+              <el-button
+                type="primary"
+                @click="showAddZoneDialog"
+              >
                 {{ $t('shipping.addFirstZone') }}
               </el-button>
             </el-empty>
@@ -64,59 +101,103 @@
         </el-tab-pane>
 
         <!-- Associations Tab -->
-        <el-tab-pane :label="$t('shipping.mappings')" name="associations">
+        <el-tab-pane
+          :label="$t('shipping.mappings')"
+          name="associations"
+        >
           <div class="associations-section">
             <!-- Product Associations -->
             <div class="association-block">
               <div class="block-header">
-                <h3 class="block-title">{{ $t('shipping.productAssociation') }}</h3>
-                <el-button type="primary" size="small" @click="showProductSelector">
+                <h3 class="block-title">
+                  {{ $t('shipping.productAssociation') }}
+                </h3>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="showProductSelector"
+                >
                   <el-icon><Plus /></el-icon>
                   {{ $t('shipping.addProduct') }}
                 </el-button>
               </div>
-              <el-table :data="productMappings" stripe v-if="productMappings.length > 0">
-                <el-table-column :label="$t('products.title')" min-width="300">
+              <el-table
+                v-if="productMappings.length > 0"
+                :data="productMappings"
+                stripe
+              >
+                <el-table-column
+                  :label="$t('products.title')"
+                  min-width="300"
+                >
                   <template #default="{ row }">
                     <div class="product-cell">
                       <div class="product-info">
-                        <p class="product-name">{{ row.target_name || $t('shipping.productId', { id: row.target_id }) }}</p>
+                        <p class="product-name">
+                          {{ row.target_name || $t('shipping.productId', { id: row.target_id }) }}
+                        </p>
                       </div>
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column :label="$t('common.actions')" width="100" align="center">
+                <el-table-column
+                  :label="$t('common.actions')"
+                  width="100"
+                  align="center"
+                >
                   <template #default="{ row }">
-                    <el-button type="danger" link size="small" @click="removeProductMapping(row)">
+                    <el-button
+                      type="danger"
+                      link
+                      size="small"
+                      @click="removeProductMapping(row)"
+                    >
                       {{ $t('shipping.remove') }}
                     </el-button>
                   </template>
                 </el-table-column>
               </el-table>
-              <el-empty v-else :description="$t('shipping.noAssociatedProducts')" :image-size="80" />
+              <el-empty
+                v-else
+                :description="$t('shipping.noAssociatedProducts')"
+                :image-size="80"
+              />
             </div>
 
             <!-- Category Associations -->
             <div class="association-block">
               <div class="block-header">
-                <h3 class="block-title">{{ $t('shipping.categoryAssociation') }}</h3>
-                <el-button type="primary" size="small" @click="showCategorySelector">
+                <h3 class="block-title">
+                  {{ $t('shipping.categoryAssociation') }}
+                </h3>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="showCategorySelector"
+                >
                   <el-icon><Plus /></el-icon>
                   {{ $t('shipping.addCategory') }}
                 </el-button>
               </div>
-              <div class="category-tags" v-if="categoryMappings.length > 0">
+              <div
+                v-if="categoryMappings.length > 0"
+                class="category-tags"
+              >
                 <el-tag
                   v-for="cat in categoryMappings"
                   :key="cat.id"
                   closable
-                  @close="removeCategoryMapping(cat)"
                   class="category-tag"
+                  @close="removeCategoryMapping(cat)"
                 >
                   {{ cat.target_name || $t('shipping.categoryId', { id: cat.target_id }) }}
                 </el-tag>
               </div>
-              <el-empty v-else :description="$t('shipping.noAssociatedCategories')" :image-size="80" />
+              <el-empty
+                v-else
+                :description="$t('shipping.noAssociatedCategories')"
+                :image-size="80"
+              />
             </div>
           </div>
         </el-tab-pane>
@@ -159,18 +240,31 @@
           </template>
         </el-input>
         <el-table
-          :data="availableProducts"
           v-loading="productLoading"
-          @selection-change="handleProductSelection"
+          :data="availableProducts"
           max-height="400"
+          @selection-change="handleProductSelection"
         >
-          <el-table-column type="selection" width="55" />
-          <el-table-column :label="$t('products.title')" min-width="300">
+          <el-table-column
+            type="selection"
+            width="55"
+          />
+          <el-table-column
+            :label="$t('products.title')"
+            min-width="300"
+          >
             <template #default="{ row }">
               <div class="product-cell">
-                <el-image v-if="row.images && row.images.length > 0" :src="row.images[0]" class="product-thumb" fit="cover" />
+                <el-image
+                  v-if="row.images && row.images.length > 0"
+                  :src="row.images[0]"
+                  class="product-thumb"
+                  fit="cover"
+                />
                 <div class="product-info">
-                  <p class="product-name">{{ row.name }}</p>
+                  <p class="product-name">
+                    {{ row.name }}
+                  </p>
                 </div>
               </div>
             </template>
@@ -178,8 +272,14 @@
         </el-table>
       </div>
       <template #footer>
-        <el-button @click="productSelectorVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="confirmProductSelection" :disabled="selectedProducts.length === 0">
+        <el-button @click="productSelectorVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :disabled="selectedProducts.length === 0"
+          @click="confirmProductSelection"
+        >
           {{ $t('shipping.confirmAdd') }} ({{ selectedProducts.length }})
         </el-button>
       </template>
@@ -202,8 +302,14 @@
         @check="handleCategoryCheck"
       />
       <template #footer>
-        <el-button @click="categorySelectorVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="confirmCategorySelection" :disabled="selectedCategories.length === 0">
+        <el-button @click="categorySelectorVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :disabled="selectedCategories.length === 0"
+          @click="confirmCategorySelection"
+        >
           {{ $t('shipping.confirmAddSelected', { count: selectedCategories.length }) }}
         </el-button>
       </template>

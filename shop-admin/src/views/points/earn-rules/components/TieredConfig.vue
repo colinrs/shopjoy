@@ -6,7 +6,9 @@
         :key="index"
         class="tier-row"
       >
-        <div class="tier-index">{{ index + 1 }}</div>
+        <div class="tier-index">
+          {{ index + 1 }}
+        </div>
 
         <!-- Threshold -->
         <div class="tier-field">
@@ -33,12 +35,12 @@
           <label>{{ $t('points.pointsPerDollar') }}</label>
           <el-input-number
             :model-value="parseFloat(tier.ratio) || 0"
-            @update:model-value="(val: number) => updateRatio(index, val)"
             :min="0.1"
             :max="100"
             :precision="2"
             :step="0.5"
             style="width: 140px"
+            @update:model-value="(val: number) => updateRatio(index, val)"
           />
         </div>
 
@@ -57,16 +59,26 @@
       </div>
     </div>
 
-    <el-button type="primary" link @click="addTier">
+    <el-button
+      type="primary"
+      link
+      @click="addTier"
+    >
       <el-icon><Plus /></el-icon>
       {{ $t('points.addTier') }}
     </el-button>
 
     <!-- Preview -->
     <div class="preview-section">
-      <div class="preview-title">{{ $t('points.calculationPreview') }}</div>
+      <div class="preview-title">
+        {{ $t('points.calculationPreview') }}
+      </div>
       <div class="preview-examples">
-        <div v-for="example in previewExamples" :key="example.amount" class="preview-item">
+        <div
+          v-for="example in previewExamples"
+          :key="example.amount"
+          class="preview-item"
+        >
           <span class="preview-label">{{ $t('points.orderAmount', { amount: example.amount }) }}</span>
           <span class="preview-value">{{ example.points }}{{ $t('points.pointsAmount') }}</span>
         </div>

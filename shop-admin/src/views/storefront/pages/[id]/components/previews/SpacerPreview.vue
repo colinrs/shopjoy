@@ -1,5 +1,8 @@
 <template>
-  <div class="spacer-preview" :style="{ height: `${config?.height || 20}px` }">
+  <div
+    class="spacer-preview"
+    :style="{ height: `${config?.height || 20}px` }"
+  >
     <div class="spacer-indicator">
       <span>{{ config?.height || 20 }}px</span>
     </div>

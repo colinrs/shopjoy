@@ -1,18 +1,26 @@
 <template>
   <div class="shipping-templates-page">
     <!-- Page Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
           <h2>{{ $t('shipping.templatesTitle') }}</h2>
-          <p class="header-desc">{{ $t('shipping.templatesDesc') }}</p>
+          <p class="header-desc">
+            {{ $t('shipping.templatesDesc') }}
+          </p>
         </div>
         <div class="header-right">
           <el-button @click="goToCalculator">
             <el-icon><Coin /></el-icon>
             {{ $t('shipping.calculatorBtn') }}
           </el-button>
-          <el-button type="primary" @click="handleCreate">
+          <el-button
+            type="primary"
+            @click="handleCreate"
+          >
             <el-icon><Plus /></el-icon>
             {{ $t('shipping.createTemplateBtn') }}
           </el-button>
@@ -21,7 +29,10 @@
     </el-card>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <el-input
           v-model="searchQuery"
@@ -35,12 +46,30 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-select v-model="filterStatus" :placeholder="$t('shipping.status')" clearable class="filter-select" @change="handleSearch">
-          <el-option :label="$t('shipping.all')" value="" />
-          <el-option :label="$t('shipping.enabled')" value="true" />
-          <el-option :label="$t('shipping.disabled')" value="false" />
+        <el-select
+          v-model="filterStatus"
+          :placeholder="$t('shipping.status')"
+          clearable
+          class="filter-select"
+          @change="handleSearch"
+        >
+          <el-option
+            :label="$t('shipping.all')"
+            value=""
+          />
+          <el-option
+            :label="$t('shipping.enabled')"
+            value="true"
+          />
+          <el-option
+            :label="$t('shipping.disabled')"
+            value="false"
+          />
         </el-select>
-        <el-button type="primary" @click="handleSearch">
+        <el-button
+          type="primary"
+          @click="handleSearch"
+        >
           <el-icon><Search /></el-icon>
           {{ $t('shipping.search') }}
         </el-button>
@@ -48,9 +77,18 @@
     </el-card>
 
     <!-- Templates Grid -->
-    <div class="templates-grid" v-loading="loading">
-      <el-empty v-if="!loading && templates.length === 0" :description="$t('shipping.noTemplates')">
-        <el-button type="primary" @click="handleCreate">
+    <div
+      v-loading="loading"
+      class="templates-grid"
+    >
+      <el-empty
+        v-if="!loading && templates.length === 0"
+        :description="$t('shipping.noTemplates')"
+      >
+        <el-button
+          type="primary"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           {{ $t('shipping.createTemplate') }}
         </el-button>
@@ -67,7 +105,11 @@
     </div>
 
     <!-- Pagination -->
-    <el-card v-if="total > 0" class="pagination-card" shadow="never">
+    <el-card
+      v-if="total > 0"
+      class="pagination-card"
+      shadow="never"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -86,18 +128,37 @@
       width="500px"
       destroy-on-close
     >
-      <el-form :model="createForm" :rules="createRules" ref="createFormRef" label-width="100px">
-        <el-form-item :label="$t('shipping.templateName')" prop="name">
-          <el-input v-model="createForm.name" :placeholder="$t('shipping.templateNamePlaceholder')" />
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createRules"
+        label-width="100px"
+      >
+        <el-form-item
+          :label="$t('shipping.templateName')"
+          prop="name"
+        >
+          <el-input
+            v-model="createForm.name"
+            :placeholder="$t('shipping.templateNamePlaceholder')"
+          />
         </el-form-item>
         <el-form-item :label="$t('shipping.setAsDefault')">
           <el-switch v-model="createForm.is_default" />
-          <div class="form-tip">{{ $t('shipping.defaultTip') }}</div>
+          <div class="form-tip">
+            {{ $t('shipping.defaultTip') }}
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleConfirmCreate" :loading="createLoading">
+        <el-button @click="createDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="createLoading"
+          @click="handleConfirmCreate"
+        >
           {{ $t('shipping.create') }}
         </el-button>
       </template>

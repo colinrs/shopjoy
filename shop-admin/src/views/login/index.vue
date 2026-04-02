@@ -5,10 +5,17 @@
       <div class="login-branding">
         <div class="branding-content">
           <div class="logo">
-            <el-icon size="48" color="#fff"><ShoppingBag /></el-icon>
+            <el-icon
+              size="48"
+              color="#fff"
+            >
+              <ShoppingBag />
+            </el-icon>
             <h1>{{ $t('login.title') }}</h1>
           </div>
-          <p class="tagline">{{ $t('login.tagline') }}</p>
+          <p class="tagline">
+            {{ $t('login.tagline') }}
+          </p>
           <div class="features">
             <div class="feature-item">
               <el-icon><Check /></el-icon>
@@ -32,13 +39,17 @@
       <!-- Right Side - Login Form -->
       <div class="login-form-section">
         <div class="form-container">
-          <h2 class="form-title">{{ $t('login.welcomeBack') }}</h2>
-          <p class="form-subtitle">{{ $t('login.loginSubtitle') }}</p>
+          <h2 class="form-title">
+            {{ $t('login.welcomeBack') }}
+          </h2>
+          <p class="form-subtitle">
+            {{ $t('login.loginSubtitle') }}
+          </p>
 
           <el-form
+            ref="loginFormRef"
             :model="loginForm"
             :rules="loginRules"
-            ref="loginFormRef"
             class="login-form"
           >
             <el-form-item prop="account">
@@ -68,16 +79,21 @@
               </el-input>
             </el-form-item>
             <div class="form-options">
-              <el-checkbox v-model="rememberMe">{{ $t('login.rememberMe') }}</el-checkbox>
-              <a href="#" class="forgot-link">{{ $t('login.forgotPassword') }}</a>
+              <el-checkbox v-model="rememberMe">
+                {{ $t('login.rememberMe') }}
+              </el-checkbox>
+              <a
+                href="#"
+                class="forgot-link"
+              >{{ $t('login.forgotPassword') }}</a>
             </div>
             <el-form-item>
               <el-button
                 type="primary"
-                @click="handleLogin"
                 :loading="loading"
                 size="large"
                 class="login-btn"
+                @click="handleLogin"
               >
                 {{ $t('login.login') }}
               </el-button>

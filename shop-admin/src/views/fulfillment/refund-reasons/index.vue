@@ -1,13 +1,19 @@
 <template>
   <div class="refund-reasons-page">
     <!-- Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
           <h2>{{ $t('refundReasons.title') }}</h2>
         </div>
         <div class="header-right">
-          <el-button type="primary" @click="handleAdd">
+          <el-button
+            type="primary"
+            @click="handleAdd"
+          >
             <el-icon><Plus /></el-icon>
             {{ $t('refundReasons.addReason') }}
           </el-button>
@@ -16,18 +22,38 @@
     </el-card>
 
     <!-- Reason List -->
-    <el-card class="list-card" shadow="never">
+    <el-card
+      class="list-card"
+      shadow="never"
+    >
       <el-table
-        :data="reasons"
         v-loading="loading"
+        :data="reasons"
         row-key="id"
         border
         stripe
       >
-        <el-table-column prop="sort" :label="$t('refundReasons.sort')" width="80" align="center" />
-        <el-table-column prop="code" :label="$t('refundReasons.code')" min-width="150" />
-        <el-table-column prop="name" :label="$t('refundReasons.name')" min-width="200" />
-        <el-table-column :label="$t('refundReasons.status')" width="100" align="center">
+        <el-table-column
+          prop="sort"
+          :label="$t('refundReasons.sort')"
+          width="80"
+          align="center"
+        />
+        <el-table-column
+          prop="code"
+          :label="$t('refundReasons.code')"
+          min-width="150"
+        />
+        <el-table-column
+          prop="name"
+          :label="$t('refundReasons.name')"
+          min-width="200"
+        />
+        <el-table-column
+          :label="$t('refundReasons.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.is_active"
@@ -37,19 +63,36 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="180" align="center">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="180"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ $t('common.edit') }}
             </el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row)">
+            <el-button
+              type="danger"
+              link
+              size="small"
+              @click="handleDelete(row)"
+            >
               {{ $t('common.delete') }}
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && reasons.length === 0" :description="$t('common.noData')" />
+      <el-empty
+        v-if="!loading && reasons.length === 0"
+        :description="$t('common.noData')"
+      />
     </el-card>
 
     <!-- Add/Edit Dialog -->
@@ -59,20 +102,48 @@
       width="450px"
       destroy-on-close
     >
-      <el-form :model="reasonForm" :rules="formRules" ref="formRef" label-width="100px">
-        <el-form-item :label="$t('refundReasons.code')" prop="code">
-          <el-input v-model="reasonForm.code" :placeholder="$t('refundReasons.enterCode')" />
+      <el-form
+        ref="formRef"
+        :model="reasonForm"
+        :rules="formRules"
+        label-width="100px"
+      >
+        <el-form-item
+          :label="$t('refundReasons.code')"
+          prop="code"
+        >
+          <el-input
+            v-model="reasonForm.code"
+            :placeholder="$t('refundReasons.enterCode')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('refundReasons.name')" prop="name">
-          <el-input v-model="reasonForm.name" :placeholder="$t('refundReasons.enterName')" />
+        <el-form-item
+          :label="$t('refundReasons.name')"
+          prop="name"
+        >
+          <el-input
+            v-model="reasonForm.name"
+            :placeholder="$t('refundReasons.enterName')"
+          />
         </el-form-item>
         <el-form-item :label="$t('refundReasons.sort')">
-          <el-input-number v-model="reasonForm.sort" :min="0" :max="9999" style="width: 100%" />
+          <el-input-number
+            v-model="reasonForm.sort"
+            :min="0"
+            :max="9999"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">
+        <el-button @click="dialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
           {{ $t('common.save') }}
         </el-button>
       </template>

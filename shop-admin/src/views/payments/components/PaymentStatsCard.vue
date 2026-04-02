@@ -1,37 +1,58 @@
 <template>
   <div class="payment-stats">
     <!-- Amount Stats Row -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="24" :sm="8">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
         <div class="stat-item today">
           <div class="stat-header">
             <el-icon><Calendar /></el-icon>
             <span class="stat-label">{{ $t('payments.todayReceived') }}</span>
           </div>
-          <p class="stat-amount">{{ currency }} {{ formatAmount(stats.today_received) }}</p>
-          <div class="stat-trend" :class="{ up: isPositiveGrowth(stats.today_growth) }">
+          <p class="stat-amount">
+            {{ currency }} {{ formatAmount(stats.today_received) }}
+          </p>
+          <div
+            class="stat-trend"
+            :class="{ up: isPositiveGrowth(stats.today_growth) }"
+          >
             <el-icon><TrendCharts /></el-icon>
             <span>{{ formatGrowth(stats.today_growth) }}%</span>
             <span class="trend-label">{{ $t('payments.vsYesterday') }}</span>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="8">
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
         <div class="stat-item period">
           <div class="stat-header">
             <el-icon><Timer /></el-icon>
             <span class="stat-label">{{ periodLabel }} {{ $t('payments.received') }}</span>
           </div>
-          <p class="stat-amount">{{ currency }} {{ formatAmount(stats.period_received) }}</p>
+          <p class="stat-amount">
+            {{ currency }} {{ formatAmount(stats.period_received) }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="8">
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
         <div class="stat-item refund">
           <div class="stat-header">
             <el-icon><RefreshLeft /></el-icon>
             <span class="stat-label">{{ $t('payments.refundAmount') }}</span>
           </div>
-          <p class="stat-amount refund-amount">{{ currency }} {{ formatAmount(stats.refund_amount) }}</p>
+          <p class="stat-amount refund-amount">
+            {{ currency }} {{ formatAmount(stats.refund_amount) }}
+          </p>
           <div class="stat-trend">
             <span class="refund-rate">{{ $t('payments.rate') }}: {{ stats.refund_rate }}%</span>
           </div>
@@ -40,7 +61,10 @@
     </el-row>
 
     <!-- Channel Distribution Card -->
-    <el-card class="channel-card" shadow="never">
+    <el-card
+      class="channel-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span class="card-title">
@@ -50,7 +74,10 @@
         </div>
       </template>
       <el-row :gutter="24">
-        <el-col :xs="24" :md="12">
+        <el-col
+          :xs="24"
+          :md="12"
+        >
           <!-- Progress Bars -->
           <div class="channel-list">
             <div
@@ -75,11 +102,16 @@
             </div>
           </div>
         </el-col>
-        <el-col :xs="24" :md="12">
+        <el-col
+          :xs="24"
+          :md="12"
+        >
           <!-- Chart Placeholder -->
           <div class="chart-container">
             <div class="chart-placeholder">
-              <el-icon :size="48"><PieChart /></el-icon>
+              <el-icon :size="48">
+                <PieChart />
+              </el-icon>
               <p>{{ $t('payments.channelDistribution') }}</p>
             </div>
           </div>

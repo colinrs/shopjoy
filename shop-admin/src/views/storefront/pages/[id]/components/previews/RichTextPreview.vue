@@ -1,8 +1,17 @@
 <template>
   <div class="rich-text-preview">
-    <div v-if="config?.content" class="content" v-html="config.content"></div>
-    <div v-else class="placeholder">
-      <el-icon size="24"><Document /></el-icon>
+    <div
+      v-if="config?.content"
+      class="content"
+      v-html="config.content"
+    />
+    <div
+      v-else
+      class="placeholder"
+    >
+      <el-icon size="24">
+        <Document />
+      </el-icon>
       <span>{{ $t('storefront.richTextBlock') }}</span>
     </div>
   </div>

@@ -1,8 +1,14 @@
 <template>
   <div class="themes-page">
-    <page-header :title="$t('storefront.themeManagement')" :subtitle="$t('storefront.selectAndCustomizeTheme')">
+    <page-header
+      :title="$t('storefront.themeManagement')"
+      :subtitle="$t('storefront.selectAndCustomizeTheme')"
+    >
       <template #extra>
-        <el-button type="primary" @click="showCustomThemeDialog">
+        <el-button
+          type="primary"
+          @click="showCustomThemeDialog"
+        >
           <el-icon><Plus /></el-icon>
           {{ $t('storefront.uploadCustomTheme') }}
         </el-button>
@@ -10,11 +16,21 @@
     </page-header>
 
     <!-- Current Theme Section -->
-    <el-card v-if="currentTheme" class="current-theme-card" shadow="hover">
+    <el-card
+      v-if="currentTheme"
+      class="current-theme-card"
+      shadow="hover"
+    >
       <template #header>
         <div class="card-header">
           <span>{{ $t('storefront.currentTheme') }}</span>
-          <el-tag type="success" effect="dark" size="small">{{ $t('storefront.inUse') }}</el-tag>
+          <el-tag
+            type="success"
+            effect="dark"
+            size="small"
+          >
+            {{ $t('storefront.inUse') }}
+          </el-tag>
         </div>
       </template>
       <div class="current-theme-content">
@@ -26,19 +42,27 @@
           >
             <template #error>
               <div class="image-placeholder">
-                <el-icon size="48"><Picture /></el-icon>
+                <el-icon size="48">
+                  <Picture />
+                </el-icon>
               </div>
             </template>
           </el-image>
         </div>
         <div class="theme-info">
           <h3>{{ currentTheme.theme.name }}</h3>
-          <p class="theme-desc">{{ currentTheme.theme.description }}</p>
+          <p class="theme-desc">
+            {{ currentTheme.theme.description }}
+          </p>
 
           <!-- Theme Config -->
           <div class="theme-config">
             <h4>{{ $t('storefront.themeConfig') }}</h4>
-            <el-form :model="configForm" label-width="100px" label-position="left">
+            <el-form
+              :model="configForm"
+              label-width="100px"
+              label-position="left"
+            >
               <el-form-item :label="$t('storefront.primaryColor')">
                 <div class="color-picker-wrapper">
                   <el-color-picker v-model="configForm.primary_color" />
@@ -52,28 +76,67 @@
                 </div>
               </el-form-item>
               <el-form-item :label="$t('storefront.font')">
-                <el-select v-model="configForm.font_family" :placeholder="$t('storefront.selectFont')">
-                  <el-option label="Inter" value="inter" />
-                  <el-option label="Roboto" value="roboto" />
-                  <el-option label="Open Sans" value="opensans" />
-                  <el-option label="Poppins" value="poppins" />
-                  <el-option label="Noto Sans" value="notosans" />
+                <el-select
+                  v-model="configForm.font_family"
+                  :placeholder="$t('storefront.selectFont')"
+                >
+                  <el-option
+                    label="Inter"
+                    value="inter"
+                  />
+                  <el-option
+                    label="Roboto"
+                    value="roboto"
+                  />
+                  <el-option
+                    label="Open Sans"
+                    value="opensans"
+                  />
+                  <el-option
+                    label="Poppins"
+                    value="poppins"
+                  />
+                  <el-option
+                    label="Noto Sans"
+                    value="notosans"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item :label="$t('storefront.buttonStyle')">
-                <el-select v-model="configForm.button_style" :placeholder="$t('storefront.selectButtonStyle')">
-                  <el-option :label="$t('storefront.roundedButton')" value="rounded" />
-                  <el-option :label="$t('storefront.pillButton')" value="pill" />
-                  <el-option :label="$t('storefront.squareButton')" value="square" />
-                  <el-option :label="$t('storefront.underlineButton')" value="underline" />
+                <el-select
+                  v-model="configForm.button_style"
+                  :placeholder="$t('storefront.selectButtonStyle')"
+                >
+                  <el-option
+                    :label="$t('storefront.roundedButton')"
+                    value="rounded"
+                  />
+                  <el-option
+                    :label="$t('storefront.pillButton')"
+                    value="pill"
+                  />
+                  <el-option
+                    :label="$t('storefront.squareButton')"
+                    value="square"
+                  />
+                  <el-option
+                    :label="$t('storefront.underlineButton')"
+                    value="underline"
+                  />
                 </el-select>
               </el-form-item>
             </el-form>
             <div class="config-actions">
-              <el-button type="primary" @click="saveConfig" :loading="configLoading">
+              <el-button
+                type="primary"
+                :loading="configLoading"
+                @click="saveConfig"
+              >
                 {{ $t('storefront.saveConfig') }}
               </el-button>
-              <el-button @click="resetConfig">{{ $t('storefront.resetToDefault') }}</el-button>
+              <el-button @click="resetConfig">
+                {{ $t('storefront.resetToDefault') }}
+              </el-button>
             </div>
           </div>
         </div>
@@ -81,10 +144,19 @@
     </el-card>
 
     <!-- Tabs Section -->
-    <el-card class="tabs-card" shadow="never">
+    <el-card
+      class="tabs-card"
+      shadow="never"
+    >
       <el-tabs v-model="activeTab">
-        <el-tab-pane :label="$t('storefront.availableThemes')" name="themes">
-          <div class="themes-grid" v-loading="loading">
+        <el-tab-pane
+          :label="$t('storefront.availableThemes')"
+          name="themes"
+        >
+          <div
+            v-loading="loading"
+            class="themes-grid"
+          >
             <div
               v-for="theme in themes"
               :key="theme.id"
@@ -100,20 +172,34 @@
                 >
                   <template #error>
                     <div class="image-placeholder">
-                      <el-icon size="32"><Picture /></el-icon>
+                      <el-icon size="32">
+                        <Picture />
+                      </el-icon>
                     </div>
                   </template>
                 </el-image>
                 <div class="theme-overlay">
-                  <el-button type="primary" size="small" @click.stop="previewTheme(theme)">
+                  <el-button
+                    type="primary"
+                    size="small"
+                    @click.stop="previewTheme(theme)"
+                  >
                     {{ $t('storefront.preview') }}
                   </el-button>
                 </div>
-                <div v-if="theme.is_current" class="current-badge">
+                <div
+                  v-if="theme.is_current"
+                  class="current-badge"
+                >
                   <el-icon><Check /></el-icon>
                   {{ $t('storefront.inUse') }}
                 </div>
-                <div v-if="theme.is_preset" class="preset-badge">{{ $t('storefront.officialTheme') }}</div>
+                <div
+                  v-if="theme.is_preset"
+                  class="preset-badge"
+                >
+                  {{ $t('storefront.officialTheme') }}
+                </div>
               </div>
               <div class="theme-meta">
                 <h4>{{ theme.name }}</h4>
@@ -123,19 +209,35 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('storefront.auditLogs')" name="audit">
-          <el-table :data="auditLogs" v-loading="auditLoading" stripe>
-            <el-table-column :label="$t('storefront.action')" width="150">
+        <el-tab-pane
+          :label="$t('storefront.auditLogs')"
+          name="audit"
+        >
+          <el-table
+            v-loading="auditLoading"
+            :data="auditLogs"
+            stripe
+          >
+            <el-table-column
+              :label="$t('storefront.action')"
+              width="150"
+            >
               <template #default="{ row }">
                 {{ getActionText(row.action) }}
               </template>
             </el-table-column>
-            <el-table-column :label="$t('storefront.theme')" width="200">
+            <el-table-column
+              :label="$t('storefront.theme')"
+              width="200"
+            >
               <template #default="{ row }">
                 {{ row.theme_name }}
               </template>
             </el-table-column>
-            <el-table-column :label="$t('storefront.user')" width="150">
+            <el-table-column
+              :label="$t('storefront.user')"
+              width="150"
+            >
               <template #default="{ row }">
                 {{ row.user_name }}
               </template>
@@ -146,7 +248,10 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!auditLoading && auditLogs.length === 0" :description="$t('storefront.noAuditLogs')" />
+          <el-empty
+            v-if="!auditLoading && auditLogs.length === 0"
+            :description="$t('storefront.noAuditLogs')"
+          />
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -158,7 +263,10 @@
       width="900px"
       destroy-on-close
     >
-      <div class="preview-dialog-content" v-if="previewThemeData">
+      <div
+        v-if="previewThemeData"
+        class="preview-dialog-content"
+      >
         <el-image
           :src="previewThemeData.preview_image || previewThemeData.thumbnail"
           fit="contain"
@@ -166,7 +274,9 @@
         >
           <template #error>
             <div class="image-placeholder large">
-              <el-icon size="64"><Picture /></el-icon>
+              <el-icon size="64">
+                <Picture />
+              </el-icon>
               <span>{{ $t('storefront.noPreviewImage') }}</span>
             </div>
           </template>
@@ -179,12 +289,18 @@
               v-if="!previewThemeData.is_current"
               type="primary"
               size="large"
-              @click="applyTheme(previewThemeData.id)"
               :loading="switchLoading"
+              @click="applyTheme(previewThemeData.id)"
             >
               {{ $t('storefront.applyTheme') }}
             </el-button>
-            <el-tag v-else type="success" size="large">{{ $t('storefront.currentlyInUse') }}</el-tag>
+            <el-tag
+              v-else
+              type="success"
+              size="large"
+            >
+              {{ $t('storefront.currentlyInUse') }}
+            </el-tag>
           </div>
         </div>
       </div>

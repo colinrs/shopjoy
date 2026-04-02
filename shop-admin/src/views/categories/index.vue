@@ -1,17 +1,28 @@
 <template>
   <div class="categories-page">
     <!-- Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
           <h2>{{ $t('categories.title') }}</h2>
         </div>
         <div class="header-right">
-          <el-button type="info" @click="handleSaveSort" :loading="sortLoading" :disabled="!hasSortChanges">
+          <el-button
+            type="info"
+            :loading="sortLoading"
+            :disabled="!hasSortChanges"
+            @click="handleSaveSort"
+          >
             <el-icon><Rank /></el-icon>
             {{ $t('categories.saveSort') }}
           </el-button>
-          <el-button type="primary" @click="handleAddRoot">
+          <el-button
+            type="primary"
+            @click="handleAddRoot"
+          >
             <el-icon><Plus /></el-icon>{{ $t('categories.addTopCategory') }}
           </el-button>
         </div>
@@ -19,10 +30,13 @@
     </el-card>
 
     <!-- Category Tree Table -->
-    <el-card class="tree-card" shadow="never">
+    <el-card
+      class="tree-card"
+      shadow="never"
+    >
       <el-table
-        :data="categoryTree"
         v-loading="loading"
+        :data="categoryTree"
         row-key="id"
         border
         default-expand-all
@@ -30,7 +44,11 @@
         @cell-mouse-enter="handleMouseEnter"
         @cell-mouse-leave="handleMouseLeave"
       >
-        <el-table-column label="" width="50" align="center">
+        <el-table-column
+          label=""
+          width="50"
+          align="center"
+        >
           <template #default="{ row }">
             <div
               class="drag-handle"
@@ -45,27 +63,63 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="name" :label="$t('categories.name')" min-width="200" />
-        <el-table-column prop="code" :label="$t('categories.categoryCode')" width="120" />
-        <el-table-column prop="level" :label="$t('categories.level')" width="80" align="center">
+        <el-table-column
+          prop="name"
+          :label="$t('categories.name')"
+          min-width="200"
+        />
+        <el-table-column
+          prop="code"
+          :label="$t('categories.categoryCode')"
+          width="120"
+        />
+        <el-table-column
+          prop="level"
+          :label="$t('categories.level')"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag size="small">L{{ row.level }}</el-tag>
+            <el-tag size="small">
+              L{{ row.level }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="sort" :label="$t('categories.sort')" width="80" align="center">
+        <el-table-column
+          prop="sort"
+          :label="$t('categories.sort')"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
             <span v-if="!dragState.dragging || dragState.sourceId !== row.id">{{ row.sort }}</span>
-            <span v-else class="sort-placeholder">-</span>
+            <span
+              v-else
+              class="sort-placeholder"
+            >-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="product_count" :label="$t('categories.productCount')" width="100" align="center">
+        <el-table-column
+          prop="product_count"
+          :label="$t('categories.productCount')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="row.product_count > 0 ? 'success' : 'info'" size="small">
+            <el-tag
+              :type="row.product_count > 0 ? 'success' : 'info'"
+              size="small"
+            >
               {{ row.product_count || 0 }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('categories.status')" width="100" align="center">
+        <el-table-column
+          prop="status"
+          :label="$t('categories.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -75,18 +129,43 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="320" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="320"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleViewDetail(row)"
+            >
               {{ $t('categories.viewDetail') }}
             </el-button>
-            <el-button type="primary" link size="small" @click="handleAddChild(row)" v-if="row.level < 3">
+            <el-button
+              v-if="row.level < 3"
+              type="primary"
+              link
+              size="small"
+              @click="handleAddChild(row)"
+            >
               {{ $t('categories.addChildCategory') }}
             </el-button>
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ $t('categories.edit') }}
             </el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row)">
+            <el-button
+              type="danger"
+              link
+              size="small"
+              @click="handleDelete(row)"
+            >
               {{ $t('categories.delete') }}
             </el-button>
           </template>
@@ -101,32 +180,72 @@
       width="600px"
       destroy-on-close
     >
-      <el-form :model="categoryForm" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item :label="$t('categories.categoryName')" prop="name">
-          <el-input v-model="categoryForm.name" :placeholder="$t('categories.enterCategoryName')" />
+      <el-form
+        ref="formRef"
+        :model="categoryForm"
+        label-width="100px"
+        :rules="formRules"
+      >
+        <el-form-item
+          :label="$t('categories.categoryName')"
+          prop="name"
+        >
+          <el-input
+            v-model="categoryForm.name"
+            :placeholder="$t('categories.enterCategoryName')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.categoryCode')">
-          <el-input v-model="categoryForm.code" :placeholder="$t('categories.enterCategoryCode')" />
+          <el-input
+            v-model="categoryForm.code"
+            :placeholder="$t('categories.enterCategoryCode')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.sort')">
-          <el-input-number v-model="categoryForm.sort" :min="0" style="width: 100%" />
+          <el-input-number
+            v-model="categoryForm.sort"
+            :min="0"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.iconUrl')">
-          <el-input v-model="categoryForm.icon" :placeholder="$t('categories.enterIconUrl')" />
+          <el-input
+            v-model="categoryForm.icon"
+            :placeholder="$t('categories.enterIconUrl')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.imageUrl')">
-          <el-input v-model="categoryForm.image" :placeholder="$t('categories.enterImageUrl')" />
+          <el-input
+            v-model="categoryForm.image"
+            :placeholder="$t('categories.enterImageUrl')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.seoTitle')">
-          <el-input v-model="categoryForm.seo_title" :placeholder="$t('categories.enterSeoTitle')" />
+          <el-input
+            v-model="categoryForm.seo_title"
+            :placeholder="$t('categories.enterSeoTitle')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.seoDescription')">
-          <el-input v-model="categoryForm.seo_description" type="textarea" rows="2" :placeholder="$t('categories.enterSeoDescription')" />
+          <el-input
+            v-model="categoryForm.seo_description"
+            type="textarea"
+            rows="2"
+            :placeholder="$t('categories.enterSeoDescription')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">{{ $t('categories.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('categories.save') }}</el-button>
+        <el-button @click="dialogVisible = false">
+          {{ $t('categories.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          {{ $t('categories.save') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -393,11 +512,11 @@ const getSiblings = (nodes: CategoryTree[], parentId: number): CategoryTree[] =>
   return []
 }
 
-const handleMouseEnter = (_row: CategoryTree) => {
+const handleMouseEnter = () => {
   // Could be used for visual feedback
 }
 
-const handleMouseLeave = (_row: CategoryTree) => {
+const handleMouseLeave = () => {
   // Could be used for visual feedback
 }
 

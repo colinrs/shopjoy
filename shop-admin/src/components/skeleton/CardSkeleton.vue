@@ -1,46 +1,79 @@
 <template>
-  <div class="skeleton-card" :class="{ 'skeleton-card--interactive': interactive }">
+  <div
+    class="skeleton-card"
+    :class="{ 'skeleton-card--interactive': interactive }"
+  >
     <!-- Header -->
-    <div v-if="showHeader" class="skeleton-card-header">
-      <div class="skeleton-title"></div>
-      <div v-if="showAction" class="skeleton-action"></div>
+    <div
+      v-if="showHeader"
+      class="skeleton-card-header"
+    >
+      <div class="skeleton-title" />
+      <div
+        v-if="showAction"
+        class="skeleton-action"
+      />
     </div>
 
     <!-- Content -->
     <div class="skeleton-card-content">
       <slot>
         <!-- Default content: stats layout -->
-        <div v-if="variant === 'stats'" class="skeleton-stats">
-          <div class="skeleton-stat-item" v-for="i in statsCount" :key="i">
-            <div class="skeleton-stat-value"></div>
-            <div class="skeleton-stat-label"></div>
+        <div
+          v-if="variant === 'stats'"
+          class="skeleton-stats"
+        >
+          <div
+            v-for="i in statsCount"
+            :key="i"
+            class="skeleton-stat-item"
+          >
+            <div class="skeleton-stat-value" />
+            <div class="skeleton-stat-label" />
           </div>
         </div>
 
         <!-- List layout -->
-        <div v-else-if="variant === 'list'" class="skeleton-list">
-          <div class="skeleton-list-item" v-for="i in listCount" :key="i">
-            <div class="skeleton-avatar"></div>
+        <div
+          v-else-if="variant === 'list'"
+          class="skeleton-list"
+        >
+          <div
+            v-for="i in listCount"
+            :key="i"
+            class="skeleton-list-item"
+          >
+            <div class="skeleton-avatar" />
             <div class="skeleton-list-content">
-              <div class="skeleton-text skeleton-text--lg"></div>
-              <div class="skeleton-text skeleton-text--sm"></div>
+              <div class="skeleton-text skeleton-text--lg" />
+              <div class="skeleton-text skeleton-text--sm" />
             </div>
           </div>
         </div>
 
         <!-- Form layout -->
-        <div v-else-if="variant === 'form'" class="skeleton-form">
-          <div class="skeleton-form-item" v-for="i in formCount" :key="i">
-            <div class="skeleton-label"></div>
-            <div class="skeleton-input"></div>
+        <div
+          v-else-if="variant === 'form'"
+          class="skeleton-form"
+        >
+          <div
+            v-for="i in formCount"
+            :key="i"
+            class="skeleton-form-item"
+          >
+            <div class="skeleton-label" />
+            <div class="skeleton-input" />
           </div>
         </div>
 
         <!-- Default: simple content -->
-        <div v-else class="skeleton-content-default">
-          <div class="skeleton-text"></div>
-          <div class="skeleton-text skeleton-text--md"></div>
-          <div class="skeleton-text skeleton-text--sm"></div>
+        <div
+          v-else
+          class="skeleton-content-default"
+        >
+          <div class="skeleton-text" />
+          <div class="skeleton-text skeleton-text--md" />
+          <div class="skeleton-text skeleton-text--sm" />
         </div>
       </slot>
     </div>

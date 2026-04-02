@@ -1,8 +1,14 @@
 <template>
   <div class="redeem-rules-page">
     <!-- Stats Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.totalRules')"
           :value="ruleStats.total"
@@ -10,7 +16,10 @@
           icon-color="primary"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.activated')"
           :value="ruleStats.active"
@@ -18,7 +27,10 @@
           icon-color="success"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.redeemedTimes')"
           :value="ruleStats.total_redeemed"
@@ -29,7 +41,10 @@
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -44,13 +59,31 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="searchParams.status" :placeholder="$t('points.statusFilter')" clearable class="filter-select" @change="loadRules">
-            <el-option :label="$t('points.all')" value="" />
-            <el-option :label="$t('points.active')" value="active" />
-            <el-option :label="$t('points.inactive')" value="inactive" />
+          <el-select
+            v-model="searchParams.status"
+            :placeholder="$t('points.statusFilter')"
+            clearable
+            class="filter-select"
+            @change="loadRules"
+          >
+            <el-option
+              :label="$t('points.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('points.active')"
+              value="active"
+            />
+            <el-option
+              :label="$t('points.inactive')"
+              value="inactive"
+            />
           </el-select>
         </div>
-        <el-button type="primary" @click="handleCreate">
+        <el-button
+          type="primary"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           {{ $t('points.createRule') }}
         </el-button>
@@ -58,32 +91,60 @@
     </el-card>
 
     <!-- Rules Table -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="ruleList" v-loading="loading" stripe>
-        <el-table-column :label="$t('points.ruleName')" min-width="250">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="ruleList"
+        stripe
+      >
+        <el-table-column
+          :label="$t('points.ruleName')"
+          min-width="250"
+        >
           <template #default="{ row }">
             <div class="rule-cell">
               <div class="rule-icon">
-                <el-icon size="24"><Ticket /></el-icon>
+                <el-icon size="24">
+                  <Ticket />
+                </el-icon>
               </div>
               <div class="rule-details">
-                <p class="rule-name">{{ row.name }}</p>
-                <p class="rule-desc">{{ row.description || $t('points.noDescription') }}</p>
+                <p class="rule-name">
+                  {{ row.name }}
+                </p>
+                <p class="rule-desc">
+                  {{ row.description || $t('points.noDescription') }}
+                </p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.coupon')" width="150" align="center">
+        <el-table-column
+          :label="$t('points.coupon')"
+          width="150"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="coupon-name">{{ row.coupon_name }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.pointsRequired')" width="100" align="center">
+        <el-table-column
+          :label="$t('points.pointsRequired')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="points-value">{{ row.points_required.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.stock')" width="180" align="center">
+        <el-table-column
+          :label="$t('points.stock')"
+          width="180"
+          align="center"
+        >
           <template #default="{ row }">
             <div class="stock-cell">
               <el-progress
@@ -98,22 +159,46 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.limitPerUser')" width="100" align="center">
+        <el-table-column
+          :label="$t('points.limitPerUser')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span v-if="row.per_user_limit > 0">{{ row.per_user_limit }}{{ $t('points.timesUnit') }}</span>
-            <span v-else class="no-limit">{{ $t('points.unlimitedText') }}</span>
+            <span
+              v-else
+              class="no-limit"
+            >{{ $t('points.unlimitedText') }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('points.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)" effect="light" size="small">
+            <el-tag
+              :type="getStatusTagType(row.status)"
+              effect="light"
+              size="small"
+            >
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.actions')" width="200" fixed="right">
+        <el-table-column
+          :label="$t('points.actions')"
+          width="200"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ $t('points.edit') }}
             </el-button>
             <el-button

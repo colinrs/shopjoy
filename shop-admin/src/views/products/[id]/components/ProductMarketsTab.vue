@@ -1,15 +1,27 @@
 <template>
   <div class="markets-section">
     <div class="section-header">
-      <h3 class="section-title">{{ $t('products.marketAvailability') }}</h3>
-      <el-button type="primary" @click="handleShowPushToMarketDialog">
+      <h3 class="section-title">
+        {{ $t('products.marketAvailability') }}
+      </h3>
+      <el-button
+        type="primary"
+        @click="handleShowPushToMarketDialog"
+      >
         <el-icon><Plus /></el-icon>
         {{ $t('products.pushToMarket') }}
       </el-button>
     </div>
 
-    <el-table :data="localProductMarkets" v-loading="loading" stripe>
-      <el-table-column :label="$t('products.market')" min-width="150">
+    <el-table
+      v-loading="loading"
+      :data="localProductMarkets"
+      stripe
+    >
+      <el-table-column
+        :label="$t('products.market')"
+        min-width="150"
+      >
         <template #default="{ row }">
           <div class="market-cell">
             <span class="market-code">{{ row.market_code }}</span>
@@ -17,7 +29,11 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.status')" width="120" align="center">
+      <el-table-column
+        :label="$t('common.status')"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
           <el-switch
             v-model="row.is_enabled"
@@ -25,7 +41,11 @@
           />
         </template>
       </el-table-column>
-      <el-table-column :label="$t('products.price')" width="180" align="right">
+      <el-table-column
+        :label="$t('products.price')"
+        width="180"
+        align="right"
+      >
         <template #default="{ row }">
           <div class="price-cell">
             <el-input-number
@@ -41,7 +61,11 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('products.compareAtPrice')" width="180" align="right">
+      <el-table-column
+        :label="$t('products.compareAtPrice')"
+        width="180"
+        align="right"
+      >
         <template #default="{ row }">
           <div class="price-cell">
             <el-input-number
@@ -57,7 +81,11 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('products.stockAlert')" width="120" align="center">
+      <el-table-column
+        :label="$t('products.stockAlert')"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
           <el-input-number
             v-model="row.stock_alert_threshold"
@@ -69,13 +97,24 @@
           />
         </template>
       </el-table-column>
-      <el-table-column :label="$t('products.publishedAt')" width="120" align="center">
+      <el-table-column
+        :label="$t('products.publishedAt')"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
           <span v-if="row.published_at">{{ formatDate(row.published_at) }}</span>
-          <span v-else class="text-muted">{{ $t('products.notPublished') }}</span>
+          <span
+            v-else
+            class="text-muted"
+          >{{ $t('products.notPublished') }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.actions')" width="100" align="center">
+      <el-table-column
+        :label="$t('common.actions')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
           <el-button
             type="danger"
@@ -89,9 +128,17 @@
       </el-table-column>
     </el-table>
 
-    <div v-if="localProductMarkets.length === 0 && !loading" class="empty-markets">
+    <div
+      v-if="localProductMarkets.length === 0 && !loading"
+      class="empty-markets"
+    >
       <el-empty :description="$t('products.notOnAnyMarket')">
-        <el-button type="primary" @click="handleShowPushToMarketDialog">{{ $t('products.pushToMarket') }}</el-button>
+        <el-button
+          type="primary"
+          @click="handleShowPushToMarketDialog"
+        >
+          {{ $t('products.pushToMarket') }}
+        </el-button>
       </el-empty>
     </div>
   </div>

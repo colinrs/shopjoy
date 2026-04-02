@@ -1,14 +1,35 @@
 <template>
   <div class="redemptions-page">
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
-          <el-select v-model="searchParams.status" :placeholder="$t('points.exchangeStatus')" clearable class="filter-select" @change="loadRedemptions">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('points.pending')" value="pending" />
-            <el-option :label="$t('points.completed')" value="completed" />
-            <el-option :label="$t('points.cancelled')" value="cancelled" />
+          <el-select
+            v-model="searchParams.status"
+            :placeholder="$t('points.exchangeStatus')"
+            clearable
+            class="filter-select"
+            @change="loadRedemptions"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('points.pending')"
+              value="pending"
+            />
+            <el-option
+              :label="$t('points.completed')"
+              value="completed"
+            />
+            <el-option
+              :label="$t('points.cancelled')"
+              value="cancelled"
+            />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -25,21 +46,40 @@
     </el-card>
 
     <!-- Redemptions Table -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="redemptionList" v-loading="loading" stripe>
-        <el-table-column prop="id" :label="$t('points.id')" width="80" align="center">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="redemptionList"
+        stripe
+      >
+        <el-table-column
+          prop="id"
+          :label="$t('points.id')"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="id-text">#{{ row.id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('points.user')" width="100" align="center">
+        <el-table-column
+          :label="$t('points.user')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="user-id">U{{ row.user_id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('points.coupon')" min-width="150">
+        <el-table-column
+          :label="$t('points.coupon')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="coupon-cell">
               <div class="coupon-icon">
@@ -50,36 +90,69 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('points.pointsUsed')" width="100" align="right">
+        <el-table-column
+          :label="$t('points.pointsUsed')"
+          width="100"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="points-value">{{ row.points_used.toLocaleString() }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('common.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('common.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)" effect="light" size="small">
+            <el-tag
+              :type="getStatusTagType(row.status)"
+              effect="light"
+              size="small"
+            >
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('points.exchangeTime')" width="180">
+        <el-table-column
+          :label="$t('points.exchangeTime')"
+          width="180"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('points.completionTime')" width="180">
+        <el-table-column
+          :label="$t('points.completionTime')"
+          width="180"
+        >
           <template #default="{ row }">
-            <span v-if="row.completed_at" class="time-text">{{ formatDateTime(row.completed_at) }}</span>
-            <span v-else class="no-data">-</span>
+            <span
+              v-if="row.completed_at"
+              class="time-text"
+            >{{ formatDateTime(row.completed_at) }}</span>
+            <span
+              v-else
+              class="no-data"
+            >-</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="100"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewDetail(row)"
+            >
               {{ $t('common.detail') }}
             </el-button>
           </template>
@@ -95,8 +168,15 @@
     </el-card>
 
     <!-- Detail Dialog -->
-    <el-dialog v-model="detailDialogVisible" :title="$t('points.exchangeDetail')" width="500px">
-      <div v-if="currentRedemption" class="detail-content">
+    <el-dialog
+      v-model="detailDialogVisible"
+      :title="$t('points.exchangeDetail')"
+      width="500px"
+    >
+      <div
+        v-if="currentRedemption"
+        class="detail-content"
+      >
         <div class="detail-row">
           <span class="detail-label">{{ $t('points.exchangeId') }}:</span>
           <span class="detail-value">#{{ currentRedemption.id }}</span>
@@ -115,7 +195,10 @@
         </div>
         <div class="detail-row">
           <span class="detail-label">{{ $t('common.status') }}:</span>
-          <el-tag :type="getStatusTagType(currentRedemption.status)" size="small">
+          <el-tag
+            :type="getStatusTagType(currentRedemption.status)"
+            size="small"
+          >
             {{ getStatusText(currentRedemption.status) }}
           </el-tag>
         </div>
@@ -123,17 +206,25 @@
           <span class="detail-label">{{ $t('points.exchangeTime') }}:</span>
           <span class="detail-value">{{ formatDateTime(currentRedemption.created_at) }}</span>
         </div>
-        <div v-if="currentRedemption.completed_at" class="detail-row">
+        <div
+          v-if="currentRedemption.completed_at"
+          class="detail-row"
+        >
           <span class="detail-label">{{ $t('points.completionTime') }}:</span>
           <span class="detail-value">{{ formatDateTime(currentRedemption.completed_at) }}</span>
         </div>
-        <div v-if="currentRedemption.user_coupon_id" class="detail-row">
+        <div
+          v-if="currentRedemption.user_coupon_id"
+          class="detail-row"
+        >
           <span class="detail-label">{{ $t('points.userCouponId') }}:</span>
           <span class="detail-value">{{ currentRedemption.user_coupon_id }}</span>
         </div>
       </div>
       <template #footer>
-        <el-button @click="detailDialogVisible = false">{{ $t('common.close') }}</el-button>
+        <el-button @click="detailDialogVisible = false">
+          {{ $t('common.close') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

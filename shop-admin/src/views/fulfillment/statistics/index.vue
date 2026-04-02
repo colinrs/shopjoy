@@ -3,14 +3,28 @@
     <!-- Page Header -->
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">{{ $t('fulfillment.afterSalesStatistics') }}</h1>
-        <p class="page-subtitle">{{ $t('fulfillment.refundAnalytics') }}</p>
+        <h1 class="page-title">
+          {{ $t('fulfillment.afterSalesStatistics') }}
+        </h1>
+        <p class="page-subtitle">
+          {{ $t('fulfillment.refundAnalytics') }}
+        </p>
       </div>
       <div class="header-right">
-        <el-radio-group v-model="timeRange" size="default" @change="loadData">
-          <el-radio-button label="7">{{ $t('payments.period7d') }}</el-radio-button>
-          <el-radio-button label="30">{{ $t('payments.period30d') }}</el-radio-button>
-          <el-radio-button label="90">{{ $t('payments.period90d') }}</el-radio-button>
+        <el-radio-group
+          v-model="timeRange"
+          size="default"
+          @change="loadData"
+        >
+          <el-radio-button label="7">
+            {{ $t('payments.period7d') }}
+          </el-radio-button>
+          <el-radio-button label="30">
+            {{ $t('payments.period30d') }}
+          </el-radio-button>
+          <el-radio-button label="90">
+            {{ $t('payments.period90d') }}
+          </el-radio-button>
         </el-radio-group>
         <el-button @click="handleExport">
           <el-icon><Download /></el-icon>{{ $t('fulfillment.exportReport') }}
@@ -19,16 +33,29 @@
     </div>
 
     <!-- Overview Stats -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card refund-rate">
           <div class="stat-icon">
             <el-icon><RefreshRight /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('fulfillment.refundRate') }}</p>
-            <p class="stat-value">{{ parseFloat(stats.refund_rate).toFixed(1) }}%</p>
-            <p class="stat-change" :class="refundRateChange >= 0 ? 'negative' : 'positive'">
+            <p class="stat-label">
+              {{ $t('fulfillment.refundRate') }}
+            </p>
+            <p class="stat-value">
+              {{ parseFloat(stats.refund_rate).toFixed(1) }}%
+            </p>
+            <p
+              class="stat-change"
+              :class="refundRateChange >= 0 ? 'negative' : 'positive'"
+            >
               <el-icon>
                 <ArrowUp v-if="refundRateChange >= 0" />
                 <ArrowDown v-else />
@@ -38,49 +65,85 @@
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card total-refunds">
           <div class="stat-icon">
             <el-icon><Money /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('fulfillment.totalRefunds') }}</p>
-            <p class="stat-value">{{ stats.total_refunds }}</p>
-            <p class="stat-amount">CNY {{ formatAmount(stats.refund_amount) }}</p>
+            <p class="stat-label">
+              {{ $t('fulfillment.totalRefunds') }}
+            </p>
+            <p class="stat-value">
+              {{ stats.total_refunds }}
+            </p>
+            <p class="stat-amount">
+              CNY {{ formatAmount(stats.refund_amount) }}
+            </p>
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card delivery-rate">
           <div class="stat-icon">
             <el-icon><Van /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('fulfillment.deliverySuccess') }}</p>
-            <p class="stat-value">{{ parseFloat(stats.delivery_success_rate).toFixed(1) }}%</p>
-            <p class="stat-detail">{{ stats.total_shipments }} {{ $t('fulfillment.totalShipments') }}</p>
+            <p class="stat-label">
+              {{ $t('fulfillment.deliverySuccess') }}
+            </p>
+            <p class="stat-value">
+              {{ parseFloat(stats.delivery_success_rate).toFixed(1) }}%
+            </p>
+            <p class="stat-detail">
+              {{ stats.total_shipments }} {{ $t('fulfillment.totalShipments') }}
+            </p>
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card pending">
           <div class="stat-icon">
             <el-icon><Clock /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('fulfillment.pendingRefunds') }}</p>
-            <p class="stat-value highlight">{{ stats.pending_refunds }}</p>
-            <p class="stat-detail">{{ $t('fulfillment.awaitingReview') }}</p>
+            <p class="stat-label">
+              {{ $t('fulfillment.pendingRefunds') }}
+            </p>
+            <p class="stat-value highlight">
+              {{ stats.pending_refunds }}
+            </p>
+            <p class="stat-detail">
+              {{ $t('fulfillment.awaitingReview') }}
+            </p>
           </div>
         </div>
       </el-col>
     </el-row>
 
     <!-- Charts Row -->
-    <el-row :gutter="20" class="charts-row">
+    <el-row
+      :gutter="20"
+      class="charts-row"
+    >
       <!-- Refund Rate Trend -->
-      <el-col :xs="24" :lg="16">
-        <el-card class="chart-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="16"
+      >
+        <el-card
+          class="chart-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -89,13 +152,23 @@
               </span>
             </div>
           </template>
-          <div ref="trendChartRef" class="chart-container" v-loading="chartLoading"></div>
+          <div
+            ref="trendChartRef"
+            v-loading="chartLoading"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- Refund Reasons Pie -->
-      <el-col :xs="24" :lg="8">
-        <el-card class="chart-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
+        <el-card
+          class="chart-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -104,53 +177,106 @@
               </span>
             </div>
           </template>
-          <div ref="reasonChartRef" class="chart-container pie-chart" v-loading="chartLoading"></div>
+          <div
+            ref="reasonChartRef"
+            v-loading="chartLoading"
+            class="chart-container pie-chart"
+          />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- Tables Row -->
-    <el-row :gutter="20" class="tables-row">
+    <el-row
+      :gutter="20"
+      class="tables-row"
+    >
       <!-- Problem Products -->
-      <el-col :xs="24" :lg="12">
-        <el-card class="table-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
+        <el-card
+          class="table-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Warning /></el-icon>
                 {{ $t('fulfillment.problemProducts') }}
-                <el-tag type="danger" size="small" effect="plain">{{ $t('fulfillment.highRefundRate') }}</el-tag>
+                <el-tag
+                  type="danger"
+                  size="small"
+                  effect="plain"
+                >{{ $t('fulfillment.highRefundRate') }}</el-tag>
               </span>
-              <el-button type="primary" link>{{ $t('common.viewAll') }}</el-button>
+              <el-button
+                type="primary"
+                link
+              >
+                {{ $t('common.viewAll') }}
+              </el-button>
             </div>
           </template>
-          <el-table :data="problemProducts" stripe style="width: 100%">
-            <el-table-column :label="$t('fulfillment.product')" min-width="180">
+          <el-table
+            :data="problemProducts"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column
+              :label="$t('fulfillment.product')"
+              min-width="180"
+            >
               <template #default="{ row }">
                 <div class="product-cell">
-                  <el-avatar :size="40" :src="row.image" shape="square" class="product-avatar">
+                  <el-avatar
+                    :size="40"
+                    :src="row.image"
+                    shape="square"
+                    class="product-avatar"
+                  >
                     <el-icon><Goods /></el-icon>
                   </el-avatar>
                   <div class="product-info">
-                    <p class="product-name">{{ row.product_name }}</p>
-                    <p class="product-id">ID: {{ row.product_id }}</p>
+                    <p class="product-name">
+                      {{ row.product_name }}
+                    </p>
+                    <p class="product-id">
+                      ID: {{ row.product_id }}
+                    </p>
                   </div>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.salesCount')" width="80" align="right">
+            <el-table-column
+              :label="$t('fulfillment.salesCount')"
+              width="80"
+              align="right"
+            >
               <template #default="{ row }">
                 <span class="sales-num">{{ row.total_sales }}</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.refundsCount')" width="80" align="right">
+            <el-table-column
+              :label="$t('fulfillment.refundsCount')"
+              width="80"
+              align="right"
+            >
               <template #default="{ row }">
                 <span class="refund-num">{{ row.refund_count }}</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.rateLabel')" width="90" align="center">
+            <el-table-column
+              :label="$t('fulfillment.rateLabel')"
+              width="90"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag :type="getRefundRateTagType(row.refund_rate)" size="small">
+                <el-tag
+                  :type="getRefundRateTagType(row.refund_rate)"
+                  size="small"
+                >
                   {{ row.refund_rate.toFixed(1) }}%
                 </el-tag>
               </template>
@@ -160,29 +286,55 @@
       </el-col>
 
       <!-- Carrier Performance -->
-      <el-col :xs="24" :lg="12">
-        <el-card class="table-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
+        <el-card
+          class="table-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Van /></el-icon>
                 {{ $t('fulfillment.carrierPerformance') }}
               </span>
-              <el-button type="primary" link>{{ $t('common.viewAll') }}</el-button>
+              <el-button
+                type="primary"
+                link
+              >
+                {{ $t('common.viewAll') }}
+              </el-button>
             </div>
           </template>
-          <el-table :data="carrierPerformance" stripe style="width: 100%">
-            <el-table-column :label="$t('fulfillment.carrier')" min-width="120">
+          <el-table
+            :data="carrierPerformance"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column
+              :label="$t('fulfillment.carrier')"
+              min-width="120"
+            >
               <template #default="{ row }">
                 <span class="carrier-name">{{ row.carrier_name }}</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.shipmentCount')" width="100" align="right">
+            <el-table-column
+              :label="$t('fulfillment.shipmentCount')"
+              width="100"
+              align="right"
+            >
               <template #default="{ row }">
                 <span class="shipment-num">{{ row.total_shipments }}</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.successRate')" width="120" align="center">
+            <el-table-column
+              :label="$t('fulfillment.successRate')"
+              width="120"
+              align="center"
+            >
               <template #default="{ row }">
                 <el-progress
                   :percentage="row.delivery_success_rate"
@@ -191,7 +343,11 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column :label="$t('fulfillment.avgDeliveryTime')" width="100" align="center">
+            <el-table-column
+              :label="$t('fulfillment.avgDeliveryTime')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
                 <span class="time-text">{{ row.avg_delivery_time }}{{ $t('fulfillment.days') }}</span>
               </template>

@@ -1,7 +1,10 @@
 <template>
   <div class="transactions-page">
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -15,14 +18,41 @@
               <el-icon><User /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="searchParams.type" :placeholder="$t('points.filterType')" clearable class="filter-select" @change="loadTransactions">
-            <el-option :label="$t('points.all')" value="" />
-            <el-option :label="$t('points.earn')" value="EARN" />
-            <el-option :label="$t('points.redeem')" value="REDEEM" />
-            <el-option :label="$t('points.adjust')" value="ADJUST" />
-            <el-option :label="$t('points.expire')" value="EXPIRE" />
-            <el-option :label="$t('points.freeze')" value="FREEZE" />
-            <el-option :label="$t('points.unfreeze')" value="UNFREEZE" />
+          <el-select
+            v-model="searchParams.type"
+            :placeholder="$t('points.filterType')"
+            clearable
+            class="filter-select"
+            @change="loadTransactions"
+          >
+            <el-option
+              :label="$t('points.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('points.earn')"
+              value="EARN"
+            />
+            <el-option
+              :label="$t('points.redeem')"
+              value="REDEEM"
+            />
+            <el-option
+              :label="$t('points.adjust')"
+              value="ADJUST"
+            />
+            <el-option
+              :label="$t('points.expire')"
+              value="EXPIRE"
+            />
+            <el-option
+              :label="$t('points.freeze')"
+              value="FREEZE"
+            />
+            <el-option
+              :label="$t('points.unfreeze')"
+              value="UNFREEZE"
+            />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -43,23 +73,43 @@
     </el-card>
 
     <!-- Stats Row -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="8">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="8"
+      >
         <div class="stat-item earned">
-          <p class="stat-value">{{ transactionStats.total_earned.toLocaleString() }}</p>
-          <p class="stat-label">{{ $t('points.totalEarned') }}</p>
+          <p class="stat-value">
+            {{ transactionStats.total_earned.toLocaleString() }}
+          </p>
+          <p class="stat-label">
+            {{ $t('points.totalEarned') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="8">
+      <el-col
+        :xs="12"
+        :sm="8"
+      >
         <div class="stat-item redeemed">
-          <p class="stat-value">{{ transactionStats.total_redeemed.toLocaleString() }}</p>
-          <p class="stat-label">{{ $t('points.totalRedeemed') }}</p>
+          <p class="stat-value">
+            {{ transactionStats.total_redeemed.toLocaleString() }}
+          </p>
+          <p class="stat-label">
+            {{ $t('points.totalRedeemed') }}
+          </p>
         </div>
       </el-col>
     </el-row>
 
     <!-- Transactions Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <TransactionTable
         :transactions="transactionList"
         :loading="loading"

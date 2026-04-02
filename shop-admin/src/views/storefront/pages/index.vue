@@ -1,8 +1,14 @@
 <template>
   <div class="pages-page">
-    <page-header :title="$t('storefront.pageManagement')" :subtitle="$t('storefront.manageAllPages')">
+    <page-header
+      :title="$t('storefront.pageManagement')"
+      :subtitle="$t('storefront.manageAllPages')"
+    >
       <template #extra>
-        <el-button type="primary" @click="openCreateDialog">
+        <el-button
+          type="primary"
+          @click="openCreateDialog"
+        >
           <el-icon><Plus /></el-icon>
           {{ $t('storefront.createPage') }}
         </el-button>
@@ -10,50 +16,99 @@
     </page-header>
 
     <!-- Pages Table -->
-    <el-card shadow="hover" class="pages-card">
-      <el-table :data="pages" v-loading="loading" style="width: 100%">
-        <el-table-column prop="name" :label="$t('storefront.pageName')" min-width="150">
+    <el-card
+      shadow="hover"
+      class="pages-card"
+    >
+      <el-table
+        v-loading="loading"
+        :data="pages"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="name"
+          :label="$t('storefront.pageName')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="page-name">
-              <el-icon class="page-icon" :class="row.page_type">
+              <el-icon
+                class="page-icon"
+                :class="row.page_type"
+              >
                 <component :is="getPageIcon(row.page_type)" />
               </el-icon>
               <span>{{ row.name }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="page_type" :label="$t('storefront.pageType')" width="120">
+        <el-table-column
+          prop="page_type"
+          :label="$t('storefront.pageType')"
+          width="120"
+        >
           <template #default="{ row }">
-            <el-tag size="small" :type="getPageTypeTag(row.page_type)">
+            <el-tag
+              size="small"
+              :type="getPageTypeTag(row.page_type)"
+            >
               {{ getPageTypeName(row.page_type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="slug" :label="$t('storefront.urlPath')" width="150">
+        <el-table-column
+          prop="slug"
+          :label="$t('storefront.urlPath')"
+          width="150"
+        >
           <template #default="{ row }">
             <code class="slug-code">/{{ row.slug }}</code>
           </template>
         </el-table-column>
-        <el-table-column prop="is_published" :label="$t('storefront.status')" width="100">
+        <el-table-column
+          prop="is_published"
+          :label="$t('storefront.status')"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag :type="row.is_published ? 'success' : 'info'" effect="light" size="small">
+            <el-tag
+              :type="row.is_published ? 'success' : 'info'"
+              effect="light"
+              size="small"
+            >
               {{ row.is_published ? $t('storefront.published') : $t('storefront.draft') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="version" :label="$t('storefront.version')" width="80">
+        <el-table-column
+          prop="version"
+          :label="$t('storefront.version')"
+          width="80"
+        >
           <template #default="{ row }">
             <el-tooltip :content="$t('storefront.viewVersionHistory')">
-              <el-button text type="primary" size="small" @click="showVersions(row)">
+              <el-button
+                text
+                type="primary"
+                size="small"
+                @click="showVersions(row)"
+              >
                 v{{ row.version }}
               </el-button>
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('storefront.actions')" width="260" fixed="right">
+        <el-table-column
+          :label="$t('storefront.actions')"
+          width="260"
+          fixed="right"
+        >
           <template #default="{ row }">
             <el-button-group>
-              <el-button size="small" @click="editPage(row)">
+              <el-button
+                size="small"
+                @click="editPage(row)"
+              >
                 <el-icon><Edit /></el-icon>
                 {{ $t('storefront.edit') }}
               </el-button>
@@ -61,8 +116,8 @@
                 v-if="!row.is_published"
                 size="small"
                 type="success"
-                @click="handlePublish(row)"
                 :loading="row.publishing"
+                @click="handlePublish(row)"
               >
                 {{ $t('storefront.publish') }}
               </el-button>
@@ -70,12 +125,15 @@
                 v-else
                 size="small"
                 type="warning"
-                @click="handleUnpublish(row)"
                 :loading="row.unpublishing"
+                @click="handleUnpublish(row)"
               >
                 {{ $t('storefront.unpublish') }}
               </el-button>
-              <el-button size="small" @click="previewPage(row)">
+              <el-button
+                size="small"
+                @click="previewPage(row)"
+              >
                 <el-icon><View /></el-icon>
               </el-button>
             </el-button-group>
@@ -97,7 +155,10 @@
         :rules="createFormRules"
         label-width="100px"
       >
-        <el-form-item :label="$t('storefront.pageName')" prop="name">
+        <el-form-item
+          :label="$t('storefront.pageName')"
+          prop="name"
+        >
           <el-input
             v-model="createForm.name"
             :placeholder="$t('storefront.pageNamePlaceholder')"
@@ -105,28 +166,62 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item :label="$t('storefront.urlPath')" prop="slug">
+        <el-form-item
+          :label="$t('storefront.urlPath')"
+          prop="slug"
+        >
           <el-input
             v-model="createForm.slug"
             :placeholder="$t('storefront.slugPlaceholder')"
             maxlength="200"
           >
-            <template #prepend>/</template>
+            <template #prepend>
+              /
+            </template>
           </el-input>
-          <div class="form-tip">{{ $t('storefront.slugTip') }}</div>
+          <div class="form-tip">
+            {{ $t('storefront.slugTip') }}
+          </div>
         </el-form-item>
-        <el-form-item :label="$t('storefront.pageType')" prop="page_type">
-          <el-select v-model="createForm.page_type" :placeholder="$t('storefront.selectPageType')" style="width: 100%">
-            <el-option :label="$t('storefront.homePage')" value="home" />
-            <el-option :label="$t('storefront.productPage')" value="product" />
-            <el-option :label="$t('storefront.collectionPage')" value="collection" />
-            <el-option :label="$t('storefront.customPage')" value="custom" />
+        <el-form-item
+          :label="$t('storefront.pageType')"
+          prop="page_type"
+        >
+          <el-select
+            v-model="createForm.page_type"
+            :placeholder="$t('storefront.selectPageType')"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('storefront.homePage')"
+              value="home"
+            />
+            <el-option
+              :label="$t('storefront.productPage')"
+              value="product"
+            />
+            <el-option
+              :label="$t('storefront.collectionPage')"
+              value="collection"
+            />
+            <el-option
+              :label="$t('storefront.customPage')"
+              value="custom"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="creating" @click="handleCreate">{{ $t('common.confirm') }}</el-button>
+        <el-button @click="createDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="creating"
+          @click="handleCreate"
+        >
+          {{ $t('common.confirm') }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -137,13 +232,21 @@
       size="450px"
       :with-header="true"
     >
-      <div class="version-drawer-content" v-if="currentPage">
+      <div
+        v-if="currentPage"
+        class="version-drawer-content"
+      >
         <div class="version-header">
           <span class="page-title">{{ currentPage.name }}</span>
-          <el-tag size="small">{{ $t('storefront.currentVersion') }}: v{{ currentPage.version }}</el-tag>
+          <el-tag size="small">
+            {{ $t('storefront.currentVersion') }}: v{{ currentPage.version }}
+          </el-tag>
         </div>
 
-        <div class="versions-list" v-loading="versionsLoading">
+        <div
+          v-loading="versionsLoading"
+          class="versions-list"
+        >
           <div
             v-for="ver in versions"
             :key="ver.id"
@@ -172,7 +275,13 @@
               >
                 {{ $t('storefront.restore') }}
               </el-button>
-              <el-tag v-else size="small" type="success">{{ $t('storefront.current') }}</el-tag>
+              <el-tag
+                v-else
+                size="small"
+                type="success"
+              >
+                {{ $t('storefront.current') }}
+              </el-tag>
             </div>
           </div>
         </div>
@@ -185,7 +294,10 @@
       :title="$t('storefront.versionDetail') + ' v' + selectedVersion?.version"
       width="800px"
     >
-      <div class="version-detail" v-if="versionDetail">
+      <div
+        v-if="versionDetail"
+        class="version-detail"
+      >
         <div class="detail-header">
           <span>{{ $t('storefront.createdTime') }}: {{ formatTime(versionDetail.version.created_at) }}</span>
         </div>
@@ -196,7 +308,9 @@
             class="block-item"
           >
             <div class="block-header">
-              <el-tag size="small">{{ block.block_type }}</el-tag>
+              <el-tag size="small">
+                {{ block.block_type }}
+              </el-tag>
             </div>
             <pre class="block-config">{{ JSON.stringify(block.block_config, null, 2) }}</pre>
           </div>
@@ -348,7 +462,7 @@ const generateSlug = (name: string): string => {
   return name
     .toLowerCase()
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\-]/g, '')
+    .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
 }

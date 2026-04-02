@@ -1,35 +1,81 @@
 <template>
   <div class="refunds-page">
     <!-- Statistics Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
-        <div class="stat-item pending" @click="handleStatusFilter('0')">
-          <p class="stat-number">{{ stats.pending }}</p>
-          <p class="stat-label">{{ $t('fulfillment.pendingRefundStatus') }}</p>
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <div
+          class="stat-item pending"
+          @click="handleStatusFilter('0')"
+        >
+          <p class="stat-number">
+            {{ stats.pending }}
+          </p>
+          <p class="stat-label">
+            {{ $t('fulfillment.pendingRefundStatus') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
-        <div class="stat-item approved" @click="handleStatusFilter('1')">
-          <p class="stat-number">{{ stats.approved }}</p>
-          <p class="stat-label">{{ $t('fulfillment.approvedRefundStatus') }}</p>
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <div
+          class="stat-item approved"
+          @click="handleStatusFilter('1')"
+        >
+          <p class="stat-number">
+            {{ stats.approved }}
+          </p>
+          <p class="stat-label">
+            {{ $t('fulfillment.approvedRefundStatus') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
-        <div class="stat-item rejected" @click="handleStatusFilter('2')">
-          <p class="stat-number">{{ stats.rejected }}</p>
-          <p class="stat-label">{{ $t('fulfillment.rejectedRefundStatus') }}</p>
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <div
+          class="stat-item rejected"
+          @click="handleStatusFilter('2')"
+        >
+          <p class="stat-number">
+            {{ stats.rejected }}
+          </p>
+          <p class="stat-label">
+            {{ $t('fulfillment.rejectedRefundStatus') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
-        <div class="stat-item completed" @click="handleStatusFilter('3')">
-          <p class="stat-number">{{ stats.completed }}</p>
-          <p class="stat-label">{{ $t('fulfillment.completedRefundStatus') }}</p>
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <div
+          class="stat-item completed"
+          @click="handleStatusFilter('3')"
+        >
+          <p class="stat-number">
+            {{ stats.completed }}
+          </p>
+          <p class="stat-label">
+            {{ $t('fulfillment.completedRefundStatus') }}
+          </p>
         </div>
       </el-col>
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -43,17 +89,53 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" :placeholder="$t('fulfillment.refundStatus')" clearable class="filter-select">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('fulfillment.pendingRefundStatus')" value="0" />
-            <el-option :label="$t('fulfillment.approvedRefundStatus')" value="1" />
-            <el-option :label="$t('fulfillment.rejectedRefundStatus')" value="2" />
-            <el-option :label="$t('fulfillment.completedRefundStatus')" value="3" />
-            <el-option :label="$t('fulfillment.cancelledRefundStatus')" value="4" />
+          <el-select
+            v-model="statusFilter"
+            :placeholder="$t('fulfillment.refundStatus')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('fulfillment.pendingRefundStatus')"
+              value="0"
+            />
+            <el-option
+              :label="$t('fulfillment.approvedRefundStatus')"
+              value="1"
+            />
+            <el-option
+              :label="$t('fulfillment.rejectedRefundStatus')"
+              value="2"
+            />
+            <el-option
+              :label="$t('fulfillment.completedRefundStatus')"
+              value="3"
+            />
+            <el-option
+              :label="$t('fulfillment.cancelledRefundStatus')"
+              value="4"
+            />
           </el-select>
-          <el-select v-model="reasonFilter" :placeholder="$t('fulfillment.reasonType')" clearable class="filter-select">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option v-for="reason in refundReasons" :key="reason.code" :label="reason.name" :value="reason.code" />
+          <el-select
+            v-model="reasonFilter"
+            :placeholder="$t('fulfillment.reasonType')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              v-for="reason in refundReasons"
+              :key="reason.code"
+              :label="reason.name"
+              :value="reason.code"
+            />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -69,7 +151,10 @@
           <el-button @click="handleExport">
             <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
-          <el-button type="primary" @click="handleRefresh">
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
@@ -87,7 +172,11 @@
         class="pending-alert"
       >
         <template #action>
-          <el-button type="warning" size="small" @click="handleStatusFilter('0')">
+          <el-button
+            type="warning"
+            size="small"
+            @click="handleStatusFilter('0')"
+          >
             {{ $t('fulfillment.reviewNow') }}
           </el-button>
         </template>
@@ -95,63 +184,130 @@
     </transition>
 
     <!-- Refunds Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <EmptyState
         v-if="refundList.length === 0 && !loading"
         :title="$t('fulfillment.noRefunds')"
         :description="$t('fulfillment.noRefundsDesc')"
       />
-      <el-table v-else :data="refundList" v-loading="loading" stripe>
-        <el-table-column prop="refund_no" :label="$t('fulfillment.refundNo')" min-width="150">
+      <el-table
+        v-else
+        v-loading="loading"
+        :data="refundList"
+        stripe
+      >
+        <el-table-column
+          prop="refund_no"
+          :label="$t('fulfillment.refundNo')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="refund-no-cell">
               <span class="refund-no">{{ row.refund_no }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" :label="$t('fulfillment.orderNo')" min-width="150">
+        <el-table-column
+          prop="order_no"
+          :label="$t('fulfillment.orderNo')"
+          min-width="150"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewOrder(row.order_id)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewOrder(row.order_id)"
+            >
               {{ row.order_no }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.buyer')" min-width="140">
+        <el-table-column
+          :label="$t('fulfillment.buyer')"
+          min-width="140"
+        >
           <template #default="{ row }">
             <div class="buyer-info">
-              <p class="buyer-name">{{ row.user_name }}</p>
-              <p class="buyer-phone">{{ row.user_phone }}</p>
+              <p class="buyer-name">
+                {{ row.user_name }}
+              </p>
+              <p class="buyer-phone">
+                {{ row.user_phone }}
+              </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.refundAmount')" width="120" align="right">
+        <el-table-column
+          :label="$t('fulfillment.refundAmount')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <div class="amount-cell">
-              <p class="refund-amount">{{ row.currency }} {{ row.amount }}</p>
+              <p class="refund-amount">
+                {{ row.currency }} {{ row.amount }}
+              </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.reason')" min-width="150">
+        <el-table-column
+          :label="$t('fulfillment.reason')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="reason-cell">
-              <el-tag size="small" effect="plain">{{ getReasonName(row.reason_type) }}</el-tag>
-              <p v-if="row.reason" class="reason-detail">{{ row.reason }}</p>
+              <el-tag
+                size="small"
+                effect="plain"
+              >
+                {{ getReasonName(row.reason_type) }}
+              </el-tag>
+              <p
+                v-if="row.reason"
+                class="reason-detail"
+              >
+                {{ row.reason }}
+              </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('common.status')" width="100" align="center">
+        <el-table-column
+          prop="status"
+          :label="$t('common.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <status-tag :status="row.status" :type-map="statusTypeMap" />
+            <status-tag
+              :status="row.status"
+              :type-map="statusTypeMap"
+            />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.appliedAt')" width="160">
+        <el-table-column
+          :label="$t('fulfillment.appliedAt')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="180"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewDetail(row)"
+            >
               {{ $t('fulfillment.detailsAction') }}
             </el-button>
             <el-button
@@ -191,9 +347,21 @@
     </el-card>
 
     <!-- Reject Dialog -->
-    <el-dialog v-model="rejectDialogVisible" :title="$t('fulfillment.rejectRefund')" width="500px">
-      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" label-width="100px">
-        <el-form-item :label="$t('fulfillment.rejectReason')" prop="reject_reason">
+    <el-dialog
+      v-model="rejectDialogVisible"
+      :title="$t('fulfillment.rejectRefund')"
+      width="500px"
+    >
+      <el-form
+        ref="rejectFormRef"
+        :model="rejectForm"
+        :rules="rejectRules"
+        label-width="100px"
+      >
+        <el-form-item
+          :label="$t('fulfillment.rejectReason')"
+          prop="reject_reason"
+        >
           <el-input
             v-model="rejectForm.reject_reason"
             type="textarea"
@@ -203,8 +371,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="rejectDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="danger" :loading="rejecting" @click="confirmReject">
+        <el-button @click="rejectDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="danger"
+          :loading="rejecting"
+          @click="confirmReject"
+        >
           {{ $t('fulfillment.confirmRejectAction') }}
         </el-button>
       </template>

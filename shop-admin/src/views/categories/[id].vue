@@ -1,17 +1,38 @@
 <template>
-  <div class="category-detail-page" v-loading="loading">
+  <div
+    v-loading="loading"
+    class="category-detail-page"
+  >
     <!-- Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
-          <el-button text @click="goBack">
+          <el-button
+            text
+            @click="goBack"
+          >
             <el-icon><ArrowLeft /></el-icon>
             {{ $t('common.back') }}
           </el-button>
           <el-divider direction="vertical" />
           <span class="page-title">{{ category?.name || t('categories.categoryDetail') }}</span>
-          <el-tag v-if="category?.status === 1" type="success" size="small">{{ $t('categories.enabled') }}</el-tag>
-          <el-tag v-else type="info" size="small">{{ $t('categories.disabled') }}</el-tag>
+          <el-tag
+            v-if="category?.status === 1"
+            type="success"
+            size="small"
+          >
+            {{ $t('categories.enabled') }}
+          </el-tag>
+          <el-tag
+            v-else
+            type="info"
+            size="small"
+          >
+            {{ $t('categories.disabled') }}
+          </el-tag>
         </div>
         <div class="header-right">
           <el-button @click="handleEdit">
@@ -25,13 +46,20 @@
     <!-- Category Info -->
     <el-row :gutter="20">
       <el-col :span="16">
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('categories.categoryInfo') }}</span>
             </div>
           </template>
-          <el-descriptions :column="2" border v-if="category">
+          <el-descriptions
+            v-if="category"
+            :column="2"
+            border
+          >
             <el-descriptions-item :label="$t('categories.categoryName')">
               {{ category.name }}
             </el-descriptions-item>
@@ -39,29 +67,55 @@
               {{ category.code || '-' }}
             </el-descriptions-item>
             <el-descriptions-item :label="$t('categories.level')">
-              <el-tag size="small">L{{ category.level }}</el-tag>
+              <el-tag size="small">
+                L{{ category.level }}
+              </el-tag>
             </el-descriptions-item>
             <el-descriptions-item :label="$t('categories.sort')">
               {{ category.sort }}
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('categories.icon')" v-if="category.icon">
-              <el-image :src="category.icon" fit="cover" class="icon-image">
+            <el-descriptions-item
+              v-if="category.icon"
+              :label="$t('categories.icon')"
+            >
+              <el-image
+                :src="category.icon"
+                fit="cover"
+                class="icon-image"
+              >
                 <template #error>
-                  <div class="image-placeholder"><el-icon><Picture /></el-icon></div>
+                  <div class="image-placeholder">
+                    <el-icon><Picture /></el-icon>
+                  </div>
                 </template>
               </el-image>
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('categories.image')" v-if="category.image">
-              <el-image :src="category.image" fit="cover" class="image-preview">
+            <el-descriptions-item
+              v-if="category.image"
+              :label="$t('categories.image')"
+            >
+              <el-image
+                :src="category.image"
+                fit="cover"
+                class="image-preview"
+              >
                 <template #error>
-                  <div class="image-placeholder"><el-icon><Picture /></el-icon></div>
+                  <div class="image-placeholder">
+                    <el-icon><Picture /></el-icon>
+                  </div>
                 </template>
               </el-image>
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('categories.seoTitle')" :span="2">
+            <el-descriptions-item
+              :label="$t('categories.seoTitle')"
+              :span="2"
+            >
               {{ category.seo_title || '-' }}
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('categories.seoDescription')" :span="2">
+            <el-descriptions-item
+              :label="$t('categories.seoDescription')"
+              :span="2"
+            >
               {{ category.seo_description || '-' }}
             </el-descriptions-item>
             <el-descriptions-item :label="$t('categories.createdAt')">
@@ -71,16 +125,26 @@
         </el-card>
 
         <!-- Market Visibility -->
-        <el-card class="info-card market-card" shadow="never">
+        <el-card
+          class="info-card market-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('categories.marketVisibility') }}</span>
-              <el-button size="small" type="primary" @click="showMarketDialog = true">
+              <el-button
+                size="small"
+                type="primary"
+                @click="showMarketDialog = true"
+              >
                 {{ $t('categories.configureMarket') }}
               </el-button>
             </div>
           </template>
-          <div class="market-tags" v-if="marketVisibility.length > 0">
+          <div
+            v-if="marketVisibility.length > 0"
+            class="market-tags"
+          >
             <el-tag
               v-for="m in marketVisibility"
               :key="m.market_id"
@@ -90,13 +154,19 @@
               {{ getMarketName(m.market_id) }}
             </el-tag>
           </div>
-          <el-empty v-else :description="$t('categories.noMarketVisibility')" />
+          <el-empty
+            v-else
+            :description="$t('categories.noMarketVisibility')"
+          />
         </el-card>
       </el-col>
 
       <el-col :span="8">
         <!-- Stats Card -->
-        <el-card class="stats-card" shadow="never">
+        <el-card
+          class="stats-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('categories.statistics') }}</span>
@@ -107,8 +177,12 @@
               <el-icon><Goods /></el-icon>
             </div>
             <div class="stat-content">
-              <p class="stat-value">{{ category?.product_count || 0 }}</p>
-              <p class="stat-label">{{ $t('categories.productCount') }}</p>
+              <p class="stat-value">
+                {{ category?.product_count || 0 }}
+              </p>
+              <p class="stat-label">
+                {{ $t('categories.productCount') }}
+              </p>
             </div>
           </div>
         </el-card>
@@ -122,32 +196,72 @@
       width="600px"
       destroy-on-close
     >
-      <el-form :model="categoryForm" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item :label="$t('categories.categoryName')" prop="name">
-          <el-input v-model="categoryForm.name" :placeholder="$t('categories.enterCategoryName')" />
+      <el-form
+        ref="formRef"
+        :model="categoryForm"
+        label-width="100px"
+        :rules="formRules"
+      >
+        <el-form-item
+          :label="$t('categories.categoryName')"
+          prop="name"
+        >
+          <el-input
+            v-model="categoryForm.name"
+            :placeholder="$t('categories.enterCategoryName')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.categoryCode')">
-          <el-input v-model="categoryForm.code" :placeholder="$t('categories.enterCategoryCode')" />
+          <el-input
+            v-model="categoryForm.code"
+            :placeholder="$t('categories.enterCategoryCode')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.sort')">
-          <el-input-number v-model="categoryForm.sort" :min="0" style="width: 100%" />
+          <el-input-number
+            v-model="categoryForm.sort"
+            :min="0"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.iconUrl')">
-          <el-input v-model="categoryForm.icon" :placeholder="$t('categories.enterIconUrl')" />
+          <el-input
+            v-model="categoryForm.icon"
+            :placeholder="$t('categories.enterIconUrl')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.imageUrl')">
-          <el-input v-model="categoryForm.image" :placeholder="$t('categories.enterImageUrl')" />
+          <el-input
+            v-model="categoryForm.image"
+            :placeholder="$t('categories.enterImageUrl')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.seoTitle')">
-          <el-input v-model="categoryForm.seo_title" :placeholder="$t('categories.enterSeoTitle')" />
+          <el-input
+            v-model="categoryForm.seo_title"
+            :placeholder="$t('categories.enterSeoTitle')"
+          />
         </el-form-item>
         <el-form-item :label="$t('categories.seoDescription')">
-          <el-input v-model="categoryForm.seo_description" type="textarea" rows="2" :placeholder="$t('categories.enterSeoDescription')" />
+          <el-input
+            v-model="categoryForm.seo_description"
+            type="textarea"
+            rows="2"
+            :placeholder="$t('categories.enterSeoDescription')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">{{ $t('categories.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('categories.save') }}</el-button>
+        <el-button @click="editDialogVisible = false">
+          {{ $t('categories.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          {{ $t('categories.save') }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -158,7 +272,10 @@
       width="500px"
       destroy-on-close
     >
-      <div class="market-selector" v-loading="marketsLoading">
+      <div
+        v-loading="marketsLoading"
+        class="market-selector"
+      >
         <el-checkbox
           v-for="market in availableMarkets"
           :key="market.id"
@@ -170,8 +287,14 @@
         </el-checkbox>
       </div>
       <template #footer>
-        <el-button @click="showMarketDialog = false">{{ $t('categories.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSaveMarketVisibility" :loading="savingMarket">
+        <el-button @click="showMarketDialog = false">
+          {{ $t('categories.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="savingMarket"
+          @click="handleSaveMarketVisibility"
+        >
           {{ $t('categories.save') }}
         </el-button>
       </template>

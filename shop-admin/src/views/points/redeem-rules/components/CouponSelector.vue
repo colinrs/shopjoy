@@ -2,13 +2,13 @@
   <div class="coupon-selector">
     <el-select
       :model-value="modelValue"
-      @update:model-value="handleSelect"
       :placeholder="$t('points.selectCoupon')"
       filterable
       remote
       :remote-method="searchCoupons"
       :loading="loading"
       class="coupon-select"
+      @update:model-value="handleSelect"
     >
       <el-option
         v-for="coupon in couponList"
@@ -24,16 +24,26 @@
     </el-select>
 
     <!-- Selected Coupon Preview -->
-    <div v-if="selectedCoupon" class="selected-coupon">
+    <div
+      v-if="selectedCoupon"
+      class="selected-coupon"
+    >
       <div class="coupon-preview">
         <div class="coupon-preview-icon">
           <el-icon><Ticket /></el-icon>
         </div>
         <div class="coupon-preview-info">
-          <p class="preview-name">{{ selectedCoupon.name }}</p>
-          <p class="preview-code">{{ $t('points.couponCode') }} {{ selectedCoupon.code }}</p>
+          <p class="preview-name">
+            {{ selectedCoupon.name }}
+          </p>
+          <p class="preview-code">
+            {{ $t('points.couponCode') }} {{ selectedCoupon.code }}
+          </p>
           <div class="preview-details">
-            <el-tag size="small" :type="selectedCoupon.type === 'fixed_amount' ? 'success' : 'warning'">
+            <el-tag
+              size="small"
+              :type="selectedCoupon.type === 'fixed_amount' ? 'success' : 'warning'"
+            >
               {{ selectedCoupon.type === 'fixed_amount' ? $t('points.fixedAmountLabel') : $t('points.percentageLabel') }}
             </el-tag>
             <span class="preview-value">

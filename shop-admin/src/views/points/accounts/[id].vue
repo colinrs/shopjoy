@@ -2,22 +2,33 @@
   <div class="account-detail-page">
     <!-- Back Button -->
     <div class="page-header">
-      <el-button link @click="goBack">
+      <el-button
+        link
+        @click="goBack"
+      >
         <el-icon><ArrowLeft /></el-icon>
         {{ $t('points.backToAccountList') }}
       </el-button>
-      <h2 class="page-title">{{ $t('points.userPointsAccount', { userId: account?.user_id }) }}</h2>
+      <h2 class="page-title">
+        {{ $t('points.userPointsAccount', { userId: account?.user_id }) }}
+      </h2>
     </div>
 
     <!-- Account Summary Card -->
-    <el-card class="summary-card" shadow="never">
+    <el-card
+      class="summary-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span class="card-title">
             <el-icon><Wallet /></el-icon>
             {{ $t('points.accountOverview') }}
           </span>
-          <el-button type="primary" @click="openAdjustDialog">
+          <el-button
+            type="primary"
+            @click="openAdjustDialog"
+          >
             <el-icon><Edit /></el-icon>
             {{ $t('points.adjustPoints') }}
           </el-button>
@@ -25,47 +36,75 @@
       </template>
 
       <el-row :gutter="16">
-        <el-col :xs="12" :sm="6">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
           <div class="summary-item">
             <div class="summary-icon balance">
               <el-icon><Star /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">{{ $t('points.availableBalance') }}</p>
-              <p class="summary-value">{{ account?.balance?.toLocaleString() || 0 }}</p>
+              <p class="summary-label">
+                {{ $t('points.availableBalance') }}
+              </p>
+              <p class="summary-value">
+                {{ account?.balance?.toLocaleString() || 0 }}
+              </p>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
           <div class="summary-item">
             <div class="summary-icon frozen">
               <el-icon><Lock /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">{{ $t('points.frozenPoints') }}</p>
-              <p class="summary-value">{{ account?.frozen_balance?.toLocaleString() || 0 }}</p>
+              <p class="summary-label">
+                {{ $t('points.frozenPoints') }}
+              </p>
+              <p class="summary-value">
+                {{ account?.frozen_balance?.toLocaleString() || 0 }}
+              </p>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
           <div class="summary-item">
             <div class="summary-icon earned">
               <el-icon><TrendCharts /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">{{ $t('points.cumulativeEarned') }}</p>
-              <p class="summary-value">{{ account?.total_earned?.toLocaleString() || 0 }}</p>
+              <p class="summary-label">
+                {{ $t('points.cumulativeEarned') }}
+              </p>
+              <p class="summary-value">
+                {{ account?.total_earned?.toLocaleString() || 0 }}
+              </p>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
           <div class="summary-item">
             <div class="summary-icon redeemed">
               <el-icon><Present /></el-icon>
             </div>
             <div class="summary-info">
-              <p class="summary-label">{{ $t('points.cumulativeRedeemed') }}</p>
-              <p class="summary-value">{{ account?.total_redeemed?.toLocaleString() || 0 }}</p>
+              <p class="summary-label">
+                {{ $t('points.cumulativeRedeemed') }}
+              </p>
+              <p class="summary-value">
+                {{ account?.total_redeemed?.toLocaleString() || 0 }}
+              </p>
             </div>
           </div>
         </el-col>
@@ -73,7 +112,10 @@
     </el-card>
 
     <!-- Transaction History -->
-    <el-card class="transactions-card" shadow="never">
+    <el-card
+      class="transactions-card"
+      shadow="never"
+    >
       <template #header>
         <span class="card-title">
           <el-icon><List /></el-icon>

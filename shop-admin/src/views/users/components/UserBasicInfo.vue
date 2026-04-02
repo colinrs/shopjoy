@@ -1,24 +1,46 @@
 <template>
   <div class="basic-info">
-    <el-descriptions :column="2" border>
-      <el-descriptions-item :label="$t('users.userId')">{{ user?.id }}</el-descriptions-item>
-      <el-descriptions-item :label="$t('users.username')">{{ user?.name || '-' }}</el-descriptions-item>
-      <el-descriptions-item :label="$t('users.email')">{{ user?.email || '-' }}</el-descriptions-item>
-      <el-descriptions-item :label="$t('users.mobile')">{{ user?.phone || '-' }}</el-descriptions-item>
+    <el-descriptions
+      :column="2"
+      border
+    >
+      <el-descriptions-item :label="$t('users.userId')">
+        {{ user?.id }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="$t('users.username')">
+        {{ user?.name || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="$t('users.email')">
+        {{ user?.email || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="$t('users.mobile')">
+        {{ user?.phone || '-' }}
+      </el-descriptions-item>
       <el-descriptions-item :label="$t('users.status')">
         <el-tag :type="user?.status === 1 ? 'success' : 'danger'">
           {{ user?.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item :label="$t('users.memberLevel')">
-        <el-tag type="info">{{ $t('users.regularMember') }}</el-tag>
+        <el-tag type="info">
+          {{ $t('users.regularMember') }}
+        </el-tag>
       </el-descriptions-item>
-      <el-descriptions-item :label="$t('users.createdAt')">{{ formatDateTime(user?.created_at) }}</el-descriptions-item>
-      <el-descriptions-item :label="$t('users.lastLogin')">{{ formatDateTime(user?.last_login) }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.createdAt')">
+        {{ formatDateTime(user?.created_at) }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="$t('users.lastLogin')">
+        {{ formatDateTime(user?.last_login) }}
+      </el-descriptions-item>
     </el-descriptions>
 
-    <div class="section-title">{{ $t('users.pointsInfo') }}</div>
-    <el-descriptions :column="4" border>
+    <div class="section-title">
+      {{ $t('users.pointsInfo') }}
+    </div>
+    <el-descriptions
+      :column="4"
+      border
+    >
       <el-descriptions-item :label="$t('users.availablePoints')">
         <span class="points-value">{{ user?.points_balance?.toLocaleString() || 0 }}</span>
       </el-descriptions-item>
@@ -33,13 +55,22 @@
       </el-descriptions-item>
     </el-descriptions>
 
-    <div class="section-title">{{ $t('users.consumptionStats') }}</div>
-    <el-descriptions :column="3" border>
-      <el-descriptions-item :label="$t('users.totalOrders')">{{ user?.order_count || 0 }}</el-descriptions-item>
+    <div class="section-title">
+      {{ $t('users.consumptionStats') }}
+    </div>
+    <el-descriptions
+      :column="3"
+      border
+    >
+      <el-descriptions-item :label="$t('users.totalOrders')">
+        {{ user?.order_count || 0 }}
+      </el-descriptions-item>
       <el-descriptions-item :label="$t('users.totalSpent')">
         <span class="spent-value">¥{{ formatPrice(user?.total_spent) }}</span>
       </el-descriptions-item>
-      <el-descriptions-item :label="$t('users.lastOrder')">{{ formatDateTime(user?.last_order_at) }}</el-descriptions-item>
+      <el-descriptions-item :label="$t('users.lastOrder')">
+        {{ formatDateTime(user?.last_order_at) }}
+      </el-descriptions-item>
     </el-descriptions>
   </div>
 </template>

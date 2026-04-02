@@ -1,50 +1,89 @@
 <template>
   <div class="shipments-page">
     <!-- Statistics Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
-        <el-card class="stat-item pending" shadow="hover" @click="handleStatusFilter('0')">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <el-card
+          class="stat-item pending"
+          shadow="hover"
+          @click="handleStatusFilter('0')"
+        >
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.pendingShipment') }}</span>
               <el-tooltip :content="$t('fulfillment.pendingShipmentTip')">
-                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+                <el-icon class="stat-tooltip">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
-          <p class="stat-number">{{ stats.pending }}</p>
+          <p class="stat-number">
+            {{ stats.pending }}
+          </p>
         </el-card>
       </el-col>
-      <el-col :xs="12" :sm="6">
-        <el-card class="stat-item shipped" shadow="hover" @click="handleStatusFilter('1')">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <el-card
+          class="stat-item shipped"
+          shadow="hover"
+          @click="handleStatusFilter('1')"
+        >
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.shippedShipment') }}</span>
               <el-tooltip :content="$t('fulfillment.shippedShipmentTip')">
-                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+                <el-icon class="stat-tooltip">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
-          <p class="stat-number">{{ stats.shipped }}</p>
+          <p class="stat-number">
+            {{ stats.shipped }}
+          </p>
         </el-card>
       </el-col>
-      <el-col :xs="12" :sm="6">
-        <el-card class="stat-item delivered" shadow="hover" @click="handleStatusFilter('3')">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
+        <el-card
+          class="stat-item delivered"
+          shadow="hover"
+          @click="handleStatusFilter('3')"
+        >
           <template #header>
             <div class="stat-header">
               <span>{{ $t('fulfillment.deliveredShipment') }}</span>
               <el-tooltip :content="$t('fulfillment.deliveredShipmentTip')">
-                <el-icon class="stat-tooltip"><QuestionFilled /></el-icon>
+                <el-icon class="stat-tooltip">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
-          <p class="stat-number">{{ stats.delivered }}</p>
+          <p class="stat-number">
+            {{ stats.delivered }}
+          </p>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -58,17 +97,53 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" :placeholder="$t('fulfillment.status')" clearable class="filter-select">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('fulfillment.pendingShipment')" value="0" />
-            <el-option :label="$t('fulfillment.shippedShipment')" value="1" />
-            <el-option :label="$t('fulfillment.inTransitShipment')" value="2" />
-            <el-option :label="$t('fulfillment.deliveredShipment')" value="3" />
-            <el-option :label="$t('fulfillment.failedShipment')" value="4" />
+          <el-select
+            v-model="statusFilter"
+            :placeholder="$t('fulfillment.status')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('fulfillment.pendingShipment')"
+              value="0"
+            />
+            <el-option
+              :label="$t('fulfillment.shippedShipment')"
+              value="1"
+            />
+            <el-option
+              :label="$t('fulfillment.inTransitShipment')"
+              value="2"
+            />
+            <el-option
+              :label="$t('fulfillment.deliveredShipment')"
+              value="3"
+            />
+            <el-option
+              :label="$t('fulfillment.failedShipment')"
+              value="4"
+            />
           </el-select>
-          <el-select v-model="carrierFilter" :placeholder="$t('fulfillment.carrier')" clearable class="filter-select">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option v-for="carrier in carriers" :key="carrier.code" :label="carrier.name" :value="carrier.code" />
+          <el-select
+            v-model="carrierFilter"
+            :placeholder="$t('fulfillment.carrier')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              v-for="carrier in carriers"
+              :key="carrier.code"
+              :label="carrier.name"
+              :value="carrier.code"
+            />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -85,7 +160,10 @@
           <el-button @click="handleExport">
             <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
-          <el-button type="primary" @click="handleRefresh">
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
@@ -94,28 +172,42 @@
 
     <!-- Batch Actions Bar -->
     <transition name="slide-down">
-      <div v-if="selectedRows.length > 0" class="batch-actions-bar">
+      <div
+        v-if="selectedRows.length > 0"
+        class="batch-actions-bar"
+      >
         <div class="batch-info">
           <el-icon><InfoFilled /></el-icon>
           <span>{{ $t('fulfillment.selectedRows', { n: selectedRows.length }) }}</span>
         </div>
         <div class="batch-actions">
-          <el-button type="primary" @click="handleBatchShip">
+          <el-button
+            type="primary"
+            @click="handleBatchShip"
+          >
             <el-icon><Van /></el-icon>{{ $t('fulfillment.batchShipment') }}
           </el-button>
-          <el-button type="warning" @click="handleBatchUpdateTracking">
+          <el-button
+            type="warning"
+            @click="handleBatchUpdateTracking"
+          >
             <el-icon><Edit /></el-icon>{{ $t('fulfillment.batchUpdateTracking') }}
           </el-button>
           <el-button @click="handleImportTracking">
             <el-icon><Upload /></el-icon>{{ $t('fulfillment.importTracking') }}
           </el-button>
-          <el-button @click="clearSelection">{{ $t('fulfillment.clearSelection') }}</el-button>
+          <el-button @click="clearSelection">
+            {{ $t('fulfillment.clearSelection') }}
+          </el-button>
         </div>
       </div>
     </transition>
 
     <!-- Shipments Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <EmptyState
         v-if="shipmentList.length === 0 && !loading"
         :title="$t('fulfillment.noShipments')"
@@ -124,41 +216,77 @@
       <el-table
         v-else
         ref="tableRef"
-        :data="shipmentList"
         v-loading="loading"
+        :data="shipmentList"
         stripe
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" :selectable="isSelectable" />
-        <el-table-column prop="shipment_no" :label="$t('fulfillment.shipmentNo')" min-width="150">
+        <el-table-column
+          type="selection"
+          width="50"
+          :selectable="isSelectable"
+        />
+        <el-table-column
+          prop="shipment_no"
+          :label="$t('fulfillment.shipmentNo')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="shipment-no-cell">
               <span class="shipment-no">{{ row.shipment_no }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" :label="$t('fulfillment.orderNo')" min-width="150">
+        <el-table-column
+          prop="order_no"
+          :label="$t('fulfillment.orderNo')"
+          min-width="150"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewOrder(row.order_id)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewOrder(row.order_id)"
+            >
               {{ row.order_no }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.logistics')" min-width="180">
+        <el-table-column
+          :label="$t('fulfillment.logistics')"
+          min-width="180"
+        >
           <template #default="{ row }">
             <div class="logistics-info">
-              <p class="carrier-name">{{ row.carrier }}</p>
-              <p class="tracking-no" v-if="row.tracking_no">
+              <p class="carrier-name">
+                {{ row.carrier }}
+              </p>
+              <p
+                v-if="row.tracking_no"
+                class="tracking-no"
+              >
                 <el-icon><Location /></el-icon>
                 {{ row.tracking_no }}
               </p>
-              <p class="tracking-no" v-else>
-                <el-tag type="warning" size="small">{{ $t('fulfillment.toBeEntered') }}</el-tag>
+              <p
+                v-else
+                class="tracking-no"
+              >
+                <el-tag
+                  type="warning"
+                  size="small"
+                >
+                  {{ $t('fulfillment.toBeEntered') }}
+                </el-tag>
               </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.items')" min-width="160">
+        <el-table-column
+          :label="$t('common.items')"
+          min-width="160"
+        >
           <template #default="{ row }">
             <div class="items-preview">
               <el-image
@@ -174,23 +302,46 @@
                   </div>
                 </template>
               </el-image>
-              <span v-if="row.items.length > 3" class="more-items">+{{ row.items.length - 3 }}</span>
+              <span
+                v-if="row.items.length > 3"
+                class="more-items"
+              >+{{ row.items.length - 3 }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('common.status')" width="110" align="center">
+        <el-table-column
+          prop="status"
+          :label="$t('common.status')"
+          width="110"
+          align="center"
+        >
           <template #default="{ row }">
-            <status-tag :status="row.status" :type-map="statusTypeMap" />
+            <status-tag
+              :status="row.status"
+              :type-map="statusTypeMap"
+            />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('fulfillment.shipmentTime')" width="160">
+        <el-table-column
+          :label="$t('fulfillment.shipmentTime')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.shipped_at || row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="180"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewDetail(row)"
+            >
               {{ $t('common.detail') }}
             </el-button>
             <el-button

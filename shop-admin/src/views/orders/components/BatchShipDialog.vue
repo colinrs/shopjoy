@@ -12,11 +12,20 @@
         <div class="section-header">
           <el-icon><List /></el-icon>
           <span>{{ $t('orders.selectedOrders') }}</span>
-          <el-tag size="small" type="primary">{{ $t('orders.itemsCount', { count: orders.length }) }}</el-tag>
+          <el-tag
+            size="small"
+            type="primary"
+          >
+            {{ $t('orders.itemsCount', { count: orders.length }) }}
+          </el-tag>
         </div>
 
         <div class="orders-list">
-          <div v-for="order in orders" :key="order.order_id" class="order-item">
+          <div
+            v-for="order in orders"
+            :key="order.order_id"
+            class="order-item"
+          >
             <div class="order-info">
               <span class="order-no">{{ order.order_no }}</span>
               <span class="order-buyer">{{ order.user_name }} - {{ order.user_phone }}</span>
@@ -30,13 +39,22 @@
       </div>
 
       <!-- Logistics Form -->
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="120px" class="logistics-form">
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="120px"
+        class="logistics-form"
+      >
         <div class="section-header">
           <el-icon><Van /></el-icon>
           <span>{{ $t('orders.logisticsSettings') }}</span>
         </div>
 
-        <el-form-item :label="$t('orders.carrier')" prop="carrier_code">
+        <el-form-item
+          :label="$t('orders.carrier')"
+          prop="carrier_code"
+        >
           <el-select
             v-model="form.carrier_code"
             :placeholder="$t('orders.selectCarrier')"
@@ -52,7 +70,10 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item :label="$t('orders.trackingNoStart')" prop="tracking_no_start">
+        <el-form-item
+          :label="$t('orders.trackingNoStart')"
+          prop="tracking_no_start"
+        >
           <div class="tracking-input-group">
             <el-input
               v-model="form.tracking_no_start"
@@ -71,11 +92,18 @@
 
         <el-form-item :label="$t('orders.preview')">
           <div class="tracking-preview">
-            <div v-for="(preview, index) in trackingPreviews" :key="index" class="preview-item">
+            <div
+              v-for="(preview, index) in trackingPreviews"
+              :key="index"
+              class="preview-item"
+            >
               <span class="preview-order">{{ preview.order_no }}</span>
               <span class="preview-tracking">{{ preview.tracking_no }}</span>
             </div>
-            <p v-if="trackingPreviews.length < orders.length" class="more-preview">
+            <p
+              v-if="trackingPreviews.length < orders.length"
+              class="more-preview"
+            >
               {{ $t('orders.moreOrders', { count: orders.length - trackingPreviews.length }) }}
             </p>
           </div>
@@ -85,8 +113,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           {{ $t('orders.confirmBatchShip') }}
         </el-button>
       </div>

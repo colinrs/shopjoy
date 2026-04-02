@@ -1,44 +1,96 @@
 <template>
   <div class="payments-page">
     <!-- Payment Stats Card -->
-    <PaymentStatsCard :stats="paymentStats" :period="selectedPeriod" />
+    <PaymentStatsCard
+      :stats="paymentStats"
+      :period="selectedPeriod"
+    />
 
     <!-- Period Selector -->
-    <el-card class="period-card" shadow="never">
+    <el-card
+      class="period-card"
+      shadow="never"
+    >
       <div class="period-bar">
         <span class="period-label">{{ $t('payments.period') }}:</span>
-        <el-radio-group v-model="selectedPeriod" size="small" @change="handlePeriodChange">
-          <el-radio-button value="7d">{{ $t('payments.period7d') }}</el-radio-button>
-          <el-radio-button value="30d">{{ $t('payments.period30d') }}</el-radio-button>
-          <el-radio-button value="90d">{{ $t('payments.period90d') }}</el-radio-button>
+        <el-radio-group
+          v-model="selectedPeriod"
+          size="small"
+          @change="handlePeriodChange"
+        >
+          <el-radio-button value="7d">
+            {{ $t('payments.period7d') }}
+          </el-radio-button>
+          <el-radio-button value="30d">
+            {{ $t('payments.period30d') }}
+          </el-radio-button>
+          <el-radio-button value="90d">
+            {{ $t('payments.period90d') }}
+          </el-radio-button>
         </el-radio-group>
       </div>
     </el-card>
 
     <!-- Statistics Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="8">
-        <div class="stat-item success" @click="handleStatusFilter(1)">
-          <p class="stat-number">{{ transactionStats.success }}</p>
-          <p class="stat-label">{{ $t('payments.success') }}</p>
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="8"
+      >
+        <div
+          class="stat-item success"
+          @click="handleStatusFilter(1)"
+        >
+          <p class="stat-number">
+            {{ transactionStats.success }}
+          </p>
+          <p class="stat-label">
+            {{ $t('payments.success') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="8">
-        <div class="stat-item pending" @click="handleStatusFilter(0)">
-          <p class="stat-number">{{ transactionStats.pending }}</p>
-          <p class="stat-label">{{ $t('payments.pending') }}</p>
+      <el-col
+        :xs="12"
+        :sm="8"
+      >
+        <div
+          class="stat-item pending"
+          @click="handleStatusFilter(0)"
+        >
+          <p class="stat-number">
+            {{ transactionStats.pending }}
+          </p>
+          <p class="stat-label">
+            {{ $t('payments.pending') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="8">
-        <div class="stat-item failed" @click="handleStatusFilter(2)">
-          <p class="stat-number">{{ transactionStats.failed }}</p>
-          <p class="stat-label">{{ $t('payments.failed') }}</p>
+      <el-col
+        :xs="12"
+        :sm="8"
+      >
+        <div
+          class="stat-item failed"
+          @click="handleStatusFilter(2)"
+        >
+          <p class="stat-number">
+            {{ transactionStats.failed }}
+          </p>
+          <p class="stat-label">
+            {{ $t('payments.failed') }}
+          </p>
         </div>
       </el-col>
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -52,17 +104,51 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" :placeholder="$t('payments.status')" clearable class="filter-select">
-            <el-option :label="$t('payments.all')" value="" />
-            <el-option :label="$t('payments.pending')" :value="0" />
-            <el-option :label="$t('payments.success')" :value="1" />
-            <el-option :label="$t('payments.failed')" :value="2" />
+          <el-select
+            v-model="statusFilter"
+            :placeholder="$t('payments.status')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('payments.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('payments.pending')"
+              :value="0"
+            />
+            <el-option
+              :label="$t('payments.success')"
+              :value="1"
+            />
+            <el-option
+              :label="$t('payments.failed')"
+              :value="2"
+            />
           </el-select>
-          <el-select v-model="paymentMethodFilter" :placeholder="$t('payments.paymentMethod')" clearable class="filter-select">
-            <el-option :label="$t('payments.all')" value="" />
-            <el-option :label="$t('payments.stripeCard')" value="stripe_card" />
-            <el-option :label="$t('payments.stripeAlipay')" value="stripe_alipay" />
-            <el-option :label="$t('payments.stripeWechat')" value="stripe_wechat" />
+          <el-select
+            v-model="paymentMethodFilter"
+            :placeholder="$t('payments.paymentMethod')"
+            clearable
+            class="filter-select"
+          >
+            <el-option
+              :label="$t('payments.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('payments.stripeCard')"
+              value="stripe_card"
+            />
+            <el-option
+              :label="$t('payments.stripeAlipay')"
+              value="stripe_alipay"
+            />
+            <el-option
+              :label="$t('payments.stripeWechat')"
+              value="stripe_wechat"
+            />
           </el-select>
           <el-date-picker
             v-model="dateRange"
@@ -79,7 +165,10 @@
             <el-icon><Download /></el-icon>
             {{ $t('common.export') }}
           </el-button>
-          <el-button type="primary" @click="handleRefresh">
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>
             {{ $t('common.refresh') }}
           </el-button>
@@ -88,65 +177,138 @@
     </el-card>
 
     <!-- Transactions Table -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="transactionList" v-loading="loading" stripe>
-        <el-table-column prop="transaction_id" :label="$t('payments.transactionId')" min-width="180">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="transactionList"
+        stripe
+      >
+        <el-table-column
+          prop="transaction_id"
+          :label="$t('payments.transactionId')"
+          min-width="180"
+        >
           <template #default="{ row }">
             <div class="transaction-id-cell">
-              <span class="transaction-id" :title="row.transaction_id">
+              <span
+                class="transaction-id"
+                :title="row.transaction_id"
+              >
                 {{ truncateId(row.transaction_id) }}
               </span>
-              <el-button link size="small" @click="copyTransactionId(row.transaction_id)">
+              <el-button
+                link
+                size="small"
+                @click="copyTransactionId(row.transaction_id)"
+              >
                 <el-icon><CopyDocument /></el-icon>
               </el-button>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="order_no" :label="$t('payments.orderNo')" min-width="160">
+        <el-table-column
+          prop="order_no"
+          :label="$t('payments.orderNo')"
+          min-width="160"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewOrder(row.order_id)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewOrder(row.order_id)"
+            >
               {{ row.order_no }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.paymentMethod')" width="140" align="center">
+        <el-table-column
+          :label="$t('payments.paymentMethod')"
+          width="140"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getPaymentMethodTagType(row.payment_method)" effect="plain" size="small">
+            <el-tag
+              :type="getPaymentMethodTagType(row.payment_method)"
+              effect="plain"
+              size="small"
+            >
               {{ row.payment_method_text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.amount')" width="140" align="right">
+        <el-table-column
+          :label="$t('payments.amount')"
+          width="140"
+          align="right"
+        >
           <template #default="{ row }">
             <div class="amount-cell">
-              <p class="transaction-amount">{{ row.currency }} {{ formatAmount(row.amount) }}</p>
+              <p class="transaction-amount">
+                {{ row.currency }} {{ formatAmount(row.amount) }}
+              </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.fee')" width="100" align="right">
+        <el-table-column
+          :label="$t('payments.fee')"
+          width="100"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="fee-amount">{{ row.currency }} {{ formatAmount(row.transaction_fee) }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('payments.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <status-tag :status="row.status" :type-map="statusTypeMap" />
+            <status-tag
+              :status="row.status"
+              :type-map="statusTypeMap"
+            />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.createdAt')" width="160">
+        <el-table-column
+          :label="$t('payments.createdAt')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('payments.paidAt')" width="160">
+        <el-table-column
+          :label="$t('payments.paidAt')"
+          width="160"
+        >
           <template #default="{ row }">
-            <span v-if="row.paid_at" class="time-text">{{ row.paid_at }}</span>
-            <span v-else class="no-data">-</span>
+            <span
+              v-if="row.paid_at"
+              class="time-text"
+            >{{ row.paid_at }}</span>
+            <span
+              v-else
+              class="no-data"
+            >-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="100"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="viewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewDetail(row)"
+            >
               {{ $t('payments.details') }}
             </el-button>
           </template>

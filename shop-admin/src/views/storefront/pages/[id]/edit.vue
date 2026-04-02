@@ -1,19 +1,40 @@
 <template>
-  <div class="page-editor" v-loading="pageLoading">
+  <div
+    v-loading="pageLoading"
+    class="page-editor"
+  >
     <!-- Editor Header -->
     <div class="editor-header">
       <div class="header-left">
-        <el-button text @click="goBack">
+        <el-button
+          text
+          @click="goBack"
+        >
           <el-icon><ArrowLeft /></el-icon>
           {{ $t('storefront.back') }}
         </el-button>
         <el-divider direction="vertical" />
         <span class="page-title">{{ pageData?.page?.name || t('storefront.pageEditor') }}</span>
-        <el-tag v-if="pageData?.page?.is_published" type="success" size="small">{{ $t('storefront.published') }}</el-tag>
-        <el-tag v-else type="info" size="small">{{ $t('storefront.draft') }}</el-tag>
+        <el-tag
+          v-if="pageData?.page?.is_published"
+          type="success"
+          size="small"
+        >
+          {{ $t('storefront.published') }}
+        </el-tag>
+        <el-tag
+          v-else
+          type="info"
+          size="small"
+        >
+          {{ $t('storefront.draft') }}
+        </el-tag>
       </div>
       <div class="header-center">
-        <el-radio-group v-model="viewMode" size="small">
+        <el-radio-group
+          v-model="viewMode"
+          size="small"
+        >
           <el-radio-button label="desktop">
             <el-icon><Monitor /></el-icon>
           </el-radio-button>
@@ -30,11 +51,18 @@
           <el-icon><Clock /></el-icon>
           {{ $t('storefront.versionHistories') }}
         </el-button>
-        <el-button @click="handleSaveDraft" :loading="saving">
+        <el-button
+          :loading="saving"
+          @click="handleSaveDraft"
+        >
           <el-icon><Document /></el-icon>
           {{ $t('storefront.saveDraft') }}
         </el-button>
-        <el-button type="primary" @click="handlePublish" :loading="publishing">
+        <el-button
+          type="primary"
+          :loading="publishing"
+          @click="handlePublish"
+        >
           <el-icon><Promotion /></el-icon>
           {{ $t('storefront.publishAction') }}
         </el-button>
@@ -54,26 +82,39 @@
             draggable="true"
             @dragstart="onDragStart($event, block.type)"
           >
-            <el-icon class="block-icon"><component :is="getBlockIcon(block.icon)" /></el-icon>
+            <el-icon class="block-icon">
+              <component :is="getBlockIcon(block.icon)" />
+            </el-icon>
             <span class="block-name">{{ block.name }}</span>
           </div>
         </div>
       </div>
 
       <!-- Canvas Area -->
-      <div class="canvas-wrapper" :class="viewMode">
+      <div
+        class="canvas-wrapper"
+        :class="viewMode"
+      >
         <div
           class="canvas"
+          :class="{ 'is-empty': blocks.length === 0 }"
           @dragover.prevent
           @drop="onDrop"
-          :class="{ 'is-empty': blocks.length === 0 }"
         >
-          <div v-if="blocks.length === 0" class="empty-placeholder">
-            <el-icon size="48"><Plus /></el-icon>
+          <div
+            v-if="blocks.length === 0"
+            class="empty-placeholder"
+          >
+            <el-icon size="48">
+              <Plus />
+            </el-icon>
             <p>{{ $t('storefront.dragToEdit') }}</p>
           </div>
 
-          <div v-else class="blocks-container">
+          <div
+            v-else
+            class="blocks-container"
+          >
             <div
               v-for="(block, index) in blocks"
               :key="block.id || `new-${index}`"
@@ -88,13 +129,28 @@
               <div class="block-toolbar">
                 <span class="block-type">{{ getBlockName(block.block_type) }}</span>
                 <div class="block-actions">
-                  <el-button text size="small" @click.stop="moveBlock(index, -1)" :disabled="index === 0">
+                  <el-button
+                    text
+                    size="small"
+                    :disabled="index === 0"
+                    @click.stop="moveBlock(index, -1)"
+                  >
                     <el-icon><ArrowUp /></el-icon>
                   </el-button>
-                  <el-button text size="small" @click.stop="moveBlock(index, 1)" :disabled="index === blocks.length - 1">
+                  <el-button
+                    text
+                    size="small"
+                    :disabled="index === blocks.length - 1"
+                    @click.stop="moveBlock(index, 1)"
+                  >
                     <el-icon><ArrowDown /></el-icon>
                   </el-button>
-                  <el-button text size="small" type="danger" @click.stop="deleteBlock(index)">
+                  <el-button
+                    text
+                    size="small"
+                    type="danger"
+                    @click.stop="deleteBlock(index)"
+                  >
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </div>
@@ -111,10 +167,17 @@
       </div>
 
       <!-- Config Panel -->
-      <div class="config-panel" v-if="selectedBlockIndex !== null">
+      <div
+        v-if="selectedBlockIndex !== null"
+        class="config-panel"
+      >
         <div class="panel-header">
           <h4>{{ getBlockName(blocks[selectedBlockIndex]?.block_type) }} {{ $t('storefront.configuration') }}</h4>
-          <el-button text size="small" @click="selectedBlockIndex = null">
+          <el-button
+            text
+            size="small"
+            @click="selectedBlockIndex = null"
+          >
             <el-icon><Close /></el-icon>
           </el-button>
         </div>
@@ -134,7 +197,10 @@
       :title="$t('storefront.versionHistory')"
       size="450px"
     >
-      <div class="version-drawer-content" v-loading="versionsLoading">
+      <div
+        v-loading="versionsLoading"
+        class="version-drawer-content"
+      >
         <div
           v-for="ver in versions"
           :key="ver.id"
@@ -145,7 +211,12 @@
             <span class="version-time">{{ new Date(ver.created_at).toLocaleString() }}</span>
           </div>
           <div class="version-actions">
-            <el-button size="small" text type="primary" @click="viewVersionDetail(ver)">
+            <el-button
+              size="small"
+              text
+              type="primary"
+              @click="viewVersionDetail(ver)"
+            >
               {{ $t('storefront.view') }}
             </el-button>
             <el-button
@@ -287,7 +358,7 @@ const onBlockDragStart = (event: DragEvent, index: number) => {
   event.dataTransfer?.setData('text/plain', `block-${index}`)
 }
 
-const onDrop = async (_event: DragEvent) => {
+const onDrop = async () => {
   if (draggedBlockType) {
     // Add new block
     const newBlock: DecorationDTO = {

@@ -1,23 +1,36 @@
 <template>
   <div class="transaction-detail-page">
     <!-- Page Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="page-header">
         <div class="header-left">
-          <el-button link @click="handleBack">
+          <el-button
+            link
+            @click="handleBack"
+          >
             <el-icon><ArrowLeft /></el-icon>
             {{ $t('payments.backToList') }}
           </el-button>
           <el-divider direction="vertical" />
           <h2 class="page-title">
             {{ $t('payments.transactionDetail') }}
-            <el-tag v-if="transaction" :type="getStatusType(transaction.status)" size="small">
+            <el-tag
+              v-if="transaction"
+              :type="getStatusType(transaction.status)"
+              size="small"
+            >
               {{ transaction.status_text }}
             </el-tag>
           </h2>
         </div>
         <div class="header-right">
-          <el-button @click="handleRefresh" :loading="loading">
+          <el-button
+            :loading="loading"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>
             {{ $t('common.refresh') }}
           </el-button>
@@ -26,22 +39,36 @@
     </el-card>
 
     <!-- Loading State -->
-    <el-skeleton v-if="loading" :rows="10" animated />
+    <el-skeleton
+      v-if="loading"
+      :rows="10"
+      animated
+    />
 
     <!-- Transaction Details -->
     <template v-else-if="transaction">
       <!-- Basic Information -->
-      <el-card class="detail-card" shadow="never">
+      <el-card
+        class="detail-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <span class="card-title">{{ $t('payments.basicInfo') }}</span>
           </div>
         </template>
-        <el-descriptions :column="2" border>
+        <el-descriptions
+          :column="2"
+          border
+        >
           <el-descriptions-item :label="$t('payments.transactionId')">
             <div class="id-cell">
               <span class="id-text">{{ transaction.transaction_id }}</span>
-              <el-button link size="small" @click="copyTransactionId">
+              <el-button
+                link
+                size="small"
+                @click="copyTransactionId"
+              >
                 <el-icon><CopyDocument /></el-icon>
               </el-button>
             </div>
@@ -50,12 +77,21 @@
             {{ transaction.id }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('payments.orderNo')">
-            <el-button type="primary" link size="small" @click="viewOrder">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="viewOrder"
+            >
               {{ transaction.order_no }}
             </el-button>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('payments.paymentMethod')">
-            <el-tag :type="getPaymentMethodTagType(transaction.payment_method)" effect="plain" size="small">
+            <el-tag
+              :type="getPaymentMethodTagType(transaction.payment_method)"
+              effect="plain"
+              size="small"
+            >
               {{ transaction.payment_method_text }}
             </el-tag>
           </el-descriptions-item>
@@ -63,19 +99,28 @@
             <span class="channel-id">{{ transaction.channel_transaction_id || '-' }}</span>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('payments.status')">
-            <status-tag :status="transaction.status" :type-map="statusTypeMap" />
+            <status-tag
+              :status="transaction.status"
+              :type-map="statusTypeMap"
+            />
           </el-descriptions-item>
         </el-descriptions>
       </el-card>
 
       <!-- Amount Information -->
-      <el-card class="detail-card" shadow="never">
+      <el-card
+        class="detail-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <span class="card-title">{{ $t('payments.amountInfo') }}</span>
           </div>
         </template>
-        <el-descriptions :column="3" border>
+        <el-descriptions
+          :column="3"
+          border
+        >
           <el-descriptions-item :label="$t('payments.amount')">
             <span class="amount-value">{{ transaction.currency }} {{ formatAmount(transaction.amount) }}</span>
           </el-descriptions-item>
@@ -89,7 +134,10 @@
       </el-card>
 
       <!-- Timeline -->
-      <el-card class="detail-card" shadow="never">
+      <el-card
+        class="detail-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <span class="card-title">{{ $t('payments.timeline') }}</span>
@@ -101,32 +149,49 @@
             :type="transaction.status === 0 ? 'primary' : 'success'"
             :hollow="transaction.status === 0"
           >
-            <p class="timeline-title">{{ $t('payments.transactionCreated') }}</p>
-            <p class="timeline-detail">{{ transaction.transaction_id }}</p>
+            <p class="timeline-title">
+              {{ $t('payments.transactionCreated') }}
+            </p>
+            <p class="timeline-detail">
+              {{ transaction.transaction_id }}
+            </p>
           </el-timeline-item>
           <el-timeline-item
             v-if="transaction.paid_at"
             timestamp="formatTime(transaction.paid_at)"
             type="success"
           >
-            <p class="timeline-title">{{ $t('payments.paymentSucceeded') }}</p>
-            <p class="timeline-detail">{{ transaction.channel_transaction_id }}</p>
+            <p class="timeline-title">
+              {{ $t('payments.paymentSucceeded') }}
+            </p>
+            <p class="timeline-detail">
+              {{ transaction.channel_transaction_id }}
+            </p>
           </el-timeline-item>
           <el-timeline-item
             v-if="transaction.status === 2"
             :timestamp="formatTime(transaction.created_at)"
             type="danger"
           >
-            <p class="timeline-title">{{ $t('payments.paymentFailed') }}</p>
+            <p class="timeline-title">
+              {{ $t('payments.paymentFailed') }}
+            </p>
           </el-timeline-item>
         </el-timeline>
       </el-card>
     </template>
 
     <!-- Error State -->
-    <el-card v-else-if="error" class="error-card" shadow="never">
+    <el-card
+      v-else-if="error"
+      class="error-card"
+      shadow="never"
+    >
       <el-empty :description="$t('payments.loadFailed')">
-        <el-button type="primary" @click="handleRefresh">
+        <el-button
+          type="primary"
+          @click="handleRefresh"
+        >
           {{ $t('common.refresh') }}
         </el-button>
       </el-empty>

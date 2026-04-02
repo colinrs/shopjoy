@@ -1,65 +1,140 @@
 <template>
-  <el-form :model="localForm" label-width="140px" :rules="formRules" ref="formRef">
+  <el-form
+    ref="formRef"
+    :model="localForm"
+    label-width="140px"
+    :rules="formRules"
+  >
     <!-- Basic Information Section -->
     <div class="form-section">
-      <h3 class="section-title">{{ $t('products.basicInfo') }}</h3>
+      <h3 class="section-title">
+        {{ $t('products.basicInfo') }}
+      </h3>
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item :label="$t('products.productName')" prop="name">
-            <el-input v-model="localForm.name" :placeholder="$t('products.enterProductName')" />
+          <el-form-item
+            :label="$t('products.productName')"
+            prop="name"
+          >
+            <el-input
+              v-model="localForm.name"
+              :placeholder="$t('products.enterProductName')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="SKU" prop="sku">
-            <el-input v-model="localForm.sku" :placeholder="$t('products.enterSKU')" />
+          <el-form-item
+            label="SKU"
+            prop="sku"
+          >
+            <el-input
+              v-model="localForm.sku"
+              :placeholder="$t('products.enterSKU')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.brand')">
-            <el-input v-model="localForm.brand" :placeholder="$t('products.enterBrand')" />
+            <el-input
+              v-model="localForm.brand"
+              :placeholder="$t('products.enterBrand')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.categoryId')">
-            <el-input-number v-model="localForm.category_id" :min="0" style="width: 100%" />
+            <el-input-number
+              v-model="localForm.category_id"
+              :min="0"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="24">
           <el-form-item :label="$t('products.productDescription')">
-            <el-input v-model="localForm.description" type="textarea" :rows="4" :placeholder="$t('products.enterProductDescription')" />
+            <el-input
+              v-model="localForm.description"
+              type="textarea"
+              :rows="4"
+              :placeholder="$t('products.enterProductDescription')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item :label="$t('products.price')" prop="price">
-            <el-input-number v-model="localForm.price" :min="0" :precision="2" style="width: 100%" />
+          <el-form-item
+            :label="$t('products.price')"
+            prop="price"
+          >
+            <el-input-number
+              v-model="localForm.price"
+              :min="0"
+              :precision="2"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.currency')">
-            <el-select v-model="localForm.currency" style="width: 100%">
-              <el-option label="USD" value="USD" />
-              <el-option label="EUR" value="EUR" />
-              <el-option label="GBP" value="GBP" />
-              <el-option label="CNY" value="CNY" />
+            <el-select
+              v-model="localForm.currency"
+              style="width: 100%"
+            >
+              <el-option
+                label="USD"
+                value="USD"
+              />
+              <el-option
+                label="EUR"
+                value="EUR"
+              />
+              <el-option
+                label="GBP"
+                value="GBP"
+              />
+              <el-option
+                label="CNY"
+                value="CNY"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.costPrice')">
-            <el-input-number v-model="localForm.cost_price" :min="0" :precision="2" style="width: 100%" />
+            <el-input-number
+              v-model="localForm.cost_price"
+              :min="0"
+              :precision="2"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.stock')">
-            <el-input-number v-model="localForm.stock" :min="0" style="width: 100%" />
+            <el-input-number
+              v-model="localForm.stock"
+              :min="0"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('common.status')">
-            <el-select v-model="localForm.status" style="width: 100%">
-              <el-option :label="$t('products.draft')" value="draft" />
-              <el-option :label="$t('products.onSale')" value="on_sale" />
-              <el-option :label="$t('products.offSale')" value="off_sale" />
+            <el-select
+              v-model="localForm.status"
+              style="width: 100%"
+            >
+              <el-option
+                :label="$t('products.draft')"
+                value="draft"
+              />
+              <el-option
+                :label="$t('products.onSale')"
+                value="on_sale"
+              />
+              <el-option
+                :label="$t('products.offSale')"
+                value="off_sale"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -73,26 +148,49 @@
 
     <!-- Compliance Section -->
     <div class="form-section">
-      <h3 class="section-title">{{ $t('products.complianceInfo') }}</h3>
+      <h3 class="section-title">
+        {{ $t('products.complianceInfo') }}
+      </h3>
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item :label="$t('products.hsCode')">
-            <el-input v-model="localForm.hs_code" :placeholder="$t('products.enterHsCode')" />
+            <el-input
+              v-model="localForm.hs_code"
+              :placeholder="$t('products.enterHsCode')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.coo')">
-            <el-input v-model="localForm.coo" :placeholder="$t('products.enterCoo')" />
+            <el-input
+              v-model="localForm.coo"
+              :placeholder="$t('products.enterCoo')"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item :label="$t('products.weight')">
-            <el-input v-model="localForm.weight" :placeholder="$t('products.weightPlaceholder')">
+            <el-input
+              v-model="localForm.weight"
+              :placeholder="$t('products.weightPlaceholder')"
+            >
               <template #append>
-                <el-select v-model="localForm.weight_unit" style="width: 80px">
-                  <el-option label="kg" value="kg" />
-                  <el-option label="g" value="g" />
-                  <el-option label="lb" value="lb" />
+                <el-select
+                  v-model="localForm.weight_unit"
+                  style="width: 80px"
+                >
+                  <el-option
+                    label="kg"
+                    value="kg"
+                  />
+                  <el-option
+                    label="g"
+                    value="g"
+                  />
+                  <el-option
+                    label="lb"
+                    value="lb"
+                  />
                 </el-select>
               </template>
             </el-input>
@@ -102,18 +200,33 @@
           <el-form-item :label="$t('products.dimensions')">
             <el-row :gutter="8">
               <el-col :span="8">
-                <el-input v-model="localForm.length" :placeholder="$t('products.length')">
-                  <template #append>cm</template>
+                <el-input
+                  v-model="localForm.length"
+                  :placeholder="$t('products.length')"
+                >
+                  <template #append>
+                    cm
+                  </template>
                 </el-input>
               </el-col>
               <el-col :span="8">
-                <el-input v-model="localForm.width" :placeholder="$t('products.width')">
-                  <template #append>cm</template>
+                <el-input
+                  v-model="localForm.width"
+                  :placeholder="$t('products.width')"
+                >
+                  <template #append>
+                    cm
+                  </template>
                 </el-input>
               </el-col>
               <el-col :span="8">
-                <el-input v-model="localForm.height" :placeholder="$t('products.height')">
-                  <template #append>cm</template>
+                <el-input
+                  v-model="localForm.height"
+                  :placeholder="$t('products.height')"
+                >
+                  <template #append>
+                    cm
+                  </template>
                 </el-input>
               </el-col>
             </el-row>
@@ -122,11 +235,21 @@
         <el-col :span="24">
           <el-form-item :label="$t('products.dangerousGoods')">
             <el-checkbox-group v-model="localForm.dangerous_goods">
-              <el-checkbox label="battery">{{ $t('products.battery') }}</el-checkbox>
-              <el-checkbox label="liquid">{{ $t('products.liquid') }}</el-checkbox>
-              <el-checkbox label="flammable">{{ $t('products.flammable') }}</el-checkbox>
-              <el-checkbox label="magnetic">{{ $t('products.magnetic') }}</el-checkbox>
-              <el-checkbox label="fragile">{{ $t('products.fragile') }}</el-checkbox>
+              <el-checkbox label="battery">
+                {{ $t('products.battery') }}
+              </el-checkbox>
+              <el-checkbox label="liquid">
+                {{ $t('products.liquid') }}
+              </el-checkbox>
+              <el-checkbox label="flammable">
+                {{ $t('products.flammable') }}
+              </el-checkbox>
+              <el-checkbox label="magnetic">
+                {{ $t('products.magnetic') }}
+              </el-checkbox>
+              <el-checkbox label="fragile">
+                {{ $t('products.fragile') }}
+              </el-checkbox>
             </el-checkbox-group>
           </el-form-item>
         </el-col>
@@ -135,11 +258,21 @@
 
     <!-- Images Section -->
     <div class="form-section">
-      <h3 class="section-title">{{ $t('products.productImage') }}</h3>
+      <h3 class="section-title">
+        {{ $t('products.productImage') }}
+      </h3>
       <el-form-item :label="$t('products.imageUrl')">
         <div class="image-list">
-          <div v-for="(img, index) in localForm.images" :key="index" class="image-item">
-            <el-image :src="img" fit="cover" class="product-image">
+          <div
+            v-for="(img, index) in localForm.images"
+            :key="index"
+            class="image-item"
+          >
+            <el-image
+              :src="img"
+              fit="cover"
+              class="product-image"
+            >
               <template #error>
                 <div class="image-placeholder">
                   <el-icon><Picture /></el-icon>
@@ -156,7 +289,10 @@
               <el-icon><Close /></el-icon>
             </el-button>
           </div>
-          <div class="add-image" @click="handleAddImage">
+          <div
+            class="add-image"
+            @click="handleAddImage"
+          >
             <el-icon><Plus /></el-icon>
             <span>{{ $t('products.addImage') }}</span>
           </div>

@@ -1,41 +1,82 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="$emit('update:visible', $event)"
     :title="isEdit ? $t('points.editRule') : $t('points.createRule')"
     width="600px"
     destroy-on-close
+    @update:model-value="$emit('update:visible', $event)"
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="100px"
+    >
       <!-- Basic Info -->
-      <el-form-item :label="$t('points.ruleName')" prop="name">
-        <el-input v-model="form.name" :placeholder="$t('points.example10Coupon')" maxlength="100" />
+      <el-form-item
+        :label="$t('points.ruleName')"
+        prop="name"
+      >
+        <el-input
+          v-model="form.name"
+          :placeholder="$t('points.example10Coupon')"
+          maxlength="100"
+        />
       </el-form-item>
 
       <el-form-item :label="$t('points.description')">
-        <el-input v-model="form.description" type="textarea" :rows="2" :placeholder="$t('points.ruleDescPlaceholder')" />
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="2"
+          :placeholder="$t('points.ruleDescPlaceholder')"
+        />
       </el-form-item>
 
       <!-- Coupon Selection -->
-      <el-form-item :label="$t('points.relatedCoupon')" prop="coupon_id">
-        <CouponSelector v-model="form.coupon_id" @change="handleCouponChange" />
+      <el-form-item
+        :label="$t('points.relatedCoupon')"
+        prop="coupon_id"
+      >
+        <CouponSelector
+          v-model="form.coupon_id"
+          @change="handleCouponChange"
+        />
       </el-form-item>
 
       <!-- Points Required -->
-      <el-form-item :label="$t('points.requiredPoints')" prop="points_required">
-        <el-input-number v-model="form.points_required" :min="1" :max="999999" style="width: 200px" />
+      <el-form-item
+        :label="$t('points.requiredPoints')"
+        prop="points_required"
+      >
+        <el-input-number
+          v-model="form.points_required"
+          :min="1"
+          :max="999999"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.pointsForExchange') }}</span>
       </el-form-item>
 
       <!-- Stock -->
       <el-form-item :label="$t('points.totalStock')">
-        <el-input-number v-model="form.total_stock" :min="0" :max="999999" style="width: 200px" />
+        <el-input-number
+          v-model="form.total_stock"
+          :min="0"
+          :max="999999"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.zeroNoLimit') }}</span>
       </el-form-item>
 
       <!-- Per User Limit -->
       <el-form-item :label="$t('points.perUserLimit')">
-        <el-input-number v-model="form.per_user_limit" :min="0" :max="100" style="width: 200px" />
+        <el-input-number
+          v-model="form.per_user_limit"
+          :min="0"
+          :max="100"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.zeroNoLimit') }}</span>
       </el-form-item>
 
@@ -53,8 +94,14 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSave" :loading="loading">
+      <el-button @click="$emit('update:visible', false)">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleSave"
+      >
         {{ $t('common.save') }}
       </el-button>
     </template>

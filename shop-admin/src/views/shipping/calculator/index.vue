@@ -1,20 +1,31 @@
 <template>
   <div class="shipping-calculator-page">
     <!-- Page Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
           <h2>{{ $t('shipping.shippingCalculatorTitle') }}</h2>
-          <p class="header-desc">{{ $t('shipping.shippingCalculatorDesc') }}</p>
+          <p class="header-desc">
+            {{ $t('shipping.shippingCalculatorDesc') }}
+          </p>
         </div>
       </div>
     </el-card>
 
     <!-- Calculator -->
-    <el-card class="calculator-card" shadow="never">
+    <el-card
+      class="calculator-card"
+      shadow="never"
+    >
       <el-row :gutter="24">
         <!-- Address Selection -->
-        <el-col :span="10" :xs="24">
+        <el-col
+          :span="10"
+          :xs="24"
+        >
           <div class="address-section">
             <h3 class="section-title">
               <el-icon><Location /></el-icon>
@@ -75,30 +86,49 @@
         </el-col>
 
         <!-- Test Items -->
-        <el-col :span="14" :xs="24">
+        <el-col
+          :span="14"
+          :xs="24"
+        >
           <div class="items-section">
             <div class="section-header">
               <h3 class="section-title">
                 <el-icon><Goods /></el-icon>
                 {{ $t('shipping.testProducts') }}
               </h3>
-              <el-button type="primary" size="small" @click="addTestItem">
+              <el-button
+                type="primary"
+                size="small"
+                @click="addTestItem"
+              >
                 <el-icon><Plus /></el-icon>
                 {{ $t('shipping.addProductBtn') }}
               </el-button>
             </div>
 
             <div class="items-list">
-              <div v-for="(item, index) in testItems" :key="index" class="test-item">
+              <div
+                v-for="(item, index) in testItems"
+                :key="index"
+                class="test-item"
+              >
                 <div class="item-header">
                   <span class="item-number">{{ $t('shipping.product') }} {{ index + 1 }}</span>
-                  <el-button type="danger" link size="small" @click="removeTestItem(index)">
+                  <el-button
+                    type="danger"
+                    link
+                    size="small"
+                    @click="removeTestItem(index)"
+                  >
                     {{ $t('shipping.remove') }}
                   </el-button>
                 </div>
 
                 <el-row :gutter="16">
-                  <el-col :span="12" :xs="24">
+                  <el-col
+                    :span="12"
+                    :xs="24"
+                  >
                     <el-form-item :label="$t('shipping.product')">
                       <el-select
                         v-model="item.product_id"
@@ -116,14 +146,27 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6" :xs="12">
+                  <el-col
+                    :span="6"
+                    :xs="12"
+                  >
                     <el-form-item :label="$t('shipping.quantity')">
-                      <el-input-number v-model="item.quantity" :min="1" :max="99" />
+                      <el-input-number
+                        v-model="item.quantity"
+                        :min="1"
+                        :max="99"
+                      />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6" :xs="12">
+                  <el-col
+                    :span="6"
+                    :xs="12"
+                  >
                     <el-form-item :label="$t('shipping.weightG')">
-                      <el-input-number v-model="item.weight" :min="1" />
+                      <el-input-number
+                        v-model="item.weight"
+                        :min="1"
+                      />
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -135,13 +178,22 @@
                     :precision="2"
                     style="width: 200px"
                   >
-                    <template #prefix>¥</template>
+                    <template #prefix>
+                      ¥
+                    </template>
                   </el-input-number>
                 </el-form-item>
               </div>
 
-              <el-empty v-if="testItems.length === 0" :description="$t('shipping.pleaseAddProducts')" :image-size="80">
-                <el-button type="primary" @click="addTestItem">
+              <el-empty
+                v-if="testItems.length === 0"
+                :description="$t('shipping.pleaseAddProducts')"
+                :image-size="80"
+              >
+                <el-button
+                  type="primary"
+                  @click="addTestItem"
+                >
                   {{ $t('shipping.addProductBtn') }}
                 </el-button>
               </el-empty>
@@ -155,9 +207,9 @@
         <el-button
           type="primary"
           size="large"
-          @click="calculateShipping"
           :loading="calculating"
           :disabled="!isFormValid"
+          @click="calculateShipping"
         >
           <el-icon><Coin /></el-icon>
           {{ $t('shipping.calculateShipping') }}
@@ -166,7 +218,11 @@
     </el-card>
 
     <!-- Result -->
-    <el-card v-if="result" class="result-card" shadow="never">
+    <el-card
+      v-if="result"
+      class="result-card"
+      shadow="never"
+    >
       <div class="result-header">
         <div class="fee-display">
           <span class="fee-label">{{ $t('shipping.shippingFee') }}</span>
@@ -177,7 +233,10 @@
       <el-divider />
 
       <div class="result-details">
-        <el-descriptions :column="2" border>
+        <el-descriptions
+          :column="2"
+          border
+        >
           <el-descriptions-item :label="$t('shipping.matchingTemplate')">
             {{ result.template_name }}
           </el-descriptions-item>
@@ -187,16 +246,24 @@
         </el-descriptions>
 
         <div class="fee-breakdown">
-          <h4 class="breakdown-title">{{ $t('shipping.feeDetails') }}</h4>
+          <h4 class="breakdown-title">
+            {{ $t('shipping.feeDetails') }}
+          </h4>
           <div class="breakdown-item">
             <span class="breakdown-label">{{ $t('shipping.billingMethodLabel') }}</span>
             <span class="breakdown-value">{{ getFeeTypeLabel(result.fee_detail.fee_type) }}</span>
           </div>
-          <div class="breakdown-item" v-if="result.fee_detail.fee_type === 'by_weight'">
+          <div
+            v-if="result.fee_detail.fee_type === 'by_weight'"
+            class="breakdown-item"
+          >
             <span class="breakdown-label">{{ $t('shipping.calculatedWeight') }}</span>
             <span class="breakdown-value">{{ result.fee_detail.calculated_weight }}g</span>
           </div>
-          <div class="breakdown-item" v-if="result.fee_detail.fee_type === 'by_count'">
+          <div
+            v-if="result.fee_detail.fee_type === 'by_count'"
+            class="breakdown-item"
+          >
             <span class="breakdown-label">{{ $t('shipping.calculatedUnits') }}</span>
             <span class="breakdown-value">{{ result.fee_detail.calculated_units }} {{ $t('shipping.itemsUnit') }}</span>
           </div>
@@ -204,7 +271,10 @@
             <span class="breakdown-label">{{ $t('shipping.baseFee') }}</span>
             <span class="breakdown-value">¥ {{ formatAmount(result.fee_detail.first_fee) }}</span>
           </div>
-          <div class="breakdown-item" v-if="getAdditionalUnits > 0">
+          <div
+            v-if="getAdditionalUnits > 0"
+            class="breakdown-item"
+          >
             <span class="breakdown-label">{{ $t('shipping.additionalFee', { units: getAdditionalUnits }) }}：</span>
             <span class="breakdown-value">¥ {{ formatAdditionalFee }}</span>
           </div>

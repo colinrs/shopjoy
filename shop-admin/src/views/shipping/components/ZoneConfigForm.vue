@@ -1,20 +1,45 @@
 <template>
   <!-- Card Mode (for list display) -->
-  <el-card v-if="!isDialog && zone" class="zone-card" shadow="never">
+  <el-card
+    v-if="!isDialog && zone"
+    class="zone-card"
+    shadow="never"
+  >
     <div class="zone-header">
       <div class="zone-title-row">
-        <el-icon class="drag-handle"><Rank /></el-icon>
-        <h4 class="zone-name">{{ zone.name }}</h4>
-        <el-tag size="small" type="info">{{ getFeeTypeLabel(zone.fee_type) }}</el-tag>
+        <el-icon class="drag-handle">
+          <Rank />
+        </el-icon>
+        <h4 class="zone-name">
+          {{ zone.name }}
+        </h4>
+        <el-tag
+          size="small"
+          type="info"
+        >
+          {{ getFeeTypeLabel(zone.fee_type) }}
+        </el-tag>
       </div>
       <div class="zone-actions">
-        <el-button type="primary" link size="small" @click="startEdit">
+        <el-button
+          type="primary"
+          link
+          size="small"
+          @click="startEdit"
+        >
           <el-icon><Edit /></el-icon>
           {{ $t('common.edit') }}
         </el-button>
-        <el-popconfirm :title="$t('shipping.confirmDelete')" @confirm="$emit('delete', zone.id)">
+        <el-popconfirm
+          :title="$t('shipping.confirmDelete')"
+          @confirm="$emit('delete', zone.id)"
+        >
           <template #reference>
-            <el-button type="danger" link size="small">
+            <el-button
+              type="danger"
+              link
+              size="small"
+            >
               <el-icon><Delete /></el-icon>
               {{ $t('common.delete') }}
             </el-button>
@@ -32,7 +57,10 @@
         <span class="label">{{ $t('shipping.shippingRule') }}：</span>
         <span class="value">{{ formatFeeConfig(zone) }}</span>
       </div>
-      <div class="zone-row" v-if="hasFreeThreshold">
+      <div
+        v-if="hasFreeThreshold"
+        class="zone-row"
+      >
         <span class="label">{{ $t('shipping.freeShippingCondition') }}：</span>
         <span class="value">{{ formatFreeThreshold(zone) }}</span>
       </div>
@@ -40,12 +68,28 @@
   </el-card>
 
   <!-- Dialog/Form Mode -->
-  <el-form v-else :model="form" :rules="rules" ref="formRef" label-width="100px">
-    <el-form-item :label="$t('shipping.zoneName')" prop="name">
-      <el-input v-model="form.name" :placeholder="$t('shipping.enterZoneName')" />
+  <el-form
+    v-else
+    ref="formRef"
+    :model="form"
+    :rules="rules"
+    label-width="100px"
+  >
+    <el-form-item
+      :label="$t('shipping.zoneName')"
+      prop="name"
+    >
+      <el-input
+        v-model="form.name"
+        :placeholder="$t('shipping.enterZoneName')"
+      />
     </el-form-item>
 
-    <el-form-item :label="$t('shipping.deliveryArea')" prop="regions" required>
+    <el-form-item
+      :label="$t('shipping.deliveryArea')"
+      prop="regions"
+      required
+    >
       <el-input
         v-model="selectedRegionsText"
         readonly
@@ -56,7 +100,10 @@
           <el-icon><Location /></el-icon>
         </template>
       </el-input>
-      <div class="selected-regions" v-if="form.regions.length > 0">
+      <div
+        v-if="form.regions.length > 0"
+        class="selected-regions"
+      >
         <el-tag
           v-for="region in displayRegions"
           :key="region"
@@ -65,13 +112,19 @@
         >
           {{ region }}
         </el-tag>
-        <span v-if="form.regions.length > 10" class="more-regions">
+        <span
+          v-if="form.regions.length > 10"
+          class="more-regions"
+        >
           {{ $t('shipping.andMoreCount', { count: form.regions.length }) }}
         </span>
       </div>
     </el-form-item>
 
-    <el-form-item :label="$t('shipping.feeType')" prop="fee_type">
+    <el-form-item
+      :label="$t('shipping.feeType')"
+      prop="fee_type"
+    >
       <FeeTypeSelector v-model="form" />
     </el-form-item>
 
@@ -88,7 +141,9 @@
             :precision="2"
             style="width: 100%; margin-top: 8px"
           >
-            <template #prefix>¥</template>
+            <template #prefix>
+              ¥
+            </template>
           </el-input-number>
         </el-col>
         <el-col :span="12">
@@ -106,8 +161,14 @@
     </el-form-item>
 
     <el-form-item class="form-actions">
-      <el-button @click="$emit('cancel')">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSubmit" :loading="submitting">
+      <el-button @click="$emit('cancel')">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="submitting"
+        @click="handleSubmit"
+      >
         {{ zone ? $t('shipping.update') : $t('shipping.add') }}
       </el-button>
     </el-form-item>
@@ -178,7 +239,7 @@ const rules = {
   ],
   regions: [
     {
-      validator: (_rule: FormItemRule, value: string[], callback: (error?: Error) => void) => {
+      validator: (_rule: FormItemRule, value: string[], callback: () => void) => {
         if (!value || value.length === 0) {
           callback(new Error('shipping.selectFeeType'))
         } else {

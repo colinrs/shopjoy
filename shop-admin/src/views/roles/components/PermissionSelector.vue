@@ -6,7 +6,10 @@
     destroy-on-close
     @update:model-value="$emit('update:visible', $event)"
   >
-    <div v-loading="loading" class="permission-selector">
+    <div
+      v-loading="loading"
+      class="permission-selector"
+    >
       <el-input
         v-model="searchQuery"
         :placeholder="$t('roles.searchPermission')"
@@ -34,13 +37,28 @@
           <template #default="{ data }">
             <span class="tree-node">
               <span class="node-label">{{ data.name }}</span>
-              <el-tag v-if="data.type === 0" type="primary" size="small" class="type-tag">
+              <el-tag
+                v-if="data.type === 0"
+                type="primary"
+                size="small"
+                class="type-tag"
+              >
                 {{ $t('roles.menu') }}
               </el-tag>
-              <el-tag v-else-if="data.type === 1" type="success" size="small" class="type-tag">
+              <el-tag
+                v-else-if="data.type === 1"
+                type="success"
+                size="small"
+                class="type-tag"
+              >
                 {{ $t('roles.button') }}
               </el-tag>
-              <el-tag v-else type="warning" size="small" class="type-tag">
+              <el-tag
+                v-else
+                type="warning"
+                size="small"
+                class="type-tag"
+              >
                 {{ $t('roles.api') }}
               </el-tag>
             </span>
@@ -54,8 +72,14 @@
     </div>
 
     <template #footer>
-      <el-button @click="handleCancel">{{ $t('roles.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
+      <el-button @click="handleCancel">
+        {{ $t('roles.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="submitLoading"
+        @click="handleSubmit"
+      >
         {{ $t('roles.confirm') }}
       </el-button>
     </template>
@@ -82,8 +106,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:visible', val: boolean): void
-  (e: 'success'): void
+  'update:visible': [val: boolean]
+  'success': []
 }>()
 
 const { t } = useI18n()

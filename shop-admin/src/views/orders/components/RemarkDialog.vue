@@ -6,18 +6,35 @@
     :close-on-click-modal="false"
     destroy-on-close
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="100px"
+    >
       <!-- Current Remark Display -->
       <div class="current-remark-section">
-        <p class="section-label">{{ $t('orders.currentRemark') }}</p>
+        <p class="section-label">
+          {{ $t('orders.currentRemark') }}
+        </p>
         <div class="current-remark-content">
-          <p v-if="currentRemark">{{ currentRemark }}</p>
-          <p v-else class="no-remark">{{ $t('orders.noRemark') }}</p>
+          <p v-if="currentRemark">
+            {{ currentRemark }}
+          </p>
+          <p
+            v-else
+            class="no-remark"
+          >
+            {{ $t('orders.noRemark') }}
+          </p>
         </div>
       </div>
 
       <!-- New Remark Input -->
-      <el-form-item :label="$t('orders.newRemark')" prop="remark">
+      <el-form-item
+        :label="$t('orders.newRemark')"
+        prop="remark"
+      >
         <el-input
           v-model="form.remark"
           type="textarea"
@@ -30,7 +47,9 @@
 
       <!-- Quick Tags -->
       <div class="quick-tags-section">
-        <p class="section-label">{{ $t('orders.quickTags') }}</p>
+        <p class="section-label">
+          {{ $t('orders.quickTags') }}
+        </p>
         <div class="quick-tags">
           <el-tag
             v-for="tag in quickTags"
@@ -46,8 +65,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           {{ $t('orders.saveRemark') }}
         </el-button>
       </div>

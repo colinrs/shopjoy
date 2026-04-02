@@ -1,19 +1,36 @@
 <template>
   <div class="banner-preview">
-    <div v-if="!config?.images?.length" class="preview-placeholder">
-      <el-icon size="32"><Picture /></el-icon>
+    <div
+      v-if="!config?.images?.length"
+      class="preview-placeholder"
+    >
+      <el-icon size="32">
+        <Picture />
+      </el-icon>
       <span>{{ $t('storefront.bannerPreview') }} ({{ config?.images?.length || 0 }} {{ $t('points.images') }})</span>
     </div>
-    <div v-else class="preview-carousel">
+    <div
+      v-else
+      class="preview-carousel"
+    >
       <el-carousel
         :autoplay="config?.autoplay !== false"
         :interval="config?.interval || 5000"
         height="200px"
         indicator-position="outside"
       >
-        <el-carousel-item v-for="(img, idx) in config.images.slice(0, 3)" :key="idx">
-          <div class="carousel-image" :style="{ backgroundImage: `url(${img})` }">
-            <span v-if="config.images.length > 3 && idx === 2" class="more-overlay">
+        <el-carousel-item
+          v-for="(img, idx) in config.images.slice(0, 3)"
+          :key="idx"
+        >
+          <div
+            class="carousel-image"
+            :style="{ backgroundImage: `url(${img})` }"
+          >
+            <span
+              v-if="config.images.length > 3 && idx === 2"
+              class="more-overlay"
+            >
               +{{ config.images.length - 3 }} {{ $t('points.images') }}
             </span>
           </div>

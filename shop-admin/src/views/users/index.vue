@@ -1,35 +1,69 @@
 <template>
   <div class="users-page">
     <!-- Stats Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card primary">
-          <p class="stat-value">{{ stats.total }}</p>
-          <p class="stat-label">{{ $t('users.totalUsers') }}</p>
+          <p class="stat-value">
+            {{ stats.total }}
+          </p>
+          <p class="stat-label">
+            {{ $t('users.totalUsers') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card success">
-          <p class="stat-value">{{ stats.active }}</p>
-          <p class="stat-label">{{ $t('users.activeUsers') }}</p>
+          <p class="stat-value">
+            {{ stats.active }}
+          </p>
+          <p class="stat-label">
+            {{ $t('users.activeUsers') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card warning">
-          <p class="stat-value">{{ stats.new_today }}</p>
-          <p class="stat-label">{{ $t('users.newUsersToday') }}</p>
+          <p class="stat-value">
+            {{ stats.new_today }}
+          </p>
+          <p class="stat-label">
+            {{ $t('users.newUsersToday') }}
+          </p>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card danger">
-          <p class="stat-value">{{ stats.suspended }}</p>
-          <p class="stat-label">{{ $t('users.suspendedUsers') }}</p>
+          <p class="stat-value">
+            {{ stats.suspended }}
+          </p>
+          <p class="stat-label">
+            {{ $t('users.suspendedUsers') }}
+          </p>
         </div>
       </el-col>
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -44,28 +78,57 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="statusFilter" :placeholder="$t('users.accountStatus')" clearable class="filter-select" @change="handleSearch">
-            <el-option :label="$t('users.all')" :value="0" />
-            <el-option :label="$t('users.normal')" :value="1" />
-            <el-option :label="$t('users.disabled')" :value="2" />
+          <el-select
+            v-model="statusFilter"
+            :placeholder="$t('users.accountStatus')"
+            clearable
+            class="filter-select"
+            @change="handleSearch"
+          >
+            <el-option
+              :label="$t('users.all')"
+              :value="0"
+            />
+            <el-option
+              :label="$t('users.normal')"
+              :value="1"
+            />
+            <el-option
+              :label="$t('users.disabled')"
+              :value="2"
+            />
           </el-select>
           <el-button @click="showAdvancedFilters = !showAdvancedFilters">
             <el-icon><Filter /></el-icon>
             {{ $t('users.advancedFilters') }}
-            <el-icon class="filter-arrow" :class="{ 'is-expanded': showAdvancedFilters }"><ArrowDown /></el-icon>
+            <el-icon
+              class="filter-arrow"
+              :class="{ 'is-expanded': showAdvancedFilters }"
+            >
+              <ArrowDown />
+            </el-icon>
           </el-button>
         </div>
         <div class="filter-right">
-          <el-button @click="handleExport" :loading="exportLoading">
+          <el-button
+            :loading="exportLoading"
+            @click="handleExport"
+          >
             <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
-          <el-button type="primary" @click="handleRefresh">
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
           </el-button>
         </div>
       </div>
       <!-- Advanced Filters -->
-      <div v-if="showAdvancedFilters" class="advanced-filters">
+      <div
+        v-if="showAdvancedFilters"
+        class="advanced-filters"
+      >
         <el-row :gutter="16">
           <el-col :span="6">
             <el-input
@@ -75,7 +138,9 @@
               clearable
               @clear="clearAdvancedFilters"
             >
-              <template #prefix>{{ $t('users.points') }}</template>
+              <template #prefix>
+                {{ $t('users.points') }}
+              </template>
             </el-input>
           </el-col>
           <el-col :span="6">
@@ -86,7 +151,9 @@
               clearable
               @clear="clearAdvancedFilters"
             >
-              <template #prefix>{{ $t('users.points') }}</template>
+              <template #prefix>
+                {{ $t('users.points') }}
+              </template>
             </el-input>
           </el-col>
           <el-col :span="6">
@@ -97,7 +164,9 @@
               clearable
               @clear="clearAdvancedFilters"
             >
-              <template #prefix>{{ $t('users.orders') }}</template>
+              <template #prefix>
+                {{ $t('users.orders') }}
+              </template>
             </el-input>
           </el-col>
           <el-col :span="6">
@@ -108,7 +177,9 @@
               clearable
               @clear="clearAdvancedFilters"
             >
-              <template #prefix>{{ $t('users.orders') }}</template>
+              <template #prefix>
+                {{ $t('users.orders') }}
+              </template>
             </el-input>
           </el-col>
         </el-row>
@@ -116,46 +187,100 @@
     </el-card>
 
     <!-- Bulk Actions -->
-    <div class="bulk-actions" v-if="selectedUsers.length > 0">
+    <div
+      v-if="selectedUsers.length > 0"
+      class="bulk-actions"
+    >
       <span class="selected-count">{{ $t('users.selectedCount', { count: selectedUsers.length }) }}</span>
-      <el-button size="small" type="success" @click="handleBatchActivate">{{ $t('users.batchActivate') }}</el-button>
-      <el-button size="small" type="warning" @click="handleBatchSuspend">{{ $t('users.batchSuspend') }}</el-button>
-      <el-button size="small" @click="handleClearSelection">{{ $t('common.clearSelection') }}</el-button>
+      <el-button
+        size="small"
+        type="success"
+        @click="handleBatchActivate"
+      >
+        {{ $t('users.batchActivate') }}
+      </el-button>
+      <el-button
+        size="small"
+        type="warning"
+        @click="handleBatchSuspend"
+      >
+        {{ $t('users.batchSuspend') }}
+      </el-button>
+      <el-button
+        size="small"
+        @click="handleClearSelection"
+      >
+        {{ $t('common.clearSelection') }}
+      </el-button>
     </div>
 
     <!-- Users Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <EmptyState
         v-if="userList.length === 0 && !loading"
         :title="$t('users.noUsers')"
         :description="$t('users.noUsersDesc')"
       />
-      <Table v-else ref="tableRef" :data="userList" :loading="loading" @selection-change="handleSelectionChange">
-        <el-table-column :label="$t('users.userInfo')" min-width="250">
+      <Table
+        v-else
+        ref="tableRef"
+        :data="userList"
+        :loading="loading"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column
+          :label="$t('users.userInfo')"
+          min-width="250"
+        >
           <template #default="{ row }">
             <div class="user-cell">
-              <el-avatar :size="48" :src="row.avatar" class="user-avatar">
+              <el-avatar
+                :size="48"
+                :src="row.avatar"
+                class="user-avatar"
+              >
                 {{ row.name ? row.name.charAt(0) : 'U' }}
               </el-avatar>
               <div class="user-details">
-                <p class="user-name">{{ row.name }}</p>
-                <p class="user-email">{{ row.email }}</p>
-                <p class="user-phone">{{ row.phone || '-' }}</p>
+                <p class="user-name">
+                  {{ row.name }}
+                </p>
+                <p class="user-email">
+                  {{ row.email }}
+                </p>
+                <p class="user-phone">
+                  {{ row.phone || '-' }}
+                </p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" :label="$t('users.registrationTime')" width="180">
+        <el-table-column
+          prop="created_at"
+          :label="$t('users.registrationTime')"
+          width="180"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="last_login" :label="$t('users.lastLogin')" width="180">
+        <el-table-column
+          prop="last_login"
+          :label="$t('users.lastLogin')"
+          width="180"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.last_login || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('users.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('users.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               :model-value="row.status === 1"
@@ -163,37 +288,83 @@
             />
           </template>
         </el-table-column>
-        <el-table-column v-if="isEnhanced" :label="$t('users.pointsBalance')" width="120" align="center">
+        <el-table-column
+          v-if="isEnhanced"
+          :label="$t('users.pointsBalance')"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="enhanced-value">{{ (row as ExtendedUser).points_balance || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column v-if="isEnhanced" :label="$t('users.orderCount')" width="100" align="center">
+        <el-table-column
+          v-if="isEnhanced"
+          :label="$t('users.orderCount')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="enhanced-value">{{ (row as ExtendedUser).order_count || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column v-if="isEnhanced" :label="$t('users.totalSpent')" width="120" align="center">
+        <el-table-column
+          v-if="isEnhanced"
+          :label="$t('users.totalSpent')"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="enhanced-value">{{ (row as ExtendedUser).total_spent || '0.00' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="180"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click.stop="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="handleEdit(row)"
+            >
               {{ $t('common.edit') }}
             </el-button>
-            <el-button type="primary" link size="small" @click.stop="handleDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="handleDetail(row)"
+            >
               {{ $t('users.viewDetail') }}
             </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
-              <el-button type="primary" link size="small">
-                {{ $t('users.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-dropdown
+              trigger="click"
+              @command="(cmd: string) => handleCommand(cmd, row)"
+            >
+              <el-button
+                type="primary"
+                link
+                size="small"
+              >
+                {{ $t('users.more') }}<el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">{{ $t('users.resetPassword') }}</el-dropdown-item>
-                  <el-dropdown-item divided command="delete" style="color: #EF4444;">{{ $t('users.deleteAccount') }}</el-dropdown-item>
+                  <el-dropdown-item command="resetPassword">
+                    {{ $t('users.resetPassword') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    command="delete"
+                    style="color: #EF4444;"
+                  >
+                    {{ $t('users.deleteAccount') }}
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -216,38 +387,81 @@
     </el-card>
 
     <!-- Edit Dialog -->
-    <el-dialog v-model="editDialogVisible" :title="$t('users.editUser')" width="500px">
-      <el-form :model="editForm" label-width="80px">
+    <el-dialog
+      v-model="editDialogVisible"
+      :title="$t('users.editUser')"
+      width="500px"
+    >
+      <el-form
+        :model="editForm"
+        label-width="80px"
+      >
         <el-form-item :label="$t('users.username')">
-          <el-input v-model="editForm.name" :placeholder="$t('users.enterUsername')" />
+          <el-input
+            v-model="editForm.name"
+            :placeholder="$t('users.enterUsername')"
+          />
         </el-form-item>
         <el-form-item :label="$t('common.avatar')">
-          <el-input v-model="editForm.avatar" :placeholder="$t('common.avatarUrl')" />
+          <el-input
+            v-model="editForm.avatar"
+            :placeholder="$t('common.avatarUrl')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="confirmEdit" :loading="editLoading">{{ $t('common.confirm') }}</el-button>
+        <el-button @click="editDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="editLoading"
+          @click="confirmEdit"
+        >
+          {{ $t('common.confirm') }}
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- User Detail Dialog -->
-    <el-dialog v-model="detailDialogVisible" :title="$t('users.userDetail')" width="600px">
-      <el-descriptions :column="2" border v-if="currentUser">
-        <el-descriptions-item :label="$t('users.userId')">{{ currentUser.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('users.username')">{{ currentUser.name }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('users.email')">{{ currentUser.email }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('users.mobile')">{{ currentUser.phone || '-' }}</el-descriptions-item>
+    <el-dialog
+      v-model="detailDialogVisible"
+      :title="$t('users.userDetail')"
+      width="600px"
+    >
+      <el-descriptions
+        v-if="currentUser"
+        :column="2"
+        border
+      >
+        <el-descriptions-item :label="$t('users.userId')">
+          {{ currentUser.id }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('users.username')">
+          {{ currentUser.name }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('users.email')">
+          {{ currentUser.email }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('users.mobile')">
+          {{ currentUser.phone || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item :label="$t('users.status')">
           <el-tag :type="currentUser.status === 1 ? 'success' : 'danger'">
             {{ currentUser.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('users.createdAt')">{{ currentUser.created_at }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('users.lastLogin')">{{ currentUser.last_login || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('users.createdAt')">
+          {{ currentUser.created_at }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('users.lastLogin')">
+          {{ currentUser.last_login || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="detailDialogVisible = false">{{ $t('common.close') }}</el-button>
+        <el-button @click="detailDialogVisible = false">
+          {{ $t('common.close') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

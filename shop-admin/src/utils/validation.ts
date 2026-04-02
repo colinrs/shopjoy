@@ -24,7 +24,7 @@ const PASSWORD_STRONG_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
 /**
  * URL validation regex
  */
-const URL_REGEX = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/w .-]*)*\/?$/
 
 /**
  * Validate email format

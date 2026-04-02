@@ -1,7 +1,11 @@
 <template>
   <div class="fee-type-selector">
     <!-- Fee Type Radio -->
-    <el-radio-group v-model="localFeeType" class="fee-type-group" @change="handleFeeTypeChange">
+    <el-radio-group
+      v-model="localFeeType"
+      class="fee-type-group"
+      @change="handleFeeTypeChange"
+    >
       <el-radio-button value="fixed">
         <el-icon><Coin /></el-icon>
         {{ $t('shipping.fixed') }}
@@ -21,7 +25,10 @@
     </el-radio-group>
 
     <!-- Fee Configuration -->
-    <div class="fee-config" v-if="localFeeType !== 'free'">
+    <div
+      v-if="localFeeType !== 'free'"
+      class="fee-config"
+    >
       <!-- Fixed Fee -->
       <template v-if="localFeeType === 'fixed'">
         <el-form-item :label="$t('shipping.shippingFee')">
@@ -31,7 +38,9 @@
             :precision="2"
             style="width: 200px"
           >
-            <template #prefix>¥</template>
+            <template #prefix>
+              ¥
+            </template>
           </el-input-number>
         </el-form-item>
       </template>
@@ -56,7 +65,9 @@
                 :precision="2"
                 style="width: 100%"
               >
-                <template #prefix>¥</template>
+                <template #prefix>
+                  ¥
+                </template>
               </el-input-number>
             </el-form-item>
           </el-col>
@@ -79,7 +90,9 @@
                 :precision="2"
                 style="width: 100%"
               >
-                <template #prefix>¥</template>
+                <template #prefix>
+                  ¥
+                </template>
               </el-input-number>
             </el-form-item>
           </el-col>
@@ -111,7 +124,9 @@
                 :precision="2"
                 style="width: 100%"
               >
-                <template #prefix>¥</template>
+                <template #prefix>
+                  ¥
+                </template>
               </el-input-number>
             </el-form-item>
           </el-col>
@@ -134,7 +149,9 @@
                 :precision="2"
                 style="width: 100%"
               >
-                <template #prefix>¥</template>
+                <template #prefix>
+                  ¥
+                </template>
               </el-input-number>
             </el-form-item>
           </el-col>
@@ -182,7 +199,7 @@ const localForm = ref({
 })
 
 // Methods
-const handleFeeTypeChange = (_value: string) => {
+const handleFeeTypeChange = () => {
   emitUpdate()
 }
 

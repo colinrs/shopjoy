@@ -1,42 +1,91 @@
 <template>
   <div class="promotions-page">
     <!-- Stats Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="primary">
-          <template #icon><Ticket /></template>
-          <template #value>{{ stats.totalCoupons }}</template>
-          <template #label>{{ $t('promotions.totalCoupons') }}</template>
+          <template #icon>
+            <Ticket />
+          </template>
+          <template #value>
+            {{ stats.totalCoupons }}
+          </template>
+          <template #label>
+            {{ $t('promotions.totalCoupons') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="success">
-          <template #icon><CircleCheck /></template>
-          <template #value>{{ stats.activeCoupons }}</template>
-          <template #label>{{ $t('promotions.activeCoupons') }}</template>
+          <template #icon>
+            <CircleCheck />
+          </template>
+          <template #value>
+            {{ stats.activeCoupons }}
+          </template>
+          <template #label>
+            {{ $t('promotions.activeCoupons') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="info">
-          <template #icon><User /></template>
-          <template #value>{{ stats.totalUsed }}</template>
-          <template #label>{{ $t('promotions.totalUsed') }}</template>
+          <template #icon>
+            <User />
+          </template>
+          <template #value>
+            {{ stats.totalUsed }}
+          </template>
+          <template #label>
+            {{ $t('promotions.totalUsed') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="warning">
-          <template #icon><Present /></template>
-          <template #value>{{ stats.totalPromotions }}</template>
-          <template #label>{{ $t('promotions.totalPromotions') }}</template>
+          <template #icon>
+            <Present />
+          </template>
+          <template #value>
+            {{ stats.totalPromotions }}
+          </template>
+          <template #label>
+            {{ $t('promotions.totalPromotions') }}
+          </template>
         </StatsCard>
       </el-col>
     </el-row>
 
     <!-- Tabs -->
-    <el-card class="tabs-card" shadow="never">
-      <el-tabs v-model="activeTab" class="promotion-tabs" @tab-change="handleTabChange">
+    <el-card
+      class="tabs-card"
+      shadow="never"
+    >
+      <el-tabs
+        v-model="activeTab"
+        class="promotion-tabs"
+        @tab-change="handleTabChange"
+      >
         <!-- Coupons Tab -->
-        <el-tab-pane :label="$t('promotions.couponManagement')" name="coupon">
+        <el-tab-pane
+          :label="$t('promotions.couponManagement')"
+          name="coupon"
+        >
           <div class="tab-header">
             <div class="tab-filters">
               <el-input
@@ -51,18 +100,51 @@
                   <el-icon><Search /></el-icon>
                 </template>
               </el-input>
-              <el-select v-model="couponParams.status" :placeholder="$t('promotions.status')" clearable class="filter-select" @change="loadCoupons">
-                <el-option :label="$t('promotions.allStatus')" value="" />
-                <el-option :label="$t('promotions.unactivated')" value="inactive" />
-                <el-option :label="$t('promotions.activatedStatus')" value="active" />
+              <el-select
+                v-model="couponParams.status"
+                :placeholder="$t('promotions.status')"
+                clearable
+                class="filter-select"
+                @change="loadCoupons"
+              >
+                <el-option
+                  :label="$t('promotions.allStatus')"
+                  value=""
+                />
+                <el-option
+                  :label="$t('promotions.unactivated')"
+                  value="inactive"
+                />
+                <el-option
+                  :label="$t('promotions.activatedStatus')"
+                  value="active"
+                />
               </el-select>
-              <el-select v-model="couponParams.type" :placeholder="$t('promotions.type')" clearable class="filter-select" @change="loadCoupons">
-                <el-option :label="$t('promotions.allType')" value="" />
-                <el-option :label="$t('promotions.fixedAmount')" value="fixed_amount" />
-                <el-option :label="$t('promotions.percentage')" value="percentage" />
+              <el-select
+                v-model="couponParams.type"
+                :placeholder="$t('promotions.type')"
+                clearable
+                class="filter-select"
+                @change="loadCoupons"
+              >
+                <el-option
+                  :label="$t('promotions.allType')"
+                  value=""
+                />
+                <el-option
+                  :label="$t('promotions.fixedAmount')"
+                  value="fixed_amount"
+                />
+                <el-option
+                  :label="$t('promotions.percentage')"
+                  value="percentage"
+                />
               </el-select>
             </div>
-            <el-button type="primary" @click="handleAddCoupon">
+            <el-button
+              type="primary"
+              @click="handleAddCoupon"
+            >
               <el-icon><Plus /></el-icon>{{ $t('promotions.createCouponButton') }}
             </el-button>
             <el-button @click="showBatchGenerateDialog">
@@ -70,18 +152,37 @@
             </el-button>
           </div>
 
-          <el-table :data="couponList" v-loading="couponLoading" stripe>
-            <el-table-column :label="$t('promotions.couponInfo')" min-width="250">
+          <el-table
+            v-loading="couponLoading"
+            :data="couponList"
+            stripe
+          >
+            <el-table-column
+              :label="$t('promotions.couponInfo')"
+              min-width="250"
+            >
               <template #default="{ row }">
                 <div class="coupon-cell">
-                  <div class="coupon-icon" :class="row.type">
-                    <el-icon size="24"><Ticket /></el-icon>
+                  <div
+                    class="coupon-icon"
+                    :class="row.type"
+                  >
+                    <el-icon size="24">
+                      <Ticket />
+                    </el-icon>
                   </div>
                   <div class="coupon-details">
-                    <p class="coupon-name">{{ row.name }}</p>
-                    <p class="coupon-code">{{ $t('promotions.couponCode') }} {{ row.code }}</p>
+                    <p class="coupon-name">
+                      {{ row.name }}
+                    </p>
+                    <p class="coupon-code">
+                      {{ $t('promotions.couponCode') }} {{ row.code }}
+                    </p>
                     <div class="coupon-tags">
-                      <el-tag size="small" :type="row.type === 'fixed_amount' ? 'success' : 'warning'">
+                      <el-tag
+                        size="small"
+                        :type="row.type === 'fixed_amount' ? 'success' : 'warning'"
+                      >
                         {{ row.type === 'fixed_amount' ? $t('promotions.fixedAmountLabel') : $t('promotions.percentageLabel') }}
                       </el-tag>
                     </div>
@@ -89,18 +190,29 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.discountStrength')" width="150" align="center">
+            <el-table-column
+              :label="$t('promotions.discountStrength')"
+              width="150"
+              align="center"
+            >
               <template #default="{ row }">
                 <div class="discount-value">
                   <span v-if="row.type === 'fixed_amount'">¥{{ row.discount_value }}</span>
                   <span v-else>{{ row.discount_value }}%</span>
                 </div>
-                <div class="min-order" v-if="row.min_order_amount && parseFloat(row.min_order_amount) > 0">
+                <div
+                  v-if="row.min_order_amount && parseFloat(row.min_order_amount) > 0"
+                  class="min-order"
+                >
                   {{ $t('promotions.minOrderValue', { min: row.min_order_amount }) }}
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.usageStats')" width="180" align="center">
+            <el-table-column
+              :label="$t('promotions.usageStats')"
+              width="180"
+              align="center"
+            >
               <template #default="{ row }">
                 <div class="usage-stats">
                   <el-progress
@@ -108,38 +220,77 @@
                     :status="getProgressStatus(row)"
                     :stroke-width="8"
                   />
-                  <p class="usage-text">{{ $t('promotions.usedOfTotal', { used: row.used_count, total: row.usage_limit > 0 ? row.usage_limit : '∞' }) }}</p>
+                  <p class="usage-text">
+                    {{ $t('promotions.usedOfTotal', { used: row.used_count, total: row.usage_limit > 0 ? row.usage_limit : '∞' }) }}
+                  </p>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.validity')" width="200">
+            <el-table-column
+              :label="$t('promotions.validity')"
+              width="200"
+            >
               <template #default="{ row }">
                 <div class="validity-period">
                   <p>{{ formatDateTime(row.start_time) }}</p>
-                  <p class="to-text">{{ $t('promotions.toText') }}</p>
+                  <p class="to-text">
+                    {{ $t('promotions.toText') }}
+                  </p>
                   <p>{{ formatDateTime(row.end_time) }}</p>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.statusColumn')" width="100" align="center">
+            <el-table-column
+              :label="$t('promotions.statusColumn')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag :type="getCouponStatusType(row.status)" effect="light" size="small">
+                <el-tag
+                  :type="getCouponStatusType(row.status)"
+                  effect="light"
+                  size="small"
+                >
                   {{ getCouponStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.actionsColumn')" width="240" fixed="right">
+            <el-table-column
+              :label="$t('promotions.actionsColumn')"
+              width="240"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="handleEditCoupon(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="handleEditCoupon(row)"
+                >
                   {{ $t('promotions.edit') }}
                 </el-button>
-                <el-button type="primary" link size="small" @click="handleCouponUsage(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="handleCouponUsage(row)"
+                >
                   {{ $t('promotions.data') }}
                 </el-button>
-                <el-button type="success" link size="small" @click="handleIssueToUser(row)">
+                <el-button
+                  type="success"
+                  link
+                  size="small"
+                  @click="handleIssueToUser(row)"
+                >
                   {{ $t('promotions.issueToUser') }}
                 </el-button>
-                <el-button type="danger" link size="small" @click="handleDeleteCoupon(row)">
+                <el-button
+                  type="danger"
+                  link
+                  size="small"
+                  @click="handleDeleteCoupon(row)"
+                >
                   {{ $t('promotions.delete') }}
                 </el-button>
               </template>
@@ -155,7 +306,10 @@
         </el-tab-pane>
 
         <!-- Promotions Tab -->
-        <el-tab-pane :label="$t('promotions.promotionActivities')" name="promotion">
+        <el-tab-pane
+          :label="$t('promotions.promotionActivities')"
+          name="promotion"
+        >
           <div class="tab-header">
             <div class="tab-filters">
               <el-input
@@ -170,78 +324,175 @@
                   <el-icon><Search /></el-icon>
                 </template>
               </el-input>
-              <el-select v-model="promotionParams.status" :placeholder="$t('promotions.promotionStatus')" clearable class="filter-select" @change="loadPromotions">
-                <el-option :label="$t('promotions.allStatus')" value="" />
-                <el-option :label="$t('promotions.pending')" value="pending" />
-                <el-option :label="$t('promotions.activeStatus')" value="active" />
-                <el-option :label="$t('promotions.paused')" value="paused" />
-                <el-option :label="$t('promotions.ended')" value="ended" />
+              <el-select
+                v-model="promotionParams.status"
+                :placeholder="$t('promotions.promotionStatus')"
+                clearable
+                class="filter-select"
+                @change="loadPromotions"
+              >
+                <el-option
+                  :label="$t('promotions.allStatus')"
+                  value=""
+                />
+                <el-option
+                  :label="$t('promotions.pending')"
+                  value="pending"
+                />
+                <el-option
+                  :label="$t('promotions.activeStatus')"
+                  value="active"
+                />
+                <el-option
+                  :label="$t('promotions.paused')"
+                  value="paused"
+                />
+                <el-option
+                  :label="$t('promotions.ended')"
+                  value="ended"
+                />
               </el-select>
-              <el-select v-model="promotionParams.type" :placeholder="$t('promotions.promotionType')" clearable class="filter-select" @change="loadPromotions">
-                <el-option :label="$t('promotions.allType')" value="" />
-                <el-option :label="$t('promotions.discount')" value="discount" />
-                <el-option :label="$t('promotions.flashSale')" value="flash_sale" />
-                <el-option :label="$t('promotions.bundle')" value="bundle" />
-                <el-option :label="$t('promotions.buyXGetY')" value="buy_x_get_y" />
+              <el-select
+                v-model="promotionParams.type"
+                :placeholder="$t('promotions.promotionType')"
+                clearable
+                class="filter-select"
+                @change="loadPromotions"
+              >
+                <el-option
+                  :label="$t('promotions.allType')"
+                  value=""
+                />
+                <el-option
+                  :label="$t('promotions.discount')"
+                  value="discount"
+                />
+                <el-option
+                  :label="$t('promotions.flashSale')"
+                  value="flash_sale"
+                />
+                <el-option
+                  :label="$t('promotions.bundle')"
+                  value="bundle"
+                />
+                <el-option
+                  :label="$t('promotions.buyXGetY')"
+                  value="buy_x_get_y"
+                />
               </el-select>
             </div>
-            <el-button type="primary" @click="handleAddPromotion">
+            <el-button
+              type="primary"
+              @click="handleAddPromotion"
+            >
               <el-icon><Plus /></el-icon>{{ $t('promotions.createPromotion') }}
             </el-button>
           </div>
 
-          <el-table :data="promotionList" v-loading="promotionLoading" stripe>
-            <el-table-column :label="$t('promotions.promotionInfo')" min-width="250">
+          <el-table
+            v-loading="promotionLoading"
+            :data="promotionList"
+            stripe
+          >
+            <el-table-column
+              :label="$t('promotions.promotionInfo')"
+              min-width="250"
+            >
               <template #default="{ row }">
                 <div class="promo-cell">
-                  <div class="promo-icon" :class="row.type">
-                    <el-icon size="24"><Present /></el-icon>
+                  <div
+                    class="promo-icon"
+                    :class="row.type"
+                  >
+                    <el-icon size="24">
+                      <Present />
+                    </el-icon>
                   </div>
                   <div class="promo-details">
-                    <p class="promo-name">{{ row.name }}</p>
-                    <p class="promo-desc">{{ row.description || $t('promotions.noDescription') }}</p>
+                    <p class="promo-name">
+                      {{ row.name }}
+                    </p>
+                    <p class="promo-desc">
+                      {{ row.description || $t('promotions.noDescription') }}
+                    </p>
                   </div>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.promotionType')" width="120" align="center">
+            <el-table-column
+              :label="$t('promotions.promotionType')"
+              width="120"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag size="small" :type="row.type === 'full_reduce' ? 'danger' : 'primary'">
+                <el-tag
+                  size="small"
+                  :type="row.type === 'full_reduce' ? 'danger' : 'primary'"
+                >
                   {{ getPromotionTypeText(row.type) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.discountContent')" width="150" align="center">
+            <el-table-column
+              :label="$t('promotions.discountContent')"
+              width="150"
+              align="center"
+            >
               <template #default="{ row }">
                 <div class="discount-value">
                   <span v-if="row.discount_type === 'fixed_amount'">¥{{ row.discount_value }}</span>
                   <span v-else-if="row.discount_type === 'percentage'">{{ row.discount_value }}%</span>
                   <span v-else>-</span>
                 </div>
-                <div class="min-order" v-if="row.min_order_amount && parseFloat(row.min_order_amount) > 0">
+                <div
+                  v-if="row.min_order_amount && parseFloat(row.min_order_amount) > 0"
+                  class="min-order"
+                >
                   {{ $t('promotions.minOrderValue', { min: row.min_order_amount }) }}
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.validity')" width="200">
+            <el-table-column
+              :label="$t('promotions.validity')"
+              width="200"
+            >
               <template #default="{ row }">
                 <div class="validity-period">
                   <p>{{ formatDateTime(row.start_time) }}</p>
-                  <p class="to-text">{{ $t('promotions.toText') }}</p>
+                  <p class="to-text">
+                    {{ $t('promotions.toText') }}
+                  </p>
                   <p>{{ formatDateTime(row.end_time) }}</p>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.statusColumn')" width="100" align="center">
+            <el-table-column
+              :label="$t('promotions.statusColumn')"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-tag :type="getPromoStatusType(row.status)" effect="light" size="small">
+                <el-tag
+                  :type="getPromoStatusType(row.status)"
+                  effect="light"
+                  size="small"
+                >
                   {{ getPromoStatusText(row.status) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('promotions.actionsColumn')" width="200" fixed="right">
+            <el-table-column
+              :label="$t('promotions.actionsColumn')"
+              width="200"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="handleEditPromotion(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="handleEditPromotion(row)"
+                >
                   {{ $t('promotions.edit') }}
                 </el-button>
                 <el-button
@@ -286,28 +537,69 @@
     </el-card>
 
     <!-- Coupon Dialog -->
-    <el-dialog v-model="couponDialogVisible" :title="isEditCoupon ? $t('promotions.editCoupon') : $t('promotions.createCoupon')" width="600px" destroy-on-close>
-      <el-form :model="couponForm" label-width="100px" :rules="couponRules" ref="couponFormRef">
-        <el-form-item :label="$t('promotions.couponName')" prop="name">
-          <el-input v-model="couponForm.name" :placeholder="$t('promotions.enterCouponName')" maxlength="100" />
+    <el-dialog
+      v-model="couponDialogVisible"
+      :title="isEditCoupon ? $t('promotions.editCoupon') : $t('promotions.createCoupon')"
+      width="600px"
+      destroy-on-close
+    >
+      <el-form
+        ref="couponFormRef"
+        :model="couponForm"
+        label-width="100px"
+        :rules="couponRules"
+      >
+        <el-form-item
+          :label="$t('promotions.couponName')"
+          prop="name"
+        >
+          <el-input
+            v-model="couponForm.name"
+            :placeholder="$t('promotions.enterCouponName')"
+            maxlength="100"
+          />
         </el-form-item>
-        <el-form-item :label="$t('promotions.couponCode')" prop="code">
-          <el-input v-model="couponForm.code" :placeholder="$t('promotions.enterCouponCode')" maxlength="50">
+        <el-form-item
+          :label="$t('promotions.couponCode')"
+          prop="code"
+        >
+          <el-input
+            v-model="couponForm.code"
+            :placeholder="$t('promotions.enterCouponCode')"
+            maxlength="50"
+          >
             <template #append>
-              <el-button @click="generateCouponCode">{{ $t('promotions.generate') }}</el-button>
+              <el-button @click="generateCouponCode">
+                {{ $t('promotions.generate') }}
+              </el-button>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item :label="$t('promotions.promotionDescription')">
-          <el-input v-model="couponForm.description" type="textarea" :rows="2" :placeholder="$t('promotions.enterDescription')" />
+          <el-input
+            v-model="couponForm.description"
+            type="textarea"
+            :rows="2"
+            :placeholder="$t('promotions.enterDescription')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('promotions.couponType')" prop="type">
+        <el-form-item
+          :label="$t('promotions.couponType')"
+          prop="type"
+        >
           <el-radio-group v-model="couponForm.type">
-            <el-radio label="fixed_amount">{{ $t('promotions.fixedAmountType') }}</el-radio>
-            <el-radio label="percentage">{{ $t('promotions.percentageType') }}</el-radio>
+            <el-radio label="fixed_amount">
+              {{ $t('promotions.fixedAmountType') }}
+            </el-radio>
+            <el-radio label="percentage">
+              {{ $t('promotions.percentageType') }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item :label="couponForm.type === 'fixed_amount' ? $t('promotions.discountAmount') : $t('promotions.discountRatio')" prop="discount_value">
+        <el-form-item
+          :label="couponForm.type === 'fixed_amount' ? $t('promotions.discountAmount') : $t('promotions.discountRatio')"
+          prop="discount_value"
+        >
           <el-input-number
             v-model="couponForm.discount_value_num"
             :min="0"
@@ -317,20 +609,48 @@
           />
         </el-form-item>
         <el-form-item :label="$t('promotions.minOrderAmount')">
-          <el-input-number v-model="couponForm.min_order_amount_num" :min="0" :precision="2" style="width: 100%" />
+          <el-input-number
+            v-model="couponForm.min_order_amount_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
-        <el-form-item v-if="couponForm.type === 'percentage'" :label="$t('promotions.maxDiscount')">
-          <el-input-number v-model="couponForm.max_discount_num" :min="0" :precision="2" style="width: 100%" />
+        <el-form-item
+          v-if="couponForm.type === 'percentage'"
+          :label="$t('promotions.maxDiscount')"
+        >
+          <el-input-number
+            v-model="couponForm.max_discount_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.usageLimit')">
-          <el-input-number v-model="couponForm.usage_limit" :min="0" style="width: 100%" />
-          <div class="form-tip">{{ $t('promotions.zeroUnlimited') }}</div>
+          <el-input-number
+            v-model="couponForm.usage_limit"
+            :min="0"
+            style="width: 100%"
+          />
+          <div class="form-tip">
+            {{ $t('promotions.zeroUnlimited') }}
+          </div>
         </el-form-item>
         <el-form-item :label="$t('promotions.perUserLimit')">
-          <el-input-number v-model="couponForm.per_user_limit" :min="0" style="width: 100%" />
-          <div class="form-tip">{{ $t('promotions.zeroUnlimited') }}</div>
+          <el-input-number
+            v-model="couponForm.per_user_limit"
+            :min="0"
+            style="width: 100%"
+          />
+          <div class="form-tip">
+            {{ $t('promotions.zeroUnlimited') }}
+          </div>
         </el-form-item>
-        <el-form-item :label="$t('promotions.validityPeriod')" prop="dateRange">
+        <el-form-item
+          :label="$t('promotions.validityPeriod')"
+          prop="dateRange"
+        >
           <el-date-picker
             v-model="couponForm.dateRange"
             type="datetimerange"
@@ -342,35 +662,86 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="couponDialogVisible = false">{{ $t('promotions.cancel') }}</el-button>
-        <el-button type="primary" @click="saveCoupon" :loading="saveLoading">{{ $t('promotions.save') }}</el-button>
+        <el-button @click="couponDialogVisible = false">
+          {{ $t('promotions.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="saveCoupon"
+        >
+          {{ $t('promotions.save') }}
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- Promotion Dialog -->
-    <el-dialog v-model="promotionDialogVisible" :title="isEditPromotion ? $t('promotions.editPromotion') : $t('promotions.createPromotion')" width="700px" destroy-on-close>
-      <el-form :model="promotionForm" label-width="100px" :rules="promotionRules" ref="promotionFormRef">
-        <el-form-item :label="$t('promotions.promotionName')" prop="name">
-          <el-input v-model="promotionForm.name" :placeholder="$t('promotions.enterPromotionName')" maxlength="100" />
+    <el-dialog
+      v-model="promotionDialogVisible"
+      :title="isEditPromotion ? $t('promotions.editPromotion') : $t('promotions.createPromotion')"
+      width="700px"
+      destroy-on-close
+    >
+      <el-form
+        ref="promotionFormRef"
+        :model="promotionForm"
+        label-width="100px"
+        :rules="promotionRules"
+      >
+        <el-form-item
+          :label="$t('promotions.promotionName')"
+          prop="name"
+        >
+          <el-input
+            v-model="promotionForm.name"
+            :placeholder="$t('promotions.enterPromotionName')"
+            maxlength="100"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.promotionDescription')">
-          <el-input v-model="promotionForm.description" type="textarea" :rows="2" :placeholder="$t('promotions.enterDescription')" />
+          <el-input
+            v-model="promotionForm.description"
+            type="textarea"
+            :rows="2"
+            :placeholder="$t('promotions.enterDescription')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('promotions.promotionTypeSelect')" prop="type">
+        <el-form-item
+          :label="$t('promotions.promotionTypeSelect')"
+          prop="type"
+        >
           <el-radio-group v-model="promotionForm.type">
-            <el-radio label="discount">{{ $t('promotions.discount') }}</el-radio>
-            <el-radio label="flash_sale">{{ $t('promotions.flashSale') }}</el-radio>
-            <el-radio label="bundle">{{ $t('promotions.bundle') }}</el-radio>
-            <el-radio label="buy_x_get_y">{{ $t('promotions.buyXGetY') }}</el-radio>
+            <el-radio label="discount">
+              {{ $t('promotions.discount') }}
+            </el-radio>
+            <el-radio label="flash_sale">
+              {{ $t('promotions.flashSale') }}
+            </el-radio>
+            <el-radio label="bundle">
+              {{ $t('promotions.bundle') }}
+            </el-radio>
+            <el-radio label="buy_x_get_y">
+              {{ $t('promotions.buyXGetY') }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item :label="$t('promotions.discountType')" prop="discount_type">
+        <el-form-item
+          :label="$t('promotions.discountType')"
+          prop="discount_type"
+        >
           <el-radio-group v-model="promotionForm.discount_type">
-            <el-radio label="fixed_amount">{{ $t('promotions.fixedAmount') }}</el-radio>
-            <el-radio label="percentage">{{ $t('promotions.percentage') }}</el-radio>
+            <el-radio label="fixed_amount">
+              {{ $t('promotions.fixedAmount') }}
+            </el-radio>
+            <el-radio label="percentage">
+              {{ $t('promotions.percentage') }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')" prop="discount_value">
+        <el-form-item
+          :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')"
+          prop="discount_value"
+        >
           <el-input-number
             v-model="promotionForm.discount_value_num"
             :min="0"
@@ -380,12 +751,28 @@
           />
         </el-form-item>
         <el-form-item :label="$t('promotions.lowestConsume')">
-          <el-input-number v-model="promotionForm.min_order_amount_num" :min="0" :precision="2" style="width: 100%" />
+          <el-input-number
+            v-model="promotionForm.min_order_amount_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
-        <el-form-item v-if="promotionForm.discount_type === 'percentage'" :label="$t('promotions.maxDiscountAmount')">
-          <el-input-number v-model="promotionForm.max_discount_num" :min="0" :precision="2" style="width: 100%" />
+        <el-form-item
+          v-if="promotionForm.discount_type === 'percentage'"
+          :label="$t('promotions.maxDiscountAmount')"
+        >
+          <el-input-number
+            v-model="promotionForm.max_discount_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
-        <el-form-item :label="$t('promotions.validityPeriod')" prop="dateRange">
+        <el-form-item
+          :label="$t('promotions.validityPeriod')"
+          prop="dateRange"
+        >
           <el-date-picker
             v-model="promotionForm.dateRange"
             type="datetimerange"
@@ -397,22 +784,54 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="promotionDialogVisible = false">{{ $t('promotions.cancel') }}</el-button>
-        <el-button type="primary" @click="savePromotion" :loading="saveLoading">{{ $t('promotions.save') }}</el-button>
+        <el-button @click="promotionDialogVisible = false">
+          {{ $t('promotions.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="savePromotion"
+        >
+          {{ $t('promotions.save') }}
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- Coupon Usage Dialog -->
-    <el-dialog v-model="usageDialogVisible" :title="$t('promotions.couponUsageRecords')" width="800px">
-      <el-table :data="usageList" v-loading="usageLoading" stripe>
-        <el-table-column prop="user_id" :label="$t('promotions.userID')" width="100" />
-        <el-table-column prop="order_id" :label="$t('promotions.orderID')" width="120" />
-        <el-table-column prop="discount_amount" :label="$t('promotions.discountAmountColumn')" width="120">
+    <el-dialog
+      v-model="usageDialogVisible"
+      :title="$t('promotions.couponUsageRecords')"
+      width="800px"
+    >
+      <el-table
+        v-loading="usageLoading"
+        :data="usageList"
+        stripe
+      >
+        <el-table-column
+          prop="user_id"
+          :label="$t('promotions.userID')"
+          width="100"
+        />
+        <el-table-column
+          prop="order_id"
+          :label="$t('promotions.orderID')"
+          width="120"
+        />
+        <el-table-column
+          prop="discount_amount"
+          :label="$t('promotions.discountAmountColumn')"
+          width="120"
+        >
           <template #default="{ row }">
             ¥{{ row.discount_amount }}
           </template>
         </el-table-column>
-        <el-table-column prop="used_at" :label="$t('promotions.usedTime')" width="180">
+        <el-table-column
+          prop="used_at"
+          :label="$t('promotions.usedTime')"
+          width="180"
+        >
           <template #default="{ row }">
             {{ formatDateTime(row.used_at) }}
           </template>
@@ -427,35 +846,78 @@
     </el-dialog>
 
     <!-- Batch Generate Coupons Dialog -->
-    <el-dialog v-model="batchGenerateDialogVisible" :title="$t('promotions.batchGenerateCoupons')" width="600px" destroy-on-close>
-      <el-form :model="batchGenerateForm" label-width="140px">
+    <el-dialog
+      v-model="batchGenerateDialogVisible"
+      :title="$t('promotions.batchGenerateCoupons')"
+      width="600px"
+      destroy-on-close
+    >
+      <el-form
+        :model="batchGenerateForm"
+        label-width="140px"
+      >
         <el-form-item :label="$t('promotions.generateCouponPrefix')">
-          <el-input v-model="batchGenerateForm.prefix" :placeholder="$t('promotions.generateCouponPrefixPlaceholder')" maxlength="10" />
+          <el-input
+            v-model="batchGenerateForm.prefix"
+            :placeholder="$t('promotions.generateCouponPrefixPlaceholder')"
+            maxlength="10"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.generateCouponQuantity')">
-          <el-input-number v-model="batchGenerateForm.quantity" :min="1" :max="1000" style="width: 100%" />
+          <el-input-number
+            v-model="batchGenerateForm.quantity"
+            :min="1"
+            :max="1000"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.generateCouponLength')">
-          <el-input-number v-model="batchGenerateForm.length" :min="4" :max="20" style="width: 100%" />
+          <el-input-number
+            v-model="batchGenerateForm.length"
+            :min="4"
+            :max="20"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-divider>{{ $t('promotions.generateCouponConfig') }}</el-divider>
         <el-form-item :label="$t('promotions.couponName')">
-          <el-input v-model="batchGenerateForm.couponName" :placeholder="$t('promotions.enterCouponName')" />
+          <el-input
+            v-model="batchGenerateForm.couponName"
+            :placeholder="$t('promotions.enterCouponName')"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.couponType')">
           <el-radio-group v-model="batchGenerateForm.couponType">
-            <el-radio label="fixed_amount">{{ $t('promotions.fixedAmountType') }}</el-radio>
-            <el-radio label="percentage">{{ $t('promotions.percentageType') }}</el-radio>
+            <el-radio label="fixed_amount">
+              {{ $t('promotions.fixedAmountType') }}
+            </el-radio>
+            <el-radio label="percentage">
+              {{ $t('promotions.percentageType') }}
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="batchGenerateForm.couponType === 'fixed_amount' ? $t('promotions.discountAmount') : $t('promotions.discountRatio')">
-          <el-input-number v-model="batchGenerateForm.discountValue" :min="0" :precision="2" style="width: 100%" />
+          <el-input-number
+            v-model="batchGenerateForm.discountValue"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.minOrderAmount')">
-          <el-input-number v-model="batchGenerateForm.minOrderAmount" :min="0" :precision="2" style="width: 100%" />
+          <el-input-number
+            v-model="batchGenerateForm.minOrderAmount"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.usageLimit')">
-          <el-input-number v-model="batchGenerateForm.usageLimit" :min="0" style="width: 100%" />
+          <el-input-number
+            v-model="batchGenerateForm.usageLimit"
+            :min="0"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.validityPeriod')">
           <el-date-picker
@@ -469,36 +931,76 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="batchGenerateDialogVisible = false">{{ $t('promotions.cancel') }}</el-button>
-        <el-button type="primary" @click="handleBatchGenerate" :loading="batchGenerating">
+        <el-button @click="batchGenerateDialogVisible = false">
+          {{ $t('promotions.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="batchGenerating"
+          @click="handleBatchGenerate"
+        >
           {{ $t('promotions.batchGenerate') }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Generated Codes Dialog -->
-    <el-dialog v-model="generatedCodesDialogVisible" :title="$t('promotions.generatedCodes')" width="700px">
+    <el-dialog
+      v-model="generatedCodesDialogVisible"
+      :title="$t('promotions.generatedCodes')"
+      width="700px"
+    >
       <div class="generated-codes-info">
         {{ $t('promotions.generatedCodesCount', { count: generatedCodes.length }) }}
-        <el-button type="primary" link @click="handleCopyAllCodes">{{ $t('promotions.copyAllCodes') }}</el-button>
+        <el-button
+          type="primary"
+          link
+          @click="handleCopyAllCodes"
+        >
+          {{ $t('promotions.copyAllCodes') }}
+        </el-button>
       </div>
       <div class="generated-codes-list">
-        <el-tag v-for="code in generatedCodes" :key="code" class="code-tag" type="info">
+        <el-tag
+          v-for="code in generatedCodes"
+          :key="code"
+          class="code-tag"
+          type="info"
+        >
           {{ code }}
         </el-tag>
       </div>
       <template #footer>
-        <el-button type="primary" @click="generatedCodesDialogVisible = false">{{ $t('common.close') }}</el-button>
+        <el-button
+          type="primary"
+          @click="generatedCodesDialogVisible = false"
+        >
+          {{ $t('common.close') }}
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- Issue Coupon to User Dialog -->
-    <el-dialog v-model="issueDialogVisible" :title="$t('promotions.issueCoupon')" width="500px" destroy-on-close>
-      <el-form :model="issueForm" label-width="100px">
+    <el-dialog
+      v-model="issueDialogVisible"
+      :title="$t('promotions.issueCoupon')"
+      width="500px"
+      destroy-on-close
+    >
+      <el-form
+        :model="issueForm"
+        label-width="100px"
+      >
         <el-form-item :label="$t('promotions.currentCoupon')">
-          <el-input :value="issueForm.coupon_name" disabled />
+          <el-input
+            :value="issueForm.coupon_name"
+            disabled
+          />
         </el-form-item>
-        <el-form-item :label="$t('promotions.userId')" required>
+        <el-form-item
+          :label="$t('promotions.userId')"
+          required
+        >
           <el-input-number
             v-model="issueForm.user_id"
             :min="1"
@@ -508,8 +1010,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="issueDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleConfirmIssue" :loading="issueLoading">
+        <el-button @click="issueDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="issueLoading"
+          @click="handleConfirmIssue"
+        >
           {{ $t('common.confirm') }}
         </el-button>
       </template>

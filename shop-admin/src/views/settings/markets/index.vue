@@ -1,14 +1,24 @@
 <template>
   <div class="markets-page">
     <!-- Header Bar -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
-          <h2 class="page-title">{{ t('settings.markets.title') }}</h2>
-          <p class="page-desc">{{ t('settings.markets.pageDesc') }}</p>
+          <h2 class="page-title">
+            {{ t('settings.markets.title') }}
+          </h2>
+          <p class="page-desc">
+            {{ t('settings.markets.pageDesc') }}
+          </p>
         </div>
         <div class="header-right">
-          <el-button type="primary" @click="handleAdd">
+          <el-button
+            type="primary"
+            @click="handleAdd"
+          >
             <el-icon><Plus /></el-icon>{{ t('settings.markets.addMarket') }}
           </el-button>
         </div>
@@ -16,39 +26,76 @@
     </el-card>
 
     <!-- Markets Table -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="marketList" v-loading="loading" stripe>
-        <el-table-column :label="t('settings.markets.market')" min-width="200">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="marketList"
+        stripe
+      >
+        <el-table-column
+          :label="t('settings.markets.market')"
+          min-width="200"
+        >
           <template #default="{ row }">
             <div class="market-cell">
               <span class="market-flag">{{ row.flag || getFlagEmoji(row.code) }}</span>
               <div class="market-details">
-                <p class="market-name">{{ row.name }}</p>
-                <p class="market-code">{{ row.code }}</p>
+                <p class="market-name">
+                  {{ row.name }}
+                </p>
+                <p class="market-code">
+                  {{ row.code }}
+                </p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="t('settings.markets.currency')" width="100" align="center">
+        <el-table-column
+          :label="t('settings.markets.currency')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag size="small">{{ row.currency }}</el-tag>
+            <el-tag size="small">
+              {{ row.currency }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('settings.markets.defaultLanguage')" width="120" align="center">
+        <el-table-column
+          :label="t('settings.markets.defaultLanguage')"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
             {{ getLanguageLabel(row.default_language) }}
           </template>
         </el-table-column>
-        <el-table-column :label="t('settings.markets.taxConfig')" min-width="180">
+        <el-table-column
+          :label="t('settings.markets.taxConfig')"
+          min-width="180"
+        >
           <template #default="{ row }">
             <div class="tax-config">
               <span v-if="row.tax_rules?.vat_rate">VAT: {{ row.tax_rules.vat_rate }}%</span>
               <span v-if="row.tax_rules?.gst_rate">GST: {{ row.tax_rules.gst_rate }}%</span>
-              <el-tag v-if="row.tax_rules?.ioss_enabled" size="small" type="success">IOSS</el-tag>
+              <el-tag
+                v-if="row.tax_rules?.ioss_enabled"
+                size="small"
+                type="success"
+              >
+                IOSS
+              </el-tag>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="t('settings.markets.status')" width="100" align="center">
+        <el-table-column
+          :label="t('settings.markets.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.is_active"
@@ -56,25 +103,50 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="t('settings.markets.defaultMarket')" width="100" align="center">
+        <el-table-column
+          :label="t('settings.markets.defaultMarket')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.is_default" type="primary" size="small">{{ t('settings.markets.defaultMarket') }}</el-tag>
-            <el-button v-else type="primary" link size="small" @click="handleSetDefault(row)">
+            <el-tag
+              v-if="row.is_default"
+              type="primary"
+              size="small"
+            >
+              {{ t('settings.markets.defaultMarket') }}
+            </el-tag>
+            <el-button
+              v-else
+              type="primary"
+              link
+              size="small"
+              @click="handleSetDefault(row)"
+            >
               {{ t('settings.markets.setAsDefault') }}
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.actions')" width="150" fixed="right">
+        <el-table-column
+          :label="t('common.actions')"
+          width="150"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ t('common.edit') }}
             </el-button>
             <el-button
               type="danger"
               link
               size="small"
-              @click="handleDelete(row)"
               :disabled="row.is_default"
+              @click="handleDelete(row)"
             >
               {{ t('common.delete') }}
             </el-button>
@@ -103,10 +175,18 @@
       width="650px"
       destroy-on-close
     >
-      <el-form :model="marketForm" label-width="120px" :rules="formRules" ref="formRef">
+      <el-form
+        ref="formRef"
+        :model="marketForm"
+        label-width="120px"
+        :rules="formRules"
+      >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item :label="t('settings.markets.marketCode')" prop="code">
+            <el-form-item
+              :label="t('settings.markets.marketCode')"
+              prop="code"
+            >
               <el-select
                 v-model="marketForm.code"
                 :placeholder="t('settings.markets.selectMarket')"
@@ -123,33 +203,95 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item :label="t('settings.markets.marketName')" prop="name">
-              <el-input v-model="marketForm.name" :placeholder="t('settings.markets.enterMarketName')" />
+            <el-form-item
+              :label="t('settings.markets.marketName')"
+              prop="name"
+            >
+              <el-input
+                v-model="marketForm.name"
+                :placeholder="t('settings.markets.enterMarketName')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item :label="t('settings.markets.currency')" prop="currency">
-              <el-select v-model="marketForm.currency" :placeholder="t('settings.markets.selectCurrency')" style="width: 100%">
-                <el-option label="CNY - RMB" value="CNY" />
-                <el-option label="USD - US Dollar" value="USD" />
-                <el-option label="EUR - Euro" value="EUR" />
-                <el-option label="GBP - British Pound" value="GBP" />
-                <el-option label="JPY - Japanese Yen" value="JPY" />
-                <el-option label="AUD - Australian Dollar" value="AUD" />
-                <el-option label="CAD - Canadian Dollar" value="CAD" />
-                <el-option label="SGD - Singapore Dollar" value="SGD" />
+            <el-form-item
+              :label="t('settings.markets.currency')"
+              prop="currency"
+            >
+              <el-select
+                v-model="marketForm.currency"
+                :placeholder="t('settings.markets.selectCurrency')"
+                style="width: 100%"
+              >
+                <el-option
+                  label="CNY - RMB"
+                  value="CNY"
+                />
+                <el-option
+                  label="USD - US Dollar"
+                  value="USD"
+                />
+                <el-option
+                  label="EUR - Euro"
+                  value="EUR"
+                />
+                <el-option
+                  label="GBP - British Pound"
+                  value="GBP"
+                />
+                <el-option
+                  label="JPY - Japanese Yen"
+                  value="JPY"
+                />
+                <el-option
+                  label="AUD - Australian Dollar"
+                  value="AUD"
+                />
+                <el-option
+                  label="CAD - Canadian Dollar"
+                  value="CAD"
+                />
+                <el-option
+                  label="SGD - Singapore Dollar"
+                  value="SGD"
+                />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item :label="t('settings.markets.defaultLanguage')" prop="default_language">
-              <el-select v-model="marketForm.default_language" :placeholder="t('settings.markets.selectLanguage')" style="width: 100%">
-                <el-option :label="t('settings.markets.langZhCN')" value="zh-CN" />
-                <el-option :label="t('settings.markets.langEnUS')" value="en-US" />
-                <el-option :label="t('settings.markets.langJaJP')" value="ja-JP" />
-                <el-option :label="t('settings.markets.langDeDE')" value="de-DE" />
-                <el-option :label="t('settings.markets.langFrFR')" value="fr-FR" />
-                <el-option :label="t('settings.markets.langEsES')" value="es-ES" />
+            <el-form-item
+              :label="t('settings.markets.defaultLanguage')"
+              prop="default_language"
+            >
+              <el-select
+                v-model="marketForm.default_language"
+                :placeholder="t('settings.markets.selectLanguage')"
+                style="width: 100%"
+              >
+                <el-option
+                  :label="t('settings.markets.langZhCN')"
+                  value="zh-CN"
+                />
+                <el-option
+                  :label="t('settings.markets.langEnUS')"
+                  value="en-US"
+                />
+                <el-option
+                  :label="t('settings.markets.langJaJP')"
+                  value="ja-JP"
+                />
+                <el-option
+                  :label="t('settings.markets.langDeDE')"
+                  value="de-DE"
+                />
+                <el-option
+                  :label="t('settings.markets.langFrFR')"
+                  value="fr-FR"
+                />
+                <el-option
+                  :label="t('settings.markets.langEsES')"
+                  value="es-ES"
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -162,7 +304,9 @@
         </el-row>
 
         <!-- Tax Configuration Section -->
-        <el-divider content-position="left">{{ t('settings.markets.taxConfig') }}</el-divider>
+        <el-divider content-position="left">
+          {{ t('settings.markets.taxConfig') }}
+        </el-divider>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item :label="t('settings.markets.vatRate')">
@@ -203,8 +347,16 @@
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ t('common.save') }}</el-button>
+        <el-button @click="dialogVisible = false">
+          {{ t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          {{ t('common.save') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

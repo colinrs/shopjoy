@@ -1,10 +1,24 @@
 <template>
   <div class="product-grid-preview">
-    <h4 v-if="config?.title" class="grid-title">{{ config.title }}</h4>
-    <div class="grid-container" :style="{ gridTemplateColumns: `repeat(${config?.columns || 4}, 1fr)` }">
-      <div v-for="i in (config?.count || 4)" :key="i" class="product-card">
+    <h4
+      v-if="config?.title"
+      class="grid-title"
+    >
+      {{ config.title }}
+    </h4>
+    <div
+      class="grid-container"
+      :style="{ gridTemplateColumns: `repeat(${config?.columns || 4}, 1fr)` }"
+    >
+      <div
+        v-for="i in (config?.count || 4)"
+        :key="i"
+        class="product-card"
+      >
         <div class="product-image">
-          <el-icon size="24"><Goods /></el-icon>
+          <el-icon size="24">
+            <Goods />
+          </el-icon>
         </div>
         <div class="product-info">
           <span class="product-name">{{ $t('storefront.product') }} {{ i }}</span>

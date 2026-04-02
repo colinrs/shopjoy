@@ -19,8 +19,14 @@
       </el-input>
 
       <!-- Province List -->
-      <div class="region-list" v-loading="loading">
-        <div v-if="!searchText" class="region-level">
+      <div
+        v-loading="loading"
+        class="region-list"
+      >
+        <div
+          v-if="!searchText"
+          class="region-level"
+        >
           <div class="level-header">
             <span class="level-title">{{ $t('shipping.province') }}</span>
             <el-checkbox
@@ -45,15 +51,26 @@
                 @click.stop
               />
               <span class="region-name">{{ province.name }}</span>
-              <el-icon v-if="province.children?.length" class="expand-icon"><ArrowRight /></el-icon>
+              <el-icon
+                v-if="province.children?.length"
+                class="expand-icon"
+              >
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
         </div>
 
         <!-- City List (shown when province is expanded) -->
-        <div v-if="expandedProvince && !searchText" class="region-level">
+        <div
+          v-if="expandedProvince && !searchText"
+          class="region-level"
+        >
           <div class="level-header">
-            <el-button link @click="expandedProvince = null">
+            <el-button
+              link
+              @click="expandedProvince = null"
+            >
               <el-icon><ArrowLeft /></el-icon>
               {{ $t('shipping.backToProvinceList') }}
             </el-button>
@@ -85,7 +102,10 @@
         </div>
 
         <!-- Search Results -->
-        <div v-if="searchText" class="region-level">
+        <div
+          v-if="searchText"
+          class="region-level"
+        >
           <div class="level-header">
             <span class="level-title">{{ $t('shipping.searchResults') }}</span>
           </div>
@@ -107,15 +127,31 @@
       </div>
 
       <!-- Selected Summary -->
-      <div class="selected-summary" v-if="selectedRegions.length > 0">
+      <div
+        v-if="selectedRegions.length > 0"
+        class="selected-summary"
+      >
         <span class="summary-text">{{ $t('shipping.selectedCount', { count: selectedRegions.length }) }}</span>
-        <el-button type="primary" link size="small" @click="clearSelection">{{ $t('shipping.clear') }}</el-button>
+        <el-button
+          type="primary"
+          link
+          size="small"
+          @click="clearSelection"
+        >
+          {{ $t('shipping.clear') }}
+        </el-button>
       </div>
     </div>
 
     <template #footer>
-      <el-button @click="handleCancel">{{ $t('shipping.cancel') }}</el-button>
-      <el-button type="primary" @click="handleConfirm" :disabled="selectedRegions.length === 0">
+      <el-button @click="handleCancel">
+        {{ $t('shipping.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :disabled="selectedRegions.length === 0"
+        @click="handleConfirm"
+      >
         {{ $t('shipping.confirmSelection') }}
       </el-button>
     </template>

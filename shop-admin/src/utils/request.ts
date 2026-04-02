@@ -53,16 +53,18 @@ const responseInterceptor = (response: any): unknown => {
 
     // Handle based on action type
     switch (errorConfig.action) {
-      case 'logout':
+      case 'logout': {
         ElMessage.error(errorConfig.message)
         const userStore = useUserStore()
         userStore.clearToken()
         window.location.href = errorConfig.redirectPath || '/login'
         break
-      case 'redirect':
+      }
+      case 'redirect': {
         ElMessage.error(errorConfig.message)
         window.location.href = errorConfig.redirectPath || '/'
         break
+      }
       case 'toast':
         ElMessage.error(errorConfig.message)
         break
@@ -96,16 +98,18 @@ axiosInstance.interceptors.response.use(
       const errorConfig = handleAdminError(errorResponse)
 
       switch (errorConfig.action) {
-        case 'logout':
+        case 'logout': {
           ElMessage.error(errorConfig.message)
           const userStore = useUserStore()
           userStore.clearToken()
           window.location.href = errorConfig.redirectPath || '/login'
           break
-        case 'redirect':
+        }
+        case 'redirect': {
           ElMessage.error(errorConfig.message)
           window.location.href = errorConfig.redirectPath || '/'
           break
+        }
         case 'toast':
           ElMessage.error(errorConfig.message)
           break

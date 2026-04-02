@@ -1,27 +1,57 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="emit('update:visible', $event)"
     :title="isEdit ? $t('products.editVariant') : $t('products.addVariant')"
     width="550px"
+    @update:model-value="emit('update:visible', $event)"
   >
-    <el-form :model="variantForm" label-width="100px" ref="variantFormRef">
-      <el-form-item :label="$t('products.skuCode')" required>
-        <el-input v-model="variantForm.code" :placeholder="$t('products.enterSkuCode')" />
+    <el-form
+      ref="variantFormRef"
+      :model="variantForm"
+      label-width="100px"
+    >
+      <el-form-item
+        :label="$t('products.skuCode')"
+        required
+      >
+        <el-input
+          v-model="variantForm.code"
+          :placeholder="$t('products.enterSkuCode')"
+        />
       </el-form-item>
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item :label="$t('products.price')">
-            <el-input-number v-model="variantForm.price" :min="0" :precision="2" style="width: 100%" />
+            <el-input-number
+              v-model="variantForm.price"
+              :min="0"
+              :precision="2"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.currency')">
-            <el-select v-model="variantForm.currency" style="width: 100%">
-              <el-option label="USD" value="USD" />
-              <el-option label="EUR" value="EUR" />
-              <el-option label="GBP" value="GBP" />
-              <el-option label="CNY" value="CNY" />
+            <el-select
+              v-model="variantForm.currency"
+              style="width: 100%"
+            >
+              <el-option
+                label="USD"
+                value="USD"
+              />
+              <el-option
+                label="EUR"
+                value="EUR"
+              />
+              <el-option
+                label="GBP"
+                value="GBP"
+              />
+              <el-option
+                label="CNY"
+                value="CNY"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -29,12 +59,20 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item :label="$t('products.stock')">
-            <el-input-number v-model="variantForm.stock" :min="0" style="width: 100%" />
+            <el-input-number
+              v-model="variantForm.stock"
+              :min="0"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.safetyStock')">
-            <el-input-number v-model="variantForm.safety_stock" :min="0" style="width: 100%" />
+            <el-input-number
+              v-model="variantForm.safety_stock"
+              :min="0"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -43,23 +81,54 @@
       </el-form-item>
       <el-form-item :label="$t('products.attributes')">
         <div class="attributes-section">
-          <div v-for="(value, key) in variantForm.attributes" :key="key" class="attribute-item">
+          <div
+            v-for="(value, key) in variantForm.attributes"
+            :key="key"
+            class="attribute-item"
+          >
             <span class="attribute-text">{{ key }}: {{ value }}</span>
-            <el-button type="danger" link size="small" @click="handleRemoveAttribute(key as string)">
+            <el-button
+              type="danger"
+              link
+              size="small"
+              @click="handleRemoveAttribute(key as string)"
+            >
               <el-icon><Close /></el-icon>
             </el-button>
           </div>
           <div class="add-attribute-row">
-            <el-input v-model="newAttributeKey" :placeholder="$t('products.attributeName')" style="width: 120px" />
-            <el-input v-model="newAttributeValue" :placeholder="$t('products.attributeValue')" style="width: 120px" />
-            <el-button type="primary" size="small" @click="handleAddAttribute">{{ $t('common.add') }}</el-button>
+            <el-input
+              v-model="newAttributeKey"
+              :placeholder="$t('products.attributeName')"
+              style="width: 120px"
+            />
+            <el-input
+              v-model="newAttributeValue"
+              :placeholder="$t('products.attributeValue')"
+              style="width: 120px"
+            />
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleAddAttribute"
+            >
+              {{ $t('common.add') }}
+            </el-button>
           </div>
         </div>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSave" :loading="loading">{{ $t('common.save') }}</el-button>
+      <el-button @click="handleClose">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleSave"
+      >
+        {{ $t('common.save') }}
+      </el-button>
     </template>
   </el-dialog>
 </template>

@@ -1,8 +1,14 @@
 <template>
   <div class="accounts-page">
     <!-- Stats Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.totalAccounts')"
           :value="accountStats.total"
@@ -10,7 +16,10 @@
           icon-color="primary"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.totalBalance')"
           :value="accountStats.total_balance"
@@ -18,7 +27,10 @@
           icon-color="warning"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.activeUsers')"
           :value="accountStats.active"
@@ -29,7 +41,10 @@
     </el-row>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <el-input
           v-model="searchQuery"
@@ -42,48 +57,91 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-button type="primary" @click="handleSearch">
+        <el-button
+          type="primary"
+          @click="handleSearch"
+        >
           {{ $t('common.search') }}
         </el-button>
       </div>
     </el-card>
 
     <!-- Accounts Table -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="accountList" v-loading="loading" stripe @row-click="handleRowClick">
-        <el-table-column :label="$t('points.userId')" width="100" align="center">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="accountList"
+        stripe
+        @row-click="handleRowClick"
+      >
+        <el-table-column
+          :label="$t('points.userId')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="user-id">U{{ row.user_id }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('users.email')" min-width="200">
+        <el-table-column
+          :label="$t('users.email')"
+          min-width="200"
+        >
           <template #default="{ row }">
             <span class="email-text">{{ row.user_email || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.availableBalance')" width="120" align="right">
+        <el-table-column
+          :label="$t('points.availableBalance')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="balance-value">{{ row.balance.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.frozenPoints')" width="100" align="right">
+        <el-table-column
+          :label="$t('points.frozenPoints')"
+          width="100"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="frozen-value">{{ row.frozen_balance.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.cumulativeEarned')" width="120" align="right">
+        <el-table-column
+          :label="$t('points.cumulativeEarned')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="earned-value">{{ row.total_earned.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('points.cumulativeRedeemed')" width="120" align="right">
+        <el-table-column
+          :label="$t('points.cumulativeRedeemed')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="redeemed-value">{{ row.total_redeemed.toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="100" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="100"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click.stop="viewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="viewDetail(row)"
+            >
               {{ $t('common.detail') }}
             </el-button>
           </template>

@@ -1,48 +1,98 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="$emit('update:visible', $event)"
     :title="isEdit ? $t('points.editRule') : $t('points.createRule')"
     width="700px"
     destroy-on-close
+    @update:model-value="$emit('update:visible', $event)"
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="120px"
+    >
       <!-- Basic Info -->
-      <el-form-item :label="$t('points.ruleName')" prop="name">
-        <el-input v-model="form.name" :placeholder="$t('points.orderPoints')" maxlength="100" />
+      <el-form-item
+        :label="$t('points.ruleName')"
+        prop="name"
+      >
+        <el-input
+          v-model="form.name"
+          :placeholder="$t('points.orderPoints')"
+          maxlength="100"
+        />
       </el-form-item>
 
       <el-form-item :label="$t('points.description')">
-        <el-input v-model="form.description" type="textarea" :rows="2" :placeholder="$t('points.ruleDescPlaceholder')" />
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="2"
+          :placeholder="$t('points.ruleDescPlaceholder')"
+        />
       </el-form-item>
 
       <!-- Scenario -->
-      <el-form-item :label="$t('points.scenario')" prop="scenario">
+      <el-form-item
+        :label="$t('points.scenario')"
+        prop="scenario"
+      >
         <el-radio-group v-model="form.scenario">
-          <el-radio value="ORDER_PAYMENT">{{ $t('points.orderPayment') }}</el-radio>
-          <el-radio value="SIGN_IN">{{ $t('points.signIn') }}</el-radio>
-          <el-radio value="PRODUCT_REVIEW">{{ $t('points.productReview') }}</el-radio>
-          <el-radio value="FIRST_ORDER">{{ $t('points.firstOrder') }}</el-radio>
+          <el-radio value="ORDER_PAYMENT">
+            {{ $t('points.orderPayment') }}
+          </el-radio>
+          <el-radio value="SIGN_IN">
+            {{ $t('points.signIn') }}
+          </el-radio>
+          <el-radio value="PRODUCT_REVIEW">
+            {{ $t('points.productReview') }}
+          </el-radio>
+          <el-radio value="FIRST_ORDER">
+            {{ $t('points.firstOrder') }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- Calculation Type -->
-      <el-form-item :label="$t('points.calculationType')" prop="calculation_type">
+      <el-form-item
+        :label="$t('points.calculationType')"
+        prop="calculation_type"
+      >
         <el-radio-group v-model="form.calculation_type">
-          <el-radio value="FIXED">{{ $t('points.fixed') }}</el-radio>
-          <el-radio value="RATIO">{{ $t('points.ratio') }}</el-radio>
-          <el-radio value="TIERED">{{ $t('points.tiered') }}</el-radio>
+          <el-radio value="FIXED">
+            {{ $t('points.fixed') }}
+          </el-radio>
+          <el-radio value="RATIO">
+            {{ $t('points.ratio') }}
+          </el-radio>
+          <el-radio value="TIERED">
+            {{ $t('points.tiered') }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- Fixed Points -->
-      <el-form-item v-if="form.calculation_type === 'FIXED'" :label="$t('points.fixedPoints')" prop="fixed_points">
-        <el-input-number v-model="form.fixed_points" :min="1" :max="99999" style="width: 200px" />
+      <el-form-item
+        v-if="form.calculation_type === 'FIXED'"
+        :label="$t('points.fixedPoints')"
+        prop="fixed_points"
+      >
+        <el-input-number
+          v-model="form.fixed_points"
+          :min="1"
+          :max="99999"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.orderPointsReward') }}</span>
       </el-form-item>
 
       <!-- Ratio -->
-      <el-form-item v-if="form.calculation_type === 'RATIO'" :label="$t('points.ratioPoints')" prop="ratio">
+      <el-form-item
+        v-if="form.calculation_type === 'RATIO'"
+        :label="$t('points.ratioPoints')"
+        prop="ratio"
+      >
         <el-input-number
           v-model="form.ratio_num"
           :min="0.1"
@@ -55,30 +105,64 @@
       </el-form-item>
 
       <!-- Tiered Config -->
-      <el-form-item v-if="form.calculation_type === 'TIERED'" :label="$t('points.tieredConfig')">
+      <el-form-item
+        v-if="form.calculation_type === 'TIERED'"
+        :label="$t('points.tieredConfig')"
+      >
         <TieredConfig v-model="form.tiers" />
       </el-form-item>
 
       <!-- Condition Type -->
       <el-form-item :label="$t('points.triggerCondition')">
-        <el-select v-model="form.condition_type" :placeholder="$t('points.condition')">
-          <el-option :label="$t('points.unconditional')" value="NONE" />
-          <el-option :label="$t('points.newUser')" value="NEW_USER" />
-          <el-option :label="$t('points.firstPurchase')" value="FIRST_ORDER" />
-          <el-option :label="$t('points.specificProducts')" value="SPECIFIC_PRODUCTS" />
-          <el-option :label="$t('points.minAmount')" value="MIN_AMOUNT" />
+        <el-select
+          v-model="form.condition_type"
+          :placeholder="$t('points.condition')"
+        >
+          <el-option
+            :label="$t('points.unconditional')"
+            value="NONE"
+          />
+          <el-option
+            :label="$t('points.newUser')"
+            value="NEW_USER"
+          />
+          <el-option
+            :label="$t('points.firstPurchase')"
+            value="FIRST_ORDER"
+          />
+          <el-option
+            :label="$t('points.specificProducts')"
+            value="SPECIFIC_PRODUCTS"
+          />
+          <el-option
+            :label="$t('points.minAmount')"
+            value="MIN_AMOUNT"
+          />
         </el-select>
       </el-form-item>
 
       <!-- Condition Value for MIN_AMOUNT -->
-      <el-form-item v-if="form.condition_type === 'MIN_AMOUNT'" :label="$t('points.minAmount')">
-        <el-input-number v-model="form.min_amount" :min="1" :precision="2" style="width: 200px" />
+      <el-form-item
+        v-if="form.condition_type === 'MIN_AMOUNT'"
+        :label="$t('points.minAmount')"
+      >
+        <el-input-number
+          v-model="form.min_amount"
+          :min="1"
+          :precision="2"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.amountDollar') }}</span>
       </el-form-item>
 
       <!-- Expiration -->
       <el-form-item :label="$t('points.pointsExpiration')">
-        <el-input-number v-model="form.expiration_months" :min="0" :max="36" style="width: 200px" />
+        <el-input-number
+          v-model="form.expiration_months"
+          :min="0"
+          :max="36"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.zeroNeverExpires') }}</span>
       </el-form-item>
 
@@ -96,15 +180,31 @@
 
       <!-- Priority -->
       <el-form-item :label="$t('points.priority')">
-        <el-input-number v-model="form.priority" :min="0" :max="100" style="width: 200px" />
+        <el-input-number
+          v-model="form.priority"
+          :min="0"
+          :max="100"
+          style="width: 200px"
+        />
         <span class="form-hint">{{ $t('points.greaterPriority') }}</span>
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
-      <el-button @click="handleSaveDraft" :loading="loading">{{ $t('points.saveDraft') }}</el-button>
-      <el-button type="primary" @click="handleSaveAndActivate" :loading="loading">
+      <el-button @click="$emit('update:visible', false)">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        :loading="loading"
+        @click="handleSaveDraft"
+      >
+        {{ $t('points.saveDraft') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleSaveAndActivate"
+      >
         {{ $t('points.saveAndActivate') }}
       </el-button>
     </template>

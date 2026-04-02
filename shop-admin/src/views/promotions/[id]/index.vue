@@ -1,5 +1,8 @@
 <template>
-  <div class="promotion-detail-page" v-loading="loading">
+  <div
+    v-loading="loading"
+    class="promotion-detail-page"
+  >
     <PageHeader
       :title="isEdit ? $t('promotions.editPromotion') : $t('promotions.createPromotion')"
       :subtitle="promotionForm.name || $t('promotions.configurePromotionInfo')"
@@ -7,30 +10,71 @@
     />
 
     <el-row :gutter="20">
-      <el-col :xs="24" :lg="16">
-        <el-card class="form-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="16"
+      >
+        <el-card
+          class="form-card"
+          shadow="never"
+        >
           <el-form
+            ref="formRef"
             :model="promotionForm"
             :rules="rules"
-            ref="formRef"
             label-width="120px"
             label-position="top"
           >
             <!-- Basic Info -->
-            <div class="section-title">{{ $t('promotions.basicInfo') }}</div>
+            <div class="section-title">
+              {{ $t('promotions.basicInfo') }}
+            </div>
             <el-row :gutter="20">
-              <el-col :xs="24" :sm="12">
-                <el-form-item :label="$t('promotions.promotionName')" prop="name">
-                  <el-input v-model="promotionForm.name" :placeholder="$t('promotions.enterPromotionName')" maxlength="100" show-word-limit />
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item
+                  :label="$t('promotions.promotionName')"
+                  prop="name"
+                >
+                  <el-input
+                    v-model="promotionForm.name"
+                    :placeholder="$t('promotions.enterPromotionName')"
+                    maxlength="100"
+                    show-word-limit
+                  />
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="12">
-                <el-form-item :label="$t('promotions.promotionTypeSelect')" prop="type">
-                  <el-select v-model="promotionForm.type" :placeholder="$t('promotions.selectPromotionType')" style="width: 100%">
-                    <el-option :label="$t('promotions.discount')" value="discount" />
-                    <el-option :label="$t('promotions.flashSale')" value="flash_sale" />
-                    <el-option :label="$t('promotions.bundle')" value="bundle" />
-                    <el-option :label="$t('promotions.buyXGetY')" value="buy_x_get_y" />
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item
+                  :label="$t('promotions.promotionTypeSelect')"
+                  prop="type"
+                >
+                  <el-select
+                    v-model="promotionForm.type"
+                    :placeholder="$t('promotions.selectPromotionType')"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      :label="$t('promotions.discount')"
+                      value="discount"
+                    />
+                    <el-option
+                      :label="$t('promotions.flashSale')"
+                      value="flash_sale"
+                    />
+                    <el-option
+                      :label="$t('promotions.bundle')"
+                      value="bundle"
+                    />
+                    <el-option
+                      :label="$t('promotions.buyXGetY')"
+                      value="buy_x_get_y"
+                    />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -48,18 +92,42 @@
             </el-form-item>
 
             <!-- Discount Settings -->
-            <div class="section-title">{{ $t('promotions.discountSettings') }}</div>
+            <div class="section-title">
+              {{ $t('promotions.discountSettings') }}
+            </div>
             <el-row :gutter="20">
-              <el-col :xs="24" :sm="8">
-                <el-form-item :label="$t('promotions.discountType')" prop="discount_type">
-                  <el-select v-model="promotionForm.discount_type" :placeholder="$t('promotions.selectDiscountType')" style="width: 100%">
-                    <el-option :label="$t('promotions.fixedAmount')" value="fixed_amount" />
-                    <el-option :label="$t('promotions.percentage')" value="percentage" />
+              <el-col
+                :xs="24"
+                :sm="8"
+              >
+                <el-form-item
+                  :label="$t('promotions.discountType')"
+                  prop="discount_type"
+                >
+                  <el-select
+                    v-model="promotionForm.discount_type"
+                    :placeholder="$t('promotions.selectDiscountType')"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      :label="$t('promotions.fixedAmount')"
+                      value="fixed_amount"
+                    />
+                    <el-option
+                      :label="$t('promotions.percentage')"
+                      value="percentage"
+                    />
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="8">
-                <el-form-item :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')" prop="discount_value">
+              <el-col
+                :xs="24"
+                :sm="8"
+              >
+                <el-form-item
+                  :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')"
+                  prop="discount_value"
+                >
                   <el-input-number
                     v-model="promotionForm.discount_value_num"
                     :min="0"
@@ -69,7 +137,10 @@
                   />
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="8">
+              <el-col
+                :xs="24"
+                :sm="8"
+              >
                 <el-form-item :label="$t('promotions.lowestConsume')">
                   <el-input-number
                     v-model="promotionForm.min_order_amount_num"
@@ -81,8 +152,14 @@
               </el-col>
             </el-row>
 
-            <el-row :gutter="20" v-if="promotionForm.discount_type === 'percentage'">
-              <el-col :xs="24" :sm="12">
+            <el-row
+              v-if="promotionForm.discount_type === 'percentage'"
+              :gutter="20"
+            >
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
                 <el-form-item :label="$t('promotions.maxDiscountAmount')">
                   <el-input-number
                     v-model="promotionForm.max_discount_num"
@@ -95,8 +172,13 @@
             </el-row>
 
             <!-- Time Range -->
-            <div class="section-title">{{ $t('promotions.activityTime') }}</div>
-            <el-form-item :label="$t('promotions.promotionPeriod')" prop="dateRange">
+            <div class="section-title">
+              {{ $t('promotions.activityTime') }}
+            </div>
+            <el-form-item
+              :label="$t('promotions.promotionPeriod')"
+              prop="dateRange"
+            >
               <el-date-picker
                 v-model="promotionForm.dateRange"
                 type="datetimerange"
@@ -109,17 +191,30 @@
             </el-form-item>
 
             <!-- Scope Settings -->
-            <div class="section-title">{{ $t('promotions.scopeSettings') }}</div>
+            <div class="section-title">
+              {{ $t('promotions.scopeSettings') }}
+            </div>
             <el-form-item :label="$t('promotions.activityScope')">
               <el-radio-group v-model="promotionForm.scope_type">
-                <el-radio label="storewide">{{ $t('promotions.storewide') }}</el-radio>
-                <el-radio label="products">{{ $t('promotions.specificProductsScope') }}</el-radio>
-                <el-radio label="categories">{{ $t('promotions.specificCategories') }}</el-radio>
-                <el-radio label="brands">{{ $t('promotions.specificBrands') }}</el-radio>
+                <el-radio label="storewide">
+                  {{ $t('promotions.storewide') }}
+                </el-radio>
+                <el-radio label="products">
+                  {{ $t('promotions.specificProductsScope') }}
+                </el-radio>
+                <el-radio label="categories">
+                  {{ $t('promotions.specificCategories') }}
+                </el-radio>
+                <el-radio label="brands">
+                  {{ $t('promotions.specificBrands') }}
+                </el-radio>
               </el-radio-group>
             </el-form-item>
 
-            <el-form-item v-if="promotionForm.scope_type === 'products'" :label="$t('promotions.selectProducts')">
+            <el-form-item
+              v-if="promotionForm.scope_type === 'products'"
+              :label="$t('promotions.selectProducts')"
+            >
               <el-select
                 v-model="promotionForm.product_ids"
                 multiple
@@ -139,8 +234,16 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item v-if="promotionForm.scope_type === 'categories'" :label="$t('promotions.selectCategories')">
-              <el-select v-model="promotionForm.category_ids" multiple :placeholder="$t('promotions.selectCategoryPlaceholder')" style="width: 100%">
+            <el-form-item
+              v-if="promotionForm.scope_type === 'categories'"
+              :label="$t('promotions.selectCategories')"
+            >
+              <el-select
+                v-model="promotionForm.category_ids"
+                multiple
+                :placeholder="$t('promotions.selectCategoryPlaceholder')"
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in categoryOptions"
                   :key="item.id"
@@ -151,18 +254,38 @@
             </el-form-item>
 
             <!-- Usage Limits -->
-            <div class="section-title">{{ $t('promotions.usageLimits') }}</div>
+            <div class="section-title">
+              {{ $t('promotions.usageLimits') }}
+            </div>
             <el-row :gutter="20">
-              <el-col :xs="24" :sm="12">
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
                 <el-form-item :label="$t('promotions.totalUsageLimit')">
-                  <el-input-number v-model="promotionForm.usage_limit" :min="0" style="width: 100%" />
-                  <div class="form-tip">{{ $t('promotions.zeroUnlimitedUsage') }}</div>
+                  <el-input-number
+                    v-model="promotionForm.usage_limit"
+                    :min="0"
+                    style="width: 100%"
+                  />
+                  <div class="form-tip">
+                    {{ $t('promotions.zeroUnlimitedUsage') }}
+                  </div>
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="12">
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
                 <el-form-item :label="$t('promotions.perUserUsageLimit')">
-                  <el-input-number v-model="promotionForm.per_user_limit" :min="0" style="width: 100%" />
-                  <div class="form-tip">{{ $t('promotions.zeroUnlimitedUsage') }}</div>
+                  <el-input-number
+                    v-model="promotionForm.per_user_limit"
+                    :min="0"
+                    style="width: 100%"
+                  />
+                  <div class="form-tip">
+                    {{ $t('promotions.zeroUnlimitedUsage') }}
+                  </div>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -170,30 +293,40 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :lg="8">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
         <!-- Status Card -->
-        <el-card v-if="isEdit" class="status-card" shadow="never">
+        <el-card
+          v-if="isEdit"
+          class="status-card"
+          shadow="never"
+        >
           <template #header>
             <span class="card-title">{{ $t('promotions.activityStatus') }}</span>
           </template>
           <div class="status-info">
-            <el-tag :type="getStatusType(promotionForm.status)" size="large">
+            <el-tag
+              :type="getStatusType(promotionForm.status)"
+              size="large"
+            >
               {{ getStatusText(promotionForm.status) }}
             </el-tag>
             <div class="status-actions">
               <el-button
                 v-if="promotionForm.status === 'pending' || promotionForm.status === 'paused'"
                 type="success"
-                @click="handleActivate"
                 :loading="activating"
+                @click="handleActivate"
               >
                 {{ $t('promotions.activateActivity') }}
               </el-button>
               <el-button
                 v-if="promotionForm.status === 'active'"
                 type="warning"
-                @click="handleDeactivate"
                 :loading="activating"
+                @click="handleDeactivate"
               >
                 {{ $t('promotions.deactivateActivity') }}
               </el-button>
@@ -202,13 +335,20 @@
         </el-card>
 
         <!-- Preview Card -->
-        <el-card class="preview-card" shadow="never">
+        <el-card
+          class="preview-card"
+          shadow="never"
+        >
           <template #header>
             <span class="card-title">{{ $t('promotions.activityPreview') }}</span>
           </template>
           <div class="preview-content">
-            <h4 class="preview-name">{{ promotionForm.name || $t('promotions.activityName') }}</h4>
-            <p class="preview-desc">{{ promotionForm.description || $t('promotions.activityDesc') }}</p>
+            <h4 class="preview-name">
+              {{ promotionForm.name || $t('promotions.activityName') }}
+            </h4>
+            <p class="preview-desc">
+              {{ promotionForm.description || $t('promotions.activityDesc') }}
+            </p>
             <div class="preview-discount">
               <span class="discount-label">{{ $t('promotions.previewDiscount') }}</span>
               <span class="discount-value">
@@ -224,7 +364,10 @@
               <span class="scope-label">{{ $t('promotions.previewScope') }}</span>
               <span class="scope-value">{{ getScopeText(promotionForm.scope_type) }}</span>
             </div>
-            <div class="preview-time" v-if="promotionForm.dateRange?.length === 2">
+            <div
+              v-if="promotionForm.dateRange?.length === 2"
+              class="preview-time"
+            >
               <span class="time-label">{{ $t('promotions.previewTime') }}</span>
               <span class="time-value">
                 {{ formatDateTime(promotionForm.dateRange[0]) }} {{ $t('promotions.to') }} {{ formatDateTime(promotionForm.dateRange[1]) }}
@@ -236,106 +379,238 @@
     </el-row>
 
     <!-- Rules Section -->
-    <el-card v-if="isEdit" class="rules-card" shadow="never">
+    <el-card
+      v-if="isEdit"
+      class="rules-card"
+      shadow="never"
+    >
       <template #header>
         <div class="rules-header">
           <span class="card-title">{{ $t('promotions.promotionRules') }}</span>
-          <el-button type="primary" size="small" @click="showAddRuleDialog">
+          <el-button
+            type="primary"
+            size="small"
+            @click="showAddRuleDialog"
+          >
             <el-icon><Plus /></el-icon>
             {{ $t('promotions.addRule') }}
           </el-button>
         </div>
       </template>
-      <el-table :data="rulesList" v-loading="rulesLoading" stripe>
-        <el-table-column :label="$t('promotions.ruleType')" width="150">
+      <el-table
+        v-loading="rulesLoading"
+        :data="rulesList"
+        stripe
+      >
+        <el-table-column
+          :label="$t('promotions.ruleType')"
+          width="150"
+        >
           <template #default="{ row }">
             {{ getRuleTypeText(row.rule_type) }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('promotions.operator')" width="120">
+        <el-table-column
+          :label="$t('promotions.operator')"
+          width="120"
+        >
           <template #default="{ row }">
             {{ getOperatorText(row.operator) }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('promotions.ruleValue')" width="150">
+        <el-table-column
+          :label="$t('promotions.ruleValue')"
+          width="150"
+        >
           <template #default="{ row }">
             {{ row.value }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('promotions.ruleDiscountType')" width="150">
+        <el-table-column
+          :label="$t('promotions.ruleDiscountType')"
+          width="150"
+        >
           <template #default="{ row }">
             {{ row.discount_type ? (row.discount_type === 'percentage' ? $t('promotions.percentage') : $t('promotions.fixedAmount')) : '-' }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('promotions.ruleDiscountValue')" width="120">
+        <el-table-column
+          :label="$t('promotions.ruleDiscountValue')"
+          width="120"
+        >
           <template #default="{ row }">
             {{ row.discount_value || '-' }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('promotions.rulePriority')" width="100" align="center">
+        <el-table-column
+          :label="$t('promotions.rulePriority')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.priority }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="150" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="150"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEditRule(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEditRule(row)"
+            >
               {{ $t('common.edit') }}
             </el-button>
-            <el-button type="danger" link size="small" @click="handleDeleteRule(row)">
+            <el-button
+              type="danger"
+              link
+              size="small"
+              @click="handleDeleteRule(row)"
+            >
               {{ $t('common.delete') }}
             </el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!rulesLoading && rulesList.length === 0" :description="$t('promotions.noRules')" />
+      <el-empty
+        v-if="!rulesLoading && rulesList.length === 0"
+        :description="$t('promotions.noRules')"
+      />
     </el-card>
 
     <!-- Add/Edit Rule Dialog -->
-    <el-dialog v-model="ruleDialogVisible" :title="editingRule ? $t('promotions.editRule') : $t('promotions.addRule')" width="500px" destroy-on-close>
-      <el-form :model="ruleForm" label-width="120px">
+    <el-dialog
+      v-model="ruleDialogVisible"
+      :title="editingRule ? $t('promotions.editRule') : $t('promotions.addRule')"
+      width="500px"
+      destroy-on-close
+    >
+      <el-form
+        :model="ruleForm"
+        label-width="120px"
+      >
         <el-form-item :label="$t('promotions.ruleType')">
-          <el-select v-model="ruleForm.rule_type" style="width: 100%">
-            <el-option :label="$t('promotions.ruleTypeProduct')" value="product" />
-            <el-option :label="$t('promotions.ruleTypeCategory')" value="category" />
-            <el-option :label="$t('promotions.ruleTypeAmount')" value="amount" />
-            <el-option :label="$t('promotions.ruleTypeQuantity')" value="quantity" />
-            <el-option :label="$t('promotions.ruleTypeUserGroup')" value="user_group" />
-            <el-option :label="$t('promotions.ruleTypeMarket')" value="market" />
+          <el-select
+            v-model="ruleForm.rule_type"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('promotions.ruleTypeProduct')"
+              value="product"
+            />
+            <el-option
+              :label="$t('promotions.ruleTypeCategory')"
+              value="category"
+            />
+            <el-option
+              :label="$t('promotions.ruleTypeAmount')"
+              value="amount"
+            />
+            <el-option
+              :label="$t('promotions.ruleTypeQuantity')"
+              value="quantity"
+            />
+            <el-option
+              :label="$t('promotions.ruleTypeUserGroup')"
+              value="user_group"
+            />
+            <el-option
+              :label="$t('promotions.ruleTypeMarket')"
+              value="market"
+            />
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('promotions.operator')">
-          <el-select v-model="ruleForm.operator" style="width: 100%">
-            <el-option :label="$t('promotions.operatorEq')" value="eq" />
-            <el-option :label="$t('promotions.operatorNe')" value="ne" />
-            <el-option :label="$t('promotions.operatorGt')" value="gt" />
-            <el-option :label="$t('promotions.operatorGte')" value="gte" />
-            <el-option :label="$t('promotions.operatorLt')" value="lt" />
-            <el-option :label="$t('promotions.operatorLte')" value="lte" />
-            <el-option :label="$t('promotions.operatorIn')" value="in" />
-            <el-option :label="$t('promotions.operatorNotIn')" value="not_in" />
-            <el-option :label="$t('promotions.operatorContains')" value="contains" />
+          <el-select
+            v-model="ruleForm.operator"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('promotions.operatorEq')"
+              value="eq"
+            />
+            <el-option
+              :label="$t('promotions.operatorNe')"
+              value="ne"
+            />
+            <el-option
+              :label="$t('promotions.operatorGt')"
+              value="gt"
+            />
+            <el-option
+              :label="$t('promotions.operatorGte')"
+              value="gte"
+            />
+            <el-option
+              :label="$t('promotions.operatorLt')"
+              value="lt"
+            />
+            <el-option
+              :label="$t('promotions.operatorLte')"
+              value="lte"
+            />
+            <el-option
+              :label="$t('promotions.operatorIn')"
+              value="in"
+            />
+            <el-option
+              :label="$t('promotions.operatorNotIn')"
+              value="not_in"
+            />
+            <el-option
+              :label="$t('promotions.operatorContains')"
+              value="contains"
+            />
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('promotions.ruleValue')">
           <el-input v-model="ruleForm.value" />
         </el-form-item>
         <el-form-item :label="$t('promotions.ruleDiscountType')">
-          <el-select v-model="ruleForm.discount_type" style="width: 100%">
-            <el-option :label="$t('promotions.fixedAmount')" value="fixed_amount" />
-            <el-option :label="$t('promotions.percentage')" value="percentage" />
+          <el-select
+            v-model="ruleForm.discount_type"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('promotions.fixedAmount')"
+              value="fixed_amount"
+            />
+            <el-option
+              :label="$t('promotions.percentage')"
+              value="percentage"
+            />
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('promotions.ruleDiscountValue')">
-          <el-input-number v-model="ruleForm.discount_value_num" :min="0" :precision="2" style="width: 100%" />
+          <el-input-number
+            v-model="ruleForm.discount_value_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item :label="$t('promotions.rulePriority')">
-          <el-input-number v-model="ruleForm.priority" :min="0" :max="100" style="width: 100%" />
+          <el-input-number
+            v-model="ruleForm.priority"
+            :min="0"
+            :max="100"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="ruleDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSaveRule" :loading="ruleSaving">
+        <el-button @click="ruleDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="ruleSaving"
+          @click="handleSaveRule"
+        >
           {{ $t('common.save') }}
         </el-button>
       </template>
@@ -343,8 +618,14 @@
 
     <!-- Footer Actions -->
     <div class="footer-actions">
-      <el-button @click="handleBack">{{ $t('promotions.cancelAction') }}</el-button>
-      <el-button type="primary" @click="handleSave" :loading="saving">
+      <el-button @click="handleBack">
+        {{ $t('promotions.cancelAction') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="saving"
+        @click="handleSave"
+      >
         {{ isEdit ? $t('promotions.saveChanges') : $t('promotions.createActivity') }}
       </el-button>
     </div>

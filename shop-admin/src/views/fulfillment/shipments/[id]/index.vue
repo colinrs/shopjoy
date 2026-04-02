@@ -1,41 +1,98 @@
 <template>
   <div class="shipment-detail-page">
     <!-- Skeleton Loading -->
-    <div v-if="pageLoading" class="skeleton-container">
-      <el-skeleton :rows="1" animated />
+    <div
+      v-if="pageLoading"
+      class="skeleton-container"
+    >
+      <el-skeleton
+        :rows="1"
+        animated
+      />
       <el-row :gutter="20">
-        <el-col :xs="24" :lg="16">
-          <el-card class="info-card" shadow="never">
+        <el-col
+          :xs="24"
+          :lg="16"
+        >
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
             <template #header>
-              <el-skeleton :rows="1" animated />
+              <el-skeleton
+                :rows="1"
+                animated
+              />
             </template>
-            <el-skeleton :rows="4" animated />
+            <el-skeleton
+              :rows="4"
+              animated
+            />
           </el-card>
-          <el-card class="info-card" shadow="never">
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
             <template #header>
-              <el-skeleton :rows="1" animated />
+              <el-skeleton
+                :rows="1"
+                animated
+              />
             </template>
-            <el-skeleton :rows="4" animated />
+            <el-skeleton
+              :rows="4"
+              animated
+            />
           </el-card>
-          <el-card class="info-card" shadow="never">
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
             <template #header>
-              <el-skeleton :rows="1" animated />
+              <el-skeleton
+                :rows="1"
+                animated
+              />
             </template>
-            <el-skeleton :rows="3" animated />
+            <el-skeleton
+              :rows="3"
+              animated
+            />
           </el-card>
         </el-col>
-        <el-col :xs="24" :lg="8">
-          <el-card class="info-card" shadow="never">
+        <el-col
+          :xs="24"
+          :lg="8"
+        >
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
             <template #header>
-              <el-skeleton :rows="1" animated />
+              <el-skeleton
+                :rows="1"
+                animated
+              />
             </template>
-            <el-skeleton :rows="5" animated />
+            <el-skeleton
+              :rows="5"
+              animated
+            />
           </el-card>
-          <el-card class="info-card" shadow="never">
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
             <template #header>
-              <el-skeleton :rows="1" animated />
+              <el-skeleton
+                :rows="1"
+                animated
+              />
             </template>
-            <el-skeleton :rows="3" animated />
+            <el-skeleton
+              :rows="3"
+              animated
+            />
           </el-card>
         </el-col>
       </el-row>
@@ -43,252 +100,388 @@
 
     <!-- Actual Content -->
     <template v-else>
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-left">
-        <el-button link @click="goBack">
-          <el-icon><ArrowLeft /></el-icon>
-          {{ $t('common.back') }}
-        </el-button>
-        <div class="title-section">
-          <h1 class="page-title">{{ $t('fulfillment.shipmentDetails') }}</h1>
-          <p class="shipment-no">{{ shipment?.shipment_no }}</p>
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="header-left">
+          <el-button
+            link
+            @click="goBack"
+          >
+            <el-icon><ArrowLeft /></el-icon>
+            {{ $t('common.back') }}
+          </el-button>
+          <div class="title-section">
+            <h1 class="page-title">
+              {{ $t('fulfillment.shipmentDetails') }}
+            </h1>
+            <p class="shipment-no">
+              {{ shipment?.shipment_no }}
+            </p>
+          </div>
+        </div>
+        <div class="header-right">
+          <status-tag
+            :status="shipment?.status"
+            :type-map="statusTypeMap"
+            size="large"
+          />
+          <el-button
+            v-if="shipment?.tracking_no"
+            type="primary"
+            @click="copyTracking"
+          >
+            <el-icon><Link /></el-icon>
+            {{ $t('fulfillment.copyTracking') }}
+          </el-button>
         </div>
       </div>
-      <div class="header-right">
-        <status-tag :status="shipment?.status" :type-map="statusTypeMap" size="large" />
-        <el-button v-if="shipment?.tracking_no" type="primary" @click="copyTracking">
-          <el-icon><Link /></el-icon>
-          {{ $t('fulfillment.copyTracking') }}
-        </el-button>
-      </div>
-    </div>
 
-    <el-row :gutter="20">
-      <!-- Left Column -->
-      <el-col :xs="24" :lg="16">
-        <!-- Basic Info Card -->
-        <el-card class="info-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Document /></el-icon>
-                {{ $t('fulfillment.basicInformation') }}
-              </span>
+      <el-row :gutter="20">
+        <!-- Left Column -->
+        <el-col
+          :xs="24"
+          :lg="16"
+        >
+          <!-- Basic Info Card -->
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
+            <template #header>
+              <div class="card-header">
+                <span class="card-title">
+                  <el-icon><Document /></el-icon>
+                  {{ $t('fulfillment.basicInformation') }}
+                </span>
+              </div>
+            </template>
+            <el-descriptions
+              :column="2"
+              border
+            >
+              <el-descriptions-item :label="$t('fulfillment.shipmentNo')">
+                <span class="value-text">{{ shipment?.shipment_no }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.orderNo')">
+                <el-button
+                  type="primary"
+                  link
+                  @click="viewOrder"
+                >
+                  {{ shipment?.order_no }}
+                </el-button>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('common.status')">
+                <status-tag
+                  :status="shipment?.status"
+                  :type-map="statusTypeMap"
+                />
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('common.createdAt')">
+                {{ shipment?.created_at }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-card>
+
+          <!-- Logistics Info Card -->
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
+            <template #header>
+              <div class="card-header">
+                <span class="card-title">
+                  <el-icon><Van /></el-icon>
+                  {{ $t('fulfillment.logisticsInformation') }}
+                </span>
+                <el-button
+                  v-if="shipment?.status === '0'"
+                  type="primary"
+                  size="small"
+                  @click="openEditLogistics"
+                >
+                  {{ $t('fulfillment.editLogistics') }}
+                </el-button>
+              </div>
+            </template>
+            <el-descriptions
+              :column="2"
+              border
+            >
+              <el-descriptions-item :label="$t('fulfillment.carrier')">
+                <span class="value-text">{{ shipment?.carrier || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.trackingNo')">
+                <span
+                  v-if="shipment?.tracking_no"
+                  class="tracking-value"
+                >
+                  {{ shipment.tracking_no }}
+                  <el-button
+                    link
+                    size="small"
+                    @click="copyTracking"
+                  >
+                    <el-icon><CopyDocument /></el-icon>
+                  </el-button>
+                </span>
+                <span
+                  v-else
+                  class="no-data"
+                >{{ $t('fulfillment.notEntered') }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.shippingCost')">
+                <span v-if="shipment?.shipping_cost">
+                  {{ shipment.currency }} {{ shipment.shipping_cost }}
+                </span>
+                <span
+                  v-else
+                  class="no-data"
+                >-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.weight')">
+                <span v-if="shipment?.weight">{{ shipment.weight }} {{ $t('fulfillment.kg') }}</span>
+                <span
+                  v-else
+                  class="no-data"
+                >-</span>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.shippedAt')">
+                {{ shipment?.shipped_at || '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('fulfillment.deliveredAt')">
+                {{ shipment?.delivered_at || '-' }}
+              </el-descriptions-item>
+            </el-descriptions>
+            <div
+              v-if="shipment?.remark"
+              class="remark-section"
+            >
+              <span class="remark-label">{{ $t('fulfillment.remark') }}:</span>
+              <span class="remark-text">{{ shipment.remark }}</span>
             </div>
-          </template>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item :label="$t('fulfillment.shipmentNo')">
-              <span class="value-text">{{ shipment?.shipment_no }}</span>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.orderNo')">
-              <el-button type="primary" link @click="viewOrder">
-                {{ shipment?.order_no }}
-              </el-button>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('common.status')">
-              <status-tag :status="shipment?.status" :type-map="statusTypeMap" />
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('common.createdAt')">
-              {{ shipment?.created_at }}
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-card>
+          </el-card>
 
-        <!-- Logistics Info Card -->
-        <el-card class="info-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Van /></el-icon>
-                {{ $t('fulfillment.logisticsInformation') }}
-              </span>
+          <!-- Items Card -->
+          <el-card
+            class="info-card"
+            shadow="never"
+          >
+            <template #header>
+              <div class="card-header">
+                <span class="card-title">
+                  <el-icon><Goods /></el-icon>
+                  {{ $t('fulfillment.shipmentItems') }}
+                </span>
+                <span class="item-count">{{ $t('fulfillment.totalItems', { n: shipment?.items?.length || 0 }) }}</span>
+              </div>
+            </template>
+            <div class="items-list">
+              <div
+                v-for="item in shipment?.items"
+                :key="item.id"
+                class="item-row"
+              >
+                <el-image
+                  :src="item.image"
+                  class="item-image"
+                  fit="cover"
+                >
+                  <template #error>
+                    <div class="image-placeholder">
+                      <el-icon><Picture /></el-icon>
+                    </div>
+                  </template>
+                </el-image>
+                <div class="item-info">
+                  <p class="item-name">
+                    {{ item.product_name }}
+                  </p>
+                  <p class="item-sku">
+                    {{ $t('fulfillment.sku') }}: {{ item.sku_name }}
+                  </p>
+                </div>
+                <div class="item-quantity">
+                  x {{ item.quantity }}
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+
+        <!-- Right Column -->
+        <el-col
+          :xs="24"
+          :lg="8"
+        >
+          <!-- Timeline Card -->
+          <el-card
+            class="timeline-card"
+            shadow="never"
+          >
+            <template #header>
+              <div class="card-header">
+                <span class="card-title">
+                  <el-icon><Clock /></el-icon>
+                  {{ $t('fulfillment.statusTimeline') }}
+                </span>
+              </div>
+            </template>
+            <el-timeline>
+              <el-timeline-item
+                v-for="(event, index) in timeline"
+                :key="index"
+                :type="event.type"
+                :timestamp="event.time"
+                :hollow="!event.active"
+                :class="{ 'is-active': event.active }"
+              >
+                <div class="timeline-content">
+                  <p class="timeline-title">
+                    {{ event.title }}
+                  </p>
+                  <p
+                    v-if="event.description"
+                    class="timeline-desc"
+                  >
+                    {{ event.description }}
+                  </p>
+                </div>
+              </el-timeline-item>
+            </el-timeline>
+          </el-card>
+
+          <!-- Actions Card -->
+          <el-card
+            class="actions-card"
+            shadow="never"
+          >
+            <template #header>
+              <div class="card-header">
+                <span class="card-title">
+                  <el-icon><Operation /></el-icon>
+                  {{ $t('fulfillment.actions') }}
+                </span>
+              </div>
+            </template>
+            <div class="action-buttons">
               <el-button
                 v-if="shipment?.status === '0'"
-                type="primary"
-                size="small"
-                @click="openEditLogistics"
+                type="success"
+                class="action-btn"
+                @click="confirmShip"
               >
-                {{ $t('fulfillment.editLogistics') }}
+                <el-icon><Van /></el-icon>
+                {{ $t('fulfillment.confirmShip') }}
+              </el-button>
+              <el-button
+                v-if="shipment?.status === '2'"
+                type="primary"
+                class="action-btn"
+                @click="markDelivered"
+              >
+                <el-icon><CircleCheck /></el-icon>
+                {{ $t('fulfillment.markAsDelivered') }}
+              </el-button>
+              <el-button
+                v-if="shipment?.tracking_no"
+                class="action-btn"
+                @click="trackShipment"
+              >
+                <el-icon><Location /></el-icon>
+                {{ $t('fulfillment.trackPackage') }}
+              </el-button>
+              <el-button
+                v-if="shipment?.status === '0'"
+                type="danger"
+                class="action-btn"
+                @click="cancelShipment"
+              >
+                <el-icon><Close /></el-icon>
+                {{ $t('fulfillment.cancelShipment') }}
               </el-button>
             </div>
-          </template>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item :label="$t('fulfillment.carrier')">
-              <span class="value-text">{{ shipment?.carrier || '-' }}</span>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.trackingNo')">
-              <span v-if="shipment?.tracking_no" class="tracking-value">
-                {{ shipment.tracking_no }}
-                <el-button link size="small" @click="copyTracking">
-                  <el-icon><CopyDocument /></el-icon>
-                </el-button>
-              </span>
-              <span v-else class="no-data">{{ $t('fulfillment.notEntered') }}</span>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.shippingCost')">
-              <span v-if="shipment?.shipping_cost">
-                {{ shipment.currency }} {{ shipment.shipping_cost }}
-              </span>
-              <span v-else class="no-data">-</span>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.weight')">
-              <span v-if="shipment?.weight">{{ shipment.weight }} {{ $t('fulfillment.kg') }}</span>
-              <span v-else class="no-data">-</span>
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.shippedAt')">
-              {{ shipment?.shipped_at || '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="$t('fulfillment.deliveredAt')">
-              {{ shipment?.delivered_at || '-' }}
-            </el-descriptions-item>
-          </el-descriptions>
-          <div v-if="shipment?.remark" class="remark-section">
-            <span class="remark-label">{{ $t('fulfillment.remark') }}:</span>
-            <span class="remark-text">{{ shipment.remark }}</span>
-          </div>
-        </el-card>
+          </el-card>
+        </el-col>
+      </el-row>
 
-        <!-- Items Card -->
-        <el-card class="info-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Goods /></el-icon>
-                {{ $t('fulfillment.shipmentItems') }}
-              </span>
-              <span class="item-count">{{ $t('fulfillment.totalItems', { n: shipment?.items?.length || 0 }) }}</span>
-            </div>
-          </template>
-          <div class="items-list">
-            <div v-for="item in shipment?.items" :key="item.id" class="item-row">
-              <el-image :src="item.image" class="item-image" fit="cover">
-                <template #error>
-                  <div class="image-placeholder">
-                    <el-icon><Picture /></el-icon>
-                  </div>
-                </template>
-              </el-image>
-              <div class="item-info">
-                <p class="item-name">{{ item.product_name }}</p>
-                <p class="item-sku">{{ $t('fulfillment.sku') }}: {{ item.sku_name }}</p>
-              </div>
-              <div class="item-quantity">
-                x {{ item.quantity }}
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <!-- Right Column -->
-      <el-col :xs="24" :lg="8">
-        <!-- Timeline Card -->
-        <el-card class="timeline-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Clock /></el-icon>
-                {{ $t('fulfillment.statusTimeline') }}
-              </span>
-            </div>
-          </template>
-          <el-timeline>
-            <el-timeline-item
-              v-for="(event, index) in timeline"
-              :key="index"
-              :type="event.type"
-              :timestamp="event.time"
-              :hollow="!event.active"
-              :class="{ 'is-active': event.active }"
+      <!-- Edit Logistics Dialog -->
+      <el-dialog
+        v-model="editDialogVisible"
+        :title="$t('fulfillment.editLogisticsInformation')"
+        width="500px"
+      >
+        <el-form
+          :model="editForm"
+          label-width="100px"
+        >
+          <el-form-item
+            :label="$t('fulfillment.carrier')"
+            required
+          >
+            <el-select
+              v-model="editForm.carrier_code"
+              :placeholder="$t('fulfillment.selectCarrier')"
+              style="width: 100%"
             >
-              <div class="timeline-content">
-                <p class="timeline-title">{{ event.title }}</p>
-                <p v-if="event.description" class="timeline-desc">{{ event.description }}</p>
-              </div>
-            </el-timeline-item>
-          </el-timeline>
-        </el-card>
-
-        <!-- Actions Card -->
-        <el-card class="actions-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Operation /></el-icon>
-                {{ $t('fulfillment.actions') }}
-              </span>
-            </div>
-          </template>
-          <div class="action-buttons">
-            <el-button
-              v-if="shipment?.status === '0'"
-              type="success"
-              class="action-btn"
-              @click="confirmShip"
+              <el-option
+                v-for="carrier in carriers"
+                :key="carrier.code"
+                :label="carrier.name"
+                :value="carrier.code"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            :label="$t('fulfillment.trackingNo')"
+            required
+          >
+            <el-input
+              v-model="editForm.tracking_no"
+              :placeholder="$t('fulfillment.enterTrackingNumber')"
+            />
+          </el-form-item>
+          <el-form-item :label="$t('fulfillment.shippingCost')">
+            <el-input-number
+              v-model="editForm.shipping_cost"
+              :min="0"
+              :precision="2"
+              style="width: 100%"
             >
-              <el-icon><Van /></el-icon>
-              {{ $t('fulfillment.confirmShip') }}
-            </el-button>
-            <el-button
-              v-if="shipment?.status === '2'"
-              type="primary"
-              class="action-btn"
-              @click="markDelivered"
-            >
-              <el-icon><CircleCheck /></el-icon>
-              {{ $t('fulfillment.markAsDelivered') }}
-            </el-button>
-            <el-button
-              v-if="shipment?.tracking_no"
-              class="action-btn"
-              @click="trackShipment"
-            >
-              <el-icon><Location /></el-icon>
-              {{ $t('fulfillment.trackPackage') }}
-            </el-button>
-            <el-button
-              v-if="shipment?.status === '0'"
-              type="danger"
-              class="action-btn"
-              @click="cancelShipment"
-            >
-              <el-icon><Close /></el-icon>
-              {{ $t('fulfillment.cancelShipment') }}
-            </el-button>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- Edit Logistics Dialog -->
-    <el-dialog v-model="editDialogVisible" :title="$t('fulfillment.editLogisticsInformation')" width="500px">
-      <el-form :model="editForm" label-width="100px">
-        <el-form-item :label="$t('fulfillment.carrier')" required>
-          <el-select v-model="editForm.carrier_code" :placeholder="$t('fulfillment.selectCarrier')" style="width: 100%">
-            <el-option v-for="carrier in carriers" :key="carrier.code" :label="carrier.name" :value="carrier.code" />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('fulfillment.trackingNo')" required>
-          <el-input v-model="editForm.tracking_no" :placeholder="$t('fulfillment.enterTrackingNumber')" />
-        </el-form-item>
-        <el-form-item :label="$t('fulfillment.shippingCost')">
-          <el-input-number v-model="editForm.shipping_cost" :min="0" :precision="2" style="width: 100%">
-            <template #prefix>{{ editForm.currency }}</template>
-          </el-input-number>
-        </el-form-item>
-        <el-form-item :label="$t('fulfillment.weight')">
-          <el-input-number v-model="editForm.weight" :min="0" :precision="2" style="width: 100%" />
-        </el-form-item>
-        <el-form-item :label="$t('fulfillment.remark')">
-          <el-input v-model="editForm.remark" type="textarea" :rows="3" :placeholder="$t('fulfillment.optional')" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="editDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="saveLogistics">{{ $t('common.save') }}</el-button>
-      </template>
-    </el-dialog>
+              <template #prefix>
+                {{ editForm.currency }}
+              </template>
+            </el-input-number>
+          </el-form-item>
+          <el-form-item :label="$t('fulfillment.weight')">
+            <el-input-number
+              v-model="editForm.weight"
+              :min="0"
+              :precision="2"
+              style="width: 100%"
+            />
+          </el-form-item>
+          <el-form-item :label="$t('fulfillment.remark')">
+            <el-input
+              v-model="editForm.remark"
+              type="textarea"
+              :rows="3"
+              :placeholder="$t('fulfillment.optional')"
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialogVisible = false">
+            {{ $t('common.cancel') }}
+          </el-button>
+          <el-button
+            type="primary"
+            @click="saveLogistics"
+          >
+            {{ $t('common.save') }}
+          </el-button>
+        </template>
+      </el-dialog>
     </template>
   </div>
 </template>

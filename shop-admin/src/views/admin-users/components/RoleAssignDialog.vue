@@ -6,9 +6,16 @@
     destroy-on-close
     @close="$emit('update:visible', false)"
   >
-    <div class="role-list" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="role-list"
+    >
       <el-checkbox-group v-model="selectedRoleIds">
-        <div v-for="role in roles" :key="role.id" class="role-item">
+        <div
+          v-for="role in roles"
+          :key="role.id"
+          class="role-item"
+        >
           <el-checkbox :label="role.id">
             <div class="role-info">
               <span class="role-name">{{ role.name }}</span>
@@ -17,11 +24,22 @@
           </el-checkbox>
         </div>
       </el-checkbox-group>
-      <el-empty v-if="!loading && roles.length === 0" :description="$t('adminUsers.noRolesAvailable')" />
+      <el-empty
+        v-if="!loading && roles.length === 0"
+        :description="$t('adminUsers.noRolesAvailable')"
+      />
     </div>
     <template #footer>
-      <el-button @click="visible = false">{{ $t('adminUsers.cancel') }}</el-button>
-      <el-button type="primary" @click="handleAssign" :loading="assigning">{{ $t('adminUsers.confirm') }}</el-button>
+      <el-button @click="visible = false">
+        {{ $t('adminUsers.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="assigning"
+        @click="handleAssign"
+      >
+        {{ $t('adminUsers.confirm') }}
+      </el-button>
     </template>
   </el-dialog>
 </template>

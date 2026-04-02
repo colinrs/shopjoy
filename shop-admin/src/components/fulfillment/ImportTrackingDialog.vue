@@ -8,7 +8,11 @@
     <div class="import-content">
       <!-- Template Download -->
       <div class="template-section">
-        <el-button type="primary" link @click="downloadTemplate">
+        <el-button
+          type="primary"
+          link
+          @click="downloadTemplate"
+        >
           <el-icon><Download /></el-icon>
           {{ $t('fulfillment.importTemplate') }}
         </el-button>
@@ -26,38 +30,81 @@
         :file-list="fileList"
         accept=".csv"
       >
-        <el-icon class="upload-icon"><UploadFilled /></el-icon>
-        <div class="upload-text">{{ $t('fulfillment.importTrackingTip') }}</div>
+        <el-icon class="upload-icon">
+          <UploadFilled />
+        </el-icon>
+        <div class="upload-text">
+          {{ $t('fulfillment.importTrackingTip') }}
+        </div>
         <template #tip>
-          <div class="upload-tip">CSV: shipment_id,carrier_code,tracking_no,weight</div>
+          <div class="upload-tip">
+            CSV: shipment_id,carrier_code,tracking_no,weight
+          </div>
         </template>
       </el-upload>
 
       <!-- Preview Table -->
-      <div v-if="parsedData.length > 0" class="preview-section">
+      <div
+        v-if="parsedData.length > 0"
+        class="preview-section"
+      >
         <div class="section-header">
           <el-icon><List /></el-icon>
           <span>{{ $t('common.preview') || 'Preview' }} ({{ parsedData.length }} items)</span>
         </div>
-        <el-table :data="parsedData" size="small" max-height="200" border>
-          <el-table-column prop="shipment_id" label="shipment_id" width="100" />
-          <el-table-column prop="carrier_code" label="carrier_code" width="100" />
-          <el-table-column prop="tracking_no" label="tracking_no" min-width="150" />
-          <el-table-column prop="weight" label="weight" width="80" />
+        <el-table
+          :data="parsedData"
+          size="small"
+          max-height="200"
+          border
+        >
+          <el-table-column
+            prop="shipment_id"
+            label="shipment_id"
+            width="100"
+          />
+          <el-table-column
+            prop="carrier_code"
+            label="carrier_code"
+            width="100"
+          />
+          <el-table-column
+            prop="tracking_no"
+            label="tracking_no"
+            min-width="150"
+          />
+          <el-table-column
+            prop="weight"
+            label="weight"
+            width="80"
+          />
         </el-table>
       </div>
 
       <!-- Error Display -->
-      <div v-if="errors.length > 0" class="error-section">
-        <el-alert type="error" :closable="false">
+      <div
+        v-if="errors.length > 0"
+        class="error-section"
+      >
+        <el-alert
+          type="error"
+          :closable="false"
+        >
           <template #title>
             {{ $t('fulfillment.importFailed', { failed: errors.length }) }}
           </template>
           <div class="error-list">
-            <div v-for="(err, idx) in errors.slice(0, 5)" :key="idx" class="error-item">
+            <div
+              v-for="(err, idx) in errors.slice(0, 5)"
+              :key="idx"
+              class="error-item"
+            >
               Shipment ID {{ err.shipment_id }}: {{ err.message }}
             </div>
-            <div v-if="errors.length > 5" class="error-more">
+            <div
+              v-if="errors.length > 5"
+              class="error-more"
+            >
               ... and {{ errors.length - 5 }} more errors
             </div>
           </div>
@@ -65,8 +112,14 @@
       </div>
 
       <!-- Summary -->
-      <div v-if="parsedData.length > 0" class="summary-section">
-        <el-alert type="info" :closable="false">
+      <div
+        v-if="parsedData.length > 0"
+        class="summary-section"
+      >
+        <el-alert
+          type="info"
+          :closable="false"
+        >
           <template #title>
             {{ $t('fulfillment.importSuccess', { success: parsedData.length }) }}
           </template>
@@ -76,7 +129,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
         <el-button
           type="primary"
           :loading="submitting"

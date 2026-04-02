@@ -1,17 +1,38 @@
 <template>
-  <div class="brand-detail-page" v-loading="loading">
+  <div
+    v-loading="loading"
+    class="brand-detail-page"
+  >
     <!-- Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="header-bar">
         <div class="header-left">
-          <el-button text @click="goBack">
+          <el-button
+            text
+            @click="goBack"
+          >
             <el-icon><ArrowLeft /></el-icon>
             {{ $t('common.back') }}
           </el-button>
           <el-divider direction="vertical" />
           <span class="page-title">{{ brand?.name || t('brands.brandDetail') }}</span>
-          <el-tag v-if="brand?.status === 1" type="success" size="small">{{ $t('brands.enabled') }}</el-tag>
-          <el-tag v-else type="info" size="small">{{ $t('brands.disabled') }}</el-tag>
+          <el-tag
+            v-if="brand?.status === 1"
+            type="success"
+            size="small"
+          >
+            {{ $t('brands.enabled') }}
+          </el-tag>
+          <el-tag
+            v-else
+            type="info"
+            size="small"
+          >
+            {{ $t('brands.disabled') }}
+          </el-tag>
         </div>
         <div class="header-right">
           <el-button @click="handleEdit">
@@ -25,30 +46,52 @@
     <!-- Brand Info -->
     <el-row :gutter="20">
       <el-col :span="16">
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('brands.brandInfo') }}</span>
             </div>
           </template>
-          <el-descriptions :column="2" border v-if="brand">
+          <el-descriptions
+            v-if="brand"
+            :column="2"
+            border
+          >
             <el-descriptions-item :label="$t('brands.brandName')">
               <div class="brand-name-cell">
-                <el-image v-if="brand.logo" :src="brand.logo" fit="cover" class="brand-logo">
+                <el-image
+                  v-if="brand.logo"
+                  :src="brand.logo"
+                  fit="cover"
+                  class="brand-logo"
+                >
                   <template #error>
-                    <div class="image-placeholder"><el-icon><Picture /></el-icon></div>
+                    <div class="image-placeholder">
+                      <el-icon><Picture /></el-icon>
+                    </div>
                   </template>
                 </el-image>
                 <span>{{ brand.name }}</span>
               </div>
             </el-descriptions-item>
             <el-descriptions-item :label="$t('brands.website')">
-              <a v-if="brand.website" :href="brand.website" target="_blank" class="website-link">
+              <a
+                v-if="brand.website"
+                :href="brand.website"
+                target="_blank"
+                class="website-link"
+              >
                 {{ brand.website }}
               </a>
               <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('brands.brandDescription')" :span="2">
+            <el-descriptions-item
+              :label="$t('brands.brandDescription')"
+              :span="2"
+            >
               <span v-if="brand.description">{{ brand.description }}</span>
               <span v-else>-</span>
             </el-descriptions-item>
@@ -76,16 +119,26 @@
         </el-card>
 
         <!-- Market Visibility -->
-        <el-card class="info-card market-card" shadow="never">
+        <el-card
+          class="info-card market-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('brands.marketVisibility') }}</span>
-              <el-button size="small" type="primary" @click="showMarketDialog = true">
+              <el-button
+                size="small"
+                type="primary"
+                @click="showMarketDialog = true"
+              >
                 {{ $t('brands.configureMarket') }}
               </el-button>
             </div>
           </template>
-          <div class="market-tags" v-if="marketVisibility.length > 0">
+          <div
+            v-if="marketVisibility.length > 0"
+            class="market-tags"
+          >
             <el-tag
               v-for="m in marketVisibility"
               :key="m.market_id"
@@ -95,13 +148,19 @@
               {{ getMarketName(m.market_id) }}
             </el-tag>
           </div>
-          <el-empty v-else :description="$t('brands.noMarketVisibility')" />
+          <el-empty
+            v-else
+            :description="$t('brands.noMarketVisibility')"
+          />
         </el-card>
       </el-col>
 
       <el-col :span="8">
         <!-- Stats Card -->
-        <el-card class="stats-card" shadow="never">
+        <el-card
+          class="stats-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span>{{ $t('brands.statistics') }}</span>
@@ -112,8 +171,12 @@
               <el-icon><Goods /></el-icon>
             </div>
             <div class="stat-content">
-              <p class="stat-value">{{ brand?.product_count || 0 }}</p>
-              <p class="stat-label">{{ $t('brands.productCount') }}</p>
+              <p class="stat-value">
+                {{ brand?.product_count || 0 }}
+              </p>
+              <p class="stat-label">
+                {{ $t('brands.productCount') }}
+              </p>
             </div>
           </div>
         </el-card>
@@ -127,41 +190,73 @@
       width="700px"
       destroy-on-close
     >
-      <el-form :model="brandForm" label-width="120px" :rules="formRules" ref="formRef">
+      <el-form
+        ref="formRef"
+        :model="brandForm"
+        label-width="120px"
+        :rules="formRules"
+      >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item :label="$t('brands.brandName')" prop="name">
-              <el-input v-model="brandForm.name" :placeholder="$t('brands.enterBrandName')" />
+            <el-form-item
+              :label="$t('brands.brandName')"
+              prop="name"
+            >
+              <el-input
+                v-model="brandForm.name"
+                :placeholder="$t('brands.enterBrandName')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('brands.sort')">
-              <el-input-number v-model="brandForm.sort" :min="0" style="width: 100%" />
+              <el-input-number
+                v-model="brandForm.sort"
+                :min="0"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item :label="$t('brands.logoUrl')">
-              <el-input v-model="brandForm.logo" :placeholder="$t('brands.brandLogoUrl')" />
+              <el-input
+                v-model="brandForm.logo"
+                :placeholder="$t('brands.brandLogoUrl')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item :label="$t('brands.brandWebsite')">
-              <el-input v-model="brandForm.website" :placeholder="$t('brands.websiteUrl')" />
+              <el-input
+                v-model="brandForm.website"
+                :placeholder="$t('brands.websiteUrl')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item :label="$t('brands.brandDescription')">
-              <el-input v-model="brandForm.description" type="textarea" rows="3" :placeholder="$t('brands.enterDescription')" />
+              <el-input
+                v-model="brandForm.description"
+                type="textarea"
+                rows="3"
+                :placeholder="$t('brands.enterDescription')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('brands.trademarkNumber')">
-              <el-input v-model="brandForm.trademark_number" :placeholder="$t('brands.trademarkRegNumber')" />
+              <el-input
+                v-model="brandForm.trademark_number"
+                :placeholder="$t('brands.trademarkRegNumber')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('brands.trademarkCountry')">
-              <el-input v-model="brandForm.trademark_country" :placeholder="$t('brands.countryExample')" />
+              <el-input
+                v-model="brandForm.trademark_country"
+                :placeholder="$t('brands.countryExample')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -172,8 +267,16 @@
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">{{ $t('brands.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('brands.save') }}</el-button>
+        <el-button @click="editDialogVisible = false">
+          {{ $t('brands.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          {{ $t('brands.save') }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -184,7 +287,10 @@
       width="500px"
       destroy-on-close
     >
-      <div class="market-selector" v-loading="marketsLoading">
+      <div
+        v-loading="marketsLoading"
+        class="market-selector"
+      >
         <el-checkbox
           v-for="market in availableMarkets"
           :key="market.id"
@@ -196,8 +302,14 @@
         </el-checkbox>
       </div>
       <template #footer>
-        <el-button @click="showMarketDialog = false">{{ $t('brands.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSaveMarketVisibility" :loading="savingMarket">
+        <el-button @click="showMarketDialog = false">
+          {{ $t('brands.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="savingMarket"
+          @click="handleSaveMarketVisibility"
+        >
           {{ $t('brands.save') }}
         </el-button>
       </template>

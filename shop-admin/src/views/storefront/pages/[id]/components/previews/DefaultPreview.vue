@@ -1,7 +1,9 @@
 <template>
   <div class="default-preview">
     <div class="preview-content">
-      <el-icon size="24"><component :is="icon" /></el-icon>
+      <el-icon size="24">
+        <component :is="icon" />
+      </el-icon>
       <span class="block-name">{{ blockName }}</span>
     </div>
   </div>

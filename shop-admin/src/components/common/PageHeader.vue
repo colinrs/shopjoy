@@ -1,12 +1,22 @@
 <template>
-  <el-card class="header-card" shadow="never">
+  <el-card
+    class="header-card"
+    shadow="never"
+  >
     <div class="header-bar">
       <div class="header-left">
-        <h2 class="page-title">{{ title }}</h2>
-        <p v-if="description" class="page-desc">{{ description }}</p>
+        <h2 class="page-title">
+          {{ title }}
+        </h2>
+        <p
+          v-if="description"
+          class="page-desc"
+        >
+          {{ description }}
+        </p>
       </div>
       <div class="header-right">
-        <slot name="actions"></slot>
+        <slot name="actions" />
       </div>
     </div>
   </el-card>

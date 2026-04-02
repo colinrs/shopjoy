@@ -3,25 +3,42 @@
     <!-- Page Header -->
     <div class="page-header">
       <div class="header-left">
-        <el-button link @click="goBack">
+        <el-button
+          link
+          @click="goBack"
+        >
           <el-icon><ArrowLeft /></el-icon>
           {{ $t('common.back') }}
         </el-button>
         <div class="title-section">
-          <h1 class="page-title">{{ $t('fulfillment.refundDetails') }}</h1>
-          <p class="refund-no">{{ refund?.refund_no }}</p>
+          <h1 class="page-title">
+            {{ $t('fulfillment.refundDetails') }}
+          </h1>
+          <p class="refund-no">
+            {{ refund?.refund_no }}
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <status-tag :status="refund?.status" :type-map="statusTypeMap" size="large" />
+        <status-tag
+          :status="refund?.status"
+          :type-map="statusTypeMap"
+          size="large"
+        />
       </div>
     </div>
 
     <el-row :gutter="20">
       <!-- Left Column -->
-      <el-col :xs="24" :lg="16">
+      <el-col
+        :xs="24"
+        :lg="16"
+      >
         <!-- Refund Info Card -->
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -30,12 +47,19 @@
               </span>
             </div>
           </template>
-          <el-descriptions :column="2" border>
+          <el-descriptions
+            :column="2"
+            border
+          >
             <el-descriptions-item :label="$t('fulfillment.refundNo')">
               <span class="value-text">{{ refund?.refund_no }}</span>
             </el-descriptions-item>
             <el-descriptions-item :label="$t('fulfillment.orderNo')">
-              <el-button type="primary" link @click="viewOrder">
+              <el-button
+                type="primary"
+                link
+                @click="viewOrder"
+              >
                 {{ refund?.order_no }}
               </el-button>
             </el-descriptions-item>
@@ -45,10 +69,15 @@
               </span>
             </el-descriptions-item>
             <el-descriptions-item :label="$t('fulfillment.refundType')">
-              <el-tag size="small">{{ $t('fulfillment.fullRefund') }}</el-tag>
+              <el-tag size="small">
+                {{ $t('fulfillment.fullRefund') }}
+              </el-tag>
             </el-descriptions-item>
             <el-descriptions-item :label="$t('common.status')">
-              <status-tag :status="refund?.status" :type-map="statusTypeMap" />
+              <status-tag
+                :status="refund?.status"
+                :type-map="statusTypeMap"
+              />
             </el-descriptions-item>
             <el-descriptions-item :label="$t('fulfillment.appliedAt')">
               {{ refund?.created_at }}
@@ -57,7 +86,10 @@
         </el-card>
 
         <!-- Reason Card -->
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -68,23 +100,42 @@
           </template>
           <div class="reason-section">
             <div class="reason-type">
-              <el-tag effect="plain" size="large">
+              <el-tag
+                effect="plain"
+                size="large"
+              >
                 {{ getReasonName(refund?.reason_type) }}
               </el-tag>
             </div>
             <div class="reason-summary">
-              <p class="summary-label">{{ $t('fulfillment.summary') }}</p>
-              <p class="summary-text">{{ refund?.reason }}</p>
+              <p class="summary-label">
+                {{ $t('fulfillment.summary') }}
+              </p>
+              <p class="summary-text">
+                {{ refund?.reason }}
+              </p>
             </div>
-            <div v-if="refund?.description" class="reason-detail">
-              <p class="detail-label">{{ $t('fulfillment.description') }}</p>
-              <p class="detail-text">{{ refund.description }}</p>
+            <div
+              v-if="refund?.description"
+              class="reason-detail"
+            >
+              <p class="detail-label">
+                {{ $t('fulfillment.description') }}
+              </p>
+              <p class="detail-text">
+                {{ refund.description }}
+              </p>
             </div>
           </div>
 
           <!-- Evidence Images -->
-          <div v-if="refund?.images && refund.images.length > 0" class="evidence-section">
-            <p class="evidence-label">{{ $t('fulfillment.evidenceImages') }}</p>
+          <div
+            v-if="refund?.images && refund.images.length > 0"
+            class="evidence-section"
+          >
+            <p class="evidence-label">
+              {{ $t('fulfillment.evidenceImages') }}
+            </p>
             <div class="image-gallery">
               <el-image
                 v-for="(img, index) in refund.images"
@@ -106,7 +157,10 @@
         </el-card>
 
         <!-- Order Items Card -->
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -117,8 +171,16 @@
             </div>
           </template>
           <div class="items-list">
-            <div v-for="item in refund?.order_items" :key="item.id" class="item-row">
-              <el-image :src="item.image" class="item-image" fit="cover">
+            <div
+              v-for="item in refund?.order_items"
+              :key="item.id"
+              class="item-row"
+            >
+              <el-image
+                :src="item.image"
+                class="item-image"
+                fit="cover"
+              >
                 <template #error>
                   <div class="image-placeholder">
                     <el-icon><Picture /></el-icon>
@@ -126,19 +188,31 @@
                 </template>
               </el-image>
               <div class="item-info">
-                <p class="item-name">{{ item.product_name }}</p>
-                <p class="item-sku">{{ $t('fulfillment.sku') }}: {{ item.sku_name }}</p>
+                <p class="item-name">
+                  {{ item.product_name }}
+                </p>
+                <p class="item-sku">
+                  {{ $t('fulfillment.sku') }}: {{ item.sku_name }}
+                </p>
               </div>
               <div class="item-price">
-                <p class="unit-price">{{ refund?.currency }} {{ item.price }}</p>
-                <p class="quantity">x {{ item.quantity }}</p>
+                <p class="unit-price">
+                  {{ refund?.currency }} {{ item.price }}
+                </p>
+                <p class="quantity">
+                  x {{ item.quantity }}
+                </p>
               </div>
             </div>
           </div>
         </el-card>
 
         <!-- Rejection Info -->
-        <el-card v-if="refund?.status === '2' && refund.reject_reason" class="info-card rejection-card" shadow="never">
+        <el-card
+          v-if="refund?.status === '2' && refund.reject_reason"
+          class="info-card rejection-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -148,16 +222,26 @@
             </div>
           </template>
           <div class="rejection-content">
-            <p class="rejection-text">{{ refund.reject_reason }}</p>
-            <p class="rejected-by">{{ $t('fulfillment.rejectedBy', { name: refund.approved_by }) }}</p>
+            <p class="rejection-text">
+              {{ refund.reject_reason }}
+            </p>
+            <p class="rejected-by">
+              {{ $t('fulfillment.rejectedBy', { name: refund.approved_by }) }}
+            </p>
           </div>
         </el-card>
       </el-col>
 
       <!-- Right Column -->
-      <el-col :xs="24" :lg="8">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
         <!-- Buyer Info Card -->
-        <el-card class="info-card" shadow="never">
+        <el-card
+          class="info-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -167,11 +251,16 @@
             </div>
           </template>
           <div class="buyer-section">
-            <el-avatar :size="48" class="buyer-avatar">
+            <el-avatar
+              :size="48"
+              class="buyer-avatar"
+            >
               {{ refund?.user_name?.charAt(0) }}
             </el-avatar>
             <div class="buyer-details">
-              <p class="buyer-name">{{ refund?.user_name }}</p>
+              <p class="buyer-name">
+                {{ refund?.user_name }}
+              </p>
               <p class="buyer-contact">
                 <el-icon><Phone /></el-icon>
                 {{ refund?.user_phone }}
@@ -181,7 +270,10 @@
         </el-card>
 
         <!-- Timeline Card -->
-        <el-card class="timeline-card" shadow="never">
+        <el-card
+          class="timeline-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -200,15 +292,26 @@
               :class="{ 'is-active': event.active }"
             >
               <div class="timeline-content">
-                <p class="timeline-title">{{ event.title }}</p>
-                <p v-if="event.description" class="timeline-desc">{{ event.description }}</p>
+                <p class="timeline-title">
+                  {{ event.title }}
+                </p>
+                <p
+                  v-if="event.description"
+                  class="timeline-desc"
+                >
+                  {{ event.description }}
+                </p>
               </div>
             </el-timeline-item>
           </el-timeline>
         </el-card>
 
         <!-- Actions Card -->
-        <el-card v-if="refund?.status === '0'" class="actions-card" shadow="never">
+        <el-card
+          v-if="refund?.status === '0'"
+          class="actions-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -218,11 +321,19 @@
             </div>
           </template>
           <div class="action-buttons">
-            <el-button type="success" class="action-btn" @click="handleApprove">
+            <el-button
+              type="success"
+              class="action-btn"
+              @click="handleApprove"
+            >
               <el-icon><CircleCheck /></el-icon>
               {{ $t('fulfillment.approveRefund') }}
             </el-button>
-            <el-button type="danger" class="action-btn" @click="openRejectDialog">
+            <el-button
+              type="danger"
+              class="action-btn"
+              @click="openRejectDialog"
+            >
               <el-icon><CircleClose /></el-icon>
               {{ $t('fulfillment.rejectRefund') }}
             </el-button>
@@ -232,8 +343,17 @@
     </el-row>
 
     <!-- Reject Dialog -->
-    <el-dialog v-model="rejectDialogVisible" :title="$t('fulfillment.rejectRefund')" width="500px">
-      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" label-width="100px">
+    <el-dialog
+      v-model="rejectDialogVisible"
+      :title="$t('fulfillment.rejectRefund')"
+      width="500px"
+    >
+      <el-form
+        ref="rejectFormRef"
+        :model="rejectForm"
+        :rules="rejectRules"
+        label-width="100px"
+      >
         <el-alert
           type="warning"
           :closable="false"
@@ -241,7 +361,10 @@
         >
           {{ $t('fulfillment.provideClearReason') }}
         </el-alert>
-        <el-form-item :label="$t('fulfillment.rejectReason')" prop="reject_reason">
+        <el-form-item
+          :label="$t('fulfillment.rejectReason')"
+          prop="reject_reason"
+        >
           <el-input
             v-model="rejectForm.reject_reason"
             type="textarea"
@@ -253,8 +376,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="rejectDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="danger" :loading="rejecting" @click="confirmReject">
+        <el-button @click="rejectDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="danger"
+          :loading="rejecting"
+          @click="confirmReject"
+        >
           {{ $t('fulfillment.confirmRejectAction') }}
         </el-button>
       </template>

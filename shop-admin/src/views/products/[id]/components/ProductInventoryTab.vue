@@ -1,19 +1,34 @@
 <template>
-  <div class="inventory-section" v-loading="inventoryLoading">
+  <div
+    v-loading="inventoryLoading"
+    class="inventory-section"
+  >
     <!-- Inventory Overview -->
     <div class="inventory-overview">
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-statistic :title="$t('products.totalStock')" :value="skuInventory?.total_stock || 0" />
+          <el-statistic
+            :title="$t('products.totalStock')"
+            :value="skuInventory?.total_stock || 0"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.availableStock')" :value="skuInventory?.available_stock || 0" />
+          <el-statistic
+            :title="$t('products.availableStock')"
+            :value="skuInventory?.available_stock || 0"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.lockedStock')" :value="skuInventory?.locked_stock || 0" />
+          <el-statistic
+            :title="$t('products.lockedStock')"
+            :value="skuInventory?.locked_stock || 0"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.safetyStock')" :value="skuInventory?.safety_stock || 0" />
+          <el-statistic
+            :title="$t('products.safetyStock')"
+            :value="skuInventory?.safety_stock || 0"
+          />
         </el-col>
       </el-row>
     </div>
@@ -21,55 +36,116 @@
     <!-- Warehouse Inventory -->
     <div class="warehouse-inventory">
       <div class="section-header">
-        <h3 class="section-title">{{ $t('products.warehouseInventory') }}</h3>
-        <el-button type="primary" size="small" @click="handleShowAdjustStockDialog">
+        <h3 class="section-title">
+          {{ $t('products.warehouseInventory') }}
+        </h3>
+        <el-button
+          type="primary"
+          size="small"
+          @click="handleShowAdjustStockDialog"
+        >
           <el-icon><Edit /></el-icon>
           {{ $t('products.adjustStock') }}
         </el-button>
       </div>
-      <el-table :data="skuInventory?.warehouses || []" stripe>
-        <el-table-column :label="$t('products.warehouse')" min-width="150">
+      <el-table
+        :data="skuInventory?.warehouses || []"
+        stripe
+      >
+        <el-table-column
+          :label="$t('products.warehouse')"
+          min-width="150"
+        >
           <template #default="{ row }">
             <span>{{ row.warehouse_name || `${$t('products.warehouse')} ${row.warehouse_id}` }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.availableStock')" prop="available_stock" width="120" align="center" />
-        <el-table-column :label="$t('products.lockedStock')" prop="locked_stock" width="120" align="center" />
-        <el-table-column :label="$t('products.totalStock')" width="120" align="center">
+        <el-table-column
+          :label="$t('products.availableStock')"
+          prop="available_stock"
+          width="120"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.lockedStock')"
+          prop="locked_stock"
+          width="120"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.totalStock')"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.available_stock + row.locked_stock }}
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!skuInventory?.warehouses?.length" :description="$t('products.noWarehouseInventory')" />
+      <el-empty
+        v-if="!skuInventory?.warehouses?.length"
+        :description="$t('products.noWarehouseInventory')"
+      />
     </div>
 
     <!-- Inventory Logs -->
     <div class="inventory-logs">
-      <h3 class="section-title">{{ $t('products.inventoryChangeLog') }}</h3>
-      <el-table :data="inventoryLogs" stripe>
-        <el-table-column :label="$t('products.time')" width="180">
+      <h3 class="section-title">
+        {{ $t('products.inventoryChangeLog') }}
+      </h3>
+      <el-table
+        :data="inventoryLogs"
+        stripe
+      >
+        <el-table-column
+          :label="$t('products.time')"
+          width="180"
+        >
           <template #default="{ row }">
             {{ row.created_at }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.type')" width="100">
+        <el-table-column
+          :label="$t('products.type')"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag :type="getLogTypeStyle(row.change_type)" size="small">
+            <el-tag
+              :type="getLogTypeStyle(row.change_type)"
+              size="small"
+            >
               {{ getLogTypeText(row.change_type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.changeQuantity')" width="120" align="right">
+        <el-table-column
+          :label="$t('products.changeQuantity')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
               {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.beforeChange')" prop="before_stock" width="100" align="center" />
-        <el-table-column :label="$t('products.afterChange')" prop="after_stock" width="100" align="center" />
-        <el-table-column :label="$t('products.remark')" prop="remark" min-width="150" />
+        <el-table-column
+          :label="$t('products.beforeChange')"
+          prop="before_stock"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.afterChange')"
+          prop="after_stock"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.remark')"
+          prop="remark"
+          min-width="150"
+        />
       </el-table>
       <el-pagination
         v-if="inventoryLogsTotal > 0"

@@ -1,11 +1,14 @@
 <template>
-  <el-card class="filter-card" shadow="never">
+  <el-card
+    class="filter-card"
+    shadow="never"
+  >
     <div class="filter-bar">
       <div class="filter-left">
-        <slot name="filters"></slot>
+        <slot name="filters" />
       </div>
       <div class="filter-right">
-        <slot name="actions"></slot>
+        <slot name="actions" />
       </div>
     </div>
   </el-card>

@@ -1,28 +1,55 @@
 <template>
-  <el-card class="tabs-card" shadow="never">
-    <el-tabs v-model="activeTab" class="detail-tabs">
-      <el-tab-pane :label="$t('users.basicInfo')" name="basic">
-        <UserBasicInfo :user="user" @refresh="$emit('refresh')" />
+  <el-card
+    class="tabs-card"
+    shadow="never"
+  >
+    <el-tabs
+      v-model="activeTab"
+      class="detail-tabs"
+    >
+      <el-tab-pane
+        :label="$t('users.basicInfo')"
+        name="basic"
+      >
+        <UserBasicInfo
+          :user="user"
+          @refresh="$emit('refresh')"
+        />
       </el-tab-pane>
-      <el-tab-pane :label="$t('users.addresses')" name="addresses">
+      <el-tab-pane
+        :label="$t('users.addresses')"
+        name="addresses"
+      >
         <UserAddressList :user-id="user?.id" />
       </el-tab-pane>
-      <el-tab-pane :label="$t('users.orderRecords')" name="orders">
+      <el-tab-pane
+        :label="$t('users.orderRecords')"
+        name="orders"
+      >
         <div class="coming-soon">
           <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane :label="$t('users.pointsRecords')" name="points">
+      <el-tab-pane
+        :label="$t('users.pointsRecords')"
+        name="points"
+      >
         <div class="coming-soon">
           <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane :label="$t('users.reviewRecords')" name="reviews">
+      <el-tab-pane
+        :label="$t('users.reviewRecords')"
+        name="reviews"
+      >
         <div class="coming-soon">
           <el-empty :description="$t('users.comingSoon')" />
         </div>
       </el-tab-pane>
-      <el-tab-pane :label="$t('users.operationLogs')" name="logs">
+      <el-tab-pane
+        :label="$t('users.operationLogs')"
+        name="logs"
+      >
         <UserOperationLog :user-id="user?.id" />
       </el-tab-pane>
     </el-tabs>

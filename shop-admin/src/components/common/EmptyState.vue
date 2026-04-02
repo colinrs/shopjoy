@@ -5,10 +5,20 @@
         <component :is="icon" />
       </el-icon>
     </div>
-    <h3 class="empty-title">{{ displayTitle }}</h3>
-    <p v-if="description" class="empty-description">{{ description }}</p>
-    <div v-if="$slots.action" class="empty-action">
-      <slot name="action"></slot>
+    <h3 class="empty-title">
+      {{ displayTitle }}
+    </h3>
+    <p
+      v-if="description"
+      class="empty-description"
+    >
+      {{ description }}
+    </p>
+    <div
+      v-if="$slots.action"
+      class="empty-action"
+    >
+      <slot name="action" />
     </div>
   </div>
 </template>

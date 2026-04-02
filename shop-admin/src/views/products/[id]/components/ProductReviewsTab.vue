@@ -1,19 +1,36 @@
 <template>
-  <div class="reviews-section" v-loading="reviewsLoading">
+  <div
+    v-loading="reviewsLoading"
+    class="reviews-section"
+  >
     <!-- Review Stats Overview -->
     <div class="review-stats-overview">
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-statistic :title="$t('products.totalReviews')" :value="productStats?.total_reviews || 0" />
+          <el-statistic
+            :title="$t('products.totalReviews')"
+            :value="productStats?.total_reviews || 0"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.averageRating')" :value="productStats?.average_rating || '0'" :suffix="$t('products.stars')" />
+          <el-statistic
+            :title="$t('products.averageRating')"
+            :value="productStats?.average_rating || '0'"
+            :suffix="$t('products.stars')"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.reviewsWithImages')" :value="productStats?.with_image_count || 0" />
+          <el-statistic
+            :title="$t('products.reviewsWithImages')"
+            :value="productStats?.with_image_count || 0"
+          />
         </el-col>
         <el-col :span="6">
-          <el-statistic :title="$t('products.replyRate')" :value="productStats?.reply_rate || 0" :suffix="$t('products.replyRateUnit')">
+          <el-statistic
+            :title="$t('products.replyRate')"
+            :value="productStats?.reply_rate || 0"
+            :suffix="$t('products.replyRateUnit')"
+          >
             <template #suffix>
               <span style="font-size: 14px">{{ $t('products.replyRateUnit') }}</span>
             </template>
@@ -24,15 +41,21 @@
 
     <!-- Rating Distribution -->
     <div class="rating-distribution">
-      <h3 class="section-title">{{ $t('products.ratingDistribution') }}</h3>
+      <h3 class="section-title">
+        {{ $t('products.ratingDistribution') }}
+      </h3>
       <div class="rating-bars">
-        <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="rating-bar-item">
+        <div
+          v-for="star in [5, 4, 3, 2, 1]"
+          :key="star"
+          class="rating-bar-item"
+        >
           <span class="star-label">{{ star }}{{ $t('products.stars') }}</span>
           <div class="bar-container">
             <div
               class="bar-fill"
               :style="{ width: getRatingPercentage(star) + '%' }"
-            ></div>
+            />
           </div>
           <span class="star-count">{{ getRatingCount(star) }}</span>
         </div>
@@ -44,20 +67,32 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <div class="rating-card">
-            <div class="rating-card-title">{{ $t('products.qualityRating') }}</div>
-            <div class="rating-card-value">{{ productStats?.quality_avg_rating || '0' }}</div>
+            <div class="rating-card-title">
+              {{ $t('products.qualityRating') }}
+            </div>
+            <div class="rating-card-value">
+              {{ productStats?.quality_avg_rating || '0' }}
+            </div>
           </div>
         </el-col>
         <el-col :span="8">
           <div class="rating-card">
-            <div class="rating-card-title">{{ $t('products.valueRating') }}</div>
-            <div class="rating-card-value">{{ productStats?.value_avg_rating || '0' }}</div>
+            <div class="rating-card-title">
+              {{ $t('products.valueRating') }}
+            </div>
+            <div class="rating-card-value">
+              {{ productStats?.value_avg_rating || '0' }}
+            </div>
           </div>
         </el-col>
         <el-col :span="8">
           <div class="rating-card">
-            <div class="rating-card-title">{{ $t('products.replyCount') }}</div>
-            <div class="rating-card-value">{{ productStats?.reply_count || 0 }}</div>
+            <div class="rating-card-title">
+              {{ $t('products.replyCount') }}
+            </div>
+            <div class="rating-card-value">
+              {{ productStats?.reply_count || 0 }}
+            </div>
           </div>
         </el-col>
       </el-row>

@@ -1,6 +1,9 @@
 <template>
   <div class="roles-page">
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -21,22 +24,44 @@
             class="filter-select"
             @change="handleSearch"
           >
-            <el-option :label="$t('roles.allStatus')" :value="0" />
-            <el-option :label="$t('roles.enabled')" :value="1" />
-            <el-option :label="$t('roles.disabled')" :value="2" />
+            <el-option
+              :label="$t('roles.allStatus')"
+              :value="0"
+            />
+            <el-option
+              :label="$t('roles.enabled')"
+              :value="1"
+            />
+            <el-option
+              :label="$t('roles.disabled')"
+              :value="2"
+            />
           </el-select>
         </div>
         <div class="filter-right">
-          <el-button type="primary" @click="handleCreate">
+          <el-button
+            type="primary"
+            @click="handleCreate"
+          >
             <el-icon><Plus /></el-icon>{{ $t('roles.addRole') }}
           </el-button>
         </div>
       </div>
     </el-card>
 
-    <el-card class="table-card" shadow="never">
-      <el-table :data="tableData" v-loading="loading" stripe>
-        <el-table-column :label="$t('roles.roleName')" min-width="200">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        stripe
+      >
+        <el-table-column
+          :label="$t('roles.roleName')"
+          min-width="200"
+        >
           <template #default="{ row }">
             <div class="role-cell">
               <div class="role-info">
@@ -46,20 +71,38 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('roles.description')" min-width="200">
+        <el-table-column
+          :label="$t('roles.description')"
+          min-width="200"
+        >
           <template #default="{ row }">
             <span class="description-text">{{ row.description || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('roles.isSystem')" width="100" align="center">
+        <el-table-column
+          :label="$t('roles.isSystem')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.is_system" type="warning" size="small">
+            <el-tag
+              v-if="row.is_system"
+              type="warning"
+              size="small"
+            >
               {{ $t('roles.system') }}
             </el-tag>
-            <span v-else class="normal-text">-</span>
+            <span
+              v-else
+              class="normal-text"
+            >-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('roles.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('roles.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -70,26 +113,55 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" :label="$t('roles.createdAt')" width="160">
+        <el-table-column
+          prop="created_at"
+          :label="$t('roles.createdAt')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('roles.actions')" width="200" fixed="right">
+        <el-table-column
+          :label="$t('roles.actions')"
+          width="200"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ $t('roles.edit') }}
             </el-button>
-            <el-button type="primary" link size="small" @click="handleAssignPermissions(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleAssignPermissions(row)"
+            >
               {{ $t('roles.assignPermissions') }}
             </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
-              <el-button type="primary" link size="small">
-                {{ $t('roles.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-dropdown
+              trigger="click"
+              @command="(cmd: string) => handleCommand(cmd, row)"
+            >
+              <el-button
+                type="primary"
+                link
+                size="small"
+              >
+                {{ $t('roles.more') }}<el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="viewPermissions">{{ $t('roles.viewPermissions') }}</el-dropdown-item>
+                  <el-dropdown-item command="viewPermissions">
+                    {{ $t('roles.viewPermissions') }}
+                  </el-dropdown-item>
                   <el-dropdown-item
                     command="delete"
                     style="color: #EF4444;"
@@ -138,7 +210,10 @@
       width="600px"
       destroy-on-close
     >
-      <div v-if="currentRolePermissions.length > 0" class="permissions-list">
+      <div
+        v-if="currentRolePermissions.length > 0"
+        class="permissions-list"
+      >
         <el-tag
           v-for="perm in currentRolePermissions"
           :key="perm.id"
@@ -148,9 +223,14 @@
           {{ perm.name }}
         </el-tag>
       </div>
-      <el-empty v-else :description="$t('roles.noPermissions')" />
+      <el-empty
+        v-else
+        :description="$t('roles.noPermissions')"
+      />
       <template #footer>
-        <el-button @click="viewPermissionsVisible = false">{{ $t('roles.close') }}</el-button>
+        <el-button @click="viewPermissionsVisible = false">
+          {{ $t('roles.close') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

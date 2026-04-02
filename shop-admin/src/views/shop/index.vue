@@ -1,9 +1,18 @@
 <template>
-  <div class="shop-settings" v-loading="loading">
+  <div
+    v-loading="loading"
+    class="shop-settings"
+  >
     <el-row :gutter="20">
       <!-- Left Column - Basic Info -->
-      <el-col :xs="24" :lg="16">
-        <el-card class="settings-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="16"
+      >
+        <el-card
+          class="settings-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -13,7 +22,12 @@
             </div>
           </template>
 
-          <el-form :model="shopForm" label-width="120px" :rules="shopRules" ref="shopFormRef">
+          <el-form
+            ref="shopFormRef"
+            :model="shopForm"
+            label-width="120px"
+            :rules="shopRules"
+          >
             <el-form-item :label="$t('shop.shopLogo')">
               <el-upload
                 class="logo-uploader"
@@ -22,20 +36,40 @@
                 :auto-upload="false"
                 :on-change="handleLogoChange"
               >
-                <img v-if="shopForm.logo" :src="shopForm.logo" class="logo-preview" />
-                <div v-else class="logo-placeholder">
-                  <el-icon size="32"><Plus /></el-icon>
+                <img
+                  v-if="shopForm.logo"
+                  :src="shopForm.logo"
+                  class="logo-preview"
+                >
+                <div
+                  v-else
+                  class="logo-placeholder"
+                >
+                  <el-icon size="32">
+                    <Plus />
+                  </el-icon>
                   <span>{{ $t('shop.uploadLogo') }}</span>
                 </div>
               </el-upload>
               <span class="upload-tip">{{ $t('shop.logoTip') }}</span>
             </el-form-item>
 
-            <el-form-item :label="$t('shop.shopName')" prop="name">
-              <el-input v-model="shopForm.name" :placeholder="$t('shop.shopNamePlaceholder')" maxlength="50" show-word-limit />
+            <el-form-item
+              :label="$t('shop.shopName')"
+              prop="name"
+            >
+              <el-input
+                v-model="shopForm.name"
+                :placeholder="$t('shop.shopNamePlaceholder')"
+                maxlength="50"
+                show-word-limit
+              />
             </el-form-item>
 
-            <el-form-item :label="$t('shop.shopDescription')" prop="description">
+            <el-form-item
+              :label="$t('shop.shopDescription')"
+              prop="description"
+            >
               <el-input
                 v-model="shopForm.description"
                 type="textarea"
@@ -46,20 +80,38 @@
               />
             </el-form-item>
 
-            <el-form-item :label="$t('shop.contactPerson')" prop="contact_name">
-              <el-input v-model="shopForm.contact_name" :placeholder="$t('shop.contactPersonPlaceholder')" />
+            <el-form-item
+              :label="$t('shop.contactPerson')"
+              prop="contact_name"
+            >
+              <el-input
+                v-model="shopForm.contact_name"
+                :placeholder="$t('shop.contactPersonPlaceholder')"
+              />
             </el-form-item>
 
-            <el-form-item :label="$t('shop.customerServicePhone')" prop="contact_phone">
-              <el-input v-model="shopForm.contact_phone" :placeholder="$t('shop.phonePlaceholder')">
+            <el-form-item
+              :label="$t('shop.customerServicePhone')"
+              prop="contact_phone"
+            >
+              <el-input
+                v-model="shopForm.contact_phone"
+                :placeholder="$t('shop.phonePlaceholder')"
+              >
                 <template #prefix>
                   <el-icon><Phone /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item :label="$t('shop.customerServiceEmail')" prop="contact_email">
-              <el-input v-model="shopForm.contact_email" :placeholder="$t('shop.emailPlaceholder')">
+            <el-form-item
+              :label="$t('shop.customerServiceEmail')"
+              prop="contact_email"
+            >
+              <el-input
+                v-model="shopForm.contact_email"
+                :placeholder="$t('shop.emailPlaceholder')"
+              >
                 <template #prefix>
                   <el-icon><Message /></el-icon>
                 </template>
@@ -67,15 +119,24 @@
             </el-form-item>
 
             <el-form-item :label="$t('shop.shopAddress')">
-              <el-input v-model="shopForm.address" :placeholder="$t('shop.addressPlaceholder')">
+              <el-input
+                v-model="shopForm.address"
+                :placeholder="$t('shop.addressPlaceholder')"
+              >
                 <template #prefix>
                   <el-icon><Location /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item :label="$t('shop.customDomain')" prop="custom_domain">
-              <el-input v-model="shopForm.custom_domain" :placeholder="$t('shop.domainPlaceholder')">
+            <el-form-item
+              :label="$t('shop.customDomain')"
+              prop="custom_domain"
+            >
+              <el-input
+                v-model="shopForm.custom_domain"
+                :placeholder="$t('shop.domainPlaceholder')"
+              >
                 <template #prefix>
                   <el-icon><Link /></el-icon>
                 </template>
@@ -85,7 +146,11 @@
         </el-card>
 
         <!-- Business Hours Settings -->
-        <el-card class="settings-card" shadow="never" style="margin-top: 20px">
+        <el-card
+          class="settings-card"
+          shadow="never"
+          style="margin-top: 20px"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -96,7 +161,11 @@
           </template>
 
           <div class="business-hours">
-            <div v-for="(hour, index) in businessHours" :key="index" class="hours-row">
+            <div
+              v-for="(hour, index) in businessHours"
+              :key="index"
+              class="hours-row"
+            >
               <span class="day-name">{{ getDayName(hour.day_of_week) }}</span>
               <el-switch
                 v-model="hour.is_closed"
@@ -132,7 +201,11 @@
         </el-card>
 
         <!-- Shipping Settings -->
-        <el-card class="settings-card" shadow="never" style="margin-top: 20px">
+        <el-card
+          class="settings-card"
+          shadow="never"
+          style="margin-top: 20px"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -142,7 +215,10 @@
             </div>
           </template>
 
-          <el-form :model="shippingForm" label-width="120px">
+          <el-form
+            :model="shippingForm"
+            label-width="120px"
+          >
             <el-form-item :label="$t('shop.defaultShippingFee')">
               <el-input-number
                 v-model="shippingForm.default_shipping_fee"
@@ -163,16 +239,24 @@
                 style="width: 200px"
               />
               <span style="margin-left: 8px; color: #909399">{{ shippingForm.currency || 'CNY' }}</span>
-              <div class="form-tip">{{ $t('shop.freeShippingThresholdTip') }}</div>
+              <div class="form-tip">
+                {{ $t('shop.freeShippingThresholdTip') }}
+              </div>
             </el-form-item>
           </el-form>
         </el-card>
       </el-col>
 
       <!-- Right Column - Status & Settings -->
-      <el-col :xs="24" :lg="8">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
         <!-- Shop Status -->
-        <el-card class="settings-card" shadow="never">
+        <el-card
+          class="settings-card"
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -191,9 +275,14 @@
             </div>
             <div class="info-row">
               <span class="info-label">{{ $t('shop.currentPlan') }}</span>
-              <el-tag type="warning">{{ shopSettings?.plan_text || '-' }}</el-tag>
+              <el-tag type="warning">
+                {{ shopSettings?.plan_text || '-' }}
+              </el-tag>
             </div>
-            <div class="info-row" v-if="shopSettings?.expire_at">
+            <div
+              v-if="shopSettings?.expire_at"
+              class="info-row"
+            >
               <span class="info-label">{{ $t('shop.expireTime') }}</span>
               <span class="info-value">{{ shopSettings?.expire_at }}</span>
             </div>
@@ -209,7 +298,11 @@
         </el-card>
 
         <!-- Notification Settings -->
-        <el-card class="settings-card" shadow="never" style="margin-top: 20px">
+        <el-card
+          class="settings-card"
+          shadow="never"
+          style="margin-top: 20px"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -219,36 +312,66 @@
             </div>
           </template>
 
-          <el-form :model="notificationForm" label-position="top">
+          <el-form
+            :model="notificationForm"
+            label-position="top"
+          >
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_created">{{ $t('shop.newOrderNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_created">
+                {{ $t('shop.newOrderNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_paid">{{ $t('shop.orderPaidNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_paid">
+                {{ $t('shop.orderPaidNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_shipped">{{ $t('shop.orderShippedNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_shipped">
+                {{ $t('shop.orderShippedNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.order_cancelled">{{ $t('shop.orderCancelledNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.order_cancelled">
+                {{ $t('shop.orderCancelledNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.refund_requested">{{ $t('shop.refundRequestNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.refund_requested">
+                {{ $t('shop.refundRequestNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.new_review">{{ $t('shop.newReviewNotification') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.new_review">
+                {{ $t('shop.newReviewNotification') }}
+              </el-checkbox>
             </div>
             <div class="notify-item">
-              <el-checkbox v-model="notificationForm.low_stock_alert">{{ $t('shop.lowStockAlert') }}</el-checkbox>
+              <el-checkbox v-model="notificationForm.low_stock_alert">
+                {{ $t('shop.lowStockAlert') }}
+              </el-checkbox>
             </div>
-            <el-form-item :label="$t('shop.lowStockThreshold')" v-if="notificationForm.low_stock_alert" style="margin-top: 12px">
-              <el-input-number v-model="notificationForm.low_stock_threshold" :min="1" :max="1000" style="width: 100%" />
+            <el-form-item
+              v-if="notificationForm.low_stock_alert"
+              :label="$t('shop.lowStockThreshold')"
+              style="margin-top: 12px"
+            >
+              <el-input-number
+                v-model="notificationForm.low_stock_threshold"
+                :min="1"
+                :max="1000"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-form>
         </el-card>
 
         <!-- Payment Settings -->
-        <el-card class="settings-card" shadow="never" style="margin-top: 20px">
+        <el-card
+          class="settings-card"
+          shadow="never"
+          style="margin-top: 20px"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -258,14 +381,29 @@
             </div>
           </template>
 
-          <el-form :model="paymentForm" label-position="top">
+          <el-form
+            :model="paymentForm"
+            label-position="top"
+          >
             <div class="notify-item">
-              <el-checkbox v-model="paymentForm.stripe_enabled">{{ $t('shop.enableStripe') }}</el-checkbox>
+              <el-checkbox v-model="paymentForm.stripe_enabled">
+                {{ $t('shop.enableStripe') }}
+              </el-checkbox>
             </div>
-            <el-form-item :label="$t('shop.stripePublicKey')" v-if="paymentForm.stripe_enabled" style="margin-top: 12px">
-              <el-input v-model="paymentForm.stripe_public_key" :placeholder="$t('shop.stripePublicKeyPlaceholder')" />
+            <el-form-item
+              v-if="paymentForm.stripe_enabled"
+              :label="$t('shop.stripePublicKey')"
+              style="margin-top: 12px"
+            >
+              <el-input
+                v-model="paymentForm.stripe_public_key"
+                :placeholder="$t('shop.stripePublicKeyPlaceholder')"
+              />
             </el-form-item>
-            <el-form-item :label="$t('shop.stripeSecretKey')" v-if="paymentForm.stripe_enabled">
+            <el-form-item
+              v-if="paymentForm.stripe_enabled"
+              :label="$t('shop.stripeSecretKey')"
+            >
               <el-input
                 v-model="paymentForm.stripe_secret_key"
                 type="password"
@@ -273,13 +411,19 @@
                 show-password
                 @change="paymentForm.stripe_secret_key_changed = true"
               />
-              <div class="form-tip">{{ $t('shop.stripeSecretKeyTip') }}</div>
+              <div class="form-tip">
+                {{ $t('shop.stripeSecretKeyTip') }}
+              </div>
             </el-form-item>
           </el-form>
         </el-card>
 
         <!-- Quick Actions -->
-        <el-card class="settings-card" shadow="never" style="margin-top: 20px">
+        <el-card
+          class="settings-card"
+          shadow="never"
+          style="margin-top: 20px"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">
@@ -290,11 +434,19 @@
           </template>
 
           <div class="quick-actions">
-            <el-button plain style="width: 100%; margin-bottom: 12px" @click="viewShopPage">
+            <el-button
+              plain
+              style="width: 100%; margin-bottom: 12px"
+              @click="viewShopPage"
+            >
               <el-icon><Document /></el-icon>
               {{ $t('shop.viewShopHomepage') }}
             </el-button>
-            <el-button plain style="width: 100%; margin-bottom: 12px" @click="copyShopLink">
+            <el-button
+              plain
+              style="width: 100%; margin-bottom: 12px"
+              @click="copyShopLink"
+            >
               <el-icon><Share /></el-icon>
               {{ $t('shop.copyShopLink') }}
             </el-button>
@@ -305,7 +457,12 @@
 
     <!-- Save Button -->
     <div class="save-bar">
-      <el-button type="primary" size="large" @click="handleSave" :loading="saving">
+      <el-button
+        type="primary"
+        size="large"
+        :loading="saving"
+        @click="handleSave"
+      >
         <el-icon><Check /></el-icon>
         {{ $t('shop.saveSettings') }}
       </el-button>

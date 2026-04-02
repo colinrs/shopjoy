@@ -1,16 +1,35 @@
 <template>
-  <div class="stat-card" :class="[iconColor, { clickable: clickable }]" @click="handleClick">
-    <div class="stat-icon" :class="iconColor">
+  <div
+    class="stat-card"
+    :class="[iconColor, { clickable: clickable }]"
+    @click="handleClick"
+  >
+    <div
+      class="stat-icon"
+      :class="iconColor"
+    >
       <el-icon :size="24">
         <component :is="icon" />
       </el-icon>
     </div>
     <div class="stat-info">
-      <p class="stat-label">{{ title }}</p>
-      <p class="stat-value">{{ formatValue(value) }}</p>
-      <div v-if="trend" class="stat-trend" :class="{ up: trend.value >= 0, down: trend.value < 0 }">
-        <el-icon v-if="trend.value >= 0"><CaretTop /></el-icon>
-        <el-icon v-else><CaretBottom /></el-icon>
+      <p class="stat-label">
+        {{ title }}
+      </p>
+      <p class="stat-value">
+        {{ formatValue(value) }}
+      </p>
+      <div
+        v-if="trend"
+        class="stat-trend"
+        :class="{ up: trend.value >= 0, down: trend.value < 0 }"
+      >
+        <el-icon v-if="trend.value >= 0">
+          <CaretTop />
+        </el-icon>
+        <el-icon v-else>
+          <CaretBottom />
+        </el-icon>
         <span>{{ Math.abs(trend.value) }}%</span>
         <span class="trend-label">{{ trend.label }}</span>
       </div>

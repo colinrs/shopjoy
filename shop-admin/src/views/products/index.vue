@@ -1,10 +1,18 @@
 <template>
   <div class="products-page">
     <!-- Market Filter Bar -->
-    <el-card class="market-filter-card" shadow="never">
+    <el-card
+      class="market-filter-card"
+      shadow="never"
+    >
       <div class="market-filter-bar">
-        <el-radio-group v-model="selectedMarket" @change="handleMarketChange">
-          <el-radio-button value="">{{ $t('common.all') }}</el-radio-button>
+        <el-radio-group
+          v-model="selectedMarket"
+          @change="handleMarketChange"
+        >
+          <el-radio-button value="">
+            {{ $t('common.all') }}
+          </el-radio-button>
           <el-radio-button
             v-for="market in markets"
             :key="market.id"
@@ -17,7 +25,10 @@
     </el-card>
 
     <!-- Search & Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -31,11 +42,29 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filterStatus" :placeholder="$t('products.status')" clearable class="filter-select" @change="handleSearch">
-            <el-option :label="$t('common.all')" value="" />
-            <el-option :label="$t('products.onSale')" value="on_sale" />
-            <el-option :label="$t('products.offSale')" value="off_sale" />
-            <el-option :label="$t('products.draft')" value="draft" />
+          <el-select
+            v-model="filterStatus"
+            :placeholder="$t('products.status')"
+            clearable
+            class="filter-select"
+            @change="handleSearch"
+          >
+            <el-option
+              :label="$t('common.all')"
+              value=""
+            />
+            <el-option
+              :label="$t('products.onSale')"
+              value="on_sale"
+            />
+            <el-option
+              :label="$t('products.offSale')"
+              value="off_sale"
+            />
+            <el-option
+              :label="$t('products.draft')"
+              value="draft"
+            />
           </el-select>
           <el-cascader
             v-model="filterCategory"
@@ -46,7 +75,10 @@
             class="filter-select"
             @change="handleSearch"
           />
-          <el-button type="primary" @click="handleSearch">
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
             <el-icon><Search /></el-icon>{{ $t('common.search') }}
           </el-button>
         </div>
@@ -54,7 +86,10 @@
           <el-button @click="handleExport">
             <el-icon><Download /></el-icon>{{ $t('common.export') }}
           </el-button>
-          <el-button type="primary" @click="handleAdd">
+          <el-button
+            type="primary"
+            @click="handleAdd"
+          >
             <el-icon><Plus /></el-icon>{{ $t('products.addProduct') }}
           </el-button>
         </div>
@@ -62,19 +97,56 @@
     </el-card>
 
     <!-- Bulk Actions -->
-    <div class="bulk-actions" v-if="selectedProducts.length > 0">
+    <div
+      v-if="selectedProducts.length > 0"
+      class="bulk-actions"
+    >
       <span class="selected-count">{{ $t('products.selectedCount', { count: selectedProducts.length }) }}</span>
-      <el-button size="small" @click="handleBatchOnSale">{{ $t('products.batchOnSale') }}</el-button>
-      <el-button size="small" @click="handleBatchOffSale">{{ $t('products.batchOffSale') }}</el-button>
-      <el-button size="small" type="success" @click="handleBatchPushToMarket">{{ $t('products.pushToMarket') }}</el-button>
-      <el-button size="small" type="danger" @click="handleBatchDelete">{{ $t('products.batchDelete') }}</el-button>
-      <el-button size="small" @click="handleClearSelection">{{ $t('common.clearSelection') }}</el-button>
+      <el-button
+        size="small"
+        @click="handleBatchOnSale"
+      >
+        {{ $t('products.batchOnSale') }}
+      </el-button>
+      <el-button
+        size="small"
+        @click="handleBatchOffSale"
+      >
+        {{ $t('products.batchOffSale') }}
+      </el-button>
+      <el-button
+        size="small"
+        type="success"
+        @click="handleBatchPushToMarket"
+      >
+        {{ $t('products.pushToMarket') }}
+      </el-button>
+      <el-button
+        size="small"
+        type="danger"
+        @click="handleBatchDelete"
+      >
+        {{ $t('products.batchDelete') }}
+      </el-button>
+      <el-button
+        size="small"
+        @click="handleClearSelection"
+      >
+        {{ $t('common.clearSelection') }}
+      </el-button>
     </div>
 
     <!-- Products Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <!-- Skeleton loading -->
-      <TableSkeleton v-if="loading && productList.length === 0" :rows="10" :columns="7" />
+      <TableSkeleton
+        v-if="loading && productList.length === 0"
+        :rows="10"
+        :columns="7"
+      />
 
       <!-- Empty state -->
       <EmptyState
@@ -91,7 +163,10 @@
         :loading="loading"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column :label="$t('products.productInfo')" min-width="300">
+        <el-table-column
+          :label="$t('products.productInfo')"
+          min-width="300"
+        >
           <template #default="{ row }">
             <div class="product-cell">
               <el-image
@@ -107,31 +182,67 @@
                 </template>
               </el-image>
               <div class="product-details">
-                <p class="product-name">{{ row.name }}</p>
-                <p class="product-sku">SKU: {{ row.sku || $t('common.noData') }}</p>
+                <p class="product-name">
+                  {{ row.name }}
+                </p>
+                <p class="product-sku">
+                  SKU: {{ row.sku || $t('common.noData') }}
+                </p>
                 <div class="product-tags">
-                  <el-tag v-if="row.tags?.includes('hot')" size="small" type="danger" effect="plain">{{ $t('products.hot') }}</el-tag>
-                  <el-tag v-if="row.tags?.includes('new')" size="small" type="success" effect="plain">{{ $t('products.new') }}</el-tag>
+                  <el-tag
+                    v-if="row.tags?.includes('hot')"
+                    size="small"
+                    type="danger"
+                    effect="plain"
+                  >
+                    {{ $t('products.hot') }}
+                  </el-tag>
+                  <el-tag
+                    v-if="row.tags?.includes('new')"
+                    size="small"
+                    type="success"
+                    effect="plain"
+                  >
+                    {{ $t('products.new') }}
+                  </el-tag>
                 </div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.price')" width="150" align="right">
+        <el-table-column
+          :label="$t('products.price')"
+          width="150"
+          align="right"
+        >
           <template #default="{ row }">
             <div class="price-cell">
-              <p class="sale-price">{{ row.currency || 'USD' }}{{ formatPrice(row.price) }}</p>
+              <p class="sale-price">
+                {{ row.currency || 'USD' }}{{ formatPrice(row.price) }}
+              </p>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="stock" :label="$t('products.stock')" width="120" align="center">
+        <el-table-column
+          prop="stock"
+          :label="$t('products.stock')"
+          width="120"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getStockType(row.stock)" size="small">
+            <el-tag
+              :type="getStockType(row.stock)"
+              size="small"
+            >
               {{ row.stock }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.markets')" min-width="150" align="center">
+        <el-table-column
+          :label="$t('products.markets')"
+          min-width="150"
+          align="center"
+        >
           <template #default="{ row }">
             <div class="market-tags">
               <el-tag
@@ -143,18 +254,30 @@
               >
                 {{ market.market_code }}
               </el-tag>
-              <span v-if="!row.markets || row.markets.length === 0" class="no-markets">
+              <span
+                v-if="!row.markets || row.markets.length === 0"
+                class="no-markets"
+              >
                 {{ $t('products.noMarkets') }}
               </span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('products.categoryId')" width="100" align="center">
+        <el-table-column
+          :label="$t('products.categoryId')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.category_id || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('products.status')" width="100" align="center">
+        <el-table-column
+          prop="status"
+          :label="$t('products.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -164,23 +287,58 @@
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="180" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="180"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEdit(row)"
+            >
               {{ $t('common.edit') }}
             </el-button>
-            <el-button type="primary" link size="small" @click="handlePreview(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handlePreview(row)"
+            >
               {{ $t('products.preview') }}
             </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
-              <el-button type="primary" link size="small">
-                {{ $t('common.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-dropdown
+              trigger="click"
+              @command="(cmd: string) => handleCommand(cmd, row)"
+            >
+              <el-button
+                type="primary"
+                link
+                size="small"
+              >
+                {{ $t('common.more') }}<el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="copy">{{ $t('products.copy') }}</el-dropdown-item>
-                  <el-dropdown-item command="top" divided>{{ $t('products.setTop') }}</el-dropdown-item>
-                  <el-dropdown-item command="delete" type="danger">{{ $t('common.delete') }}</el-dropdown-item>
+                  <el-dropdown-item command="copy">
+                    {{ $t('products.copy') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="top"
+                    divided
+                  >
+                    {{ $t('products.setTop') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="delete"
+                    type="danger"
+                  >
+                    {{ $t('common.delete') }}
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -209,17 +367,37 @@
       width="900px"
       destroy-on-close
     >
-      <el-tabs v-model="activeProductTab" class="product-form-tabs">
-        <el-tab-pane :label="$t('products.basicInfo')" name="basic">
-          <el-form :model="productForm" label-width="100px" :rules="formRules" ref="formRef">
+      <el-tabs
+        v-model="activeProductTab"
+        class="product-form-tabs"
+      >
+        <el-tab-pane
+          :label="$t('products.basicInfo')"
+          name="basic"
+        >
+          <el-form
+            ref="formRef"
+            :model="productForm"
+            label-width="100px"
+            :rules="formRules"
+          >
             <el-row :gutter="20">
               <el-col :span="24">
-                <el-form-item :label="$t('products.productName')" prop="name">
-                  <el-input v-model="productForm.name" :placeholder="$t('products.enterProductName')" />
+                <el-form-item
+                  :label="$t('products.productName')"
+                  prop="name"
+                >
+                  <el-input
+                    v-model="productForm.name"
+                    :placeholder="$t('products.enterProductName')"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item :label="$t('products.productCategory')" prop="category_id">
+                <el-form-item
+                  :label="$t('products.productCategory')"
+                  prop="category_id"
+                >
                   <el-cascader
                     v-model="productForm.category_id"
                     :options="categories"
@@ -231,7 +409,10 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.brand')">
-                  <el-input v-model="productForm.brand" :placeholder="$t('products.enterBrand')" />
+                  <el-input
+                    v-model="productForm.brand"
+                    :placeholder="$t('products.enterBrand')"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="24">
@@ -243,51 +424,113 @@
                     :auto-upload="false"
                     :on-change="handleImageChange"
                   >
-                    <img v-if="productForm.image" :src="productForm.image" class="avatar" />
-                    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                    <img
+                      v-if="productForm.image"
+                      :src="productForm.image"
+                      class="avatar"
+                    >
+                    <el-icon
+                      v-else
+                      class="avatar-uploader-icon"
+                    >
+                      <Plus />
+                    </el-icon>
                   </el-upload>
                 </el-form-item>
               </el-col>
               <el-col :span="24">
                 <el-form-item :label="$t('products.productDescription')">
-                  <el-input v-model="productForm.description" type="textarea" rows="4" />
+                  <el-input
+                    v-model="productForm.description"
+                    type="textarea"
+                    rows="4"
+                  />
                 </el-form-item>
               </el-col>
             </el-row>
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('products.priceStock')" name="price">
-          <el-form :model="productForm" label-width="100px">
+        <el-tab-pane
+          :label="$t('products.priceStock')"
+          name="price"
+        >
+          <el-form
+            :model="productForm"
+            label-width="100px"
+          >
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item :label="$t('products.productPrice')" prop="price">
-                  <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
+                <el-form-item
+                  :label="$t('products.productPrice')"
+                  prop="price"
+                >
+                  <el-input-number
+                    v-model="productForm.price"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.originalPrice')">
-                  <el-input-number v-model="productForm.original_price" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.original_price"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item :label="$t('products.stockQuantity')" prop="stock">
-                  <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
+                <el-form-item
+                  :label="$t('products.stockQuantity')"
+                  prop="stock"
+                >
+                  <el-input-number
+                    v-model="productForm.stock"
+                    :min="0"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.costPrice')">
-                  <el-input-number v-model="productForm.cost_price" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.cost_price"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.currency')">
-                  <el-select v-model="productForm.currency" style="width: 100%">
-                    <el-option label="USD" value="USD" />
-                    <el-option label="EUR" value="EUR" />
-                    <el-option label="GBP" value="GBP" />
-                    <el-option label="CNY" value="CNY" />
-                    <el-option label="JPY" value="JPY" />
+                  <el-select
+                    v-model="productForm.currency"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      label="USD"
+                      value="USD"
+                    />
+                    <el-option
+                      label="EUR"
+                      value="EUR"
+                    />
+                    <el-option
+                      label="GBP"
+                      value="GBP"
+                    />
+                    <el-option
+                      label="CNY"
+                      value="CNY"
+                    />
+                    <el-option
+                      label="JPY"
+                      value="JPY"
+                    />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -295,69 +538,146 @@
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('products.logisticsInfo')" name="logistics">
-          <el-form :model="productForm" label-width="100px">
+        <el-tab-pane
+          :label="$t('products.logisticsInfo')"
+          name="logistics"
+        >
+          <el-form
+            :model="productForm"
+            label-width="100px"
+          >
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item :label="$t('products.weight')">
-                  <el-input-number v-model="productForm.weight" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.weight"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.weightUnit')">
-                  <el-select v-model="productForm.weight_unit" style="width: 100%">
-                    <el-option label="kg" value="kg" />
-                    <el-option label="g" value="g" />
-                    <el-option label="lb" value="lb" />
-                    <el-option label="oz" value="oz" />
+                  <el-select
+                    v-model="productForm.weight_unit"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      label="kg"
+                      value="kg"
+                    />
+                    <el-option
+                      label="g"
+                      value="g"
+                    />
+                    <el-option
+                      label="lb"
+                      value="lb"
+                    />
+                    <el-option
+                      label="oz"
+                      value="oz"
+                    />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="8">
                 <el-form-item :label="$t('products.length')">
-                  <el-input-number v-model="productForm.length" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.length"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="8">
                 <el-form-item :label="$t('products.width')">
-                  <el-input-number v-model="productForm.width" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.width"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="8">
                 <el-form-item :label="$t('products.height')">
-                  <el-input-number v-model="productForm.height" :min="0" :precision="2" style="width: 100%" />
+                  <el-input-number
+                    v-model="productForm.height"
+                    :min="0"
+                    :precision="2"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
             </el-row>
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('products.complianceInfo')" name="compliance">
-          <el-form :model="productForm" label-width="100px">
+        <el-tab-pane
+          :label="$t('products.complianceInfo')"
+          name="compliance"
+        >
+          <el-form
+            :model="productForm"
+            label-width="100px"
+          >
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item :label="$t('products.hsCode')">
-                  <el-input v-model="productForm.hs_code" :placeholder="$t('products.enterHsCode')" />
+                  <el-input
+                    v-model="productForm.hs_code"
+                    :placeholder="$t('products.enterHsCode')"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item :label="$t('products.coo')">
-                  <el-select v-model="productForm.coo" :placeholder="$t('products.selectCoo')" style="width: 100%">
-                    <el-option label="China" value="CN" />
-                    <el-option label="United States" value="US" />
-                    <el-option label="European Union" value="EU" />
-                    <el-option label="Japan" value="JP" />
-                    <el-option label="South Korea" value="KR" />
+                  <el-select
+                    v-model="productForm.coo"
+                    :placeholder="$t('products.selectCoo')"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      label="China"
+                      value="CN"
+                    />
+                    <el-option
+                      label="United States"
+                      value="US"
+                    />
+                    <el-option
+                      label="European Union"
+                      value="EU"
+                    />
+                    <el-option
+                      label="Japan"
+                      value="JP"
+                    />
+                    <el-option
+                      label="South Korea"
+                      value="KR"
+                    />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="24">
                 <el-form-item :label="$t('products.dangerousGoods')">
                   <el-checkbox-group v-model="productForm.dangerous_goods">
-                    <el-checkbox label="flammable">{{ $t('products.flammable') }}</el-checkbox>
-                    <el-checkbox label="explosive">{{ $t('products.explosive') }}</el-checkbox>
-                    <el-checkbox label="corrosive">{{ $t('products.corrosive') }}</el-checkbox>
-                    <el-checkbox label="radioactive">{{ $t('products.radioactive') }}</el-checkbox>
+                    <el-checkbox label="flammable">
+                      {{ $t('products.flammable') }}
+                    </el-checkbox>
+                    <el-checkbox label="explosive">
+                      {{ $t('products.explosive') }}
+                    </el-checkbox>
+                    <el-checkbox label="corrosive">
+                      {{ $t('products.corrosive') }}
+                    </el-checkbox>
+                    <el-checkbox label="radioactive">
+                      {{ $t('products.radioactive') }}
+                    </el-checkbox>
                   </el-checkbox-group>
                 </el-form-item>
               </el-col>
@@ -366,8 +686,16 @@
         </el-tab-pane>
       </el-tabs>
       <template #footer>
-        <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSave" :loading="saveLoading">{{ $t('common.save') }}</el-button>
+        <el-button @click="dialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          {{ $t('common.save') }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -378,8 +706,16 @@
       width="500px"
       destroy-on-close
     >
-      <el-form :model="pushToMarketForm" label-width="120px" ref="pushToMarketFormRef">
-        <el-form-item :label="$t('products.markets')" prop="markets" required>
+      <el-form
+        ref="pushToMarketFormRef"
+        :model="pushToMarketForm"
+        label-width="120px"
+      >
+        <el-form-item
+          :label="$t('products.markets')"
+          prop="markets"
+          required
+        >
           <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">
             <el-checkbox
               v-for="market in availableMarkets"
@@ -391,19 +727,31 @@
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item :label="$t('products.priceUSD')" prop="price" required>
+        <el-form-item
+          :label="$t('products.priceUSD')"
+          prop="price"
+          required
+        >
           <el-input-number
             v-model="pushToMarketForm.price"
             :min="0"
             :precision="2"
             style="width: 100%"
           />
-          <div class="price-note">{{ $t('products.priceNote') }}</div>
+          <div class="price-note">
+            {{ $t('products.priceNote') }}
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="pushToMarketDialogVisible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleConfirmPushToMarket" :loading="pushToMarketLoading">
+        <el-button @click="pushToMarketDialogVisible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="pushToMarketLoading"
+          @click="handleConfirmPushToMarket"
+        >
           {{ $t('products.pushToMarket') }}
         </el-button>
       </template>
@@ -416,7 +764,10 @@
       width="700px"
       destroy-on-close
     >
-      <div v-if="previewProduct" class="preview-content">
+      <div
+        v-if="previewProduct"
+        class="preview-content"
+      >
         <el-row :gutter="20">
           <el-col :span="8">
             <div class="preview-image">
@@ -427,18 +778,37 @@
                 class="preview-main-image"
                 :preview-src-list="previewProduct.images"
               />
-              <div v-else class="preview-image-placeholder">
+              <div
+                v-else
+                class="preview-image-placeholder"
+              >
                 <el-icon><Picture /></el-icon>
               </div>
             </div>
           </el-col>
           <el-col :span="16">
             <div class="preview-info">
-              <h3 class="preview-title">{{ previewProduct.name }}</h3>
-              <p class="preview-sku">SKU: {{ previewProduct.sku || $t('common.noData') }}</p>
+              <h3 class="preview-title">
+                {{ previewProduct.name }}
+              </h3>
+              <p class="preview-sku">
+                SKU: {{ previewProduct.sku || $t('common.noData') }}
+              </p>
               <div class="preview-tags">
-                <el-tag v-if="previewProduct.tags?.includes('hot')" size="small" type="danger">{{ $t('products.hot') }}</el-tag>
-                <el-tag v-if="previewProduct.tags?.includes('new')" size="small" type="success">{{ $t('products.new') }}</el-tag>
+                <el-tag
+                  v-if="previewProduct.tags?.includes('hot')"
+                  size="small"
+                  type="danger"
+                >
+                  {{ $t('products.hot') }}
+                </el-tag>
+                <el-tag
+                  v-if="previewProduct.tags?.includes('new')"
+                  size="small"
+                  type="success"
+                >
+                  {{ $t('products.new') }}
+                </el-tag>
               </div>
               <div class="preview-price">
                 <span class="price-label">{{ $t('products.price') }}:</span>
@@ -446,11 +816,19 @@
               </div>
               <div class="preview-detail-row">
                 <span class="detail-label">{{ $t('products.stock') }}:</span>
-                <el-tag :type="getStockType(previewProduct.stock)" size="small">{{ previewProduct.stock }}</el-tag>
+                <el-tag
+                  :type="getStockType(previewProduct.stock)"
+                  size="small"
+                >
+                  {{ previewProduct.stock }}
+                </el-tag>
               </div>
               <div class="preview-detail-row">
                 <span class="detail-label">{{ $t('products.status') }}:</span>
-                <el-tag :type="previewProduct.status === 'on_sale' ? 'success' : 'warning'" size="small">
+                <el-tag
+                  :type="previewProduct.status === 'on_sale' ? 'success' : 'warning'"
+                  size="small"
+                >
                   {{ previewProduct.status === 'on_sale' ? $t('products.onSale') : previewProduct.status === 'off_sale' ? $t('products.offSale') : $t('products.draft') }}
                 </el-tag>
               </div>
@@ -465,15 +843,23 @@
             </div>
           </el-col>
         </el-row>
-        <el-row :gutter="20" class="preview-description-row">
+        <el-row
+          :gutter="20"
+          class="preview-description-row"
+        >
           <el-col :span="24">
             <div class="preview-description">
               <span class="detail-label">{{ $t('products.productDescription') }}:</span>
-              <p class="description-content">{{ previewProduct.description || $t('common.noData') }}</p>
+              <p class="description-content">
+                {{ previewProduct.description || $t('common.noData') }}
+              </p>
             </div>
           </el-col>
         </el-row>
-        <el-row v-if="previewProduct.markets && previewProduct.markets.length > 0" :gutter="20">
+        <el-row
+          v-if="previewProduct.markets && previewProduct.markets.length > 0"
+          :gutter="20"
+        >
           <el-col :span="24">
             <div class="preview-markets">
               <span class="detail-label">{{ $t('products.markets') }}:</span>
@@ -491,7 +877,10 @@
             </div>
           </el-col>
         </el-row>
-        <el-row :gutter="20" class="preview-meta-row">
+        <el-row
+          :gutter="20"
+          class="preview-meta-row"
+        >
           <el-col :span="12">
             <div class="preview-meta">
               <span class="detail-label">{{ $t('common.createdAt') }}:</span>
@@ -507,8 +896,15 @@
         </el-row>
       </div>
       <template #footer>
-        <el-button @click="previewDialogVisible = false">{{ $t('common.close') }}</el-button>
-        <el-button type="primary" @click="handlePreviewEdit">{{ $t('common.edit') }}</el-button>
+        <el-button @click="previewDialogVisible = false">
+          {{ $t('common.close') }}
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handlePreviewEdit"
+        >
+          {{ $t('common.edit') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

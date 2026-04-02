@@ -6,16 +6,29 @@
     :close-on-click-modal="false"
     destroy-on-close
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="120px"
+    >
       <!-- Order Info -->
       <div class="order-info-section">
         <div class="section-header">
           <el-icon><Document /></el-icon>
           <span>{{ $t('orders.orderInformation') }}</span>
         </div>
-        <el-descriptions :column="2" border size="small">
-          <el-descriptions-item :label="$t('orders.orderNo')">{{ order?.order_no }}</el-descriptions-item>
-          <el-descriptions-item :label="$t('orders.items')">{{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}</el-descriptions-item>
+        <el-descriptions
+          :column="2"
+          border
+          size="small"
+        >
+          <el-descriptions-item :label="$t('orders.orderNo')">
+            {{ order?.order_no }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('orders.items')">
+            {{ $t('orders.itemsCount', { count: order?.items?.length || 0 }) }}
+          </el-descriptions-item>
         </el-descriptions>
       </div>
 
@@ -26,7 +39,10 @@
           <span>{{ $t('orders.logisticsInformation') }}</span>
         </div>
 
-        <el-form-item :label="$t('orders.carrier')" prop="carrier_code">
+        <el-form-item
+          :label="$t('orders.carrier')"
+          prop="carrier_code"
+        >
           <el-select
             v-model="form.carrier_code"
             :placeholder="$t('orders.selectCarrier')"
@@ -42,12 +58,25 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="form.carrier_code === 'OTHER'" :label="$t('orders.customCarrier')" prop="carrier_name">
-          <el-input v-model="form.carrier_name" :placeholder="$t('orders.enterCarrierName')" />
+        <el-form-item
+          v-if="form.carrier_code === 'OTHER'"
+          :label="$t('orders.customCarrier')"
+          prop="carrier_name"
+        >
+          <el-input
+            v-model="form.carrier_name"
+            :placeholder="$t('orders.enterCarrierName')"
+          />
         </el-form-item>
 
-        <el-form-item :label="$t('orders.trackingNo')" prop="tracking_no">
-          <el-input v-model="form.tracking_no" :placeholder="$t('orders.enterTrackingNumber')">
+        <el-form-item
+          :label="$t('orders.trackingNo')"
+          prop="tracking_no"
+        >
+          <el-input
+            v-model="form.tracking_no"
+            :placeholder="$t('orders.enterTrackingNumber')"
+          >
             <template #prefix>
               <el-icon><Tickets /></el-icon>
             </template>
@@ -85,7 +114,12 @@
         <div class="section-header">
           <el-icon><Goods /></el-icon>
           <span>{{ $t('orders.itemsToShip') }}</span>
-          <el-tag size="small" type="info">{{ selectedItems.length }} {{ $t('orders.selected') }}</el-tag>
+          <el-tag
+            size="small"
+            type="info"
+          >
+            {{ selectedItems.length }} {{ $t('orders.selected') }}
+          </el-tag>
         </div>
 
         <div class="items-list">
@@ -97,7 +131,11 @@
             @click="toggleItem(item)"
           >
             <el-checkbox :model-value="isItemSelected(item.order_item_id)" />
-            <el-image :src="item.image" class="item-image" fit="cover">
+            <el-image
+              :src="item.image"
+              class="item-image"
+              fit="cover"
+            >
               <template #error>
                 <div class="image-placeholder">
                   <el-icon><Picture /></el-icon>
@@ -105,33 +143,53 @@
               </template>
             </el-image>
             <div class="item-info">
-              <p class="item-name">{{ item.product_name }}</p>
-              <p class="item-sku">{{ item.sku_name }}</p>
+              <p class="item-name">
+                {{ item.product_name }}
+              </p>
+              <p class="item-sku">
+                {{ item.sku_name }}
+              </p>
             </div>
             <div class="item-quantity">
               <el-input-number
                 v-if="isItemSelected(item.order_item_id)"
                 :model-value="getItemQuantity(item.order_item_id)"
-                @update:model-value="(val: number) => setItemQuantity(item.order_item_id, val)"
                 :min="1"
                 :max="item.pending_qty || item.quantity"
                 size="small"
                 style="width: 100px"
+                @update:model-value="(val: number) => setItemQuantity(item.order_item_id, val)"
                 @click.stop
               />
-              <span v-else class="quantity-text">x {{ item.quantity }}</span>
+              <span
+                v-else
+                class="quantity-text"
+              >x {{ item.quantity }}</span>
             </div>
           </div>
         </div>
 
         <div class="select-actions">
-          <el-button size="small" @click="selectAllItems">{{ $t('orders.selectAll') }}</el-button>
-          <el-button size="small" @click="clearItems">{{ $t('orders.clear') }}</el-button>
+          <el-button
+            size="small"
+            @click="selectAllItems"
+          >
+            {{ $t('orders.selectAll') }}
+          </el-button>
+          <el-button
+            size="small"
+            @click="clearItems"
+          >
+            {{ $t('orders.clear') }}
+          </el-button>
         </div>
       </div>
 
       <!-- Remark -->
-      <el-form-item :label="$t('orders.remark')" class="remark-item">
+      <el-form-item
+        :label="$t('orders.remark')"
+        class="remark-item"
+      >
         <el-input
           v-model="form.remark"
           type="textarea"
@@ -145,8 +203,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           {{ $t('orders.confirmShipment') }}
         </el-button>
       </div>

@@ -1,22 +1,38 @@
 <template>
-  <div class="localization-section" v-loading="localizationsLoading">
+  <div
+    v-loading="localizationsLoading"
+    class="localization-section"
+  >
     <div class="section-header">
-      <h3 class="section-title">{{ $t('products.multilingualContent') }}</h3>
-      <el-button type="primary" size="small" @click="handleAddLocalization">
+      <h3 class="section-title">
+        {{ $t('products.multilingualContent') }}
+      </h3>
+      <el-button
+        type="primary"
+        size="small"
+        @click="handleAddLocalization"
+      >
         <el-icon><Plus /></el-icon>
         {{ $t('products.addLanguage') }}
       </el-button>
     </div>
 
     <!-- Language Tabs -->
-    <el-tabs v-model="activeLanguage" type="card" class="language-tabs">
+    <el-tabs
+      v-model="activeLanguage"
+      type="card"
+      class="language-tabs"
+    >
       <el-tab-pane
         v-for="lang in supportedLanguages"
         :key="lang.code"
         :label="lang.name"
         :name="lang.code"
       >
-        <div v-if="getLocalizationByLang(lang.code)" class="localization-content">
+        <div
+          v-if="getLocalizationByLang(lang.code)"
+          class="localization-content"
+        >
           <el-form label-width="100px">
             <el-form-item :label="$t('products.productName')">
               <el-input
@@ -35,15 +51,26 @@
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="danger" size="small" @click="handleDeleteLocalization(getLocalizationByLang(lang.code)!)">
+              <el-button
+                type="danger"
+                size="small"
+                @click="handleDeleteLocalization(getLocalizationByLang(lang.code)!)"
+              >
                 {{ $t('products.deleteThisLanguage') }}
               </el-button>
             </el-form-item>
           </el-form>
         </div>
-        <div v-else class="no-localization">
+        <div
+          v-else
+          class="no-localization"
+        >
           <el-empty :description="$t('products.noContentForLang', { name: lang.name })">
-            <el-button type="primary" size="small" @click="handleCreateLocalization(lang.code)">
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleCreateLocalization(lang.code)"
+            >
               {{ $t('products.createContentForLang', { name: lang.name }) }}
             </el-button>
           </el-empty>

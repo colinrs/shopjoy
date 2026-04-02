@@ -2,24 +2,43 @@
   <div class="user-detail-page">
     <!-- Back Button -->
     <div class="page-header">
-      <el-button link @click="goBack">
+      <el-button
+        link
+        @click="goBack"
+      >
         <el-icon><ArrowLeft /></el-icon>
         {{ $t('users.backToUserList') }}
       </el-button>
-      <h2 class="page-title">{{ $t('users.userDetail') }}</h2>
+      <h2 class="page-title">
+        {{ $t('users.userDetail') }}
+      </h2>
     </div>
 
     <!-- User Summary Card -->
-    <el-card class="summary-card" shadow="never" v-loading="loading">
+    <el-card
+      v-loading="loading"
+      class="summary-card"
+      shadow="never"
+    >
       <div class="user-summary">
         <div class="user-avatar-section">
-          <el-avatar :size="80" :src="user?.avatar" class="user-avatar">
+          <el-avatar
+            :size="80"
+            :src="user?.avatar"
+            class="user-avatar"
+          >
             {{ user?.name ? user.name.charAt(0) : 'U' }}
           </el-avatar>
           <div class="user-info">
-            <h3 class="user-name">{{ user?.name || '-' }}</h3>
-            <p class="user-email">{{ user?.email || '-' }}</p>
-            <p class="user-phone">{{ user?.phone || '-' }}</p>
+            <h3 class="user-name">
+              {{ user?.name || '-' }}
+            </h3>
+            <p class="user-email">
+              {{ user?.email || '-' }}
+            </p>
+            <p class="user-phone">
+              {{ user?.phone || '-' }}
+            </p>
           </div>
         </div>
         <div class="user-stats">
@@ -36,13 +55,21 @@
             <span class="stat-label">{{ $t('users.totalSpent') }}</span>
           </div>
           <div class="stat-item">
-            <el-tag :type="user?.status === 1 ? 'success' : 'danger'" size="large">
+            <el-tag
+              :type="user?.status === 1 ? 'success' : 'danger'"
+              size="large"
+            >
               {{ user?.status === 1 ? $t('users.enabled') : $t('users.disabled') }}
             </el-tag>
           </div>
         </div>
         <div class="user-actions">
-          <el-button type="primary" @click="handleEdit">{{ $t('common.edit') }}</el-button>
+          <el-button
+            type="primary"
+            @click="handleEdit"
+          >
+            {{ $t('common.edit') }}
+          </el-button>
           <el-button
             :type="user?.status === 1 ? 'danger' : 'success'"
             @click="handleStatusToggle"
@@ -54,7 +81,10 @@
     </el-card>
 
     <!-- Tabs -->
-    <UserDetailTabs :user="user" @refresh="loadUser" />
+    <UserDetailTabs
+      :user="user"
+      @refresh="loadUser"
+    />
   </div>
 </template>
 

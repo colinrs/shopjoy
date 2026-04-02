@@ -5,17 +5,31 @@
     width="600px"
     :close-on-click-modal="false"
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="120px"
+    >
       <!-- Order Info -->
       <div class="order-info-section">
         <div class="section-header">
           <el-icon><Document /></el-icon>
           <span>Order Information</span>
         </div>
-        <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="Order No.">{{ shipment?.order_no }}</el-descriptions-item>
+        <el-descriptions
+          :column="2"
+          border
+          size="small"
+        >
+          <el-descriptions-item label="Order No.">
+            {{ shipment?.order_no }}
+          </el-descriptions-item>
           <el-descriptions-item label="Status">
-            <status-tag :status="shipment?.status" :type-map="statusTypeMap" />
+            <status-tag
+              :status="shipment?.status"
+              :type-map="statusTypeMap"
+            />
           </el-descriptions-item>
         </el-descriptions>
       </div>
@@ -27,7 +41,10 @@
           <span>Logistics Information</span>
         </div>
 
-        <el-form-item label="Carrier" prop="carrier_code">
+        <el-form-item
+          label="Carrier"
+          prop="carrier_code"
+        >
           <el-select
             v-model="form.carrier_code"
             placeholder="Select carrier"
@@ -43,12 +60,25 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="form.carrier_code === 'OTHER'" label="Custom Carrier" prop="carrier">
-          <el-input v-model="form.carrier" placeholder="Enter carrier name" />
+        <el-form-item
+          v-if="form.carrier_code === 'OTHER'"
+          label="Custom Carrier"
+          prop="carrier"
+        >
+          <el-input
+            v-model="form.carrier"
+            placeholder="Enter carrier name"
+          />
         </el-form-item>
 
-        <el-form-item label="Tracking No." prop="tracking_no">
-          <el-input v-model="form.tracking_no" placeholder="Enter tracking number">
+        <el-form-item
+          label="Tracking No."
+          prop="tracking_no"
+        >
+          <el-input
+            v-model="form.tracking_no"
+            placeholder="Enter tracking number"
+          >
             <template #prefix>
               <el-icon><Tickets /></el-icon>
             </template>
@@ -65,7 +95,9 @@
                 style="width: 100%"
                 placeholder="Optional"
               >
-                <template #prefix>{{ form.currency }}</template>
+                <template #prefix>
+                  {{ form.currency }}
+                </template>
               </el-input-number>
             </el-form-item>
           </el-col>
@@ -88,7 +120,12 @@
         <div class="section-header">
           <el-icon><Goods /></el-icon>
           <span>Items to Ship</span>
-          <el-tag size="small" type="info">{{ selectedItems.length }} selected</el-tag>
+          <el-tag
+            size="small"
+            type="info"
+          >
+            {{ selectedItems.length }} selected
+          </el-tag>
         </div>
 
         <div class="items-list">
@@ -100,7 +137,11 @@
             @click="toggleItem(item)"
           >
             <el-checkbox :model-value="isItemSelected(item.id)" />
-            <el-image :src="item.image" class="item-image" fit="cover">
+            <el-image
+              :src="item.image"
+              class="item-image"
+              fit="cover"
+            >
               <template #error>
                 <div class="image-placeholder">
                   <el-icon><Picture /></el-icon>
@@ -108,33 +149,53 @@
               </template>
             </el-image>
             <div class="item-info">
-              <p class="item-name">{{ item.product_name }}</p>
-              <p class="item-sku">{{ item.sku_name }}</p>
+              <p class="item-name">
+                {{ item.product_name }}
+              </p>
+              <p class="item-sku">
+                {{ item.sku_name }}
+              </p>
             </div>
             <div class="item-quantity">
               <el-input-number
                 v-if="isItemSelected(item.id)"
                 :model-value="getItemQuantity(item.id)"
-                @update:model-value="(val: number) => setItemQuantity(item.id, val)"
                 :min="1"
                 :max="item.quantity"
                 size="small"
                 style="width: 100px"
+                @update:model-value="(val: number) => setItemQuantity(item.id, val)"
                 @click.stop
               />
-              <span v-else class="quantity-text">x {{ item.quantity }}</span>
+              <span
+                v-else
+                class="quantity-text"
+              >x {{ item.quantity }}</span>
             </div>
           </div>
         </div>
 
         <div class="select-actions">
-          <el-button size="small" @click="selectAllItems">Select All</el-button>
-          <el-button size="small" @click="clearItems">Clear</el-button>
+          <el-button
+            size="small"
+            @click="selectAllItems"
+          >
+            Select All
+          </el-button>
+          <el-button
+            size="small"
+            @click="clearItems"
+          >
+            Clear
+          </el-button>
         </div>
       </div>
 
       <!-- Remark -->
-      <el-form-item label="Remark" class="remark-item">
+      <el-form-item
+        label="Remark"
+        class="remark-item"
+      >
         <el-input
           v-model="form.remark"
           type="textarea"
@@ -146,8 +207,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button @click="visible = false">
+          Cancel
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           Confirm Shipment
         </el-button>
       </div>

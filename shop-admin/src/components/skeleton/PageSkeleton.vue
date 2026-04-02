@@ -1,44 +1,70 @@
 <template>
   <div class="skeleton-page">
     <!-- Header skeleton -->
-    <el-card v-if="showHeader" class="skeleton-page-header" shadow="never">
+    <el-card
+      v-if="showHeader"
+      class="skeleton-page-header"
+      shadow="never"
+    >
       <div class="skeleton-header-content">
         <div class="skeleton-header-left">
-          <div class="skeleton-page-title"></div>
-          <div class="skeleton-page-subtitle"></div>
+          <div class="skeleton-page-title" />
+          <div class="skeleton-page-subtitle" />
         </div>
-        <div v-if="showHeaderAction" class="skeleton-header-action"></div>
+        <div
+          v-if="showHeaderAction"
+          class="skeleton-header-action"
+        />
       </div>
     </el-card>
 
     <!-- Stats skeleton -->
-    <div v-if="showStats" class="skeleton-stats-grid">
-      <el-card v-for="i in statsCount" :key="i" class="skeleton-stat-card" shadow="never">
+    <div
+      v-if="showStats"
+      class="skeleton-stats-grid"
+    >
+      <el-card
+        v-for="i in statsCount"
+        :key="i"
+        class="skeleton-stat-card"
+        shadow="never"
+      >
         <div class="skeleton-stat">
-          <div class="skeleton-stat-icon"></div>
+          <div class="skeleton-stat-icon" />
           <div class="skeleton-stat-info">
-            <div class="skeleton-stat-value"></div>
-            <div class="skeleton-stat-label"></div>
+            <div class="skeleton-stat-value" />
+            <div class="skeleton-stat-label" />
           </div>
         </div>
       </el-card>
     </div>
 
     <!-- Filter bar skeleton -->
-    <el-card v-if="showFilter" class="skeleton-filter-card" shadow="never">
+    <el-card
+      v-if="showFilter"
+      class="skeleton-filter-card"
+      shadow="never"
+    >
       <div class="skeleton-filter-bar">
         <div class="skeleton-filter-left">
-          <div class="skeleton-search"></div>
-          <div class="skeleton-select"></div>
-          <div class="skeleton-select"></div>
+          <div class="skeleton-search" />
+          <div class="skeleton-select" />
+          <div class="skeleton-select" />
         </div>
-        <div class="skeleton-filter-action"></div>
+        <div class="skeleton-filter-action" />
       </div>
     </el-card>
 
     <!-- Table skeleton -->
-    <el-card v-if="showTable" class="skeleton-table-card" shadow="never">
-      <TableSkeleton :rows="tableRows" :columns="tableColumns" />
+    <el-card
+      v-if="showTable"
+      class="skeleton-table-card"
+      shadow="never"
+    >
+      <TableSkeleton
+        :rows="tableRows"
+        :columns="tableColumns"
+      />
     </el-card>
   </div>
 </template>

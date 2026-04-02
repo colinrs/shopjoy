@@ -5,12 +5,23 @@
     width="700px"
     destroy-on-close
   >
-    <div class="version-restore-content" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="version-restore-content"
+    >
       <!-- Version Info -->
-      <div class="version-info" v-if="version">
-        <el-descriptions :column="2" border>
+      <div
+        v-if="version"
+        class="version-info"
+      >
+        <el-descriptions
+          :column="2"
+          border
+        >
           <el-descriptions-item :label="$t('storefront.version')">
-            <el-tag size="small">v{{ version.version }}</el-tag>
+            <el-tag size="small">
+              v{{ version.version }}
+            </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('storefront.createdTime')">
             {{ formatTime(version.created_at) }}
@@ -19,7 +30,10 @@
       </div>
 
       <!-- Block Preview -->
-      <div class="block-preview" v-if="versionDetail">
+      <div
+        v-if="versionDetail"
+        class="block-preview"
+      >
         <h4>{{ $t('storefront.blockPreview') }}</h4>
         <div class="preview-blocks">
           <div
@@ -28,17 +42,28 @@
             class="preview-block"
           >
             <div class="block-header">
-              <el-tag size="small" type="info">{{ block.block_type }}</el-tag>
+              <el-tag
+                size="small"
+                type="info"
+              >
+                {{ block.block_type }}
+              </el-tag>
               <span class="block-order">#{{ index + 1 }}</span>
             </div>
             <pre class="block-config">{{ JSON.stringify(block.block_config, null, 2) }}</pre>
           </div>
-          <el-empty v-if="versionDetail.blocks.length === 0" :description="$t('storefront.noBlocks')" />
+          <el-empty
+            v-if="versionDetail.blocks.length === 0"
+            :description="$t('storefront.noBlocks')"
+          />
         </div>
       </div>
 
       <!-- JSON Raw View -->
-      <div class="json-view" v-if="versionDetail">
+      <div
+        v-if="versionDetail"
+        class="json-view"
+      >
         <h4>{{ $t('storefront.rawJson') }}</h4>
         <pre class="json-content">{{ JSON.stringify(versionDetail, null, 2) }}</pre>
       </div>
@@ -46,8 +71,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleRestore" :loading="restoring">
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="restoring"
+          @click="handleRestore"
+        >
           {{ $t('storefront.restoreThisVersion') }}
         </el-button>
       </div>
@@ -70,8 +101,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'restored'): void
+  'update:modelValue': [value: boolean]
+  'restored': []
 }>()
 
 const loading = ref(false)

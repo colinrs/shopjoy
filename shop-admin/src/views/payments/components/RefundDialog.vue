@@ -6,26 +6,42 @@
     :close-on-click-modal="false"
     destroy-on-close
   >
-    <el-steps :active="currentStep" simple class="refund-steps">
+    <el-steps
+      :active="currentStep"
+      simple
+      class="refund-steps"
+    >
       <el-step :title="$t('payments.selectType')" />
       <el-step :title="$t('payments.confirm')" />
     </el-steps>
 
     <!-- Step 1: Type & Reason -->
-    <div v-show="currentStep === 0" class="step-content">
+    <div
+      v-show="currentStep === 0"
+      class="step-content"
+    >
       <!-- Order Info -->
       <div class="order-info-banner">
         <el-icon><Document /></el-icon>
         <div class="order-info-content">
-          <p class="order-no">{{ $t('payments.order') }}: {{ order?.order_no }}</p>
-          <p class="order-amount">{{ $t('payments.paid') }}: {{ order?.currency }} {{ formatAmount(maxRefundable) }}</p>
+          <p class="order-no">
+            {{ $t('payments.order') }}: {{ order?.order_no }}
+          </p>
+          <p class="order-amount">
+            {{ $t('payments.paid') }}: {{ order?.currency }} {{ formatAmount(maxRefundable) }}
+          </p>
         </div>
       </div>
 
       <!-- Refund Type -->
       <div class="refund-type-section">
-        <p class="section-label">{{ $t('payments.refundType') }}</p>
-        <el-radio-group v-model="form.refundType" class="refund-type-group">
+        <p class="section-label">
+          {{ $t('payments.refundType') }}
+        </p>
+        <el-radio-group
+          v-model="form.refundType"
+          class="refund-type-group"
+        >
           <el-radio-button value="full">
             <div class="type-option">
               <el-icon><FullScreen /></el-icon>
@@ -45,8 +61,13 @@
 
       <!-- Partial Amount Input -->
       <transition name="slide-down">
-        <div v-if="form.refundType === 'partial'" class="amount-input-section">
-          <p class="section-label">{{ $t('payments.refundAmount') }}</p>
+        <div
+          v-if="form.refundType === 'partial'"
+          class="amount-input-section"
+        >
+          <p class="section-label">
+            {{ $t('payments.refundAmount') }}
+          </p>
           <div class="amount-input-wrapper">
             <span class="currency-label">{{ order?.currency }}</span>
             <el-input-number
@@ -72,8 +93,14 @@
 
       <!-- Reason -->
       <div class="reason-section">
-        <p class="section-label">{{ $t('payments.refundReason') }}</p>
-        <el-select v-model="form.reasonType" :placeholder="$t('payments.selectRefundReason')" style="width: 100%">
+        <p class="section-label">
+          {{ $t('payments.refundReason') }}
+        </p>
+        <el-select
+          v-model="form.reasonType"
+          :placeholder="$t('payments.selectRefundReason')"
+          style="width: 100%"
+        >
           <el-option
             v-for="reason in refundReasons"
             :key="reason.code"
@@ -85,7 +112,9 @@
 
       <!-- Notes -->
       <div class="notes-section">
-        <p class="section-label">{{ $t('payments.additionalNotes') }}</p>
+        <p class="section-label">
+          {{ $t('payments.additionalNotes') }}
+        </p>
         <el-input
           v-model="form.notes"
           type="textarea"
@@ -98,20 +127,33 @@
     </div>
 
     <!-- Step 2: Confirmation -->
-    <div v-show="currentStep === 1" class="step-content">
-      <el-alert type="warning" :closable="false" class="confirm-alert">
+    <div
+      v-show="currentStep === 1"
+      class="step-content"
+    >
+      <el-alert
+        type="warning"
+        :closable="false"
+        class="confirm-alert"
+      >
         <template #title>
           {{ $t('payments.confirmRefundDetails') }}
         </template>
       </el-alert>
 
       <div class="confirm-summary">
-        <el-descriptions :column="1" border>
+        <el-descriptions
+          :column="1"
+          border
+        >
           <el-descriptions-item :label="$t('payments.orderNo')">
             <span class="value-text">{{ order?.order_no }}</span>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('payments.refundType')">
-            <el-tag :type="form.refundType === 'full' ? 'primary' : 'warning'" size="small">
+            <el-tag
+              :type="form.refundType === 'full' ? 'primary' : 'warning'"
+              size="small"
+            >
               {{ form.refundType === 'full' ? $t('payments.fullRefund') : $t('payments.partialRefund') }}
             </el-tag>
           </el-descriptions-item>
@@ -123,12 +165,18 @@
           <el-descriptions-item :label="$t('payments.reason')">
             {{ getReasonName(form.reasonType) }}
           </el-descriptions-item>
-          <el-descriptions-item v-if="form.notes" :label="$t('payments.notes')">
+          <el-descriptions-item
+            v-if="form.notes"
+            :label="$t('payments.notes')"
+          >
             {{ form.notes }}
           </el-descriptions-item>
         </el-descriptions>
 
-        <div v-if="form.refundType === 'partial'" class="remaining-info">
+        <div
+          v-if="form.refundType === 'partial'"
+          class="remaining-info"
+        >
           <el-icon><InfoFilled /></el-icon>
           <span>{{ $t('payments.remainingOrderAmount') }}: {{ order?.currency }} {{ formatAmount(remainingAmount) }}</span>
         </div>
@@ -137,11 +185,16 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button v-if="currentStep > 0" @click="prevStep">
+        <el-button
+          v-if="currentStep > 0"
+          @click="prevStep"
+        >
           <el-icon><ArrowLeft /></el-icon>
           {{ $t('payments.back') }}
         </el-button>
-        <el-button @click="handleCancel">{{ $t('common.cancel') }}</el-button>
+        <el-button @click="handleCancel">
+          {{ $t('common.cancel') }}
+        </el-button>
         <el-button
           v-if="currentStep === 0"
           type="primary"
@@ -197,8 +250,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'success'): void
+  'update:modelValue': [value: boolean]
+  'success': []
 }>()
 
 const visible = computed({

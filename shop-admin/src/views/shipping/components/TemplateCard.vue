@@ -1,14 +1,29 @@
 <template>
-  <el-card class="template-card" shadow="hover" @click="handleClick">
+  <el-card
+    class="template-card"
+    shadow="hover"
+    @click="handleClick"
+  >
     <!-- Header -->
     <div class="card-header">
       <div class="header-left">
-        <el-tag v-if="template.is_default" type="success" effect="dark" size="small" class="default-badge">
+        <el-tag
+          v-if="template.is_default"
+          type="success"
+          effect="dark"
+          size="small"
+          class="default-badge"
+        >
           {{ $t('shipping.default') }}
         </el-tag>
-        <h3 class="template-name">{{ template.name }}</h3>
+        <h3 class="template-name">
+          {{ template.name }}
+        </h3>
       </div>
-      <el-tag :type="template.is_active ? 'success' : 'info'" size="small">
+      <el-tag
+        :type="template.is_active ? 'success' : 'info'"
+        size="small"
+      >
         {{ template.is_active ? $t('shipping.enabled') : $t('shipping.disabled') }}
       </el-tag>
     </div>
@@ -33,8 +48,16 @@
     </div>
 
     <!-- Actions -->
-    <div class="card-actions" @click.stop>
-      <el-button type="primary" link size="small" @click="$emit('edit', template.id)">
+    <div
+      class="card-actions"
+      @click.stop
+    >
+      <el-button
+        type="primary"
+        link
+        size="small"
+        @click="$emit('edit', template.id)"
+      >
         <el-icon><Edit /></el-icon>
         {{ $t('common.edit') }}
       </el-button>
@@ -54,7 +77,11 @@
         @confirm="$emit('delete', template)"
       >
         <template #reference>
-          <el-button type="danger" link size="small">
+          <el-button
+            type="danger"
+            link
+            size="small"
+          >
             <el-icon><Delete /></el-icon>
             {{ $t('common.delete') }}
           </el-button>

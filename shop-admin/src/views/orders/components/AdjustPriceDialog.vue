@@ -6,7 +6,12 @@
     :close-on-click-modal="false"
     destroy-on-close
   >
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="120px"
+    >
       <!-- Current Amount Display -->
       <div class="amount-display">
         <div class="amount-row">
@@ -33,7 +38,10 @@
       </el-form-item>
 
       <!-- Adjustment Amount -->
-      <el-form-item :label="$t('orders.amount')" prop="adjustAmount">
+      <el-form-item
+        :label="$t('orders.amount')"
+        prop="adjustAmount"
+      >
         <div class="amount-input-wrapper">
           <span class="currency-label">{{ currency }}</span>
           <el-input-number
@@ -46,7 +54,10 @@
             :placeholder="$t('orders.enterAmount')"
           />
         </div>
-        <div v-if="form.adjustType === 'decrease'" class="amount-hint">
+        <div
+          v-if="form.adjustType === 'decrease'"
+          class="amount-hint"
+        >
           <el-icon><InfoFilled /></el-icon>
           <span>{{ $t('orders.maximum') }} {{ currency }} {{ formatAmount(currentAmount) }}</span>
         </div>
@@ -62,7 +73,10 @@
           <span class="preview-label">
             {{ form.adjustType === 'decrease' ? $t('orders.decrease') : $t('orders.increase') }}
           </span>
-          <span class="preview-value" :class="form.adjustType">
+          <span
+            class="preview-value"
+            :class="form.adjustType"
+          >
             {{ form.adjustType === 'decrease' ? '-' : '+' }}{{ currency }}
             {{ form.adjustAmount ? form.adjustAmount.toFixed(2) : '0.00' }}
           </span>
@@ -75,7 +89,10 @@
       </div>
 
       <!-- Reason -->
-      <el-form-item :label="$t('orders.reason')" prop="reason">
+      <el-form-item
+        :label="$t('orders.reason')"
+        prop="reason"
+      >
         <el-input
           v-model="form.reason"
           type="textarea"
@@ -89,7 +106,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">{{ $t('common.cancel') }}</el-button>
+        <el-button @click="visible = false">
+          {{ $t('common.cancel') }}
+        </el-button>
         <el-button
           type="primary"
           :loading="submitting"

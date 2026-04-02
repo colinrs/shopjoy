@@ -1,58 +1,96 @@
 <template>
   <div class="dashboard">
     <!-- Stats Cards -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :xs="24" :sm="12" :lg="6">
+    <el-row
+      :gutter="20"
+      class="stats-row"
+    >
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <div class="stat-card orders">
           <div class="stat-icon">
             <el-icon><ShoppingCart /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('dashboard.todayOrders') }}</p>
-            <p class="stat-value">{{ stats.today_orders }}</p>
-            <p class="stat-change" :class="{ positive: isGrowthPositive(stats.today_growth), negative: !isGrowthPositive(stats.today_growth) }">
+            <p class="stat-label">
+              {{ $t('dashboard.todayOrders') }}
+            </p>
+            <p class="stat-value">
+              {{ stats.today_orders }}
+            </p>
+            <p
+              class="stat-change"
+              :class="{ positive: isGrowthPositive(stats.today_growth), negative: !isGrowthPositive(stats.today_growth) }"
+            >
               <el-icon><ArrowUp v-if="isGrowthPositive(stats.today_growth)" /><ArrowDown v-else /></el-icon>
               {{ stats.today_growth }} {{ $t('dashboard.vsLastPeriod') }}
             </p>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <div class="stat-card revenue">
           <div class="stat-icon">
             <el-icon><Money /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('dashboard.todaySales') }}</p>
-            <p class="stat-value">¥{{ formatNumber(stats.today_sales) }}</p>
+            <p class="stat-label">
+              {{ $t('dashboard.todaySales') }}
+            </p>
+            <p class="stat-value">
+              ¥{{ formatNumber(stats.today_sales) }}
+            </p>
             <p class="stat-change">
               <span class="neutral">{{ $t('dashboard.yesterdaySales') }} ¥{{ formatNumber(stats.yesterday_sales) }}</span>
             </p>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <div class="stat-card products">
           <div class="stat-icon">
             <el-icon><Goods /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('dashboard.totalProducts') }}</p>
-            <p class="stat-value">{{ stats.total_products }}</p>
+            <p class="stat-label">
+              {{ $t('dashboard.totalProducts') }}
+            </p>
+            <p class="stat-value">
+              {{ stats.total_products }}
+            </p>
             <p class="stat-change">
               <span class="neutral">{{ $t('dashboard.activeProducts') }}</span>
             </p>
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <div class="stat-card users">
           <div class="stat-icon">
             <el-icon><User /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-label">{{ $t('dashboard.totalUsers') }}</p>
-            <p class="stat-value">{{ stats.total_users }}</p>
+            <p class="stat-label">
+              {{ $t('dashboard.totalUsers') }}
+            </p>
+            <p class="stat-value">
+              {{ stats.total_users }}
+            </p>
             <p class="stat-change positive">
               <el-icon><ArrowUp /></el-icon>+{{ stats.new_users_today }} {{ $t('dashboard.newUsersToday') }}
             </p>
@@ -62,75 +100,156 @@
     </el-row>
 
     <!-- Charts Row -->
-    <el-row :gutter="20" class="charts-row">
-      <el-col :xs="24" :lg="16">
-        <el-card class="chart-card" v-loading="loading.charts">
+    <el-row
+      :gutter="20"
+      class="charts-row"
+    >
+      <el-col
+        :xs="24"
+        :lg="16"
+      >
+        <el-card
+          v-loading="loading.charts"
+          class="chart-card"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">{{ $t('dashboard.salesTrend') }}</span>
-              <el-radio-group v-model="timeRange" size="small" @change="fetchSalesTrend">
-                <el-radio-button label="week">{{ $t('dashboard.thisWeek') }}</el-radio-button>
-                <el-radio-button label="month">{{ $t('dashboard.thisMonth') }}</el-radio-button>
-                <el-radio-button label="year">{{ $t('dashboard.thisYear') }}</el-radio-button>
+              <el-radio-group
+                v-model="timeRange"
+                size="small"
+                @change="fetchSalesTrend"
+              >
+                <el-radio-button label="week">
+                  {{ $t('dashboard.thisWeek') }}
+                </el-radio-button>
+                <el-radio-button label="month">
+                  {{ $t('dashboard.thisMonth') }}
+                </el-radio-button>
+                <el-radio-button label="year">
+                  {{ $t('dashboard.thisYear') }}
+                </el-radio-button>
               </el-radio-group>
             </div>
           </template>
-          <div ref="salesChart" class="chart-container"></div>
+          <div
+            ref="salesChart"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
-      <el-col :xs="24" :lg="8">
-        <el-card class="chart-card" v-loading="loading.charts">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
+        <el-card
+          v-loading="loading.charts"
+          class="chart-card"
+        >
           <template #header>
             <div class="card-header">
               <span class="card-title">{{ $t('dashboard.orderStatusDistribution') }}</span>
             </div>
           </template>
-          <div ref="orderChart" class="chart-container pie-chart"></div>
+          <div
+            ref="orderChart"
+            class="chart-container pie-chart"
+          />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- Tables Row -->
-    <el-row :gutter="20" class="tables-row">
-      <el-col :xs="24" :lg="12">
+    <el-row
+      :gutter="20"
+      class="tables-row"
+    >
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="table-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">
                 <el-icon><Bell /></el-icon>
                 {{ $t('dashboard.pendingOrders') }}
-                <el-badge :value="pendingOrdersTotal" :max="99" v-if="pendingOrdersTotal > 0" />
+                <el-badge
+                  v-if="pendingOrdersTotal > 0"
+                  :value="pendingOrdersTotal"
+                  :max="99"
+                />
               </span>
-              <el-button type="primary" link @click="goToOrders">{{ $t('common.viewAll') }}</el-button>
+              <el-button
+                type="primary"
+                link
+                @click="goToOrders"
+              >
+                {{ $t('common.viewAll') }}
+              </el-button>
             </div>
           </template>
-          <el-table :data="pendingOrders" stripe style="width: 100%" v-loading="loading.pending">
-            <el-table-column prop="order_no" :label="$t('orders.orderNo')" min-width="120">
+          <el-table
+            v-loading="loading.pending"
+            :data="pendingOrders"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column
+              prop="order_no"
+              :label="$t('orders.orderNo')"
+              min-width="120"
+            >
               <template #default="{ row }">
                 <span class="order-no">{{ row.order_no }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="pay_amount" :label="$t('orders.amount')" width="100">
+            <el-table-column
+              prop="pay_amount"
+              :label="$t('orders.amount')"
+              width="100"
+            >
               <template #default="{ row }">
                 <span class="amount">¥{{ row.pay_amount }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="status_text" :label="$t('common.status')" width="90">
+            <el-table-column
+              prop="status_text"
+              :label="$t('common.status')"
+              width="90"
+            >
               <template #default="{ row }">
-                <el-tag :type="getOrderStatusType(row.status)" size="small">
+                <el-tag
+                  :type="getOrderStatusType(row.status)"
+                  size="small"
+                >
                   {{ row.status_text }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('common.actions')" width="80" align="center">
+            <el-table-column
+              :label="$t('common.actions')"
+              width="80"
+              align="center"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="goToOrderDetail(row.id)">{{ $t('dashboard.process') }}</el-button>
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  @click="goToOrderDetail(row.id)"
+                >
+                  {{ $t('dashboard.process') }}
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-card>
       </el-col>
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="table-card">
           <template #header>
             <div class="card-header">
@@ -138,28 +257,61 @@
                 <el-icon><TrendCharts /></el-icon>
                 {{ $t('dashboard.hotProductsTop5') }}
               </span>
-              <el-button type="primary" link @click="goToProducts">{{ $t('common.viewAll') }}</el-button>
+              <el-button
+                type="primary"
+                link
+                @click="goToProducts"
+              >
+                {{ $t('common.viewAll') }}
+              </el-button>
             </div>
           </template>
-          <el-table :data="hotProducts" stripe style="width: 100%" v-loading="loading.products">
-            <el-table-column type="index" :label="$t('dashboard.rank')" width="60" align="center">
+          <el-table
+            v-loading="loading.products"
+            :data="hotProducts"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column
+              type="index"
+              :label="$t('dashboard.rank')"
+              width="60"
+              align="center"
+            >
               <template #default="{ $index }">
-                <div class="rank" :class="{ 'top3': $index < 3 }">
+                <div
+                  class="rank"
+                  :class="{ 'top3': $index < 3 }"
+                >
                   {{ $index + 1 }}
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="product_name" :label="$t('dashboard.productName')" min-width="150">
+            <el-table-column
+              prop="product_name"
+              :label="$t('dashboard.productName')"
+              min-width="150"
+            >
               <template #default="{ row }">
                 <div class="product-name">
-                  <el-avatar :size="32" :src="row.image" shape="square" class="product-avatar">
+                  <el-avatar
+                    :size="32"
+                    :src="row.image"
+                    shape="square"
+                    class="product-avatar"
+                  >
                     <el-icon><Goods /></el-icon>
                   </el-avatar>
                   <span>{{ row.product_name }}</span>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="sales" :label="$t('dashboard.sales')" width="100" align="right">
+            <el-table-column
+              prop="sales"
+              :label="$t('dashboard.sales')"
+              width="100"
+              align="right"
+            >
               <template #default="{ row }">
                 <span class="sales-num">{{ row.sales }}</span>
               </template>
@@ -170,7 +322,10 @@
     </el-row>
 
     <!-- Activity Row -->
-    <el-row :gutter="20" class="activity-row">
+    <el-row
+      :gutter="20"
+      class="activity-row"
+    >
       <el-col :xs="24">
         <el-card>
           <template #header>
@@ -191,7 +346,11 @@
               {{ activity.content }}
             </el-timeline-item>
           </el-timeline>
-          <el-empty v-else :description="$t('dashboard.noActivityRecords')" :image-size="80" />
+          <el-empty
+            v-else
+            :description="$t('dashboard.noActivityRecords')"
+            :image-size="80"
+          />
         </el-card>
       </el-col>
     </el-row>

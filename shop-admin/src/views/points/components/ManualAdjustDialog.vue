@@ -1,10 +1,10 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="$emit('update:visible', $event)"
     :title="$t('points.adjustPoints')"
     width="500px"
     destroy-on-close
+    @update:model-value="$emit('update:visible', $event)"
   >
     <div class="adjust-dialog">
       <!-- Current Balance -->
@@ -13,9 +13,17 @@
         <span class="value">{{ account?.balance?.toLocaleString() || 0 }} {{ $t('points.pointsUnit2') }}</span>
       </div>
 
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="100px"
+      >
         <!-- Adjustment Type -->
-        <el-form-item :label="$t('points.adjustmentType')" prop="adjustment_type">
+        <el-form-item
+          :label="$t('points.adjustmentType')"
+          prop="adjustment_type"
+        >
           <el-radio-group v-model="form.adjustment_type">
             <el-radio value="ADD">
               <span class="radio-label add">{{ $t('points.addPoints') }}</span>
@@ -27,7 +35,10 @@
         </el-form-item>
 
         <!-- Points Amount -->
-        <el-form-item :label="$t('points.pointsAmountInput')" prop="points">
+        <el-form-item
+          :label="$t('points.pointsAmountInput')"
+          prop="points"
+        >
           <el-input-number
             v-model="form.points"
             :min="1"
@@ -38,7 +49,10 @@
         </el-form-item>
 
         <!-- Reason -->
-        <el-form-item :label="$t('points.reason')" prop="reason">
+        <el-form-item
+          :label="$t('points.reason')"
+          prop="reason"
+        >
           <el-input
             v-model="form.reason"
             type="textarea"
@@ -51,8 +65,13 @@
 
         <!-- Preview -->
         <div class="preview-box">
-          <div class="preview-label">{{ $t('points.previewBalanceAfter') }}</div>
-          <div class="preview-value" :class="{ negative: previewBalance < 0 }">
+          <div class="preview-label">
+            {{ $t('points.previewBalanceAfter') }}
+          </div>
+          <div
+            class="preview-value"
+            :class="{ negative: previewBalance < 0 }"
+          >
             {{ previewBalance.toLocaleString() }} {{ $t('points.pointsUnit2') }}
           </div>
         </div>
@@ -60,8 +79,14 @@
     </div>
 
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSubmit" :loading="loading">
+      <el-button @click="$emit('update:visible', false)">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleSubmit"
+      >
         {{ $t('points.confirmButton') }}
       </el-button>
     </template>

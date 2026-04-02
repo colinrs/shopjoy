@@ -1,41 +1,87 @@
 <template>
   <div class="reviews-page">
     <!-- Statistics Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="primary">
-          <template #icon><ChatDotRound /></template>
-          <template #value>{{ stats.total_reviews }}</template>
-          <template #label>{{ $t('reviews.totalReviews') }}</template>
+          <template #icon>
+            <ChatDotRound />
+          </template>
+          <template #value>
+            {{ stats.total_reviews }}
+          </template>
+          <template #label>
+            {{ $t('reviews.totalReviews') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="warning">
-          <template #icon><Clock /></template>
-          <template #value>{{ stats.pending_reviews }}</template>
-          <template #label>{{ $t('reviews.pendingApproval') }}</template>
+          <template #icon>
+            <Clock />
+          </template>
+          <template #value>
+            {{ stats.pending_reviews }}
+          </template>
+          <template #label>
+            {{ $t('reviews.pendingApproval') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="success">
-          <template #icon><Star /></template>
-          <template #value>{{ parseFloat(stats.average_rating).toFixed(1) }}</template>
-          <template #label>{{ $t('reviews.averageRating') }}</template>
+          <template #icon>
+            <Star />
+          </template>
+          <template #value>
+            {{ parseFloat(stats.average_rating).toFixed(1) }}
+          </template>
+          <template #label>
+            {{ $t('reviews.averageRating') }}
+          </template>
         </StatsCard>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <StatsCard color="info">
-          <template #icon><Picture /></template>
-          <template #value>{{ stats.with_image_count }}</template>
-          <template #label>{{ $t('reviews.withImages') }}</template>
+          <template #icon>
+            <Picture />
+          </template>
+          <template #value>
+            {{ stats.with_image_count }}
+          </template>
+          <template #label>
+            {{ $t('reviews.withImages') }}
+          </template>
         </StatsCard>
       </el-col>
     </el-row>
 
     <!-- Rating Distribution Card -->
-    <el-card class="distribution-card" shadow="never">
+    <el-card
+      class="distribution-card"
+      shadow="never"
+    >
       <div class="rating-distribution">
-        <div class="distribution-item" v-for="star in 5" :key="star">
+        <div
+          v-for="star in 5"
+          :key="star"
+          class="distribution-item"
+        >
           <span class="star-label">{{ 6 - star }} {{ $t('reviews.stars') }}</span>
           <el-progress
             :percentage="getRatingPercentage(6 - star)"
@@ -53,7 +99,10 @@
     </el-card>
 
     <!-- Filter Bar -->
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -68,21 +117,68 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-select v-model="filters.status" :placeholder="$t('reviews.status')" clearable class="filter-select" @change="handleSearch">
-            <el-option :label="$t('reviews.allStatus')" value="" />
-            <el-option :label="$t('reviews.pending')" value="pending" />
-            <el-option :label="$t('reviews.approved')" value="approved" />
-            <el-option :label="$t('reviews.hidden')" value="hidden" />
+          <el-select
+            v-model="filters.status"
+            :placeholder="$t('reviews.status')"
+            clearable
+            class="filter-select"
+            @change="handleSearch"
+          >
+            <el-option
+              :label="$t('reviews.allStatus')"
+              value=""
+            />
+            <el-option
+              :label="$t('reviews.pending')"
+              value="pending"
+            />
+            <el-option
+              :label="$t('reviews.approved')"
+              value="approved"
+            />
+            <el-option
+              :label="$t('reviews.hidden')"
+              value="hidden"
+            />
           </el-select>
-          <el-select v-model="filters.rating_min" :placeholder="$t('reviews.minRating')" clearable class="filter-select" @change="handleSearch">
-            <el-option :label="$t('reviews.any')" :value="0" />
-            <el-option :label="'1+'" :value="1" />
-            <el-option :label="'2+'" :value="2" />
-            <el-option :label="'3+'" :value="3" />
-            <el-option :label="'4+'" :value="4" />
-            <el-option :label="'5'" :value="5" />
+          <el-select
+            v-model="filters.rating_min"
+            :placeholder="$t('reviews.minRating')"
+            clearable
+            class="filter-select"
+            @change="handleSearch"
+          >
+            <el-option
+              :label="$t('reviews.any')"
+              :value="0"
+            />
+            <el-option
+              :label="'1+'"
+              :value="1"
+            />
+            <el-option
+              :label="'2+'"
+              :value="2"
+            />
+            <el-option
+              :label="'3+'"
+              :value="3"
+            />
+            <el-option
+              :label="'4+'"
+              :value="4"
+            />
+            <el-option
+              :label="'5'"
+              :value="5"
+            />
           </el-select>
-          <el-checkbox v-model="filters.has_image" @change="handleSearch">{{ $t('reviews.hasImages') }}</el-checkbox>
+          <el-checkbox
+            v-model="filters.has_image"
+            @change="handleSearch"
+          >
+            {{ $t('reviews.hasImages') }}
+          </el-checkbox>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
@@ -95,13 +191,24 @@
           />
         </div>
         <div class="filter-right">
-          <el-button v-if="selectedRows.length > 0" type="success" @click="handleBatchApprove">
+          <el-button
+            v-if="selectedRows.length > 0"
+            type="success"
+            @click="handleBatchApprove"
+          >
             <el-icon><Check /></el-icon>{{ $t('reviews.batchApprove') }} ({{ selectedRows.length }})
           </el-button>
-          <el-button v-if="selectedRows.length > 0" type="warning" @click="handleBatchHide">
+          <el-button
+            v-if="selectedRows.length > 0"
+            type="warning"
+            @click="handleBatchHide"
+          >
             <el-icon><Hide /></el-icon>{{ $t('reviews.batchHide') }}
           </el-button>
-          <el-button type="primary" @click="handleRefresh">
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>{{ $t('reviews.refresh') }}
           </el-button>
         </div>
@@ -109,47 +216,83 @@
     </el-card>
 
     <!-- Reviews Table -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         ref="tableRef"
-        :data="reviewList"
         v-loading="loading"
+        :data="reviewList"
         stripe
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
-        <el-table-column :label="$t('reviews.productInfo')" min-width="180">
+        <el-table-column
+          type="selection"
+          width="50"
+        />
+        <el-table-column
+          :label="$t('reviews.productInfo')"
+          min-width="180"
+        >
           <template #default="{ row }">
             <div class="product-cell">
               <div class="product-info">
-                <p class="product-name">{{ row.product_name }}</p>
-                <p class="product-sku">{{ $t('reviews.sku') }}: {{ row.sku_code }}</p>
+                <p class="product-name">
+                  {{ row.product_name }}
+                </p>
+                <p class="product-sku">
+                  {{ $t('reviews.sku') }}: {{ row.sku_code }}
+                </p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.reviewer')" min-width="120">
+        <el-table-column
+          :label="$t('reviews.reviewer')"
+          min-width="120"
+        >
           <template #default="{ row }">
             <div class="reviewer-cell">
               <p class="reviewer-name">
                 {{ row.is_anonymous ? $t('reviews.anonymous') : row.user_name }}
               </p>
               <div class="reviewer-badges">
-                <el-tag v-if="row.is_verified" size="small" type="success" effect="plain" class="verified-tag">
+                <el-tag
+                  v-if="row.is_verified"
+                  size="small"
+                  type="success"
+                  effect="plain"
+                  class="verified-tag"
+                >
                   <el-icon><CircleCheck /></el-icon>{{ $t('reviews.verified') }}
                 </el-tag>
-                <el-tag v-if="row.is_featured" size="small" type="warning" effect="plain">
+                <el-tag
+                  v-if="row.is_featured"
+                  size="small"
+                  type="warning"
+                  effect="plain"
+                >
                   <el-icon><Star /></el-icon>{{ $t('reviews.featured') }}
                 </el-tag>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.ratingLabel')" width="160" align="center">
+        <el-table-column
+          :label="$t('reviews.ratingLabel')"
+          width="160"
+          align="center"
+        >
           <template #default="{ row }">
             <div class="rating-cell">
               <div class="rating-stars">
-                <el-rate :model-value="parseFloat(row.overall_rating)" disabled :max="5" size="small" />
+                <el-rate
+                  :model-value="parseFloat(row.overall_rating)"
+                  disabled
+                  :max="5"
+                  size="small"
+                />
               </div>
               <div class="rating-detail">
                 <span class="rating-item">
@@ -164,10 +307,16 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.contentLabel')" min-width="200">
+        <el-table-column
+          :label="$t('reviews.contentLabel')"
+          min-width="200"
+        >
           <template #default="{ row }">
             <div class="content-cell">
-              <p class="content-text" :class="{ 'is-expanded': expandedRows.has(row.id) }">
+              <p
+                class="content-text"
+                :class="{ 'is-expanded': expandedRows.has(row.id) }"
+              >
                 {{ row.content || $t('reviews.noContent') }}
               </p>
               <el-button
@@ -182,10 +331,21 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.images')" width="100" align="center">
+        <el-table-column
+          :label="$t('reviews.images')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <div v-if="row.images && row.images.length > 0" class="images-cell">
-              <el-badge :value="row.images.length" :max="99" class="image-badge">
+            <div
+              v-if="row.images && row.images.length > 0"
+              class="images-cell"
+            >
+              <el-badge
+                :value="row.images.length"
+                :max="99"
+                class="image-badge"
+              >
                 <el-image
                   :src="row.images[0]"
                   :preview-src-list="row.images"
@@ -200,17 +360,32 @@
                 </el-image>
               </el-badge>
             </div>
-            <span v-else class="no-images">-</span>
+            <span
+              v-else
+              class="no-images"
+            >-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('reviews.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" effect="light" size="small">
+            <el-tag
+              :type="getStatusType(row.status)"
+              effect="light"
+              size="small"
+            >
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.helpful')" width="90" align="center">
+        <el-table-column
+          :label="$t('reviews.helpful')"
+          width="90"
+          align="center"
+        >
           <template #default="{ row }">
             <div class="helpful-cell">
               <el-icon><Star /></el-icon>
@@ -218,20 +393,50 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.reply')" width="90" align="center">
+        <el-table-column
+          :label="$t('reviews.reply')"
+          width="90"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.has_reply" type="success" effect="plain" size="small">{{ $t('reviews.replied') }}</el-tag>
-            <el-tag v-else type="info" effect="plain" size="small">{{ $t('reviews.noReply') }}</el-tag>
+            <el-tag
+              v-if="row.has_reply"
+              type="success"
+              effect="plain"
+              size="small"
+            >
+              {{ $t('reviews.replied') }}
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+              effect="plain"
+              size="small"
+            >
+              {{ $t('reviews.noReply') }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('reviews.createdAt')" width="160">
+        <el-table-column
+          :label="$t('reviews.createdAt')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.actions')" width="200" fixed="right">
+        <el-table-column
+          :label="$t('common.actions')"
+          width="200"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleViewDetail(row)"
+            >
               {{ $t('reviews.detail') }}
             </el-button>
             <el-button
@@ -304,10 +509,15 @@
       destroy-on-close
       class="detail-dialog"
     >
-      <div v-if="currentReview" class="detail-content">
+      <div
+        v-if="currentReview"
+        class="detail-content"
+      >
         <!-- Order Info -->
         <div class="detail-section">
-          <h4 class="section-title">{{ $t('reviews.orderInformation') }}</h4>
+          <h4 class="section-title">
+            {{ $t('reviews.orderInformation') }}
+          </h4>
           <div class="order-info">
             <div class="info-item">
               <span class="info-label">{{ $t('reviews.orderId') }}:</span>
@@ -326,30 +536,51 @@
 
         <!-- Reviewer Info -->
         <div class="detail-section">
-          <h4 class="section-title">{{ $t('reviews.reviewerInfo') }}</h4>
+          <h4 class="section-title">
+            {{ $t('reviews.reviewerInfo') }}
+          </h4>
           <div class="reviewer-info">
             <div class="reviewer-meta">
               <p class="reviewer-name">
                 {{ currentReview.is_anonymous ? $t('reviews.anonymousUser') : currentReview.user_name }}
-                <el-tag v-if="currentReview.is_anonymous" size="small" type="info" effect="plain">
+                <el-tag
+                  v-if="currentReview.is_anonymous"
+                  size="small"
+                  type="info"
+                  effect="plain"
+                >
                   {{ $t('reviews.anonymousUser') }}
                 </el-tag>
-                <el-tag v-if="currentReview.is_verified" size="small" type="success" effect="plain">
+                <el-tag
+                  v-if="currentReview.is_verified"
+                  size="small"
+                  type="success"
+                  effect="plain"
+                >
                   <el-icon><CircleCheck /></el-icon>{{ $t('reviews.verifiedPurchase') }}
                 </el-tag>
               </p>
-              <p class="reviewer-date">{{ $t('reviews.reviewedOn') }} {{ formatDateTime(currentReview.created_at) }}</p>
+              <p class="reviewer-date">
+                {{ $t('reviews.reviewedOn') }} {{ formatDateTime(currentReview.created_at) }}
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Rating Display -->
         <div class="detail-section">
-          <h4 class="section-title">{{ $t('reviews.ratings') }}</h4>
+          <h4 class="section-title">
+            {{ $t('reviews.ratings') }}
+          </h4>
           <div class="rating-display">
             <div class="overall-rating">
               <span class="rating-score">{{ parseFloat(currentReview.overall_rating).toFixed(1) }}</span>
-              <el-rate :model-value="parseFloat(currentReview.overall_rating)" disabled :max="5" size="large" />
+              <el-rate
+                :model-value="parseFloat(currentReview.overall_rating)"
+                disabled
+                :max="5"
+                size="large"
+              />
             </div>
             <div class="rating-breakdown">
               <div class="rating-bar-item">
@@ -378,9 +609,16 @@
 
         <!-- Review Content -->
         <div class="detail-section">
-          <h4 class="section-title">{{ $t('reviews.reviewContent') }}</h4>
-          <p class="review-content">{{ currentReview.content || $t('reviews.noContent') }}</p>
-          <div v-if="currentReview.images && currentReview.images.length > 0" class="review-images">
+          <h4 class="section-title">
+            {{ $t('reviews.reviewContent') }}
+          </h4>
+          <p class="review-content">
+            {{ currentReview.content || $t('reviews.noContent') }}
+          </p>
+          <div
+            v-if="currentReview.images && currentReview.images.length > 0"
+            class="review-images"
+          >
             <el-image
               v-for="(img, idx) in currentReview.images"
               :key="idx"
@@ -401,7 +639,9 @@
 
         <!-- Statistics -->
         <div class="detail-section">
-          <h4 class="section-title">{{ $t('reviews.statistics') }}</h4>
+          <h4 class="section-title">
+            {{ $t('reviews.statistics') }}
+          </h4>
           <div class="stats-info">
             <div class="stat-item">
               <span class="stat-label">{{ $t('reviews.helpfulCount') }}:</span>
@@ -409,29 +649,65 @@
             </div>
             <div class="stat-item">
               <span class="stat-label">{{ $t('reviews.status') }}:</span>
-              <el-tag :type="getStatusType(currentReview.status)" effect="light" size="small">
+              <el-tag
+                :type="getStatusType(currentReview.status)"
+                effect="light"
+                size="small"
+              >
                 {{ getStatusText(currentReview.status) }}
               </el-tag>
             </div>
-            <div class="stat-item" v-if="currentReview.is_featured">
+            <div
+              v-if="currentReview.is_featured"
+              class="stat-item"
+            >
               <span class="stat-label">{{ $t('reviews.featuredLabel') }}:</span>
-              <el-tag type="warning" effect="light" size="small">{{ $t('reviews.yes') }}</el-tag>
+              <el-tag
+                type="warning"
+                effect="light"
+                size="small"
+              >
+                {{ $t('reviews.yes') }}
+              </el-tag>
             </div>
           </div>
         </div>
 
         <!-- Merchant Reply -->
-        <div class="detail-section" v-if="currentReview.reply">
-          <h4 class="section-title">{{ $t('reviews.merchantReply') }}</h4>
+        <div
+          v-if="currentReview.reply"
+          class="detail-section"
+        >
+          <h4 class="section-title">
+            {{ $t('reviews.merchantReply') }}
+          </h4>
           <div class="merchant-reply">
             <div class="reply-header">
-              <el-icon class="reply-icon"><ChatLineRound /></el-icon>
+              <el-icon class="reply-icon">
+                <ChatLineRound />
+              </el-icon>
               <span class="reply-label">{{ $t('reviews.shopResponse') }}</span>
               <span class="reply-time">{{ formatDateTime(currentReview.reply.created_at) }}</span>
-              <el-button type="primary" link size="small" @click="handleEditReply">{{ $t('reviews.editReply') }}</el-button>
-              <el-button type="danger" link size="small" @click="handleDeleteReply">{{ $t('reviews.deleteReply') }}</el-button>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click="handleEditReply"
+              >
+                {{ $t('reviews.editReply') }}
+              </el-button>
+              <el-button
+                type="danger"
+                link
+                size="small"
+                @click="handleDeleteReply"
+              >
+                {{ $t('reviews.deleteReply') }}
+              </el-button>
             </div>
-            <p class="reply-content">{{ currentReview.reply.content }}</p>
+            <p class="reply-content">
+              {{ currentReview.reply.content }}
+            </p>
           </div>
         </div>
       </div>
@@ -472,7 +748,9 @@
           >
             {{ currentReview?.reply ? $t('reviews.editReply') : $t('reviews.reply') }}
           </el-button>
-          <el-button @click="detailDialogVisible = false">{{ $t('reviews.close') }}</el-button>
+          <el-button @click="detailDialogVisible = false">
+            {{ $t('reviews.close') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -484,21 +762,39 @@
       width="500px"
       destroy-on-close
     >
-      <div v-if="replyReview" class="reply-dialog-content">
+      <div
+        v-if="replyReview"
+        class="reply-dialog-content"
+      >
         <!-- Original Review Preview -->
         <div class="original-review">
           <div class="review-header">
             <span class="reviewer">{{ replyReview.is_anonymous ? $t('reviews.anonymous') : replyReview.user_name }}</span>
-            <el-rate :model-value="parseFloat(replyReview.overall_rating)" disabled :max="5" size="small" />
+            <el-rate
+              :model-value="parseFloat(replyReview.overall_rating)"
+              disabled
+              :max="5"
+              size="small"
+            />
           </div>
-          <p class="review-text">{{ replyReview.content || $t('reviews.noContent') }}</p>
+          <p class="review-text">
+            {{ replyReview.content || $t('reviews.noContent') }}
+          </p>
         </div>
 
         <el-divider />
 
         <!-- Reply Form -->
-        <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top">
-          <el-form-item :label="$t('reviews.yourReply')" prop="content">
+        <el-form
+          ref="replyFormRef"
+          :model="replyForm"
+          :rules="replyRules"
+          label-position="top"
+        >
+          <el-form-item
+            :label="$t('reviews.yourReply')"
+            prop="content"
+          >
             <el-input
               v-model="replyForm.content"
               type="textarea"
@@ -512,8 +808,14 @@
       </div>
 
       <template #footer>
-        <el-button @click="replyDialogVisible = false">{{ $t('reviews.cancel') }}</el-button>
-        <el-button type="primary" @click="submitReply" :loading="replyLoading">
+        <el-button @click="replyDialogVisible = false">
+          {{ $t('reviews.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="replyLoading"
+          @click="submitReply"
+        >
           {{ isEditReply ? $t('reviews.updateReply') : $t('reviews.submitReply') }}
         </el-button>
       </template>
@@ -525,7 +827,10 @@
       :title="$t('reviews.hideReview')"
       width="400px"
     >
-      <el-form :model="hideForm" label-position="top">
+      <el-form
+        :model="hideForm"
+        label-position="top"
+      >
         <el-form-item :label="$t('reviews.reasonOptional')">
           <el-input
             v-model="hideForm.reason"
@@ -537,8 +842,16 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="hideDialogVisible = false">{{ $t('reviews.cancel') }}</el-button>
-        <el-button type="warning" @click="confirmHide" :loading="hideLoading">{{ $t('reviews.hide') }}</el-button>
+        <el-button @click="hideDialogVisible = false">
+          {{ $t('reviews.cancel') }}
+        </el-button>
+        <el-button
+          type="warning"
+          :loading="hideLoading"
+          @click="confirmHide"
+        >
+          {{ $t('reviews.hide') }}
+        </el-button>
       </template>
     </el-dialog>
   </div>

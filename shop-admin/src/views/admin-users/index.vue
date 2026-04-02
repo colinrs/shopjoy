@@ -1,11 +1,24 @@
 <template>
   <div class="admin-users-page">
-    <el-tabs v-model="activeTab" class="user-tabs">
-      <el-tab-pane :label="$t('adminUsers.admin')" name="admin" v-if="isPlatformAdmin" />
-      <el-tab-pane :label="$t('adminUsers.customer')" name="customer" />
+    <el-tabs
+      v-model="activeTab"
+      class="user-tabs"
+    >
+      <el-tab-pane
+        v-if="isPlatformAdmin"
+        :label="$t('adminUsers.admin')"
+        name="admin"
+      />
+      <el-tab-pane
+        :label="$t('adminUsers.customer')"
+        name="customer"
+      />
     </el-tabs>
 
-    <el-card class="filter-card" shadow="never">
+    <el-card
+      class="filter-card"
+      shadow="never"
+    >
       <div class="filter-bar">
         <div class="filter-left">
           <el-input
@@ -20,77 +33,152 @@
             </template>
           </el-input>
           <el-select
+            v-if="activeTab === 'admin' && isPlatformAdmin"
             v-model="filterType"
             :placeholder="$t('adminUsers.filterType')"
             clearable
             class="filter-select"
-            v-if="activeTab === 'admin' && isPlatformAdmin"
             @change="handleSearch"
           >
-            <el-option :label="$t('adminUsers.all')" :value="0" />
-            <el-option :label="$t('adminUsers.merchantAdmin')" :value="2" />
-            <el-option :label="$t('adminUsers.merchantSubAccount')" :value="3" />
+            <el-option
+              :label="$t('adminUsers.all')"
+              :value="0"
+            />
+            <el-option
+              :label="$t('adminUsers.merchantAdmin')"
+              :value="2"
+            />
+            <el-option
+              :label="$t('adminUsers.merchantSubAccount')"
+              :value="3"
+            />
           </el-select>
           <el-select
+            v-if="activeTab === 'admin'"
             v-model="filterStatus"
             :placeholder="$t('adminUsers.filterStatus')"
             clearable
             class="filter-select"
-            v-if="activeTab === 'admin'"
             @change="handleSearch"
           >
-            <el-option :label="$t('adminUsers.all')" :value="0" />
-            <el-option :label="$t('adminUsers.enabled')" :value="1" />
-            <el-option :label="$t('adminUsers.disabled')" :value="2" />
+            <el-option
+              :label="$t('adminUsers.all')"
+              :value="0"
+            />
+            <el-option
+              :label="$t('adminUsers.enabled')"
+              :value="1"
+            />
+            <el-option
+              :label="$t('adminUsers.disabled')"
+              :value="2"
+            />
           </el-select>
         </div>
         <div class="filter-right">
-          <el-button type="primary" @click="handleAdd" v-if="activeTab === 'admin' && isPlatformAdmin">
+          <el-button
+            v-if="activeTab === 'admin' && isPlatformAdmin"
+            type="primary"
+            @click="handleAdd"
+          >
             <el-icon><Plus /></el-icon>{{ $t('adminUsers.addAdmin') }}
           </el-button>
         </div>
       </div>
     </el-card>
 
-    <el-card class="table-card" shadow="never">
-      <el-table :data="tableData" v-loading="loading" stripe @row-click="handleRowClick">
-        <el-table-column :label="$t('adminUsers.userInfo')" min-width="250">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        stripe
+        @row-click="handleRowClick"
+      >
+        <el-table-column
+          :label="$t('adminUsers.userInfo')"
+          min-width="250"
+        >
           <template #default="{ row }">
             <div class="user-cell">
-              <el-avatar :size="44" :src="row.avatar" class="user-avatar">
+              <el-avatar
+                :size="44"
+                :src="row.avatar"
+                class="user-avatar"
+              >
                 {{ getAvatarText(row) }}
               </el-avatar>
               <div class="user-details">
-                <p class="user-name">{{ row.real_name || row.name || '-' }}</p>
-                <p class="user-email">{{ row.email || '-' }}</p>
-                <p class="user-phone">{{ row.mobile || row.phone || '-' }}</p>
+                <p class="user-name">
+                  {{ row.real_name || row.name || '-' }}
+                </p>
+                <p class="user-email">
+                  {{ row.email || '-' }}
+                </p>
+                <p class="user-phone">
+                  {{ row.mobile || row.phone || '-' }}
+                </p>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.type')" width="130" align="center" v-if="activeTab === 'admin'">
+        <el-table-column
+          v-if="activeTab === 'admin'"
+          :label="$t('adminUsers.type')"
+          width="130"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getTypeTagType(row.type)" size="small">
+            <el-tag
+              :type="getTypeTagType(row.type)"
+              size="small"
+            >
               {{ row.type_text }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.role')" width="100" align="center" v-if="activeTab === 'customer'">
+        <el-table-column
+          v-if="activeTab === 'customer'"
+          :label="$t('adminUsers.role')"
+          width="100"
+          align="center"
+        >
           <template #default>
-            <el-tag type="info" size="small">{{ $t('adminUsers.ordinary') }}</el-tag>
+            <el-tag
+              type="info"
+              size="small"
+            >
+              {{ $t('adminUsers.ordinary') }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.orderCount')" width="100" align="center" v-if="activeTab === 'customer'">
+        <el-table-column
+          v-if="activeTab === 'customer'"
+          :label="$t('adminUsers.orderCount')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="order-count">{{ row.order_count || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.totalSpent')" width="120" align="right" v-if="activeTab === 'customer'">
+        <el-table-column
+          v-if="activeTab === 'customer'"
+          :label="$t('adminUsers.totalSpent')"
+          width="120"
+          align="right"
+        >
           <template #default="{ row }">
             <span class="total-spent">¥{{ formatPrice(row.total_spent) }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.status')" width="100" align="center">
+        <el-table-column
+          :label="$t('adminUsers.status')"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -100,35 +188,80 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" :label="$t('adminUsers.createdAt')" width="160">
+        <el-table-column
+          prop="created_at"
+          :label="$t('adminUsers.createdAt')"
+          width="160"
+        >
           <template #default="{ row }">
             <span class="time-text">{{ row.created_at }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.actions')" width="180" fixed="right" v-if="activeTab === 'admin'">
+        <el-table-column
+          v-if="activeTab === 'admin'"
+          :label="$t('adminUsers.actions')"
+          width="180"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click.stop="handleView(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="handleView(row)"
+            >
               {{ $t('adminUsers.viewDetail') }}
             </el-button>
-            <el-button type="primary" link size="small" @click.stop="handleAssignRoles(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="handleAssignRoles(row)"
+            >
               {{ $t('adminUsers.assignRoles') }}
             </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, row)">
-              <el-button type="primary" link size="small">
-                {{ $t('adminUsers.more') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-dropdown
+              trigger="click"
+              @command="(cmd: string) => handleCommand(cmd, row)"
+            >
+              <el-button
+                type="primary"
+                link
+                size="small"
+              >
+                {{ $t('adminUsers.more') }}<el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">{{ $t('adminUsers.resetPassword') }}</el-dropdown-item>
-                  <el-dropdown-item command="delete" style="color: #EF4444;">{{ $t('adminUsers.delete') }}</el-dropdown-item>
+                  <el-dropdown-item command="resetPassword">
+                    {{ $t('adminUsers.resetPassword') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="delete"
+                    style="color: #EF4444;"
+                  >
+                    {{ $t('adminUsers.delete') }}
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('adminUsers.actions')" width="120" fixed="right" v-if="activeTab === 'customer'">
+        <el-table-column
+          v-if="activeTab === 'customer'"
+          :label="$t('adminUsers.actions')"
+          width="120"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click.stop="handleViewCustomer(row)">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click.stop="handleViewCustomer(row)"
+            >
               {{ $t('adminUsers.viewDetail') }}
             </el-button>
             <el-button
@@ -162,54 +295,145 @@
       width="500px"
       destroy-on-close
     >
-      <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
-        <el-form-item :label="$t('adminUsers.emailLabel')" prop="email">
-          <el-input v-model="formData.email" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="100px"
+      >
+        <el-form-item
+          :label="$t('adminUsers.emailLabel')"
+          prop="email"
+        >
+          <el-input
+            v-model="formData.email"
+            :placeholder="$t('adminUsers.pleaseEnterEmail')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('adminUsers.mobileLabel')" prop="mobile">
-          <el-input v-model="formData.mobile" :placeholder="$t('adminUsers.pleaseEnterEmail')" />
+        <el-form-item
+          :label="$t('adminUsers.mobileLabel')"
+          prop="mobile"
+        >
+          <el-input
+            v-model="formData.mobile"
+            :placeholder="$t('adminUsers.pleaseEnterEmail')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('adminUsers.realNameLabel')" prop="real_name">
-          <el-input v-model="formData.real_name" :placeholder="$t('adminUsers.pleaseEnterRealName')" />
+        <el-form-item
+          :label="$t('adminUsers.realNameLabel')"
+          prop="real_name"
+        >
+          <el-input
+            v-model="formData.real_name"
+            :placeholder="$t('adminUsers.pleaseEnterRealName')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('adminUsers.initialPassword')" prop="password">
-          <el-input v-model="formData.password" type="password" :placeholder="$t('adminUsers.initialPasswordPlaceholder')" show-password />
+        <el-form-item
+          :label="$t('adminUsers.initialPassword')"
+          prop="password"
+        >
+          <el-input
+            v-model="formData.password"
+            type="password"
+            :placeholder="$t('adminUsers.initialPasswordPlaceholder')"
+            show-password
+          />
         </el-form-item>
-        <el-form-item :label="$t('adminUsers.userType')" prop="type">
-          <el-select v-model="formData.type" :placeholder="$t('adminUsers.pleaseSelectUserType')" style="width: 100%">
-            <el-option :label="$t('adminUsers.merchantAdmin')" :value="2" />
-            <el-option :label="$t('adminUsers.merchantSubAccount')" :value="3" />
+        <el-form-item
+          :label="$t('adminUsers.userType')"
+          prop="type"
+        >
+          <el-select
+            v-model="formData.type"
+            :placeholder="$t('adminUsers.pleaseSelectUserType')"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('adminUsers.merchantAdmin')"
+              :value="2"
+            />
+            <el-option
+              :label="$t('adminUsers.merchantSubAccount')"
+              :value="3"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('adminUsers.tenantId')" prop="tenant_id" v-if="isPlatformAdmin">
-          <el-input-number v-model="formData.tenant_id" :min="0" :placeholder="$t('adminUsers.tenantIdPlaceholder')" style="width: 100%" />
+        <el-form-item
+          v-if="isPlatformAdmin"
+          :label="$t('adminUsers.tenantId')"
+          prop="tenant_id"
+        >
+          <el-input-number
+            v-model="formData.tenant_id"
+            :min="0"
+            :placeholder="$t('adminUsers.tenantIdPlaceholder')"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">{{ $t('adminUsers.cancel') }}</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">{{ $t('adminUsers.confirm') }}</el-button>
+        <el-button @click="dialogVisible = false">
+          {{ $t('adminUsers.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          {{ $t('adminUsers.confirm') }}
+        </el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="detailVisible" :title="$t('adminUsers.userDetail')" width="600px">
-      <el-descriptions :column="2" border v-if="currentRow">
-        <el-descriptions-item :label="$t('adminUsers.userId')">{{ currentRow.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.username')">{{ ('real_name' in currentRow ? currentRow.real_name : currentRow.name) || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.email')">{{ currentRow.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ currentRow.mobile || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.type')" v-if="'type_text' in currentRow && currentRow.type_text">
-          <el-tag :type="getTypeTagType((currentRow as AdminUser).type)">{{ (currentRow as AdminUser).type_text }}</el-tag>
+    <el-dialog
+      v-model="detailVisible"
+      :title="$t('adminUsers.userDetail')"
+      width="600px"
+    >
+      <el-descriptions
+        v-if="currentRow"
+        :column="2"
+        border
+      >
+        <el-descriptions-item :label="$t('adminUsers.userId')">
+          {{ currentRow.id }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.username')">
+          {{ ('real_name' in currentRow ? currentRow.real_name : currentRow.name) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.email')">
+          {{ currentRow.email || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.mobile')">
+          {{ currentRow.mobile || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          v-if="'type_text' in currentRow && currentRow.type_text"
+          :label="$t('adminUsers.type')"
+        >
+          <el-tag :type="getTypeTagType((currentRow as AdminUser).type)">
+            {{ (currentRow as AdminUser).type_text }}
+          </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.status')">
           <el-tag :type="currentRow.status === 1 ? 'success' : 'danger'">
             {{ currentRow.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.createdAt')">{{ currentRow.created_at }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.updatedAt')" v-if="'updated_at' in currentRow && currentRow.updated_at">{{ (currentRow as AdminUser).updated_at }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.createdAt')">
+          {{ currentRow.created_at }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          v-if="'updated_at' in currentRow && currentRow.updated_at"
+          :label="$t('adminUsers.updatedAt')"
+        >
+          {{ (currentRow as AdminUser).updated_at }}
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="detailVisible = false">{{ $t('adminUsers.close') }}</el-button>
+        <el-button @click="detailVisible = false">
+          {{ $t('adminUsers.close') }}
+        </el-button>
       </template>
     </el-dialog>
 

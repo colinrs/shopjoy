@@ -1,17 +1,27 @@
 <template>
   <div class="product-detail-page">
     <!-- Page Header -->
-    <el-card class="header-card" shadow="never">
+    <el-card
+      class="header-card"
+      shadow="never"
+    >
       <div class="page-header">
         <div class="header-left">
-          <el-button link @click="handleBack">
+          <el-button
+            link
+            @click="handleBack"
+          >
             <el-icon><ArrowLeft /></el-icon>
             {{ $t('products.backToList') }}
           </el-button>
           <el-divider direction="vertical" />
           <h2 class="product-title">
             {{ product?.name || $t('common.loading') }}
-            <el-tag v-if="product" :type="getStatusType(product.status)" size="small">
+            <el-tag
+              v-if="product"
+              :type="getStatusType(product.status)"
+              size="small"
+            >
               {{ getStatusText(product.status) }}
             </el-tag>
           </h2>
@@ -19,8 +29,8 @@
         <div class="header-right">
           <el-button
             v-if="product?.status === 'on_sale'"
-            @click="handleTakeOffSale"
             :loading="statusLoading"
+            @click="handleTakeOffSale"
           >
             <el-icon><Hide /></el-icon>
             {{ $t('products.offSale') }}
@@ -28,13 +38,17 @@
           <el-button
             v-else-if="product?.status === 'off_sale' || product?.status === 'draft'"
             type="success"
-            @click="handlePutOnSale"
             :loading="statusLoading"
+            @click="handlePutOnSale"
           >
             <el-icon><View /></el-icon>
             {{ $t('products.onSale') }}
           </el-button>
-          <el-button @click="handleSave" type="primary" :loading="saveLoading">
+          <el-button
+            type="primary"
+            :loading="saveLoading"
+            @click="handleSave"
+          >
             <el-icon><Check /></el-icon>
             {{ $t('products.saveChanges') }}
           </el-button>
@@ -43,13 +57,27 @@
     </el-card>
 
     <!-- Loading State -->
-    <el-skeleton v-if="loading" :rows="10" animated />
+    <el-skeleton
+      v-if="loading"
+      :rows="10"
+      animated
+    />
 
     <!-- Tab Layout -->
-    <el-card v-else class="tabs-card" shadow="never">
-      <el-tabs v-model="activeTab" class="product-tabs">
+    <el-card
+      v-else
+      class="tabs-card"
+      shadow="never"
+    >
+      <el-tabs
+        v-model="activeTab"
+        class="product-tabs"
+      >
         <!-- Basic Info Tab -->
-        <el-tab-pane :label="$t('products.basicInfo')" name="basic">
+        <el-tab-pane
+          :label="$t('products.basicInfo')"
+          name="basic"
+        >
           <ProductInfoTab
             :product="product"
             :product-form="productForm"
@@ -61,7 +89,10 @@
         </el-tab-pane>
 
         <!-- Markets Tab -->
-        <el-tab-pane :label="$t('products.markets')" name="markets">
+        <el-tab-pane
+          :label="$t('products.markets')"
+          name="markets"
+        >
           <ProductMarketsTab
             :product-id="productId"
             :product-markets="productMarkets"
@@ -74,7 +105,10 @@
         </el-tab-pane>
 
         <!-- Variants Tab -->
-        <el-tab-pane :label="$t('products.variants')" name="variants">
+        <el-tab-pane
+          :label="$t('products.variants')"
+          name="variants"
+        >
           <ProductVariantsTab
             :product-id="productId"
             :default-price="productForm.price"
@@ -85,7 +119,10 @@
         </el-tab-pane>
 
         <!-- Pricing Tab -->
-        <el-tab-pane :label="$t('products.pricing')" name="pricing">
+        <el-tab-pane
+          :label="$t('products.pricing')"
+          name="pricing"
+        >
           <ProductPricingTab
             :product-id="productId"
             :product-markets="productMarkets"
@@ -95,7 +132,10 @@
         </el-tab-pane>
 
         <!-- Localization Tab -->
-        <el-tab-pane :label="$t('products.localization')" name="localization">
+        <el-tab-pane
+          :label="$t('products.localization')"
+          name="localization"
+        >
           <ProductLocalizationTab
             :product-id="productId"
             :product-name="productForm.name"
@@ -106,7 +146,10 @@
         </el-tab-pane>
 
         <!-- Inventory Tab -->
-        <el-tab-pane :label="$t('products.stock')" name="inventory">
+        <el-tab-pane
+          :label="$t('products.stock')"
+          name="inventory"
+        >
           <ProductInventoryTab
             :product-id="productId"
             :sku="productForm.sku"
@@ -116,7 +159,10 @@
         </el-tab-pane>
 
         <!-- Reviews Tab -->
-        <el-tab-pane :label="$t('products.reviewStats')" name="reviews">
+        <el-tab-pane
+          :label="$t('products.reviewStats')"
+          name="reviews"
+        >
           <ProductReviewsTab
             :product-id="productId"
             :loading="reviewsLoading"

@@ -1,43 +1,82 @@
 <template>
-  <div class="admin-user-detail-page" v-loading="loading">
+  <div
+    v-loading="loading"
+    class="admin-user-detail-page"
+  >
     <!-- Back Button -->
     <div class="page-header">
-      <el-button link @click="goBack">
+      <el-button
+        link
+        @click="goBack"
+      >
         <el-icon><ArrowLeft /></el-icon>
         {{ $t('adminUsers.backToUserList') }}
       </el-button>
-      <h2 class="page-title">{{ $t('adminUsers.adminDetail') }}</h2>
+      <h2 class="page-title">
+        {{ $t('adminUsers.adminDetail') }}
+      </h2>
     </div>
 
     <!-- User Summary Card -->
-    <el-card class="summary-card" shadow="never">
+    <el-card
+      class="summary-card"
+      shadow="never"
+    >
       <div class="user-summary">
         <div class="user-avatar-section">
-          <el-avatar :size="80" :src="adminUser?.avatar" class="user-avatar">
+          <el-avatar
+            :size="80"
+            :src="adminUser?.avatar"
+            class="user-avatar"
+          >
             {{ getAvatarText() }}
           </el-avatar>
           <div class="user-info">
-            <h3 class="user-name">{{ adminUser?.real_name || adminUser?.email || '-' }}</h3>
-            <p class="user-email">{{ adminUser?.email || '-' }}</p>
-            <p class="user-phone">{{ adminUser?.mobile || '-' }}</p>
+            <h3 class="user-name">
+              {{ adminUser?.real_name || adminUser?.email || '-' }}
+            </h3>
+            <p class="user-email">
+              {{ adminUser?.email || '-' }}
+            </p>
+            <p class="user-phone">
+              {{ adminUser?.mobile || '-' }}
+            </p>
           </div>
         </div>
         <div class="user-meta">
           <div class="meta-item">
-            <el-tag :type="getTypeTagType(adminUser?.type)" size="large">
+            <el-tag
+              :type="getTypeTagType(adminUser?.type)"
+              size="large"
+            >
               {{ adminUser?.type_text || $t('adminUsers.unknownType') }}
             </el-tag>
           </div>
           <div class="meta-item">
-            <el-tag :type="adminUser?.status === 1 ? 'success' : 'danger'" size="large">
+            <el-tag
+              :type="adminUser?.status === 1 ? 'success' : 'danger'"
+              size="large"
+            >
               {{ adminUser?.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
             </el-tag>
           </div>
         </div>
         <div class="user-actions">
-          <el-button type="primary" @click="handleEdit">{{ $t('adminUsers.edit') }}</el-button>
-          <el-button @click="handleAssignRoles">{{ $t('adminUsers.assignRoles') }}</el-button>
-          <el-button type="warning" @click="handleResetPassword">{{ $t('adminUsers.resetPassword') }}</el-button>
+          <el-button
+            type="primary"
+            @click="handleEdit"
+          >
+            {{ $t('adminUsers.edit') }}
+          </el-button>
+          <el-button @click="handleAssignRoles">
+            {{ $t('adminUsers.assignRoles') }}
+          </el-button>
+          <el-button
+            type="warning"
+            @click="handleResetPassword"
+          >
+            {{ $t('adminUsers.resetPassword') }}
+          </el-button>
           <el-button
             :type="adminUser?.status === 1 ? 'danger' : 'success'"
             @click="handleStatusToggle"
@@ -49,15 +88,29 @@
     </el-card>
 
     <!-- Info Card -->
-    <el-card class="info-card" shadow="never">
+    <el-card
+      class="info-card"
+      shadow="never"
+    >
       <template #header>
         <span class="card-title">{{ $t('adminUsers.basicInfo') }}</span>
       </template>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item :label="$t('adminUsers.userId')">{{ adminUser?.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.realName')">{{ adminUser?.real_name || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.email')">{{ adminUser?.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ adminUser?.mobile || '-' }}</el-descriptions-item>
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item :label="$t('adminUsers.userId')">
+          {{ adminUser?.id }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.realName')">
+          {{ adminUser?.real_name || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.email')">
+          {{ adminUser?.email || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.mobile')">
+          {{ adminUser?.mobile || '-' }}
+        </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.type')">
           <el-tag :type="getTypeTagType(adminUser?.type)">
             {{ adminUser?.type_text || '-' }}
@@ -68,29 +121,57 @@
             {{ adminUser?.status === 1 ? $t('adminUsers.enabled') : $t('adminUsers.disabled') }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.createdAt')">{{ formatDateTime(adminUser?.created_at) }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.updatedAt')">{{ formatDateTime(adminUser?.updated_at) }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.createdAt')">
+          {{ formatDateTime(adminUser?.created_at) }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.updatedAt')">
+          {{ formatDateTime(adminUser?.updated_at) }}
+        </el-descriptions-item>
       </el-descriptions>
     </el-card>
 
     <!-- Roles Card -->
-    <el-card class="roles-card" shadow="never">
+    <el-card
+      class="roles-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span class="card-title">{{ $t('adminUsers.assignedRoles') }}</span>
-          <el-button type="primary" size="small" @click="handleAssignRoles">{{ $t('adminUsers.assignRoles') }}</el-button>
+          <el-button
+            type="primary"
+            size="small"
+            @click="handleAssignRoles"
+          >
+            {{ $t('adminUsers.assignRoles') }}
+          </el-button>
         </div>
       </template>
-      <div class="role-list" v-if="adminUser?.roles?.length">
-        <el-tag v-for="role in adminUser.roles" :key="role.id" class="role-tag">
+      <div
+        v-if="adminUser?.roles?.length"
+        class="role-list"
+      >
+        <el-tag
+          v-for="role in adminUser.roles"
+          :key="role.id"
+          class="role-tag"
+        >
           {{ role.name }}
         </el-tag>
       </div>
-      <el-empty v-else :description="$t('adminUsers.noRolesAssigned')" />
+      <el-empty
+        v-else
+        :description="$t('adminUsers.noRolesAssigned')"
+      />
     </el-card>
 
     <!-- Edit Dialog -->
-    <el-dialog v-model="editDialogVisible" :title="$t('adminUsers.editAdmin')" width="500px" destroy-on-close>
+    <el-dialog
+      v-model="editDialogVisible"
+      :title="$t('adminUsers.editAdmin')"
+      width="500px"
+      destroy-on-close
+    >
       <AdminUserForm
         ref="editFormRef"
         v-model="editFormData"
@@ -98,8 +179,16 @@
         :admin-user="adminUser"
       />
       <template #footer>
-        <el-button @click="editDialogVisible = false">{{ $t('adminUsers.cancel') }}</el-button>
-        <el-button type="primary" @click="confirmEdit" :loading="editLoading">{{ $t('adminUsers.confirm') }}</el-button>
+        <el-button @click="editDialogVisible = false">
+          {{ $t('adminUsers.cancel') }}
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="editLoading"
+          @click="confirmEdit"
+        >
+          {{ $t('adminUsers.confirm') }}
+        </el-button>
       </template>
     </el-dialog>
 

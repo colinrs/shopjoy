@@ -1,13 +1,21 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="emit('update:visible', $event)"
     :title="$t('products.pushToMarket')"
     width="500px"
     destroy-on-close
+    @update:model-value="emit('update:visible', $event)"
   >
-    <el-form :model="pushToMarketForm" label-width="120px" ref="pushToMarketFormRef">
-      <el-form-item :label="$t('products.market')" prop="markets" required>
+    <el-form
+      ref="pushToMarketFormRef"
+      :model="pushToMarketForm"
+      label-width="120px"
+    >
+      <el-form-item
+        :label="$t('products.market')"
+        prop="markets"
+        required
+      >
         <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">
           <el-checkbox
             v-for="market in availableMarketsForPush"
@@ -19,19 +27,31 @@
           </el-checkbox>
         </el-checkbox-group>
       </el-form-item>
-      <el-form-item :label="$t('products.priceUSD')" prop="price" required>
+      <el-form-item
+        :label="$t('products.priceUSD')"
+        prop="price"
+        required
+      >
         <el-input-number
           v-model="pushToMarketForm.price"
           :min="0"
           :precision="2"
           style="width: 100%"
         />
-        <div class="price-note">{{ $t('products.priceNote') }}</div>
+        <div class="price-note">
+          {{ $t('products.priceNote') }}
+        </div>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleConfirm" :loading="loading">
+      <el-button @click="handleClose">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleConfirm"
+      >
         {{ $t('products.pushToMarket') }}
       </el-button>
     </template>

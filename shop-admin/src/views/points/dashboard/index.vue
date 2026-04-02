@@ -1,8 +1,14 @@
 <template>
   <div class="points-dashboard">
     <!-- Stats Cards -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.issuedPoints')"
           :value="stats.total_issued"
@@ -10,7 +16,10 @@
           icon-color="primary"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.redeemedPoints')"
           :value="stats.total_redeemed"
@@ -18,7 +27,10 @@
           icon-color="success"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.activeBalance')"
           :value="stats.outstanding_balance"
@@ -26,7 +38,10 @@
           icon-color="warning"
         />
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <PointsStatsCard
           :title="$t('points.activeUsers')"
           :value="stats.active_users"
@@ -37,7 +52,10 @@
     </el-row>
 
     <!-- Trend Chart Section -->
-    <el-card class="trend-card" shadow="never">
+    <el-card
+      class="trend-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span class="card-title">
@@ -45,46 +63,92 @@
             {{ $t('points.pointsTrend') }}
           </span>
           <div class="card-actions">
-            <el-radio-group v-model="trendPeriod" size="small" @change="loadTrendData">
-              <el-radio-button value="7d">{{ $t('points.sevenDays') }}</el-radio-button>
-              <el-radio-button value="30d">{{ $t('points.thirtyDays') }}</el-radio-button>
+            <el-radio-group
+              v-model="trendPeriod"
+              size="small"
+              @change="loadTrendData"
+            >
+              <el-radio-button value="7d">
+                {{ $t('points.sevenDays') }}
+              </el-radio-button>
+              <el-radio-button value="30d">
+                {{ $t('points.thirtyDays') }}
+              </el-radio-button>
             </el-radio-group>
           </div>
         </div>
       </template>
       <div class="chart-container">
-        <div v-if="trendLoading" class="chart-loading">
-          <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+        <div
+          v-if="trendLoading"
+          class="chart-loading"
+        >
+          <el-icon
+            class="is-loading"
+            :size="32"
+          >
+            <Loading />
+          </el-icon>
         </div>
-        <div v-else-if="trendData.length === 0" class="chart-empty">
-          <el-icon :size="48"><DataLine /></el-icon>
+        <div
+          v-else-if="trendData.length === 0"
+          class="chart-empty"
+        >
+          <el-icon :size="48">
+            <DataLine />
+          </el-icon>
           <p>{{ $t('points.noTrendData') }}</p>
         </div>
-        <div v-else class="chart-wrapper">
+        <div
+          v-else
+          class="chart-wrapper"
+        >
           <PointsTrendChart :data="trendData" />
         </div>
       </div>
     </el-card>
 
     <!-- Two Column Section -->
-    <el-row :gutter="16" class="bottom-section">
+    <el-row
+      :gutter="16"
+      class="bottom-section"
+    >
       <!-- Expiring Soon -->
-      <el-col :xs="24" :lg="12">
-        <el-card class="expiring-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
+        <el-card
+          class="expiring-card"
+          shadow="never"
+        >
           <template #header>
             <span class="card-title">
               <el-icon><Timer /></el-icon>
               {{ $t('points.expiringSoon') }}
             </span>
           </template>
-          <div v-if="expiringLoading" class="loading-state">
-            <el-icon class="is-loading"><Loading /></el-icon>
+          <div
+            v-if="expiringLoading"
+            class="loading-state"
+          >
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
           </div>
-          <div v-else-if="expiringList.length === 0" class="empty-state">
-            <el-icon :size="32"><CircleCheck /></el-icon>
+          <div
+            v-else-if="expiringList.length === 0"
+            class="empty-state"
+          >
+            <el-icon :size="32">
+              <CircleCheck />
+            </el-icon>
             <p>{{ $t('points.noExpiringPoints') }}</p>
           </div>
-          <div v-else class="expiring-list">
+          <div
+            v-else
+            class="expiring-list"
+          >
             <div
               v-for="item in expiringList"
               :key="item.date"
@@ -108,33 +172,58 @@
       </el-col>
 
       <!-- Top Users -->
-      <el-col :xs="24" :lg="12">
-        <el-card class="top-users-card" shadow="never">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
+        <el-card
+          class="top-users-card"
+          shadow="never"
+        >
           <template #header>
             <span class="card-title">
               <el-icon><Trophy /></el-icon>
               {{ $t('points.ranking') }}
             </span>
           </template>
-          <div v-if="topUsersLoading" class="loading-state">
-            <el-icon class="is-loading"><Loading /></el-icon>
+          <div
+            v-if="topUsersLoading"
+            class="loading-state"
+          >
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
           </div>
-          <div v-else-if="topUsers.length === 0" class="empty-state">
-            <el-icon :size="32"><User /></el-icon>
+          <div
+            v-else-if="topUsers.length === 0"
+            class="empty-state"
+          >
+            <el-icon :size="32">
+              <User />
+            </el-icon>
             <p>{{ $t('points.noUserData') }}</p>
           </div>
-          <div v-else class="top-users-list">
+          <div
+            v-else
+            class="top-users-list"
+          >
             <div
               v-for="(user, index) in topUsers"
               :key="user.user_id"
               class="top-user-item"
             >
-              <div class="rank" :class="{ top3: index < 3 }">
+              <div
+                class="rank"
+                :class="{ top3: index < 3 }"
+              >
                 {{ index + 1 }}
               </div>
               <div class="user-info">
                 <span class="user-id">U{{ user.user_id }}</span>
-                <span v-if="user.user_email" class="user-email">{{ user.user_email }}</span>
+                <span
+                  v-if="user.user_email"
+                  class="user-email"
+                >{{ user.user_email }}</span>
               </div>
               <div class="user-points">
                 {{ user.points_earned.toLocaleString() }} {{ $t('points.pointsLabel') }}

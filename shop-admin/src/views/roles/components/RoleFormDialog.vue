@@ -6,27 +6,46 @@
     destroy-on-close
     @update:model-value="$emit('update:visible', $event)"
   >
-    <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
-      <el-form-item :label="$t('roles.roleName')" prop="name">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="100px"
+    >
+      <el-form-item
+        :label="$t('roles.roleName')"
+        prop="name"
+      >
         <el-input
           v-model="formData.name"
           :placeholder="$t('roles.enterRoleName')"
           :disabled="isEdit && !!props.role?.is_system"
         />
       </el-form-item>
-      <el-form-item :label="$t('roles.roleCode')" prop="code" v-if="!isEdit">
+      <el-form-item
+        v-if="!isEdit"
+        :label="$t('roles.roleCode')"
+        prop="code"
+      >
         <el-input
           v-model="formData.code"
           :placeholder="$t('roles.enterRoleCode')"
         />
       </el-form-item>
-      <el-form-item :label="$t('roles.roleCode')" prop="code" v-else>
+      <el-form-item
+        v-else
+        :label="$t('roles.roleCode')"
+        prop="code"
+      >
         <el-input
           v-model="formData.code"
           disabled
         />
       </el-form-item>
-      <el-form-item :label="$t('roles.description')" prop="description">
+      <el-form-item
+        :label="$t('roles.description')"
+        prop="description"
+      >
         <el-input
           v-model="formData.description"
           type="textarea"
@@ -36,8 +55,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleCancel">{{ $t('roles.cancel') }}</el-button>
-      <el-button type="primary" @click="handleSubmit" :loading="submitLoading">
+      <el-button @click="handleCancel">
+        {{ $t('roles.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="submitLoading"
+        @click="handleSubmit"
+      >
         {{ $t('roles.confirm') }}
       </el-button>
     </template>
@@ -57,8 +82,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:visible', val: boolean): void
-  (e: 'success'): void
+  'update:visible': [val: boolean]
+  'success': []
 }>()
 
 const { t } = useI18n()

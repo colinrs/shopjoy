@@ -1,15 +1,19 @@
 <template>
   <el-table
     ref="tableRef"
-    :data="data"
     v-loading="loading"
+    :data="data"
     stripe
     @selection-change="handleSelectionChange"
     @select="handleSelect"
     @select-all="handleSelectAll"
     @cell-click="handleCellClick"
   >
-    <el-table-column type="selection" width="50" :selectable="checkSelectable" />
+    <el-table-column
+      type="selection"
+      width="50"
+      :selectable="checkSelectable"
+    />
     <slot />
   </el-table>
 </template>
@@ -124,7 +128,7 @@ const handleSelectionChange = (selection: T[]) => {
 }
 
 // Handle select event
-const handleSelect = (_selection: T[], _row: T) => {
+const handleSelect = () => {
   // Could be used for additional tracking if needed
 }
 

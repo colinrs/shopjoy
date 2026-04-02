@@ -1,13 +1,23 @@
 <template>
   <el-container class="main-layout">
     <!-- Sidebar -->
-    <el-aside width="220px" class="sidebar">
+    <el-aside
+      width="220px"
+      class="sidebar"
+    >
       <div class="logo-section">
         <div class="logo">
-          <el-icon size="28" color="#fff"><ShoppingBag /></el-icon>
+          <el-icon
+            size="28"
+            color="#fff"
+          >
+            <ShoppingBag />
+          </el-icon>
           <span class="logo-text">ShopJoy</span>
         </div>
-        <div class="version">v2.0.0</div>
+        <div class="version">
+          v2.0.0
+        </div>
       </div>
       
       <el-menu
@@ -21,7 +31,15 @@
           <el-icon><DataLine /></el-icon>
           <template #title>
             <span>{{ $t('dashboard.title') }}</span>
-            <el-tag v-if="hasNewData" size="small" type="danger" effect="dark" class="menu-badge">NEW</el-tag>
+            <el-tag
+              v-if="hasNewData"
+              size="small"
+              type="danger"
+              effect="dark"
+              class="menu-badge"
+            >
+              NEW
+            </el-tag>
           </template>
         </el-menu-item>
 
@@ -51,14 +69,23 @@
           </template>
           <el-menu-item index="/orders">
             <span>{{ $t('orders.title') }}</span>
-            <el-badge :value="pendingOrders" v-if="pendingOrders > 0" class="menu-badge" />
+            <el-badge
+              v-if="pendingOrders > 0"
+              :value="pendingOrders"
+              class="menu-badge"
+            />
           </el-menu-item>
           <el-menu-item index="/fulfillment/shipments">
             <span>{{ $t('fulfillment.shipments') }}</span>
           </el-menu-item>
           <el-menu-item index="/fulfillment/refunds">
             <span>{{ $t('fulfillment.refunds') }}</span>
-            <el-badge :value="pendingRefunds" v-if="pendingRefunds > 0" class="menu-badge" type="warning" />
+            <el-badge
+              v-if="pendingRefunds > 0"
+              :value="pendingRefunds"
+              class="menu-badge"
+              type="warning"
+            />
           </el-menu-item>
           <el-menu-item index="/fulfillment/statistics">
             <span>{{ $t('fulfillment.statistics') }}</span>
@@ -76,7 +103,12 @@
           <el-icon><ChatDotRound /></el-icon>
           <template #title>
             <span>{{ $t('reviews.title') }}</span>
-            <el-badge :value="pendingReviews" v-if="pendingReviews > 0" class="menu-badge" type="warning" />
+            <el-badge
+              v-if="pendingReviews > 0"
+              :value="pendingReviews"
+              class="menu-badge"
+              type="warning"
+            />
           </template>
         </el-menu-item>
 
@@ -137,8 +169,15 @@
             <span>{{ $t('common.storageSpace') }}</span>
             <span>75%</span>
           </div>
-          <el-progress :percentage="75" :stroke-width="6" :show-text="false" color="#10B981" />
-          <p class="storage-detail">7.5GB / 10GB {{ $t('common.used') }}</p>
+          <el-progress
+            :percentage="75"
+            :stroke-width="6"
+            :show-text="false"
+            color="#10B981"
+          />
+          <p class="storage-detail">
+            7.5GB / 10GB {{ $t('common.used') }}
+          </p>
         </div>
       </div>
     </el-aside>
@@ -150,8 +189,8 @@
           <el-button
             class="collapse-btn"
             :icon="isCollapse ? Expand : Fold"
-            @click="toggleCollapse"
             text
+            @click="toggleCollapse"
           />
           <breadcrumb />
         </div>
@@ -169,8 +208,15 @@
           </div>
           
           <!-- Quick Actions -->
-          <el-tooltip :content="isDarkMode ? $t('common.switchToLightMode') : $t('common.switchToDarkMode')" placement="bottom">
-            <el-button text @click="toggleTheme" class="theme-toggle-btn">
+          <el-tooltip
+            :content="isDarkMode ? $t('common.switchToLightMode') : $t('common.switchToDarkMode')"
+            placement="bottom"
+          >
+            <el-button
+              text
+              class="theme-toggle-btn"
+              @click="toggleTheme"
+            >
               <el-icon size="18">
                 <Sunny v-if="isDarkMode" />
                 <Moon v-else />
@@ -178,33 +224,70 @@
             </el-button>
           </el-tooltip>
 
-          <el-tooltip :content="$t('common.fullscreen')" placement="bottom">
-            <el-button text :icon="FullScreen" @click="toggleFullscreen" />
+          <el-tooltip
+            :content="$t('common.fullscreen')"
+            placement="bottom"
+          >
+            <el-button
+              text
+              :icon="FullScreen"
+              @click="toggleFullscreen"
+            />
           </el-tooltip>
           
-          <el-tooltip :content="$t('common.notifications')" placement="bottom">
-            <el-badge :value="3" class="notification-badge">
-              <el-button text :icon="Bell" @click="showNotifications" />
+          <el-tooltip
+            :content="$t('common.notifications')"
+            placement="bottom"
+          >
+            <el-badge
+              :value="3"
+              class="notification-badge"
+            >
+              <el-button
+                text
+                :icon="Bell"
+                @click="showNotifications"
+              />
             </el-badge>
           </el-tooltip>
 
           <!-- Language Switcher -->
-          <el-dropdown trigger="click" @command="handleLocaleChange">
+          <el-dropdown
+            trigger="click"
+            @command="handleLocaleChange"
+          >
             <div class="locale-switch">
               <span class="locale-text">{{ $t(locale === 'en' ? 'common.languageEN' : 'common.languageZH') }}</span>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="en" :disabled="locale === 'en'">{{ $t('common.languageEN') }}</el-dropdown-item>
-                <el-dropdown-item command="zh" :disabled="locale === 'zh'">{{ $t('common.languageZH') }}</el-dropdown-item>
+                <el-dropdown-item
+                  command="en"
+                  :disabled="locale === 'en'"
+                >
+                  {{ $t('common.languageEN') }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                  command="zh"
+                  :disabled="locale === 'zh'"
+                >
+                  {{ $t('common.languageZH') }}
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           
           <!-- User Menu -->
-          <el-dropdown trigger="click" class="user-dropdown">
+          <el-dropdown
+            trigger="click"
+            class="user-dropdown"
+          >
             <div class="user-info">
-              <el-avatar :size="36" :src="userStore.userInfo?.avatar" class="user-avatar">
+              <el-avatar
+                :size="36"
+                :src="userStore.userInfo?.avatar"
+                class="user-avatar"
+              >
                 {{ userStore.userInfo?.real_name?.charAt(0) || 'A' }}
               </el-avatar>
               <div class="user-meta">
@@ -221,7 +304,10 @@
                 <el-dropdown-item @click="goToSettings">
                   <el-icon><Setting /></el-icon>{{ $t('common.accountSettings') }}
                 </el-dropdown-item>
-                <el-dropdown-item divided @click="logout">
+                <el-dropdown-item
+                  divided
+                  @click="logout"
+                >
                   <el-icon><SwitchButton /></el-icon>{{ $t('common.logout') }}
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -233,7 +319,10 @@
       <!-- Main Content -->
       <el-main class="main-content">
         <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
+          <transition
+            name="fade"
+            mode="out-in"
+          >
             <component :is="Component" />
           </transition>
         </router-view>
@@ -249,15 +338,27 @@
     :with-header="true"
   >
     <div class="notification-list">
-      <div v-for="(notice, index) in notifications" :key="index" class="notification-item" :class="{ unread: !notice.read }">
-        <div class="notice-icon" :class="notice.type">
+      <div
+        v-for="(notice, index) in notifications"
+        :key="index"
+        class="notification-item"
+        :class="{ unread: !notice.read }"
+      >
+        <div
+          class="notice-icon"
+          :class="notice.type"
+        >
           <el-icon size="20">
             <component :is="notice.icon" />
           </el-icon>
         </div>
         <div class="notice-content">
-          <h4 class="notice-title">{{ $t(notice.titleKey) }}</h4>
-          <p class="notice-desc">{{ $t(notice.contentKey) }}</p>
+          <h4 class="notice-title">
+            {{ $t(notice.titleKey) }}
+          </h4>
+          <p class="notice-desc">
+            {{ $t(notice.contentKey) }}
+          </p>
           <span class="notice-time">{{ $t(notice.timeKey, notice.timeParams) }}</span>
         </div>
       </div>

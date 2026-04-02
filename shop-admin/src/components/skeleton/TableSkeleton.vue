@@ -1,15 +1,23 @@
 <template>
   <div class="skeleton-table">
     <div class="skeleton-table-header">
-      <div v-for="i in columns" :key="i" class="skeleton-cell skeleton-header"></div>
+      <div
+        v-for="i in columns"
+        :key="i"
+        class="skeleton-cell skeleton-header"
+      />
     </div>
-    <div v-for="row in rows" :key="row" class="skeleton-table-row">
+    <div
+      v-for="row in rows"
+      :key="row"
+      class="skeleton-table-row"
+    >
       <div
         v-for="col in columns"
         :key="col"
         class="skeleton-cell"
         :class="getCellClass(col)"
-      ></div>
+      />
     </div>
   </div>
 </template>

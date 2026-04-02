@@ -1,14 +1,24 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="emit('update:visible', $event)"
     :title="$t('products.addImageUrl')"
     width="400px"
+    @update:model-value="emit('update:visible', $event)"
   >
-    <el-input v-model="imageUrl" :placeholder="$t('products.enterImageUrl')" />
+    <el-input
+      v-model="imageUrl"
+      :placeholder="$t('products.enterImageUrl')"
+    />
     <template #footer>
-      <el-button @click="handleClose">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" @click="handleConfirm">{{ $t('common.add') }}</el-button>
+      <el-button @click="handleClose">
+        {{ $t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        @click="handleConfirm"
+      >
+        {{ $t('common.add') }}
+      </el-button>
     </template>
   </el-dialog>
 </template>

@@ -5,10 +5,10 @@
 
     <!-- Filter Bar -->
     <OrderFilterBar
-      v-model:searchQuery="searchQuery"
-      v-model:statusFilter="statusFilter"
-      v-model:fulfillmentFilter="fulfillmentFilter"
-      v-model:dateRange="dateRange"
+      v-model:search-query="searchQuery"
+      v-model:status-filter="statusFilter"
+      v-model:fulfillment-filter="fulfillmentFilter"
+      v-model:date-range="dateRange"
       :exporting="exporting"
       @search="handleSearch"
       @refresh="handleRefresh"

@@ -1,21 +1,40 @@
 <template>
-  <div class="stats-card" :class="[`stats-card--${color}`, { 'stats-card--clickable': clickable }]" @click="handleClick">
-    <div class="stats-icon" v-if="icon || $slots.icon">
+  <div
+    class="stats-card"
+    :class="[`stats-card--${color}`, { 'stats-card--clickable': clickable }]"
+    @click="handleClick"
+  >
+    <div
+      v-if="icon || $slots.icon"
+      class="stats-icon"
+    >
       <slot name="icon">
-        <el-icon v-if="icon" :size="32">
+        <el-icon
+          v-if="icon"
+          :size="32"
+        >
           <component :is="icon" />
         </el-icon>
       </slot>
     </div>
     <div class="stats-info">
       <p class="stats-value">
-        <slot name="value">{{ value }}</slot>
+        <slot name="value">
+          {{ value }}
+        </slot>
       </p>
       <p class="stats-label">
-        <slot name="label">{{ title }}</slot>
+        <slot name="label">
+          {{ title }}
+        </slot>
       </p>
-      <p class="stats-trend" v-if="trend || $slots.trend">
-        <slot name="trend">{{ trend }}</slot>
+      <p
+        v-if="trend || $slots.trend"
+        class="stats-trend"
+      >
+        <slot name="trend">
+          {{ trend }}
+        </slot>
       </p>
     </div>
   </div>
