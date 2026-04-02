@@ -356,6 +356,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { getPromotionStatusType } from '@/utils/status'
 import {
   getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion,
   getPromotionRules, createPromotionRules, updatePromotionRule, deletePromotionRule,
@@ -365,9 +366,11 @@ import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { t } from '@/plugins/i18n'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
 const route = useRoute()
+const { handleError } = useErrorHandler()
 
 const formRef = ref()
 const loading = ref(false)
@@ -424,8 +427,7 @@ const loadPromotion = async () => {
     promotionForm.per_user_limit = res.per_user_limit || 0
     promotionForm.status = res.status
   } catch (error) {
-    console.error('Failed to load promotion:', error)
-    ElMessage.error(t('promotions.loadPromotionFailed'))
+    handleError(error, t('promotions.loadPromotionFailed'))
   } finally {
     loading.value = false
   }
@@ -436,8 +438,7 @@ const loadCategories = async () => {
     const res = await getCategories()
     categoryOptions.value = (res.list || []).map(c => ({ id: c.id, name: c.name }))
   } catch (error) {
-    console.error('Failed to load categories:', error)
-    ElMessage.error(t('promotions.loadCategoriesFailed'))
+    handleError(error, t('promotions.loadCategoriesFailed'))
   }
 }
 
@@ -447,8 +448,7 @@ const searchProducts = async (query: string) => {
     const res = await getProductList({ page: 1, page_size: 20, name: query })
     productOptions.value = (res.list || []).map(p => ({ id: p.id, name: p.name }))
   } catch (error) {
-    console.error('Failed to search products:', error)
-    ElMessage.error(t('promotions.searchProductsFailed'))
+    handleError(error, t('promotions.searchProductsFailed'))
   }
 }
 
@@ -489,8 +489,7 @@ const handleSave = async () => {
         router.push('/promotions')
       }
     } catch (error) {
-      console.error('Failed to save promotion:', error)
-      ElMessage.error(t('promotions.savePromotionFailed'))
+      handleError(error, t('promotions.savePromotionFailed'))
     } finally {
       saving.value = false
     }
@@ -504,8 +503,7 @@ const handleActivate = async () => {
     ElMessage.success(t('promotions.activateSuccess'))
     promotionForm.status = 'active'
   } catch (error) {
-    console.error('Failed to activate:', error)
-    ElMessage.error(t('promotions.activatePromotionFailed'))
+    handleError(error, t('promotions.activatePromotionFailed'))
   } finally {
     activating.value = false
   }
@@ -518,8 +516,7 @@ const handleDeactivate = async () => {
     ElMessage.success(t('promotions.deactivateSuccess'))
     promotionForm.status = 'paused'
   } catch (error) {
-    console.error('Failed to deactivate:', error)
-    ElMessage.error(t('promotions.deactivatePromotionFailed'))
+    handleError(error, t('promotions.deactivatePromotionFailed'))
   } finally {
     activating.value = false
   }
@@ -537,15 +534,7 @@ const formatDateTime = (dateStr: string) => {
   })
 }
 
-const getStatusType = (status: string) => {
-  const types: Record<string, string> = {
-    'active': 'success',
-    'paused': 'warning',
-    'pending': 'info',
-    'ended': 'info'
-  }
-  return types[status] || 'info'
-}
+const getStatusType = getPromotionStatusType
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
@@ -589,8 +578,7 @@ const loadRules = async () => {
     const res = await getPromotionRules(promotionId.value)
     rulesList.value = res.list || []
   } catch (error) {
-    console.error('Failed to load rules:', error)
-    ElMessage.error(t('promotions.loadRulesFailed'))
+    handleError(error, t('promotions.loadRulesFailed'))
   } finally {
     rulesLoading.value = false
   }
@@ -630,8 +618,7 @@ const handleDeleteRule = async (rule: PromotionRule) => {
     loadRules()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete rule:', error)
-      ElMessage.error(t('promotions.deleteRuleFailed'))
+      handleError(error, t('promotions.deleteRuleFailed'))
     }
   }
 }
@@ -658,8 +645,7 @@ const handleSaveRule = async () => {
     ruleDialogVisible.value = false
     loadRules()
   } catch (error) {
-    console.error('Failed to save rule:', error)
-    ElMessage.error(editingRule.value ? t('promotions.updateRuleFailed') : t('promotions.createRuleFailed'))
+    handleError(error, editingRule.value ? t('promotions.updateRuleFailed') : t('promotions.createRuleFailed'))
   } finally {
     ruleSaving.value = false
   }

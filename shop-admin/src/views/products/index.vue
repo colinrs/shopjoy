@@ -517,7 +517,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
 import { getProductList, getProduct, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, exportProductsUrl, batchUpdateProducts, type Product, type ListProductsParams, type BatchUpdateProductRequest } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
@@ -528,8 +528,10 @@ import Table from '@/components/common/Table.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -629,7 +631,7 @@ const handleExport = async () => {
 
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Export failed:', error)
+    handleError(error)
     // Error message is handled by downloadFile utility
   } finally {
     loading.value = false
@@ -651,7 +653,7 @@ const handleAdd = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = (row: any) => {
+const handleEdit = (row: Product) => {
   router.push(`/products/${row.id}`)
 }
 
@@ -668,8 +670,7 @@ const handlePreview = async (row: Product) => {
     const freshProduct = await getProduct(row.id)
     previewProduct.value = freshProduct
   } catch (error) {
-    console.error('Failed to load product for preview:', error)
-    ElMessage.error(t('products.previewLoadFailed'))
+    handleError(error, t('products.previewLoadFailed'))
     previewDialogVisible.value = false
   } finally {
     previewLoading.value = false
@@ -713,8 +714,7 @@ const handleCommand = async (cmd: string, row: Product) => {
         // Navigate to edit the new product
         router.push(`/products/${response.id}`)
       } catch (error) {
-        console.error('Failed to copy product:', error)
-        ElMessage.error(t('products.copyFailed'))
+        handleError(error, t('products.copyFailed'))
       }
       break
     case 'top':
@@ -741,9 +741,8 @@ const handleDelete = async (row: Product) => {
     ElMessage.success(t('products.deleteSuccess'))
     loadProducts()
   } catch (error) {
-    console.error('Failed to delete product:', error)
-    if ((error as any) !== 'cancel') {
-      ElMessage.error(t('products.deleteFailed'))
+    if ((error as Error).message !== 'cancel') {
+      handleError(error, t('products.deleteFailed'))
     }
   }
 }
@@ -759,15 +758,14 @@ const handleStatusChange = async (row: Product, val: string) => {
     ElMessage.success(t(statusKey))
     loadProducts()
   } catch (error) {
-    console.error('Failed to update status:', error)
     const errorKey = val === 'on_sale' ? 'products.onSaleFailed' : 'products.offSaleFailed'
-    ElMessage.error(t(errorKey))
+    handleError(error, t(errorKey))
     // Revert the switch
     row.status = val === 'on_sale' ? 'off_sale' : 'on_sale'
   }
 }
 
-const handleSelectionChange = (selection: any[]) => {
+const handleSelectionChange = (selection: Product[]) => {
   selectedProducts.value = selection
 }
 
@@ -799,8 +797,7 @@ const handleBatchOnSale = async () => {
     selectedProducts.value = []
     loadProducts()
   } catch (error) {
-    console.error('Failed to batch put on sale:', error)
-    ElMessage.error(t('products.batchOnSaleFailed'))
+    handleError(error, t('products.batchOnSaleFailed'))
   }
 }
 
@@ -827,8 +824,7 @@ const handleBatchOffSale = async () => {
     selectedProducts.value = []
     loadProducts()
   } catch (error) {
-    console.error('Failed to batch take off sale:', error)
-    ElMessage.error(t('products.batchOffSaleFailed'))
+    handleError(error, t('products.batchOffSaleFailed'))
   }
 }
 
@@ -859,9 +855,8 @@ const handleBatchDelete = async () => {
     selectedProducts.value = []
     loadProducts()
   } catch (error) {
-    console.error('Failed to batch delete:', error)
-    if ((error as any)?.message !== 'cancel') {
-      ElMessage.error(t('products.batchDeleteFailed'))
+    if ((error as Error)?.message !== 'cancel') {
+      handleError(error, t('products.batchDeleteFailed'))
     }
   }
 }
@@ -914,8 +909,7 @@ const handleConfirmPushToMarket = async () => {
     ElMessage.success(t('products.pushToMarketSuccess', { success: successCount, failed: failCount }))
     loadProducts()
   } catch (error) {
-    console.error('Failed to push to market:', error)
-    ElMessage.error(t('products.pushToMarketFailed'))
+    handleError(error, t('products.pushToMarketFailed'))
   } finally {
     pushToMarketLoading.value = false
   }
@@ -952,8 +946,7 @@ const handleSave = async () => {
         ElMessage.success(t('products.addSuccess'))
         loadProducts()
       } catch (error) {
-        console.error('Failed to create product:', error)
-        ElMessage.error(t('products.addFailed'))
+        handleError(error, t('products.addFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -961,13 +954,16 @@ const handleSave = async () => {
   })
 }
 
-const handleImageChange = async (file: any) => {
+const handleImageChange = async (file: UploadFile) => {
   try {
+    if (!file.raw) {
+      handleError(new Error('No file to upload'), t('products.imageUploadFailed'))
+      return
+    }
     const response = await uploadImage(file.raw, 'product')
     productForm.image = response.url
   } catch (error) {
-    console.error('Upload failed:', error)
-    ElMessage.error(t('products.imageUploadFailed'))
+    handleError(error, t('products.imageUploadFailed'))
   }
 }
 
@@ -991,8 +987,7 @@ const loadMarkets = async () => {
     const response = await getMarkets()
     markets.value = response.list || []
   } catch (error) {
-    console.error('Failed to load markets:', error)
-    ElMessage.error(t('products.loadMarketsFailed'))
+    handleError(error, t('products.loadMarketsFailed'))
   }
 }
 
@@ -1001,8 +996,7 @@ const fetchCategories = async () => {
     const response = await getCategoryTree()
     categories.value = response || []
   } catch (error) {
-    console.error('Failed to load categories:', error)
-    ElMessage.error(t('products.loadCategoriesFailed'))
+    handleError(error, t('products.loadCategoriesFailed'))
   }
 }
 
@@ -1031,8 +1025,7 @@ const loadProducts = async () => {
     productList.value = response.list || []
     total.value = response.total || 0
   } catch (error) {
-    console.error('Failed to load products:', error)
-    ElMessage.error(t('products.loadFailed'))
+    handleError(error, t('products.loadFailed'))
   } finally {
     loading.value = false
   }

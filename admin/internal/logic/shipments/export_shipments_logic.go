@@ -48,9 +48,9 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 
 	// Build query request with large page size for export
 	queryReq := appfulfillment.QueryShipmentRequest{
-		Page:      1,
-		PageSize:  10001, // Check if exceeds limit
-		TrackingNo: req.TrackingNo,
+		Page:        1,
+		PageSize:    10001, // Check if exceeds limit
+		TrackingNo:  req.TrackingNo,
 		CarrierCode: req.CarrierCode,
 	}
 

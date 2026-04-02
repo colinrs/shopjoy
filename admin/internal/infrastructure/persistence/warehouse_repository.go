@@ -37,7 +37,7 @@ func (warehouseModel) TableName() string {
 
 func (m *warehouseModel) toEntity() *product.Warehouse {
 	return &product.Warehouse{
-		Model:    application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model:     application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:  shared.TenantID(m.TenantID),
 		Code:      m.Code,
 		Name:      m.Name,

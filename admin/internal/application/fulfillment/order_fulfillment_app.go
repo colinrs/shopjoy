@@ -17,9 +17,9 @@ import (
 // OrderValidationInfo represents order information needed for shipment validation
 type OrderValidationInfo struct {
 	OrderID           int64
-	Status            string        // Order status: pending_payment, paid, shipped, etc.
-	FulfillmentStatus int8          // Fulfillment status: pending, partial_shipped, shipped, delivered
-	IsPaid            bool          // Whether order is paid
+	Status            string // Order status: pending_payment, paid, shipped, etc.
+	FulfillmentStatus int8   // Fulfillment status: pending, partial_shipped, shipped, delivered
+	IsPaid            bool   // Whether order is paid
 	Items             []OrderItemInfo
 }
 
@@ -183,14 +183,14 @@ type OrderFulfillmentApp interface {
 
 // ShipOrderRequest 发货请求
 type ShipOrderRequest struct {
-	CarrierCode   string
-	CarrierName   string
-	TrackingNo    string
-	ShippingCost  decimal.Decimal
-	Currency      string
-	Weight        decimal.Decimal
-	Remark        string
-	Items         []CreateShipmentItemRequest
+	CarrierCode  string
+	CarrierName  string
+	TrackingNo   string
+	ShippingCost decimal.Decimal
+	Currency     string
+	Weight       decimal.Decimal
+	Remark       string
+	Items        []CreateShipmentItemRequest
 }
 
 type orderFulfillmentApp struct {
@@ -516,20 +516,20 @@ func (a *orderFulfillmentApp) ExportOrders(ctx context.Context, tenantID shared.
 	rows := make([]*fulfillment.OrderExportRow, len(orders))
 	for i, o := range orders {
 		rows[i] = &fulfillment.OrderExportRow{
-			OrderNo:          o.OrderNo,
-			Status:           o.Status.Text(),
+			OrderNo:           o.OrderNo,
+			Status:            o.Status.Text(),
 			FulfillmentStatus: o.FulfillmentStatus.Text(),
-			RefundStatus:     o.RefundStatus.Text(),
-			TotalAmount:      o.TotalAmount,
-			DiscountAmount:   o.DiscountAmount,
-			ShippingFee:      o.ShippingFee,
-			PayAmount:        o.PayAmount,
-			ReceiverName:     o.ReceiverName,
-			ReceiverPhone:    o.ReceiverPhone,
-			ReceiverAddress:  o.ReceiverAddress,
-			PaymentMethod:    o.PaymentMethod,
-			CreatedAt:        o.Audit.CreatedAt,
-			PaidAt:           o.PaidAt,
+			RefundStatus:      o.RefundStatus.Text(),
+			TotalAmount:       o.TotalAmount,
+			DiscountAmount:    o.DiscountAmount,
+			ShippingFee:       o.ShippingFee,
+			PayAmount:         o.PayAmount,
+			ReceiverName:      o.ReceiverName,
+			ReceiverPhone:     o.ReceiverPhone,
+			ReceiverAddress:   o.ReceiverAddress,
+			PaymentMethod:     o.PaymentMethod,
+			CreatedAt:         o.Audit.CreatedAt,
+			PaidAt:            o.PaidAt,
 		}
 	}
 

@@ -381,6 +381,7 @@ export interface ExportProductsParams {
   min_price?: string
   max_price?: string
   market_id?: number
+  [key: string]: unknown
 }
 
 /**

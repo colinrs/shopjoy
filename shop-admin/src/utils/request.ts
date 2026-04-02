@@ -25,7 +25,9 @@ axiosInstance.interceptors.request.use(
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
-    config.headers['X-Tenant-ID'] = '1'
+    // Use tenant_id from userInfo if available, otherwise fall back to localStorage or default '1'
+    const tenantId = userStore.userInfo?.tenant_id || localStorage.getItem('tenant_id') || '1'
+    config.headers['X-Tenant-ID'] = String(tenantId)
     return config
   },
   (error: AxiosError) => {
@@ -33,49 +35,52 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// Response interceptor
-axiosInstance.interceptors.response.use(
-  (response): any => {
-    const res = response.data as ApiResponse
+// Response interceptor - intentionally unwraps ApiResponse to return just data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const responseInterceptor = (response: any): unknown => {
+  const res = response.data as ApiResponse
 
-    // Business error code check (code !== 0)
-    if (res.code !== 0) {
-      const errorResponse: ErrorResponse = {
-        code: res.code,
-        msg: res.msg,
-        httpStatus: response.status,
-        data: res.data
-      }
-
-      const errorConfig = handleAdminError(errorResponse)
-
-      // Handle based on action type
-      switch (errorConfig.action) {
-        case 'logout':
-          ElMessage.error(errorConfig.message)
-          const userStore = useUserStore()
-          userStore.clearToken()
-          window.location.href = errorConfig.redirectPath || '/login'
-          break
-        case 'redirect':
-          ElMessage.error(errorConfig.message)
-          window.location.href = errorConfig.redirectPath || '/'
-          break
-        case 'toast':
-          ElMessage.error(errorConfig.message)
-          break
-        case 'none':
-          // Silent handling
-          break
-        default:
-          ElMessage.error(errorConfig.message)
-      }
-
-      return Promise.reject(new Error(errorConfig.message))
+  // Business error code check (code !== 0)
+  if (res.code !== 0) {
+    const errorResponse: ErrorResponse = {
+      code: res.code,
+      msg: res.msg,
+      httpStatus: response.status,
+      data: res.data
     }
 
-    return res.data
-  },
+    const errorConfig = handleAdminError(errorResponse)
+
+    // Handle based on action type
+    switch (errorConfig.action) {
+      case 'logout':
+        ElMessage.error(errorConfig.message)
+        const userStore = useUserStore()
+        userStore.clearToken()
+        window.location.href = errorConfig.redirectPath || '/login'
+        break
+      case 'redirect':
+        ElMessage.error(errorConfig.message)
+        window.location.href = errorConfig.redirectPath || '/'
+        break
+      case 'toast':
+        ElMessage.error(errorConfig.message)
+        break
+      case 'none':
+        // Silent handling
+        break
+      default:
+        ElMessage.error(errorConfig.message)
+    }
+
+    return Promise.reject(new Error(errorConfig.message))
+  }
+
+  return res.data
+}
+
+axiosInstance.interceptors.response.use(
+  responseInterceptor as any,
   (error: AxiosError<ApiResponse>) => {
     const { response } = error
 
@@ -118,13 +123,13 @@ axiosInstance.interceptors.response.use(
 )
 
 // Export typed request wrapper
-const request = Object.assign(
-  (config: AxiosRequestConfig) => axiosInstance(config) as Promise<any>,
+const request: RequestInstance = Object.assign(
+  (config: AxiosRequestConfig) => axiosInstance(config),
   {
-    get: (url: string, config?: AxiosRequestConfig) => axiosInstance.get(url, config) as Promise<any>,
-    post: (url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.post(url, data, config) as Promise<any>,
-    put: (url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.put(url, data, config) as Promise<any>,
-    delete: (url: string, config?: AxiosRequestConfig) => axiosInstance.delete(url, config) as Promise<any>
+    get: <T = unknown>(url: string, config?: AxiosRequestConfig) => axiosInstance.get(url, config) as Promise<T>,
+    post: <T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.post(url, data, config) as Promise<T>,
+    put: <T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig) => axiosInstance.put(url, data, config) as Promise<T>,
+    delete: <T = unknown>(url: string, config?: AxiosRequestConfig) => axiosInstance.delete(url, config) as Promise<T>
   }
 ) as RequestInstance
 

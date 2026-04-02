@@ -13,14 +13,14 @@ type CarrierApp interface {
 }
 
 type carrierApp struct {
-	db         *gorm.DB
+	db          *gorm.DB
 	carrierRepo fulfillment.CarrierRepository
 }
 
 // NewCarrierApp 创建物流公司应用服务
 func NewCarrierApp(db *gorm.DB, carrierRepo fulfillment.CarrierRepository) CarrierApp {
 	return &carrierApp{
-		db:         db,
+		db:          db,
 		carrierRepo: carrierRepo,
 	}
 }

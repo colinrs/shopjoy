@@ -70,8 +70,10 @@ import { Check } from '@element-plus/icons-vue'
 import { updateProductMarket, type ProductMarket } from '@/api/product'
 import { t } from '@/plugins/i18n'
 import type { ProductPricingTabProps, ProductPricingTabEmits, PricingRowData } from '../types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductPricingTabProps>()
+const { handleError } = useErrorHandler()
 const emit = defineEmits<ProductPricingTabEmits>()
 
 const pricingData = ref<PricingRowData[]>([])
@@ -111,8 +113,7 @@ const handleSavePricing = async () => {
     ElMessage.success(t('products.savePricingSuccess'))
     emit('refresh')
   } catch (error) {
-    console.error('Failed to save pricing:', error)
-    ElMessage.error(t('products.savePricingFailed'))
+    handleError(error, t('products.savePricingFailed'))
   } finally {
     pricingSaveLoading.value = false
   }

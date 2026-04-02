@@ -91,8 +91,10 @@ import { Edit } from '@element-plus/icons-vue'
 import { getSKUInventory, getInventoryLogs, type SKUInventory, type InventoryLog } from '@/api/inventory'
 import { t } from '@/plugins/i18n'
 import type { ProductInventoryTabProps, ProductInventoryTabEmits } from '../types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductInventoryTabProps>()
+const { handleError } = useErrorHandler()
 const emit = defineEmits<ProductInventoryTabEmits>()
 
 const inventoryLoading = ref(false)
@@ -120,7 +122,7 @@ const loadInventoryData = async () => {
     inventoryLogs.value = logs.list || []
     inventoryLogsTotal.value = logs.total || 0
   } catch (error) {
-    console.error('Failed to load inventory:', error)
+    handleError(error)
   } finally {
     inventoryLoading.value = false
   }

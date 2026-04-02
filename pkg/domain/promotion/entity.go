@@ -46,11 +46,11 @@ func (s Status) String() string {
 type Type int
 
 const (
-	TypeDiscount Type = iota // 0 - Generic discount (FIXED_DISCOUNT)
-	TypeFlashSale            // 1 - Flash sale (Phase 2)
-	TypeBundle               // 2 - Bundle promotion (Phase 2)
-	TypeBuyXGetY             // 3 - Buy X Get Y (Phase 2)
-	TypeFullReduce           // 4 - Tiered full reduction (NEW for MVP)
+	TypeDiscount   Type = iota // 0 - Generic discount (FIXED_DISCOUNT)
+	TypeFlashSale              // 1 - Flash sale (Phase 2)
+	TypeBundle                 // 2 - Bundle promotion (Phase 2)
+	TypeBuyXGetY               // 3 - Buy X Get Y (Phase 2)
+	TypeFullReduce             // 4 - Tiered full reduction (NEW for MVP)
 )
 
 func (t Type) IsValid() bool {
@@ -183,8 +183,8 @@ type PromotionRule struct {
 	ConditionType  ConditionType   `json:"condition_type"`
 	ConditionValue decimal.Decimal `json:"condition_value"` // Threshold: amount for MIN_AMOUNT, count for MIN_QUANTITY
 	ActionType     ActionType      `json:"action_type"`
-	ActionValue    decimal.Decimal `json:"action_value"`    // Discount: amount for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
-	MaxDiscount    decimal.Decimal `json:"max_discount"`    // Maximum discount cap for percentage
+	ActionValue    decimal.Decimal `json:"action_value"` // Discount: amount for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
+	MaxDiscount    decimal.Decimal `json:"max_discount"` // Maximum discount cap for percentage
 	Currency       string          `json:"currency"`
 	SortOrder      int             `json:"sort_order"`
 	CreatedAt      time.Time       `json:"created_at"`
@@ -245,7 +245,7 @@ type Promotion struct {
 	Currency    string           `json:"currency"`
 	Rules       []PromotionRule  `json:"rules,omitempty"`
 	Audit       shared.AuditInfo `json:"audit"`
-	DeletedAt   *int64          `json:"deleted_at,omitempty"`
+	DeletedAt   *int64           `json:"deleted_at,omitempty"`
 }
 
 func (p *Promotion) TableName() string {

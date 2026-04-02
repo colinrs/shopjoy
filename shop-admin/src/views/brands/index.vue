@@ -190,8 +190,10 @@ import {
   toggleBrandPage,
   type Brand
 } from '@/api/brand'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 const router = useRouter()
 
 const loading = ref(false)
@@ -279,8 +281,7 @@ const handleDelete = (row: Brand) => {
       ElMessage.success(t('brands.deleteSuccess'))
       loadBrands()
     } catch (error) {
-      console.error('Failed to delete brand:', error)
-      ElMessage.error(t('brands.deleteFailed'))
+      handleError(error, t('brands.deleteFailed'))
     }
   })
 }
@@ -290,8 +291,7 @@ const handleStatusChange = async (row: Brand, status: number) => {
     await updateBrandStatus(row.id, status)
     ElMessage.success(status === 1 ? t('brands.enabledSuccess') : t('brands.disabledSuccess'))
   } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error(t('brands.operationFailed'))
+    handleError(error, t('brands.operationFailed'))
     row.status = status === 1 ? 0 : 1
   }
 }
@@ -301,8 +301,7 @@ const handleTogglePage = async (row: Brand, enabled: boolean) => {
     await toggleBrandPage(row.id, enabled)
     ElMessage.success(enabled ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
   } catch (error) {
-    console.error('Failed to toggle page:', error)
-    ElMessage.error(t('brands.operationFailed'))
+    handleError(error, t('brands.operationFailed'))
     row.enable_page = enabled ? 0 : 1
   }
 }
@@ -343,8 +342,7 @@ const handleSave = async () => {
         dialogVisible.value = false
         loadBrands()
       } catch (error) {
-        console.error('Failed to save brand:', error)
-        ElMessage.error(isEdit.value ? t('brands.updateFailed') : t('brands.createFailed'))
+        handleError(error, isEdit.value ? t('brands.updateFailed') : t('brands.createFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -374,8 +372,7 @@ const loadBrands = async () => {
     brandList.value = response.list || []
     total.value = response.total || 0
   } catch (error) {
-    console.error('Failed to load brands:', error)
-    ElMessage.error(t('brands.loadFailed'))
+    handleError(error, t('brands.loadFailed'))
   } finally {
     loading.value = false
   }

@@ -9,14 +9,14 @@ import (
 
 // PaymentStatsDTO represents payment statistics
 type PaymentStatsDTO struct {
-	TodayReceived       string                  `json:"today_received"`
-	TodayGrowth         string                  `json:"today_growth"`
-	PeriodReceived      string                  `json:"period_received"`
-	RefundAmount        string                  `json:"refund_amount"`
-	RefundRate          string                  `json:"refund_rate"`
-	Currency            string                  `json:"currency"`
+	TodayReceived       string                   `json:"today_received"`
+	TodayGrowth         string                   `json:"today_growth"`
+	PeriodReceived      string                   `json:"period_received"`
+	RefundAmount        string                   `json:"refund_amount"`
+	RefundRate          string                   `json:"refund_rate"`
+	Currency            string                   `json:"currency"`
 	ChannelDistribution []ChannelDistributionDTO `json:"channel_distribution"`
-	Stats               TransactionStatsDTO     `json:"stats"`
+	Stats               TransactionStatsDTO      `json:"stats"`
 }
 
 // ChannelDistributionDTO represents channel distribution
@@ -49,10 +49,10 @@ type ListTransactionsRequest struct {
 
 // ListTransactionsResponse represents the response for listing transactions
 type ListTransactionsResponse struct {
-	List     []*TransactionDTO `json:"list"`
-	Total    int64             `json:"total"`
-	Page     int               `json:"page"`
-	PageSize int               `json:"page_size"`
+	List     []*TransactionDTO   `json:"list"`
+	Total    int64               `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 	Stats    TransactionStatsDTO `json:"stats"`
 }
 
@@ -76,21 +76,21 @@ type TransactionDTO struct {
 
 // OrderPaymentDTO represents payment details for an order
 type OrderPaymentDTO struct {
-	PaymentID         int64                `json:"payment_id"`
-	PaymentNo         string               `json:"payment_no"`
-	PaymentMethod     string               `json:"payment_method"`
-	PaymentMethodText string               `json:"payment_method_text"`
-	ChannelIntentID   string               `json:"channel_intent_id"`
-	ChannelPaymentID  string               `json:"channel_payment_id"`
-	Amount            string               `json:"amount"`
-	Currency          string               `json:"currency"`
-	TransactionFee    string               `json:"transaction_fee"`
-	FeeCurrency       string               `json:"fee_currency"`
-	Status            int8                 `json:"status"`
-	StatusText        string               `json:"status_text"`
-	PaidAt            string               `json:"paid_at,optional"`
-	RefundedAmount    string               `json:"refunded_amount"`
-	Refunds           []*PaymentRefundDTO  `json:"refunds"`
+	PaymentID         int64               `json:"payment_id"`
+	PaymentNo         string              `json:"payment_no"`
+	PaymentMethod     string              `json:"payment_method"`
+	PaymentMethodText string              `json:"payment_method_text"`
+	ChannelIntentID   string              `json:"channel_intent_id"`
+	ChannelPaymentID  string              `json:"channel_payment_id"`
+	Amount            string              `json:"amount"`
+	Currency          string              `json:"currency"`
+	TransactionFee    string              `json:"transaction_fee"`
+	FeeCurrency       string              `json:"fee_currency"`
+	Status            int8                `json:"status"`
+	StatusText        string              `json:"status_text"`
+	PaidAt            string              `json:"paid_at,optional"`
+	RefundedAmount    string              `json:"refunded_amount"`
+	Refunds           []*PaymentRefundDTO `json:"refunds"`
 }
 
 // PaymentRefundDTO represents a payment refund

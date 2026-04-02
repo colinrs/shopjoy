@@ -315,6 +315,7 @@ type Repository interface {
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Product, int64, error)
 	UpdateStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, delta int) error
 	Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (bool, error)
+	CountTotal(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
 }
 
 // Query 查询条件（值对象）

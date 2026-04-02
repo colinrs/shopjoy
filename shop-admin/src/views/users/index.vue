@@ -278,8 +278,10 @@ import {
 } from '@/api/user'
 import Table from '@/components/common/Table.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 const loading = ref(false)
 const editLoading = ref(false)
 const exportLoading = ref(false)
@@ -363,8 +365,7 @@ const loadUsers = async () => {
       total.value = res.total || 0
     }
   } catch (error) {
-    console.error('Failed to load users:', error)
-    ElMessage.error(t('users.loadFailed'))
+    handleError(error, t('users.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -376,8 +377,7 @@ const loadStats = async () => {
     const res = await getUserStats()
     stats.value = res
   } catch (error) {
-    console.error('Failed to load stats:', error)
-    ElMessage.error(t('users.loadStatsFailed'))
+    handleError(error, t('users.loadStatsFailed'))
   }
 }
 
@@ -418,8 +418,7 @@ const confirmEdit = async () => {
     editDialogVisible.value = false
     loadUsers()
   } catch (error) {
-    console.error('Failed to update user:', error)
-    ElMessage.error(t('users.updateFailed'))
+    handleError(error, t('users.updateFailed'))
   } finally {
     editLoading.value = false
   }
@@ -448,8 +447,7 @@ const handleExport = async () => {
     window.URL.revokeObjectURL(url)
     ElMessage.success(t('users.exportSuccess'))
   } catch (error) {
-    console.error('Failed to export users:', error)
-    ElMessage.error(t('users.exportFailed'))
+    handleError(error, t('users.exportFailed'))
   } finally {
     exportLoading.value = false
   }
@@ -488,8 +486,7 @@ const handleStatusChange = async (row: User, val: boolean) => {
     loadUsers()
     loadStats()
   } catch (error) {
-    console.error('Failed to change status:', error)
-    ElMessage.error(t('users.operationFailed'))
+    handleError(error, t('users.operationFailed'))
   }
 }
 
@@ -507,8 +504,7 @@ const handleResetPassword = (row: User) => {
       const res = await resetUserPassword(row.id)
       ElMessage.success(`${t('users.passwordResetSuccess')}: ${res.temporary_password}`)
     } catch (error) {
-      console.error('Failed to reset password:', error)
-      ElMessage.error(t('users.passwordResetFailed'))
+      handleError(error, t('users.passwordResetFailed'))
     }
   })
 }
@@ -529,8 +525,7 @@ const handleDelete = (row: User) => {
       loadUsers()
       loadStats()
     } catch (error) {
-      console.error('Failed to delete user:', error)
-      ElMessage.error(t('users.deleteFailed'))
+      handleError(error, t('users.deleteFailed'))
     }
   })
 }
@@ -558,8 +553,7 @@ const handleBatchActivate = async () => {
     loadUsers()
     loadStats()
   } catch (error) {
-    console.error('Failed to batch activate users:', error)
-    ElMessage.error(t('users.batchActivateFailed'))
+    handleError(error, t('users.batchActivateFailed'))
   }
 }
 

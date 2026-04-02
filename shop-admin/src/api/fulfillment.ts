@@ -14,7 +14,9 @@ export const ShipmentStatusMap = {
   CANCELLED: '5'
 } as const
 
-export type FulfillmentStatus = 'pending' | 'partial_shipped' | 'shipped' | 'delivered'
+// Re-export FulfillmentStatus from order.ts to avoid duplication
+// FulfillmentStatus: 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
+export type { FulfillmentStatus } from './order'
 
 export type RefundType = 'full_refund' | 'partial_refund'
 
@@ -297,6 +299,7 @@ export interface ExportRefundsParams {
   reason_type?: string
   start_time?: string
   end_time?: string
+  [key: string]: unknown
 }
 
 export interface ExportShipmentsParams {
@@ -305,12 +308,14 @@ export interface ExportShipmentsParams {
   carrier_code?: string
   start_time?: string
   end_time?: string
+  [key: string]: unknown
 }
 
 export interface ExportFulfillmentStatisticsParams {
   period?: string
   start_date?: string
   end_date?: string
+  [key: string]: unknown
 }
 
 /**

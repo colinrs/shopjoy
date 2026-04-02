@@ -46,8 +46,7 @@ export function useApi<T>(
   options: ApiOptions<T> = {}
 ): ApiResult<T> {
   const loading = ref(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = ref<any>(options.defaultValue)
+  const data = ref<T | undefined>(options.defaultValue)
   const error = ref<Error | null>(null)
 
   const execute = async (...args: unknown[]): Promise<T | undefined> => {
@@ -83,7 +82,7 @@ export function useApi<T>(
 
   return {
     loading,
-    data,
+    data: data as Ref<T | undefined>,
     error,
     execute
   }

@@ -220,8 +220,10 @@ import {
   type Brand
 } from '@/api/brand'
 import { getMarkets, type Market } from '@/api/market'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
@@ -275,7 +277,7 @@ const loadMarketVisibility = async () => {
     const res = await getBrandMarketVisibility(brandId)
     marketVisibility.value = res.markets || []
   } catch (error) {
-    console.error('Failed to load market visibility:', error)
+    handleError(error)
   }
 }
 
@@ -291,7 +293,7 @@ const loadMarkets = async () => {
       selected: marketVisibility.value.some(v => v.market_id === m.id && v.is_visible)
     }))
   } catch (error) {
-    console.error('Failed to load markets:', error)
+    handleError(error)
   } finally {
     marketsLoading.value = false
   }
@@ -340,8 +342,7 @@ const handleSave = async () => {
         editDialogVisible.value = false
         loadBrand()
       } catch (error) {
-        console.error('Failed to update brand:', error)
-        ElMessage.error(t('brands.updateFailed'))
+        handleError(error, t('brands.updateFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -355,8 +356,7 @@ const handleTogglePage = async () => {
     await toggleBrandPage(brand.value.id, brand.value.enable_page === 1)
     ElMessage.success(brand.value.enable_page === 1 ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
   } catch (error) {
-    console.error('Failed to toggle page:', error)
-    ElMessage.error(t('brands.operationFailed'))
+    handleError(error, t('brands.operationFailed'))
     // Revert the change
     brand.value.enable_page = brand.value.enable_page === 1 ? 0 : 1
   }
@@ -371,8 +371,7 @@ const handleSaveMarketVisibility = async () => {
     showMarketDialog.value = false
     loadMarketVisibility()
   } catch (error) {
-    console.error('Failed to save market visibility:', error)
-    ElMessage.error(t('brands.updateFailed'))
+    handleError(error, t('brands.updateFailed'))
   } finally {
     savingMarket.value = false
   }

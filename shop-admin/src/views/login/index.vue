@@ -133,10 +133,14 @@ const handleLogin = async () => {
         })
         userStore.setToken(res.access_token)
         userStore.userInfo = res.user
+        // Persist tenant_id for session persistence
+        if (res.user.tenant_id) {
+          localStorage.setItem('tenant_id', String(res.user.tenant_id))
+        }
         ElMessage.success(t('login.loginSuccess'))
         router.push('/')
-      } catch (error: any) {
-        ElMessage.error(error.message || t('login.loginFailed'))
+      } catch (error: unknown) {
+        ElMessage.error((error as Error).message || t('login.loginFailed'))
       } finally {
         loading.value = false
       }

@@ -15,13 +15,13 @@
 
 <script setup lang="ts">
 import { FolderOpened } from '@element-plus/icons-vue'
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
 import { t } from '@/plugins/i18n'
 
 const props = withDefaults(defineProps<{
   title?: string
   description?: string
-  icon?: any
+  icon?: Component
 }>(), {
   title: '',
   description: '',

@@ -19,40 +19,40 @@ func NewOrderRepository() fulfillment.OrderRepository {
 }
 
 type orderModel struct {
-	ID               int64           `gorm:"column:id;primaryKey"`
-	TenantID         int64           `gorm:"column:tenant_id;not null;index"`
-	OrderNo          string          `gorm:"column:order_no;not null;uniqueIndex:uk_order_no"`
-	UserID           int64           `gorm:"column:user_id;not null;index"`
-	Status           string          `gorm:"column:status;not null;default:'pending_payment';index"`
-	FulfillmentStatus int8          `gorm:"column:fulfillment_status;not null;default:0;index"`
-	RefundStatus     int8            `gorm:"column:refund_status;not null;default:0;index"`
-	TotalAmount      decimal.Decimal `gorm:"column:total_amount;type:decimal(19,4);not null"`
-	DiscountAmount   decimal.Decimal `gorm:"column:discount_amount;type:decimal(19,4);not null"`
-	ShippingFee      decimal.Decimal `gorm:"column:shipping_fee;type:decimal(19,4);not null"`
-	PayAmount        decimal.Decimal `gorm:"column:pay_amount;type:decimal(19,4);not null"`
-	Currency         string          `gorm:"column:currency;not null;default:'CNY'"`
-	MerchantRemark   string          `gorm:"column:merchant_remark;not null;default:''"`
-	Remark           string          `gorm:"column:remark;not null;default:''"`
-	OriginalAmount   decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null;default:0"`
-	AdjustAmount     decimal.Decimal `gorm:"column:adjust_amount;type:decimal(19,4);not null;default:0"`
-	AdjustReason     string          `gorm:"column:adjust_reason;not null;default:''"`
-	AdjustedBy       int64            `gorm:"column:adjusted_by;not null;default:0"`
-	AdjustedAt       *int64           `gorm:"column:adjusted_at"`
-	Version          int              `gorm:"column:version;not null;default:1"`
-	PaymentMethod    string           `gorm:"column:payment_method;not null;default:''"`
-	Source           string           `gorm:"column:source;not null;default:''"`
-	ReceiverName     string           `gorm:"column:receiver_name;not null"`
-	ReceiverPhone    string           `gorm:"column:receiver_phone;not null"`
-	ReceiverAddress  string           `gorm:"column:receiver_address;not null"`
-	PaidAt           *int64           `gorm:"column:paid_at"`
-	ShippedAt        *int64           `gorm:"column:shipped_at"`
-	DeliveredAt      *int64           `gorm:"column:delivered_at"`
-	CancelledAt      *int64           `gorm:"column:cancelled_at"`
-	CreatedBy        int64            `gorm:"column:created_by;not null"`
-	UpdatedBy        int64            `gorm:"column:updated_by;not null"`
-	DeletedAt        *int64           `gorm:"column:deleted_at;index"`
-	CreatedAt        int64            `gorm:"column:created_at;not null"`
-	UpdatedAt        int64            `gorm:"column:updated_at;not null"`
+	ID                int64           `gorm:"column:id;primaryKey"`
+	TenantID          int64           `gorm:"column:tenant_id;not null;index"`
+	OrderNo           string          `gorm:"column:order_no;not null;uniqueIndex:uk_order_no"`
+	UserID            int64           `gorm:"column:user_id;not null;index"`
+	Status            string          `gorm:"column:status;not null;default:'pending_payment';index"`
+	FulfillmentStatus int8            `gorm:"column:fulfillment_status;not null;default:0;index"`
+	RefundStatus      int8            `gorm:"column:refund_status;not null;default:0;index"`
+	TotalAmount       decimal.Decimal `gorm:"column:total_amount;type:decimal(19,4);not null"`
+	DiscountAmount    decimal.Decimal `gorm:"column:discount_amount;type:decimal(19,4);not null"`
+	ShippingFee       decimal.Decimal `gorm:"column:shipping_fee;type:decimal(19,4);not null"`
+	PayAmount         decimal.Decimal `gorm:"column:pay_amount;type:decimal(19,4);not null"`
+	Currency          string          `gorm:"column:currency;not null;default:'CNY'"`
+	MerchantRemark    string          `gorm:"column:merchant_remark;not null;default:''"`
+	Remark            string          `gorm:"column:remark;not null;default:''"`
+	OriginalAmount    decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null;default:0"`
+	AdjustAmount      decimal.Decimal `gorm:"column:adjust_amount;type:decimal(19,4);not null;default:0"`
+	AdjustReason      string          `gorm:"column:adjust_reason;not null;default:''"`
+	AdjustedBy        int64           `gorm:"column:adjusted_by;not null;default:0"`
+	AdjustedAt        *int64          `gorm:"column:adjusted_at"`
+	Version           int             `gorm:"column:version;not null;default:1"`
+	PaymentMethod     string          `gorm:"column:payment_method;not null;default:''"`
+	Source            string          `gorm:"column:source;not null;default:''"`
+	ReceiverName      string          `gorm:"column:receiver_name;not null"`
+	ReceiverPhone     string          `gorm:"column:receiver_phone;not null"`
+	ReceiverAddress   string          `gorm:"column:receiver_address;not null"`
+	PaidAt            *int64          `gorm:"column:paid_at"`
+	ShippedAt         *int64          `gorm:"column:shipped_at"`
+	DeliveredAt       *int64          `gorm:"column:delivered_at"`
+	CancelledAt       *int64          `gorm:"column:cancelled_at"`
+	CreatedBy         int64           `gorm:"column:created_by;not null"`
+	UpdatedBy         int64           `gorm:"column:updated_by;not null"`
+	DeletedAt         *int64          `gorm:"column:deleted_at;index"`
+	CreatedAt         int64           `gorm:"column:created_at;not null"`
+	UpdatedAt         int64           `gorm:"column:updated_at;not null"`
 }
 
 func (orderModel) TableName() string {
@@ -282,15 +282,15 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 		Where("id = ? AND tenant_id = ? AND version = ? AND deleted_at IS NULL",
 			order.ID, order.TenantID.Int64(), order.Version).
 		Updates(map[string]interface{}{
-			"pay_amount":         model.PayAmount,
-			"adjust_amount":      model.AdjustAmount,
-			"adjust_reason":      model.AdjustReason,
-			"adjusted_by":        model.AdjustedBy,
-			"adjusted_at":        model.AdjustedAt,
-			"merchant_remark":    model.MerchantRemark,
-			"version":            gorm.Expr("version + 1"),
-			"updated_by":         model.UpdatedBy,
-			"updated_at":         model.UpdatedAt,
+			"pay_amount":      model.PayAmount,
+			"adjust_amount":   model.AdjustAmount,
+			"adjust_reason":   model.AdjustReason,
+			"adjusted_by":     model.AdjustedBy,
+			"adjusted_at":     model.AdjustedAt,
+			"merchant_remark": model.MerchantRemark,
+			"version":         gorm.Expr("version + 1"),
+			"updated_by":      model.UpdatedBy,
+			"updated_at":      model.UpdatedAt,
 		})
 
 	if result.Error != nil {
@@ -411,6 +411,146 @@ func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, tenantID sha
 	return orders, nil
 }
 
+// CountByStatus 按状态统计订单数量
+func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]fulfillment.OrderStatusCount, error) {
+	query := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64())
+
+	var results []fulfillment.OrderStatusCount
+	err := query.Select("status, COUNT(*) as count").
+		Group("status").
+		Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// FindPendingOrders 查询待付款订单
+func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+	var models []orderModel
+	err := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND status = ? AND deleted_at IS NULL", tenantID.Int64(), string(fulfillment.OrderStatusPendingPayment)).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]*fulfillment.Order, len(models))
+	for i, m := range models {
+		orders[i] = m.toEntity()
+	}
+	return orders, nil
+}
+
+// CountPendingOrders 统计待付款订单数量
+func (r *orderRepo) CountPendingOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+	var count int64
+	err := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND status = ? AND deleted_at IS NULL", tenantID.Int64(), string(fulfillment.OrderStatusPendingPayment)).
+		Count(&count).Error
+	return count, err
+}
+
+// FindRecentOrders 查询最近创建的订单
+func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+	var models []orderModel
+	err := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]*fulfillment.Order, len(models))
+	for i, m := range models {
+		orders[i] = m.toEntity()
+	}
+	return orders, nil
+}
+
+// FindRecentPaidOrders 查询最近已支付的订单
+func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+	var models []orderModel
+	err := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND paid_at IS NOT NULL AND deleted_at IS NULL", tenantID.Int64()).
+		Order("paid_at DESC").
+		Limit(limit).
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]*fulfillment.Order, len(models))
+	for i, m := range models {
+		orders[i] = m.toEntity()
+	}
+	return orders, nil
+}
+
+// SumGMVByDateRange 按日期范围统计GMV
+func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, start, end time.Time, statuses []fulfillment.OrderStatus) (decimal.Decimal, error) {
+	statusStrings := make([]string, len(statuses))
+	for i, s := range statuses {
+		statusStrings[i] = string(s)
+	}
+
+	query := db.WithContext(ctx).Model(&orderModel{}).
+		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
+			tenantID.Int64(), statusStrings, start.Unix(), end.Unix())
+
+	var result struct {
+		Total decimal.Decimal
+	}
+	err := query.Select("COALESCE(SUM(pay_amount), 0) as total").Scan(&result).Error
+	return result.Total, err
+}
+
+// FindTopProducts 查询热销商品
+func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, startTime time.Time, limit int) ([]*fulfillment.TopProduct, error) {
+	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
+
+	query := db.WithContext(ctx).Table("order_items oi").
+		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_price) as revenue").
+		Joins("JOIN orders o ON o.id = oi.order_id").
+		Where("o.tenant_id = ? AND o.status IN ? AND o.deleted_at IS NULL", tenantID.Int64(), statusStrings)
+
+	if !startTime.IsZero() {
+		query = query.Where("o.paid_at >= ?", startTime.Unix())
+	}
+
+	var results []*fulfillment.TopProduct
+	err := query.Group("oi.product_id, oi.product_name, oi.image").
+		Order("sales DESC").
+		Limit(limit).
+		Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// FindSalesTrend 查询销售趋势
+func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, startDate, endDate time.Time) ([]*fulfillment.DailySalesTrend, error) {
+	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
+
+	var results []*fulfillment.DailySalesTrend
+	err := db.WithContext(ctx).Model(&orderModel{}).
+		Select("FROM_UNIXTIME(paid_at, '%Y-%m-%d') as date, SUM(pay_amount) as sales, COUNT(*) as orders").
+		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
+			tenantID.Int64(), statusStrings, startDate.Unix(), endDate.Unix()).
+		Group("FROM_UNIXTIME(paid_at, '%Y-%m-%d')").
+		Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 // ==================== OrderItem Repository ====================
 
 type orderItemRepo struct{}
@@ -432,7 +572,7 @@ type orderItemModel struct {
 	UnitPrice   decimal.Decimal `gorm:"column:unit_price;type:decimal(19,4);not null"`
 	TotalPrice  decimal.Decimal `gorm:"column:total_price;type:decimal(19,4);not null"`
 	Currency    string          `gorm:"column:currency;not null;default:'CNY'"`
-	CreatedAt   int64            `gorm:"column:created_at;not null"`
+	CreatedAt   int64           `gorm:"column:created_at;not null"`
 }
 
 func (orderItemModel) TableName() string {

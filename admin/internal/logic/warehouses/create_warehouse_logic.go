@@ -51,7 +51,7 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 	}
 
 	warehouse := &product.Warehouse{
-		Model:    application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
+		Model:     application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:  shared.TenantID(tenantID),
 		Code:      req.Code,
 		Name:      req.Name,

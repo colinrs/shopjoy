@@ -30,7 +30,7 @@ func (t TenantID) IsValid() bool {
 // Money 金额（值对象）
 type Money struct {
 	Amount   decimal.Decimal // 单位为元，避免浮点数精度问题
-	Currency string         // 币种，如 CNY, USD
+	Currency string          // 币种，如 CNY, USD
 }
 
 // NewMoney 创建金额

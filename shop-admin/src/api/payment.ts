@@ -157,6 +157,7 @@ export interface ExportPaymentTransactionsParams {
   payment_method?: string
   start_time?: string
   end_time?: string
+  [key: string]: unknown
 }
 
 /**

@@ -150,7 +150,7 @@
 import { ref, watch, reactive, onMounted } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getProductList } from '@/api/product'
+import { getProductList, type Product } from '@/api/product'
 
 const props = defineProps<{
   blockType: string
@@ -172,10 +172,10 @@ const loadProducts = async () => {
   loadingProducts.value = true
   try {
     const response = await getProductList({ page: 1, page_size: 100 })
-    productOptions.value = response.list.map((p: any) => ({
+    productOptions.value = response.list.map((p: Product) => ({
       id: p.id,
       name: p.name,
-      sku_code: p.sku_code || ''
+      sku_code: p.sku || ''
     }))
   } catch (error) {
     console.error('Failed to load products:', error)

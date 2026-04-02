@@ -193,8 +193,10 @@ import {
   type Category
 } from '@/api/category'
 import { getMarkets, type Market } from '@/api/market'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
@@ -247,7 +249,7 @@ const loadMarketVisibility = async () => {
     const res = await getCategoryMarketVisibility(categoryId)
     marketVisibility.value = res.markets || []
   } catch (error) {
-    console.error('Failed to load market visibility:', error)
+    handleError(error)
   }
 }
 
@@ -263,7 +265,7 @@ const loadMarkets = async () => {
       selected: marketVisibility.value.some(v => v.market_id === m.id && v.is_visible)
     }))
   } catch (error) {
-    console.error('Failed to load markets:', error)
+    handleError(error)
   } finally {
     marketsLoading.value = false
   }
@@ -310,8 +312,7 @@ const handleSave = async () => {
         editDialogVisible.value = false
         loadCategory()
       } catch (error) {
-        console.error('Failed to update category:', error)
-        ElMessage.error(t('categories.updateFailed'))
+        handleError(error, t('categories.updateFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -328,8 +329,7 @@ const handleSaveMarketVisibility = async () => {
     showMarketDialog.value = false
     loadMarketVisibility()
   } catch (error) {
-    console.error('Failed to save market visibility:', error)
-    ElMessage.error(t('categories.updateFailed'))
+    handleError(error, t('categories.updateFailed'))
   } finally {
     savingMarket.value = false
   }

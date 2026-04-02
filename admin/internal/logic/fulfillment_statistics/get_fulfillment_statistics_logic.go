@@ -141,9 +141,9 @@ func (l *GetFulfillmentStatisticsLogic) GetFulfillmentStatistics(req *types.GetR
 
 	return &types.FulfillmentStatisticsResp{
 		Overview:           overview,
-		RefundRateTrend:     refundRateTrend,
-		RefundReasons:       refundReasons,
-		ProblemProducts:     problemProducts,
-		CarrierPerformance:  carrierPerformance,
+		RefundRateTrend:    refundRateTrend,
+		RefundReasons:      refundReasons,
+		ProblemProducts:    problemProducts,
+		CarrierPerformance: carrierPerformance,
 	}, nil
 }

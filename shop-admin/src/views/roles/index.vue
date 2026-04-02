@@ -172,8 +172,10 @@ import {
   type Permission,
   type ListRolesParams
 } from '@/api/role'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const loading = ref(false)
 const searchQuery = ref('')
@@ -223,9 +225,8 @@ const handleViewPermissions = async (row: Role) => {
     currentRolePermissions.value = res.permissions || []
     currentRole.value = row
     viewPermissionsVisible.value = true
-  } catch (e) {
-    console.error(e)
-    ElMessage.error(t('roles.loadPermissionsFailed'))
+  } catch (error) {
+    handleError(error, t('roles.loadPermissionsFailed'))
   }
 }
 
@@ -299,9 +300,8 @@ const loadData = async () => {
     const res = await getRoleList(params)
     tableData.value = res.list || []
     total.value = res.total || 0
-  } catch (e) {
-    console.error(e)
-    ElMessage.error(t('roles.loadFailed'))
+  } catch (error) {
+    handleError(error, t('roles.loadFailed'))
   } finally {
     loading.value = false
   }

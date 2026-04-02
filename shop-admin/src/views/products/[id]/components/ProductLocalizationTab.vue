@@ -66,8 +66,10 @@ import {
 } from '@/api/product'
 import { t } from '@/plugins/i18n'
 import type { ProductLocalizationTabProps, ProductLocalizationTabEmits, SupportedLanguage } from '../types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductLocalizationTabProps>()
+const { handleError } = useErrorHandler()
 const emit = defineEmits<ProductLocalizationTabEmits>()
 
 const localizationsLoading = ref(false)
@@ -100,8 +102,7 @@ const loadLocalizations = async () => {
       activeLanguage.value = localizations.value[0].language_code
     }
   } catch (error) {
-    console.error('Failed to load localizations:', error)
-    ElMessage.error(t('products.loadLocalizationsFailed'))
+    handleError(error, t('products.loadLocalizationsFailed'))
   } finally {
     localizationsLoading.value = false
   }
@@ -132,8 +133,7 @@ const handleCreateLocalization = async (langCode: string) => {
     loadLocalizations()
     emit('localizations-change')
   } catch (error) {
-    console.error('Failed to create localization:', error)
-    ElMessage.error(t('products.createFailed'))
+    handleError(error, t('products.createFailed'))
   }
 }
 
@@ -146,8 +146,7 @@ const handleUpdateLocalization = async (loc: ProductLocalization) => {
     })
     ElMessage.success(t('products.updateSuccess'))
   } catch (error) {
-    console.error('Failed to update localization:', error)
-    ElMessage.error(t('products.updateFailed'))
+    handleError(error, t('products.updateFailed'))
     loadLocalizations() // Reload to reset
   }
 }
@@ -169,8 +168,7 @@ const handleDeleteLocalization = async (loc: ProductLocalization) => {
     emit('localizations-change')
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete localization:', error)
-      ElMessage.error(t('products.deleteFailed'))
+      handleError(error, t('products.deleteFailed'))
     }
   }
 }

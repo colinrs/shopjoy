@@ -18,12 +18,12 @@ import (
 type ShipmentStatus int
 
 const (
-	ShipmentStatusPending ShipmentStatus = iota // 待发货
-	ShipmentStatusShipped                       // 已发货
-	ShipmentStatusInTransit                     // 运输中
-	ShipmentStatusDelivered                     // 已送达
-	ShipmentStatusFailed                        // 发货失败
-	ShipmentStatusCancelled                     // 已取消
+	ShipmentStatusPending   ShipmentStatus = iota // 待发货
+	ShipmentStatusShipped                         // 已发货
+	ShipmentStatusInTransit                       // 运输中
+	ShipmentStatusDelivered                       // 已送达
+	ShipmentStatusFailed                          // 发货失败
+	ShipmentStatusCancelled                       // 已取消
 )
 
 func (s ShipmentStatus) String() string {
@@ -73,11 +73,11 @@ func ParseShipmentStatus(s string) ShipmentStatus {
 type RefundStatus int
 
 const (
-	RefundStatusPending RefundStatus = iota // 待处理
-	RefundStatusApproved                    // 已批准
-	RefundStatusRejected                    // 已拒绝
-	RefundStatusCompleted                   // 已完成
-	RefundStatusCancelled                   // 已取消
+	RefundStatusPending   RefundStatus = iota // 待处理
+	RefundStatusApproved                      // 已批准
+	RefundStatusRejected                      // 已拒绝
+	RefundStatusCompleted                     // 已完成
+	RefundStatusCancelled                     // 已取消
 )
 
 func (s RefundStatus) String() string {
@@ -123,8 +123,8 @@ func ParseRefundStatus(s string) RefundStatus {
 type RefundType int
 
 const (
-	RefundTypeFull RefundType = iota + 1 // 全额退款
-	RefundTypePartial                    // 部分退款 (Phase 2)
+	RefundTypeFull    RefundType = iota + 1 // 全额退款
+	RefundTypePartial                       // 部分退款 (Phase 2)
 )
 
 func (t RefundType) String() string {
@@ -154,10 +154,10 @@ func ParseRefundType(s string) RefundType {
 type FulfillmentStatus int
 
 const (
-	FulfillmentStatusPending FulfillmentStatus = iota // 待发货
-	FulfillmentStatusPartialShipped                   // 部分发货
-	FulfillmentStatusShipped                          // 已发货
-	FulfillmentStatusDelivered                        // 已送达
+	FulfillmentStatusPending        FulfillmentStatus = iota // 待发货
+	FulfillmentStatusPartialShipped                          // 部分发货
+	FulfillmentStatusShipped                                 // 已发货
+	FulfillmentStatusDelivered                               // 已送达
 )
 
 func (s FulfillmentStatus) String() string {
@@ -200,11 +200,11 @@ func ParseFulfillmentStatus(s string) FulfillmentStatus {
 // Carrier 物流公司
 type Carrier struct {
 	application.Model
-	Code       string
-	Name       string
+	Code        string
+	Name        string
 	TrackingURL string
-	IsActive   bool
-	Sort       int
+	IsActive    bool
+	Sort        int
 }
 
 func (c *Carrier) TableName() string {
@@ -220,13 +220,13 @@ func (c *Carrier) GetTrackingURL(trackingNo string) string {
 
 // PredefinedCarrierCodes 预定义物流公司代码
 const (
-	CarrierCodeSF   = "SF"   // 顺丰
-	CarrierCodeYT   = "YT"   // 圆通
-	CarrierCodeZT   = "ZT"   // 中通
-	CarrierCodeST   = "ST"   // 申通
-	CarrierCodeYD   = "YD"   // 韵达
-	CarrierCodeEMS  = "EMS"  // EMS
-	CarrierCodeJD   = "JD"   // 京东物流
+	CarrierCodeSF    = "SF"    // 顺丰
+	CarrierCodeYT    = "YT"    // 圆通
+	CarrierCodeZT    = "ZT"    // 中通
+	CarrierCodeST    = "ST"    // 申通
+	CarrierCodeYD    = "YD"    // 韵达
+	CarrierCodeEMS   = "EMS"   // EMS
+	CarrierCodeJD    = "JD"    // 京东物流
 	CarrierCodeOther = "OTHER" // 其他
 )
 
@@ -247,10 +247,10 @@ var DefaultCarriers = []Carrier{
 // RefundReason 退款原因
 type RefundReason struct {
 	application.Model
-	Code      string
-	Name      string
-	Sort      int
-	IsActive  bool
+	Code     string
+	Name     string
+	Sort     int
+	IsActive bool
 }
 
 func (r *RefundReason) TableName() string {
@@ -259,13 +259,13 @@ func (r *RefundReason) TableName() string {
 
 // Predefined refund reason codes
 const (
-	RefundReasonDefective      = "DEFECTIVE"       // 产品有缺陷
-	RefundReasonWrongItem      = "WRONG_ITEM"      // 发错货
+	RefundReasonDefective      = "DEFECTIVE"        // 产品有缺陷
+	RefundReasonWrongItem      = "WRONG_ITEM"       // 发错货
 	RefundReasonNotAsDescribed = "NOT_AS_DESCRIBED" // 与描述不符
-	RefundReasonDamaged        = "DAMAGED"         // 运输损坏
+	RefundReasonDamaged        = "DAMAGED"          // 运输损坏
 	RefundReasonNotNeeded      = "NO_LONGER_NEEDED" // 不再需要
-	RefundReasonLateDelivery   = "LATE_DELIVERY"   // 配送太慢
-	RefundReasonOther          = "OTHER"           // 其他
+	RefundReasonLateDelivery   = "LATE_DELIVERY"    // 配送太慢
+	RefundReasonOther          = "OTHER"            // 其他
 )
 
 // DefaultRefundReasons 默认退款原因列表
@@ -291,14 +291,14 @@ type Shipment struct {
 	Carrier          string          `gorm:"column:carrier;not null;default:''"`
 	CarrierCode      string          `gorm:"column:carrier_code;not null;default:''"`
 	TrackingNo       string          `gorm:"column:tracking_no;not null;default:'';index"`
-	ShippingCost     decimal.Decimal `gorm:"column:cost_amount;type:decimal(19,4);not null;default:0"`   // 运费成本
+	ShippingCost     decimal.Decimal `gorm:"column:cost_amount;type:decimal(19,4);not null;default:0"` // 运费成本
 	ShippingCurrency string          `gorm:"column:cost_currency;not null;default:'CNY'"`
 	Weight           decimal.Decimal `gorm:"column:weight;type:decimal(10,3);not null;default:0"` // 重量（kg）
-	ShippedAt        *time.Time     `gorm:"column:shipped_at"`
-	DeliveredAt      *time.Time     `gorm:"column:delivered_at"`
-	CancelledAt      *time.Time     `gorm:"column:cancelled_at"`
-	CancelledBy      int64          `gorm:"column:cancelled_by;not null;default:0"`
-	CancelledReason  string         `gorm:"column:cancelled_reason;not null;default:''"`
+	ShippedAt        *time.Time      `gorm:"column:shipped_at"`
+	DeliveredAt      *time.Time      `gorm:"column:delivered_at"`
+	CancelledAt      *time.Time      `gorm:"column:cancelled_at"`
+	CancelledBy      int64           `gorm:"column:cancelled_by;not null;default:0"`
+	CancelledReason  string          `gorm:"column:cancelled_reason;not null;default:''"`
 	Remark           string          `gorm:"column:remark;not null;default:''"`
 	Items            []ShipmentItem  `gorm:"foreignKey:ShipmentID"`
 }
@@ -449,16 +449,16 @@ func (s *Shipment) CanShip() bool {
 
 // ShipmentItem 发货单明细
 type ShipmentItem struct {
-	Model        application.Model
-	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	ShipmentID   int64           `gorm:"column:shipment_id;not null;index"`
-	OrderItemID  int64           `gorm:"column:order_item_id;not null;index"`
-	ProductID    int64           `gorm:"column:product_id;not null;index"`
-	SKUID        int64           `gorm:"column:sku_id;not null;index"`
-	ProductName  string          `gorm:"column:product_name;not null;default:''"` // 商品名称快照
-	SKUName      string          `gorm:"column:sku_name;not null;default:''"`     // SKU名称快照
-	Image        string          `gorm:"column:image;not null;default:''"`        // 商品图片快照
-	Quantity     int             `gorm:"column:quantity;not null;default:1"`
+	Model       application.Model
+	TenantID    shared.TenantID `gorm:"column:tenant_id;not null;index"`
+	ShipmentID  int64           `gorm:"column:shipment_id;not null;index"`
+	OrderItemID int64           `gorm:"column:order_item_id;not null;index"`
+	ProductID   int64           `gorm:"column:product_id;not null;index"`
+	SKUID       int64           `gorm:"column:sku_id;not null;index"`
+	ProductName string          `gorm:"column:product_name;not null;default:''"` // 商品名称快照
+	SKUName     string          `gorm:"column:sku_name;not null;default:''"`     // SKU名称快照
+	Image       string          `gorm:"column:image;not null;default:''"`        // 商品图片快照
+	Quantity    int             `gorm:"column:quantity;not null;default:1"`
 }
 
 func (si *ShipmentItem) TableName() string {
@@ -489,21 +489,21 @@ func NewShipmentItem(tenantID shared.TenantID, orderItemID, productID, skuID int
 type Refund struct {
 	application.Model
 	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	OrderID      int64         `gorm:"column:order_id;not null;index"`
-	RefundNo     string         `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
-	UserID       int64          `gorm:"column:user_id;not null;index"`
-	Type         RefundType     `gorm:"column:type;not null;default:1"`
-	Status       RefundStatus   `gorm:"column:status;not null;default:0;index"`
-	ReasonType   string         `gorm:"column:reason_type;not null;default:''"`
-	Reason       string         `gorm:"column:reason;not null;default:''"`
-	Description  string         `gorm:"column:description"`
-	Images       string         `gorm:"column:images;type:json"` // JSON array of image URLs
-	Amount       decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"`       // 退款金额
-	Currency     string         `gorm:"column:currency;not null;default:'CNY'"`
-	RejectReason string         `gorm:"column:reject_reason;not null;default:''"`
-	ApprovedAt   *time.Time   `gorm:"column:approved_at"`
-	ApprovedBy   int64          `gorm:"column:approved_by;not null;default:0"`
-	CompletedAt  *time.Time   `gorm:"column:completed_at"`
+	OrderID      int64           `gorm:"column:order_id;not null;index"`
+	RefundNo     string          `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
+	UserID       int64           `gorm:"column:user_id;not null;index"`
+	Type         RefundType      `gorm:"column:type;not null;default:1"`
+	Status       RefundStatus    `gorm:"column:status;not null;default:0;index"`
+	ReasonType   string          `gorm:"column:reason_type;not null;default:''"`
+	Reason       string          `gorm:"column:reason;not null;default:''"`
+	Description  string          `gorm:"column:description"`
+	Images       string          `gorm:"column:images;type:json"`                             // JSON array of image URLs
+	Amount       decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"` // 退款金额
+	Currency     string          `gorm:"column:currency;not null;default:'CNY'"`
+	RejectReason string          `gorm:"column:reject_reason;not null;default:''"`
+	ApprovedAt   *time.Time      `gorm:"column:approved_at"`
+	ApprovedBy   int64           `gorm:"column:approved_by;not null;default:0"`
+	CompletedAt  *time.Time      `gorm:"column:completed_at"`
 }
 
 func (r *Refund) TableName() string {
@@ -610,12 +610,12 @@ func (r *Refund) CanCancel() bool {
 // ShipmentQuery 发货单查询参数
 type ShipmentQuery struct {
 	shared.PageQuery
-	OrderID    int64
-	Status     ShipmentStatus
+	OrderID     int64
+	Status      ShipmentStatus
 	CarrierCode string
-	TrackingNo string
-	StartTime  time.Time
-	EndTime    time.Time
+	TrackingNo  string
+	StartTime   time.Time
+	EndTime     time.Time
 }
 
 // RefundQuery 退款查询参数
@@ -632,27 +632,27 @@ type RefundQuery struct {
 
 // FulfillmentSummary 履约统计摘要
 type FulfillmentSummary struct {
-	PendingShipment  int64 `json:"pending_shipment"`  // 待发货订单数
-	PartialShipped   int64 `json:"partial_shipped"`   // 部分发货订单数
-	Shipped          int64 `json:"shipped"`           // 已发货订单数
-	Delivered        int64 `json:"delivered"`         // 已送达订单数
-	PendingRefund    int64 `json:"pending_refund"`    // 待处理退款数
+	PendingShipment int64 `json:"pending_shipment"` // 待发货订单数
+	PartialShipped  int64 `json:"partial_shipped"`  // 部分发货订单数
+	Shipped         int64 `json:"shipped"`          // 已发货订单数
+	Delivered       int64 `json:"delivered"`        // 已送达订单数
+	PendingRefund   int64 `json:"pending_refund"`   // 待处理退款数
 }
 
 // RefundStatistics 退款统计
 type RefundStatistics struct {
-	TotalRefunds      int64           `json:"total_refunds"`        // 总退款数
-	TotalRefundAmount decimal.Decimal `json:"total_refund_amount"`  // 总退款金额
-	RefundRate        float64         `json:"refund_rate"`          // 退款率
-	TopReasons        []RefundReasonCount `json:"top_reasons"`     // 热门退款原因
-	TopProducts       []ProductRefundCount `json:"top_products"`  // 高退款率商品
+	TotalRefunds      int64                `json:"total_refunds"`       // 总退款数
+	TotalRefundAmount decimal.Decimal      `json:"total_refund_amount"` // 总退款金额
+	RefundRate        float64              `json:"refund_rate"`         // 退款率
+	TopReasons        []RefundReasonCount  `json:"top_reasons"`         // 热门退款原因
+	TopProducts       []ProductRefundCount `json:"top_products"`        // 高退款率商品
 }
 
 // RefundReasonCount 退款原因统计
 type RefundReasonCount struct {
-	ReasonType string `json:"reason_type"`
-	ReasonName string `json:"reason_name"`
-	Count      int64  `json:"count"`
+	ReasonType string  `json:"reason_type"`
+	ReasonName string  `json:"reason_name"`
+	Count      int64   `json:"count"`
 	Percentage float64 `json:"percentage"`
 }
 

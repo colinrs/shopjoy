@@ -10,29 +10,29 @@ import (
 
 // ShopSettings 店铺设置
 type ShopSettings struct {
-	ID               int64  `gorm:"column:id;primaryKey"`
-	TenantID         int64  `gorm:"column:tenant_id;not null;uniqueIndex"`
-	Name             string          `gorm:"column:name;size:100;not null"`
-	Code             string          `gorm:"column:code;size:50;not null"`
-	Logo             string          `gorm:"column:logo;size:500"`
-	Description      string          `gorm:"column:description;size:500"`
-	ContactName      string          `gorm:"column:contact_name;size:50"`
-	ContactPhone     string          `gorm:"column:contact_phone;size:20"`
-	ContactEmail     string          `gorm:"column:contact_email;size:100"`
-	Address          string          `gorm:"column:address;size:255"`
-	Domain           string          `gorm:"column:domain;size:100"`
-	CustomDomain     string          `gorm:"column:custom_domain;size:100"`
-	PrimaryColor     string          `gorm:"column:primary_color;size:7"`
-	SecondaryColor   string          `gorm:"column:secondary_color;size:7"`
-	Favicon          string          `gorm:"column:favicon;size:255"`
-	DefaultCurrency  string          `gorm:"column:default_currency;size:3"`
-	DefaultLanguage  string          `gorm:"column:default_language;size:10"`
-	Timezone         string          `gorm:"column:timezone;size:50"`
-	Status           int8            `gorm:"column:status;not null;default:1"`
-	Plan             int8            `gorm:"column:plan;not null;default:0"`
-	ExpireAt         string          `gorm:"column:expire_at;size:50"`
-	CreatedAt        time.Time       `gorm:"column:created_at"`
-	UpdatedAt        time.Time       `gorm:"column:updated_at"`
+	ID              int64     `gorm:"column:id;primaryKey"`
+	TenantID        int64     `gorm:"column:tenant_id;not null;uniqueIndex"`
+	Name            string    `gorm:"column:name;size:100;not null"`
+	Code            string    `gorm:"column:code;size:50;not null"`
+	Logo            string    `gorm:"column:logo;size:500"`
+	Description     string    `gorm:"column:description;size:500"`
+	ContactName     string    `gorm:"column:contact_name;size:50"`
+	ContactPhone    string    `gorm:"column:contact_phone;size:20"`
+	ContactEmail    string    `gorm:"column:contact_email;size:100"`
+	Address         string    `gorm:"column:address;size:255"`
+	Domain          string    `gorm:"column:domain;size:100"`
+	CustomDomain    string    `gorm:"column:custom_domain;size:100"`
+	PrimaryColor    string    `gorm:"column:primary_color;size:7"`
+	SecondaryColor  string    `gorm:"column:secondary_color;size:7"`
+	Favicon         string    `gorm:"column:favicon;size:255"`
+	DefaultCurrency string    `gorm:"column:default_currency;size:3"`
+	DefaultLanguage string    `gorm:"column:default_language;size:10"`
+	Timezone        string    `gorm:"column:timezone;size:50"`
+	Status          int8      `gorm:"column:status;not null;default:1"`
+	Plan            int8      `gorm:"column:plan;not null;default:0"`
+	ExpireAt        string    `gorm:"column:expire_at;size:50"`
+	CreatedAt       time.Time `gorm:"column:created_at"`
+	UpdatedAt       time.Time `gorm:"column:updated_at"`
 }
 
 func (s *ShopSettings) TableName() string {
@@ -85,18 +85,18 @@ func (b *BusinessHours) TableName() string {
 
 // NotificationSettings 通知设置
 type NotificationSettings struct {
-	ID                 int64     `gorm:"column:id;primaryKey"`
-	ShopID             int64     `gorm:"column:shop_id;not null;uniqueIndex"`
-	OrderCreated       bool      `gorm:"column:order_created;not null;default:true"`
-	OrderPaid          bool      `gorm:"column:order_paid;not null;default:true"`
-	OrderShipped       bool      `gorm:"column:order_shipped;not null;default:true"`
-	OrderCancelled     bool      `gorm:"column:order_cancelled;not null;default:true"`
-	LowStockAlert      bool      `gorm:"column:low_stock_alert;not null;default:true"`
-	LowStockThreshold  int       `gorm:"column:low_stock_threshold;not null;default:10"`
-	RefundRequested    bool      `gorm:"column:refund_requested;not null;default:true"`
-	NewReview          bool      `gorm:"column:new_review;not null;default:true"`
-	CreatedAt          time.Time `gorm:"column:created_at"`
-	UpdatedAt          time.Time `gorm:"column:updated_at"`
+	ID                int64     `gorm:"column:id;primaryKey"`
+	ShopID            int64     `gorm:"column:shop_id;not null;uniqueIndex"`
+	OrderCreated      bool      `gorm:"column:order_created;not null;default:true"`
+	OrderPaid         bool      `gorm:"column:order_paid;not null;default:true"`
+	OrderShipped      bool      `gorm:"column:order_shipped;not null;default:true"`
+	OrderCancelled    bool      `gorm:"column:order_cancelled;not null;default:true"`
+	LowStockAlert     bool      `gorm:"column:low_stock_alert;not null;default:true"`
+	LowStockThreshold int       `gorm:"column:low_stock_threshold;not null;default:10"`
+	RefundRequested   bool      `gorm:"column:refund_requested;not null;default:true"`
+	NewReview         bool      `gorm:"column:new_review;not null;default:true"`
+	CreatedAt         time.Time `gorm:"column:created_at"`
+	UpdatedAt         time.Time `gorm:"column:updated_at"`
 }
 
 func (n *NotificationSettings) TableName() string {
@@ -120,13 +120,13 @@ func (p *PaymentSettings) TableName() string {
 
 // ShippingSettings 运费设置
 type ShippingSettings struct {
-	ID                     int64           `gorm:"column:id;primaryKey"`
-	ShopID                 int64           `gorm:"column:shop_id;not null;uniqueIndex"`
-	FreeShippingThreshold  decimal.Decimal  `gorm:"column:free_shipping_threshold;type:decimal(19,4);not null"`
-	DefaultShippingFee     decimal.Decimal  `gorm:"column:default_shipping_fee;type:decimal(19,4);not null"`
-	Currency               string          `gorm:"column:currency;size:3;not null"`
-	CreatedAt              time.Time       `gorm:"column:created_at"`
-	UpdatedAt              time.Time       `gorm:"column:updated_at"`
+	ID                    int64           `gorm:"column:id;primaryKey"`
+	ShopID                int64           `gorm:"column:shop_id;not null;uniqueIndex"`
+	FreeShippingThreshold decimal.Decimal `gorm:"column:free_shipping_threshold;type:decimal(19,4);not null"`
+	DefaultShippingFee    decimal.Decimal `gorm:"column:default_shipping_fee;type:decimal(19,4);not null"`
+	Currency              string          `gorm:"column:currency;size:3;not null"`
+	CreatedAt             time.Time       `gorm:"column:created_at"`
+	UpdatedAt             time.Time       `gorm:"column:updated_at"`
 }
 
 func (s *ShippingSettings) TableName() string {

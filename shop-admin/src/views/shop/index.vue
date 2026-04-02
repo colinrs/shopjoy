@@ -316,7 +316,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type UploadFile } from 'element-plus'
 import {
   Shop, Plus, Phone, Message, Location, Link,
   InfoFilled, Bell, Operation, Document, Share, Check,
@@ -338,8 +338,10 @@ import {
   type BusinessHours,
   type NotificationSettings
 } from '@/api/shop'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n({ useScope: 'global' })
+const { handleError } = useErrorHandler()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -463,22 +465,24 @@ const loadSettings = async () => {
     shippingForm.default_shipping_fee = parseFloat(shippingData.default_shipping_fee) || 0
     shippingForm.currency = shippingData.currency || 'CNY'
   } catch (error) {
-    console.error('Failed to load settings:', error)
-    ElMessage.error(t('shop.loadFailed'))
+    handleError(error, t('shop.loadFailed'))
   } finally {
     loading.value = false
   }
 }
 
 // Handle logo upload
-const handleLogoChange = async (file: any) => {
+const handleLogoChange = async (file: UploadFile) => {
   try {
+    if (!file.raw) {
+      handleError(new Error('No file to upload'), t('shop.logoUploadFailed'))
+      return
+    }
     const response = await uploadImage(file.raw, 'banner')
     shopForm.logo = response.url
     ElMessage.success(t('shop.logoUploadSuccess'))
   } catch (error) {
-    console.error('Upload failed:', error)
-    ElMessage.error(t('shop.logoUploadFailed'))
+    handleError(error, t('shop.logoUploadFailed'))
   }
 }
 
@@ -586,9 +590,7 @@ const handleSave = async () => {
     // Reload settings to get updated values
     await loadSettings()
   } catch (error: unknown) {
-    console.error('Failed to save settings:', error)
-    const err = error as { response?: { data?: { message?: string } } }
-    ElMessage.error(err?.response?.data?.message || t('common.actionFailed'))
+    handleError(error, t('common.actionFailed'))
   } finally {
     saving.value = false
   }

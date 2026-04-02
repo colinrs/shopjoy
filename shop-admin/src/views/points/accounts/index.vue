@@ -108,7 +108,7 @@ import { ElMessage } from 'element-plus'
 import { User, Star, CircleCheck, Search } from '@element-plus/icons-vue'
 import PointsStatsCard from '../components/PointsStatsCard.vue'
 import TablePagination from '@/components/common/TablePagination.vue'
-import { getPointsAccounts, type PointsAccount } from '@/api/points'
+import { getPointsAccounts, type PointsAccount, type ListAccountsParams } from '@/api/points'
 
 const { t } = useI18n()
 
@@ -133,7 +133,7 @@ const accountStats = ref({
 const loadAccounts = async () => {
   loading.value = true
   try {
-    const params: any = {
+    const params: ListAccountsParams = {
       page: currentPage.value,
       page_size: pageSize.value
     }

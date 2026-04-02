@@ -222,8 +222,10 @@ import { Location, Goods, Plus, Coin } from '@element-plus/icons-vue'
 import { calculateShippingFee, getRegions, type CalculateResult, type Region } from '@/api/shipping'
 import { getProductList } from '@/api/product'
 import type { Product } from '@/api/product'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 // Types
 interface TestItem {
@@ -287,8 +289,7 @@ const loadProducts = async () => {
     const data = await getProductList({ page: 1, page_size: 100 })
     products.value = data.list || []
   } catch (error) {
-    console.error('Failed to load products:', error)
-    ElMessage.error(t('shipping.loadProductsFailed'))
+    handleError(error, t('shipping.loadProductsFailed'))
   }
 }
 
@@ -297,8 +298,7 @@ const loadProvinces = async () => {
     const data = await getRegions()
     allProvinces.value = data
   } catch (error) {
-    console.error('Failed to load provinces:', error)
-    ElMessage.error(t('shipping.loadProvincesListFailed'))
+    handleError(error, t('shipping.loadProvincesListFailed'))
   }
 }
 
@@ -307,8 +307,7 @@ const loadCities = async (provinceCode: string) => {
     const data = await getRegions(provinceCode)
     allCities.value = data
   } catch (error) {
-    console.error('Failed to load cities:', error)
-    ElMessage.error(t('shipping.loadCitiesListFailed'))
+    handleError(error, t('shipping.loadCitiesListFailed'))
   }
 }
 
@@ -317,8 +316,7 @@ const loadDistricts = async (cityCode: string) => {
     const data = await getRegions(cityCode)
     allDistricts.value = data
   } catch (error) {
-    console.error('Failed to load districts:', error)
-    ElMessage.error(t('shipping.loadDistrictsFailed'))
+    handleError(error, t('shipping.loadDistrictsFailed'))
   }
 }
 
@@ -387,8 +385,7 @@ const calculateShipping = async () => {
     result.value = data
     ElMessage.success(t('shipping.calculationComplete'))
   } catch (error) {
-    console.error('Failed to calculate:', error)
-    ElMessage.error(t('shipping.calculationFailed'))
+    handleError(error, t('shipping.calculationFailed'))
   } finally {
     calculating.value = false
   }

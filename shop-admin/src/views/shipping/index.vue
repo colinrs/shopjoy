@@ -116,12 +116,15 @@ import {
   createShippingTemplate,
   deleteShippingTemplate,
   setDefaultTemplate,
-  type ShippingTemplate
+  type ShippingTemplate,
+  type TemplateListParams
 } from '@/api/shipping'
 import TemplateCard from './components/TemplateCard.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -151,7 +154,7 @@ const createRules = {
 const loadTemplates = async () => {
   loading.value = true
   try {
-    const params: any = {
+    const params: TemplateListParams = {
       page: currentPage.value,
       page_size: pageSize.value
     }
@@ -165,8 +168,7 @@ const loadTemplates = async () => {
     templates.value = data.list || []
     total.value = data.total || 0
   } catch (error) {
-    console.error('Failed to load templates:', error)
-    ElMessage.error(t('shipping.loadTemplateFailed'))
+    handleError(error, t('shipping.loadTemplateFailed'))
   } finally {
     loading.value = false
   }
@@ -198,8 +200,7 @@ const handleConfirmCreate = async () => {
         createDialogVisible.value = false
         loadTemplates()
       } catch (error) {
-        console.error('Failed to create template:', error)
-        ElMessage.error(t('shipping.createFailed'))
+        handleError(error, t('shipping.createFailed'))
       } finally {
         createLoading.value = false
       }
@@ -226,10 +227,9 @@ const handleDelete = async (template: ShippingTemplate) => {
     await deleteShippingTemplate(template.id)
     ElMessage.success(t('shipping.deleteSuccess'))
     loadTemplates()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      console.error('Failed to delete template:', error)
-      ElMessage.error(t('shipping.deleteFailed'))
+      handleError(error, t('shipping.deleteFailed'))
     }
   }
 }
@@ -240,8 +240,7 @@ const handleSetDefault = async (template: ShippingTemplate) => {
     ElMessage.success(t('shipping.setAsDefaultSuccess'))
     loadTemplates()
   } catch (error) {
-    console.error('Failed to set default:', error)
-    ElMessage.error(t('shipping.setAsDefaultFailed'))
+    handleError(error, t('shipping.setAsDefaultFailed'))
   }
 }
 

@@ -66,8 +66,8 @@ type Order struct {
 	ShippedAt      *time.Time
 	CompletedAt    *time.Time
 	CancelledAt    *time.Time
-	DeletedAt     *int64
-	Audit         shared.AuditInfo `gorm:"embedded"`
+	DeletedAt      *int64
+	Audit          shared.AuditInfo `gorm:"embedded"`
 }
 
 func (o *Order) TableName() string {
@@ -139,7 +139,7 @@ func (o *Order) Complete() error {
 
 type OrderItem struct {
 	ID          int64
-	OrderID     int64           `gorm:"column:order_id;not null;index:idx_order_id"`
+	OrderID     int64 `gorm:"column:order_id;not null;index:idx_order_id"`
 	ProductID   int64
 	SKUId       int64
 	ProductName string

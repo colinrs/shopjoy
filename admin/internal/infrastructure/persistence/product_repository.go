@@ -324,3 +324,15 @@ func (r *productRepo) Exists(ctx context.Context, db *gorm.DB, tenantID shared.T
 	}
 	return count > 0, nil
 }
+
+func (r *productRepo) CountTotal(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+	query := db.WithContext(ctx).Model(&productModel{}).
+		Where("deleted_at IS NULL")
+	// 租户过滤：平台管理员 (tenantID == 0) 可访问所有租户数据
+	if tenantID != 0 {
+		query = query.Where("tenant_id = ?", tenantID.Int64())
+	}
+	var count int64
+	err := query.Count(&count).Error
+	return count, err
+}

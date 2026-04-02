@@ -60,8 +60,10 @@ import { Plus } from '@element-plus/icons-vue'
 import { getSKUsByProduct, deleteSKU, type SKU } from '@/api/product'
 import { t } from '@/plugins/i18n'
 import type { ProductVariantsTabProps, ProductVariantsTabEmits } from '../types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductVariantsTabProps>()
+const { handleError } = useErrorHandler()
 const emit = defineEmits<ProductVariantsTabEmits>()
 
 const variants = ref<SKU[]>([])
@@ -73,8 +75,7 @@ const loadVariants = async () => {
     const response = await getSKUsByProduct(props.productId)
     variants.value = response.list || []
   } catch (error) {
-    console.error('Failed to load variants:', error)
-    ElMessage.error(t('products.loadSKUsFailed'))
+    handleError(error, t('products.loadSKUsFailed'))
   } finally {
     loading.value = false
   }
@@ -105,8 +106,7 @@ const handleDeleteVariant = async (row: SKU) => {
     emit('variants-change')
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete variant:', error)
-      ElMessage.error(t('products.variantDeleteFailed'))
+      handleError(error, t('products.variantDeleteFailed'))
     }
   }
 }

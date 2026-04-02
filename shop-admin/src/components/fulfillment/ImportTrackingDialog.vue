@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type UploadFile } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { UploadFilled, Download, List } from '@element-plus/icons-vue'
 import { batchUpdateTracking, type BatchUpdateTrackingRequest } from '@/api/fulfillment'
@@ -114,7 +114,7 @@ const visible = computed({
 })
 
 const uploadRef = ref()
-const fileList = ref<any[]>([])
+const fileList = ref<UploadFile[]>([])
 const submitting = ref(false)
 const parsedData = ref<BatchUpdateTrackingRequest[]>([])
 const errors = ref<{ shipment_id: number; message: string }[]>([])
@@ -161,9 +161,14 @@ const parseCSV = (content: string): BatchUpdateTrackingRequest[] => {
 }
 
 // Handle file selection
-const handleFileChange = (file: any) => {
+const handleFileChange = (file: UploadFile) => {
   errors.value = []
   parsedData.value = []
+
+  if (!file.raw) {
+    ElMessage.error(t('fulfillment.importEmptyError'))
+    return
+  }
 
   const reader = new FileReader()
   reader.onload = (e) => {

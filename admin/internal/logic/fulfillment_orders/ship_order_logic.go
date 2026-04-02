@@ -45,13 +45,13 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 
 	// Build ship order request
 	shipReq := appfulfillment.ShipOrderRequest{
-		CarrierCode:   req.CarrierCode,
-		CarrierName:   req.CarrierName,
-		TrackingNo:    req.TrackingNo,
-		ShippingCost:  shippingCost,
-		Currency:      req.Currency,
-		Weight:        weight,
-		Remark:        req.Remark,
+		CarrierCode:  req.CarrierCode,
+		CarrierName:  req.CarrierName,
+		TrackingNo:   req.TrackingNo,
+		ShippingCost: shippingCost,
+		Currency:     req.Currency,
+		Weight:       weight,
+		Remark:       req.Remark,
 	}
 
 	// Build items
@@ -76,4 +76,3 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 		ShipmentNo: shipmentResp.ShipmentNo,
 	}, nil
 }
-

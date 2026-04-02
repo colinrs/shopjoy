@@ -337,8 +337,8 @@ const handleCreate = async () => {
     await fetchPages()
     // Navigate to edit the newly created page
     router.push(`/storefront/pages/${res.page_id}/edit`)
-  } catch (error: any) {
-    ElMessage.error(error.message || t('storefront.createPageFailed'))
+  } catch (error: unknown) {
+    ElMessage.error((error as Error).message || t('storefront.createPageFailed'))
   } finally {
     creating.value = false
   }
@@ -364,9 +364,9 @@ const handlePublish = async (page: PageItem & { publishing?: boolean }) => {
     await publishPage(page.id)
     ElMessage.success(t('storefront.pagePublished'))
     await fetchPages()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.publishFailed'))
+      ElMessage.error((error as Error).message || t('storefront.publishFailed'))
     }
   } finally {
     page.publishing = false
@@ -384,9 +384,9 @@ const handleUnpublish = async (page: PageItem & { unpublishing?: boolean }) => {
     await unpublishPage(page.id)
     ElMessage.success(t('storefront.pageUnpublished'))
     await fetchPages()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.unpublishFailed'))
+      ElMessage.error((error as Error).message || t('storefront.unpublishFailed'))
     }
   } finally {
     page.unpublishing = false
@@ -431,9 +431,9 @@ const restoreVersion = async (ver: VersionItem) => {
     ElMessage.success(t('storefront.versionRestored'))
     versionDrawerVisible.value = false
     await fetchPages()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.restoreFailed'))
+      ElMessage.error((error as Error).message || t('storefront.restoreFailed'))
     }
   }
 }

@@ -7,16 +7,16 @@ import (
 	"time"
 
 	appAdminUser "github.com/colinrs/shopjoy/admin/internal/application/adminuser"
-	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
-	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	appPoints "github.com/colinrs/shopjoy/admin/internal/application/points"
+	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
+	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
 	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/config"
+	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
@@ -27,8 +27,8 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/auth"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/infra"
 	"github.com/colinrs/shopjoy/pkg/sku"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
@@ -38,43 +38,43 @@ import (
 )
 
 type ServiceContext struct {
-	Config                 config.Config
-	DB                     *gorm.DB
-	ProductService         appProduct.Service
-	UserService            appUser.Service
-	AdminUserService       appAdminUser.Service
-	PaymentService         appPayment.Service
-	PromotionApp           apppromotion.PromotionApp
-	CouponApp              apppromotion.CouponApp
-	ShipmentApp            appfulfillment.ShipmentApp
-	CarrierApp             appfulfillment.CarrierApp
-	OrderFulfillmentApp    appfulfillment.OrderFulfillmentApp
-	RefundApp              appfulfillment.RefundApp
-	RefundReasonApp        appfulfillment.RefundReasonApp
-	JWTManager             *auth.JWTManager
-	AuthMiddleware         rest.Middleware
-	ProductRepo            product.Repository
-	ProductMarketRepo      product.ProductMarketRepository
-	MarketRepo             market.Repository
-	CategoryRepo           product.CategoryRepository
-	CategoryMarketRepo     product.CategoryMarketRepository
-	BrandRepo              product.BrandRepository
-	BrandMarketRepo        product.BrandMarketRepository
-	WarehouseRepo          product.WarehouseRepository
-	WarehouseInventoryRepo product.WarehouseInventoryRepository
-	InventoryLogRepo       product.InventoryLogRepository
-	SKURepo                   product.SKURepository
-	ProductLocalizationRepo   product.ProductLocalizationRepository
-	SKUGenerator              sku.Generator
-	IDGen                     snowflake.Snowflake
-	PromotionRepo             pkgpromotion.Repository
-	CouponRepo                pkgpromotion.CouponRepository
-	UserCouponRepo            pkgpromotion.UserCouponRepository
-	OrderRepo                 fulfillment.OrderRepository
-	OrderItemRepo             fulfillment.OrderItemRepository
-	ReviewService             appReview.Service
-	ReviewRepo                review.Repository
-	ReplyRepo                 review.ReplyRepository
+	Config                  config.Config
+	DB                      *gorm.DB
+	ProductService          appProduct.Service
+	UserService             appUser.Service
+	AdminUserService        appAdminUser.Service
+	PaymentService          appPayment.Service
+	PromotionApp            apppromotion.PromotionApp
+	CouponApp               apppromotion.CouponApp
+	ShipmentApp             appfulfillment.ShipmentApp
+	CarrierApp              appfulfillment.CarrierApp
+	OrderFulfillmentApp     appfulfillment.OrderFulfillmentApp
+	RefundApp               appfulfillment.RefundApp
+	RefundReasonApp         appfulfillment.RefundReasonApp
+	JWTManager              *auth.JWTManager
+	AuthMiddleware          rest.Middleware
+	ProductRepo             product.Repository
+	ProductMarketRepo       product.ProductMarketRepository
+	MarketRepo              market.Repository
+	CategoryRepo            product.CategoryRepository
+	CategoryMarketRepo      product.CategoryMarketRepository
+	BrandRepo               product.BrandRepository
+	BrandMarketRepo         product.BrandMarketRepository
+	WarehouseRepo           product.WarehouseRepository
+	WarehouseInventoryRepo  product.WarehouseInventoryRepository
+	InventoryLogRepo        product.InventoryLogRepository
+	SKURepo                 product.SKURepository
+	ProductLocalizationRepo product.ProductLocalizationRepository
+	SKUGenerator            sku.Generator
+	IDGen                   snowflake.Snowflake
+	PromotionRepo           pkgpromotion.Repository
+	CouponRepo              pkgpromotion.CouponRepository
+	UserCouponRepo          pkgpromotion.UserCouponRepository
+	OrderRepo               fulfillment.OrderRepository
+	OrderItemRepo           fulfillment.OrderItemRepository
+	ReviewService           appReview.Service
+	ReviewRepo              review.Repository
+	ReplyRepo               review.ReplyRepository
 	// Storefront services
 	ThemeService      appStorefront.ThemeService
 	PageService       appStorefront.PageService
@@ -90,17 +90,17 @@ type ServiceContext struct {
 	// Storage
 	Storage storage.Storage
 	// Points
-	PointsService          appPoints.Service
-	EarnRuleRepo           points.EarnRuleRepository
-	RedeemRuleRepo         points.RedeemRuleRepository
-	PointsAccountRepo      points.PointsAccountRepository
-	PointsTransactionRepo  points.PointsTransactionRepository
-	PointsRedemptionRepo   points.PointsRedemptionRepository
+	PointsService         appPoints.Service
+	EarnRuleRepo          points.EarnRuleRepository
+	RedeemRuleRepo        points.RedeemRuleRepository
+	PointsAccountRepo     points.PointsAccountRepository
+	PointsTransactionRepo points.PointsTransactionRepository
+	PointsRedemptionRepo  points.PointsRedemptionRepository
 	// Shop Settings
 	ShopSettingsRepo         shop.ShopSettingsRepository
 	BusinessHoursRepo        shop.BusinessHoursRepository
 	NotificationSettingsRepo shop.NotificationSettingsRepository
-	PaymentSettingsRepo     shop.PaymentSettingsRepository
+	PaymentSettingsRepo      shop.PaymentSettingsRepository
 	ShippingSettingsRepo     shop.ShippingSettingsRepository
 }
 
@@ -226,43 +226,43 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	shippingSettingsRepo := persistence.NewShippingSettingsRepository()
 
 	return &ServiceContext{
-		Config:                 c,
-		DB:                     db,
-		ProductService:         productService,
-		UserService:            userService,
-		AdminUserService:       adminUserService,
-		PaymentService:         paymentService,
-		PromotionApp:           promotionApp,
-		CouponApp:              couponApp,
-		ShipmentApp:            shipmentApp,
-		CarrierApp:             carrierApp,
-		OrderFulfillmentApp:    orderFulfillmentApp,
-		RefundApp:              refundApp,
-		RefundReasonApp:        refundReasonApp,
-		JWTManager:             jwtManager,
-		AuthMiddleware:         authMiddleware,
-		ProductRepo:            productRepo,
-		ProductMarketRepo:      productMarketRepo,
-		MarketRepo:             marketRepo,
-		CategoryRepo:           categoryRepo,
-		CategoryMarketRepo:     categoryMarketRepo,
-		BrandRepo:              brandRepo,
-		BrandMarketRepo:        brandMarketRepo,
-		WarehouseRepo:          warehouseRepo,
-		WarehouseInventoryRepo: warehouseInventoryRepo,
-		InventoryLogRepo:       inventoryLogRepo,
-		SKURepo:                skuRepo,
+		Config:                  c,
+		DB:                      db,
+		ProductService:          productService,
+		UserService:             userService,
+		AdminUserService:        adminUserService,
+		PaymentService:          paymentService,
+		PromotionApp:            promotionApp,
+		CouponApp:               couponApp,
+		ShipmentApp:             shipmentApp,
+		CarrierApp:              carrierApp,
+		OrderFulfillmentApp:     orderFulfillmentApp,
+		RefundApp:               refundApp,
+		RefundReasonApp:         refundReasonApp,
+		JWTManager:              jwtManager,
+		AuthMiddleware:          authMiddleware,
+		ProductRepo:             productRepo,
+		ProductMarketRepo:       productMarketRepo,
+		MarketRepo:              marketRepo,
+		CategoryRepo:            categoryRepo,
+		CategoryMarketRepo:      categoryMarketRepo,
+		BrandRepo:               brandRepo,
+		BrandMarketRepo:         brandMarketRepo,
+		WarehouseRepo:           warehouseRepo,
+		WarehouseInventoryRepo:  warehouseInventoryRepo,
+		InventoryLogRepo:        inventoryLogRepo,
+		SKURepo:                 skuRepo,
 		ProductLocalizationRepo: productLocalizationRepo,
-		SKUGenerator:           skuGenerator,
-		IDGen:                  idGen,
-		PromotionRepo:          promotionRepo,
-		CouponRepo:             couponRepo,
-		UserCouponRepo:         userCouponRepo,
-		OrderRepo:              orderRepo,
-		OrderItemRepo:          orderItemRepo,
-		ReviewService:          reviewService,
-		ReviewRepo:             reviewRepo,
-		ReplyRepo:              replyRepo,
+		SKUGenerator:            skuGenerator,
+		IDGen:                   idGen,
+		PromotionRepo:           promotionRepo,
+		CouponRepo:              couponRepo,
+		UserCouponRepo:          userCouponRepo,
+		OrderRepo:               orderRepo,
+		OrderItemRepo:           orderItemRepo,
+		ReviewService:           reviewService,
+		ReviewRepo:              reviewRepo,
+		ReplyRepo:               replyRepo,
 		// Storefront services
 		ThemeService:      themeService,
 		PageService:       pageService,
@@ -292,7 +292,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ShopSettingsRepo:         shopSettingsRepo,
 		BusinessHoursRepo:        businessHoursRepo,
 		NotificationSettingsRepo: notificationSettingsRepo,
-		PaymentSettingsRepo:     paymentSettingsRepo,
+		PaymentSettingsRepo:      paymentSettingsRepo,
 		ShippingSettingsRepo:     shippingSettingsRepo,
 	}
 }

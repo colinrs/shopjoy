@@ -49,6 +49,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { createRole, updateRole, type Role, type CreateRoleParams } from '@/api/role'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<{
   visible: boolean
@@ -61,6 +62,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const formRef = ref()
 const submitLoading = ref(false)
@@ -123,9 +125,8 @@ const handleSubmit = async () => {
         }
         emit('update:visible', false)
         emit('success')
-      } catch (e) {
-        console.error('Failed to save role:', e)
-        ElMessage.error(t('roles.saveFailed'))
+      } catch (error) {
+        handleError(error, t('roles.saveFailed'))
       } finally {
         submitLoading.value = false
       }

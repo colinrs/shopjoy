@@ -43,13 +43,13 @@ func (l *CreateShipmentLogic) CreateShipment(req *types.CreateShipmentReq) (resp
 	// Build request
 	shippingCost, _ := decimal.NewFromString(req.ShippingCost)
 	createReq := appfulfillment.CreateShipmentRequest{
-		OrderID:       req.OrderID,
-		CarrierCode:   req.CarrierCode,
-		CarrierName:   req.CarrierName,
-		TrackingNo:    req.TrackingNo,
-		ShippingCost:  shippingCost,
-		Currency:      req.Currency,
-		Remark:        req.Remark,
+		OrderID:      req.OrderID,
+		CarrierCode:  req.CarrierCode,
+		CarrierName:  req.CarrierName,
+		TrackingNo:   req.TrackingNo,
+		ShippingCost: shippingCost,
+		Currency:     req.Currency,
+		Remark:       req.Remark,
 	}
 
 	// Parse weight

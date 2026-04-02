@@ -176,6 +176,7 @@ export interface ExportInventoryLogsParams {
   sku_code?: string
   product_id?: number
   type?: string
+  [key: string]: unknown
 }
 
 /**

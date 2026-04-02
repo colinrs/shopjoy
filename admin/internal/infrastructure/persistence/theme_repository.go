@@ -19,18 +19,18 @@ func NewThemeRepository() storefront.ThemeRepository {
 }
 
 type themeModel struct {
-	ID            int64  `gorm:"column:id;primaryKey"`
-	TenantID      int64  `gorm:"column:tenant_id;not null;index"`
-	Name          string `gorm:"column:name;type:varchar(100);not null"`
-	Code          string `gorm:"column:code;type:varchar(100);not null;index"`
-	Description   string `gorm:"column:description;type:text"`
-	Thumbnail     string `gorm:"column:thumbnail;type:varchar(500)"`
-	PreviewImage  string `gorm:"column:preview_image;type:varchar(500)"`
-	Config        string `gorm:"column:config;type:json"`
-	ConfigSchema  string `gorm:"column:config_schema;type:text"`
-	DefaultConfig string `gorm:"column:default_config;type:text"`
-	IsActive      int    `gorm:"column:is_active;not null;default:0;index"`
-	IsCustom      int    `gorm:"column:is_custom;not null;default:0"`
+	ID            int64     `gorm:"column:id;primaryKey"`
+	TenantID      int64     `gorm:"column:tenant_id;not null;index"`
+	Name          string    `gorm:"column:name;type:varchar(100);not null"`
+	Code          string    `gorm:"column:code;type:varchar(100);not null;index"`
+	Description   string    `gorm:"column:description;type:text"`
+	Thumbnail     string    `gorm:"column:thumbnail;type:varchar(500)"`
+	PreviewImage  string    `gorm:"column:preview_image;type:varchar(500)"`
+	Config        string    `gorm:"column:config;type:json"`
+	ConfigSchema  string    `gorm:"column:config_schema;type:text"`
+	DefaultConfig string    `gorm:"column:default_config;type:text"`
+	IsActive      int       `gorm:"column:is_active;not null;default:0;index"`
+	IsCustom      int       `gorm:"column:is_custom;not null;default:0"`
 	IsPreset      int       `gorm:"column:is_preset;not null;default:1"`
 	CreatedAt     time.Time `gorm:"column:created_at;not null"`
 	UpdatedAt     time.Time `gorm:"column:updated_at;not null"`

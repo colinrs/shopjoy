@@ -1,6 +1,7 @@
 /**
  * Shared validation utilities for the admin frontend
  */
+import type { FormItemRule } from 'element-plus'
 
 /**
  * Email validation regex
@@ -142,7 +143,7 @@ export const formRules = {
   }),
 
   email: (message = '请输入有效的邮箱地址') => ({
-    validator: (_rule: any, value: string, callback: (error?: Error) => void) => {
+    validator: (_rule: FormItemRule, value: string, callback: (error?: Error) => void) => {
       if (!value || isValidEmail(value)) {
         callback()
       } else {
@@ -153,7 +154,7 @@ export const formRules = {
   }),
 
   phone: (message = '请输入有效的手机号码') => ({
-    validator: (_rule: any, value: string, callback: (error?: Error) => void) => {
+    validator: (_rule: FormItemRule, value: string, callback: (error?: Error) => void) => {
       if (!value || isValidPhone(value)) {
         callback()
       } else {
@@ -176,7 +177,7 @@ export const formRules = {
   }),
 
   password: (message = '密码至少8位，包含大小写字母和数字') => ({
-    validator: (_rule: any, value: string, callback: (error?: Error) => void) => {
+    validator: (_rule: FormItemRule, value: string, callback: (error?: Error) => void) => {
       if (!value || isStrongPassword(value)) {
         callback()
       } else {
@@ -187,7 +188,7 @@ export const formRules = {
   }),
 
   url: (message = '请输入有效的URL') => ({
-    validator: (_rule: any, value: string, callback: (error?: Error) => void) => {
+    validator: (_rule: FormItemRule, value: string, callback: (error?: Error) => void) => {
       if (!value || isValidUrl(value)) {
         callback()
       } else {
@@ -198,7 +199,7 @@ export const formRules = {
   }),
 
   positiveNumber: (message = '请输入大于0的数字') => ({
-    validator: (_rule: any, value: number, callback: (error?: Error) => void) => {
+    validator: (_rule: FormItemRule, value: number, callback: (error?: Error) => void) => {
       if (value === undefined || value === null || isPositive(value)) {
         callback()
       } else {

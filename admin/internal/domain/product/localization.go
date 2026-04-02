@@ -12,11 +12,11 @@ import (
 // ProductLocalization 商品多语言本地化实体
 type ProductLocalization struct {
 	application.Model
-	TenantID     shared.TenantID // 租户ID
-	ProductID    int64           // 商品ID
-	LanguageCode string          // 语言代码，如 en, zh-CN, ja
-	Name         string          // 商品名称（本地化）
-	Description  string          // 商品描述（本地化）
+	TenantID     shared.TenantID  // 租户ID
+	ProductID    int64            // 商品ID
+	LanguageCode string           // 语言代码，如 en, zh-CN, ja
+	Name         string           // 商品名称（本地化）
+	Description  string           // 商品描述（本地化）
 	AuditInfo    shared.AuditInfo `gorm:"embedded"` // 审计信息
 }
 

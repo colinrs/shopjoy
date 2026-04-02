@@ -42,17 +42,17 @@ const (
 // AdminUser 管理后台用户实体
 type AdminUser struct {
 	application.Model
-	TenantID    int64     `gorm:"column:tenant_id;not null;default:0;index"`
-	Username    string    `gorm:"column:username;uniqueIndex;size:64"`
-	Email       string    `gorm:"column:email;uniqueIndex;not null;size:128"`
-	Mobile      string    `gorm:"column:mobile;uniqueIndex;size:20"`
-	Password    string    `gorm:"column:password;not null;size:255"`
-	RealName    string    `gorm:"column:real_name;size:32"`
-	Avatar      string    `gorm:"column:avatar;size:255"`
-	Type        Type      `gorm:"column:type;not null;default:1;index"`
-	Status      Status    `gorm:"column:status;not null;default:1;index"`
+	TenantID    int64      `gorm:"column:tenant_id;not null;default:0;index"`
+	Username    string     `gorm:"column:username;uniqueIndex;size:64"`
+	Email       string     `gorm:"column:email;uniqueIndex;not null;size:128"`
+	Mobile      string     `gorm:"column:mobile;uniqueIndex;size:20"`
+	Password    string     `gorm:"column:password;not null;size:255"`
+	RealName    string     `gorm:"column:real_name;size:32"`
+	Avatar      string     `gorm:"column:avatar;size:255"`
+	Type        Type       `gorm:"column:type;not null;default:1;index"`
+	Status      Status     `gorm:"column:status;not null;default:1;index"`
 	LastLoginAt *time.Time `gorm:"column:last_login_at"`
-	LastLoginIP string    `gorm:"column:last_login_ip;size:45"`
+	LastLoginIP string     `gorm:"column:last_login_ip;size:45"`
 }
 
 func (u *AdminUser) TableName() string {

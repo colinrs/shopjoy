@@ -14,16 +14,12 @@
   </el-table>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { ref, watch } from 'vue'
 import type { ElTable } from 'element-plus'
 
-export interface TableRow {
-  [key: string]: any
-}
-
 const props = withDefaults(defineProps<{
-  data: TableRow[]
+  data: T[]
   loading?: boolean
   rowKey?: string
 }>(), {
@@ -32,7 +28,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  'selection-change': [selection: any[]]
+  'selection-change': [selection: T[]]
 }>()
 
 const tableRef = ref<InstanceType<typeof ElTable>>()
@@ -42,27 +38,32 @@ const lastSelectedId = ref<number | string | null>(null)
 // Check if row is selectable (always true for selection column)
 const checkSelectable = () => true
 
+// Helper to get row key value from a row
+const getRowKey = (row: T): number | string => {
+  return (row as Record<string, unknown>)[props.rowKey] as number | string
+}
+
 // Get index by row id
 const getIndexById = (id: number | string): number => {
-  return props.data.findIndex(row => row[props.rowKey] === id)
+  return props.data.findIndex(row => getRowKey(row) === id)
 }
 
 // Check if a row is selected by trying to toggle and checking selection
 const selectedRows = ref<Set<number | string>>(new Set())
 
 // Check if a row is selected
-const isRowSelected = (row: TableRow): boolean => {
-  return selectedRows.value.has(row[props.rowKey])
+const isRowSelected = (row: T): boolean => {
+  return selectedRows.value.has(getRowKey(row))
 }
 
 // Handle cell click - detect shift/ctrl/cmd clicks on selection column
-const handleCellClick = (row: TableRow, column: any, event: MouseEvent) => {
+const handleCellClick = (row: T, column: unknown, event: MouseEvent) => {
   // Only handle clicks on the selection column (type === 'selection')
-  if (column.type !== 'selection') {
+  if ((column as { type?: string }).type !== 'selection') {
     return
   }
 
-  const clickedIndex = getIndexById(row[props.rowKey])
+  const clickedIndex = getIndexById(getRowKey(row))
 
   if (event.shiftKey && lastSelectedIndex.value !== null) {
     // Shift + click: select range
@@ -75,7 +76,7 @@ const handleCellClick = (row: TableRow, column: any, event: MouseEvent) => {
 
   // Update last selected after interaction
   lastSelectedIndex.value = clickedIndex
-  lastSelectedId.value = row[props.rowKey]
+  lastSelectedId.value = getRowKey(row)
 }
 
 // Handle shift selection - select range from last selected to current
@@ -91,12 +92,12 @@ const handleShiftSelection = (clickedIndex: number) => {
   // Select all rows in range (Element Plus will handle preserving other selections)
   rangeRows.forEach(row => {
     tableRef.value?.toggleRowSelection(row, true)
-    selectedRows.value.add(row[props.rowKey])
+    selectedRows.value.add(getRowKey(row))
   })
 }
 
 // Handle ctrl/cmd selection - toggle single row without affecting others
-const handleCtrlSelection = (row: TableRow, clickedIndex: number) => {
+const handleCtrlSelection = (row: T, clickedIndex: number) => {
   const isCurrentlySelected = isRowSelected(row)
 
   // Toggle the clicked row
@@ -104,35 +105,35 @@ const handleCtrlSelection = (row: TableRow, clickedIndex: number) => {
 
   // Update selectedRows set
   if (!isCurrentlySelected) {
-    selectedRows.value.add(row[props.rowKey])
+    selectedRows.value.add(getRowKey(row))
   } else {
-    selectedRows.value.delete(row[props.rowKey])
+    selectedRows.value.delete(getRowKey(row))
   }
 
   // If we're selecting (not deselecting), update last selected
   if (!isCurrentlySelected) {
     lastSelectedIndex.value = clickedIndex
-    lastSelectedId.value = row[props.rowKey]
+    lastSelectedId.value = getRowKey(row)
   }
 }
 
 // Handle selection change from Element Plus
-const handleSelectionChange = (selection: TableRow[]) => {
-  selectedRows.value = new Set(selection.map(row => row[props.rowKey]))
+const handleSelectionChange = (selection: T[]) => {
+  selectedRows.value = new Set(selection.map(row => getRowKey(row)))
   emit('selection-change', selection)
 }
 
 // Handle select event
-const handleSelect = (_selection: TableRow[], _row: TableRow) => {
+const handleSelect = (_selection: T[], _row: T) => {
   // Could be used for additional tracking if needed
 }
 
 // Handle select-all event
-const handleSelectAll = (selection: TableRow[]) => {
+const handleSelectAll = (selection: T[]) => {
   // Reset tracking on select all
   lastSelectedIndex.value = null
   lastSelectedId.value = null
-  selectedRows.value = new Set(selection.map(r => r[props.rowKey]))
+  selectedRows.value = new Set(selection.map(r => getRowKey(r)))
 }
 
 // Clear all selections
@@ -144,12 +145,12 @@ const clearSelection = () => {
 }
 
 // Toggle selection for a single row
-const toggleRowSelection = (row: TableRow, selected?: boolean) => {
+const toggleRowSelection = (row: T, selected?: boolean) => {
   tableRef.value?.toggleRowSelection(row, selected)
 }
 
 // Toggle selection for multiple rows
-const toggleRowSelectionForRows = (rows: TableRow[], selected: boolean) => {
+const toggleRowSelectionForRows = (rows: T[], selected: boolean) => {
   rows.forEach(_row => {
     tableRef.value?.toggleRowSelection(_row, selected)
   })

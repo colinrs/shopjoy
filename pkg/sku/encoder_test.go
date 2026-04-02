@@ -95,7 +95,7 @@ func TestDecodeBase62InvalidChars(t *testing.T) {
 		"ABC-123", // Contains hyphen
 		"ABC_123", // Contains underscore
 		"ABC 123", // Contains space
-		"中文",     // Contains non-ASCII
+		"中文",      // Contains non-ASCII
 	}
 
 	for _, tt := range tests {

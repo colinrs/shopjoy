@@ -50,15 +50,17 @@ const updateChart = () => {
           backgroundColor: '#6B7280'
         }
       },
-      formatter: (params: any) => {
+      formatter: (params: unknown) => {
         if (!Array.isArray(params) || params.length === 0) return ''
-        const date = params[0].axisValue
+        const typedParams = params as Array<{ axisValue?: string; color?: unknown; seriesName?: string; value?: number }>
+        const firstParam = typedParams[0]
+        const date = firstParam.axisValue
         let html = `<div style="font-weight: 600; margin-bottom: 8px;">${date}</div>`
-        params.forEach((param: any) => {
-          const color = param.color instanceof Object ? param.color.colorStops?.[0]?.color : param.color
+        typedParams.forEach((param) => {
+          const color = param.color instanceof Object ? (param.color as { colorStops?: Array<{ color?: string }> }).colorStops?.[0]?.color : param.color
           html += `<div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
             <span style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: ${color};"></span>
-            <span>${param.seriesName}: <strong>${param.value.toLocaleString()}</strong></span>
+            <span>${param.seriesName}: <strong>${param.value?.toLocaleString() ?? 0}</strong></span>
           </div>`
         })
         return html

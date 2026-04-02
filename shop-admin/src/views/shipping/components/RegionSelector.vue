@@ -126,10 +126,11 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Search, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 import { getRegions, type Region } from '@/api/shipping'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 interface CityWithProvince extends Region {
   provinceName: string
@@ -229,8 +230,7 @@ const loadProvinces = async () => {
     const data = await getRegions()
     provinces.value = data
   } catch (error) {
-    console.error('Failed to load provinces:', error)
-    ElMessage.error(t('shipping.loadProvincesFailed'))
+    handleError(error, t('shipping.loadProvincesFailed'))
   } finally {
     loading.value = false
   }
@@ -243,8 +243,7 @@ const loadCities = async (provinceCode: string) => {
     const data = await getRegions(provinceCode)
     citiesMap.value[provinceCode] = data
   } catch (error) {
-    console.error('Failed to load cities:', error)
-    ElMessage.error(t('shipping.loadCitiesFailed'))
+    handleError(error, t('shipping.loadCitiesFailed'))
   }
 }
 

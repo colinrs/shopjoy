@@ -18,15 +18,15 @@ import (
 
 // CreateShipmentRequest 创建发货单请求
 type CreateShipmentRequest struct {
-	OrderID       int64
-	CarrierCode   string
-	CarrierName   string
-	TrackingNo    string
-	ShippingCost  decimal.Decimal
-	Currency      string
-	Weight        decimal.Decimal
-	Remark        string
-	Items         []CreateShipmentItemRequest
+	OrderID      int64
+	CarrierCode  string
+	CarrierName  string
+	TrackingNo   string
+	ShippingCost decimal.Decimal
+	Currency     string
+	Weight       decimal.Decimal
+	Remark       string
+	Items        []CreateShipmentItemRequest
 }
 
 // CreateShipmentItemRequest 创建发货单明细请求
@@ -42,51 +42,51 @@ type CreateShipmentItemRequest struct {
 
 // UpdateShipmentRequest 更新发货单请求
 type UpdateShipmentRequest struct {
-	ID            int64
-	CarrierCode   string
-	CarrierName   string
-	TrackingNo    string
-	ShippingCost  decimal.Decimal
-	Currency      string
-	Weight        decimal.Decimal
-	Remark        string
+	ID           int64
+	CarrierCode  string
+	CarrierName  string
+	TrackingNo   string
+	ShippingCost decimal.Decimal
+	Currency     string
+	Weight       decimal.Decimal
+	Remark       string
 }
 
 // QueryShipmentRequest 查询发货单请求
 type QueryShipmentRequest struct {
-	Page         int
-	PageSize     int
-	ShipmentNo   string
-	OrderID      int64
-	TrackingNo   string
-	Status       fulfillment.ShipmentStatus
-	CarrierCode  string
+	Page              int
+	PageSize          int
+	ShipmentNo        string
+	OrderID           int64
+	TrackingNo        string
+	Status            fulfillment.ShipmentStatus
+	CarrierCode       string
 	FulfillmentStatus int8
-	StartTime    time.Time
-	EndTime      time.Time
+	StartTime         time.Time
+	EndTime           time.Time
 }
 
 // ShipmentResponse 发货单响应
 type ShipmentResponse struct {
-	ID            int64                        `json:"id"`
-	ShipmentNo    string                       `json:"shipment_no"`
-	OrderID       int64                        `json:"order_id"`
-	Status        int                          `json:"status"`
-	StatusText    string                       `json:"status_text"`
-	Carrier       string                       `json:"carrier"`
-	CarrierCode   string                       `json:"carrier_code"`
-	TrackingNo    string                       `json:"tracking_no"`
-	TrackingURL   string                       `json:"tracking_url,omitempty"`
-	ShippingCost  string                       `json:"shipping_cost"`
-	Currency      string                       `json:"currency"`
-	Weight        string                       `json:"weight"`
-	ShippedAt     *time.Time                   `json:"shipped_at,omitempty"`
-	DeliveredAt   *time.Time                   `json:"delivered_at,omitempty"`
-	Remark        string                       `json:"remark"`
-	Items         []*ShipmentItemResponse      `json:"items"`
-	CreatedAt     time.Time                    `json:"created_at"`
-	UpdatedAt     time.Time                    `json:"updated_at"`
-	CreatedBy     int64                        `json:"created_by"`
+	ID           int64                   `json:"id"`
+	ShipmentNo   string                  `json:"shipment_no"`
+	OrderID      int64                   `json:"order_id"`
+	Status       int                     `json:"status"`
+	StatusText   string                  `json:"status_text"`
+	Carrier      string                  `json:"carrier"`
+	CarrierCode  string                  `json:"carrier_code"`
+	TrackingNo   string                  `json:"tracking_no"`
+	TrackingURL  string                  `json:"tracking_url,omitempty"`
+	ShippingCost string                  `json:"shipping_cost"`
+	Currency     string                  `json:"currency"`
+	Weight       string                  `json:"weight"`
+	ShippedAt    *time.Time              `json:"shipped_at,omitempty"`
+	DeliveredAt  *time.Time              `json:"delivered_at,omitempty"`
+	Remark       string                  `json:"remark"`
+	Items        []*ShipmentItemResponse `json:"items"`
+	CreatedAt    time.Time               `json:"created_at"`
+	UpdatedAt    time.Time               `json:"updated_at"`
+	CreatedBy    int64                   `json:"created_by"`
 }
 
 // ShipmentItemResponse 发货单明细响应
@@ -156,11 +156,11 @@ type BatchShipmentResultItem struct {
 }
 
 type shipmentApp struct {
-	db              *gorm.DB
-	shipmentRepo    fulfillment.ShipmentRepository
+	db               *gorm.DB
+	shipmentRepo     fulfillment.ShipmentRepository
 	shipmentItemRepo fulfillment.ShipmentItemRepository
-	carrierRepo     fulfillment.CarrierRepository
-	idGen           snowflake.Snowflake
+	carrierRepo      fulfillment.CarrierRepository
+	idGen            snowflake.Snowflake
 }
 
 // NewShipmentApp 创建发货单应用服务
@@ -172,11 +172,11 @@ func NewShipmentApp(
 	idGen snowflake.Snowflake,
 ) ShipmentApp {
 	return &shipmentApp{
-		db:              db,
-		shipmentRepo:    shipmentRepo,
+		db:               db,
+		shipmentRepo:     shipmentRepo,
 		shipmentItemRepo: shipmentItemRepo,
-		carrierRepo:     carrierRepo,
-		idGen:           idGen,
+		carrierRepo:      carrierRepo,
+		idGen:            idGen,
 	}
 }
 
@@ -623,24 +623,24 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 	}
 
 	return &ShipmentResponse{
-		ID:            s.ID,
-		ShipmentNo:    s.ShipmentNo,
-		OrderID:       s.OrderID,
-		Status:        int(s.Status),
-		StatusText:    s.Status.String(),
-		Carrier:       s.Carrier,
-		CarrierCode:   s.CarrierCode,
-		TrackingNo:    s.TrackingNo,
-		TrackingURL:   trackingURL,
-		ShippingCost:  s.ShippingCost.StringFixed(2),
-		Currency:      s.ShippingCurrency,
-		Weight:        s.Weight.StringFixed(3),
-		ShippedAt:     s.ShippedAt,
-		DeliveredAt:   s.DeliveredAt,
-		Remark:        s.Remark,
-		Items:         items,
-		CreatedAt:     s.CreatedAt,
-		UpdatedAt:     s.UpdatedAt,
+		ID:           s.ID,
+		ShipmentNo:   s.ShipmentNo,
+		OrderID:      s.OrderID,
+		Status:       int(s.Status),
+		StatusText:   s.Status.String(),
+		Carrier:      s.Carrier,
+		CarrierCode:  s.CarrierCode,
+		TrackingNo:   s.TrackingNo,
+		TrackingURL:  trackingURL,
+		ShippingCost: s.ShippingCost.StringFixed(2),
+		Currency:     s.ShippingCurrency,
+		Weight:       s.Weight.StringFixed(3),
+		ShippedAt:    s.ShippedAt,
+		DeliveredAt:  s.DeliveredAt,
+		Remark:       s.Remark,
+		Items:        items,
+		CreatedAt:    s.CreatedAt,
+		UpdatedAt:    s.UpdatedAt,
 	}
 }
 

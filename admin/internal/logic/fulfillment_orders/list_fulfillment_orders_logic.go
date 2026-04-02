@@ -41,12 +41,12 @@ func (l *ListFulfillmentOrdersLogic) ListFulfillmentOrders(req *types.ListFulfil
 
 	// Build query request
 	queryReq := appfulfillment.QueryOrderRequest{
-		Page:              req.Page,
-		PageSize:          req.PageSize,
-		OrderNo:           req.OrderNo,
-		UserID:            req.UserID,
-		UserName:          req.UserName,
-		Status:            req.Status,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		OrderNo:  req.OrderNo,
+		UserID:   req.UserID,
+		UserName: req.UserName,
+		Status:   req.Status,
 	}
 
 	// Parse fulfillment status - convert from string to int8

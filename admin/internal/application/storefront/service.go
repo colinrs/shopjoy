@@ -14,16 +14,16 @@ import (
 // DTO types for application layer
 
 type ThemeDTO struct {
-	ID            int64                  `json:"id"`
-	Code          string                 `json:"code"`
-	Name          string                 `json:"name"`
-	Description   string                 `json:"description"`
-	PreviewImage  string                 `json:"preview_image"`
-	Thumbnail     string                 `json:"thumbnail"`
-	IsPreset      bool                   `json:"is_preset"`
-	IsCurrent     bool                   `json:"is_current"`
-	DefaultConfig *ThemeConfigDTO        `json:"default_config,omitempty"`
-	ConfigSchema  *ThemeConfigSchemaDTO  `json:"config_schema,omitempty"`
+	ID            int64                 `json:"id"`
+	Code          string                `json:"code"`
+	Name          string                `json:"name"`
+	Description   string                `json:"description"`
+	PreviewImage  string                `json:"preview_image"`
+	Thumbnail     string                `json:"thumbnail"`
+	IsPreset      bool                  `json:"is_preset"`
+	IsCurrent     bool                  `json:"is_current"`
+	DefaultConfig *ThemeConfigDTO       `json:"default_config,omitempty"`
+	ConfigSchema  *ThemeConfigSchemaDTO `json:"config_schema,omitempty"`
 }
 
 type ThemeConfigDTO struct {
@@ -38,11 +38,11 @@ type ThemeConfigSchemaDTO struct {
 }
 
 type ThemeConfigFieldDTO struct {
-	Key     string        `json:"key"`
-	Label   string        `json:"label"`
-	Type    string        `json:"type"`
+	Key     string         `json:"key"`
+	Label   string         `json:"label"`
+	Type    string         `json:"type"`
 	Options []SelectOptDTO `json:"options,omitempty"`
-	Default string        `json:"default"`
+	Default string         `json:"default"`
 }
 
 type SelectOptDTO struct {
@@ -68,24 +68,24 @@ type ThemeAuditLogDTO struct {
 }
 
 type PageDTO struct {
-	ID          int64            `json:"id"`
-	PageType    string           `json:"page_type"`
-	Name        string           `json:"name"`
-	Slug        string           `json:"slug"`
-	IsPublished bool             `json:"is_published"`
-	Version     int              `json:"version"`
+	ID          int64  `json:"id"`
+	PageType    string `json:"page_type"`
+	Name        string `json:"name"`
+	Slug        string `json:"slug"`
+	IsPublished bool   `json:"is_published"`
+	Version     int    `json:"version"`
 }
 
 type PageDetailDTO struct {
-	Page        *PageDTO        `json:"page"`
+	Page        *PageDTO         `json:"page"`
 	Decorations []*DecorationDTO `json:"decorations"`
 }
 
 type DecorationDTO struct {
-	ID          int64                  `json:"id"`
-	BlockType   string                 `json:"block_type"`
-	BlockConfig map[string]any         `json:"block_config"`
-	SortOrder   int                    `json:"sort_order"`
+	ID          int64          `json:"id"`
+	BlockType   string         `json:"block_type"`
+	BlockConfig map[string]any `json:"block_config"`
+	SortOrder   int            `json:"sort_order"`
 }
 
 type BlockOrderDTO struct {
@@ -101,7 +101,7 @@ type VersionDTO struct {
 }
 
 type VersionDetailDTO struct {
-	Version *VersionDTO     `json:"version"`
+	Version *VersionDTO      `json:"version"`
 	Blocks  []*DecorationDTO `json:"blocks"`
 }
 
@@ -112,9 +112,9 @@ type SEOConfigDTO struct {
 }
 
 type PageSEOConfigDTO struct {
-	PageType string        `json:"page_type"`
-	PageID   *int64        `json:"page_id,omitempty"`
-	Config   SEOConfigDTO  `json:"config"`
+	PageType string       `json:"page_type"`
+	PageID   *int64       `json:"page_id,omitempty"`
+	Config   SEOConfigDTO `json:"config"`
 }
 
 // Paginated result wrapper
@@ -311,15 +311,15 @@ func (s *themeService) SwitchTheme(ctx context.Context, tenantID shared.TenantID
 
 		// Create audit log
 		auditLog := &storefront.ThemeAuditLog{
-			TenantID:   tenantID,
-			Action:     "switch_theme",
-			ThemeID:    themeID,
-			ThemeName:  theme.Name,
-			ThemeCode:  theme.Code,
-			OldConfig:  oldThemeName + " (" + oldThemeCode + ")",
-			NewConfig:  theme.Name + " (" + theme.Code + ")",
-			UserID:     userID,
-			UserName:   userName,
+			TenantID:  tenantID,
+			Action:    "switch_theme",
+			ThemeID:   themeID,
+			ThemeName: theme.Name,
+			ThemeCode: theme.Code,
+			OldConfig: oldThemeName + " (" + oldThemeCode + ")",
+			NewConfig: theme.Name + " (" + theme.Code + ")",
+			UserID:    userID,
+			UserName:  userName,
 		}
 		return s.auditLogRepo.Create(ctx, tx, auditLog)
 	})
@@ -376,15 +376,15 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context, tenantID shared.Te
 
 		// Create audit log
 		auditLog := &storefront.ThemeAuditLog{
-			TenantID:   tenantID,
-			Action:     "update_config",
-			ThemeID:    themeID,
-			ThemeName:  themeName,
-			ThemeCode:  themeCode,
-			OldConfig:  oldConfigJSON,
-			NewConfig:  newConfigJSON,
-			UserID:     userID,
-			UserName:   userName,
+			TenantID:  tenantID,
+			Action:    "update_config",
+			ThemeID:   themeID,
+			ThemeName: themeName,
+			ThemeCode: themeCode,
+			OldConfig: oldConfigJSON,
+			NewConfig: newConfigJSON,
+			UserID:    userID,
+			UserName:  userName,
 		}
 		return s.auditLogRepo.Create(ctx, tx, auditLog)
 	})

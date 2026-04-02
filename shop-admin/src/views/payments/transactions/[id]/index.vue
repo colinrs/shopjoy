@@ -140,6 +140,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Refresh, CopyDocument } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import { getPaymentStatusType } from '@/utils/status'
 import { getTransactionDetail, type Transaction } from '@/api/payment'
 import { t } from '@/plugins/i18n'
 
@@ -172,14 +173,7 @@ const formatTime = (timeStr: string | null | undefined) => {
   }
 }
 
-const getStatusType = (status: number) => {
-  const types: Record<number, string> = {
-    0: 'warning',
-    1: 'success',
-    2: 'danger'
-  }
-  return types[status] || 'info'
-}
+const getStatusType = getPaymentStatusType
 
 const getPaymentMethodTagType = (method: string) => {
   const types: Record<string, string> = {

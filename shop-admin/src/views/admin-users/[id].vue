@@ -129,8 +129,10 @@ import {
   type AdminUserDetail,
   type UpdateAdminUserParams
 } from '@/api/admin-user'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
@@ -151,8 +153,7 @@ const loadAdminUser = async () => {
     const res = await getAdminUserDetail(userId())
     adminUser.value = res
   } catch (error) {
-    console.error('Failed to load admin user:', error)
-    ElMessage.error(t('adminUsers.failedToLoadAdminDetail'))
+    handleError(error, t('adminUsers.failedToLoadAdminDetail'))
   } finally {
     loading.value = false
   }
@@ -208,8 +209,7 @@ const confirmEdit = async () => {
     editDialogVisible.value = false
     loadAdminUser()
   } catch (error) {
-    console.error('Failed to update:', error)
-    ElMessage.error(t('adminUsers.updateFailed'))
+    handleError(error, t('adminUsers.updateFailed'))
   } finally {
     editLoading.value = false
   }

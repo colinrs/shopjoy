@@ -34,10 +34,10 @@ func (refundReasonModel) TableName() string {
 func (m *refundReasonModel) toEntity() *fulfillment.RefundReason {
 	return &fulfillment.RefundReason{
 		Model:    application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC()},
-		Code:      m.Code,
-		Name:      m.Name,
-		Sort:      m.Sort,
-		IsActive:  m.IsActive == 1,
+		Code:     m.Code,
+		Name:     m.Name,
+		Sort:     m.Sort,
+		IsActive: m.IsActive == 1,
 	}
 }
 

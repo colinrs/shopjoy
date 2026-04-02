@@ -34,13 +34,13 @@ type Service interface {
 }
 
 type service struct {
-	db                *gorm.DB
-	paymentRepo       payment.PaymentRepository
-	refundRepo        payment.PaymentRefundRepository
-	transactionRepo   payment.PaymentTransactionRepository
-	webhookEventRepo  payment.WebhookEventRepository
+	db                  *gorm.DB
+	paymentRepo         payment.PaymentRepository
+	refundRepo          payment.PaymentRefundRepository
+	transactionRepo     payment.PaymentTransactionRepository
+	webhookEventRepo    payment.WebhookEventRepository
 	paymentSettingsRepo shop.PaymentSettingsRepository
-	idGen             snowflake.Snowflake
+	idGen               snowflake.Snowflake
 }
 
 // NewService creates a new payment application service
@@ -54,13 +54,13 @@ func NewService(
 	idGen snowflake.Snowflake,
 ) Service {
 	return &service{
-		db:               db,
-		paymentRepo:      paymentRepo,
-		refundRepo:       refundRepo,
-		transactionRepo:  transactionRepo,
-		webhookEventRepo: webhookEventRepo,
+		db:                  db,
+		paymentRepo:         paymentRepo,
+		refundRepo:          refundRepo,
+		transactionRepo:     transactionRepo,
+		webhookEventRepo:    webhookEventRepo,
 		paymentSettingsRepo: paymentSettingsRepo,
-		idGen:            idGen,
+		idGen:               idGen,
 	}
 }
 

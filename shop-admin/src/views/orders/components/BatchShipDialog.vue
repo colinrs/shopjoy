@@ -192,8 +192,8 @@ const handleSubmit = async () => {
       ElMessage.success(t('orders.batchShipSuccess', { count: props.orders.length }))
       emit('success')
       visible.value = false
-    } catch (error: any) {
-      ElMessage.error(error?.message || t('orders.batchShipFailed'))
+    } catch (error: unknown) {
+      ElMessage.error((error as Error)?.message || t('orders.batchShipFailed'))
     } finally {
       submitting.value = false
     }

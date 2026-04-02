@@ -206,8 +206,8 @@ import {
   ShoppingCart, Money, Goods, User, ArrowUp, ArrowDown,
   Bell, TrendCharts, Timer
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 import { t } from '@/plugins/i18n'
+import { getOrderStatusType } from '@/utils/status'
 import {
   getDashboardOverview,
   getSalesTrend,
@@ -222,8 +222,10 @@ import {
   type PendingOrderItem,
   type ActivityItem
 } from '@/api/dashboard'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 const timeRange = ref<'week' | 'month' | 'year'>('week')
 const loading = ref({
   overview: false,
@@ -274,17 +276,6 @@ const isGrowthPositive = (growth: string) => {
   return growth.startsWith('+') || growth === '0%' || !growth.startsWith('-')
 }
 
-const getOrderStatusType = (status: string) => {
-  const types: Record<string, string> = {
-    'pending_payment': 'warning',
-    'paid': 'primary',
-    'shipped': 'info',
-    'delivered': 'success',
-    'cancelled': 'danger',
-    'refunded': 'danger'
-  }
-  return types[status] || 'info'
-}
 
 const getActivityType = (type: string) => {
   const types: Record<string, string> = {
@@ -317,8 +308,7 @@ const fetchOverview = async () => {
   try {
     stats.value = await getDashboardOverview()
   } catch (error) {
-    console.error('Failed to fetch overview:', error)
-    ElMessage.error(t('dashboard.loadOverviewFailed'))
+    handleError(error, t('dashboard.loadOverviewFailed'))
   } finally {
     loading.value.overview = false
   }
@@ -332,8 +322,7 @@ const fetchSalesTrend = async () => {
     salesTrendData.value = data.data
     updateSalesChart()
   } catch (error) {
-    console.error('Failed to fetch sales trend:', error)
-    ElMessage.error(t('dashboard.loadSalesTrendFailed'))
+    handleError(error, t('dashboard.loadSalesTrendFailed'))
   } finally {
     loading.value.charts = false
   }
@@ -346,8 +335,7 @@ const fetchOrderStatus = async () => {
     orderStatusData.value = data.list
     updateOrderChart()
   } catch (error) {
-    console.error('Failed to fetch order status:', error)
-    ElMessage.error(t('dashboard.loadOrderStatusFailed'))
+    handleError(error, t('dashboard.loadOrderStatusFailed'))
   }
 }
 
@@ -359,8 +347,7 @@ const fetchPendingOrders = async () => {
     pendingOrders.value = data.list
     pendingOrdersTotal.value = data.total
   } catch (error) {
-    console.error('Failed to fetch pending orders:', error)
-    ElMessage.error(t('dashboard.loadPendingOrdersFailed'))
+    handleError(error, t('dashboard.loadPendingOrdersFailed'))
   } finally {
     loading.value.pending = false
   }
@@ -373,8 +360,7 @@ const fetchTopProducts = async () => {
     const data = await getTopProducts({ limit: 5, period: 'week' })
     hotProducts.value = data.list
   } catch (error) {
-    console.error('Failed to fetch top products:', error)
-    ElMessage.error(t('dashboard.loadHotProductsFailed'))
+    handleError(error, t('dashboard.loadHotProductsFailed'))
   } finally {
     loading.value.products = false
   }
@@ -386,8 +372,7 @@ const fetchRecentActivities = async () => {
     const data = await getRecentActivities({ limit: 10 })
     recentActivities.value = data.list
   } catch (error) {
-    console.error('Failed to fetch recent activities:', error)
-    ElMessage.error(t('dashboard.loadRecentActivityFailed'))
+    handleError(error, t('dashboard.loadRecentActivityFailed'))
   }
 }
 
@@ -408,9 +393,10 @@ const updateSalesChart = () => {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'cross' },
-      formatter: (params: any) => {
-        const point = params[0]
-        return `${point.axisValue}<br/>${t('dashboard.chartSalesTooltip')}¥${formatNumber(point.value)}`
+      formatter: (params: unknown) => {
+        const p = (params as { axisValue?: string; value?: number }[])
+        const point = p[0]
+        return `${point.axisValue || ''}<br/>${t('dashboard.chartSalesTooltip')}¥${formatNumber(point.value || 0)}`
       }
     },
     grid: {

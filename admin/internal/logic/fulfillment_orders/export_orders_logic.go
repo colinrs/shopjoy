@@ -47,11 +47,11 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 
 	// Build query request
 	queryReq := appfulfillment.QueryOrderRequest{
-		Page:              1,
-		PageSize:          10001, // Check if exceeds limit
-		OrderNo:           req.OrderNo,
-		UserID:            req.UserID,
-		Status:            req.Status,
+		Page:     1,
+		PageSize: 10001, // Check if exceeds limit
+		OrderNo:  req.OrderNo,
+		UserID:   req.UserID,
+		Status:   req.Status,
 	}
 
 	// Parse fulfillment status - convert from string to int8

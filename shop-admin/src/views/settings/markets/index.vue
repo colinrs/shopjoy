@@ -341,8 +341,9 @@ const loadMarkets = async () => {
     const response = await getMarkets()
     marketList.value = response.list || []
     total.value = response.total || 0
-  } catch (error: any) {
-    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.loadingFailed'))
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
+    ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.loadingFailed'))
   } finally {
     loading.value = false
   }
@@ -373,8 +374,9 @@ const handleEdit = async (row: Market) => {
       }
     })
     dialogVisible.value = true
-  } catch (error: any) {
-    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.getMarketFailed'))
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
+    ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.getMarketFailed'))
   }
 }
 
@@ -398,9 +400,10 @@ const handleDelete = async (row: Market) => {
     await deleteMarket(row.id)
     ElMessage.success(t('settings.markets.deleteSuccess'))
     loadMarkets()
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
     if (error !== 'cancel') {
-      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.deleteFailed'))
+      ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.deleteFailed'))
     }
   }
 }
@@ -412,9 +415,10 @@ const handleStatusChange = async (row: Market, val: boolean) => {
       is_active: val
     })
     ElMessage.success(val ? t('settings.markets.enabled') : t('settings.markets.disabled'))
-  } catch (error: any) {
+  } catch (error: unknown) {
     row.is_active = !val
-    ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.statusUpdateFailed'))
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
+    ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.statusUpdateFailed'))
   }
 }
 
@@ -438,9 +442,10 @@ const handleSetDefault = async (row: Market) => {
 
     ElMessage.success(t('settings.markets.defaultSetSuccess'))
     loadMarkets()
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
     if (error !== 'cancel') {
-      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.setDefaultFailed'))
+      ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.setDefaultFailed'))
     }
   }
 }
@@ -488,9 +493,10 @@ const handleSave = async () => {
 
     dialogVisible.value = false
     loadMarkets()
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } }; message?: string }
     if (error !== false) {
-      ElMessage.error(error?.response?.data?.msg || error.message || t('settings.markets.saveFailed'))
+      ElMessage.error(err.response?.data?.msg || err.message || t('settings.markets.saveFailed'))
     }
   } finally {
     saveLoading.value = false

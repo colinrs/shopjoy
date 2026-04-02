@@ -133,7 +133,7 @@ func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB, tenantI
 		Select("id").
 		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
 		Order("version ASC").
-		Limit(int(total) - keepCount).
+		Limit(int(total)-keepCount).
 		Pluck("id", &idsToDelete).Error
 	if err != nil {
 		return err

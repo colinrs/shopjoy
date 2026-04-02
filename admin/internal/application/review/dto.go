@@ -9,16 +9,16 @@ import (
 
 // ListReviewsRequest list reviews request
 type ListReviewsRequest struct {
-	ProductID  int64
-	Status     string
-	RatingMin  *int
-	RatingMax  *int
-	HasImage   bool
-	Keyword    string
-	StartTime  *time.Time
-	EndTime    *time.Time
-	Page       int
-	PageSize   int
+	ProductID int64
+	Status    string
+	RatingMin *int
+	RatingMax *int
+	HasImage  bool
+	Keyword   string
+	StartTime *time.Time
+	EndTime   *time.Time
+	Page      int
+	PageSize  int
 }
 
 // ReviewListItem review list item DTO

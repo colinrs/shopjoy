@@ -22,20 +22,20 @@ type CartItem struct {
 }
 
 type CalculateRequest struct {
-	TenantID   shared.TenantID  `json:"tenant_id"`
-	UserID     int64            `json:"user_id"`
-	CartItems  []CartItem       `json:"cart_items"`
-	Currency   string           `json:"currency"`
-	CouponCode string           `json:"coupon_code,omitempty"`
+	TenantID   shared.TenantID `json:"tenant_id"`
+	UserID     int64           `json:"user_id"`
+	CartItems  []CartItem      `json:"cart_items"`
+	Currency   string          `json:"currency"`
+	CouponCode string          `json:"coupon_code,omitempty"`
 }
 
 type CalculateResult struct {
-	OriginalTotal     decimal.Decimal   `json:"original_total"`
-	PromotionDiscount decimal.Decimal   `json:"promotion_discount"`
-	CouponDiscount    decimal.Decimal   `json:"coupon_discount"`
-	FinalTotal        decimal.Decimal   `json:"final_total"`
+	OriginalTotal     decimal.Decimal    `json:"original_total"`
+	PromotionDiscount decimal.Decimal    `json:"promotion_discount"`
+	CouponDiscount    decimal.Decimal    `json:"coupon_discount"`
+	FinalTotal        decimal.Decimal    `json:"final_total"`
 	AppliedPromotions []AppliedPromotion `json:"applied_promotions"`
-	AppliedCoupon     *AppliedCoupon    `json:"applied_coupon,omitempty"`
+	AppliedCoupon     *AppliedCoupon     `json:"applied_coupon,omitempty"`
 }
 
 type AppliedPromotion struct {

@@ -69,13 +69,13 @@ type InventoryLog struct {
 	TenantID       shared.TenantID
 	SKUCode        string
 	ProductID      int64
-	WarehouseID    int64 // 0 = total/summary
+	WarehouseID    int64  // 0 = total/summary
 	ChangeType     string // manual, order, return, adjustment
 	ChangeQuantity int    // positive = increase, negative = decrease
 	BeforeStock    int
 	AfterStock     int
 	OrderNo        string
-	Remark        string
+	Remark         string
 	OperatorID     int64
 }
 

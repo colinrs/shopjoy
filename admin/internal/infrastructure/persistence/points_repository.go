@@ -24,21 +24,21 @@ func NewEarnRuleRepository() points.EarnRuleRepository {
 
 type earnRuleModel struct {
 	application.Model
-	TenantID         int64           `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
-	Name             string          `gorm:"column:name;type:varchar(255);not null"`
-	Description      string          `gorm:"column:description;type:text"`
-	Scenario         string          `gorm:"column:scenario;type:varchar(50);not null"`
-	CalculationType  string          `gorm:"column:calculation_type;type:varchar(20);not null"`
-	FixedPoints      int64           `gorm:"column:fixed_points;type:bigint;default:0"`
-	Ratio            decimal.Decimal `gorm:"column:ratio;type:decimal(10,4)"`
+	TenantID         int64              `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
+	Name             string             `gorm:"column:name;type:varchar(255);not null"`
+	Description      string             `gorm:"column:description;type:text"`
+	Scenario         string             `gorm:"column:scenario;type:varchar(50);not null"`
+	CalculationType  string             `gorm:"column:calculation_type;type:varchar(20);not null"`
+	FixedPoints      int64              `gorm:"column:fixed_points;type:bigint;default:0"`
+	Ratio            decimal.Decimal    `gorm:"column:ratio;type:decimal(10,4)"`
 	Tiers            points.TierConfigs `gorm:"column:tiers;type:json"`
-	ConditionType    string          `gorm:"column:condition_type;type:varchar(50);not null;default:'NONE'"`
-	ConditionValue   string          `gorm:"column:condition_value;type:text"`
-	ExpirationMonths int             `gorm:"column:expiration_months;type:int;not null;default:12"`
-	Status           int             `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	Priority         int             `gorm:"column:priority;type:int;not null;default:0"`
-	StartAt          *time.Time      `gorm:"column:start_at"`
-	EndAt            *time.Time      `gorm:"column:end_at"`
+	ConditionType    string             `gorm:"column:condition_type;type:varchar(50);not null;default:'NONE'"`
+	ConditionValue   string             `gorm:"column:condition_value;type:text"`
+	ExpirationMonths int                `gorm:"column:expiration_months;type:int;not null;default:12"`
+	Status           int                `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
+	Priority         int                `gorm:"column:priority;type:int;not null;default:0"`
+	StartAt          *time.Time         `gorm:"column:start_at"`
+	EndAt            *time.Time         `gorm:"column:end_at"`
 }
 
 func (earnRuleModel) TableName() string {
@@ -257,17 +257,17 @@ func NewRedeemRuleRepository() points.RedeemRuleRepository {
 
 type redeemRuleModel struct {
 	application.Model
-	TenantID       int64           `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
-	Name           string          `gorm:"column:name;type:varchar(255);not null"`
-	Description    string          `gorm:"column:description;type:text"`
-	CouponID       int64           `gorm:"column:coupon_id;type:bigint;not null"`
-	PointsRequired int64           `gorm:"column:points_required;type:bigint;not null"`
-	TotalStock     int64           `gorm:"column:total_stock;type:bigint;not null;default:0"`
-	UsedStock      int64           `gorm:"column:used_stock;type:bigint;not null;default:0"`
-	PerUserLimit   int             `gorm:"column:per_user_limit;type:int;not null;default:1"`
-	Status         int             `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	StartAt        *time.Time      `gorm:"column:start_at"`
-	EndAt          *time.Time      `gorm:"column:end_at"`
+	TenantID       int64      `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
+	Name           string     `gorm:"column:name;type:varchar(255);not null"`
+	Description    string     `gorm:"column:description;type:text"`
+	CouponID       int64      `gorm:"column:coupon_id;type:bigint;not null"`
+	PointsRequired int64      `gorm:"column:points_required;type:bigint;not null"`
+	TotalStock     int64      `gorm:"column:total_stock;type:bigint;not null;default:0"`
+	UsedStock      int64      `gorm:"column:used_stock;type:bigint;not null;default:0"`
+	PerUserLimit   int        `gorm:"column:per_user_limit;type:int;not null;default:1"`
+	Status         int        `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
+	StartAt        *time.Time `gorm:"column:start_at"`
+	EndAt          *time.Time `gorm:"column:end_at"`
 }
 
 func (redeemRuleModel) TableName() string {
@@ -276,7 +276,7 @@ func (redeemRuleModel) TableName() string {
 
 func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 	return &points.RedeemRule{
-		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
+		Model:          application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt, DeletedAt: m.DeletedAt},
 		TenantID:       shared.TenantID(m.TenantID),
 		Name:           m.Name,
 		Description:    m.Description,
@@ -293,7 +293,7 @@ func (m *redeemRuleModel) toEntity() *points.RedeemRule {
 
 func fromRedeemRuleEntity(r *points.RedeemRule) *redeemRuleModel {
 	return &redeemRuleModel{
-		Model:         application.Model{ID: r.ID, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, DeletedAt: r.DeletedAt},
+		Model:          application.Model{ID: r.ID, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, DeletedAt: r.DeletedAt},
 		TenantID:       r.TenantID.Int64(),
 		Name:           r.Name,
 		Description:    r.Description,
@@ -634,15 +634,15 @@ func NewPointsTransactionRepository() points.PointsTransactionRepository {
 
 type pointsTransactionModel struct {
 	application.Model
-	TenantID      int64  `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
-	UserID        int64  `gorm:"column:user_id;not null;index:idx_tenant_user"`
-	AccountID     int64  `gorm:"column:account_id;not null;index:idx_account_id"`
-	Points        int64  `gorm:"column:points;type:bigint;not null"`
-	BalanceAfter  int64  `gorm:"column:balance_after;type:bigint;not null"`
-	Type          string `gorm:"column:type;type:varchar(20);not null;index:idx_type"`
-	ReferenceType string `gorm:"column:reference_type;type:varchar(50)"`
-	ReferenceID   string `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
-	Description   string `gorm:"column:description;type:text"`
+	TenantID      int64      `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
+	UserID        int64      `gorm:"column:user_id;not null;index:idx_tenant_user"`
+	AccountID     int64      `gorm:"column:account_id;not null;index:idx_account_id"`
+	Points        int64      `gorm:"column:points;type:bigint;not null"`
+	BalanceAfter  int64      `gorm:"column:balance_after;type:bigint;not null"`
+	Type          string     `gorm:"column:type;type:varchar(20);not null;index:idx_type"`
+	ReferenceType string     `gorm:"column:reference_type;type:varchar(50)"`
+	ReferenceID   string     `gorm:"column:reference_id;type:varchar(100);index:idx_reference"`
+	Description   string     `gorm:"column:description;type:text"`
 	ExpiresAt     *time.Time `gorm:"column:expires_at"`
 }
 
@@ -805,13 +805,13 @@ func NewPointsRedemptionRepository() points.PointsRedemptionRepository {
 
 type pointsRedemptionModel struct {
 	application.Model
-	TenantID     int64  `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
-	UserID       int64  `gorm:"column:user_id;not null;index:idx_tenant_user"`
-	RedeemRuleID int64  `gorm="column:redeem_rule_id;not null;index:idx_redeem_rule"`
-	CouponID     int64  `gorm:"column:coupon_id;type:bigint;not null"`
-	UserCouponID int64  `gorm:"column:user_coupon_id;type:bigint"`
-	PointsUsed   int64  `gorm:"column:points_used;type:bigint;not null"`
-	Status       int    `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
+	TenantID     int64      `gorm:"column:tenant_id;not null;index:idx_tenant_user"`
+	UserID       int64      `gorm:"column:user_id;not null;index:idx_tenant_user"`
+	RedeemRuleID int64      `gorm="column:redeem_rule_id;not null;index:idx_redeem_rule"`
+	CouponID     int64      `gorm:"column:coupon_id;type:bigint;not null"`
+	UserCouponID int64      `gorm:"column:user_coupon_id;type:bigint"`
+	PointsUsed   int64      `gorm:"column:points_used;type:bigint;not null"`
+	Status       int        `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
 	CompletedAt  *time.Time `gorm:"column:completed_at"`
 }
 

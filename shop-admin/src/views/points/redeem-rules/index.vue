@@ -183,6 +183,9 @@ import {
   type CreateRedeemRuleParams
 } from '@/api/points'
 import { t } from '@/plugins/i18n'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -220,8 +223,7 @@ const loadRules = async () => {
     total.value = res.total || 0
     ruleStats.value = res.stats
   } catch (error) {
-    console.error('Failed to load redeem rules:', error)
-    ElMessage.error(t('points.loadRedeemRulesFailed'))
+    handleError(error, t('points.loadRedeemRulesFailed'))
   } finally {
     loading.value = false
   }
@@ -277,8 +279,7 @@ const handleActivate = async (row: RedeemRule) => {
     ElMessage.success(t('points.activateSuccess'))
     loadRules()
   } catch (error) {
-    console.error('Failed to activate:', error)
-    ElMessage.error(t('points.activateRuleFailed'))
+    handleError(error, t('points.activateRuleFailed'))
   }
 }
 
@@ -288,8 +289,7 @@ const handleDeactivate = async (row: RedeemRule) => {
     ElMessage.success(t('points.deactivateSuccess'))
     loadRules()
   } catch (error) {
-    console.error('Failed to deactivate:', error)
-    ElMessage.error(t('points.deactivateRuleFailed'))
+    handleError(error, t('points.deactivateRuleFailed'))
   }
 }
 
@@ -305,8 +305,7 @@ const handleDelete = async (row: RedeemRule) => {
     loadRules()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete:', error)
-      ElMessage.error(t('points.deleteRuleFailed'))
+      handleError(error, t('points.deleteRuleFailed'))
     }
   }
 }
@@ -324,8 +323,7 @@ const handleSave = async (data: CreateRedeemRuleParams) => {
     formDialogVisible.value = false
     loadRules()
   } catch (error) {
-    console.error('Failed to save:', error)
-    ElMessage.error(t('points.saveRuleFailed'))
+    handleError(error, t('points.saveRuleFailed'))
   } finally {
     saveLoading.value = false
   }

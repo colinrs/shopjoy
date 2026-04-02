@@ -163,18 +163,18 @@ func (uc *UserCoupon) CanUse() bool {
 // ==================== PromotionUsage (Entity) ====================
 
 type PromotionUsage struct {
-	ID             int64            `json:"id"`
-	TenantID       shared.TenantID  `json:"tenant_id"`
-	PromotionID    int64            `json:"promotion_id"`
-	RuleID         *int64           `json:"rule_id,omitempty"`
-	OrderID        int64            `json:"order_id"`
-	UserID         int64            `json:"user_id"`
-	DiscountAmount decimal.Decimal  `json:"discount_amount"`
-	Currency       string           `json:"currency"`
-	OriginalAmount decimal.Decimal  `json:"original_amount"`
-	FinalAmount    decimal.Decimal  `json:"final_amount"`
-	CouponID       *int64           `json:"coupon_id,omitempty"`
-	CreatedAt      time.Time        `json:"created_at"`
+	ID             int64           `json:"id"`
+	TenantID       shared.TenantID `json:"tenant_id"`
+	PromotionID    int64           `json:"promotion_id"`
+	RuleID         *int64          `json:"rule_id,omitempty"`
+	OrderID        int64           `json:"order_id"`
+	UserID         int64           `json:"user_id"`
+	DiscountAmount decimal.Decimal `json:"discount_amount"`
+	Currency       string          `json:"currency"`
+	OriginalAmount decimal.Decimal `json:"original_amount"`
+	FinalAmount    decimal.Decimal `json:"final_amount"`
+	CouponID       *int64          `json:"coupon_id,omitempty"`
+	CreatedAt      time.Time       `json:"created_at"`
 }
 
 func (pu *PromotionUsage) TableName() string {

@@ -534,8 +534,10 @@ import {
 import TablePagination from '@/components/common/TablePagination.vue'
 import StatsCard from '@/components/common/StatsCard.vue'
 import { t } from '@/plugins/i18n'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 // Tab state
 const activeTab = ref('coupon')
@@ -673,8 +675,7 @@ const loadCoupons = async () => {
     stats.value.activeCoupons = couponList.value.filter(c => c.status === 'active').length
     stats.value.totalUsed = couponList.value.reduce((sum, c) => sum + c.used_count, 0)
   } catch (error) {
-    console.error('Failed to load coupons:', error)
-    ElMessage.error(t('promotions.loadCouponsFailed'))
+    handleError(error, t('promotions.loadCouponsFailed'))
   } finally {
     couponLoading.value = false
   }
@@ -688,8 +689,7 @@ const loadPromotions = async () => {
     promotionTotal.value = res.total || 0
     stats.value.totalPromotions = promotionTotal.value
   } catch (error) {
-    console.error('Failed to load promotions:', error)
-    ElMessage.error(t('promotions.loadPromotionsFailed'))
+    handleError(error, t('promotions.loadPromotionsFailed'))
   } finally {
     promotionLoading.value = false
   }
@@ -702,8 +702,7 @@ const loadCouponUsage = async () => {
     usageList.value = res.list || []
     usageTotal.value = res.total || 0
   } catch (error) {
-    console.error('Failed to load coupon usage:', error)
-    ElMessage.error(t('promotions.loadCouponUsageFailed'))
+    handleError(error, t('promotions.loadCouponUsageFailed'))
   } finally {
     usageLoading.value = false
   }
@@ -870,8 +869,7 @@ const handleDeleteCoupon = async (row: Coupon) => {
     loadCoupons()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete coupon:', error)
-      ElMessage.error(t('promotions.deleteFailed'))
+      handleError(error, t('promotions.deleteFailed'))
     }
   }
 }
@@ -898,8 +896,7 @@ const handleConfirmIssue = async () => {
     ElMessage.success(t('promotions.issueSuccess'))
     issueDialogVisible.value = false
   } catch (error) {
-    console.error('Failed to issue coupon:', error)
-    ElMessage.error(t('promotions.issueFailed'))
+    handleError(error, t('promotions.issueFailed'))
   } finally {
     issueLoading.value = false
   }
@@ -937,8 +934,7 @@ const saveCoupon = async () => {
       couponDialogVisible.value = false
       loadCoupons()
     } catch (error) {
-      console.error('Failed to save coupon:', error)
-      ElMessage.error(isEditCoupon.value ? t('promotions.updateCouponFailed') : t('promotions.createCouponFailed'))
+      handleError(error, isEditCoupon.value ? t('promotions.updateCouponFailed') : t('promotions.createCouponFailed'))
     } finally {
       saveLoading.value = false
     }
@@ -994,8 +990,7 @@ const handleBatchGenerate = async () => {
     generatedCodesDialogVisible.value = true
     ElMessage.success(t('promotions.generateSuccess'))
   } catch (error) {
-    console.error('Failed to generate coupon codes:', error)
-    ElMessage.error(t('promotions.generateFailed'))
+    handleError(error, t('promotions.generateFailed'))
   } finally {
     batchGenerating.value = false
   }
@@ -1007,7 +1002,7 @@ const handleCopyAllCodes = async () => {
     await navigator.clipboard.writeText(codesText)
     ElMessage.success(t('promotions.codesCopied'))
   } catch (error) {
-    console.error('Failed to copy codes:', error)
+    handleError(error)
   }
 }
 
@@ -1038,8 +1033,7 @@ const handleActivatePromotion = async (row: Promotion) => {
     ElMessage.success(t('promotions.activateSuccess'))
     loadPromotions()
   } catch (error) {
-    console.error('Failed to activate promotion:', error)
-    ElMessage.error(t('promotions.activatePromotionFailed'))
+    handleError(error, t('promotions.activatePromotionFailed'))
   }
 }
 
@@ -1049,8 +1043,7 @@ const handleDeactivatePromotion = async (row: Promotion) => {
     ElMessage.success(t('promotions.deactivateSuccess'))
     loadPromotions()
   } catch (error) {
-    console.error('Failed to deactivate promotion:', error)
-    ElMessage.error(t('promotions.deactivatePromotionFailed'))
+    handleError(error, t('promotions.deactivatePromotionFailed'))
   }
 }
 
@@ -1066,8 +1059,7 @@ const handleDeletePromotion = async (row: Promotion) => {
     loadPromotions()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete promotion:', error)
-      ElMessage.error(t('promotions.deleteFailed'))
+      handleError(error, t('promotions.deleteFailed'))
     }
   }
 }
@@ -1102,8 +1094,7 @@ const savePromotion = async () => {
       promotionDialogVisible.value = false
       loadPromotions()
     } catch (error) {
-      console.error('Failed to save promotion:', error)
-      ElMessage.error(t('promotions.savePromotionFailed'))
+      handleError(error, t('promotions.savePromotionFailed'))
     } finally {
       saveLoading.value = false
     }

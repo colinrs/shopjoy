@@ -16,26 +16,26 @@ import (
 
 // RefundDetailResponse represents the refund detail response DTO for API
 type RefundDetailResponse struct {
-	ID             int64    `json:"id"`
-	RefundNo       string   `json:"refund_no"`
-	OrderID        int64    `json:"order_id"`
-	UserID         int64    `json:"user_id"`
-	Type           int8     `json:"type"`
-	TypeText       string   `json:"type_text"`
-	Status         int8     `json:"status"`
-	StatusText     string   `json:"status_text"`
-	ReasonType     string   `json:"reason_type"`
-	Reason         string   `json:"reason"`
-	Description    string   `json:"description"`
-	Images         []string `json:"images"`
-	Amount         string   `json:"amount"`
-	Currency       string   `json:"currency"`
-	RejectReason   string   `json:"reject_reason"`
-	ApprovedAt     string   `json:"approved_at"`
-	ApprovedBy     int64    `json:"approved_by"`
-	CompletedAt    string   `json:"completed_at"`
-	CreatedAt      string   `json:"created_at"`
-	UpdatedAt      string   `json:"updated_at"`
+	ID           int64    `json:"id"`
+	RefundNo     string   `json:"refund_no"`
+	OrderID      int64    `json:"order_id"`
+	UserID       int64    `json:"user_id"`
+	Type         int8     `json:"type"`
+	TypeText     string   `json:"type_text"`
+	Status       int8     `json:"status"`
+	StatusText   string   `json:"status_text"`
+	ReasonType   string   `json:"reason_type"`
+	Reason       string   `json:"reason"`
+	Description  string   `json:"description"`
+	Images       []string `json:"images"`
+	Amount       string   `json:"amount"`
+	Currency     string   `json:"currency"`
+	RejectReason string   `json:"reject_reason"`
+	ApprovedAt   string   `json:"approved_at"`
+	ApprovedBy   int64    `json:"approved_by"`
+	CompletedAt  string   `json:"completed_at"`
+	CreatedAt    string   `json:"created_at"`
+	UpdatedAt    string   `json:"updated_at"`
 }
 
 // RefundListResponse represents the refund list response
@@ -104,7 +104,7 @@ type RefundReasonListResponse struct {
 
 // RefundReasonItemResponse represents a single refund reason
 type RefundReasonItemResponse struct {
-	ID       int64 `json:"id"`
+	ID       int64  `json:"id"`
 	Code     string `json:"code"`
 	Name     string `json:"name"`
 	Sort     int    `json:"sort"`

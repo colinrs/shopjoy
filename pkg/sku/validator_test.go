@@ -22,7 +22,7 @@ func TestValidatePrefix(t *testing.T) {
 		{"NIKE-SHOE", code.ErrSKUPrefixInvalid}, // Contains hyphen
 		{"NIKE_2024", code.ErrSKUPrefixInvalid}, // Contains underscore
 		{"NIKE 2024", code.ErrSKUPrefixInvalid}, // Contains space
-		{"NIKE中文", code.ErrSKUPrefixInvalid},  // Contains non-ASCII
+		{"NIKE中文", code.ErrSKUPrefixInvalid},    // Contains non-ASCII
 	}
 
 	for _, tt := range tests {

@@ -194,11 +194,11 @@
     <el-dialog v-model="detailVisible" :title="$t('adminUsers.userDetail')" width="600px">
       <el-descriptions :column="2" border v-if="currentRow">
         <el-descriptions-item :label="$t('adminUsers.userId')">{{ currentRow.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.username')">{{ currentRow.real_name || currentRow.name || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.username')">{{ ('real_name' in currentRow ? currentRow.real_name : currentRow.name) || '-' }}</el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.email')">{{ currentRow.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ currentRow.mobile || currentRow.phone || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.type')" v-if="currentRow.type_text">
-          <el-tag :type="getTypeTagType(currentRow.type)">{{ currentRow.type_text }}</el-tag>
+        <el-descriptions-item :label="$t('adminUsers.mobile')">{{ currentRow.mobile || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.type')" v-if="'type_text' in currentRow && currentRow.type_text">
+          <el-tag :type="getTypeTagType((currentRow as AdminUser).type)">{{ (currentRow as AdminUser).type_text }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.status')">
           <el-tag :type="currentRow.status === 1 ? 'success' : 'danger'">
@@ -206,7 +206,7 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.createdAt')">{{ currentRow.created_at }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('adminUsers.updatedAt')" v-if="currentRow.updated_at">{{ currentRow.updated_at }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('adminUsers.updatedAt')" v-if="'updated_at' in currentRow && currentRow.updated_at">{{ (currentRow as AdminUser).updated_at }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailVisible = false">{{ $t('adminUsers.close') }}</el-button>
@@ -240,10 +240,14 @@ import {
   getCustomerList,
   type AdminUser,
   type AdminUserDetail,
-  type CreateAdminUserParams
+  type CreateAdminUserParams,
+  type Customer,
+  type GetAdminUsersParams
 } from '@/api/admin-user'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -258,13 +262,13 @@ const filterStatus = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
-const tableData = ref<any[]>([])
+const tableData = ref<(AdminUser | Customer)[]>([])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const roleDialogVisible = ref(false)
 const submitLoading = ref(false)
-const currentRow = ref<any>(null)
+const currentRow = ref<AdminUser | Customer | null>(null)
 const currentAdminUser = ref<AdminUserDetail | null>(null)
 const formRef = ref()
 
@@ -292,8 +296,8 @@ const formRules = computed(() => ({
 
 const dialogTitle = computed(() => t('adminUsers.addAdmin'))
 
-const getAvatarText = (row: any) => {
-  const name = row.real_name || row.name || row.username || ''
+const getAvatarText = (row: AdminUser | Customer) => {
+  const name = ('real_name' in row ? row.real_name : row.name) || ''
   return name.charAt(0).toUpperCase()
 }
 
@@ -332,11 +336,11 @@ const handleView = (row: AdminUser) => {
   router.push(`/admin-users/${row.id}`)
 }
 
-const handleViewCustomer = (row: any) => {
+const handleViewCustomer = (row: Customer) => {
   router.push(`/users/${row.id}`)
 }
 
-const handleRowClick = (row: any) => {
+const handleRowClick = (row: AdminUser | Customer) => {
   if (activeTab.value === 'admin') {
     router.push(`/admin-users/${row.id}`)
   } else {
@@ -344,7 +348,7 @@ const handleRowClick = (row: any) => {
   }
 }
 
-const handleEditCustomer = (row: any) => {
+const handleEditCustomer = (row: Customer) => {
   router.push(`/users/${row.id}`)
 }
 
@@ -413,8 +417,7 @@ const handleSubmit = async () => {
         dialogVisible.value = false
         loadData()
       } catch (error) {
-        console.error('Failed to create:', error)
-        ElMessage.error(t('adminUsers.createFailed'))
+        handleError(error, t('adminUsers.createFailed'))
       } finally {
         submitLoading.value = false
       }
@@ -422,7 +425,7 @@ const handleSubmit = async () => {
   })
 }
 
-const handleStatusChange = async (row: any, val: number) => {
+const handleStatusChange = async (row: AdminUser, val: number) => {
   const action = val === 1 ? t('adminUsers.enabled2') : t('adminUsers.disabled2')
   try {
     await ElMessageBox.confirm(
@@ -462,7 +465,7 @@ const loadData = async () => {
   loading.value = true
   try {
     if (activeTab.value === 'admin') {
-      const params: any = {
+      const params: GetAdminUsersParams = {
         page: currentPage.value,
         page_size: pageSize.value
       }
@@ -474,7 +477,12 @@ const loadData = async () => {
       tableData.value = res.list || []
       total.value = res.total || 0
     } else {
-      const params: any = {
+      const params: {
+        page: number
+        page_size: number
+        name?: string
+        email?: string
+      } = {
         page: currentPage.value,
         page_size: pageSize.value
       }
@@ -487,9 +495,8 @@ const loadData = async () => {
       tableData.value = res.list || []
       total.value = res.total || 0
     }
-  } catch (e) {
-    console.error(e)
-    ElMessage.error(t('adminUsers.loadDataFailed'))
+  } catch (error) {
+    handleError(error, t('adminUsers.loadDataFailed'))
   } finally {
     loading.value = false
   }
@@ -508,7 +515,7 @@ watch(activeTab, () => {
 watch(
   () => userStore.userInfo,
   (info) => {
-    if (info && info.type !== 1) {
+    if (info && 'type' in info && info.type !== 1) {
       activeTab.value = 'customer'
     }
   },

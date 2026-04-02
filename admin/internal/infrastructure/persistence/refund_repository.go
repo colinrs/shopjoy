@@ -26,21 +26,21 @@ type refundModel struct {
 	OrderID      int64           `gorm:"column:order_id;not null;index"`
 	RefundNo     string          `gorm:"column:refund_no;size:32;not null;uniqueIndex:uk_refund_no"`
 	UserID       int64           `gorm:"column:user_id;not null;index"`
-	Type         int              `gorm:"column:type;not null;default:1"`
-	Status       int              `gorm:"column:status;not null;default:0;index"`
+	Type         int             `gorm:"column:type;not null;default:1"`
+	Status       int             `gorm:"column:status;not null;default:0;index"`
 	ReasonType   string          `gorm:"column:reason_type;size:50;not null;default:''"`
 	Reason       string          `gorm:"column:reason;size:500;not null;default:''"`
-	Description string          `gorm:"column:description;type:text"`
+	Description  string          `gorm:"column:description;type:text"`
 	Images       string          `gorm:"column:images;type:json"`
 	Amount       decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
 	Currency     string          `gorm:"column:currency;size:10;not null;default:'CNY'"`
 	RejectReason string          `gorm:"column:reject_reason;size:500;not null;default:''"`
-	ApprovedAt   *time.Time     `gorm:"column:approved_at"`
+	ApprovedAt   *time.Time      `gorm:"column:approved_at"`
 	ApprovedBy   int64           `gorm:"column:approved_by;not null;default:0"`
-	CompletedAt  *time.Time     `gorm:"column:completed_at"`
-	DeletedAt    *time.Time     `gorm:"column:deleted_at;index"`
-	CreatedAt    time.Time      `gorm:"column:created_at;not null"`
-	UpdatedAt    time.Time      `gorm:"column:updated_at;not null"`
+	CompletedAt  *time.Time      `gorm:"column:completed_at"`
+	DeletedAt    *time.Time      `gorm:"column:deleted_at;index"`
+	CreatedAt    time.Time       `gorm:"column:created_at;not null"`
+	UpdatedAt    time.Time       `gorm:"column:updated_at;not null"`
 }
 
 func (refundModel) TableName() string {

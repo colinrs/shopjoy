@@ -234,10 +234,12 @@ import { getProductList } from '@/api/product'
 import type { Product } from '@/api/product'
 import { getCategoryTree, type CategoryTree } from '@/api/category'
 import ZoneConfigForm from '../components/ZoneConfigForm.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -287,8 +289,7 @@ const loadTemplate = async () => {
     zones.value = data.zones || []
     mappings.value = data.mappings || []
   } catch (error) {
-    console.error('Failed to load template:', error)
-    ElMessage.error(t('shipping.loadTemplateFailed'))
+    handleError(error, t('shipping.loadTemplateFailed'))
   } finally {
     loading.value = false
   }
@@ -306,8 +307,7 @@ const handleStatusChange = async (val: boolean) => {
       template.value.is_active = val
     }
   } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error(t('shipping.updateStatusFailed'))
+    handleError(error, t('shipping.updateStatusFailed'))
   }
 }
 
@@ -317,8 +317,7 @@ const handleSave = async () => {
     // Save zones if needed
     ElMessage.success(t('shipping.saveSuccess'))
   } catch (error) {
-    console.error('Failed to save:', error)
-    ElMessage.error(t('shipping.saveFailed'))
+    handleError(error, t('shipping.saveFailed'))
   } finally {
     saveLoading.value = false
   }
@@ -338,8 +337,7 @@ const handleZoneUpdate = async (zone: ShippingZone) => {
     ElMessage.success(t('shipping.updateZoneSuccess'))
     loadTemplate()
   } catch (error) {
-    console.error('Failed to update zone:', error)
-    ElMessage.error(t('shipping.updateZoneFailed'))
+    handleError(error, t('shipping.updateZoneFailed'))
   }
 }
 
@@ -349,8 +347,7 @@ const handleZoneDelete = async (zoneId: number) => {
     ElMessage.success(t('shipping.deleteZoneSuccess'))
     loadTemplate()
   } catch (error) {
-    console.error('Failed to delete zone:', error)
-    ElMessage.error(t('shipping.deleteZoneFailed'))
+    handleError(error, t('shipping.deleteZoneFailed'))
   }
 }
 
@@ -365,8 +362,7 @@ const handleZoneSave = async (zoneData: CreateZoneRequest) => {
     zoneDialogVisible.value = false
     loadTemplate()
   } catch (error) {
-    console.error('Failed to save zone:', error)
-    ElMessage.error(t('shipping.addZoneFailed'))
+    handleError(error, t('shipping.addZoneFailed'))
   }
 }
 
@@ -386,7 +382,7 @@ const searchProducts = async () => {
     })
     availableProducts.value = data.list || []
   } catch (error) {
-    console.error('Failed to search products:', error)
+    handleError(error)
   } finally {
     productLoading.value = false
   }
@@ -409,8 +405,7 @@ const confirmProductSelection = async () => {
     productSelectorVisible.value = false
     loadTemplate()
   } catch (error) {
-    console.error('Failed to add mappings:', error)
-    ElMessage.error(t('shipping.addProductFailed'))
+    handleError(error, t('shipping.addProductFailed'))
   }
 }
 
@@ -420,8 +415,7 @@ const removeProductMapping = async (mapping: TemplateMapping) => {
     ElMessage.success(t('shipping.removeProductSuccess'))
     loadTemplate()
   } catch (error) {
-    console.error('Failed to remove mapping:', error)
-    ElMessage.error(t('shipping.removeProductFailed'))
+    handleError(error, t('shipping.removeProductFailed'))
   }
 }
 
@@ -432,11 +426,11 @@ const showCategorySelector = async () => {
     const data = await getCategoryTree()
     categoryTree.value = data || []
   } catch (error) {
-    console.error('Failed to load categories:', error)
+    handleError(error)
   }
 }
 
-const handleCategoryCheck = (_: any, { checkedNodes }: any) => {
+const handleCategoryCheck = (_: unknown, { checkedNodes }: { checkedNodes: CategoryTree[] }) => {
   selectedCategories.value = checkedNodes
 }
 
@@ -453,8 +447,7 @@ const confirmCategorySelection = async () => {
     categorySelectorVisible.value = false
     loadTemplate()
   } catch (error) {
-    console.error('Failed to add mappings:', error)
-    ElMessage.error(t('shipping.addCategoryFailed'))
+    handleError(error, t('shipping.addCategoryFailed'))
   }
 }
 
@@ -464,8 +457,7 @@ const removeCategoryMapping = async (mapping: TemplateMapping) => {
     ElMessage.success(t('shipping.removeCategorySuccess'))
     loadTemplate()
   } catch (error) {
-    console.error('Failed to remove mapping:', error)
-    ElMessage.error(t('shipping.removeCategoryFailed'))
+    handleError(error, t('shipping.removeCategoryFailed'))
   }
 }
 

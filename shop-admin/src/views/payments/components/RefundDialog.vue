@@ -287,8 +287,9 @@ const confirmRefund = async () => {
     ElMessage.success(t('payments.refundInitiatedSuccessfully'))
     emit('success')
     visible.value = false
-  } catch (error: any) {
-    ElMessage.error(error?.response?.data?.msg || t('payments.failedToInitiateRefund'))
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { msg?: string } } }
+    ElMessage.error(err.response?.data?.msg || t('payments.failedToInitiateRefund'))
   } finally {
     submitting.value = false
   }

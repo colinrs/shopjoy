@@ -212,14 +212,14 @@ type Service interface {
 
 // PointsStatsDTO represents points statistics
 type PointsStatsDTO struct {
-	TotalIssued        int64   `json:"total_issued"`
-	TotalRedeemed      int64   `json:"total_redeemed"`
-	TotalExpired       int64   `json:"total_expired"`
-	OutstandingBalance int64   `json:"outstanding_balance"`
-	RedemptionRate     string  `json:"redemption_rate"`
-	ActiveUsers        int64   `json:"active_users"`
-	PeriodStart        string  `json:"period_start"`
-	PeriodEnd          string  `json:"period_end"`
+	TotalIssued        int64  `json:"total_issued"`
+	TotalRedeemed      int64  `json:"total_redeemed"`
+	TotalExpired       int64  `json:"total_expired"`
+	OutstandingBalance int64  `json:"outstanding_balance"`
+	RedemptionRate     string `json:"redemption_rate"`
+	ActiveUsers        int64  `json:"active_users"`
+	PeriodStart        string `json:"period_start"`
+	PeriodEnd          string `json:"period_end"`
 }
 
 // TrendDataPoint represents trend data point
@@ -437,7 +437,7 @@ func (s *service) CreateRedeemRule(ctx context.Context, tenantID shared.TenantID
 	}
 
 	rule := &points.RedeemRule{
-		Model:         application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
+		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:       tenantID,
 		Name:           req.Name,
 		Description:    req.Description,
@@ -629,7 +629,7 @@ func (s *service) AdjustPoints(ctx context.Context, tenantID shared.TenantID, re
 		}
 
 		transaction = &points.PointsTransaction{
-			Model:       application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
+			Model:        application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 			TenantID:     tenantID,
 			UserID:       account.UserID,
 			AccountID:    account.ID,

@@ -11,20 +11,20 @@ import (
 
 type Shop struct {
 	application.Model
-	TenantID        shared.TenantID
-	Name            string
-	Description     string
-	Logo            string
-	Banner          string
-	ContactPhone    string
-	ContactEmail    string
-	Address         string
-	SocialLinks     map[string]string
-	SEO             SEOConfig
-	Status          shared.Status
-	CurrentThemeID  *int64
-	ThemeConfig     *ThemeConfig
-	Audit           shared.AuditInfo `gorm:"embedded"`
+	TenantID       shared.TenantID
+	Name           string
+	Description    string
+	Logo           string
+	Banner         string
+	ContactPhone   string
+	ContactEmail   string
+	Address        string
+	SocialLinks    map[string]string
+	SEO            SEOConfig
+	Status         shared.Status
+	CurrentThemeID *int64
+	ThemeConfig    *ThemeConfig
+	Audit          shared.AuditInfo `gorm:"embedded"`
 }
 
 func (s *Shop) TableName() string {
@@ -167,11 +167,11 @@ func (s *SEOConfigEntity) TableName() string {
 
 type Navigation struct {
 	application.Model
-	TenantID  shared.TenantID
-	Name      string
-	Position  string
-	Items     []NavItem
-	Status    shared.Status
+	TenantID shared.TenantID
+	Name     string
+	Position string
+	Items    []NavItem
+	Status   shared.Status
 }
 
 func (n *Navigation) TableName() string {
@@ -180,13 +180,13 @@ func (n *Navigation) TableName() string {
 
 type NavItem struct {
 	application.Model
-	NavID     int64
-	ParentID  int64
-	Name      string
-	Link      string
-	Type      string
-	TargetID  int64
-	Sort      int
+	NavID    int64
+	ParentID int64
+	Name     string
+	Link     string
+	Type     string
+	TargetID int64
+	Sort     int
 }
 
 func (ni *NavItem) TableName() string {
@@ -202,17 +202,17 @@ type BlockOrder struct {
 // ThemeAuditLog represents an audit log entry for theme changes
 type ThemeAuditLog struct {
 	application.Model
-	TenantID   shared.TenantID
-	Action     string // switch_theme, update_config
-	ThemeID    int64
-	ThemeName  string
-	ThemeCode  string
-	OldConfig  string // JSON string
-	NewConfig  string // JSON string
-	UserID     int64
-	UserName   string
-	IPAddress  string
-	UserAgent  string
+	TenantID  shared.TenantID
+	Action    string // switch_theme, update_config
+	ThemeID   int64
+	ThemeName string
+	ThemeCode string
+	OldConfig string // JSON string
+	NewConfig string // JSON string
+	UserID    int64
+	UserName  string
+	IPAddress string
+	UserAgent string
 }
 
 func (l *ThemeAuditLog) TableName() string {

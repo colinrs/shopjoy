@@ -185,8 +185,10 @@ import {
 } from '@/api/payment'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -278,7 +280,7 @@ const handleExport = async () => {
 
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Export failed:', error)
+    handleError(error)
     // Error message is handled by downloadFile utility
   }
 }
@@ -312,8 +314,7 @@ const loadStats = async () => {
     const res = await getPaymentStats(selectedPeriod.value)
     paymentStats.value = res
   } catch (error) {
-    ElMessage.error(t('payments.loadFailed'))
-    console.error('loadStats error:', error)
+    handleError(error, t('payments.loadFailed'))
     // Reset to empty state on error
     paymentStats.value = {
       today_received: '',
@@ -346,8 +347,7 @@ const loadData = async () => {
     total.value = res.total
     transactionStats.value = res.stats
   } catch (error) {
-    ElMessage.error(t('payments.loadFailed'))
-    console.error('loadData error:', error)
+    handleError(error, t('payments.loadFailed'))
     transactionList.value = []
     total.value = 0
     // Do not use mock data on error - keep the previous stats or show empty

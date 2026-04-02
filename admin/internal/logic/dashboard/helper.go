@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
-	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
@@ -137,17 +136,7 @@ func (h *DashboardHelper) GetSalesTrend(tenantID shared.TenantID, period string)
 
 // GetOrderStatusDistribution returns order counts by status
 func (h *DashboardHelper) GetOrderStatusDistribution(tenantID shared.TenantID) (*types.OrderStatusDistributionResponse, error) {
-	type statusCount struct {
-		Status fulfillment.OrderStatus
-		Count  int64
-	}
-
-	var results []statusCount
-	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Select("status, COUNT(*) as count").
-		Group("status").
-		Scan(&results).Error
+	results, err := h.svcCtx.OrderRepo.CountByStatus(h.ctx, h.svcCtx.DB, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -203,34 +192,7 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 		daysAgo = time.Now().UTC().AddDate(0, 0, -7)
 	}
 
-	// Query top products by sales quantity from order items
-	type productSales struct {
-		ProductID   int64
-		ProductName string
-		Image       string
-		Sales       int64
-		Revenue     decimal.Decimal
-	}
-
-	var results []productSales
-	query := h.svcCtx.DB.Table("order_items oi").
-		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_price) as revenue").
-		Joins("JOIN orders o ON o.id = oi.order_id").
-		Where("o.tenant_id = ?", tenantID).
-		Where("o.status IN ?", []fulfillment.OrderStatus{
-			fulfillment.OrderStatusPaid,
-			fulfillment.OrderStatusShipped,
-			fulfillment.OrderStatusDelivered,
-		})
-
-	if !daysAgo.IsZero() {
-		query = query.Where("o.paid_at >= ?", daysAgo)
-	}
-
-	err := query.Group("oi.product_id, oi.product_name, oi.image").
-		Order("sales DESC").
-		Limit(limit).
-		Scan(&results).Error
+	results, err := h.svcCtx.OrderRepo.FindTopProducts(h.ctx, h.svcCtx.DB, tenantID, daysAgo, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -254,23 +216,15 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 
 // GetPendingOrders returns recent pending payment orders
 func (h *DashboardHelper) GetPendingOrders(tenantID shared.TenantID, limit int) (*types.PendingOrdersResponse, error) {
-	var orders []*fulfillment.Order
-	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Where("status = ?", fulfillment.OrderStatusPendingPayment).
-		Order("created_at DESC").
-		Limit(limit).
-		Find(&orders).Error
+	orders, err := h.svcCtx.OrderRepo.FindPendingOrders(h.ctx, h.svcCtx.DB, tenantID, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get total count
-	var total int64
-	h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Where("status = ?", fulfillment.OrderStatusPendingPayment).
-		Count(&total)
+	total, err := h.svcCtx.OrderRepo.CountPendingOrders(h.ctx, h.svcCtx.DB, tenantID)
+	if err != nil {
+		return nil, err
+	}
 
 	list := make([]*types.PendingOrderItem, 0, len(orders))
 	for _, o := range orders {
@@ -295,12 +249,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 	activities := make([]*types.ActivityItem, 0, limit)
 
 	// Get recent orders
-	var recentOrders []*fulfillment.Order
-	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Order("created_at DESC").
-		Limit(5).
-		Find(&recentOrders).Error
+	recentOrders, err := h.svcCtx.OrderRepo.FindRecentOrders(h.ctx, h.svcCtx.DB, tenantID, 5)
 	if err == nil {
 		for _, o := range recentOrders {
 			activities = append(activities, &types.ActivityItem{
@@ -313,13 +262,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 	}
 
 	// Get recent payments
-	var paidOrders []*fulfillment.Order
-	err = h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Where("paid_at IS NOT NULL").
-		Order("paid_at DESC").
-		Limit(5).
-		Find(&paidOrders).Error
+	paidOrders, err := h.svcCtx.OrderRepo.FindRecentPaidOrders(h.ctx, h.svcCtx.DB, tenantID, 5)
 	if err == nil {
 		for _, o := range paidOrders {
 			activities = append(activities, &types.ActivityItem{
@@ -348,63 +291,38 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 // Helper methods
 
 func (h *DashboardHelper) getYesterdayGMV(tenantID shared.TenantID, start, end time.Time) (decimal.Decimal, error) {
-	var total decimal.Decimal
-	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Where("tenant_id = ?", tenantID).
-		Where("status IN ?", []fulfillment.OrderStatus{
-			fulfillment.OrderStatusPaid,
-			fulfillment.OrderStatusShipped,
-			fulfillment.OrderStatusDelivered,
-		}).
-		Where("paid_at >= ? AND paid_at < ?", start, end).
-		Select("COALESCE(SUM(pay_amount), 0)").
-		Scan(&total).Error
-	if err != nil {
-		return decimal.Zero, err
+	statuses := []fulfillment.OrderStatus{
+		fulfillment.OrderStatusPaid,
+		fulfillment.OrderStatusShipped,
+		fulfillment.OrderStatusDelivered,
 	}
-	return total, nil
+	return h.svcCtx.OrderRepo.SumGMVByDateRange(h.ctx, h.svcCtx.DB, tenantID, start, end, statuses)
 }
 
 func (h *DashboardHelper) getTotalProducts(tenantID shared.TenantID) (int64, error) {
-	var count int64
-	err := h.svcCtx.DB.Model(&product.Product{}).
-		Where("tenant_id = ?", tenantID).
-		Where("deleted_at IS NULL").
-		Count(&count).Error
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
+	return h.svcCtx.ProductRepo.CountTotal(h.ctx, h.svcCtx.DB, tenantID)
 }
 
 func (h *DashboardHelper) getTotalUsers(tenantID shared.TenantID) (int64, error) {
-	var count int64
-	err := h.svcCtx.DB.Table("users").
-		Where("tenant_id = ?", tenantID).
-		Where("deleted_at IS NULL").
-		Count(&count).Error
+	stats, err := h.svcCtx.UserService.GetStats(h.ctx, tenantID)
 	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return stats.Total, nil
 }
 
 func (h *DashboardHelper) getNewUsersToday(tenantID shared.TenantID, todayStart time.Time) (int64, error) {
-	var count int64
-	err := h.svcCtx.DB.Table("users").
-		Where("tenant_id = ?", tenantID).
-		Where("created_at >= ?", todayStart).
-		Where("deleted_at IS NULL").
-		Count(&count).Error
+	stats, err := h.svcCtx.UserService.GetStats(h.ctx, tenantID)
 	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return stats.NewToday, nil
 }
 
 func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) ([]*types.SalesTrendData, error) {
 	now := time.Now().UTC()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	endDate := todayStart.Add(24 * time.Hour)
 
 	// Generate date range
 	dates := make([]time.Time, days)
@@ -413,33 +331,15 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	}
 
 	// Query daily sales
-	type dailySales struct {
-		Date   time.Time
-		Sales  decimal.Decimal
-		Orders int64
-	}
-
-	var results []dailySales
-	err := h.svcCtx.DB.Model(&fulfillment.Order{}).
-		Select("DATE(paid_at) as date, SUM(pay_amount) as sales, COUNT(*) as orders").
-		Where("tenant_id = ?", tenantID).
-		Where("status IN ?", []fulfillment.OrderStatus{
-			fulfillment.OrderStatusPaid,
-			fulfillment.OrderStatusShipped,
-			fulfillment.OrderStatusDelivered,
-		}).
-		Where("paid_at >= ?", dates[0]).
-		Group("DATE(paid_at)").
-		Scan(&results).Error
+	results, err := h.svcCtx.OrderRepo.FindSalesTrend(h.ctx, h.svcCtx.DB, tenantID, dates[0], endDate)
 	if err != nil {
 		return nil, err
 	}
 
 	// Map results by date
-	salesMap := make(map[string]dailySales)
+	salesMap := make(map[string]*fulfillment.DailySalesTrend)
 	for _, r := range results {
-		dateStr := r.Date.Format(time.DateOnly)
-		salesMap[dateStr] = r
+		salesMap[r.Date] = r
 	}
 
 	// Build response for all dates
@@ -447,10 +347,16 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	for i, d := range dates {
 		dateStr := d.Format(time.DateOnly)
 		sales := salesMap[dateStr]
+		salesAmount := decimal.Zero
+		orders := int64(0)
+		if sales != nil {
+			salesAmount = sales.Sales
+			orders = sales.Orders
+		}
 		data[i] = &types.SalesTrendData{
 			Date:   dateStr,
-			Sales:  utils.FormatAmountWithCurrency(sales.Sales, "CNY"),
-			Orders: sales.Orders,
+			Sales:  utils.FormatAmountWithCurrency(salesAmount, "CNY"),
+			Orders: orders,
 		}
 	}
 

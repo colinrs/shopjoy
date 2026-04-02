@@ -86,7 +86,7 @@ func isValidPageType(pageType string) bool {
 		"home":       true,
 		"product":    true,
 		"collection": true,
-		"custom":    true,
+		"custom":     true,
 	}
 	return validTypes[pageType]
 }

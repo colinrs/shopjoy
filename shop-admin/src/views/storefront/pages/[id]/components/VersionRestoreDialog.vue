@@ -117,9 +117,9 @@ const handleRestore = async () => {
     ElMessage.success(t('storefront.versionRestored'))
     visible.value = false
     emit('restored')
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to restore version:', error)
-    ElMessage.error(error.message || t('storefront.restoreFailed'))
+    ElMessage.error((error as Error).message || t('storefront.restoreFailed'))
   } finally {
     restoring.value = false
   }

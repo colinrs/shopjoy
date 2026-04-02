@@ -2,6 +2,7 @@
 PROJECT_NAME := ./desc/admin.api
 
 GOCTL := goctl
+GOFMT := gofmt
 
 # 设置go模块环境变量
 export GO111MODULE := on
@@ -29,4 +30,9 @@ all: format gen-go-api
 
 api: format gen-go-api
 
-.PHONY: format gen-go-api lint
+## fmt: Format Go code
+fmt:
+	$(GOFMT) -w -s .
+	@echo "Go code formatted"
+
+.PHONY: format gen-go-api lint fmt

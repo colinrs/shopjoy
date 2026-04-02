@@ -27,18 +27,18 @@ func (c *Cart) TableName() string {
 // CartItem 购物车商品
 type CartItem struct {
 	application.Model
-	TenantID   shared.TenantID `gorm:"column:tenant_id;not null;index"`
-	UserID     int64           `gorm:"column:user_id;not null;index"`
-	CartID     int64           `gorm:"column:cart_id;not null;index"`
-	ProductID  int64           `gorm:"column:product_id;not null;index"`
-	SKUId       int64           `gorm:"column:sku_id;not null;index"`
-	ProductName string          `gorm:"column:product_name;size:255;not null"`
-	SKUName     string          `gorm:"column:sku_name;size:255;not null;default:''"`
-	Image       string          `gorm:"column:image;size:500;not null;default:''"`
-	Price       shared.Money    `gorm:"column:price;type:decimal(19,4);not null;embedded"`
-	Quantity    int             `gorm:"column:quantity;not null;default:1"`
+	TenantID    shared.TenantID  `gorm:"column:tenant_id;not null;index"`
+	UserID      int64            `gorm:"column:user_id;not null;index"`
+	CartID      int64            `gorm:"column:cart_id;not null;index"`
+	ProductID   int64            `gorm:"column:product_id;not null;index"`
+	SKUId       int64            `gorm:"column:sku_id;not null;index"`
+	ProductName string           `gorm:"column:product_name;size:255;not null"`
+	SKUName     string           `gorm:"column:sku_name;size:255;not null;default:''"`
+	Image       string           `gorm:"column:image;size:500;not null;default:''"`
+	Price       shared.Money     `gorm:"column:price;type:decimal(19,4);not null;embedded"`
+	Quantity    int              `gorm:"column:quantity;not null;default:1"`
 	TotalAmount shared.Money     `gorm:"column:total_amount;type:decimal(19,4);not null;embedded"`
-	Selected    bool            `gorm:"column:selected;not null;default:true"`
+	Selected    bool             `gorm:"column:selected;not null;default:true"`
 	Audit       shared.AuditInfo `gorm:"embedded"`
 }
 

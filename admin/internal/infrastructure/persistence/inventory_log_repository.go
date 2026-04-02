@@ -38,36 +38,36 @@ func (inventoryLogModel) TableName() string {
 
 func (m *inventoryLogModel) toEntity() *product.InventoryLog {
 	return &product.InventoryLog{
-		Model:         application.Model{ID: m.ID},
-		TenantID:      shared.TenantID(m.TenantID),
-		SKUCode:       m.SKUCode,
-		ProductID:     m.ProductID,
-		WarehouseID:   m.WarehouseID,
-		ChangeType:    m.ChangeType,
+		Model:          application.Model{ID: m.ID},
+		TenantID:       shared.TenantID(m.TenantID),
+		SKUCode:        m.SKUCode,
+		ProductID:      m.ProductID,
+		WarehouseID:    m.WarehouseID,
+		ChangeType:     m.ChangeType,
 		ChangeQuantity: m.ChangeQuantity,
-		BeforeStock:   m.BeforeStock,
-		AfterStock:    m.AfterStock,
-		OrderNo:       m.OrderNo,
-		Remark:        m.Remark,
-		OperatorID:    m.OperatorID,
+		BeforeStock:    m.BeforeStock,
+		AfterStock:     m.AfterStock,
+		OrderNo:        m.OrderNo,
+		Remark:         m.Remark,
+		OperatorID:     m.OperatorID,
 	}
 }
 
 func fromInventoryLogEntity(il *product.InventoryLog) *inventoryLogModel {
 	return &inventoryLogModel{
-		ID:              il.ID,
-		TenantID:        il.TenantID.Int64(),
-		SKUCode:         il.SKUCode,
-		ProductID:       il.ProductID,
-		WarehouseID:     il.WarehouseID,
-		ChangeType:      il.ChangeType,
-		ChangeQuantity:  il.ChangeQuantity,
-		BeforeStock:     il.BeforeStock,
-		AfterStock:      il.AfterStock,
-		OrderNo:         il.OrderNo,
-		Remark:          il.Remark,
-		OperatorID:      il.OperatorID,
-		CreatedAt:       time.Now().UTC(),
+		ID:             il.ID,
+		TenantID:       il.TenantID.Int64(),
+		SKUCode:        il.SKUCode,
+		ProductID:      il.ProductID,
+		WarehouseID:    il.WarehouseID,
+		ChangeType:     il.ChangeType,
+		ChangeQuantity: il.ChangeQuantity,
+		BeforeStock:    il.BeforeStock,
+		AfterStock:     il.AfterStock,
+		OrderNo:        il.OrderNo,
+		Remark:         il.Remark,
+		OperatorID:     il.OperatorID,
+		CreatedAt:      time.Now().UTC(),
 	}
 }
 

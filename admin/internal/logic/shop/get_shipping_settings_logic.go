@@ -53,7 +53,7 @@ func (l *GetShippingSettingsLogic) GetShippingSettings() (resp *types.ShippingSe
 		return &types.ShippingSettings{
 			FreeShippingThreshold: "0.00",
 			DefaultShippingFee:    "0.00",
-			Currency:             "CNY",
+			Currency:              "CNY",
 		}, nil
 	}
 

@@ -361,6 +361,9 @@ import {
 } from '@/api/inventory'
 import { downloadFile } from '@/utils/download'
 import { t } from '@/plugins/i18n'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+
+const { handleError } = useErrorHandler()
 
 // Low stock alerts
 const lowStockList = ref<LowStockSKU[]>([])
@@ -469,8 +472,7 @@ const handleBatchUpdateSafetyStock = async () => {
     batchSafetyStockDialogVisible.value = false
     loadLowStockAlerts()
   } catch (error) {
-    console.error('Failed to batch update safety stock:', error)
-    ElMessage.error(t('inventory.batchUpdateFailed'))
+    handleError(error, t('inventory.batchUpdateFailed'))
   } finally {
     batchSafetyStockLoading.value = false
   }
@@ -502,8 +504,7 @@ const handleUpdateSafetyStock = async () => {
     editSafetyStockDialogVisible.value = false
     loadLowStockAlerts()
   } catch (error) {
-    console.error('Failed to update safety stock:', error)
-    ElMessage.error(t('inventory.batchUpdateFailed'))
+    handleError(error, t('inventory.batchUpdateFailed'))
   } finally {
     editSafetyStockLoading.value = false
   }
@@ -516,8 +517,7 @@ const loadLowStockAlerts = async () => {
     lowStockList.value = res.list || []
     lowStockTotal.value = res.total || 0
   } catch (error) {
-    console.error('Failed to load low stock alerts:', error)
-    ElMessage.error(t('inventory.loadLowStockFailed'))
+    handleError(error, t('inventory.loadLowStockFailed'))
   }
 }
 
@@ -534,8 +534,7 @@ const loadInventoryLogs = async () => {
     logList.value = res.list || []
     logTotal.value = res.total || 0
   } catch (error) {
-    console.error('Failed to load inventory logs:', error)
-    ElMessage.error(t('inventory.loadLogsFailed'))
+    handleError(error, t('inventory.loadLogsFailed'))
   } finally {
     logLoading.value = false
   }
@@ -551,7 +550,7 @@ const handleExportInventoryLogs = async () => {
     })
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Failed to export inventory logs:', error)
+    handleError(error)
   } finally {
     logExporting.value = false
   }
@@ -564,8 +563,7 @@ const loadWarehouses = async () => {
     const res = await getWarehouses()
     warehouseList.value = res || []
   } catch (error) {
-    console.error('Failed to load warehouses:', error)
-    ElMessage.error(t('inventory.loadWarehouseFailed'))
+    handleError(error, t('inventory.loadWarehouseFailed'))
   } finally {
     warehouseLoading.value = false
   }
@@ -627,8 +625,7 @@ const handleSaveWarehouse = async () => {
         warehouseDialogVisible.value = false
         loadWarehouses()
       } catch (error) {
-        console.error('Failed to save warehouse:', error)
-        ElMessage.error(isEditWarehouse.value ? t('inventory.updateFailed') : t('inventory.createFailed'))
+        handleError(error, isEditWarehouse.value ? t('inventory.updateFailed') : t('inventory.createFailed'))
       } finally {
         warehouseSaveLoading.value = false
       }
@@ -641,8 +638,7 @@ const handleWarehouseStatusChange = async (row: Warehouse, status: number) => {
     await updateWarehouseStatus(row.id, status)
     ElMessage.success(status === 1 ? t('inventory.enabledSuccess') : t('inventory.disabledSuccess'))
   } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error(t('inventory.updateStatusFailed'))
+    handleError(error, t('inventory.updateStatusFailed'))
     row.status = status === 1 ? 0 : 1
   }
 }
@@ -653,8 +649,7 @@ const handleSetDefaultWarehouse = async (row: Warehouse) => {
     ElMessage.success(t('inventory.setDefaultSuccess'))
     loadWarehouses()
   } catch (error) {
-    console.error('Failed to set default:', error)
-    ElMessage.error(t('inventory.operationFailed'))
+    handleError(error, t('inventory.operationFailed'))
   }
 }
 
@@ -669,8 +664,7 @@ const handleDeleteWarehouse = (row: Warehouse) => {
       ElMessage.success(t('inventory.deleteSuccess'))
       loadWarehouses()
     } catch (error) {
-      console.error('Failed to delete warehouse:', error)
-      ElMessage.error(t('inventory.deleteFailed'))
+      handleError(error, t('inventory.deleteFailed'))
     }
   })
 }
@@ -697,8 +691,7 @@ const handleAdjustSubmit = async () => {
     loadInventoryLogs()
     loadLowStockAlerts()
   } catch (error) {
-    console.error('Failed to adjust stock:', error)
-    ElMessage.error(t('inventory.adjustFailed'))
+    handleError(error, t('inventory.adjustFailed'))
   } finally {
     adjustLoading.value = false
   }
@@ -738,8 +731,7 @@ const handleQuickAdjust = async () => {
     loadLowStockAlerts()
     loadInventoryLogs()
   } catch (error) {
-    console.error('Failed to quick adjust:', error)
-    ElMessage.error(t('inventory.replenishFailed'))
+    handleError(error, t('inventory.replenishFailed'))
   } finally {
     quickAdjustLoading.value = false
   }

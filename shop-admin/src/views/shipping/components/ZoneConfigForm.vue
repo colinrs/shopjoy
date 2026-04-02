@@ -124,6 +124,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FormItemRule } from 'element-plus'
 import { Rank, Edit, Delete, Location } from '@element-plus/icons-vue'
 import type { ShippingZone, CreateZoneRequest } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'
@@ -177,7 +178,7 @@ const rules = {
   ],
   regions: [
     {
-      validator: (_rule: any, value: string[], callback: any) => {
+      validator: (_rule: FormItemRule, value: string[], callback: (error?: Error) => void) => {
         if (!value || value.length === 0) {
           callback(new Error('shipping.selectFeeType'))
         } else {

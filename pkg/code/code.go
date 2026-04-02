@@ -55,11 +55,11 @@ var (
 	ErrUserPasswordMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 11008, Msg: "passwords do not match"}
 
 	// User additional errors
-	ErrUserSuspended          = &Err{HTTPCode: http.StatusBadRequest, Code: 11009, Msg: "user already suspended"}
-	ErrUserCannotSuspendSelf  = &Err{HTTPCode: http.StatusForbidden, Code: 11010, Msg: "cannot suspend yourself"}
-	ErrUserCannotDeleteSelf   = &Err{HTTPCode: http.StatusForbidden, Code: 11011, Msg: "cannot delete yourself"}
-	ErrAddressNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 11012, Msg: "address not found"}
-	ErrUserExportLimitExceed  = &Err{HTTPCode: http.StatusBadRequest, Code: 11013, Msg: "export limit exceeded, maximum 10000 records"}
+	ErrUserSuspended         = &Err{HTTPCode: http.StatusBadRequest, Code: 11009, Msg: "user already suspended"}
+	ErrUserCannotSuspendSelf = &Err{HTTPCode: http.StatusForbidden, Code: 11010, Msg: "cannot suspend yourself"}
+	ErrUserCannotDeleteSelf  = &Err{HTTPCode: http.StatusForbidden, Code: 11011, Msg: "cannot delete yourself"}
+	ErrAddressNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 11012, Msg: "address not found"}
+	ErrUserExportLimitExceed = &Err{HTTPCode: http.StatusBadRequest, Code: 11013, Msg: "export limit exceeded, maximum 10000 records"}
 
 	// ErrProductEmptyName ==================== Product Module (30xxx) ====================
 	ErrProductEmptyName               = &Err{HTTPCode: http.StatusBadRequest, Code: 30001, Msg: "商品名称不能为空"}
@@ -75,7 +75,7 @@ var (
 	ErrProductInsufficientStock       = &Err{HTTPCode: http.StatusBadRequest, Code: 30011, Msg: "库存不足"}
 	ErrProductNotFound                = &Err{HTTPCode: http.StatusNotFound, Code: 30012, Msg: "商品不存在"}
 	ErrProductInvalidID               = &Err{HTTPCode: http.StatusBadRequest, Code: 30013, Msg: "invalid product id"}
-	ErrProductExportLimitExceed      = &Err{HTTPCode: http.StatusBadRequest, Code: 30014, Msg: "export product limit exceeded, maximum 10000 records"}
+	ErrProductExportLimitExceed       = &Err{HTTPCode: http.StatusBadRequest, Code: 30014, Msg: "export product limit exceeded, maximum 10000 records"}
 
 	//  ErrCategoryNotFound Category errors (30xxx - 31xxx)
 	ErrCategoryNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 30101, Msg: "category not found"}
@@ -108,27 +108,27 @@ var (
 	ErrOrderCannotRemind         = &Err{HTTPCode: http.StatusBadRequest, Code: 40018, Msg: "order cannot be reminded in current status"}
 
 	// ErrPaymentNotFound ==================== Payment Module (50xxx) ====================
-	ErrPaymentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}
-	ErrPaymentInvalidAmount         = &Err{HTTPCode: http.StatusBadRequest, Code: 50002, Msg: "invalid payment amount"}
-	ErrPaymentFailed                = &Err{HTTPCode: http.StatusPaymentRequired, Code: 50003, Msg: "payment failed"}
-	ErrPaymentAlreadyPaid           = &Err{HTTPCode: http.StatusBadRequest, Code: 50004, Msg: "payment already completed"}
-	ErrPaymentExpired               = &Err{HTTPCode: http.StatusBadRequest, Code: 50005, Msg: "payment expired"}
-	ErrPaymentOrderNotPaid          = &Err{HTTPCode: http.StatusBadRequest, Code: 50006, Msg: "order not paid, cannot refund"}
-	ErrPaymentRefundAmountExceeded = &Err{HTTPCode: http.StatusBadRequest, Code: 50007, Msg: "refund amount exceeds refundable"}
-	ErrPaymentRefundReasonRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 50008, Msg: "refund reason is required"}
-	ErrChannelRefundFailed          = &Err{HTTPCode: http.StatusInternalServerError, Code: 50009, Msg: "channel refund failed"}
-	ErrPaymentOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 50010, Msg: "order not found"}
-	ErrPaymentOrderAlreadyRefunded  = &Err{HTTPCode: http.StatusBadRequest, Code: 50011, Msg: "order already fully refunded"}
-	ErrTransactionNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 50012, Msg: "transaction not found"}
-	ErrPaymentChannelUnavailable     = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 50013, Msg: "payment channel unavailable"}
-	ErrRefundNotSupported           = &Err{HTTPCode: http.StatusBadRequest, Code: 50014, Msg: "refund not supported for this channel"}
-	ErrCurrencyNotSupported         = &Err{HTTPCode: http.StatusBadRequest, Code: 50015, Msg: "currency not supported by channel"}
-	ErrPaymentRefundNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 50016, Msg: "payment refund not found"}
-	ErrPaymentRequiresAction        = &Err{HTTPCode: http.StatusAccepted, Code: 50017, Msg: "payment requires additional action"}
-	ErrRefundCurrencyMismatch       = &Err{HTTPCode: http.StatusBadRequest, Code: 50018, Msg: "refund currency must match payment currency"}
-	ErrIdempotencyKeyConflict        = &Err{HTTPCode: http.StatusConflict, Code: 50019, Msg: "duplicate idempotency key"}
-	ErrDisputeCreated                = &Err{HTTPCode: http.StatusConflict, Code: 50020, Msg: "dispute created for this charge"}
-	ErrPaymentExportLimitExceed      = &Err{HTTPCode: http.StatusBadRequest, Code: 50021, Msg: "export payment transactions limit exceeded"}
+	ErrPaymentNotFound                = &Err{HTTPCode: http.StatusNotFound, Code: 50001, Msg: "payment not found"}
+	ErrPaymentInvalidAmount           = &Err{HTTPCode: http.StatusBadRequest, Code: 50002, Msg: "invalid payment amount"}
+	ErrPaymentFailed                  = &Err{HTTPCode: http.StatusPaymentRequired, Code: 50003, Msg: "payment failed"}
+	ErrPaymentAlreadyPaid             = &Err{HTTPCode: http.StatusBadRequest, Code: 50004, Msg: "payment already completed"}
+	ErrPaymentExpired                 = &Err{HTTPCode: http.StatusBadRequest, Code: 50005, Msg: "payment expired"}
+	ErrPaymentOrderNotPaid            = &Err{HTTPCode: http.StatusBadRequest, Code: 50006, Msg: "order not paid, cannot refund"}
+	ErrPaymentRefundAmountExceeded    = &Err{HTTPCode: http.StatusBadRequest, Code: 50007, Msg: "refund amount exceeds refundable"}
+	ErrPaymentRefundReasonRequired    = &Err{HTTPCode: http.StatusBadRequest, Code: 50008, Msg: "refund reason is required"}
+	ErrChannelRefundFailed            = &Err{HTTPCode: http.StatusInternalServerError, Code: 50009, Msg: "channel refund failed"}
+	ErrPaymentOrderNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 50010, Msg: "order not found"}
+	ErrPaymentOrderAlreadyRefunded    = &Err{HTTPCode: http.StatusBadRequest, Code: 50011, Msg: "order already fully refunded"}
+	ErrTransactionNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 50012, Msg: "transaction not found"}
+	ErrPaymentChannelUnavailable      = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 50013, Msg: "payment channel unavailable"}
+	ErrRefundNotSupported             = &Err{HTTPCode: http.StatusBadRequest, Code: 50014, Msg: "refund not supported for this channel"}
+	ErrCurrencyNotSupported           = &Err{HTTPCode: http.StatusBadRequest, Code: 50015, Msg: "currency not supported by channel"}
+	ErrPaymentRefundNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 50016, Msg: "payment refund not found"}
+	ErrPaymentRequiresAction          = &Err{HTTPCode: http.StatusAccepted, Code: 50017, Msg: "payment requires additional action"}
+	ErrRefundCurrencyMismatch         = &Err{HTTPCode: http.StatusBadRequest, Code: 50018, Msg: "refund currency must match payment currency"}
+	ErrIdempotencyKeyConflict         = &Err{HTTPCode: http.StatusConflict, Code: 50019, Msg: "duplicate idempotency key"}
+	ErrDisputeCreated                 = &Err{HTTPCode: http.StatusConflict, Code: 50020, Msg: "dispute created for this charge"}
+	ErrPaymentExportLimitExceed       = &Err{HTTPCode: http.StatusBadRequest, Code: 50021, Msg: "export payment transactions limit exceeded"}
 	ErrPaymentWebhookSignatureInvalid = &Err{HTTPCode: http.StatusUnauthorized, Code: 50022, Msg: "invalid stripe webhook signature"}
 
 	// ErrCartItemNotFound ==================== Cart Module (60xxx) ====================
@@ -199,30 +199,30 @@ var (
 	ErrRoleInUse              = &Err{HTTPCode: http.StatusBadRequest, Code: 100005, Msg: "role is in use by users"}
 
 	// ErrShopNotFound ==================== Storefront Module (110xxx) ====================
-	ErrShopNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 110001, Msg: "shop not found"}
-	ErrShopInvalid       = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
-	ErrShopInvalidDomain = &Err{HTTPCode: http.StatusBadRequest, Code: 110003, Msg: "invalid domain format"}
-	ErrShopDomainInUse   = &Err{HTTPCode: http.StatusConflict, Code: 110004, Msg: "custom domain already in use"}
+	ErrShopNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 110001, Msg: "shop not found"}
+	ErrShopInvalid        = &Err{HTTPCode: http.StatusBadRequest, Code: 110002, Msg: "invalid shop"}
+	ErrShopInvalidDomain  = &Err{HTTPCode: http.StatusBadRequest, Code: 110003, Msg: "invalid domain format"}
+	ErrShopDomainInUse    = &Err{HTTPCode: http.StatusConflict, Code: 110004, Msg: "custom domain already in use"}
 	ErrShopPlanRestricted = &Err{HTTPCode: http.StatusForbidden, Code: 110005, Msg: "feature not available in current plan"}
 
 	// Theme errors (110101-110199)
-	ErrThemeNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 110101, Msg: "theme not found"}
-	ErrThemeAlreadyActive  = &Err{HTTPCode: http.StatusBadRequest, Code: 110102, Msg: "theme is already active"}
-	ErrThemeConfigInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110103, Msg: "invalid theme configuration"}
-	ErrThemePresetOnly     = &Err{HTTPCode: http.StatusBadRequest, Code: 110104, Msg: "preset theme cannot be modified"}
+	ErrThemeNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 110101, Msg: "theme not found"}
+	ErrThemeAlreadyActive = &Err{HTTPCode: http.StatusBadRequest, Code: 110102, Msg: "theme is already active"}
+	ErrThemeConfigInvalid = &Err{HTTPCode: http.StatusBadRequest, Code: 110103, Msg: "invalid theme configuration"}
+	ErrThemePresetOnly    = &Err{HTTPCode: http.StatusBadRequest, Code: 110104, Msg: "preset theme cannot be modified"}
 
 	// Page errors (110201-110299)
-	ErrPageNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 110201, Msg: "page not found"}
-	ErrPageSlugDuplicate   = &Err{HTTPCode: http.StatusBadRequest, Code: 110202, Msg: "page slug already exists"}
-	ErrPagePublishFailed   = &Err{HTTPCode: http.StatusInternalServerError, Code: 110203, Msg: "failed to publish page"}
+	ErrPageNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 110201, Msg: "page not found"}
+	ErrPageSlugDuplicate    = &Err{HTTPCode: http.StatusBadRequest, Code: 110202, Msg: "page slug already exists"}
+	ErrPagePublishFailed    = &Err{HTTPCode: http.StatusInternalServerError, Code: 110203, Msg: "failed to publish page"}
 	ErrPageAlreadyPublished = &Err{HTTPCode: http.StatusBadRequest, Code: 110204, Msg: "page is already published"}
-	ErrPageNotPublished    = &Err{HTTPCode: http.StatusBadRequest, Code: 110205, Msg: "page is not published"}
+	ErrPageNotPublished     = &Err{HTTPCode: http.StatusBadRequest, Code: 110205, Msg: "page is not published"}
 
 	// Decoration errors (110301-110399)
-	ErrDecorationNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 110301, Msg: "decoration block not found"}
-	ErrInvalidBlockType    = &Err{HTTPCode: http.StatusBadRequest, Code: 110302, Msg: "invalid block type"}
-	ErrInvalidBlockConfig  = &Err{HTTPCode: http.StatusBadRequest, Code: 110303, Msg: "invalid block configuration"}
-	ErrBlockLimitExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 110304, Msg: "block limit exceeded"}
+	ErrDecorationNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 110301, Msg: "decoration block not found"}
+	ErrInvalidBlockType       = &Err{HTTPCode: http.StatusBadRequest, Code: 110302, Msg: "invalid block type"}
+	ErrInvalidBlockConfig     = &Err{HTTPCode: http.StatusBadRequest, Code: 110303, Msg: "invalid block configuration"}
+	ErrBlockLimitExceeded     = &Err{HTTPCode: http.StatusBadRequest, Code: 110304, Msg: "block limit exceeded"}
 	ErrDecorationPageMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 110305, Msg: "decoration does not belong to this page"}
 
 	// Version errors (110401-110499)
@@ -231,46 +231,46 @@ var (
 	ErrVersionCannotRestore = &Err{HTTPCode: http.StatusBadRequest, Code: 110403, Msg: "cannot restore to the same version"}
 
 	// SEO errors (110501-110599)
-	ErrSEOConfigNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 110501, Msg: "SEO config not found"}
-	ErrSEOPageTypeInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 110502, Msg: "invalid SEO page type"}
-	ErrSEOTitleTooLong     = &Err{HTTPCode: http.StatusBadRequest, Code: 110503, Msg: "SEO title exceeds maximum length"}
+	ErrSEOConfigNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 110501, Msg: "SEO config not found"}
+	ErrSEOPageTypeInvalid    = &Err{HTTPCode: http.StatusBadRequest, Code: 110502, Msg: "invalid SEO page type"}
+	ErrSEOTitleTooLong       = &Err{HTTPCode: http.StatusBadRequest, Code: 110503, Msg: "SEO title exceeds maximum length"}
 	ErrSEODescriptionTooLong = &Err{HTTPCode: http.StatusBadRequest, Code: 110504, Msg: "SEO description exceeds maximum length"}
 
 	// ErrShipmentNotFound ==================== Fulfillment Module (120xxx) ====================
-	ErrShipmentNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120001, Msg: "shipment not found"}
-	ErrShipmentInvalidTracking       = &Err{HTTPCode: http.StatusBadRequest, Code: 120002, Msg: "invalid tracking number"}
-	ErrShipmentAlreadyShipped        = &Err{HTTPCode: http.StatusBadRequest, Code: 120003, Msg: "order already shipped"}
-	ErrShipmentCarrierRequired       = &Err{HTTPCode: http.StatusBadRequest, Code: 120004, Msg: "carrier is required"}
-	ErrShipmentTrackingRequired      = &Err{HTTPCode: http.StatusBadRequest, Code: 120005, Msg: "tracking number is required"}
+	ErrShipmentNotFound                = &Err{HTTPCode: http.StatusNotFound, Code: 120001, Msg: "shipment not found"}
+	ErrShipmentInvalidTracking         = &Err{HTTPCode: http.StatusBadRequest, Code: 120002, Msg: "invalid tracking number"}
+	ErrShipmentAlreadyShipped          = &Err{HTTPCode: http.StatusBadRequest, Code: 120003, Msg: "order already shipped"}
+	ErrShipmentCarrierRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 120004, Msg: "carrier is required"}
+	ErrShipmentTrackingRequired        = &Err{HTTPCode: http.StatusBadRequest, Code: 120005, Msg: "tracking number is required"}
 	ErrShipmentInvalidStatusTransition = &Err{HTTPCode: http.StatusBadRequest, Code: 120006, Msg: "invalid shipment status transition"}
-	ErrShipmentCannotCancelDelivered = &Err{HTTPCode: http.StatusBadRequest, Code: 120007, Msg: "cannot cancel delivered shipment"}
-	ErrShipmentItemNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 120008, Msg: "shipment item not found"}
-	ErrShipmentOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 120009, Msg: "order not found"}
-	ErrShipmentOrderCannotShip       = &Err{HTTPCode: http.StatusBadRequest, Code: 120010, Msg: "order cannot be shipped"}
-	ErrShipmentDuplicateTracking     = &Err{HTTPCode: http.StatusConflict, Code: 120011, Msg: "tracking number already exists"}
-	ErrShipmentItemsRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 120012, Msg: "shipment items are required"}
-	ErrShipmentItemQuantityExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 120013, Msg: "shipment item quantity exceeded order quantity"}
-	ErrShipmentInvalidItems         = &Err{HTTPCode: http.StatusBadRequest, Code: 120014, Msg: "invalid shipment items"}
-	ErrShipmentExportLimitExceed    = &Err{HTTPCode: http.StatusBadRequest, Code: 120015, Msg: "export shipment count exceeds limit of 10000"}
-	ErrShipmentAlreadyCancelled     = &Err{HTTPCode: http.StatusBadRequest, Code: 120016, Msg: "shipment already cancelled"}
+	ErrShipmentCannotCancelDelivered   = &Err{HTTPCode: http.StatusBadRequest, Code: 120007, Msg: "cannot cancel delivered shipment"}
+	ErrShipmentItemNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 120008, Msg: "shipment item not found"}
+	ErrShipmentOrderNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 120009, Msg: "order not found"}
+	ErrShipmentOrderCannotShip         = &Err{HTTPCode: http.StatusBadRequest, Code: 120010, Msg: "order cannot be shipped"}
+	ErrShipmentDuplicateTracking       = &Err{HTTPCode: http.StatusConflict, Code: 120011, Msg: "tracking number already exists"}
+	ErrShipmentItemsRequired           = &Err{HTTPCode: http.StatusBadRequest, Code: 120012, Msg: "shipment items are required"}
+	ErrShipmentItemQuantityExceeded    = &Err{HTTPCode: http.StatusBadRequest, Code: 120013, Msg: "shipment item quantity exceeded order quantity"}
+	ErrShipmentInvalidItems            = &Err{HTTPCode: http.StatusBadRequest, Code: 120014, Msg: "invalid shipment items"}
+	ErrShipmentExportLimitExceed       = &Err{HTTPCode: http.StatusBadRequest, Code: 120015, Msg: "export shipment count exceeds limit of 10000"}
+	ErrShipmentAlreadyCancelled        = &Err{HTTPCode: http.StatusBadRequest, Code: 120016, Msg: "shipment already cancelled"}
 
 	// Refund errors (1201xx)
-	ErrRefundNotFound              = &Err{HTTPCode: http.StatusNotFound, Code: 120101, Msg: "refund not found"}
-	ErrRefundInvalidStatus         = &Err{HTTPCode: http.StatusBadRequest, Code: 120102, Msg: "invalid refund status"}
-	ErrRefundCannotCancel          = &Err{HTTPCode: http.StatusBadRequest, Code: 120103, Msg: "cannot cancel refund in current status"}
-	ErrRefundAlreadyPending        = &Err{HTTPCode: http.StatusConflict, Code: 120104, Msg: "order already has pending refund"}
-	ErrRefundOrderNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 120105, Msg: "order not found"}
-	ErrRefundOrderCannotRefund     = &Err{HTTPCode: http.StatusBadRequest, Code: 120106, Msg: "order cannot be refunded"}
-	ErrRefundTimeExpired           = &Err{HTTPCode: http.StatusBadRequest, Code: 120107, Msg: "refund period has expired"}
-	ErrRefundReasonRequired        = &Err{HTTPCode: http.StatusBadRequest, Code: 120108, Msg: "refund reason is required"}
-	ErrRefundRejectReasonRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 120109, Msg: "reject reason is required"}
-	ErrRefundAmountExceeded        = &Err{HTTPCode: http.StatusBadRequest, Code: 120110, Msg: "refund amount exceeds order amount"}
-	ErrRefundOrderNotPaid          = &Err{HTTPCode: http.StatusBadRequest, Code: 120111, Msg: "order is not paid"}
+	ErrRefundNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 120101, Msg: "refund not found"}
+	ErrRefundInvalidStatus        = &Err{HTTPCode: http.StatusBadRequest, Code: 120102, Msg: "invalid refund status"}
+	ErrRefundCannotCancel         = &Err{HTTPCode: http.StatusBadRequest, Code: 120103, Msg: "cannot cancel refund in current status"}
+	ErrRefundAlreadyPending       = &Err{HTTPCode: http.StatusConflict, Code: 120104, Msg: "order already has pending refund"}
+	ErrRefundOrderNotFound        = &Err{HTTPCode: http.StatusNotFound, Code: 120105, Msg: "order not found"}
+	ErrRefundOrderCannotRefund    = &Err{HTTPCode: http.StatusBadRequest, Code: 120106, Msg: "order cannot be refunded"}
+	ErrRefundTimeExpired          = &Err{HTTPCode: http.StatusBadRequest, Code: 120107, Msg: "refund period has expired"}
+	ErrRefundReasonRequired       = &Err{HTTPCode: http.StatusBadRequest, Code: 120108, Msg: "refund reason is required"}
+	ErrRefundRejectReasonRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 120109, Msg: "reject reason is required"}
+	ErrRefundAmountExceeded       = &Err{HTTPCode: http.StatusBadRequest, Code: 120110, Msg: "refund amount exceeds order amount"}
+	ErrRefundOrderNotPaid         = &Err{HTTPCode: http.StatusBadRequest, Code: 120111, Msg: "order is not paid"}
 
 	// Carrier errors (1202xx)
-	ErrCarrierNotFound   = &Err{HTTPCode: http.StatusNotFound, Code: 120201, Msg: "carrier not found"}
-	ErrCarrierDuplicate  = &Err{HTTPCode: http.StatusConflict, Code: 120202, Msg: "carrier code already exists"}
-	ErrCarrierInactive   = &Err{HTTPCode: http.StatusBadRequest, Code: 120203, Msg: "carrier is inactive"}
+	ErrCarrierNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 120201, Msg: "carrier not found"}
+	ErrCarrierDuplicate = &Err{HTTPCode: http.StatusConflict, Code: 120202, Msg: "carrier code already exists"}
+	ErrCarrierInactive  = &Err{HTTPCode: http.StatusBadRequest, Code: 120203, Msg: "carrier is inactive"}
 
 	// RefundReason errors (1203xx)
 	ErrRefundReasonNotFound  = &Err{HTTPCode: http.StatusNotFound, Code: 120301, Msg: "refund reason not found"}
@@ -331,38 +331,38 @@ var (
 	ErrSKUPrefixStartsWithNumber = &Err{HTTPCode: http.StatusBadRequest, Code: 190006, Msg: "SKU前缀不能以数字开头"}
 
 	// ErrReviewNotFound ==================== Review Module (210xxx) ====================
-	ErrReviewNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 210001, Msg: "review not found"}
-	ErrReviewAlreadyReplied      = &Err{HTTPCode: http.StatusBadRequest, Code: 210002, Msg: "review already has reply"}
-	ErrReviewCannotReplyHidden   = &Err{HTTPCode: http.StatusBadRequest, Code: 210003, Msg: "cannot reply to hidden review"}
-	ErrReviewInvalidStatus       = &Err{HTTPCode: http.StatusBadRequest, Code: 210004, Msg: "invalid review status"}
-	ErrReviewContentTooLong      = &Err{HTTPCode: http.StatusBadRequest, Code: 210005, Msg: "review content exceeds limit"}
-	ErrReplyContentTooLong       = &Err{HTTPCode: http.StatusBadRequest, Code: 210006, Msg: "reply content exceeds limit"}
-	ErrReplyNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 210007, Msg: "reply not found"}
-	ErrReviewCannotApprove       = &Err{HTTPCode: http.StatusBadRequest, Code: 210008, Msg: "cannot approve review in current status"}
-	ErrReviewCannotHide          = &Err{HTTPCode: http.StatusBadRequest, Code: 210009, Msg: "cannot hide review in current status"}
-	ErrReviewCannotShow          = &Err{HTTPCode: http.StatusBadRequest, Code: 210010, Msg: "cannot show review in current status"}
-	ErrReviewCannotFeature       = &Err{HTTPCode: http.StatusBadRequest, Code: 210011, Msg: "can only feature approved reviews"}
-	ErrReviewAlreadyDeleted      = &Err{HTTPCode: http.StatusBadRequest, Code: 210012, Msg: "review already deleted"}
-	ErrReviewReplyEmpty          = &Err{HTTPCode: http.StatusBadRequest, Code: 210013, Msg: "reply content cannot be empty"}
-	ErrReviewInvalidRating       = &Err{HTTPCode: http.StatusBadRequest, Code: 210014, Msg: "rating must be between 1 and 5"}
-	ErrReviewBatchEmpty          = &Err{HTTPCode: http.StatusBadRequest, Code: 210015, Msg: "batch operation requires at least one review id"}
-	ErrReviewBatchLimitExceeded  = &Err{HTTPCode: http.StatusBadRequest, Code: 210016, Msg: "batch operation limited to 100 reviews"}
+	ErrReviewNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 210001, Msg: "review not found"}
+	ErrReviewAlreadyReplied     = &Err{HTTPCode: http.StatusBadRequest, Code: 210002, Msg: "review already has reply"}
+	ErrReviewCannotReplyHidden  = &Err{HTTPCode: http.StatusBadRequest, Code: 210003, Msg: "cannot reply to hidden review"}
+	ErrReviewInvalidStatus      = &Err{HTTPCode: http.StatusBadRequest, Code: 210004, Msg: "invalid review status"}
+	ErrReviewContentTooLong     = &Err{HTTPCode: http.StatusBadRequest, Code: 210005, Msg: "review content exceeds limit"}
+	ErrReplyContentTooLong      = &Err{HTTPCode: http.StatusBadRequest, Code: 210006, Msg: "reply content exceeds limit"}
+	ErrReplyNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 210007, Msg: "reply not found"}
+	ErrReviewCannotApprove      = &Err{HTTPCode: http.StatusBadRequest, Code: 210008, Msg: "cannot approve review in current status"}
+	ErrReviewCannotHide         = &Err{HTTPCode: http.StatusBadRequest, Code: 210009, Msg: "cannot hide review in current status"}
+	ErrReviewCannotShow         = &Err{HTTPCode: http.StatusBadRequest, Code: 210010, Msg: "cannot show review in current status"}
+	ErrReviewCannotFeature      = &Err{HTTPCode: http.StatusBadRequest, Code: 210011, Msg: "can only feature approved reviews"}
+	ErrReviewAlreadyDeleted     = &Err{HTTPCode: http.StatusBadRequest, Code: 210012, Msg: "review already deleted"}
+	ErrReviewReplyEmpty         = &Err{HTTPCode: http.StatusBadRequest, Code: 210013, Msg: "reply content cannot be empty"}
+	ErrReviewInvalidRating      = &Err{HTTPCode: http.StatusBadRequest, Code: 210014, Msg: "rating must be between 1 and 5"}
+	ErrReviewBatchEmpty         = &Err{HTTPCode: http.StatusBadRequest, Code: 210015, Msg: "batch operation requires at least one review id"}
+	ErrReviewBatchLimitExceeded = &Err{HTTPCode: http.StatusBadRequest, Code: 210016, Msg: "batch operation limited to 100 reviews"}
 
 	// ErrDashboardDataUnavailable ==================== Dashboard Module (220xxx) ====================
 	ErrDashboardDataUnavailable = &Err{HTTPCode: http.StatusServiceUnavailable, Code: 220001, Msg: "dashboard data temporarily unavailable"}
 
 	// Inventory Transfer errors (additional 170xxx)
-	ErrInventoryTransferFailed       = &Err{HTTPCode: http.StatusBadRequest, Code: 170006, Msg: "stock transfer failed"}
-	ErrInsufficientStockForTransfer  = &Err{HTTPCode: http.StatusBadRequest, Code: 170007, Msg: "insufficient stock for transfer"}
-	ErrSameWarehouseTransfer         = &Err{HTTPCode: http.StatusBadRequest, Code: 170008, Msg: "cannot transfer to same warehouse"}
-	ErrInventoryCannotDeleteDefault  = &Err{HTTPCode: http.StatusBadRequest, Code: 170009, Msg: "cannot delete default warehouse"}
+	ErrInventoryTransferFailed      = &Err{HTTPCode: http.StatusBadRequest, Code: 170006, Msg: "stock transfer failed"}
+	ErrInsufficientStockForTransfer = &Err{HTTPCode: http.StatusBadRequest, Code: 170007, Msg: "insufficient stock for transfer"}
+	ErrSameWarehouseTransfer        = &Err{HTTPCode: http.StatusBadRequest, Code: 170008, Msg: "cannot transfer to same warehouse"}
+	ErrInventoryCannotDeleteDefault = &Err{HTTPCode: http.StatusBadRequest, Code: 170009, Msg: "cannot delete default warehouse"}
 
 	// ==================== Shipping Module (230xxx) ====================
-	ErrShippingTemplateNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}
-	ErrShippingTemplateNameRequired  = &Err{HTTPCode: http.StatusBadRequest, Code: 230002, Msg: "template name is required"}
-	ErrShippingTemplateHasZones      = &Err{HTTPCode: http.StatusBadRequest, Code: 230003, Msg: "cannot delete template with zones"}
-	ErrShippingTemplateIsDefault     = &Err{HTTPCode: http.StatusBadRequest, Code: 230004, Msg: "cannot delete default template"}
-	ErrShippingTemplateDuplicate     = &Err{HTTPCode: http.StatusConflict, Code: 230005, Msg: "template name already exists"}
+	ErrShippingTemplateNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}
+	ErrShippingTemplateNameRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 230002, Msg: "template name is required"}
+	ErrShippingTemplateHasZones     = &Err{HTTPCode: http.StatusBadRequest, Code: 230003, Msg: "cannot delete template with zones"}
+	ErrShippingTemplateIsDefault    = &Err{HTTPCode: http.StatusBadRequest, Code: 230004, Msg: "cannot delete default template"}
+	ErrShippingTemplateDuplicate    = &Err{HTTPCode: http.StatusConflict, Code: 230005, Msg: "template name already exists"}
 
 	// Shipping Zone errors (2301xx)
 	ErrShippingZoneNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 230101, Msg: "shipping zone not found"}
@@ -373,9 +373,9 @@ var (
 	ErrShippingZoneDuplicateRegion   = &Err{HTTPCode: http.StatusBadRequest, Code: 230106, Msg: "region already assigned to another zone"}
 
 	// Shipping Mapping errors (2302xx)
-	ErrShippingMappingNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 230201, Msg: "shipping mapping not found"}
-	ErrShippingMappingAlreadyExists  = &Err{HTTPCode: http.StatusConflict, Code: 230202, Msg: "mapping already exists"}
-	ErrShippingMappingInvalidTarget  = &Err{HTTPCode: http.StatusBadRequest, Code: 230203, Msg: "invalid target type"}
+	ErrShippingMappingNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 230201, Msg: "shipping mapping not found"}
+	ErrShippingMappingAlreadyExists = &Err{HTTPCode: http.StatusConflict, Code: 230202, Msg: "mapping already exists"}
+	ErrShippingMappingInvalidTarget = &Err{HTTPCode: http.StatusBadRequest, Code: 230203, Msg: "invalid target type"}
 
 	// Shipping Calculator errors (2303xx)
 	ErrShippingCalcNoMatchZone       = &Err{HTTPCode: http.StatusBadRequest, Code: 230301, Msg: "no matching zone for address"}
@@ -403,19 +403,19 @@ var (
 	ErrEarnRuleNotStarted    = &Err{HTTPCode: http.StatusBadRequest, Code: 250006, Msg: "earn rule has not started"}
 
 	// RedeemRule errors (2501xx)
-	ErrRedeemRuleNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 250101, Msg: "redeem rule not found"}
-	ErrRedeemRuleInvalid        = &Err{HTTPCode: http.StatusBadRequest, Code: 250102, Msg: "invalid redeem rule"}
-	ErrRedeemRuleNotActive      = &Err{HTTPCode: http.StatusBadRequest, Code: 250103, Msg: "redeem rule is not active"}
-	ErrRedeemRuleOutOfStock     = &Err{HTTPCode: http.StatusBadRequest, Code: 250104, Msg: "redeem rule is out of stock"}
+	ErrRedeemRuleNotFound         = &Err{HTTPCode: http.StatusNotFound, Code: 250101, Msg: "redeem rule not found"}
+	ErrRedeemRuleInvalid          = &Err{HTTPCode: http.StatusBadRequest, Code: 250102, Msg: "invalid redeem rule"}
+	ErrRedeemRuleNotActive        = &Err{HTTPCode: http.StatusBadRequest, Code: 250103, Msg: "redeem rule is not active"}
+	ErrRedeemRuleOutOfStock       = &Err{HTTPCode: http.StatusBadRequest, Code: 250104, Msg: "redeem rule is out of stock"}
 	ErrRedeemRuleUserLimitReached = &Err{HTTPCode: http.StatusBadRequest, Code: 250105, Msg: "user has reached redemption limit"}
 
 	// PointsAccount errors (2502xx)
-	ErrPointsAccountNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 250201, Msg: "points account not found"}
-	ErrPointsAccountInsufficient  = &Err{HTTPCode: http.StatusBadRequest, Code: 250202, Msg: "insufficient points balance"}
-	ErrPointsAccountFrozen        = &Err{HTTPCode: http.StatusBadRequest, Code: 250203, Msg: "points are frozen"}
+	ErrPointsAccountNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 250201, Msg: "points account not found"}
+	ErrPointsAccountInsufficient = &Err{HTTPCode: http.StatusBadRequest, Code: 250202, Msg: "insufficient points balance"}
+	ErrPointsAccountFrozen       = &Err{HTTPCode: http.StatusBadRequest, Code: 250203, Msg: "points are frozen"}
 
 	// PointsTransaction errors (2503xx)
-	ErrPointsTransactionNotFound       = &Err{HTTPCode: http.StatusNotFound, Code: 250301, Msg: "points transaction not found"}
+	ErrPointsTransactionNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 250301, Msg: "points transaction not found"}
 	ErrPointsTransactionExportLimitExceed = &Err{HTTPCode: http.StatusBadRequest, Code: 250302, Msg: "export limit exceeded, maximum 10000 records"}
 
 	// PointsRedemption errors (2504xx)

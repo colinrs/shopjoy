@@ -43,14 +43,14 @@ func (l *UpdateShipmentLogic) UpdateShipment(req *types.UpdateShipmentReq) (resp
 	shippingCost, _ := decimal.NewFromString(req.ShippingCost)
 	weight, _ := decimal.NewFromString(req.Weight)
 	updateReq := appfulfillment.UpdateShipmentRequest{
-		ID:            req.ID,
-		CarrierCode:   req.CarrierCode,
-		CarrierName:   req.CarrierName,
-		TrackingNo:    req.TrackingNo,
-		ShippingCost:  shippingCost,
-		Currency:      req.Currency,
-		Weight:        weight,
-		Remark:        req.Remark,
+		ID:           req.ID,
+		CarrierCode:  req.CarrierCode,
+		CarrierName:  req.CarrierName,
+		TrackingNo:   req.TrackingNo,
+		ShippingCost: shippingCost,
+		Currency:     req.Currency,
+		Weight:       weight,
+		Remark:       req.Remark,
 	}
 
 	// Update shipment

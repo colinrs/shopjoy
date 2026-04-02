@@ -68,13 +68,13 @@ func mockServiceContext(mockApp *mockShipmentApp) *svc.ServiceContext {
 
 func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 	tests := []struct {
-		name       string
-		setupCtx   func(ctx context.Context) context.Context
-		mockApp    *mockShipmentApp
-		req        *types.CancelShipmentReq
-		wantErr    error
-		wantResp   bool
-		respCheck  func(t *testing.T, resp *types.CancelShipmentResp)
+		name      string
+		setupCtx  func(ctx context.Context) context.Context
+		mockApp   *mockShipmentApp
+		req       *types.CancelShipmentReq
+		wantErr   error
+		wantResp  bool
+		respCheck func(t *testing.T, resp *types.CancelShipmentResp)
 	}{
 		{
 			name: "successful cancellation",
@@ -144,7 +144,7 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				ID:     999,
 				Reason: "Test reason",
 			},
-			wantErr: code.ErrShipmentNotFound,
+			wantErr:  code.ErrShipmentNotFound,
 			wantResp: false,
 		},
 		{

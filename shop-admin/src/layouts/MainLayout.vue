@@ -205,10 +205,10 @@
           <el-dropdown trigger="click" class="user-dropdown">
             <div class="user-info">
               <el-avatar :size="36" :src="userStore.userInfo?.avatar" class="user-avatar">
-                {{ userStore.userInfo?.name?.charAt(0) || 'A' }}
+                {{ userStore.userInfo?.real_name?.charAt(0) || 'A' }}
               </el-avatar>
               <div class="user-meta">
-                <span class="user-name">{{ userStore.userInfo?.name || $t('common.defaultAdmin') }}</span>
+                <span class="user-name">{{ userStore.userInfo?.real_name || $t('common.defaultAdmin') }}</span>
                 <span class="user-role">{{ $t('common.superAdmin') }}</span>
               </div>
               <el-icon><ArrowDown /></el-icon>

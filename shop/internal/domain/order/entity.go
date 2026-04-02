@@ -18,14 +18,14 @@ import (
 type Status int
 
 const (
-	StatusPendingPayment Status = iota // 待支付
-	StatusPaid                       // 已支付
-	StatusPendingShipment            // 待发货
-	StatusShipped                    // 已发货
-	StatusCompleted                  // 已完成
-	StatusCancelled                  // 已取消
-	StatusRefunding                 // 退款中
-	StatusRefunded                  // 已退款
+	StatusPendingPayment  Status = iota // 待支付
+	StatusPaid                          // 已支付
+	StatusPendingShipment               // 待发货
+	StatusShipped                       // 已发货
+	StatusCompleted                     // 已完成
+	StatusCancelled                     // 已取消
+	StatusRefunding                     // 退款中
+	StatusRefunded                      // 已退款
 )
 
 func (s Status) String() string {
@@ -58,14 +58,14 @@ func (s Status) IsValid() bool {
 // CanTransitionTo 检查状态是否可以转换
 func (s Status) CanTransitionTo(target Status) bool {
 	transitions := map[Status][]Status{
-		StatusPendingPayment: {StatusPaid, StatusCancelled},
-		StatusPaid:         {StatusPendingShipment, StatusCancelled, StatusRefunding},
+		StatusPendingPayment:  {StatusPaid, StatusCancelled},
+		StatusPaid:            {StatusPendingShipment, StatusCancelled, StatusRefunding},
 		StatusPendingShipment: {StatusShipped, StatusCancelled},
-		StatusShipped:       {StatusCompleted, StatusRefunding},
-		StatusCompleted:     {},
-		StatusCancelled:     {},
-		StatusRefunding:    {StatusRefunded, StatusPendingShipment},
-		StatusRefunded:     {},
+		StatusShipped:         {StatusCompleted, StatusRefunding},
+		StatusCompleted:       {},
+		StatusCancelled:       {},
+		StatusRefunding:       {StatusRefunded, StatusPendingShipment},
+		StatusRefunded:        {},
 	}
 
 	allowed, ok := transitions[s]
@@ -87,10 +87,10 @@ func (s Status) CanTransitionTo(target Status) bool {
 type FulfillmentStatus int
 
 const (
-	FulfillmentStatusPending FulfillmentStatus = iota // 待发货
-	FulfillmentStatusPartialShipped                   // 部分发货
-	FulfillmentStatusShipped                          // 已发货
-	FulfillmentStatusDelivered                        // 已送达
+	FulfillmentStatusPending        FulfillmentStatus = iota // 待发货
+	FulfillmentStatusPartialShipped                          // 部分发货
+	FulfillmentStatusShipped                                 // 已发货
+	FulfillmentStatusDelivered                               // 已送达
 )
 
 func (s FulfillmentStatus) String() string {
@@ -114,11 +114,11 @@ func (s FulfillmentStatus) String() string {
 type RefundStatus int
 
 const (
-	RefundStatusNone RefundStatus = iota // 无退款
-	RefundStatusPending                  // 待处理
-	RefundStatusApproved                 // 已批准
-	RefundStatusRejected                 // 已拒绝
-	RefundStatusCompleted                // 已完成
+	RefundStatusNone      RefundStatus = iota // 无退款
+	RefundStatusPending                       // 待处理
+	RefundStatusApproved                      // 已批准
+	RefundStatusRejected                      // 已拒绝
+	RefundStatusCompleted                     // 已完成
 )
 
 func (s RefundStatus) String() string {
@@ -143,38 +143,38 @@ func (s RefundStatus) String() string {
 // Order 订单实体
 type Order struct {
 	application.Model
-	ID                  int64           `gorm:"column:id;primaryKey"`
-	TenantID            shared.TenantID `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
-	UserID              int64           `gorm:"column:user_id;not null;index:idx_user_id"`
-	OrderNo             string          `gorm:"column:order_no;not null;uniqueIndex:uk_order_no;size:64"`
-	Status              Status          `gorm:"column:status;not null;default:0;index:idx_status"`
-	FulfillmentStatus   FulfillmentStatus `gorm:"column:fulfillment_status;not null;default:0;index:idx_fulfillment_status"`
-	RefundStatus        RefundStatus    `gorm:"column:refund_status;not null;default:0;index:idx_refund_status"`
-	TotalAmount         shared.Money    `gorm:"column:total_amount;type:decimal(19,4);not null;embedded"`
-	DiscountAmount      shared.Money    `gorm:"column:discount_amount;type:decimal(19,4);not null;embedded"`
-	FreightAmount       shared.Money    `gorm:"column:freight_amount;type:decimal(19,4);not null;embedded"`
-	PayAmount           shared.Money    `gorm:"column:pay_amount;type:decimal(19,4);not null;embedded"`
-	OriginalAmount      shared.Money    `gorm:"column:original_amount;type:decimal(19,4);not null;embedded"`
-	AdjustAmount        shared.Money    `gorm:"column:adjust_amount;type:decimal(19,4);not null;embedded"`
-	AdjustReason        string          `gorm:"column:adjust_reason;size:200;not null;default:''"`
-	AdjustedBy           int64           `gorm:"column:adjusted_by;not null;default:0"`
-	AdjustedAt          *time.Time      `gorm:"column:adjusted_at"`
-	Version             int             `gorm:"column:version;not null;default:1"`
-	PaymentMethod       string          `gorm:"column:payment_method;size:32;not null;default:''"`
-	Source              string          `gorm:"column:source;size:32;not null;default:''"`
-	Currency            string          `gorm:"column:currency;size:10;not null;default:'CNY'"`
-	Address             ShippingAddress `gorm:"embedded"`
-	TrackingNo          string          `gorm:"column:tracking_no;size:100;not null;default:''"`
-	Carrier             string          `gorm:"column:carrier;size:50;not null;default:''"`
-	Remark              string          `gorm:"column:remark;type:text"`
-	MerchantRemark     string          `gorm:"column:merchant_remark;size:500;not null;default:''"`
-	ExpireAt           time.Time       `gorm:"column:expire_at;not null"`
-	PaidAt             *time.Time      `gorm:"column:paid_at"`
-	ShippedAt          *time.Time      `gorm:"column:shipped_at"`
-	CompletedAt        *time.Time      `gorm:"column:completed_at"`
-	CancelledAt        *time.Time      `gorm:"column:cancelled_at"`
-	Audit              shared.AuditInfo `gorm:"embedded"`
-	Items              []OrderItem     `gorm:"foreignKey:OrderID"`
+	ID                int64             `gorm:"column:id;primaryKey"`
+	TenantID          shared.TenantID   `gorm:"column:tenant_id;not null;index:idx_tenant_id"`
+	UserID            int64             `gorm:"column:user_id;not null;index:idx_user_id"`
+	OrderNo           string            `gorm:"column:order_no;not null;uniqueIndex:uk_order_no;size:64"`
+	Status            Status            `gorm:"column:status;not null;default:0;index:idx_status"`
+	FulfillmentStatus FulfillmentStatus `gorm:"column:fulfillment_status;not null;default:0;index:idx_fulfillment_status"`
+	RefundStatus      RefundStatus      `gorm:"column:refund_status;not null;default:0;index:idx_refund_status"`
+	TotalAmount       shared.Money      `gorm:"column:total_amount;type:decimal(19,4);not null;embedded"`
+	DiscountAmount    shared.Money      `gorm:"column:discount_amount;type:decimal(19,4);not null;embedded"`
+	FreightAmount     shared.Money      `gorm:"column:freight_amount;type:decimal(19,4);not null;embedded"`
+	PayAmount         shared.Money      `gorm:"column:pay_amount;type:decimal(19,4);not null;embedded"`
+	OriginalAmount    shared.Money      `gorm:"column:original_amount;type:decimal(19,4);not null;embedded"`
+	AdjustAmount      shared.Money      `gorm:"column:adjust_amount;type:decimal(19,4);not null;embedded"`
+	AdjustReason      string            `gorm:"column:adjust_reason;size:200;not null;default:''"`
+	AdjustedBy        int64             `gorm:"column:adjusted_by;not null;default:0"`
+	AdjustedAt        *time.Time        `gorm:"column:adjusted_at"`
+	Version           int               `gorm:"column:version;not null;default:1"`
+	PaymentMethod     string            `gorm:"column:payment_method;size:32;not null;default:''"`
+	Source            string            `gorm:"column:source;size:32;not null;default:''"`
+	Currency          string            `gorm:"column:currency;size:10;not null;default:'CNY'"`
+	Address           ShippingAddress   `gorm:"embedded"`
+	TrackingNo        string            `gorm:"column:tracking_no;size:100;not null;default:''"`
+	Carrier           string            `gorm:"column:carrier;size:50;not null;default:''"`
+	Remark            string            `gorm:"column:remark;type:text"`
+	MerchantRemark    string            `gorm:"column:merchant_remark;size:500;not null;default:''"`
+	ExpireAt          time.Time         `gorm:"column:expire_at;not null"`
+	PaidAt            *time.Time        `gorm:"column:paid_at"`
+	ShippedAt         *time.Time        `gorm:"column:shipped_at"`
+	CompletedAt       *time.Time        `gorm:"column:completed_at"`
+	CancelledAt       *time.Time        `gorm:"column:cancelled_at"`
+	Audit             shared.AuditInfo  `gorm:"embedded"`
+	Items             []OrderItem       `gorm:"foreignKey:OrderID"`
 }
 
 func (o *Order) TableName() string {
@@ -277,15 +277,15 @@ func (o *Order) IsExpired() bool {
 
 // ShippingAddress 收货地址
 type ShippingAddress struct {
-	Name        string `gorm:"column:address_name;size:100;not null;default:''"`
-	Phone       string `gorm:"column:address_phone;size:20;not null;default:''"`
-	Province    string `gorm:"column:address_province;size:50;not null;default:''"`
-	City        string `gorm:"column:address_city;size:50;not null;default:''"`
-	District    string `gorm:"column:address_district;size:50;not null;default:''"`
-	Detail      string `gorm:"column:address_detail;type:text"`
-	ZipCode     string `gorm:"column:address_zipcode;size:20;not null;default:''"`
-	TrackingNo  string `gorm:"column:tracking_no;size:100;not null;default:''"`
-	Carrier     string `gorm:"column:carrier;size:50;not null;default:''"`
+	Name       string `gorm:"column:address_name;size:100;not null;default:''"`
+	Phone      string `gorm:"column:address_phone;size:20;not null;default:''"`
+	Province   string `gorm:"column:address_province;size:50;not null;default:''"`
+	City       string `gorm:"column:address_city;size:50;not null;default:''"`
+	District   string `gorm:"column:address_district;size:50;not null;default:''"`
+	Detail     string `gorm:"column:address_detail;type:text"`
+	ZipCode    string `gorm:"column:address_zipcode;size:20;not null;default:''"`
+	TrackingNo string `gorm:"column:tracking_no;size:100;not null;default:''"`
+	Carrier    string `gorm:"column:carrier;size:50;not null;default:''"`
 }
 
 // ==================== OrderItem 订单商品 ====================

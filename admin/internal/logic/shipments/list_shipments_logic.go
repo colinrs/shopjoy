@@ -40,12 +40,12 @@ func (l *ListShipmentsLogic) ListShipments(req *types.ListShipmentsReq) (resp *t
 
 	// Build query request
 	queryReq := appfulfillment.QueryShipmentRequest{
-		Page:         req.Page,
-		PageSize:     req.PageSize,
-		ShipmentNo:   req.ShipmentNo,
-		OrderID:      req.OrderID,
-		TrackingNo:   req.TrackingNo,
-		CarrierCode:  req.CarrierCode,
+		Page:        req.Page,
+		PageSize:    req.PageSize,
+		ShipmentNo:  req.ShipmentNo,
+		OrderID:     req.OrderID,
+		TrackingNo:  req.TrackingNo,
+		CarrierCode: req.CarrierCode,
 	}
 
 	// Parse status - convert from string to domain enum

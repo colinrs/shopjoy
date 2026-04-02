@@ -121,8 +121,8 @@ const handleSubmit = async () => {
       ElMessage.success(t('orders.remarkSaveSuccess'))
       emit('success')
       visible.value = false
-    } catch (error: any) {
-      ElMessage.error(error?.message || t('orders.remarkSaveFailed'))
+    } catch (error: unknown) {
+      ElMessage.error((error as Error)?.message || t('orders.remarkSaveFailed'))
     } finally {
       submitting.value = false
     }

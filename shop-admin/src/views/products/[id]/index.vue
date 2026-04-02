@@ -165,6 +165,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Check, Hide, View } from '@element-plus/icons-vue'
+import { getProductStatusType } from '@/utils/status'
 import {
   getProduct,
   updateProduct,
@@ -194,9 +195,11 @@ import {
   VariantDialog
 } from './components'
 import type { ProductFormData, VariantFormData } from './types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const route = useRoute()
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 const productId = computed(() => Number(route.params.id))
 
@@ -266,14 +269,7 @@ const productForm = reactive<ProductFormData>({
 })
 
 // Helper functions
-const getStatusType = (status: string) => {
-  const types: Record<string, string> = {
-    on_sale: 'success',
-    off_sale: 'warning',
-    draft: 'info'
-  }
-  return types[status] || 'info'
-}
+const getStatusType = getProductStatusType
 
 const getStatusText = (status: string) => {
   const statusKeyMap: Record<string, string> = {
@@ -325,8 +321,7 @@ const loadProduct = async () => {
       dangerous_goods: data.dangerous_goods || []
     })
   } catch (error) {
-    console.error('Failed to load product:', error)
-    ElMessage.error(t('products.loadFailed'))
+    handleError(error, t('products.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -339,8 +334,7 @@ const loadProductMarkets = async () => {
     const response = await getProductMarkets(productId.value)
     productMarkets.value = response.list || []
   } catch (error) {
-    console.error('Failed to load product markets:', error)
-    ElMessage.error(t('products.loadMarketsFailed'))
+    handleError(error, t('products.loadMarketsFailed'))
   } finally {
     marketsLoading.value = false
   }
@@ -352,8 +346,7 @@ const loadMarkets = async () => {
     const response = await getMarkets()
     markets.value = response.list || []
   } catch (error) {
-    console.error('Failed to load markets:', error)
-    ElMessage.error(t('products.loadMarketsFailed'))
+    handleError(error, t('products.loadMarketsFailed'))
   }
 }
 
@@ -365,8 +358,7 @@ const handlePutOnSale = async () => {
     ElMessage.success(t('products.onSaleSuccess'))
     loadProduct()
   } catch (error) {
-    console.error('Failed to put on sale:', error)
-    ElMessage.error(t('products.onSaleFailed'))
+    handleError(error, t('products.onSaleFailed'))
   } finally {
     statusLoading.value = false
   }
@@ -380,8 +372,7 @@ const handleTakeOffSale = async () => {
     ElMessage.success(t('products.offSaleSuccess'))
     loadProduct()
   } catch (error) {
-    console.error('Failed to take off sale:', error)
-    ElMessage.error(t('products.offSaleFailed'))
+    handleError(error, t('products.offSaleFailed'))
   } finally {
     statusLoading.value = false
   }
@@ -423,8 +414,7 @@ const handleSave = async () => {
     ElMessage.success(t('products.updateSuccess'))
     loadProduct()
   } catch (error) {
-    console.error('Failed to update product:', error)
-    ElMessage.error(t('products.updateFailed'))
+    handleError(error, t('products.updateFailed'))
   } finally {
     saveLoading.value = false
   }
@@ -465,7 +455,7 @@ const loadWarehouses = async () => {
     const response = await getWarehouses()
     warehouses.value = response || []
   } catch (error) {
-    console.error('Failed to load warehouses:', error)
+    handleError(error)
   }
 }
 

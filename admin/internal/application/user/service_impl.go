@@ -546,19 +546,19 @@ func sanitizeCSVField(field string) string {
 
 func toUserDetailResponse(u *domain.User) *UserDetailResponse {
 	resp := &UserDetailResponse{
-		ID:            u.ID,
-		TenantID:      u.TenantID.Int64(),
-		Email:         u.Email,
-		Phone:         u.Phone,
-		Name:          u.Name,
-		Avatar:        u.Avatar,
-		Gender:        int(u.Gender),
-		GenderText:    getGenderText(u.Gender),
-		Status:        int(u.Status),
-		StatusText:    getStatusText(u.Status),
-		CreatedAt:     u.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:     u.Audit.UpdatedAt.Format(time.RFC3339),
-		LastOrderAt:   "", // Will be set by caller if needed
+		ID:             u.ID,
+		TenantID:       u.TenantID.Int64(),
+		Email:          u.Email,
+		Phone:          u.Phone,
+		Name:           u.Name,
+		Avatar:         u.Avatar,
+		Gender:         int(u.Gender),
+		GenderText:     getGenderText(u.Gender),
+		Status:         int(u.Status),
+		StatusText:     getStatusText(u.Status),
+		CreatedAt:      u.Audit.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      u.Audit.UpdatedAt.Format(time.RFC3339),
+		LastOrderAt:    "",  // Will be set by caller if needed
 		DefaultAddress: nil, // Will be set by caller if needed
 	}
 

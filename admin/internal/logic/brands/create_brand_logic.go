@@ -51,7 +51,7 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 	}
 
 	brand := &product.Brand{
-		Model:           application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
+		Model:            application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 		TenantID:         shared.TenantID(tenantID),
 		Name:             req.Name,
 		Logo:             req.Logo,

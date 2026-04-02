@@ -117,10 +117,13 @@ import {
   getAccountTransactions,
   adjustPoints,
   type PointsAccount,
-  type PointsTransaction
+  type PointsTransaction,
+  type ListTransactionsParams
 } from '@/api/points'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const route = useRoute()
 const router = useRouter()
@@ -148,8 +151,7 @@ const loadAccount = async () => {
     const res = await getPointsAccount(id)
     account.value = res
   } catch (error) {
-    console.error('Failed to load account:', error)
-    ElMessage.error(t('points.loadAccountDetailFailed'))
+    handleError(error, t('points.loadAccountDetailFailed'))
   } finally {
     loading.value = false
   }
@@ -160,7 +162,7 @@ const loadTransactions = async (filters: { type?: string; startDate?: string; en
 
   transactionLoading.value = true
   try {
-    const params: any = {
+    const params: ListTransactionsParams = {
       page: transactionPage.value,
       page_size: transactionPageSize.value
     }
@@ -172,8 +174,7 @@ const loadTransactions = async (filters: { type?: string; startDate?: string; en
     transactions.value = res.list || []
     transactionTotal.value = res.total || 0
   } catch (error) {
-    console.error('Failed to load transactions:', error)
-    ElMessage.error(t('points.loadTransactionRecordsFailed'))
+    handleError(error, t('points.loadTransactionRecordsFailed'))
   } finally {
     transactionLoading.value = false
   }
@@ -211,8 +212,7 @@ const handleAdjust = async (data: { adjustment_type: 'ADD' | 'DEDUCT'; points: n
     await loadAccount()
     await loadTransactions()
   } catch (error) {
-    console.error('Failed to adjust:', error)
-    ElMessage.error(t('points.adjustFailed'))
+    handleError(error, t('points.adjustFailed'))
   } finally {
     adjustLoading.value = false
   }

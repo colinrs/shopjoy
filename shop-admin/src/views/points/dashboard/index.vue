@@ -150,7 +150,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
 import {
   TrendCharts, Present, Star, User, DataLine, Timer, Trophy,
   CircleCheck, Loading
@@ -167,8 +166,10 @@ import {
   type TopUser,
   type ExpiringPoints
 } from '@/api/points'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 // Stats
 const stats = ref<PointsStats>({
@@ -205,8 +206,7 @@ const loadStats = async () => {
     const res = await getPointsStats(trendPeriod.value)
     stats.value = res
   } catch (error) {
-    console.error('Failed to load stats:', error)
-    ElMessage.error(t('points.loadStatsFailed'))
+    handleError(error, t('points.loadStatsFailed'))
   }
 }
 
@@ -216,8 +216,7 @@ const loadTrendData = async () => {
     const res = await getPointsTrend(trendPeriod.value)
     trendData.value = res.data
   } catch (error) {
-    console.error('Failed to load trend:', error)
-    ElMessage.error(t('points.loadTrendFailed'))
+    handleError(error, t('points.loadTrendFailed'))
   } finally {
     trendLoading.value = false
   }
@@ -229,8 +228,7 @@ const loadTopUsers = async () => {
     const res = await getTopUsers(trendPeriod.value, 10)
     topUsers.value = res.list
   } catch (error) {
-    console.error('Failed to load top users:', error)
-    ElMessage.error(t('points.loadRankingFailed'))
+    handleError(error, t('points.loadRankingFailed'))
   } finally {
     topUsersLoading.value = false
   }
@@ -242,8 +240,7 @@ const loadExpiring = async () => {
     const res = await getExpiringPoints(30)
     expiringList.value = res.list
   } catch (error) {
-    console.error('Failed to load expiring:', error)
-    ElMessage.error(t('points.loadExpiringFailed'))
+    handleError(error, t('points.loadExpiringFailed'))
   } finally {
     expiringLoading.value = false
   }

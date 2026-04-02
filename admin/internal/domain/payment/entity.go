@@ -16,14 +16,14 @@ import (
 type PaymentStatus int
 
 const (
-	PaymentStatusPending         PaymentStatus = iota // 0 待支付
-	PaymentStatusProcessing                           // 1 支付处理中
-	PaymentStatusSuccess                              // 2 支付成功
-	PaymentStatusFailed                               // 3 支付失败
-	PaymentStatusCancelled                            // 4 已取消
-	PaymentStatusRefunded                             // 5 已退款
-	PaymentStatusPartiallyRefunded                    // 6 部分退款
-	PaymentStatusRequiresAction                       // 7 待验证 (3D Secure)
+	PaymentStatusPending           PaymentStatus = iota // 0 待支付
+	PaymentStatusProcessing                             // 1 支付处理中
+	PaymentStatusSuccess                                // 2 支付成功
+	PaymentStatusFailed                                 // 3 支付失败
+	PaymentStatusCancelled                              // 4 已取消
+	PaymentStatusRefunded                               // 5 已退款
+	PaymentStatusPartiallyRefunded                      // 6 部分退款
+	PaymentStatusRequiresAction                         // 7 待验证 (3D Secure)
 )
 
 func (s PaymentStatus) String() string {
@@ -57,9 +57,9 @@ func (s PaymentStatus) IsValid() bool {
 type TransactionStatus int
 
 const (
-	TransactionStatusPending TransactionStatus = iota // 0 待处理
-	TransactionStatusSucceeded                        // 1 成功
-	TransactionStatusFailed                           // 2 失败
+	TransactionStatusPending   TransactionStatus = iota // 0 待处理
+	TransactionStatusSucceeded                          // 1 成功
+	TransactionStatusFailed                             // 2 失败
 )
 
 func (s TransactionStatus) String() string {
@@ -83,9 +83,9 @@ func (s TransactionStatus) IsValid() bool {
 type PaymentRefundStatus int
 
 const (
-	PaymentRefundStatusPending PaymentRefundStatus = iota // 0 待处理
-	PaymentRefundStatusSucceeded                           // 1 退款成功
-	PaymentRefundStatusFailed                              // 2 退款失败
+	PaymentRefundStatusPending   PaymentRefundStatus = iota // 0 待处理
+	PaymentRefundStatusSucceeded                            // 1 退款成功
+	PaymentRefundStatusFailed                               // 2 退款失败
 )
 
 func (s PaymentRefundStatus) String() string {
@@ -135,13 +135,13 @@ type Payment struct {
 	PaymentMethod    PaymentMethod    `gorm:"column:payment_method;not null"`
 	ChannelIntentID  string           `gorm:"column:channel_intent_id;not null;default:'';index"`
 	ChannelPaymentID string           `gorm:"column:channel_payment_id;not null;default:'';index"`
-	Amount           decimal.Decimal `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
+	Amount           decimal.Decimal  `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
 	Currency         string           `gorm:"column:currency;not null;default:'USD'"`
 	Status           PaymentStatus    `gorm:"column:status;not null;default:0;index"`
-	TransactionFee   decimal.Decimal `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
+	TransactionFee   decimal.Decimal  `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
 	FeeCurrency      string           `gorm:"column:fee_currency;not null;default:'USD'"`
-	PaidAt           *time.Time     `gorm:"column:paid_at"`
-	FailedAt         *time.Time     `gorm:"column:failed_at"`
+	PaidAt           *time.Time       `gorm:"column:paid_at"`
+	FailedAt         *time.Time       `gorm:"column:failed_at"`
 	FailedReason     string           `gorm:"column:failed_reason;not null;default:''"`
 	Audit            shared.AuditInfo `gorm:"embedded"`
 }
@@ -228,21 +228,21 @@ func GeneratePaymentNo(tenantID shared.TenantID, sequence int) string {
 // PaymentRefund 支付退款记录
 type PaymentRefund struct {
 	application.Model
-	TenantID            shared.TenantID      `gorm:"column:tenant_id;not null;index:idx_tenant_order"`
-	OrderID             int64                `gorm:"column:order_id;not null;index:idx_tenant_order"`
-	PaymentID           int64                `gorm:"column:payment_id;not null;index"`
-	FulfillmentRefundID int64                `gorm:"column:fulfillment_refund_id"`
-	RefundNo            string               `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
-	IdempotencyKey      string               `gorm:"column:idempotency_key;not null;default:'';uniqueIndex:uk_idempotency_key"`
-	ChannelRefundID     string               `gorm:"column:channel_refund_id;not null;default:'';index"`
-	Amount              decimal.Decimal      `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
-	Currency            string               `gorm:"column:currency;not null;default:'USD'"`
-	RefundFee           decimal.Decimal      `gorm:"column:refund_fee;type:decimal(19,4);not null;default:0"`
-	Status              PaymentRefundStatus  `gorm:"column:status;not null;default:0"`
-	ReasonType          string               `gorm:"column:reason_type;not null;default:''"`
-	Reason              string               `gorm:"column:reason;not null;default:''"`
+	TenantID            shared.TenantID     `gorm:"column:tenant_id;not null;index:idx_tenant_order"`
+	OrderID             int64               `gorm:"column:order_id;not null;index:idx_tenant_order"`
+	PaymentID           int64               `gorm:"column:payment_id;not null;index"`
+	FulfillmentRefundID int64               `gorm:"column:fulfillment_refund_id"`
+	RefundNo            string              `gorm:"column:refund_no;not null;uniqueIndex:uk_refund_no"`
+	IdempotencyKey      string              `gorm:"column:idempotency_key;not null;default:'';uniqueIndex:uk_idempotency_key"`
+	ChannelRefundID     string              `gorm:"column:channel_refund_id;not null;default:'';index"`
+	Amount              decimal.Decimal     `gorm:"column:amount;type:decimal(19,4);not null;default:0"`
+	Currency            string              `gorm:"column:currency;not null;default:'USD'"`
+	RefundFee           decimal.Decimal     `gorm:"column:refund_fee;type:decimal(19,4);not null;default:0"`
+	Status              PaymentRefundStatus `gorm:"column:status;not null;default:0"`
+	ReasonType          string              `gorm:"column:reason_type;not null;default:''"`
+	Reason              string              `gorm:"column:reason;not null;default:''"`
 	RefundedAt          *time.Time          `gorm:"column:refunded_at"`
-	CreatedBy           int64                `gorm:"column:created_by;not null;default:0"`
+	CreatedBy           int64               `gorm:"column:created_by;not null;default:0"`
 }
 
 func (r *PaymentRefund) TableName() string {
@@ -303,7 +303,7 @@ type PaymentTransaction struct {
 	Currency             string            `gorm:"column:currency;not null;default:'USD'"`
 	Status               TransactionStatus `gorm:"column:status;not null;default:0"`
 	TransactionFee       decimal.Decimal   `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
-	PaidAt               *time.Time       `gorm:"column:paid_at"`
+	PaidAt               *time.Time        `gorm:"column:paid_at"`
 	FailedReason         string            `gorm:"column:failed_reason;not null;default:''"`
 }
 
@@ -316,14 +316,14 @@ func (t *PaymentTransaction) TableName() string {
 // WebhookEvent Webhook事件记录
 type WebhookEvent struct {
 	application.Model
-	TenantID     shared.TenantID  `gorm:"column:tenant_id;not null;default:0"`
-	EventID      string           `gorm:"column:event_id;not null;uniqueIndex:uk_event_id"`
-	EventType    string           `gorm:"column:event_type;not null;index:idx_tenant_event"`
-	ResourceID   string           `gorm:"column:resource_id;not null;default:'';index"`
-	Processed    int8             `gorm:"column:processed;not null;default:0"` // 0=pending, 1=processed, 2=failed
-	RawPayload   string           `gorm:"column:raw_payload;type:text"`
-	ErrorMessage string           `gorm:"column:error_message;not null;default:''"`
-	ProcessedAt  *time.Time     `gorm:"column:processed_at"`
+	TenantID     shared.TenantID `gorm:"column:tenant_id;not null;default:0"`
+	EventID      string          `gorm:"column:event_id;not null;uniqueIndex:uk_event_id"`
+	EventType    string          `gorm:"column:event_type;not null;index:idx_tenant_event"`
+	ResourceID   string          `gorm:"column:resource_id;not null;default:'';index"`
+	Processed    int8            `gorm:"column:processed;not null;default:0"` // 0=pending, 1=processed, 2=failed
+	RawPayload   string          `gorm:"column:raw_payload;type:text"`
+	ErrorMessage string          `gorm:"column:error_message;not null;default:''"`
+	ProcessedAt  *time.Time      `gorm:"column:processed_at"`
 }
 
 func (e *WebhookEvent) TableName() string {

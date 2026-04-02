@@ -13,10 +13,10 @@ const (
 
 // Config 存储配置
 type Config struct {
-	Type StorageType
+	Type  StorageType
 	Local LocalConfig
-	OSS  OSSConfig
-	S3   S3Config
+	OSS   OSSConfig
+	S3    S3Config
 }
 
 // LocalConfig 本地存储配置

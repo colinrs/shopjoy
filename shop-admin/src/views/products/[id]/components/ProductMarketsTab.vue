@@ -104,8 +104,10 @@ import { Plus } from '@element-plus/icons-vue'
 import { updateProductMarket, removeFromMarket, type ProductMarket } from '@/api/product'
 import { t } from '@/plugins/i18n'
 import type { ProductMarketsTabProps, ProductMarketsTabEmits } from '../types'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductMarketsTabProps>()
+const { handleError } = useErrorHandler()
 const emit = defineEmits<ProductMarketsTabEmits>()
 
 const localProductMarkets = ref<ProductMarket[]>([...props.productMarkets])
@@ -126,8 +128,7 @@ const handleMarketEnableChange = async (row: ProductMarket, enabled: boolean) =>
     ElMessage.success(enabled ? t('products.marketEnabled') : t('products.marketDisabled'))
     emit('refresh')
   } catch (error) {
-    console.error('Failed to update market:', error)
-    ElMessage.error(t('products.updateMarketStatusFailed'))
+    handleError(error, t('products.updateMarketStatusFailed'))
     row.is_enabled = !enabled // Revert
   }
 }
@@ -141,8 +142,7 @@ const handleMarketPriceChange = async (row: ProductMarket) => {
     })
     ElMessage.success(t('products.marketPriceUpdated'))
   } catch (error) {
-    console.error('Failed to update market price:', error)
-    ElMessage.error(t('products.updateMarketPriceFailed'))
+    handleError(error, t('products.updateMarketPriceFailed'))
   }
 }
 
@@ -162,8 +162,7 @@ const handleRemoveFromMarket = async (row: ProductMarket) => {
     emit('refresh')
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to remove from market:', error)
-      ElMessage.error(t('products.removeFromMarketFailed'))
+      handleError(error, t('products.removeFromMarketFailed'))
     }
   }
 }

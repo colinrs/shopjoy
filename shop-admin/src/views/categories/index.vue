@@ -147,8 +147,10 @@ import {
   updateCategorySort,
   type CategoryTree
 } from '@/api/category'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 const router = useRouter()
 
 const loading = ref(false)
@@ -196,8 +198,7 @@ const loadCategories = async () => {
     categoryTree.value = data || []
     originalTree.value = JSON.parse(JSON.stringify(data || []))
   } catch (error) {
-    console.error('Failed to load categories:', error)
-    ElMessage.error(t('categories.loadFailed'))
+    handleError(error, t('categories.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -274,8 +275,7 @@ const handleDelete = (row: CategoryTree) => {
       ElMessage.success(t('categories.deleteSuccess'))
       loadCategories()
     } catch (error) {
-      console.error('Failed to delete category:', error)
-      ElMessage.error(t('categories.deleteFailed'))
+      handleError(error, t('categories.deleteFailed'))
     }
   })
 }
@@ -285,8 +285,7 @@ const handleStatusChange = async (row: CategoryTree, status: number) => {
     await updateCategoryStatus(row.id, status)
     ElMessage.success(status === 1 ? t('categories.enabledSuccess') : t('categories.disabledSuccess'))
   } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error(t('categories.updateStatusFailed'))
+    handleError(error, t('categories.updateStatusFailed'))
     row.status = status === 1 ? 0 : 1
   }
 }
@@ -417,8 +416,7 @@ const handleSaveSort = async () => {
       loadCategories()
     }
   } catch (error) {
-    console.error('Failed to save sort:', error)
-    ElMessage.error(t('categories.saveSortFailed'))
+    handleError(error, t('categories.saveSortFailed'))
   } finally {
     sortLoading.value = false
   }
@@ -468,8 +466,7 @@ const handleSave = async () => {
         dialogVisible.value = false
         loadCategories()
       } catch (error) {
-        console.error('Failed to save category:', error)
-        ElMessage.error(isEdit.value ? t('categories.updateFailed') : t('categories.createFailed'))
+        handleError(error, isEdit.value ? t('categories.updateFailed') : t('categories.createFailed'))
       } finally {
         saveLoading.value = false
       }

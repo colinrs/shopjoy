@@ -77,12 +77,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
 import { User, Download } from '@element-plus/icons-vue'
 import TransactionTable from '../components/TransactionTable.vue'
 import { getTransactions, exportPointsTransactionsUrl, type PointsTransaction, type ListTransactionsParams } from '@/api/points'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -126,8 +128,7 @@ const loadTransactions = async () => {
     total.value = res.total || 0
     transactionStats.value = res.stats
   } catch (error) {
-    console.error('Failed to load transactions:', error)
-    ElMessage.error(t('points.loadTransactionsFailed'))
+    handleError(error, t('points.loadTransactionsFailed'))
   } finally {
     loading.value = false
   }
@@ -167,7 +168,7 @@ const handleExport = async () => {
 
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Export failed:', error)
+    handleError(error)
     // Error message is handled by downloadFile utility
   }
 }

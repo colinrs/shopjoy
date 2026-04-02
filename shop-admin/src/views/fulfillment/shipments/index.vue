@@ -287,8 +287,10 @@ import {
   type BatchUpdateTrackingRequest
 } from '@/api/fulfillment'
 import { downloadFile } from '@/utils/download'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -396,7 +398,7 @@ const handleExport = async () => {
 
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Export failed:', error)
+    handleError(error)
     // Error message is handled by downloadFile utility
   }
 }
@@ -512,8 +514,7 @@ const handleBatchUpdateTracking = async () => {
     loadData()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to batch update tracking:', error)
-      ElMessage.error(t('fulfillment.batchUpdateTrackingFailed'))
+      handleError(error, t('fulfillment.batchUpdateTrackingFailed'))
     }
   }
 }

@@ -278,9 +278,9 @@ const applyTheme = async (themeId: number) => {
     previewDialogVisible.value = false
     await fetchThemes()
     await fetchCurrentTheme()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.themeSwitchFailed'))
+      ElMessage.error((error as Error).message || t('storefront.themeSwitchFailed'))
     }
   } finally {
     switchLoading.value = false
@@ -292,8 +292,8 @@ const saveConfig = async () => {
   try {
     await updateThemeConfig({ config: { ...configForm } })
     ElMessage.success(t('storefront.themeConfigSaved'))
-  } catch (error: any) {
-    ElMessage.error(error.message || t('storefront.saveConfigFailed'))
+  } catch (error: unknown) {
+    ElMessage.error((error as Error).message || t('storefront.saveConfigFailed'))
   } finally {
     configLoading.value = false
   }

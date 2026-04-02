@@ -62,8 +62,10 @@ request.interceptors.request.use(
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
-    // Customer side - get tenant from domain or default
-    config.headers['X-Tenant-ID'] = '1'
+    // Customer side - use tenant_id from userInfo, localStorage, or default to '1'
+    // TODO: Derive tenant from domain/subdomain when multi-domain support is implemented
+    const tenantId = userStore.userInfo?.tenant_id || localStorage.getItem('tenant_id') || '1'
+    config.headers['X-Tenant-ID'] = String(tenantId)
     return config
   },
   (error: AxiosError) => {

@@ -120,8 +120,8 @@ type promotionRuleModel struct {
 	MaxDiscount    decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
 	Currency       string          `gorm:"column:currency;size:10;not null"`
 	SortOrder      int             `gorm:"column:sort_order;not null;default:0"`
-	CreatedAt      int64            `gorm:"column:created_at"`
-	UpdatedAt      int64            `gorm:"column:updated_at"`
+	CreatedAt      int64           `gorm:"column:created_at"`
+	UpdatedAt      int64           `gorm:"column:updated_at"`
 }
 
 func (promotionRuleModel) TableName() string {
@@ -173,19 +173,19 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 		Model(&promotionModel{}).
 		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", p.ID, p.TenantID.Int64()).
 		Updates(map[string]interface{}{
-			"name":          model.Name,
-			"description":   model.Description,
-			"type":          model.Type,
-			"status":        model.Status,
-			"priority":      model.Priority,
-			"start_at":      model.StartAt,
-			"end_at":        model.EndAt,
-			"scope_type":    model.ScopeType,
-			"scope_ids":     model.ScopeIDs,
-			"exclude_ids":   model.ExcludeIDs,
-			"currency":      model.Currency,
-			"updated_by":    model.UpdatedBy,
-			"updated_at":    model.UpdatedAt,
+			"name":        model.Name,
+			"description": model.Description,
+			"type":        model.Type,
+			"status":      model.Status,
+			"priority":    model.Priority,
+			"start_at":    model.StartAt,
+			"end_at":      model.EndAt,
+			"scope_type":  model.ScopeType,
+			"scope_ids":   model.ScopeIDs,
+			"exclude_ids": model.ExcludeIDs,
+			"currency":    model.Currency,
+			"updated_by":  model.UpdatedBy,
+			"updated_at":  model.UpdatedAt,
 		}).Error
 }
 

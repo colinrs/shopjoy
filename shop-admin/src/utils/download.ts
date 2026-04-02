@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type AxiosError } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { t } from '@/plugins/i18n'
@@ -11,7 +11,7 @@ import { t } from '@/plugins/i18n'
  */
 export async function downloadFile(
   url: string,
-  params: Record<string, any> = {},
+  params: Record<string, unknown> = {},
   filename?: string
 ): Promise<void> {
   const userStore = useUserStore()
@@ -57,11 +57,12 @@ export async function downloadFile(
     window.URL.revokeObjectURL(downloadUrl)
 
     ElMessage.success(t('common.exportSuccess'))
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Try to parse error response as JSON to get error message
-    if (error.response?.data) {
+    const axiosError = error as AxiosError
+    if (axiosError.response?.data) {
       try {
-        const text = await error.response.data.text()
+        const text = await (axiosError.response.data as Blob).text()
         const json = JSON.parse(text)
         ElMessage.error(json.msg || t('common.exportFailed'))
       } catch {
@@ -79,9 +80,13 @@ export async function downloadFile(
  * @param url - The URL to open
  * @param params - Query parameters
  */
-export function openExportUrl(url: string, params: Record<string, any> = {}): void {
+export function openExportUrl(url: string, params: Record<string, unknown> = {}): void {
   // Build URL with params
-  const queryString = new URLSearchParams(params).toString()
+  const stringParams: Record<string, string> = {}
+  for (const [key, value] of Object.entries(params)) {
+    stringParams[key] = String(value ?? '')
+  }
+  const queryString = new URLSearchParams(stringParams).toString()
   const fullUrl = queryString ? `${url}?${queryString}` : url
 
   // Open in new window

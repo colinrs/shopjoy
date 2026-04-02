@@ -13,11 +13,11 @@ import (
 )
 
 type pageService struct {
-	db            *gorm.DB
-	pageRepo      storefront.PageRepository
+	db             *gorm.DB
+	pageRepo       storefront.PageRepository
 	decorationRepo storefront.DecorationRepository
-	versionRepo   storefront.PageVersionRepository
-	idGen         snowflake.Snowflake
+	versionRepo    storefront.PageVersionRepository
+	idGen          snowflake.Snowflake
 }
 
 func NewPageService(
@@ -28,11 +28,11 @@ func NewPageService(
 	idGen snowflake.Snowflake,
 ) PageService {
 	return &pageService{
-		db:            db,
-		pageRepo:      pageRepo,
+		db:             db,
+		pageRepo:       pageRepo,
 		decorationRepo: decorationRepo,
-		versionRepo:   versionRepo,
-		idGen:         idGen,
+		versionRepo:    versionRepo,
+		idGen:          idGen,
 	}
 }
 
@@ -405,7 +405,7 @@ func (s *decorationService) ReorderBlocks(ctx context.Context, tenantID shared.T
 	blockOrders := make([]storefront.BlockOrder, len(orders))
 	for i, o := range orders {
 		blockOrders[i] = storefront.BlockOrder{
-			Model:    application.Model{ID: o.ID},
+			Model:     application.Model{ID: o.ID},
 			SortOrder: o.SortOrder,
 		}
 	}
@@ -430,11 +430,11 @@ func isValidBlockType(blockType string) bool {
 }
 
 type versionService struct {
-	db            *gorm.DB
-	pageRepo      storefront.PageRepository
-	versionRepo   storefront.PageVersionRepository
+	db             *gorm.DB
+	pageRepo       storefront.PageRepository
+	versionRepo    storefront.PageVersionRepository
 	decorationRepo storefront.DecorationRepository
-	idGen         snowflake.Snowflake
+	idGen          snowflake.Snowflake
 }
 
 func NewVersionService(
@@ -445,11 +445,11 @@ func NewVersionService(
 	idGen snowflake.Snowflake,
 ) VersionService {
 	return &versionService{
-		db:            db,
-		pageRepo:      pageRepo,
-		versionRepo:   versionRepo,
+		db:             db,
+		pageRepo:       pageRepo,
+		versionRepo:    versionRepo,
 		decorationRepo: decorationRepo,
-		idGen:         idGen,
+		idGen:          idGen,
 	}
 }
 
@@ -580,8 +580,8 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 }
 
 type seoService struct {
-	db        *gorm.DB
-	seoRepo   storefront.SEOConfigRepository
+	db      *gorm.DB
+	seoRepo storefront.SEOConfigRepository
 }
 
 func NewSEOService(

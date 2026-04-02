@@ -30,8 +30,8 @@ type promotionUsageModel struct {
 	Currency       string          `gorm:"column:currency;size:10;not null"`
 	OriginalAmount decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null"`
 	FinalAmount    decimal.Decimal `gorm:"column:final_amount;type:decimal(19,4);not null"`
-	CouponID       *int64           `gorm:"column:coupon_id;index"`
-	CreatedAt      int64            `gorm:"column:created_at"`
+	CouponID       *int64          `gorm:"column:coupon_id;index"`
+	CreatedAt      int64           `gorm:"column:created_at"`
 }
 
 func (promotionUsageModel) TableName() string {

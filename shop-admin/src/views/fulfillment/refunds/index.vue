@@ -231,8 +231,10 @@ import {
   type RefundListParams
 } from '@/api/fulfillment'
 import { downloadFile } from '@/utils/download'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const router = useRouter()
+const { handleError } = useErrorHandler()
 
 // State
 const loading = ref(false)
@@ -358,7 +360,7 @@ const handleExport = async () => {
 
     await downloadFile(url, params)
   } catch (error) {
-    console.error('Export failed:', error)
+    handleError(error)
     // Error message is handled by downloadFile utility
   }
 }

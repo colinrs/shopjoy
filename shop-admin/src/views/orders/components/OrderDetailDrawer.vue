@@ -239,6 +239,9 @@ import ShipDialog from './ShipDialog.vue'
 import RemarkDialog from './RemarkDialog.vue'
 import AdjustPriceDialog from './AdjustPriceDialog.vue'
 import { t } from '@/plugins/i18n'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+
+const { handleError } = useErrorHandler()
 
 const props = defineProps<{
   modelValue: boolean
@@ -344,7 +347,7 @@ const statusTimeline = computed(() => {
 const canShip = computed(() => {
   if (!order.value) return false
   return order.value.status === 'paid' &&
-    (order.value.fulfillment_status === '0' || order.value.fulfillment_status === '1')
+    (order.value.fulfillment_status === 0 || order.value.fulfillment_status === 1)
 })
 
 const canAdjustPrice = computed(() => {
@@ -373,8 +376,7 @@ const loadCarriers = async () => {
     const res = await getCarrierList()
     carriers.value = res.filter(c => c.is_active)
   } catch (error) {
-    console.error('Failed to load carriers:', error)
-    ElMessage.error(t('orders.loadCarriersFailed'))
+    handleError(error, t('orders.loadCarriersFailed'))
   }
 }
 
@@ -404,10 +406,10 @@ const getStatusTagType = (status: OrderStatus | undefined) => {
 
 const getFulfillmentTagType = (status: FulfillmentStatus | undefined) => {
   const types: Record<FulfillmentStatus, string> = {
-    '0': 'warning',
-    '1': 'primary',
-    '2': 'info',
-    '3': 'success'
+    0: 'warning',
+    1: 'primary',
+    2: 'info',
+    3: 'success'
   }
   return status !== undefined ? types[status] : 'info'
 }

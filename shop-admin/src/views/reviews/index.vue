@@ -561,6 +561,7 @@ import {
   Hide
 } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
+import { getReviewStatusType } from '@/utils/status'
 import {
   getReviewList,
   getReviewDetail,
@@ -669,14 +670,7 @@ const formatDateTime = (dateStr: string) => {
   })
 }
 
-const getStatusType = (status: string) => {
-  const types: Record<string, string> = {
-    'pending': 'warning',
-    'approved': 'success',
-    'hidden': 'info'
-  }
-  return types[status] || 'info'
-}
+const getStatusType = getReviewStatusType
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {

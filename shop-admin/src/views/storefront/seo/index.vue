@@ -226,8 +226,8 @@ const saveGlobalSEO = async () => {
   try {
     await updateGlobalSEO({ ...globalSEO })
     ElMessage.success(t('storefront.globalSEOSaved'))
-  } catch (error: any) {
-    ElMessage.error(error.message || t('storefront.saveFailed'))
+  } catch (error: unknown) {
+    ElMessage.error((error as Error).message || t('storefront.saveFailed'))
   } finally {
     globalSaving.value = false
   }
@@ -242,8 +242,8 @@ const savePageSEO = async (item: PageSEOConfigDTO & { saving?: boolean }) => {
       keywords: item.config.keywords
     }, item.page_id)
     ElMessage.success(t('storefront.pageSEOConfigSaved'))
-  } catch (error: any) {
-    ElMessage.error(error.message || t('storefront.saveFailed'))
+  } catch (error: unknown) {
+    ElMessage.error((error as Error).message || t('storefront.saveFailed'))
   } finally {
     item.saving = false
   }

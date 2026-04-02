@@ -160,7 +160,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document, Van, Goods, Tickets, Picture } from '@element-plus/icons-vue'
 import StatusTag from '@/components/common/StatusTag.vue'
-import { createShipment, type Shipment, type Carrier } from '@/api/fulfillment'
+import { createShipment, type Shipment, type Carrier, type ShipmentItem } from '@/api/fulfillment'
 
 const props = defineProps<{
   modelValue: boolean
@@ -233,7 +233,7 @@ const setItemQuantity = (id: number, quantity: number) => {
   }
 }
 
-const toggleItem = (item: any) => {
+const toggleItem = (item: ShipmentItem) => {
   const index = selectedItems.value.indexOf(item.id)
   if (index === -1) {
     selectedItems.value.push(item.id)

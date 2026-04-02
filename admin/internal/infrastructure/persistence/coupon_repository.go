@@ -36,16 +36,16 @@ type couponModel struct {
 	UsedCount    int             `gorm:"column:used_count;not null;default:0"`
 	PerUserLimit int             `gorm:"column:per_user_limit;not null;default:0"`
 	Status       int             `gorm:"column:status;not null;index"`
-	StartAt      int64            `gorm:"column:start_at;not null;index"`
-	EndAt        int64            `gorm:"column:end_at;not null;index"`
-	ScopeType    string           `gorm:"column:scope_type;size:32;not null"`
-	ScopeIDs     string           `gorm:"column:scope_ids;type:json"`   // JSON array of int64
-	ExcludeIDs   string           `gorm:"column:exclude_ids;type:json"` // JSON array of int64
-	CreatedBy    int64            `gorm:"column:created_by;not null"`
-	UpdatedBy    int64            `gorm:"column:updated_by;not null"`
-	DeletedAt    *int64           `gorm:"column:deleted_at;index"`
-	CreatedAt    int64            `gorm:"column:created_at"`
-	UpdatedAt    int64            `gorm:"column:updated_at"`
+	StartAt      int64           `gorm:"column:start_at;not null;index"`
+	EndAt        int64           `gorm:"column:end_at;not null;index"`
+	ScopeType    string          `gorm:"column:scope_type;size:32;not null"`
+	ScopeIDs     string          `gorm:"column:scope_ids;type:json"`   // JSON array of int64
+	ExcludeIDs   string          `gorm:"column:exclude_ids;type:json"` // JSON array of int64
+	CreatedBy    int64           `gorm:"column:created_by;not null"`
+	UpdatedBy    int64           `gorm:"column:updated_by;not null"`
+	DeletedAt    *int64          `gorm:"column:deleted_at;index"`
+	CreatedAt    int64           `gorm:"column:created_at"`
+	UpdatedAt    int64           `gorm:"column:updated_at"`
 }
 
 func (couponModel) TableName() string {
@@ -63,22 +63,22 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 	}
 
 	return &promotion.Coupon{
-		ID:          m.ID,
-		TenantID:    shared.TenantID(m.TenantID),
-		Name:        m.Name,
-		Code:        m.Code,
-		Description: m.Description,
-		Type:        promotion.CouponType(m.Type),
-		Value:       m.Value,
-		MinAmount:   m.MinAmount,
-		MaxDiscount: m.MaxDiscount,
-		Currency:    m.Currency,
-		TotalCount:  m.TotalCount,
-		UsedCount:   m.UsedCount,
+		ID:           m.ID,
+		TenantID:     shared.TenantID(m.TenantID),
+		Name:         m.Name,
+		Code:         m.Code,
+		Description:  m.Description,
+		Type:         promotion.CouponType(m.Type),
+		Value:        m.Value,
+		MinAmount:    m.MinAmount,
+		MaxDiscount:  m.MaxDiscount,
+		Currency:     m.Currency,
+		TotalCount:   m.TotalCount,
+		UsedCount:    m.UsedCount,
 		PerUserLimit: m.PerUserLimit,
-		Status:      promotion.CouponStatus(m.Status),
-		StartAt:     time.Unix(m.StartAt, 0),
-		EndAt:       time.Unix(m.EndAt, 0),
+		Status:       promotion.CouponStatus(m.Status),
+		StartAt:      time.Unix(m.StartAt, 0),
+		EndAt:        time.Unix(m.EndAt, 0),
 		Scope: promotion.PromotionScope{
 			Type:       promotion.ScopeType(m.ScopeType),
 			IDs:        scopeIDs,
@@ -100,30 +100,30 @@ func fromCouponEntity(c *promotion.Coupon) *couponModel {
 	excludeIDsJSON, _ := json.Marshal(c.Scope.ExcludeIDs)
 
 	return &couponModel{
-		ID:          c.ID,
-		TenantID:    c.TenantID.Int64(),
-		Name:        c.Name,
-		Code:        c.Code,
-		Description: c.Description,
-		Type:        int(c.Type),
-		Value:       c.Value,
-		MinAmount:   c.MinAmount,
-		MaxDiscount: c.MaxDiscount,
-		Currency:    c.Currency,
-		TotalCount:  c.TotalCount,
-		UsedCount:   c.UsedCount,
+		ID:           c.ID,
+		TenantID:     c.TenantID.Int64(),
+		Name:         c.Name,
+		Code:         c.Code,
+		Description:  c.Description,
+		Type:         int(c.Type),
+		Value:        c.Value,
+		MinAmount:    c.MinAmount,
+		MaxDiscount:  c.MaxDiscount,
+		Currency:     c.Currency,
+		TotalCount:   c.TotalCount,
+		UsedCount:    c.UsedCount,
 		PerUserLimit: c.PerUserLimit,
-		Status:      int(c.Status),
-		StartAt:     c.StartAt.Unix(),
-		EndAt:       c.EndAt.Unix(),
-		ScopeType:   string(c.Scope.Type),
-		ScopeIDs:    string(scopeIDsJSON),
-		ExcludeIDs:  string(excludeIDsJSON),
-		CreatedBy:   c.Audit.CreatedBy,
-		UpdatedBy:   c.Audit.UpdatedBy,
-		DeletedAt:   c.DeletedAt,
-		CreatedAt:   c.Audit.CreatedAt.Unix(),
-		UpdatedAt:   c.Audit.UpdatedAt.Unix(),
+		Status:       int(c.Status),
+		StartAt:      c.StartAt.Unix(),
+		EndAt:        c.EndAt.Unix(),
+		ScopeType:    string(c.Scope.Type),
+		ScopeIDs:     string(scopeIDsJSON),
+		ExcludeIDs:   string(excludeIDsJSON),
+		CreatedBy:    c.Audit.CreatedBy,
+		UpdatedBy:    c.Audit.UpdatedBy,
+		DeletedAt:    c.DeletedAt,
+		CreatedAt:    c.Audit.CreatedAt.Unix(),
+		UpdatedAt:    c.Audit.UpdatedAt.Unix(),
 	}
 }
 

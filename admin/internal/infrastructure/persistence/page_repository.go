@@ -19,25 +19,25 @@ func NewPageRepository() storefront.PageRepository {
 }
 
 type pageModel struct {
-	ID           int64     `gorm:"column:id;primaryKey"`
-	TenantID     int64     `gorm:"column:tenant_id;not null;index"`
-	Name         string    `gorm:"column:name;type:varchar(255);not null"`
-	Slug         string    `gorm:"column:slug;type:varchar(255);not null"`
-	Type         int       `gorm:"column:type;not null;default:0;index"`
-	Content      string    `gorm:"column:content;type:longtext"`
-	SEOTitle     string    `gorm:"column:seo_title;type:varchar(255)"`
-	SEODesc      string    `gorm:"column:seo_description;type:text"`
-	SEOKeywords  string    `gorm:"column:seo_keywords;type:varchar(500)"`
-	Status       int8      `gorm:"column:status;not null;default:1;index"`
-	Sort         int       `gorm:"column:sort;not null;default:0"`
-	IsPublished  int       `gorm:"column:is_published;not null;default:0"`
-	PublishedAt  *time.Time `gorm:"column:published_at"`
-	Version      int       `gorm:"column:version;not null;default:1"`
-	CreatedAt    time.Time `gorm:"column:created_at;not null"`
-	UpdatedAt    time.Time `gorm:"column:updated_at;not null"`
-	CreatedBy    int64     `gorm:"column:created_by;not null;default:0"`
-	UpdatedBy    int64     `gorm:"column:updated_by;not null;default:0"`
-	DeletedAt    *int64    `gorm:"column:deleted_at;index"`
+	ID          int64      `gorm:"column:id;primaryKey"`
+	TenantID    int64      `gorm:"column:tenant_id;not null;index"`
+	Name        string     `gorm:"column:name;type:varchar(255);not null"`
+	Slug        string     `gorm:"column:slug;type:varchar(255);not null"`
+	Type        int        `gorm:"column:type;not null;default:0;index"`
+	Content     string     `gorm:"column:content;type:longtext"`
+	SEOTitle    string     `gorm:"column:seo_title;type:varchar(255)"`
+	SEODesc     string     `gorm:"column:seo_description;type:text"`
+	SEOKeywords string     `gorm:"column:seo_keywords;type:varchar(500)"`
+	Status      int8       `gorm:"column:status;not null;default:1;index"`
+	Sort        int        `gorm:"column:sort;not null;default:0"`
+	IsPublished int        `gorm:"column:is_published;not null;default:0"`
+	PublishedAt *time.Time `gorm:"column:published_at"`
+	Version     int        `gorm:"column:version;not null;default:1"`
+	CreatedAt   time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt   time.Time  `gorm:"column:updated_at;not null"`
+	CreatedBy   int64      `gorm:"column:created_by;not null;default:0"`
+	UpdatedBy   int64      `gorm:"column:updated_by;not null;default:0"`
+	DeletedAt   *int64     `gorm:"column:deleted_at;index"`
 }
 
 func (pageModel) TableName() string {
@@ -46,7 +46,7 @@ func (pageModel) TableName() string {
 
 func (m *pageModel) toEntity() *storefront.Page {
 	return &storefront.Page{
-		Model:     application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
+		Model:    application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID: shared.TenantID(m.TenantID),
 		Name:     m.Name,
 		Slug:     m.Slug,
@@ -111,20 +111,20 @@ func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Pag
 	return db.WithContext(ctx).Model(&pageModel{}).
 		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", page.Model.ID, page.TenantID.Int64()).
 		Updates(map[string]interface{}{
-			"name":          model.Name,
-			"slug":          model.Slug,
-			"type":          model.Type,
-			"content":       model.Content,
-			"seo_title":     model.SEOTitle,
+			"name":            model.Name,
+			"slug":            model.Slug,
+			"type":            model.Type,
+			"content":         model.Content,
+			"seo_title":       model.SEOTitle,
 			"seo_description": model.SEODesc,
-			"seo_keywords":  model.SEOKeywords,
-			"status":        model.Status,
-			"sort":          model.Sort,
-			"is_published":  model.IsPublished,
-			"published_at":  model.PublishedAt,
-			"version":       model.Version,
-			"updated_at":    model.UpdatedAt,
-			"updated_by":    model.UpdatedBy,
+			"seo_keywords":    model.SEOKeywords,
+			"status":          model.Status,
+			"sort":            model.Sort,
+			"is_published":    model.IsPublished,
+			"published_at":    model.PublishedAt,
+			"version":         model.Version,
+			"updated_at":      model.UpdatedAt,
+			"updated_by":      model.UpdatedBy,
 		}).Error
 }
 

@@ -289,8 +289,8 @@ const handleSubmit = async () => {
       ElMessage.success(t('orders.shipSuccess'))
       emit('success')
       visible.value = false
-    } catch (error: any) {
-      ElMessage.error(error?.message || t('orders.shipFailed'))
+    } catch (error: unknown) {
+      ElMessage.error((error as Error)?.message || t('orders.shipFailed'))
     } finally {
       submitting.value = false
     }

@@ -55,31 +55,31 @@ type DeductStockRequest struct {
 
 // ProductResponse 商品响应
 type ProductResponse struct {
-	ID              int64             `json:"id"`
-	Name            string            `json:"name"`
-	Description     string            `json:"description"`
-	Price           decimal.Decimal   `json:"price"`
-	Currency        string            `json:"currency"`
-	CostPrice       decimal.Decimal   `json:"cost_price"`
-	Stock           int               `json:"stock"`
-	Status          string            `json:"status"`
-	CategoryID      int64             `json:"category_id"`
-	CreatedAt       string            `json:"created_at"`
-	UpdatedAt       string            `json:"updated_at"`
-	SKU             string            `json:"sku"`
-	Brand           string            `json:"brand"`
-	Tags            []string          `json:"tags"`
-	Images          []string          `json:"images"`
-	IsMatrixProduct bool              `json:"is_matrix_product"`
-	HSCode          string            `json:"hs_code"`
-	COO             string            `json:"coo"`
-	Weight          decimal.Decimal   `json:"weight"`
-	WeightUnit      string            `json:"weight_unit"`
-	Length          decimal.Decimal   `json:"length"`
-	Width           decimal.Decimal   `json:"width"`
-	Height          decimal.Decimal   `json:"height"`
-	DangerousGoods  []string          `json:"dangerous_goods"`
-	Markets         []MarketInfo      `json:"markets"`
+	ID              int64           `json:"id"`
+	Name            string          `json:"name"`
+	Description     string          `json:"description"`
+	Price           decimal.Decimal `json:"price"`
+	Currency        string          `json:"currency"`
+	CostPrice       decimal.Decimal `json:"cost_price"`
+	Stock           int             `json:"stock"`
+	Status          string          `json:"status"`
+	CategoryID      int64           `json:"category_id"`
+	CreatedAt       string          `json:"created_at"`
+	UpdatedAt       string          `json:"updated_at"`
+	SKU             string          `json:"sku"`
+	Brand           string          `json:"brand"`
+	Tags            []string        `json:"tags"`
+	Images          []string        `json:"images"`
+	IsMatrixProduct bool            `json:"is_matrix_product"`
+	HSCode          string          `json:"hs_code"`
+	COO             string          `json:"coo"`
+	Weight          decimal.Decimal `json:"weight"`
+	WeightUnit      string          `json:"weight_unit"`
+	Length          decimal.Decimal `json:"length"`
+	Width           decimal.Decimal `json:"width"`
+	Height          decimal.Decimal `json:"height"`
+	DangerousGoods  []string        `json:"dangerous_goods"`
+	Markets         []MarketInfo    `json:"markets"`
 }
 
 // MarketInfo 市场信息

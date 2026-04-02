@@ -196,8 +196,8 @@ const handleSubmit = async () => {
       ElMessage.success(t('orders.priceAdjustSuccess'))
       emit('success')
       visible.value = false
-    } catch (error: any) {
-      ElMessage.error(error?.message || t('orders.priceAdjustFailed'))
+    } catch (error: unknown) {
+      ElMessage.error((error as Error)?.message || t('orders.priceAdjustFailed'))
     } finally {
       submitting.value = false
     }

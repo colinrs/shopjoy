@@ -19,13 +19,13 @@ func NewCarrierRepository() fulfillment.CarrierRepository {
 
 // carrierModel represents the database model for Carrier
 type carrierModel struct {
-	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	Code       string `gorm:"column:code;size:20;not null;uniqueIndex"`
-	Name       string `gorm:"column:name;size:100;not null"`
+	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
+	Code        string `gorm:"column:code;size:20;not null;uniqueIndex"`
+	Name        string `gorm:"column:name;size:100;not null"`
 	TrackingURL string `gorm:"column:tracking_url;size:255;not null;default:''"`
-	IsActive   int    `gorm:"column:is_active;not null;default:1"`
-	Sort       int    `gorm:"column:sort;not null;default:0"`
-	CreatedAt  int64  `gorm:"column:created_at;not null"`
+	IsActive    int    `gorm:"column:is_active;not null;default:1"`
+	Sort        int    `gorm:"column:sort;not null;default:0"`
+	CreatedAt   int64  `gorm:"column:created_at;not null"`
 }
 
 func (carrierModel) TableName() string {
@@ -34,12 +34,12 @@ func (carrierModel) TableName() string {
 
 func (m *carrierModel) toEntity() *fulfillment.Carrier {
 	return &fulfillment.Carrier{
-		Model:      application.Model{ID: m.ID, CreatedAt: parseUnixTime(m.CreatedAt)},
-		Code:       m.Code,
-		Name:       m.Name,
+		Model:       application.Model{ID: m.ID, CreatedAt: parseUnixTime(m.CreatedAt)},
+		Code:        m.Code,
+		Name:        m.Name,
 		TrackingURL: m.TrackingURL,
-		IsActive:   m.IsActive == 1,
-		Sort:       m.Sort,
+		IsActive:    m.IsActive == 1,
+		Sort:        m.Sort,
 	}
 }
 
@@ -49,13 +49,13 @@ func fromCarrierEntity(c *fulfillment.Carrier) *carrierModel {
 		isActive = 1
 	}
 	return &carrierModel{
-		ID:         c.Model.ID,
-		Code:       c.Code,
-		Name:       c.Name,
+		ID:          c.Model.ID,
+		Code:        c.Code,
+		Name:        c.Name,
 		TrackingURL: c.TrackingURL,
-		IsActive:   isActive,
-		Sort:       c.Sort,
-		CreatedAt:  c.Model.CreatedAt.Unix(),
+		IsActive:    isActive,
+		Sort:        c.Sort,
+		CreatedAt:   c.Model.CreatedAt.Unix(),
 	}
 }
 

@@ -136,10 +136,10 @@ type CouponApp interface {
 }
 
 type couponApp struct {
-	db               *gorm.DB
-	couponRepo       pkgcoupon.CouponRepository
-	userCouponRepo   pkgcoupon.UserCouponRepository
-	idGen            snowflake.Snowflake
+	db             *gorm.DB
+	couponRepo     pkgcoupon.CouponRepository
+	userCouponRepo pkgcoupon.UserCouponRepository
+	idGen          snowflake.Snowflake
 }
 
 // NewCouponApp 创建优惠券应用服务

@@ -78,40 +78,40 @@ type ListResponse struct {
 	List     []*AdminUserResponse `json:"list"`
 	Total    int64                `json:"total"`
 	Page     int                  `json:"page"`
-PageSize int                  `json:"page_size"`
+	PageSize int                  `json:"page_size"`
 }
 
 // CreateAdminUserRequest 创建管理员请求
 type CreateAdminUserRequest struct {
 	TenantID int64
-Username string
-Email    string
-Password string
-Mobile   string
-RealName string
-Avatar   string
-Type     int
-RoleIDs  []int64
+	Username string
+	Email    string
+	Password string
+	Mobile   string
+	RealName string
+	Avatar   string
+	Type     int
+	RoleIDs  []int64
 }
 
 // UpdateAdminUserRequest 更新管理员请求
 type UpdateAdminUserRequest struct {
 	ID       int64
-RealName string
-Avatar   string
-Mobile   string
-Email    string
+	RealName string
+	Avatar   string
+	Mobile   string
+	Email    string
 }
 
 // AssignRolesRequest 分配角色请求
 type AssignRolesRequest struct {
-AdminUserID int64
-RoleIDs     []int64
+	AdminUserID int64
+	RoleIDs     []int64
 }
 
 // ResetPasswordResponse 重置密码响应
 type ResetPasswordResponse struct {
-TemporaryPassword string `json:"temporary_password"`
+	TemporaryPassword string `json:"temporary_password"`
 }
 
 // Service 管理员应用服务接口

@@ -3,9 +3,9 @@ package seo
 import (
 	"context"
 
+	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"

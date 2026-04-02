@@ -356,7 +356,7 @@ const deleteBlock = async (index: number) => {
       selectedBlockIndex.value--
     }
     ElMessage.success(t('storefront.blockDeleted'))
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
       ElMessage.error(t('storefront.deleteBlockFailed'))
     }
@@ -376,8 +376,8 @@ const handleSaveDraft = async () => {
     await saveDraft(pageId, blocks.value)
     ElMessage.success(t('storefront.draftSaved'))
     await fetchPage()
-  } catch (error: any) {
-    ElMessage.error(error.message || t('storefront.saveFailedAction'))
+  } catch (error: unknown) {
+    ElMessage.error((error as Error).message || t('storefront.saveFailedAction'))
   } finally {
     saving.value = false
   }
@@ -396,9 +396,9 @@ const handlePublish = async () => {
     await publishPage(pageId)
     ElMessage.success(t('storefront.pagePublishedAction'))
     await fetchPage()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || t('storefront.publishFailedAction'))
+      ElMessage.error((error as Error).message || t('storefront.publishFailedAction'))
     }
   } finally {
     publishing.value = false

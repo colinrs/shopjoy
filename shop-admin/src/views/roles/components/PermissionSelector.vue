@@ -74,6 +74,7 @@ import {
   type Role,
   type Permission
 } from '@/api/role'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<{
   visible: boolean
@@ -86,6 +87,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const treeRef = ref()
 const loading = ref(false)
@@ -155,8 +157,7 @@ const loadPermissions = async () => {
     const res = await getPermissionList()
     allPermissions.value = res.list || []
   } catch (e) {
-    console.error('Failed to load permissions:', e)
-    ElMessage.error(t('roles.loadPermissionsFailed'))
+    handleError(e, t('roles.loadPermissionsFailed'))
   } finally {
     loading.value = false
   }
@@ -176,7 +177,7 @@ const loadRolePermissions = async () => {
       }
     })
   } catch (e) {
-    console.error('Failed to load role permissions:', e)
+    handleError(e)
   }
 }
 
@@ -198,8 +199,7 @@ const handleSubmit = async () => {
     emit('update:visible', false)
     emit('success')
   } catch (e) {
-    console.error('Failed to update permissions:', e)
-    ElMessage.error(t('roles.updatePermissionsFailed'))
+    handleError(e, t('roles.updatePermissionsFailed'))
   } finally {
     submitLoading.value = false
   }

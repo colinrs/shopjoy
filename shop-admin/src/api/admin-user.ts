@@ -3,6 +3,7 @@ import request from '@/utils/request'
 // Admin User interface
 export interface AdminUser {
   id: number
+  tenant_id: number
   email: string
   mobile: string
   real_name: string

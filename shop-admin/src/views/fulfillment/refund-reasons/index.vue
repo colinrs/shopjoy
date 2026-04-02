@@ -89,8 +89,10 @@ import {
   getRefundReasonList,
   type RefundReason
 } from '@/api/fulfillment'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
+const { handleError } = useErrorHandler()
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -118,8 +120,7 @@ const loadReasons = async () => {
     const data = await getRefundReasonList()
     reasons.value = data || []
   } catch (error) {
-    console.error('Failed to load refund reasons:', error)
-    ElMessage.error(t('refundReasons.loadFailed'))
+    handleError(error, t('refundReasons.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -165,8 +166,7 @@ const handleSave = async () => {
         // Reload to ensure data is fresh
         loadReasons()
       } catch (error) {
-        console.error('Failed to save refund reason:', error)
-        ElMessage.error(t('refundReasons.saveFailed'))
+        handleError(error, t('refundReasons.saveFailed'))
       } finally {
         saveLoading.value = false
       }
@@ -203,8 +203,7 @@ const handleStatusChange = async (row: RefundReason, isActive: boolean) => {
     // Revert the change since backend doesn't support it
     row.is_active = !isActive
   } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error(t('refundReasons.updateStatusFailed'))
+    handleError(error, t('refundReasons.updateStatusFailed'))
     // Revert the change
     row.is_active = !isActive
   }

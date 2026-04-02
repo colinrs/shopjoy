@@ -200,7 +200,7 @@ func (a AdjustmentType) IsValid() bool {
 
 // TierConfig 阶梯配置
 type TierConfig struct {
-	Threshold *int64         `json:"threshold"` // null for last tier (unlimited)
+	Threshold *int64          `json:"threshold"` // null for last tier (unlimited)
 	Ratio     decimal.Decimal `json:"ratio"`     // Points per currency unit
 }
 
@@ -365,8 +365,8 @@ type RedeemRule struct {
 	UsedStock      int64            `gorm:"column:used_stock;type:bigint;not null;default:0"`
 	PerUserLimit   int              `gorm:"column:per_user_limit;type:int;not null;default:1"`
 	Status         RedeemRuleStatus `gorm:"column:status;type:tinyint;not null;default:0;index:idx_status"`
-	StartAt        *time.Time      `gorm:"column:start_at"`
-	EndAt          *time.Time      `gorm:"column:end_at"`
+	StartAt        *time.Time       `gorm:"column:start_at"`
+	EndAt          *time.Time       `gorm:"column:end_at"`
 }
 
 func (r *RedeemRule) TableName() string {
