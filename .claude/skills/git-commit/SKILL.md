@@ -10,6 +10,16 @@ Automatically check git status, review changes, and create a well-structured com
 
 ## Workflow
 
+### 0. Format Code (REQUIRED)
+
+Before staging or committing any changes, **you MUST** run code formatting from the project root:
+
+```bash
+make fmt
+```
+
+This step formats all Go code and is mandatory before every commit.
+
 ### 1. Check Git Status
 
 ```bash
@@ -120,6 +130,7 @@ docs: add API reference documentation
 
 When invoked, execute the following:
 
+0. **Run `make fmt`** in project root (MANDATORY - formats Go code)
 1. Run `git status` to see current changes
 2. Run `git diff --stat` to see change summary
 3. Analyze changes and determine commit type
