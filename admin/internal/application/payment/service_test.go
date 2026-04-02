@@ -117,9 +117,9 @@ func (m *mockTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenantI
 
 // mockWebhookEventRepo is a mock implementation of payment.WebhookEventRepository
 type mockWebhookEventRepo struct {
-	findByEventIDFunc  func(ctx context.Context, db *gorm.DB, eventID string) (*payment.WebhookEvent, error)
-	createFunc         func(ctx context.Context, db *gorm.DB, event *payment.WebhookEvent) error
-	markProcessedFunc   func(ctx context.Context, db *gorm.DB, id int64, processed int8, errorMsg string) error
+	findByEventIDFunc func(ctx context.Context, db *gorm.DB, eventID string) (*payment.WebhookEvent, error)
+	createFunc        func(ctx context.Context, db *gorm.DB, event *payment.WebhookEvent) error
+	markProcessedFunc func(ctx context.Context, db *gorm.DB, id int64, processed int8, errorMsg string) error
 }
 
 func (m *mockWebhookEventRepo) Create(ctx context.Context, db *gorm.DB, event *payment.WebhookEvent) error {
@@ -539,14 +539,14 @@ func TestHandleWebhook_ChargeRefunded(t *testing.T) {
 				return &mockPaymentRepo{
 					findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 						return &payment.Payment{
-							Model:             application.Model{ID: 3},
-							TenantID:          1,
-							OrderID:           102,
-							PaymentNo:         "PAY125",
-							Amount:            decimal.NewFromInt(200),
-							Currency:          "USD",
-							Status:            payment.PaymentStatusSuccess,
-							ChannelPaymentID:  "ch_refunded123",
+							Model:            application.Model{ID: 3},
+							TenantID:         1,
+							OrderID:          102,
+							PaymentNo:        "PAY125",
+							Amount:           decimal.NewFromInt(200),
+							Currency:         "USD",
+							Status:           payment.PaymentStatusSuccess,
+							ChannelPaymentID: "ch_refunded123",
 						}, nil
 					},
 					updateFunc: func(ctx context.Context, db *gorm.DB, p *payment.Payment) error {
@@ -652,8 +652,8 @@ func TestHandleWebhook_Idempotent(t *testing.T) {
 			findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 				callCount++
 				return &payment.Payment{
-					Model:           application.Model{ID: 1},
-					Status:          payment.PaymentStatusSuccess,
+					Model:            application.Model{ID: 1},
+					Status:           payment.PaymentStatusSuccess,
 					ChannelPaymentID: "pi_success123",
 				}, nil
 			},
@@ -816,8 +816,8 @@ func TestHandleWebhook_ExistingUnprocessedEvent(t *testing.T) {
 		mockPaymentRepo := &mockPaymentRepo{
 			findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 				return &payment.Payment{
-					Model:           application.Model{ID: 1},
-					Status:          payment.PaymentStatusSuccess,
+					Model:            application.Model{ID: 1},
+					Status:           payment.PaymentStatusSuccess,
 					ChannelPaymentID: "pi_existing",
 				}, nil
 			},
@@ -898,8 +898,8 @@ func TestHandleWebhook_EventCreation(t *testing.T) {
 		mockPaymentRepo := &mockPaymentRepo{
 			findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 				return &payment.Payment{
-					Model:           application.Model{ID: 1},
-					Status:          payment.PaymentStatusSuccess,
+					Model:            application.Model{ID: 1},
+					Status:           payment.PaymentStatusSuccess,
 					ChannelPaymentID: "pi_create_test",
 				}, nil
 			},

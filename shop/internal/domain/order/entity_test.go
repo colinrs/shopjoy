@@ -15,19 +15,19 @@ func newTestOrder(status Status) *Order {
 	now := time.Now().UTC()
 	expireAt := now.Add(30 * time.Minute)
 	return &Order{
-		Status:       status,
-		TenantID:     1,
-		UserID:       100,
-		OrderNo:      "ORD20260402123456123456",
-		Currency:     "CNY",
-		TotalAmount:  shared.NewMoney(decimal.NewFromInt(100), "CNY"),
+		Status:         status,
+		TenantID:       1,
+		UserID:         100,
+		OrderNo:        "ORD20260402123456123456",
+		Currency:       "CNY",
+		TotalAmount:    shared.NewMoney(decimal.NewFromInt(100), "CNY"),
 		DiscountAmount: shared.NewMoney(decimal.Zero, "CNY"),
 		FreightAmount:  shared.NewMoney(decimal.Zero, "CNY"),
 		PayAmount:      shared.NewMoney(decimal.NewFromInt(100), "CNY"),
 		OriginalAmount: shared.NewMoney(decimal.NewFromInt(100), "CNY"),
-		AdjustAmount:    shared.NewMoney(decimal.Zero, "CNY"),
-		Version:      1,
-		ExpireAt:     expireAt,
+		AdjustAmount:   shared.NewMoney(decimal.Zero, "CNY"),
+		Version:        1,
+		ExpireAt:       expireAt,
 		Audit: shared.AuditInfo{
 			CreatedAt: now,
 			UpdatedAt: now,

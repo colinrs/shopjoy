@@ -50,7 +50,7 @@ func (m *mockPaymentService) HandleWebhook(ctx context.Context, event *appPaymen
 func mockServiceContext(mockPaymentService *mockPaymentService, webhookSecret string) *svc.ServiceContext {
 	return &svc.ServiceContext{
 		PaymentService: mockPaymentService,
-		Config:        config.Config{StripeWebhookSecret: webhookSecret},
+		Config:         config.Config{StripeWebhookSecret: webhookSecret},
 	}
 }
 

@@ -349,7 +349,7 @@ type TopProduct struct {
 
 // DailySalesTrend 日销售趋势
 type DailySalesTrend struct {
-	Date   string          // 日期字符串，格式为 YYYY-MM-DD
+	Date   string // 日期字符串，格式为 YYYY-MM-DD
 	Sales  decimal.Decimal
 	Orders int64
 }

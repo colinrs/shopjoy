@@ -324,7 +324,7 @@ func TestAuthMiddleware_MalformedToken(t *testing.T) {
 			wantNext:   false,
 		},
 		{
-			name:       "token with wrong signature",
+			name: "token with wrong signature",
 			authHeader: func() string {
 				// Generate token with different secret
 				token, _ := generateTestToken("wrong-secret", 100, 0, 1, time.Now().Add(time.Hour))
@@ -583,9 +583,9 @@ func TestAuthMiddleware_UserInfoInContext(t *testing.T) {
 
 func TestAuthMiddleware_TenantIDInContext(t *testing.T) {
 	tests := []struct {
-		name            string
-		tokenTenantID   int64
-		expectedTenant  int64
+		name           string
+		tokenTenantID  int64
+		expectedTenant int64
 	}{
 		{
 			name:           "platform admin with tenant_id 0",
