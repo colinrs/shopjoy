@@ -177,7 +177,8 @@ const handleShowAddVariantDialog = () => {
   emit('variants-change')
 }
 
-const handleEditVariant = () => {
+// eslint-disable-next-line no-unused-vars
+const handleEditVariant = (_row: SKU) => {
   emit('variants-change')
 }
 

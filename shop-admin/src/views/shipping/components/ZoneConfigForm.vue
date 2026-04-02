@@ -239,7 +239,8 @@ const rules = {
   ],
   regions: [
     {
-      validator: (_rule: FormItemRule, value: string[], callback: () => void) => {
+      // eslint-disable-next-line no-unused-vars
+      validator: (_rule: FormItemRule, value: string[], callback: (error?: Error) => void) => {
         if (!value || value.length === 0) {
           callback(new Error('shipping.selectFeeType'))
         } else {
