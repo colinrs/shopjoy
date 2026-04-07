@@ -11,6 +11,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/tenant"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -628,6 +630,16 @@ func TestAuthMiddleware_TenantIDInContext(t *testing.T) {
 			}
 			if tenantID != tt.expectedTenant {
 				t.Errorf("GetTenantID() = %v, want %v", tenantID, tt.expectedTenant)
+			}
+
+			// Also verify tenant.FromContext returns the correct value
+			// This ensures the Logic layer can read tenant context properly
+			tid, ok := tenant.FromContext(capturedContext)
+			if !ok {
+				t.Error("tenant.FromContext() ok = false, want true")
+			}
+			if tid != shared.TenantID(tt.expectedTenant) {
+				t.Errorf("tenant.FromContext() = %v, want %v", tid, shared.TenantID(tt.expectedTenant))
 			}
 		})
 	}

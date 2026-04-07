@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/config"
 	"github.com/colinrs/shopjoy/admin/internal/handler"
+	"github.com/colinrs/shopjoy/admin/internal/middleware"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/pkg/response"
 
@@ -26,6 +27,7 @@ func main() {
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
+	server.Use(middleware.LoggingMiddleware())
 	handler.RegisterHandlers(server, ctx)
 	httpx.SetErrorHandlerCtx(response.ErrHandle)
 	httpx.SetOkHandler(response.OKHandle)
