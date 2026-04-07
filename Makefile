@@ -68,7 +68,7 @@ coverage: test
 ## security: Run security scanner
 security:
 	@which gosec > /dev/null || (echo "Installing gosec..." && go install github.com/securego/gosec/v2/cmd/gosec@latest)
-	gosec ./...
+	gosec -exclude-rules=".*/tests/.*:G704" ./...
 
 ## deps: Download dependencies
 deps:

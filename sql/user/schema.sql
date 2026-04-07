@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS `tenants` (
 -- 测试数据
 -- ============================================
 
-INSERT INTO `tenants` (`id`, `name`, `code`, `status`, `plan`, `domain`, `custom_domain`, `logo`, `contact_name`, `contact_phone`, `contact_email`, `address`, `expire_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 'Demo Shop', 'demo', 1, 2, 'demo.shopjoy.com', 'www.demoshop.com', 'https://cdn.example.com/logo.png', '张三', '13800138000', 'admin@demoshop.com', '北京市朝阳区', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 1 YEAR)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
-(2, 'Test Store', 'test', 1, 1, 'test.shopjoy.com', '', 'https://cdn.example.com/logo2.png', '李四', '13900139000', 'admin@teststore.com', '上海市浦东新区', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 6 MONTH)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
-(3, 'Enterprise Corp', 'enterprise', 1, 3, 'enterprise.shopjoy.com', 'shop.enterprisecorp.com', 'https://cdn.example.com/logo3.png', '王五', '13700137000', 'admin@enterprisecorp.com', '广州市天河区', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 2 YEAR)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1);-- ============================================
+INSERT IGNORE INTO `tenants` (`id`, `name`, `code`, `status`, `plan`, `domain`, `custom_domain`, `logo`, `contact_name`, `contact_phone`, `contact_email`, `address`, `expire_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 'Demo Shop', 'demo', 1, 2, 'demo.shopjoy.com', 'www.demoshop.com', 'https://cdn.example.com/logo.png', '张三', '13800138000', 'admin@demoshop.com', '北京市朝阳区', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW(), 1, 1),
+(2, 'Test Store', 'test', 1, 1, 'test.shopjoy.com', '', 'https://cdn.example.com/logo2.png', '李四', '13900139000', 'admin@teststore.com', '上海市浦东新区', DATE_ADD(NOW(), INTERVAL 6 MONTH), NOW(), NOW(), 1, 1),
+(3, 'Enterprise Corp', 'enterprise', 1, 3, 'enterprise.shopjoy.com', 'shop.enterprisecorp.com', 'https://cdn.example.com/logo3.png', '王五', '13700137000', 'admin@enterprisecorp.com', '广州市天河区', DATE_ADD(NOW(), INTERVAL 2 YEAR), NOW(), NOW(), 1, 1);-- ============================================
 -- 用户表 (users)
 -- C端用户/顾客
 -- ============================================
@@ -69,20 +69,20 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- 密码均为: user123456
 -- ============================================
 
-INSERT INTO `users` (`id`, `tenant_id`, `email`, `phone`, `password`, `name`, `avatar`, `gender`, `birthday`, `status`, `last_login`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT IGNORE INTO `users` (`id`, `tenant_id`, `email`, `phone`, `password`, `name`, `avatar`, `gender`, `birthday`, `status`, `last_login`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Demo Shop 用户
-(1, 1, 'user1@example.com', '13800000001', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小明', 'https://cdn.example.com/u1.png', 1, UNIX_TIMESTAMP('1990-05-15'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(2, 1, 'user2@example.com', '13800000002', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小红', 'https://cdn.example.com/u2.png', 2, UNIX_TIMESTAMP('1995-08-20'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(3, 1, 'user3@example.com', '13800000003', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小刚', 'https://cdn.example.com/u3.png', 1, UNIX_TIMESTAMP('1988-03-10'), 1, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(1, 1, 'user1@example.com', '13800000001', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小明', 'https://cdn.example.com/u1.png', 1, '1990-05-15', 1, NOW(), NOW(), NOW(), 0, 0),
+(2, 1, 'user2@example.com', '13800000002', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小红', 'https://cdn.example.com/u2.png', 2, '1995-08-20', 1, NOW(), NOW(), NOW(), 0, 0),
+(3, 1, 'user3@example.com', '13800000003', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '小刚', 'https://cdn.example.com/u3.png', 1, '1988-03-10', 1, NULL, NOW(), NOW(), 0, 0),
 
 -- Test Store 用户
-(4, 2, 'user4@example.com', '13800000004', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '大卫', 'https://cdn.example.com/u4.png', 1, UNIX_TIMESTAMP('1992-11-25'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(5, 2, 'user5@example.com', '13800000005', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '艾米', 'https://cdn.example.com/u5.png', 2, UNIX_TIMESTAMP('1998-01-05'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
+(4, 2, 'user4@example.com', '13800000004', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '大卫', 'https://cdn.example.com/u4.png', 1, '1992-11-25', 1, NOW(), NOW(), NOW(), 0, 0),
+(5, 2, 'user5@example.com', '13800000005', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '艾米', 'https://cdn.example.com/u5.png', 2, '1998-01-05', 1, NOW(), NOW(), NOW(), 0, 0),
 
 -- Enterprise Corp 用户
-(6, 3, 'user6@example.com', '13800000006', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '约翰', 'https://cdn.example.com/u6.png', 1, UNIX_TIMESTAMP('1985-07-12'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(7, 3, 'user7@example.com', '13800000007', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '玛丽', 'https://cdn.example.com/u7.png', 2, UNIX_TIMESTAMP('1993-04-30'), 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0),
-(8, 3, 'user8@example.com', '13800000008', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '汤姆', 'https://cdn.example.com/u8.png', 1, UNIX_TIMESTAMP('1990-09-18'), 2, NULL, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0);-- ============================================
+(6, 3, 'user6@example.com', '13800000006', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '约翰', 'https://cdn.example.com/u6.png', 1, '1985-07-12', 1, NOW(), NOW(), NOW(), 0, 0),
+(7, 3, 'user7@example.com', '13800000007', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '玛丽', 'https://cdn.example.com/u7.png', 2, '1993-04-30', 1, NOW(), NOW(), NOW(), 0, 0),
+(8, 3, 'user8@example.com', '13800000008', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '汤姆', 'https://cdn.example.com/u8.png', 1, '1990-09-18', 2, NULL, NOW(), NOW(), 0, 0);-- ============================================
 -- 管理员用户表 (admin_users)
 -- 后台管理系统用户，支持超管、租户管理员、子账号
 -- ============================================
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
     UNIQUE KEY `uk_mobile` (`mobile`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_type` (`type`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员用户表';
 
 -- ============================================
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 -- 密码均为: password123,$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy
 -- ============================================
 
-INSERT INTO `admin_users` (`id`, `tenant_id`, `username`, `email`, `mobile`, `password`, `real_name`, `avatar`, `type`, `status`, `last_login_at`, `last_login_ip`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `admin_users` (`id`, `tenant_id`, `username`, `email`, `mobile`, `password`, `real_name`, `avatar`, `type`, `status`, `last_login_at`, `last_login_ip`, `created_at`, `updated_at`) VALUES
 -- 平台超级管理员
 (1, 0, 'superadmin', 'superadmin@shopjoy.com', '13600000001', '$2a$10$Wqlk81.6vgogQadFe2le1.WP6KKG2dueb0n11pbzzNb5fPUZhHgyy', '超级管理员', 'https://cdn.example.com/avatar1.png', 1, 1, NOW(), '127.0.0.1', NOW(), NOW()),
 
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `roles` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_code` (`code`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
 
 -- ============================================
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
     PRIMARY KEY (`id`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_code` (`code`),
-    KEY `idx_type` (`type`),
+    KEY `idx_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='权限表';
 
 -- ============================================
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`user_id`, `role_id`),
-    KEY `idx_role_id` (`role_id`),
+    KEY `idx_role_id` (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
 
 -- ============================================
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS `role_permissions` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`role_id`, `permission_id`),
-    KEY `idx_permission_id` (`permission_id`),
+    KEY `idx_permission_id` (`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色权限关联表';
 
 -- ============================================
@@ -209,17 +209,17 @@ CREATE TABLE IF NOT EXISTS `role_permissions` (
 -- ============================================
 
 -- 角色数据
-INSERT INTO `roles` (`id`, `tenant_id`, `name`, `code`, `description`, `status`, `is_system`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, '管理员', 'admin', 'Demo Shop 管理员', 1, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1),
-(2, 1, '运营', 'operator', 'Demo Shop 运营人员', 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, '客服', 'service', 'Demo Shop 客服人员', 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 2, '管理员', 'admin', 'Test Store 管理员', 1, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 4, 4),
-(5, 3, '管理员', 'admin', 'Enterprise 管理员', 1, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
-(6, 3, '运营主管', 'operator_lead', 'Enterprise 运营主管', 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
-(7, 3, '普通运营', 'operator', 'Enterprise 普通运营', 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
+INSERT IGNORE INTO `roles` (`id`, `tenant_id`, `name`, `code`, `description`, `status`, `is_system`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 1, '管理员', 'admin', 'Demo Shop 管理员', 1, 1, NOW(), NOW(), 1, 1),
+(2, 1, '运营', 'operator', 'Demo Shop 运营人员', 1, 0, NOW(), NOW(), 2, 2),
+(3, 1, '客服', 'service', 'Demo Shop 客服人员', 1, 0, NOW(), NOW(), 2, 2),
+(4, 2, '管理员', 'admin', 'Test Store 管理员', 1, 1, NOW(), NOW(), 4, 4),
+(5, 3, '管理员', 'admin', 'Enterprise 管理员', 1, 1, NOW(), NOW(), 5, 5),
+(6, 3, '运营主管', 'operator_lead', 'Enterprise 运营主管', 1, 0, NOW(), NOW(), 5, 5),
+(7, 3, '普通运营', 'operator', 'Enterprise 普通运营', 1, 0, NOW(), NOW(), 5, 5);
 
 -- 权限数据
-INSERT INTO `permissions` (`id`, `name`, `code`, `type`, `parent_id`, `path`, `icon`, `sort`) VALUES
+INSERT IGNORE INTO `permissions` (`id`, `name`, `code`, `type`, `parent_id`, `path`, `icon`, `sort`) VALUES
 -- 菜单权限
 (1, '仪表盘', 'dashboard', 0, 0, '/dashboard', 'dashboard', 1),
 (2, '商品管理', 'product', 0, 0, '/product', 'shopping', 2),
@@ -247,24 +247,24 @@ INSERT INTO `permissions` (`id`, `name`, `code`, `type`, `parent_id`, `path`, `i
 (23, '取消订单', 'order:cancel', 1, 7, '', '', 3);
 
 -- 用户角色关联
-INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
+INSERT IGNORE INTO `user_roles` (`user_id`, `role_id`) VALUES
 (3, 2),
 (3, 3),
 (6, 6),
 (7, 7);
 
 -- 角色权限关联 (Demo Shop 管理员)
-INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+INSERT IGNORE INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
 (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20),
 (1, 21), (1, 22), (1, 23);
 
 -- 角色权限关联 (Demo Shop 运营)
-INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+INSERT IGNORE INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (2, 1), (2, 2), (2, 3), (2, 6), (2, 7), (2, 16), (2, 17), (2, 21), (2, 22);
 
 -- 角色权限关联 (Demo Shop 客服)
-INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+INSERT IGNORE INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (3, 1), (3, 6), (3, 7), (3, 21);
 
 -- ============================================

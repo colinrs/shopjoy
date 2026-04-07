@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `promotion_rules` (
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_promotion_id` (`promotion_id`),
-    KEY `idx_promotion_rules_sort_order` (`promotion_id`, `sort_order`),
+    KEY `idx_promotion_rules_sort_order` (`promotion_id`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销规则表';
 
 -- ============================================
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `promotion_usage` (
     INDEX `idx_promotion_id` (`promotion_id`),
     INDEX `idx_order_id` (`order_id`),
     INDEX `idx_user_id` (`user_id`),
-    INDEX `idx_created_at` (`created_at`),
+    INDEX `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销使用记录表';
 
 -- ============================================
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `user_coupons` (
     KEY `idx_user_id` (`user_id`),
     KEY `idx_coupon_id` (`coupon_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_expire_at` (`expire_at`),
+    KEY `idx_expire_at` (`expire_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户优惠券表';
 
 -- ============================================
@@ -146,19 +146,19 @@ CREATE TABLE IF NOT EXISTS `user_coupons` (
 -- ============================================
 
 -- 促销活动数据 (Demo Shop)
-INSERT INTO `promotions` (`id`, `tenant_id`, `name`, `description`, `type`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, '春季大促', '春季全场促销活动', 0, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 30 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, '限时抢购-鞋类专场', '运动鞋限时抢购', 1, 1, UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 1 DAY)), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 8 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, '买二送一', '购买任意两件商品送一件同等价值商品', 3, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 60 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, '会员日特惠', '每月18号会员专享折扣', 0, 2, UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 10 DAY)), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 40 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(5, 1, '清仓大甩卖', '库存清仓特价', 1, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 15 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+INSERT IGNORE INTO `promotions` (`id`, `tenant_id`, `name`, `description`, `type`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 1, '春季大促', '春季全场促销活动', 0, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW(), 2, 2),
+(2, 1, '限时抢购-鞋类专场', '运动鞋限时抢购', 1, 1, DATE_ADD(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 8 DAY), NOW(), NOW(), 2, 2),
+(3, 1, '买二送一', '购买任意两件商品送一件同等价值商品', 3, 1, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), NOW(), NOW(), 2, 2),
+(4, 1, '会员日特惠', '每月18号会员专享折扣', 0, 2, DATE_ADD(NOW(), INTERVAL 10 DAY), DATE_ADD(NOW(), INTERVAL 40 DAY), NOW(), NOW(), 2, 2),
+(5, 1, '清仓大甩卖', '库存清仓特价', 1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 15 DAY), NOW(), NOW(), 2, 2),
 
 -- Enterprise Corp 促销活动
-(6, 3, '企业采购季', '企业客户采购优惠季', 0, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
-(7, 3, '跨境特惠', '跨境电商专属优惠', 0, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
+(6, 3, '企业采购季', '企业客户采购优惠季', 0, 1, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY), NOW(), NOW(), 5, 5),
+(7, 3, '跨境特惠', '跨境电商专属优惠', 0, 1, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), NOW(), NOW(), 5, 5);
 
 -- 促销规则数据
-INSERT INTO `promotion_rules` (`id`, `promotion_id`, `condition_type`, `condition_value`, `action_type`, `action_value`, `max_discount_amount`, `max_discount_currency`) VALUES
+INSERT IGNORE INTO `promotion_rules` (`id`, `promotion_id`, `condition_type`, `condition_value`, `action_type`, `action_value`, `max_discount_amount`, `max_discount_currency`) VALUES
 -- 春季大促规则
 (1, 1, 0, 10000, 1, 10, 5000, 'CNY'),   -- 满100减10%, 最多减50
 (2, 1, 0, 30000, 1, 15, 10000, 'CNY'),  -- 满300减15%, 最多减100
@@ -184,28 +184,28 @@ INSERT INTO `promotion_rules` (`id`, `promotion_id`, `condition_type`, `conditio
 (10, 7, 0, 30000, 1, 10, 20000, 'CNY'); -- 满300减10%, 最多减200
 
 -- 优惠券数据 (Demo Shop)
-INSERT INTO `coupons` (`id`, `tenant_id`, `name`, `code`, `description`, `type`, `value`, `min_amount`, `max_discount`, `total_count`, `used_count`, `per_user_limit`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, '新用户专享', 'NEWUSER50', '新用户首单立减50元', 0, 5000, 10000, 0, 1000, 150, 1, 1, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY)), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, '全场9折', 'SAVE10', '全场商品9折优惠', 1, 10, 5000, 10000, 500, 80, 3, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, '满200减30', 'SAVE30', '满200元减30元', 0, 3000, 20000, 0, 200, 45, 2, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 60 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, '免邮券', 'FREESHIP', '全场免运费', 2, 0, 5000, 1500, 300, 20, 1, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 30 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(5, 1, 'VIP专享8折', 'VIP20', 'VIP会员专享8折', 1, 20, 10000, 20000, 100, 10, 1, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+INSERT IGNORE INTO `coupons` (`id`, `tenant_id`, `name`, `code`, `description`, `type`, `value`, `min_amount`, `max_discount`, `total_count`, `used_count`, `per_user_limit`, `status`, `start_at`, `end_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 1, '新用户专享', 'NEWUSER50', '新用户首单立减50元', 0, 5000, 10000, 0, 1000, 150, 1, 1, DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 365 DAY), NOW(), NOW(), 2, 2),
+(2, 1, '全场9折', 'SAVE10', '全场商品9折优惠', 1, 10, 5000, 10000, 500, 80, 3, 1, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY), NOW(), NOW(), 2, 2),
+(3, 1, '满200减30', 'SAVE30', '满200元减30元', 0, 3000, 20000, 0, 200, 45, 2, 1, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), NOW(), NOW(), 2, 2),
+(4, 1, '免邮券', 'FREESHIP', '全场免运费', 2, 0, 5000, 1500, 300, 20, 1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW(), 2, 2),
+(5, 1, 'VIP专享8折', 'VIP20', 'VIP会员专享8折', 1, 20, 10000, 20000, 100, 10, 1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), NOW(), NOW(), 2, 2),
 
 -- Enterprise Corp 优惠券
-(6, 3, '企业专属优惠', 'ENT50', '企业客户专享50元优惠', 0, 5000, 20000, 0, 500, 30, 5, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5),
-(7, 3, '跨境免邮', 'GLOBALSHIP', '跨境电商免邮', 2, 0, 30000, 5000, 200, 15, 3, 1, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY)), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 5, 5);
+(6, 3, '企业专属优惠', 'ENT50', '企业客户专享50元优惠', 0, 5000, 20000, 0, 500, 30, 5, 1, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY), NOW(), NOW(), 5, 5),
+(7, 3, '跨境免邮', 'GLOBALSHIP', '跨境电商免邮', 2, 0, 30000, 5000, 200, 15, 3, 1, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), NOW(), NOW(), 5, 5);
 
 -- 用户优惠券数据 (Demo Shop)
-INSERT INTO `user_coupons` (`id`, `tenant_id`, `user_id`, `coupon_id`, `status`, `used_at`, `order_id`, `received_at`, `expire_at`) VALUES
-(1, 1, 1, 1, 1, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 DAY)), 1, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 DAY)), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 300 DAY))),
-(2, 1, 1, 2, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY))),
-(3, 1, 1, 3, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 60 DAY))),
-(4, 1, 2, 1, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY))),
-(5, 1, 2, 2, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 90 DAY))),
-(6, 1, 3, 1, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY))),
-(7, 1, 3, 4, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 30 DAY))),
+INSERT IGNORE INTO `user_coupons` (`id`, `tenant_id`, `user_id`, `coupon_id`, `status`, `used_at`, `order_id`, `received_at`, `expire_at`) VALUES
+(1, 1, 1, 1, 1, DATE_SUB(NOW(), INTERVAL 5 DAY), 1, DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_ADD(NOW(), INTERVAL 300 DAY)),
+(2, 1, 1, 2, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(3, 1, 1, 3, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY)),
+(4, 1, 2, 1, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY)),
+(5, 1, 2, 2, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY)),
+(6, 1, 3, 1, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY)),
+(7, 1, 3, 4, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
 
 -- Enterprise Corp 用户优惠券
-(8, 3, 6, 6, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY))),
-(9, 3, 6, 7, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 180 DAY))),
-(10, 3, 7, 6, 0, NULL, 0, UNIX_TIMESTAMP(NOW()), UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 365 DAY)));
+(8, 3, 6, 6, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY)),
+(9, 3, 6, 7, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY)),
+(10, 3, 7, 6, 0, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY));

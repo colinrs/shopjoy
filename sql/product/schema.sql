@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_parent_id` (`parent_id`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类表';
 
 -- ============================================
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `brands` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_name` (`name`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌表';
 
 -- ============================================
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `products` (
     KEY `idx_name` (`name`),
     KEY `idx_category_id` (`category_id`),
     KEY `idx_brand_id` (`brand_id`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品表';
 
 -- ============================================
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `skus` (
     UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_product_id` (`product_id`),
     KEY `idx_status` (`status`),
-    KEY `idx_low_stock_alert` (`tenant_id`, `status`, `safety_stock`, `available_stock`),
+    KEY `idx_low_stock_alert` (`tenant_id`, `status`, `safety_stock`, `available_stock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SKU表';
 
 -- ============================================
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `product_markets` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_product_id` (`product_id`),
     KEY `idx_market_id` (`market_id`),
-    KEY `idx_variant_id` (`variant_id`),
+    KEY `idx_variant_id` (`variant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品市场关联表';
 
 -- ============================================
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `product_localizations` (
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_product_id` (`product_id`),
-    UNIQUE KEY `idx_tenant_product_language` (`tenant_id`, `product_id`, `language_code`),
+    UNIQUE KEY `idx_tenant_product_language` (`tenant_id`, `product_id`, `language_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品多语言表';
 
 -- ============================================
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `category_markets` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_category_id` (`category_id`),
     KEY `idx_market_id` (`market_id`),
-    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`),
+    UNIQUE KEY `idx_tenant_category_market` (`tenant_id`, `category_id`, `market_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类市场可见性';
 
 -- ============================================
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `brand_markets` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_brand_id` (`brand_id`),
     KEY `idx_market_id` (`market_id`),
-    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`),
+    UNIQUE KEY `idx_tenant_brand_market` (`tenant_id`, `brand_id`, `market_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='品牌市场可见性';
 
 -- ============================================
@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS `warehouse_inventories` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_sku_code` (`sku_code`),
     KEY `idx_warehouse_id` (`warehouse_id`),
-    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`),
+    UNIQUE KEY `idx_tenant_sku_warehouse` (`tenant_id`, `sku_code`, `warehouse_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库库存表';
 
 -- ============================================
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS `inventory_logs` (
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_sku_code` (`sku_code`),
     KEY `idx_product_id` (`product_id`),
-    KEY `idx_created_at` (`created_at`),
+    KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存变更日志';
 
 -- ============================================
@@ -303,7 +303,7 @@ CREATE TABLE IF NOT EXISTS `markets` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`),
     KEY `idx_code` (`code`),
-    KEY `idx_is_active` (`is_active`),
+    KEY `idx_is_active` (`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='市场表';
 
 -- ============================================
@@ -311,70 +311,70 @@ CREATE TABLE IF NOT EXISTS `markets` (
 -- ============================================
 
 -- 分类数据 (Demo Shop)
-INSERT INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `code`, `level`, `sort`, `icon`, `image`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, 0, '服装', 'clothing', 1, 1, 'shirt', 'https://cdn.example.com/cat1.png', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, 1, '男装', 'mens', 2, 1, '', '', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, 1, '女装', 'womens', 2, 2, '', '', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, 0, '电子产品', 'electronics', 1, 2, 'laptop', 'https://cdn.example.com/cat2.png', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(5, 1, 4, '手机配件', 'phone-accessories', 2, 1, '', '', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(6, 1, 4, '电脑配件', 'computer-accessories', 2, 2, '', '', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(7, 1, 0, '家居', 'home', 1, 3, 'home', 'https://cdn.example.com/cat3.png', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
+INSERT IGNORE INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `code`, `level`, `sort`, `icon`, `image`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 1, 0, '服装', 'clothing', 1, 1, 'shirt', 'https://cdn.example.com/cat1.png', 1, NOW(), NOW(), 2, 2),
+(2, 1, 1, '男装', 'mens', 2, 1, '', '', 1, NOW(), NOW(), 2, 2),
+(3, 1, 1, '女装', 'womens', 2, 2, '', '', 1, NOW(), NOW(), 2, 2),
+(4, 1, 0, '电子产品', 'electronics', 1, 2, 'laptop', 'https://cdn.example.com/cat2.png', 1, NOW(), NOW(), 2, 2),
+(5, 1, 4, '手机配件', 'phone-accessories', 2, 1, '', '', 1, NOW(), NOW(), 2, 2),
+(6, 1, 4, '电脑配件', 'computer-accessories', 2, 2, '', '', 1, NOW(), NOW(), 2, 2),
+(7, 1, 0, '家居', 'home', 1, 3, 'home', 'https://cdn.example.com/cat3.png', 1, NOW(), NOW(), 2, 2);
 
 -- 品牌数据 (Demo Shop)
-INSERT INTO `brands` (`id`, `tenant_id`, `name`, `logo`, `description`, `website`, `sort`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, 'Nike', 'https://cdn.example.com/nike.png', 'Just Do It', 'https://www.nike.com', 1, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, 'Adidas', 'https://cdn.example.com/adidas.png', 'Impossible is Nothing', 'https://www.adidas.com', 2, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, 'Apple', 'https://cdn.example.com/apple.png', 'Think Different', 'https://www.apple.com', 3, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, 'Samsung', 'https://cdn.example.com/samsung.png', 'Do What You Can''t', 'https://www.samsung.com', 4, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
+INSERT IGNORE INTO `brands` (`id`, `tenant_id`, `name`, `logo`, `description`, `website`, `sort`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 1, 'Nike', 'https://cdn.example.com/nike.png', 'Just Do It', 'https://www.nike.com', 1, 1, NOW(), NOW(), 2, 2),
+(2, 1, 'Adidas', 'https://cdn.example.com/adidas.png', 'Impossible is Nothing', 'https://www.adidas.com', 2, 1, NOW(), NOW(), 2, 2),
+(3, 1, 'Apple', 'https://cdn.example.com/apple.png', 'Think Different', 'https://www.apple.com', 3, 1, NOW(), NOW(), 2, 2),
+(4, 1, 'Samsung', 'https://cdn.example.com/samsung.png', 'Do What You Can''t', 'https://www.samsung.com', 4, 1, NOW(), NOW(), 2, 2);
 
 -- 商品数据 (Demo Shop)
-INSERT INTO `products` (`id`, `sku`, `name`, `description`, `price`, `cost_price`, `currency`, `stock`, `status`, `category_id`, `brand`, `tags`, `images`, `is_matrix_product`, `hs_code`, `coo`, `weight`, `weight_unit`, `length`, `width`, `height`, `dangerous_goods`, `created_at`, `updated_at`) VALUES
-(1, 'SKU-001', 'Nike Air Max 270', 'Nike Air Max 270 运动鞋，舒适透气', 129900, 80000, 'CNY', 100, 1, 2, 'Nike', '["运动", "跑步", "休闲"]', '["https://cdn.example.com/p1-1.jpg", "https://cdn.example.com/p1-2.jpg"]', 1, '64041100', 'CN', 450.00, 'g', 28.00, 18.00, 12.00, '[]', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(2, 'SKU-002', 'Adidas Ultraboost 22', 'Adidas Ultraboost 22 跑步鞋', 159900, 95000, 'CNY', 80, 1, 2, 'Adidas', '["运动", "跑步"]', '["https://cdn.example.com/p2-1.jpg"]', 1, '64041100', 'VN', 380.00, 'g', 27.00, 17.00, 11.00, '[]', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(3, 'SKU-003', 'iPhone 15 手机壳', 'iPhone 15 硅胶保护壳', 9900, 3000, 'CNY', 500, 1, 5, 'Apple', '["手机配件", "保护壳"]', '["https://cdn.example.com/p3-1.jpg"]', 0, '39269010', 'CN', 35.00, 'g', 15.00, 8.00, 1.50, '[]', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(4, 'SKU-004', 'MacBook 充电器', 'MacBook Pro 16寸 充电器 140W', 79900, 45000, 'CNY', 50, 1, 6, 'Apple', '["电脑配件", "充电器"]', '["https://cdn.example.com/p4-1.jpg"]', 0, '85044014', 'CN', 480.00, 'g', 15.00, 15.00, 3.50, '[]', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(5, 'SKU-005', '简约台灯', '北欧简约风格LED台灯', 29900, 12000, 'CNY', 200, 1, 7, '', '["家居", "灯具"]', '["https://cdn.example.com/p5-1.jpg"]', 0, '94052100', 'CN', 850.00, 'g', 35.00, 15.00, 45.00, '[]', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+INSERT IGNORE INTO `products` (`id`, `sku`, `name`, `description`, `price`, `cost_price`, `currency`, `stock`, `status`, `category_id`, `brand`, `tags`, `images`, `is_matrix_product`, `hs_code`, `coo`, `weight`, `weight_unit`, `length`, `width`, `height`, `dangerous_goods`, `created_at`, `updated_at`) VALUES
+(1, 'SKU-001', 'Nike Air Max 270', 'Nike Air Max 270 运动鞋，舒适透气', 129900, 80000, 'CNY', 100, 1, 2, 'Nike', '["运动", "跑步", "休闲"]', '["https://cdn.example.com/p1-1.jpg", "https://cdn.example.com/p1-2.jpg"]', 1, '64041100', 'CN', 450.00, 'g', 28.00, 18.00, 12.00, '[]', NOW(), NOW()),
+(2, 'SKU-002', 'Adidas Ultraboost 22', 'Adidas Ultraboost 22 跑步鞋', 159900, 95000, 'CNY', 80, 1, 2, 'Adidas', '["运动", "跑步"]', '["https://cdn.example.com/p2-1.jpg"]', 1, '64041100', 'VN', 380.00, 'g', 27.00, 17.00, 11.00, '[]', NOW(), NOW()),
+(3, 'SKU-003', 'iPhone 15 手机壳', 'iPhone 15 硅胶保护壳', 9900, 3000, 'CNY', 500, 1, 5, 'Apple', '["手机配件", "保护壳"]', '["https://cdn.example.com/p3-1.jpg"]', 0, '39269010', 'CN', 35.00, 'g', 15.00, 8.00, 1.50, '[]', NOW(), NOW()),
+(4, 'SKU-004', 'MacBook 充电器', 'MacBook Pro 16寸 充电器 140W', 79900, 45000, 'CNY', 50, 1, 6, 'Apple', '["电脑配件", "充电器"]', '["https://cdn.example.com/p4-1.jpg"]', 0, '85044014', 'CN', 480.00, 'g', 15.00, 15.00, 3.50, '[]', NOW(), NOW()),
+(5, 'SKU-005', '简约台灯', '北欧简约风格LED台灯', 29900, 12000, 'CNY', 200, 1, 7, '', '["家居", "灯具"]', '["https://cdn.example.com/p5-1.jpg"]', 0, '94052100', 'CN', 850.00, 'g', 35.00, 15.00, 45.00, '[]', NOW(), NOW());
 
 -- SKU数据 (商品变体)
-INSERT INTO `skus` (`id`, `product_id`, `code`, `price_amount`, `price_currency`, `stock`, `attributes`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT IGNORE INTO `skus` (`id`, `product_id`, `code`, `price_amount`, `price_currency`, `stock`, `attributes`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Nike Air Max 270 变体
-(1, 1, 'SKU-001-BLK-42', 129900, 'CNY', 30, '{"颜色": "黑色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(2, 1, 'SKU-001-BLK-43', 129900, 'CNY', 25, '{"颜色": "黑色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(3, 1, 'SKU-001-WHT-42', 129900, 'CNY', 25, '{"颜色": "白色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(4, 1, 'SKU-001-WHT-43', 129900, 'CNY', 20, '{"颜色": "白色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(1, 1, 'SKU-001-BLK-42', 129900, 'CNY', 30, '{"颜色": "黑色", "尺码": "42"}', 1, NOW(), NOW(), 2, 2),
+(2, 1, 'SKU-001-BLK-43', 129900, 'CNY', 25, '{"颜色": "黑色", "尺码": "43"}', 1, NOW(), NOW(), 2, 2),
+(3, 1, 'SKU-001-WHT-42', 129900, 'CNY', 25, '{"颜色": "白色", "尺码": "42"}', 1, NOW(), NOW(), 2, 2),
+(4, 1, 'SKU-001-WHT-43', 129900, 'CNY', 20, '{"颜色": "白色", "尺码": "43"}', 1, NOW(), NOW(), 2, 2),
 -- Adidas Ultraboost 22 变体
-(5, 2, 'SKU-002-BLK-42', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "42"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(6, 2, 'SKU-002-BLK-43', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "43"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(5, 2, 'SKU-002-BLK-42', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "42"}', 1, NOW(), NOW(), 2, 2),
+(6, 2, 'SKU-002-BLK-43', 159900, 'CNY', 40, '{"颜色": "黑色", "尺码": "43"}', 1, NOW(), NOW(), 2, 2),
 -- iPhone 15 手机壳 变体
-(7, 3, 'SKU-003-BLK', 9900, 'CNY', 200, '{"颜色": "黑色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(8, 3, 'SKU-003-WHT', 9900, 'CNY', 200, '{"颜色": "白色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
-(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(7, 3, 'SKU-003-BLK', 9900, 'CNY', 200, '{"颜色": "黑色"}', 1, NOW(), NOW(), 2, 2),
+(8, 3, 'SKU-003-WHT', 9900, 'CNY', 200, '{"颜色": "白色"}', 1, NOW(), NOW(), 2, 2),
+(9, 3, 'SKU-003-BLU', 9900, 'CNY', 100, '{"颜色": "蓝色"}', 1, NOW(), NOW(), 2, 2),
 -- MacBook 充电器 (无规格)
-(10, 4, 'SKU-004', 79900, 'CNY', 50, '{}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2),
+(10, 4, 'SKU-004', 79900, 'CNY', 50, '{}', 1, NOW(), NOW(), 2, 2),
 -- 简约台灯 (无规格)
-(11, 5, 'SKU-005', 29900, 'CNY', 200, '{}', 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 2, 2);
+(11, 5, 'SKU-005', 29900, 'CNY', 200, '{}', 1, NOW(), NOW(), 2, 2);
 
 -- ============================================
 -- 测试数据
 -- ============================================
 
 -- 市场数据
-INSERT INTO `markets` (`id`, `tenant_id`, `code`, `name`, `currency`, `default_language`, `flag`, `is_active`, `is_default`, `tax_rules`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `markets` (`id`, `tenant_id`, `code`, `name`, `currency`, `default_language`, `flag`, `is_active`, `is_default`, `tax_rules`, `created_at`, `updated_at`) VALUES
 -- Demo Shop 市场
-(1, 1, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(2, 1, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false, "GSTRate": 0}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(3, 1, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(4, 1, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(5, 1, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 1, 0, '{"IncludeTax": true, "GSTRate": 0.10}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(1, 1, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
+(2, 1, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false, "GSTRate": 0}', NOW(), NOW()),
+(3, 1, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
+(4, 1, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', NOW(), NOW()),
+(5, 1, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 1, 0, '{"IncludeTax": true, "GSTRate": 0.10}', NOW(), NOW()),
 
 -- Test Store 市场
-(6, 2, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(7, 2, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
+(6, 2, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
+(7, 2, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', NOW(), NOW()),
 
 -- Enterprise Corp 市场
-(8, 3, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(9, 3, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(10, 3, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(11, 3, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(12, 3, 'FR', '法国', 'EUR', 'fr', '🇫🇷', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(13, 3, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 0, 0, '{"IncludeTax": true, "GSTRate": 0.10}', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+(8, 3, 'CN', '中国大陆', 'CNY', 'zh-CN', '🇨🇳', 1, 1, '{"IncludeTax": true, "VATRate": 0.13}', NOW(), NOW()),
+(9, 3, 'US', '美国', 'USD', 'en', '🇺🇸', 1, 0, '{"IncludeTax": false}', NOW(), NOW()),
+(10, 3, 'UK', '英国', 'GBP', 'en-GB', '🇬🇧', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
+(11, 3, 'DE', '德国', 'EUR', 'de', '🇩🇪', 1, 0, '{"IncludeTax": true, "VATRate": 0.19, "IOSSEnabled": true}', NOW(), NOW()),
+(12, 3, 'FR', '法国', 'EUR', 'fr', '🇫🇷', 1, 0, '{"IncludeTax": true, "VATRate": 0.20, "IOSSEnabled": true}', NOW(), NOW()),
+(13, 3, 'AU', '澳大利亚', 'AUD', 'en-AU', '🇦🇺', 0, 0, '{"IncludeTax": true, "GSTRate": 0.10}', NOW(), NOW());

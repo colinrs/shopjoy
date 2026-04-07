@@ -79,29 +79,29 @@ CREATE TABLE `review_stats` (
 -- ============================================
 
 -- 评价数据 (Demo Shop)
-INSERT INTO `reviews` (`id`, `tenant_id`, `order_id`, `product_id`, `sku_code`, `user_id`, `user_name`, `quality_rating`, `value_rating`, `overall_rating`, `content`, `images`, `status`, `is_anonymous`, `is_verified`, `is_featured`, `helpful_count`, `created_at`) VALUES
+INSERT IGNORE INTO `reviews` (`id`, `tenant_id`, `order_id`, `product_id`, `sku_code`, `user_id`, `user_name`, `quality_rating`, `value_rating`, `overall_rating`, `content`, `images`, `status`, `is_anonymous`, `is_verified`, `is_featured`, `helpful_count`, `created_at`) VALUES
 -- Order 1 订单的评价
-(1, 1, 1, 1, 'SKU-001-BLK-42', 1, '小明', 5, 5, 5.00, '鞋子非常舒适，尺码标准，物流也很快！', '["https://cdn.example.com/review1-1.jpg", "https://cdn.example.com/review1-2.jpg"]', 1, FALSE, TRUE, TRUE, 15, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY))),
-(2, 1, 1, 3, 'SKU-003-BLK', 1, '小明', 4, 4, 4.00, '手机壳质量不错，就是颜色有点色差', '["https://cdn.example.com/review2-1.jpg"]', 1, FALSE, TRUE, FALSE, 8, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 DAY))),
-(3, 1, 1, 5, 'SKU-005', 1, '小明', 5, 5, 5.00, '台灯很漂亮，装点效果很好', NULL, 1, FALSE, TRUE, FALSE, 5, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 23 DAY))),
+(1, 1, 1, 1, 'SKU-001-BLK-42', 1, '小明', 5, 5, 5.00, '鞋子非常舒适，尺码标准，物流也很快！', '["https://cdn.example.com/review1-1.jpg", "https://cdn.example.com/review1-2.jpg"]', 1, FALSE, TRUE, TRUE, 15, DATE_SUB(NOW(), INTERVAL 25 DAY)),
+(2, 1, 1, 3, 'SKU-003-BLK', 1, '小明', 4, 4, 4.00, '手机壳质量不错，就是颜色有点色差', '["https://cdn.example.com/review2-1.jpg"]', 1, FALSE, TRUE, FALSE, 8, DATE_SUB(NOW(), INTERVAL 24 DAY)),
+(3, 1, 1, 5, 'SKU-005', 1, '小明', 5, 5, 5.00, '台灯很漂亮，装点效果很好', NULL, 1, FALSE, TRUE, FALSE, 5, DATE_SUB(NOW(), INTERVAL 23 DAY)),
 
 -- Order 2 订单的评价
-(4, 1, 2, 2, 'SKU-002-BLK-42', 2, '小红', 5, 5, 5.00, 'Adidas的鞋就是好，穿着很舒服，尺码也很准', NULL, 1, FALSE, TRUE, TRUE, 12, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY))),
+(4, 1, 2, 2, 'SKU-002-BLK-42', 2, '小红', 5, 5, 5.00, 'Adidas的鞋就是好，穿着很舒服，尺码也很准', NULL, 1, FALSE, TRUE, TRUE, 12, DATE_SUB(NOW(), INTERVAL 3 DAY)),
 
 -- Order 6 订单的评价 (Enterprise)
-(5, 3, 6, 4, 'SKU-004', 6, '约翰', 4, 5, 4.50, '充电器做工不错，就是发热有点大', NULL, 1, FALSE, TRUE, FALSE, 3, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 DAY)));
+(5, 3, 6, 4, 'SKU-004', 6, '约翰', 4, 5, 4.50, '充电器做工不错，就是发热有点大', NULL, 1, FALSE, TRUE, FALSE, 3, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 -- 评价回复数据
-INSERT INTO `review_replies` (`id`, `review_id`, `tenant_id`, `admin_id`, `admin_name`, `content`, `created_at`) VALUES
-(1, 1, 1, 2, 'Demo管理员', '感谢您的好评！我们会继续努力提供更好的服务！', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 DAY))),
-(2, 4, 1, 2, 'Demo管理员', '感谢您的认可，欢迎下次再来！', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)));
+INSERT IGNORE INTO `review_replies` (`id`, `review_id`, `tenant_id`, `admin_id`, `admin_name`, `content`, `created_at`) VALUES
+(1, 1, 1, 2, 'Demo管理员', '感谢您的好评！我们会继续努力提供更好的服务！', DATE_SUB(NOW(), INTERVAL 24 DAY)),
+(2, 4, 1, 2, 'Demo管理员', '感谢您的认可，欢迎下次再来！', DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 -- 评价统计数据
-INSERT INTO `review_stats` (`id`, `tenant_id`, `product_id`, `total_reviews`, `average_rating`, `quality_avg_rating`, `value_avg_rating`, `rating_1_count`, `rating_2_count`, `rating_3_count`, `rating_4_count`, `rating_5_count`, `with_image_count`, `created_at`) VALUES
+INSERT IGNORE INTO `review_stats` (`id`, `tenant_id`, `product_id`, `total_reviews`, `average_rating`, `quality_avg_rating`, `value_avg_rating`, `rating_1_count`, `rating_2_count`, `rating_3_count`, `rating_4_count`, `rating_5_count`, `with_image_count`, `created_at`) VALUES
 -- Demo Shop 产品统计
-(1, 1, 1, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 1, UNIX_TIMESTAMP()),
-(2, 1, 2, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 0, UNIX_TIMESTAMP()),
-(3, 1, 3, 1, 4.00, 4.00, 4.00, 0, 0, 0, 1, 0, 1, UNIX_TIMESTAMP()),
-(4, 1, 5, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 0, UNIX_TIMESTAMP()),
+(1, 1, 1, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 1, NOW()),
+(2, 1, 2, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 0, NOW()),
+(3, 1, 3, 1, 4.00, 4.00, 4.00, 0, 0, 0, 1, 0, 1, NOW()),
+(4, 1, 5, 1, 5.00, 5.00, 5.00, 0, 0, 0, 0, 1, 0, NOW()),
 -- Enterprise 产品统计
-(5, 3, 4, 1, 4.50, 4.00, 5.00, 0, 0, 0, 1, 0, 0, UNIX_TIMESTAMP());
+(5, 3, 4, 1, 4.50, 4.00, 5.00, 0, 0, 0, 1, 0, 0, NOW());

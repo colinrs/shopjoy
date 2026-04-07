@@ -52,3 +52,5 @@ docs/superpowers
 .claude/settings.local.json
 .claude/sessions
 tests
+shop-admin/playwright-report/
+shop-admin/test-results/

@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `shipment_items` (
     PRIMARY KEY (`id`),
     KEY `idx_shipment_id` (`shipment_id`),
     KEY `idx_order_item_id` (`order_item_id`),
-    KEY `idx_product_id` (`product_id`),
+    KEY `idx_product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='发货商品表';
 
 -- ============================================
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `shipping_templates` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
-    INDEX `idx_is_default` (`is_default`),
+    INDEX `idx_is_default` (`is_default`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping templates table';
 
 -- ============================================
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `shipping_zones` (
     `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
-    INDEX `idx_template_id` (`template_id`),
+    INDEX `idx_template_id` (`template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping zones table';
 
 -- ============================================
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `shipping_template_mappings` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_template_id` (`template_id`),
-    INDEX `idx_target` (`target_type`, `target_id`),
+    INDEX `idx_target` (`target_type`, `target_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping template mappings table';
 
 -- ============================================
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `shipping_zone_regions` (
     `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     UNIQUE INDEX `idx_zone_city` (`zone_id`, `city_code`),
-    INDEX `idx_city_code` (`city_code`),
+    INDEX `idx_city_code` (`city_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping zone regions junction table';
 
 -- ============================================
@@ -175,18 +175,18 @@ CREATE TABLE IF NOT EXISTS `shipping_zone_regions` (
 -- ============================================
 
 -- 发货数据
-INSERT INTO `shipments` (`id`, `tenant_id`, `order_id`, `status`, `carrier`, `tracking_no`, `weight`, `cost_amount`, `cost_currency`, `shipped_at`, `delivered_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT IGNORE INTO `shipments` (`id`, `tenant_id`, `order_id`, `status`, `carrier`, `tracking_no`, `weight`, `cost_amount`, `cost_currency`, `shipped_at`, `delivered_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Order 1 发货
-(1, 1, 1, 3, '顺丰速运', 'SF1234567890', 1.50, 1200, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 28 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 20 DAY)), 2, 2),
+(1, 1, 1, 3, '顺丰速运', 'SF1234567890', 1.50, 1200, 'CNY', DATE_SUB(NOW(), INTERVAL 28 DAY), DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 29 DAY), DATE_SUB(NOW(), INTERVAL 20 DAY), 2, 2),
 
 -- Order 2 发货
-(2, 1, 2, 2, '圆通快递', 'YT9876543210', 0.45, 800, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), NULL, UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), 2, 2),
+(2, 1, 2, 2, '圆通快递', 'YT9876543210', 0.45, 800, 'CNY', DATE_SUB(NOW(), INTERVAL 2 DAY), NULL, DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 2, 2),
 
 -- Order 6 发货 (Enterprise)
-(3, 3, 6, 3, 'EMS', 'EMS2025031201', 0.55, 1500, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 3 DAY)), 5, 5);
+(3, 3, 6, 3, 'EMS', 'EMS2025031201', 0.55, 1500, 'CNY', DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), 5, 5);
 
 -- 发货商品数据
-INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
+INSERT IGNORE INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`, `product_id`, `sku_id`, `quantity`) VALUES
 (1, 1, 1, 1, 1, 1, 1),
 (2, 1, 1, 2, 3, 7, 3),
 (3, 1, 1, 3, 5, 11, 1),
@@ -194,9 +194,9 @@ INSERT INTO `shipment_items` (`id`, `tenant_id`, `shipment_id`, `order_item_id`,
 (5, 3, 3, 8, 4, 10, 1);
 
 -- 退款数据
-INSERT INTO `refunds` (`id`, `tenant_id`, `order_id`, `refund_no`, `user_id`, `type`, `status`, `reason_type`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT IGNORE INTO `refunds` (`id`, `tenant_id`, `order_id`, `refund_no`, `user_id`, `type`, `status`, `reason_type`, `reason`, `description`, `images`, `amount`, `currency`, `approved_at`, `completed_at`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Order 1 手机壳退款 (已完成)
-(1, 1, 1, 'REF202503010001', 1, 2, 3, 'quality', '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 26 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 27 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 25 DAY)), 1, 1),
+(1, 1, 1, 'REF202503010001', 1, 2, 3, 'quality', '商品质量问题', '手机壳有划痕，申请退款', '["https://cdn.example.com/refund1.jpg", "https://cdn.example.com/refund2.jpg"]', 29700, 'CNY', DATE_SUB(NOW(), INTERVAL 26 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY), DATE_SUB(NOW(), INTERVAL 27 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY), 1, 1),
 
 -- Order 5 全额退款 (已完成)
-(2, 1, 5, 'REF202503050001', 1, 1, 3, 'cancel', '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 19 DAY)), 1, 1);
+(2, 1, 5, 'REF202503050001', 1, 1, 3, 'cancel', '不想要了', '取消订单，申请退款', '[]', 29900, 'CNY', DATE_SUB(NOW(), INTERVAL 19 DAY), DATE_SUB(NOW(), INTERVAL 19 DAY), DATE_SUB(NOW(), INTERVAL 19 DAY), DATE_SUB(NOW(), INTERVAL 19 DAY), 1, 1);

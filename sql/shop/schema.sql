@@ -105,12 +105,12 @@ CREATE TABLE IF NOT EXISTS `shop_shipping_settings` (
 -- ============================================
 
 -- 店铺设置数据
-INSERT INTO `shop_settings` (`id`, `tenant_id`, `name`, `code`, `logo`, `description`, `contact_name`, `contact_phone`, `contact_email`, `address`, `domain`, `custom_domain`, `primary_color`, `secondary_color`, `favicon`, `default_currency`, `default_language`, `timezone`, `status`, `plan`, `expire_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Demo Shop', 'demo-shop', 'https://cdn.example.com/shop-logo.png', 'Demo Shop 是一家专注于高品质运动装备的在线商店', '张三', '400-888-8888', 'support@demoshop.com', '北京市朝阳区建国路88号', 'demo.myshopjoy.com', '', '#1890ff', '#52c41a', 'https://cdn.example.com/favicon.ico', 'CNY', 'zh-CN', 'Asia/Shanghai', 1, 1, '2027-12-31', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
-(2, 2, 'Test Store', 'test-store', 'https://cdn.example.com/store-logo.png', 'Test Store - 精选好物', '李四', '400-999-9999', 'support@teststore.com', '上海市浦东新区陆家嘴', 'test.myshopjoy.com', '', '#1d39c4', '#fa8c16', '', 'CNY', 'zh-CN', 'Asia/Shanghai', 1, 0, '2026-06-30', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());
+INSERT IGNORE INTO `shop_settings` (`id`, `tenant_id`, `name`, `code`, `logo`, `description`, `contact_name`, `contact_phone`, `contact_email`, `address`, `domain`, `custom_domain`, `primary_color`, `secondary_color`, `favicon`, `default_currency`, `default_language`, `timezone`, `status`, `plan`, `expire_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Demo Shop', 'demo-shop', 'https://cdn.example.com/shop-logo.png', 'Demo Shop 是一家专注于高品质运动装备的在线商店', '张三', '400-888-8888', 'support@demoshop.com', '北京市朝阳区建国路88号', 'demo.myshopjoy.com', '', '#1890ff', '#52c41a', 'https://cdn.example.com/favicon.ico', 'CNY', 'zh-CN', 'Asia/Shanghai', 1, 1, '2027-12-31', NOW(), NOW()),
+(2, 2, 'Test Store', 'test-store', 'https://cdn.example.com/store-logo.png', 'Test Store - 精选好物', '李四', '400-999-9999', 'support@teststore.com', '上海市浦东新区陆家嘴', 'test.myshopjoy.com', '', '#1d39c4', '#fa8c16', '', 'CNY', 'zh-CN', 'Asia/Shanghai', 1, 0, '2026-06-30', NOW(), NOW());
 
 -- 营业时间数据
-INSERT INTO `shop_business_hours` (`shop_id`, `day_of_week`, `open_time`, `close_time`, `is_closed`) VALUES
+INSERT IGNORE INTO `shop_business_hours` (`shop_id`, `day_of_week`, `open_time`, `close_time`, `is_closed`) VALUES
 (1, 0, '10:00', '18:00', 1),  -- Sunday closed
 (1, 1, '09:00', '22:00', 0),  -- Monday
 (1, 2, '09:00', '22:00', 0),  -- Tuesday
@@ -120,16 +120,16 @@ INSERT INTO `shop_business_hours` (`shop_id`, `day_of_week`, `open_time`, `close
 (1, 6, '09:00', '20:00', 0);  -- Saturday
 
 -- 通知设置数据
-INSERT INTO `shop_notification_settings` (`shop_id`, `order_created`, `order_paid`, `order_shipped`, `order_cancelled`, `low_stock_alert`, `low_stock_threshold`, `refund_requested`, `new_review`) VALUES
+INSERT IGNORE INTO `shop_notification_settings` (`shop_id`, `order_created`, `order_paid`, `order_shipped`, `order_cancelled`, `low_stock_alert`, `low_stock_threshold`, `refund_requested`, `new_review`) VALUES
 (1, 1, 1, 1, 1, 1, 10, 1, 1),
 (2, 1, 1, 1, 1, 1, 5, 1, 0);
 
 -- 支付设置数据
-INSERT INTO `shop_payment_settings` (`shop_id`, `stripe_enabled`, `stripe_public_key`, `stripe_secret_key`) VALUES
+INSERT IGNORE INTO `shop_payment_settings` (`shop_id`, `stripe_enabled`, `stripe_public_key`, `stripe_secret_key`) VALUES
 (1, 1, 'pk_live_xxxxx', 'sk_live_xxxxx'),
 (2, 0, '', '');
 
 -- 运费设置数据
-INSERT INTO `shop_shipping_settings` (`shop_id`, `free_shipping_threshold`, `default_shipping_fee`, `currency`) VALUES
+INSERT IGNORE INTO `shop_shipping_settings` (`shop_id`, `free_shipping_threshold`, `default_shipping_fee`, `currency`) VALUES
 (1, 99.00, 10.00, 'CNY'),
 (2, 199.00, 15.00, 'CNY');

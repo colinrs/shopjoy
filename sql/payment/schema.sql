@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
     KEY `idx_order_id` (`order_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_transaction_id` (`transaction_id`),
-    KEY `idx_status` (`status`),
+    KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付表';
 
 -- ============================================
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `webhook_events` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX `uk_event_id` (`event_id`),
     INDEX `idx_tenant_event` (`tenant_id`, `event_type`),
-    INDEX `idx_resource` (`resource_id`),
+    INDEX `idx_resource` (`resource_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Webhook events table for deduplication';
 
 -- ============================================
@@ -148,12 +148,12 @@ CREATE TABLE IF NOT EXISTS `webhook_events` (
 -- ============================================
 
 -- 支付数据
-INSERT INTO `payments` (`id`, `tenant_id`, `order_id`, `user_id`, `amount`, `currency`, `status`, `method`, `transaction_id`, `paid_at`, `expire_at`, `notify_url`, `return_url`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT IGNORE INTO `payments` (`id`, `tenant_id`, `order_id`, `user_id`, `amount`, `currency`, `status`, `method`, `transaction_id`, `paid_at`, `expire_at`, `notify_url`, `return_url`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 -- Demo Shop 支付
-('PAY202503010001', 1, 'ORD202503010001', 1, 254800, 'CNY', 2, 0, 'ALI202503010001', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 29 DAY)), 1, 1),
-('PAY202503100001', 1, 'ORD202503100001', 1, 169800, 'CNY', 2, 1, 'WX202503100001', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 DAY)), 1, 1),
-('PAY202503150001', 1, 'ORD202503150001', 2, 9900, 'CNY', 2, 0, 'ALI202503150001', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)), 2, 2),
-('PAY202503200001', 1, 'ORD202503200001', 3, 116910, 'CNY', 0, 0, '', NULL, UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL 1 DAY)), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 3, 3),
+('PAY202503010001', 1, 'ORD202503010001', 1, 254800, 'CNY', 2, 0, 'ALI202503010001', DATE_SUB(NOW(), INTERVAL 29 DAY), DATE_SUB(NOW(), INTERVAL 29 DAY), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 29 DAY), 1, 1),
+('PAY202503100001', 1, 'ORD202503100001', 1, 169800, 'CNY', 2, 1, 'WX202503100001', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY), 1, 1),
+('PAY202503150001', 1, 'ORD202503150001', 2, 9900, 'CNY', 2, 0, 'ALI202503150001', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), 2, 2),
+('PAY202503200001', 1, 'ORD202503200001', 3, 116910, 'CNY', 0, 0, '', NULL, DATE_ADD(NOW(), INTERVAL 1 DAY), 'https://api.demoshop.com/payment/notify', 'https://www.demoshop.com/order/success', NOW(), NOW(), 3, 3),
 
 -- Enterprise Corp 支付
-('PAY202503120001', 3, 'ORD202503120001', 6, 81400, 'CNY', 2, 2, 'CC202503120001', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), 'https://api.enterprisecorp.com/payment/notify', 'https://shop.enterprisecorp.com/order/success', UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 DAY)), UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 9 DAY)), 6, 6);
+('PAY202503120001', 3, 'ORD202503120001', 6, 81400, 'CNY', 2, 2, 'CC202503120001', DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY), 'https://api.enterprisecorp.com/payment/notify', 'https://shop.enterprisecorp.com/order/success', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY), 6, 6);
