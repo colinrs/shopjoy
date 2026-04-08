@@ -12,7 +12,7 @@ import (
 
 func GetReviewStatsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ReviewStatsResp
+		var req types.ReviewStatsReq
 		if err := httpy.Parse(r, &req); err != nil {
 			httpy.ResultCtx(r, w, nil, err)
 			return

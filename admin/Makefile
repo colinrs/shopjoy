@@ -35,4 +35,10 @@ fmt:
 	$(GOFMT) -w -s .
 	@echo "Go code formatted"
 
-.PHONY: format gen-go-api lint fmt
+run:
+	go run admin.go -f etc/admin-api.yaml
+
+dev:
+	go run admin.go -f etc/admin-api.yaml
+
+.PHONY: format gen-go-api lint fmt run dev

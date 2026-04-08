@@ -12,7 +12,7 @@ import (
 
 func ListCarriersHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ListCarriersResp
+		var req types.ListCarriersReq
 		if err := httpy.Parse(r, &req); err != nil {
 			httpy.ResultCtx(r, w, nil, err)
 			return

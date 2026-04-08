@@ -23,7 +23,7 @@ func NewListCarriersLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListC
 	}
 }
 
-func (l *ListCarriersLogic) ListCarriers(req *types.ListCarriersResp) (resp *types.ListCarriersResp, err error) {
+func (l *ListCarriersLogic) ListCarriers(req *types.ListCarriersReq) (resp *types.ListCarriersResp, err error) {
 	// Get carriers
 	carriers, err := l.svcCtx.CarrierApp.ListCarriers(l.ctx)
 	if err != nil {

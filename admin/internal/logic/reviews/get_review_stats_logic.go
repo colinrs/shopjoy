@@ -26,7 +26,7 @@ func NewGetReviewStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 	}
 }
 
-func (l *GetReviewStatsLogic) GetReviewStats(req *types.ReviewStatsResp) (resp *types.ReviewStatsResp, err error) {
+func (l *GetReviewStatsLogic) GetReviewStats(req *types.ReviewStatsReq) (resp *types.ReviewStatsResp, err error) {
 	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
 	if err != nil {
 		l.Logger.Errorf("failed to get tenant ID: %v", err)

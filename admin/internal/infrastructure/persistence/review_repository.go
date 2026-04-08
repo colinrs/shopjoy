@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
@@ -20,26 +21,26 @@ func NewReviewRepository() review.Repository {
 }
 
 type reviewModel struct {
-	ID            int64   `gorm:"column:id;primaryKey"`
-	TenantID      int64   `gorm:"column:tenant_id;not null;index:idx_tenant_product"`
-	OrderID       int64   `gorm:"column:order_id;not null;index"`
-	ProductID     int64   `gorm:"column:product_id;not null;index:idx_tenant_product;index:idx_product_status"`
-	SKUCode       string  `gorm:"column:sku_code;size:64;not null"`
-	UserID        int64   `gorm:"column:user_id;not null;index:idx_tenant_user"`
-	UserName      string  `gorm:"column:user_name;size:100;not null"`
-	QualityRating int     `gorm:"column:quality_rating;not null"`
-	ValueRating   int     `gorm:"column:value_rating;not null"`
-	OverallRating float64 `gorm:"column:overall_rating;type:decimal(3,2);not null"`
-	Content       string  `gorm:"column:content;type:text;not null"`
-	Images        string  `gorm:"column:images;type:json"`
-	Status        int     `gorm:"column:status;not null;default:0;index:idx_status;index:idx_product_status"`
-	IsAnonymous   bool    `gorm:"column:is_anonymous;not null;default:false"`
-	IsVerified    bool    `gorm:"column:is_verified;not null;default:false"`
-	IsFeatured    bool    `gorm:"column:is_featured;not null;default:false"`
-	HelpfulCount  int     `gorm:"column:helpful_count;not null;default:0"`
-	DeletedAt     *int64  `gorm:"column:deleted_at;index"`
-	CreatedAt     int64   `gorm:"column:created_at;not null"`
-	UpdatedAt     int64   `gorm:"column:updated_at;not null"`
+	ID            int64      `gorm:"column:id;primaryKey"`
+	TenantID      int64      `gorm:"column:tenant_id;not null;index:idx_tenant_product"`
+	OrderID       int64      `gorm:"column:order_id;not null;index"`
+	ProductID     int64      `gorm:"column:product_id;not null;index:idx_tenant_product;index:idx_product_status"`
+	SKUCode       string     `gorm:"column:sku_code;size:64;not null"`
+	UserID        int64      `gorm:"column:user_id;not null;index:idx_tenant_user"`
+	UserName      string     `gorm:"column:user_name;size:100;not null"`
+	QualityRating int        `gorm:"column:quality_rating;not null"`
+	ValueRating   int        `gorm:"column:value_rating;not null"`
+	OverallRating float64    `gorm:"column:overall_rating;type:decimal(3,2);not null"`
+	Content       string     `gorm:"column:content;type:text;not null"`
+	Images        string     `gorm:"column:images;type:json"`
+	Status        int        `gorm:"column:status;not null;default:0;index:idx_status;index:idx_product_status"`
+	IsAnonymous   bool       `gorm:"column:is_anonymous;not null;default:false"`
+	IsVerified    bool       `gorm:"column:is_verified;not null;default:false"`
+	IsFeatured    bool       `gorm:"column:is_featured;not null;default:false"`
+	HelpfulCount  int        `gorm:"column:helpful_count;not null;default:0"`
+	DeletedAt     *time.Time `gorm:"column:deleted_at;index"`
+	CreatedAt     time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt     time.Time  `gorm:"column:updated_at;not null"`
 }
 
 func (reviewModel) TableName() string {
@@ -53,6 +54,7 @@ func (m *reviewModel) toEntity() *review.Review {
 	}
 
 	return &review.Review{
+		Model:         application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:      shared.TenantID(m.TenantID),
 		OrderID:       m.OrderID,
 		ProductID:     m.ProductID,

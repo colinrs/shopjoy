@@ -515,7 +515,7 @@ func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, tenantID s
 	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
 
 	query := db.WithContext(ctx).Table("order_items oi").
-		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_price) as revenue").
+		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_amount) as revenue").
 		Joins("JOIN orders o ON o.id = oi.order_id").
 		Where("o.tenant_id = ? AND o.status IN ? AND o.deleted_at IS NULL", tenantID.Int64(), statusStrings)
 
