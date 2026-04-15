@@ -40,7 +40,8 @@
     "languageSwitch": "Language",
     "languageEN": "English",
     "languageZH": "中文",
-    "defaultAdmin": "Admin"
+    "defaultAdmin": "Admin",
+    "logout": "Logout"
   },
   "status": {
     "success": "Success",
@@ -2201,6 +2202,7 @@
     }
   },
   "shop": {
+    "title": "Shop",
     "basicInfo": "Basic Info",
     "shopLogo": "Shop Logo",
     "uploadLogo": "Upload Logo",

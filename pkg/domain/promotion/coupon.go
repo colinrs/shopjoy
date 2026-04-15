@@ -77,7 +77,7 @@ type Coupon struct {
 	EndAt        time.Time        `json:"end_at"`
 	Scope        PromotionScope   `json:"scope"`
 	Audit        shared.AuditInfo `json:"audit"`
-	DeletedAt    *int64           `json:"deleted_at,omitempty"`
+	DeletedAt    *time.Time       `json:"deleted_at,omitempty"`
 }
 
 func (c *Coupon) TableName() string {

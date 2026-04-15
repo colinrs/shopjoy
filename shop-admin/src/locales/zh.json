@@ -40,7 +40,8 @@
     "languageSwitch": "语言切换",
     "languageEN": "English",
     "languageZH": "中文",
-    "defaultAdmin": "管理员"
+    "defaultAdmin": "管理员",
+    "logout": "退出登录"
   },
   "status": {
     "success": "成功",
@@ -2201,6 +2202,7 @@
     }
   },
   "shop": {
+    "title": "店铺设置",
     "basicInfo": "基本信息",
     "shopLogo": "店铺Logo",
     "uploadLogo": "上传Logo",

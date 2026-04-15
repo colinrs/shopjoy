@@ -257,7 +257,7 @@ export const rejectRefund = (refundId: number, rejectReason: string) => {
 
 // Reference Data
 export const getCarrierList = () => {
-  return request.get<Carrier[]>('/api/v1/carriers')
+  return request.get<{ list: Carrier[] }>('/api/v1/carriers')
 }
 
 export const getRefundReasonList = () => {

@@ -483,7 +483,7 @@ const shipmentList = ref<Shipment[]>([])
 const loadCarriers = async () => {
   try {
     const res = await getCarrierList()
-    carriers.value = res
+    carriers.value = res.list
   } catch (error) {
     ElMessage.error(t('fulfillment.loadCarriersFailed'))
   }

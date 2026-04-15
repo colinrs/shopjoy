@@ -19,13 +19,13 @@ func NewCarrierRepository() fulfillment.CarrierRepository {
 
 // carrierModel represents the database model for Carrier
 type carrierModel struct {
-	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	Code        string `gorm:"column:code;size:20;not null;uniqueIndex"`
-	Name        string `gorm:"column:name;size:100;not null"`
-	TrackingURL string `gorm:"column:tracking_url;size:255;not null;default:''"`
-	IsActive    int    `gorm:"column:is_active;not null;default:1"`
-	Sort        int    `gorm:"column:sort;not null;default:0"`
-	CreatedAt   int64  `gorm:"column:created_at;not null"`
+	ID          int64     `gorm:"column:id;primaryKey;autoIncrement:false"`
+	Code        string    `gorm:"column:code;size:20;not null;uniqueIndex"`
+	Name        string    `gorm:"column:name;size:100;not null"`
+	TrackingURL string    `gorm:"column:tracking_url;size:255;not null;default:''"`
+	IsActive    int       `gorm:"column:is_active;not null;default:1"`
+	Sort        int       `gorm:"column:sort;not null;default:0"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null"`
 }
 
 func (carrierModel) TableName() string {
@@ -34,7 +34,7 @@ func (carrierModel) TableName() string {
 
 func (m *carrierModel) toEntity() *fulfillment.Carrier {
 	return &fulfillment.Carrier{
-		Model:       application.Model{ID: m.ID, CreatedAt: parseUnixTime(m.CreatedAt)},
+		Model:       application.Model{ID: m.ID, CreatedAt: m.CreatedAt.UTC()},
 		Code:        m.Code,
 		Name:        m.Name,
 		TrackingURL: m.TrackingURL,
@@ -55,7 +55,7 @@ func fromCarrierEntity(c *fulfillment.Carrier) *carrierModel {
 		TrackingURL: c.TrackingURL,
 		IsActive:    isActive,
 		Sort:        c.Sort,
-		CreatedAt:   c.Model.CreatedAt.Unix(),
+		CreatedAt:   c.Model.CreatedAt,
 	}
 }
 
@@ -156,12 +156,4 @@ func (r *carrierRepo) FindByCodes(ctx context.Context, db *gorm.DB, codes []stri
 		result[m.Code] = m.toEntity()
 	}
 	return result, nil
-}
-
-// parseUnixTime is a helper to convert Unix timestamp to time.Time
-func parseUnixTime(ts int64) time.Time {
-	if ts == 0 {
-		return time.Time{}
-	}
-	return time.Unix(ts, 0).UTC()
 }

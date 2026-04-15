@@ -31,7 +31,7 @@ type promotionUsageModel struct {
 	OriginalAmount decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null"`
 	FinalAmount    decimal.Decimal `gorm:"column:final_amount;type:decimal(19,4);not null"`
 	CouponID       *int64          `gorm:"column:coupon_id;index"`
-	CreatedAt      int64           `gorm:"column:created_at"`
+	CreatedAt      time.Time       `gorm:"column:created_at"`
 }
 
 func (promotionUsageModel) TableName() string {
@@ -51,7 +51,7 @@ func (m *promotionUsageModel) toEntity() *promotion.PromotionUsage {
 		OriginalAmount: m.OriginalAmount,
 		FinalAmount:    m.FinalAmount,
 		CouponID:       m.CouponID,
-		CreatedAt:      time.Unix(m.CreatedAt, 0),
+		CreatedAt:      m.CreatedAt.UTC(),
 	}
 }
 
@@ -68,7 +68,7 @@ func fromPromotionUsageEntity(pu *promotion.PromotionUsage) *promotionUsageModel
 		OriginalAmount: pu.OriginalAmount,
 		FinalAmount:    pu.FinalAmount,
 		CouponID:       pu.CouponID,
-		CreatedAt:      pu.CreatedAt.Unix(),
+		CreatedAt:      pu.CreatedAt,
 	}
 }
 
