@@ -54,3 +54,4 @@ docs/superpowers
 tests
 shop-admin/playwright-report/
 shop-admin/test-results/
+__debug_*
