@@ -36,16 +36,16 @@ type couponModel struct {
 	UsedCount    int             `gorm:"column:used_count;not null;default:0"`
 	PerUserLimit int             `gorm:"column:per_user_limit;not null;default:0"`
 	Status       int             `gorm:"column:status;not null;index"`
-	StartAt      int64           `gorm:"column:start_at;not null;index"`
-	EndAt        int64           `gorm:"column:end_at;not null;index"`
+	StartAt      time.Time       `gorm:"column:start_at;not null;index"`
+	EndAt        time.Time       `gorm:"column:end_at;not null;index"`
 	ScopeType    string          `gorm:"column:scope_type;size:32;not null"`
 	ScopeIDs     string          `gorm:"column:scope_ids;type:json"`   // JSON array of int64
 	ExcludeIDs   string          `gorm:"column:exclude_ids;type:json"` // JSON array of int64
 	CreatedBy    int64           `gorm:"column:created_by;not null"`
 	UpdatedBy    int64           `gorm:"column:updated_by;not null"`
-	DeletedAt    *int64          `gorm:"column:deleted_at;index"`
-	CreatedAt    int64           `gorm:"column:created_at"`
-	UpdatedAt    int64           `gorm:"column:updated_at"`
+	DeletedAt    *time.Time      `gorm:"column:deleted_at;index"`
+	CreatedAt    time.Time       `gorm:"column:created_at"`
+	UpdatedAt    time.Time       `gorm:"column:updated_at"`
 }
 
 func (couponModel) TableName() string {
@@ -77,16 +77,16 @@ func (m *couponModel) toEntity() *promotion.Coupon {
 		UsedCount:    m.UsedCount,
 		PerUserLimit: m.PerUserLimit,
 		Status:       promotion.CouponStatus(m.Status),
-		StartAt:      time.Unix(m.StartAt, 0),
-		EndAt:        time.Unix(m.EndAt, 0),
+		StartAt:      m.StartAt.UTC(),
+		EndAt:        m.EndAt.UTC(),
 		Scope: promotion.PromotionScope{
 			Type:       promotion.ScopeType(m.ScopeType),
 			IDs:        scopeIDs,
 			ExcludeIDs: excludeIDs,
 		},
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt.UTC(),
+			UpdatedAt: m.UpdatedAt.UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -114,16 +114,16 @@ func fromCouponEntity(c *promotion.Coupon) *couponModel {
 		UsedCount:    c.UsedCount,
 		PerUserLimit: c.PerUserLimit,
 		Status:       int(c.Status),
-		StartAt:      c.StartAt.Unix(),
-		EndAt:        c.EndAt.Unix(),
+		StartAt:      c.StartAt,
+		EndAt:        c.EndAt,
 		ScopeType:    string(c.Scope.Type),
 		ScopeIDs:     string(scopeIDsJSON),
 		ExcludeIDs:   string(excludeIDsJSON),
 		CreatedBy:    c.Audit.CreatedBy,
 		UpdatedBy:    c.Audit.UpdatedBy,
 		DeletedAt:    c.DeletedAt,
-		CreatedAt:    c.Audit.CreatedAt.Unix(),
-		UpdatedAt:    c.Audit.UpdatedAt.Unix(),
+		CreatedAt:    c.Audit.CreatedAt,
+		UpdatedAt:    c.Audit.UpdatedAt,
 	}
 }
 

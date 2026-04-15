@@ -232,7 +232,7 @@ const loadStats = async () => {
 const loadCarriers = async () => {
   try {
     const res = await getCarrierList()
-    carriers.value = res.filter(c => c.is_active)
+    carriers.value = res.list.filter(c => c.is_active)
   } catch (error) {
     handleError(error, t('orders.loadCarriersFailed'))
   }

@@ -19,12 +19,12 @@ func NewRefundReasonRepository() fulfillment.RefundReasonRepository {
 
 // refundReasonModel represents the database model for RefundReason
 type refundReasonModel struct {
-	ID        int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	Code      string `gorm:"column:code;size:50;not null;uniqueIndex"`
-	Name      string `gorm:"column:name;size:100;not null"`
-	Sort      int    `gorm:"column:sort;not null;default:0"`
-	IsActive  int    `gorm:"column:is_active;not null;default:1"`
-	CreatedAt int64  `gorm:"column:created_at;not null"`
+	ID        int64     `gorm:"column:id;primaryKey;autoIncrement:false"`
+	Code      string    `gorm:"column:code;size:50;not null;uniqueIndex"`
+	Name      string    `gorm:"column:name;size:100;not null"`
+	Sort      int       `gorm:"column:sort;not null;default:0"`
+	IsActive  int       `gorm:"column:is_active;not null;default:1"`
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
 }
 
 func (refundReasonModel) TableName() string {
@@ -33,7 +33,7 @@ func (refundReasonModel) TableName() string {
 
 func (m *refundReasonModel) toEntity() *fulfillment.RefundReason {
 	return &fulfillment.RefundReason{
-		Model:    application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC()},
+		Model:    application.Model{ID: m.ID, CreatedAt: m.CreatedAt.UTC()},
 		Code:     m.Code,
 		Name:     m.Name,
 		Sort:     m.Sort,
@@ -52,7 +52,7 @@ func fromRefundReasonEntity(r *fulfillment.RefundReason) *refundReasonModel {
 		Name:      r.Name,
 		Sort:      r.Sort,
 		IsActive:  isActive,
-		CreatedAt: r.Model.CreatedAt.Unix(),
+		CreatedAt: r.Model.CreatedAt,
 	}
 }
 

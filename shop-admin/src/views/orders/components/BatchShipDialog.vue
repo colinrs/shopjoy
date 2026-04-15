@@ -200,7 +200,7 @@ const loadCarriers = async () => {
   loadingCarriers.value = true
   try {
     const res = await getCarrierList()
-    carriers.value = res.filter(c => c.is_active)
+    carriers.value = res.list.filter(c => c.is_active)
   } catch (error) {
     console.error('Failed to load carriers:', error)
     ElMessage.error(t('orders.loadCarriersFailed'))

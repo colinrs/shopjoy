@@ -22,24 +22,24 @@ func NewPromotionRepository() promotion.Repository {
 
 // promotionModel represents the database model for Promotion
 type promotionModel struct {
-	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID    int64  `gorm:"column:tenant_id;not null;index"`
-	Name        string `gorm:"column:name;size:200;not null;index"`
-	Description string `gorm:"column:description;type:text"`
-	Type        int    `gorm:"column:type;not null;index"`
-	Status      int    `gorm:"column:status;not null;index"`
-	Priority    int    `gorm:"column:priority;not null;default:0"`
-	StartAt     int64  `gorm:"column:start_at;not null;index"`
-	EndAt       int64  `gorm:"column:end_at;not null;index"`
-	ScopeType   string `gorm:"column:scope_type;size:32;not null"`
-	ScopeIDs    string `gorm:"column:scope_ids;type:json"`       // JSON array of int64
-	ExcludeIDs  string `gorm:"column:exclude_ids;type:json"`     // JSON array of int64
-	Currency    string `gorm:"column:currency;size:10;not null"` // ISO 4217
-	CreatedBy   int64  `gorm:"column:created_by;not null"`
-	UpdatedBy   int64  `gorm:"column:updated_by;not null"`
-	DeletedAt   *int64 `gorm:"column:deleted_at;index"`
-	CreatedAt   int64  `gorm:"column:created_at"`
-	UpdatedAt   int64  `gorm:"column:updated_at"`
+	ID          int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID    int64      `gorm:"column:tenant_id;not null;index"`
+	Name        string     `gorm:"column:name;size:200;not null;index"`
+	Description string     `gorm:"column:description;type:text"`
+	Type        int        `gorm:"column:type;not null;index"`
+	Status      int        `gorm:"column:status;not null;index"`
+	Priority    int        `gorm:"column:priority;not null;default:0"`
+	StartAt     time.Time  `gorm:"column:start_at;not null;index"`
+	EndAt       time.Time  `gorm:"column:end_at;not null;index"`
+	ScopeType   string     `gorm:"column:scope_type;size:32;not null"`
+	ScopeIDs    string     `gorm:"column:scope_ids;type:json"`       // JSON array of int64
+	ExcludeIDs  string     `gorm:"column:exclude_ids;type:json"`     // JSON array of int64
+	Currency    string     `gorm:"column:currency;size:10;not null"` // ISO 4217
+	CreatedBy   int64      `gorm:"column:created_by;not null"`
+	UpdatedBy   int64      `gorm:"column:updated_by;not null"`
+	DeletedAt   *time.Time `gorm:"column:deleted_at;index"`
+	CreatedAt   time.Time  `gorm:"column:created_at"`
+	UpdatedAt   time.Time  `gorm:"column:updated_at"`
 }
 
 func (promotionModel) TableName() string {
@@ -64,8 +64,8 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 		Type:        promotion.Type(m.Type),
 		Status:      promotion.Status(m.Status),
 		Priority:    m.Priority,
-		StartAt:     time.Unix(m.StartAt, 0),
-		EndAt:       time.Unix(m.EndAt, 0),
+		StartAt:     m.StartAt.UTC(),
+		EndAt:       m.EndAt.UTC(),
 		Scope: promotion.PromotionScope{
 			Type:       promotion.ScopeType(m.ScopeType),
 			IDs:        scopeIDs,
@@ -73,8 +73,8 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 		},
 		Currency: m.Currency,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt.UTC(),
+			UpdatedAt: m.UpdatedAt.UTC(),
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -95,8 +95,8 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 		Type:        int(p.Type),
 		Status:      int(p.Status),
 		Priority:    p.Priority,
-		StartAt:     p.StartAt.Unix(),
-		EndAt:       p.EndAt.Unix(),
+		StartAt:     p.StartAt,
+		EndAt:       p.EndAt,
 		ScopeType:   string(p.Scope.Type),
 		ScopeIDs:    string(scopeIDsJSON),
 		ExcludeIDs:  string(excludeIDsJSON),
@@ -104,8 +104,8 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
 		DeletedAt:   p.DeletedAt,
-		CreatedAt:   p.Audit.CreatedAt.Unix(),
-		UpdatedAt:   p.Audit.UpdatedAt.Unix(),
+		CreatedAt:   p.Audit.CreatedAt,
+		UpdatedAt:   p.Audit.UpdatedAt,
 	}
 }
 
@@ -120,8 +120,8 @@ type promotionRuleModel struct {
 	MaxDiscount    decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
 	Currency       string          `gorm:"column:currency;size:10;not null"`
 	SortOrder      int             `gorm:"column:sort_order;not null;default:0"`
-	CreatedAt      int64           `gorm:"column:created_at"`
-	UpdatedAt      int64           `gorm:"column:updated_at"`
+	CreatedAt      time.Time       `gorm:"column:created_at"`
+	UpdatedAt      time.Time       `gorm:"column:updated_at"`
 }
 
 func (promotionRuleModel) TableName() string {
@@ -139,8 +139,8 @@ func (m *promotionRuleModel) toEntity() promotion.PromotionRule {
 		MaxDiscount:    m.MaxDiscount,
 		Currency:       m.Currency,
 		SortOrder:      m.SortOrder,
-		CreatedAt:      time.Unix(m.CreatedAt, 0),
-		UpdatedAt:      time.Unix(m.UpdatedAt, 0),
+		CreatedAt:      m.CreatedAt.UTC(),
+		UpdatedAt:      m.UpdatedAt.UTC(),
 	}
 }
 
@@ -155,8 +155,8 @@ func fromPromotionRuleEntity(r *promotion.PromotionRule) *promotionRuleModel {
 		MaxDiscount:    r.MaxDiscount,
 		Currency:       r.Currency,
 		SortOrder:      r.SortOrder,
-		CreatedAt:      r.CreatedAt.Unix(),
-		UpdatedAt:      r.UpdatedAt.Unix(),
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 	}
 }
 
