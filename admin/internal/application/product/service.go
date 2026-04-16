@@ -227,54 +227,63 @@ func (s *service) BatchUpdateProduct(ctx context.Context, tenantID shared.Tenant
 	var successIDs []int64
 	var failed []BatchProductFail
 
-	for _, productID := range req.ProductIDs {
-		p, err := s.productRepo.FindByID(ctx, s.db, tenantID, productID)
-		if err != nil {
-			failed = append(failed, BatchProductFail{
-				ProductID: productID,
-				Code:      30012, // ErrProductNotFound code
-				Message:   "商品不存在",
-			})
-			continue
-		}
-
-		// Apply updates
-		if req.Fields.Price != nil {
-			if err := p.UpdatePrice(product.Money{Amount: *req.Fields.Price, Currency: p.Price.Currency}); err != nil {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		for _, productID := range req.ProductIDs {
+			p, err := s.productRepo.FindByID(ctx, tx, tenantID, productID)
+			if err != nil {
 				failed = append(failed, BatchProductFail{
 					ProductID: productID,
-					Code:      30002, // ErrProductInvalidPrice code
-					Message:   "商品价格必须大于0",
+					Code:      30012, // ErrProductNotFound code
+					Message:   "商品不存在",
 				})
 				continue
 			}
-		}
 
-		if req.Fields.Stock != nil {
-			if err := p.UpdateStock(*req.Fields.Stock); err != nil {
-				failed = append(failed, BatchProductFail{
-					ProductID: productID,
-					Code:      30008, // ErrProductNegativeStock code
-					Message:   "库存不能为负数",
-				})
-				continue
-			}
-		}
-
-		if req.Fields.Status != nil {
-			// For status changes, we use the status transition methods
-			switch *req.Fields.Status {
-			case product.StatusOnSale:
-				if err := p.PutOnSale(); err != nil {
+			// Apply updates
+			if req.Fields.Price != nil {
+				if err := p.UpdatePrice(product.Money{Amount: *req.Fields.Price, Currency: p.Price.Currency}); err != nil {
 					failed = append(failed, BatchProductFail{
 						ProductID: productID,
-						Code:      30006, // ErrProductInvalidStatusTransition code
-						Message:   "无效的状态转换",
+						Code:      30002, // ErrProductInvalidPrice code
+						Message:   "商品价格必须大于0",
 					})
 					continue
 				}
-			case product.StatusOffSale:
-				if err := p.TakeOffSale(); err != nil {
+			}
+
+			if req.Fields.Stock != nil {
+				if err := p.UpdateStock(*req.Fields.Stock); err != nil {
+					failed = append(failed, BatchProductFail{
+						ProductID: productID,
+						Code:      30008, // ErrProductNegativeStock code
+						Message:   "库存不能为负数",
+					})
+					continue
+				}
+			}
+
+			if req.Fields.Status != nil {
+				// For status changes, we use the status transition methods
+				switch *req.Fields.Status {
+				case product.StatusOnSale:
+					if err := p.PutOnSale(); err != nil {
+						failed = append(failed, BatchProductFail{
+							ProductID: productID,
+							Code:      30006, // ErrProductInvalidStatusTransition code
+							Message:   "无效的状态转换",
+						})
+						continue
+					}
+				case product.StatusOffSale:
+					if err := p.TakeOffSale(); err != nil {
+						failed = append(failed, BatchProductFail{
+							ProductID: productID,
+							Code:      30006,
+							Message:   "无效的状态转换",
+						})
+						continue
+					}
+				default:
 					failed = append(failed, BatchProductFail{
 						ProductID: productID,
 						Code:      30006,
@@ -282,31 +291,28 @@ func (s *service) BatchUpdateProduct(ctx context.Context, tenantID shared.Tenant
 					})
 					continue
 				}
-			default:
+			}
+
+			if req.Fields.CategoryID != nil {
+				p.CategoryID = *req.Fields.CategoryID
+			}
+
+			if err := s.productRepo.Update(ctx, tx, p); err != nil {
 				failed = append(failed, BatchProductFail{
 					ProductID: productID,
-					Code:      30006,
-					Message:   "无效的状态转换",
+					Code:      20002, // ErrDatabase code
+					Message:   "数据库错误",
 				})
 				continue
 			}
-		}
 
-		if req.Fields.CategoryID != nil {
-			p.CategoryID = *req.Fields.CategoryID
+			successIDs = append(successIDs, productID)
 		}
+		return nil
+	})
 
-		if err := s.productRepo.Update(ctx, s.db, p); err != nil {
-			failed = append(failed, BatchProductFail{
-				ProductID: productID,
-				Code:      20002, // ErrDatabase code
-				Message:   "数据库错误",
-			})
-			continue
-		}
-
-		successIDs = append(successIDs, productID)
+	if err != nil {
+		return nil, failed, err
 	}
-
 	return successIDs, failed, nil
 }

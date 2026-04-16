@@ -132,6 +132,16 @@ This document lists all error codes used in the ShopJoy API.
 | 40006 | 400 | insufficient stock | Insufficient stock for order |
 | 40007 | 400 | invalid amount | Invalid order amount |
 | 40008 | 400 | cart is empty | Cannot create order with empty cart |
+| 40009 | 400 | 当前状态无法改价 | Cannot adjust price in current status |
+| 40010 | 400 | 改价金额超出限制 | Price adjustment exceeds limit |
+| 40011 | 400 | 导出数量超出限制 | Export count exceeds limit |
+| 40012 | 400 | 改价原因不能为空 | Price adjustment reason is required |
+| 40013 | 409 | 订单已被修改，请刷新后重试 | Order version conflict |
+| 40014 | 400 | order cannot be cancelled in current status | Order cancellation not allowed |
+| 40015 | 400 | cancel reason is required | Cancel reason is required |
+| 40016 | 429 | payment reminder already sent recently | Too many payment reminders |
+| 40017 | 400 | order already paid, cannot send reminder | Cannot remind paid order |
+| 40018 | 400 | order cannot be reminded in current status | Cannot remind order |
 
 ---
 
@@ -144,6 +154,23 @@ This document lists all error codes used in the ShopJoy API.
 | 50003 | 402 | payment failed | Payment processing failed |
 | 50004 | 400 | payment already completed | Payment already completed |
 | 50005 | 400 | payment expired | Payment session expired |
+| 50006 | 400 | order not paid, cannot refund | Order must be paid before refund |
+| 50007 | 400 | refund amount exceeds refundable | Refund amount too high |
+| 50008 | 400 | refund reason is required | Refund reason required |
+| 50009 | 500 | channel refund failed | Payment channel refund failed |
+| 50010 | 404 | order not found | Order not found for payment |
+| 50011 | 400 | order already fully refunded | Order already fully refunded |
+| 50012 | 404 | transaction not found | Transaction not found |
+| 50013 | 503 | payment channel unavailable | Payment channel unavailable |
+| 50014 | 400 | refund not supported for this channel | Channel does not support refund |
+| 50015 | 400 | currency not supported by channel | Currency not supported |
+| 50016 | 404 | payment refund not found | Refund record not found |
+| 50017 | 202 | payment requires additional action | Additional action required |
+| 50018 | 400 | refund currency must match payment currency | Currency mismatch |
+| 50019 | 409 | duplicate idempotency key | Idempotency key already used |
+| 50020 | 409 | dispute created for this charge | Dispute created |
+| 50021 | 400 | export limit exceeded | Export limit exceeded |
+| 50022 | 401 | invalid stripe webhook signature | Webhook signature invalid |
 
 ---
 
@@ -241,6 +268,190 @@ This document lists all error codes used in the ShopJoy API.
 | 180001 | 404 | brand not found | Brand not found |
 | 180002 | 409 | brand name already exists | Brand name already exists |
 | 180003 | 400 | brand has products | Cannot delete brand with products |
+
+---
+
+## Fulfillment Module (120xxx)
+
+### Shipment Errors (120xxx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 120001 | 404 | shipment not found | Shipment not found |
+| 120002 | 400 | invalid tracking number | Invalid tracking number |
+| 120003 | 400 | order already shipped | Order already shipped |
+| 120004 | 400 | carrier is required | Carrier is required |
+| 120005 | 400 | tracking number is required | Tracking number required |
+| 120006 | 400 | invalid shipment status transition | Invalid status transition |
+| 120007 | 400 | cannot cancel delivered shipment | Cannot cancel delivered shipment |
+| 120008 | 404 | shipment item not found | Shipment item not found |
+| 120009 | 404 | order not found | Order not found |
+| 120010 | 400 | order cannot be shipped | Order cannot be shipped |
+| 120011 | 409 | tracking number already exists | Duplicate tracking number |
+| 120012 | 400 | shipment items are required | Shipment items required |
+| 120013 | 400 | shipment item quantity exceeded order quantity | Quantity exceeds order |
+| 120014 | 400 | invalid shipment items | Invalid shipment items |
+| 120015 | 400 | export shipment count exceeds limit | Export limit exceeded |
+| 120016 | 400 | shipment already cancelled | Shipment already cancelled |
+
+### Refund Errors (1201xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 120101 | 404 | refund not found | Refund not found |
+| 120102 | 400 | invalid refund status | Invalid refund status |
+| 120103 | 400 | cannot cancel refund in current status | Cannot cancel refund |
+| 120104 | 409 | order already has pending refund | Duplicate pending refund |
+| 120105 | 404 | order not found | Order not found |
+| 120106 | 400 | order cannot be refunded | Order cannot be refunded |
+| 120107 | 400 | refund period has expired | Refund period expired |
+| 120108 | 400 | refund reason is required | Refund reason required |
+| 120109 | 400 | reject reason is required | Reject reason required |
+| 120110 | 400 | refund amount exceeds order amount | Refund amount too high |
+| 120111 | 400 | order is not paid | Order is not paid |
+
+### Carrier Errors (1202xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 120201 | 404 | carrier not found | Carrier not found |
+| 120202 | 409 | carrier code already exists | Duplicate carrier code |
+| 120203 | 400 | carrier is inactive | Carrier is inactive |
+
+### Refund Reason Errors (1203xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 120301 | 404 | refund reason not found | Refund reason not found |
+| 120302 | 409 | refund reason code already exists | Duplicate refund reason code |
+
+---
+
+## Review Module (210xxx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 210001 | 404 | review not found | Review not found |
+| 210002 | 400 | review already has reply | Review already replied |
+| 210003 | 400 | cannot reply to hidden review | Cannot reply hidden review |
+| 210004 | 400 | invalid review status | Invalid review status |
+| 210005 | 400 | review content exceeds limit | Review too long |
+| 210006 | 400 | reply content exceeds limit | Reply too long |
+| 210007 | 404 | reply not found | Reply not found |
+| 210008 | 400 | cannot approve review in current status | Cannot approve review |
+| 210009 | 400 | cannot hide review in current status | Cannot hide review |
+| 210010 | 400 | cannot show review in current status | Cannot show review |
+| 210011 | 400 | can only feature approved reviews | Cannot feature unapproved review |
+| 210012 | 400 | review already deleted | Review already deleted |
+| 210013 | 400 | reply content cannot be empty | Reply cannot be empty |
+| 210014 | 400 | rating must be between 1 and 5 | Invalid rating |
+| 210015 | 400 | batch operation requires at least one review id | Batch list empty |
+| 210016 | 400 | batch operation limited to 100 reviews | Batch size limit |
+
+---
+
+## Shipping Module (230xxx)
+
+### Shipping Template Errors (230xxx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 230001 | 404 | shipping template not found | Template not found |
+| 230002 | 400 | template name is required | Template name required |
+| 230003 | 400 | cannot delete template with zones | Template has zones |
+| 230004 | 400 | cannot delete default template | Cannot delete default |
+| 230005 | 409 | template name already exists | Duplicate template name |
+
+### Shipping Zone Errors (2301xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 230101 | 404 | shipping zone not found | Zone not found |
+| 230102 | 400 | zone name is required | Zone name required |
+| 230103 | 400 | zone regions are required | Regions required |
+| 230104 | 400 | invalid fee type | Invalid fee type |
+| 230105 | 400 | fee configuration is required | Fee config required |
+| 230106 | 409 | region already assigned to another zone | Duplicate region |
+
+### Shipping Mapping Errors (2302xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 230201 | 404 | shipping mapping not found | Mapping not found |
+| 230202 | 409 | mapping already exists | Mapping already exists |
+| 230203 | 400 | invalid target type | Invalid target type |
+
+### Shipping Calculator Errors (2303xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 230301 | 400 | no matching zone for address | No zone for address |
+| 230302 | 400 | no default shipping template configured | No default template |
+| 230303 | 400 | items are required | Items required |
+| 230304 | 400 | address is required | Address required |
+| 230305 | 400 | invalid quantity in items | Invalid quantity |
+| 230306 | 400 | invalid weight in items | Invalid weight |
+| 230307 | 400 | invalid price in items | Invalid price |
+
+---
+
+## Upload Module (240xxx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 240001 | 400 | unsupported file type | File type not allowed |
+| 240002 | 400 | file size exceeded | File too large |
+| 240003 | 400 | invalid category | Invalid category |
+| 240004 | 500 | upload failed | Upload failed |
+| 240005 | 404 | file not found | File not found |
+
+---
+
+## Points Module (250xxx)
+
+### Earn Rule Errors (250xxx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 250001 | 404 | earn rule not found | Earn rule not found |
+| 250002 | 400 | invalid earn rule | Invalid earn rule |
+| 250003 | 400 | earn rule is not active | Earn rule inactive |
+| 250004 | 400 | earn rule is already active | Already active |
+| 250005 | 400 | earn rule has expired | Earn rule expired |
+| 250006 | 400 | earn rule has not started | Earn rule not started |
+
+### Redeem Rule Errors (2501xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 250101 | 404 | redeem rule not found | Redeem rule not found |
+| 250102 | 400 | invalid redeem rule | Invalid redeem rule |
+| 250103 | 400 | redeem rule is not active | Redeem rule inactive |
+| 250104 | 400 | redeem rule is out of stock | Out of stock |
+| 250105 | 400 | user has reached redemption limit | User limit reached |
+
+### Points Account Errors (2502xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 250201 | 404 | points account not found | Points account not found |
+| 250202 | 400 | insufficient points balance | Insufficient points |
+| 250203 | 400 | points are frozen | Points frozen |
+
+### Points Transaction Errors (2503xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 250301 | 404 | points transaction not found | Transaction not found |
+| 250302 | 400 | export limit exceeded, maximum 10000 records | Export limit exceeded |
+
+### Points Redemption Errors (2504xx)
+
+| Code | HTTP Status | Message | Description |
+|------|-------------|---------|-------------|
+| 250401 | 404 | points redemption not found | Redemption not found |
+| 250402 | 400 | invalid redemption status | Invalid redemption status |
+| 250403 | 400 | cannot cancel redemption in current status | Cannot cancel redemption |
 
 ---
 

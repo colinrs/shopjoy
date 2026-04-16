@@ -3,6 +3,7 @@ package fulfillment
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
@@ -377,5 +378,7 @@ func formatAmountFromInt64(amount int64) string {
 
 // formatPercentage formats a percentage value
 func formatPercentage(value float64) string {
-	return shared.NewMoney(decimal.NewFromFloat(value*100), "").String()
+	// Use string conversion to avoid float precision issues
+	percentage := value * 100
+	return fmt.Sprintf("%.2f%%", percentage)
 }

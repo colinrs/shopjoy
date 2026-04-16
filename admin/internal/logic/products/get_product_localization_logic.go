@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -28,9 +29,10 @@ func NewGetProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceCont
 
 func (l *GetProductLocalizationLogic) GetProductLocalization(req *types.GetProductLocalizationReq) (resp *types.ProductLocalizationResp, err error) {
 	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all tenant data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

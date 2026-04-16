@@ -45,7 +45,11 @@ func (l *ListCategoriesLogic) ListCategories(req *types.ListCategoryReq) (resp *
 
 	list := make([]*types.CategoryDetailResp, 0, len(categories))
 	for _, c := range categories {
-		productCount, _ := l.svcCtx.CategoryRepo.GetProductCount(l.ctx, l.svcCtx.DB, c.ID)
+		productCount, err := l.svcCtx.CategoryRepo.GetProductCount(l.ctx, l.svcCtx.DB, c.ID)
+		if err != nil {
+			l.Logger.Errorf("failed to get product count for category %d: %v", c.ID, err)
+			productCount = 0
+		}
 		list = append(list, &types.CategoryDetailResp{
 			ID:             c.ID,
 			ParentID:       c.ParentID,

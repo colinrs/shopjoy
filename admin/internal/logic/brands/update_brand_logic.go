@@ -70,7 +70,11 @@ func (l *UpdateBrandLogic) UpdateBrand(req *types.UpdateBrandReq) (resp *types.B
 	}
 
 	// Get product count
-	productCount, _ := l.svcCtx.BrandRepo.GetProductCount(l.ctx, l.svcCtx.DB, brand.ID)
+	productCount, err := l.svcCtx.BrandRepo.GetProductCount(l.ctx, l.svcCtx.DB, brand.ID)
+	if err != nil {
+		l.Logger.Errorf("failed to get product count for brand %d: %v", brand.ID, err)
+		productCount = 0
+	}
 
 	return toBrandDetailResp(brand, productCount), nil
 }

@@ -31,7 +31,10 @@ func NewBatchUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProductReq) (resp *types.BatchUpdateProductResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
 
 	// 平台管理员设置 tenantID = 0 以访问所有数据
 	if contextx.IsPlatformAdmin(l.ctx) {
@@ -52,7 +55,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 			return &types.BatchUpdateProductResp{
 				Success: []int64{},
 				Failed: []types.BatchProductFail{
-					{ProductID: 0, Code: 30002, Message: "无效的价格格式"},
+					{ProductID: 0, Code: code.ErrProductInvalidPrice.Code, Message: code.ErrProductInvalidPrice.Msg},
 				},
 			}, nil
 		}
@@ -67,7 +70,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 			return &types.BatchUpdateProductResp{
 				Success: []int64{},
 				Failed: []types.BatchProductFail{
-					{ProductID: 0, Code: 30006, Message: "无效的状态值"},
+					{ProductID: 0, Code: code.ErrProductInvalidStatusTransition.Code, Message: code.ErrProductInvalidStatusTransition.Msg},
 				},
 			}, nil
 		}

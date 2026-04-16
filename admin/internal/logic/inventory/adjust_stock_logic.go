@@ -29,7 +29,13 @@ func NewAdjustStockLogic(ctx context.Context, svcCtx *svc.ServiceContext) Adjust
 }
 
 func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.CreateWarehouseResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
 	userID, _ := contextx.GetUserID(l.ctx)
 
 	// Verify warehouse exists

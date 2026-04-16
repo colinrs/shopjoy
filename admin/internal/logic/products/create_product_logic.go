@@ -6,6 +6,7 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -28,10 +29,13 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Crea
 
 func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *types.CreateProductResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// 平台管理员创建商品时需要指定 tenantID（暂不允许，或后续可扩展）
-	// 目前平台管理员创建的商品归属于自身租户（tenantID = 0 表示平台）
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
 
 	// 解析价格字符串（单位：元）
 	price, err := appProduct.ToDomainMoneyFromString(req.Price, req.Currency)

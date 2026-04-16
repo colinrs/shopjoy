@@ -55,3 +55,4 @@ tests
 shop-admin/playwright-report/
 shop-admin/test-results/
 __debug_*
+.full-review/

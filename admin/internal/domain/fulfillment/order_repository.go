@@ -176,7 +176,7 @@ func (o *Order) AdjustPrice(adjustAmount decimal.Decimal, reason string, adjuste
 	}
 
 	// Check if adjustment exceeds 20% limit
-	maxAdjust := o.OriginalAmount.Mul(decimal.NewFromFloat(0.2))
+	maxAdjust := o.OriginalAmount.Mul(decimal.RequireFromString("0.2"))
 	if adjustAmount.IsPositive() && adjustAmount.GreaterThan(maxAdjust) {
 		return code.ErrOrderAdjustAmountExceed
 	}

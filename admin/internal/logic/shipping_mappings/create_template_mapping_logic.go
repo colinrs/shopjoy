@@ -28,9 +28,12 @@ func NewCreateTemplateMappingLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *CreateTemplateMappingLogic) CreateTemplateMapping(req *types.CreateTemplateMappingReq) (resp *types.TemplateMappingDetail, err error) {
 	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if tenantID == 0 {
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
 		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
 	}
 
 	// Verify template exists and belongs to tenant

@@ -5,6 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,7 +26,10 @@ func NewGetDashboardLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetDa
 
 func (l *GetDashboardLogic) GetDashboard(req *types.GetDashboardRequest) (resp *types.GetDashboardResponse, err error) {
 	helper := NewDashboardHelper(l.ctx, l.svcCtx)
-	tenantID := helper.GetTenantID()
+	tenantID, ok := helper.GetTenantID()
+	if !ok {
+		return nil, code.ErrUnauthorized
+	}
 
 	// Get overview
 	overview, err := helper.GetOverview(tenantID)

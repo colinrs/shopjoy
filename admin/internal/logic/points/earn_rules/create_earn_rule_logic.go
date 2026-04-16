@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -30,7 +31,13 @@ func NewCreateEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cre
 }
 
 func (l *CreateEarnRuleLogic) CreateEarnRule(req *types.CreateEarnRuleReq) (resp *types.EarnRule, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
 	userID, _ := contextx.GetUserID(l.ctx)
 
 	createReq := apppoints.CreateEarnRuleRequest{
