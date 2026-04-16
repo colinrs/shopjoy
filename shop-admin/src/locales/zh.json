@@ -41,7 +41,8 @@
     "languageEN": "English",
     "languageZH": "中文",
     "defaultAdmin": "管理员",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "viewAll": "查看全部"
   },
   "status": {
     "success": "成功",
@@ -1510,7 +1511,19 @@
     "warehouseCodePlaceholder": "如: WH-001",
     "countryPlaceholder": "如: CN, US",
     "addressPlaceholder": "详细地址",
-    "exportLogs": "导出记录"
+    "exportLogs": "导出记录",
+    "batchUpdateSafetyStock": "批量更新安全库存",
+    "batchSafetyStock": "批量安全库存",
+    "selectSKU": "选择SKU",
+    "enterSKUCode": "输入SKU编码",
+    "safetyStockValue": "安全库存值",
+    "batchUpdateSuccess": "安全库存更新成功",
+    "batchUpdateFailed": "更新安全库存失败",
+    "currentSafetyStock": "当前安全库存",
+    "newSafetyStock": "新安全库存",
+    "pleaseSelectSKU": "请至少选择一个SKU",
+    "pleaseEnterValidStock": "请输入有效的安全库存值",
+    "selectedItems": "已选项目"
   },
   "login": {
     "title": "ShopJoy",
@@ -1766,22 +1779,6 @@
     "withImageReviews": "带图评价",
     "replyCount": "回复数",
     "replyRate": "回复率"
-  },
-  "inventory": {
-    "batchUpdateSafetyStock": "批量更新安全库存",
-    "batchSafetyStock": "批量安全库存",
-    "selectSKU": "选择SKU",
-    "enterSKUCode": "输入SKU编码",
-    "safetyStockValue": "安全库存值",
-    "batchUpdateSuccess": "安全库存更新成功",
-    "batchUpdateFailed": "更新安全库存失败",
-    "currentSafetyStock": "当前安全库存",
-    "newSafetyStock": "新安全库存",
-    "pleaseSelectSKU": "请至少选择一个SKU",
-    "pleaseEnterValidStock": "请输入有效的安全库存值",
-    "skuCode": "SKU编码",
-    "productName": "商品名称",
-    "selectedItems": "已选项目"
   },
   "shipping": {
     "title": "运费模板",
