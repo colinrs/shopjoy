@@ -41,7 +41,8 @@
     "languageEN": "English",
     "languageZH": "中文",
     "defaultAdmin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "viewAll": "View All"
   },
   "status": {
     "success": "Success",
@@ -1510,7 +1511,19 @@
     "warehouseCodePlaceholder": "e.g. WH-001",
     "countryPlaceholder": "e.g. CN, US",
     "addressPlaceholder": "Detailed address",
-    "exportLogs": "Export Logs"
+    "exportLogs": "Export Logs",
+    "batchUpdateSafetyStock": "Batch Update Safety Stock",
+    "batchSafetyStock": "Batch Safety Stock",
+    "selectSKU": "Select SKU",
+    "enterSKUCode": "Enter SKU code",
+    "safetyStockValue": "Safety Stock Value",
+    "batchUpdateSuccess": "Safety stock updated successfully",
+    "batchUpdateFailed": "Failed to update safety stock",
+    "currentSafetyStock": "Current Safety Stock",
+    "newSafetyStock": "New Safety Stock",
+    "pleaseSelectSKU": "Please select at least one SKU",
+    "pleaseEnterValidStock": "Please enter a valid safety stock value",
+    "selectedItems": "Selected Items"
   },
   "login": {
     "title": "ShopJoy",
@@ -1766,22 +1779,6 @@
     "withImageReviews": "With Images",
     "replyCount": "Replies",
     "replyRate": "Reply Rate"
-  },
-  "inventory": {
-    "batchUpdateSafetyStock": "Batch Update Safety Stock",
-    "batchSafetyStock": "Batch Safety Stock",
-    "selectSKU": "Select SKU",
-    "enterSKUCode": "Enter SKU code",
-    "safetyStockValue": "Safety Stock Value",
-    "batchUpdateSuccess": "Safety stock updated successfully",
-    "batchUpdateFailed": "Failed to update safety stock",
-    "currentSafetyStock": "Current Safety Stock",
-    "newSafetyStock": "New Safety Stock",
-    "pleaseSelectSKU": "Please select at least one SKU",
-    "pleaseEnterValidStock": "Please enter a valid safety stock value",
-    "skuCode": "SKU Code",
-    "productName": "Product Name",
-    "selectedItems": "Selected Items"
   },
   "shipping": {
     "title": "Shipping Templates",

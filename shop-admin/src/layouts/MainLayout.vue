@@ -22,12 +22,11 @@
       
       <el-menu
         :default-active="$route.path"
-        router
         class="sidebar-menu"
         :collapse="isCollapse"
         :collapse-transition="false"
       >
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/dashboard" @click="router.push('/dashboard')">
           <el-icon><DataLine /></el-icon>
           <template #title>
             <span>{{ $t('dashboard.title') }}</span>
@@ -48,16 +47,16 @@
             <el-icon><Goods /></el-icon>
             <span>{{ $t('products.title') }}</span>
           </template>
-          <el-menu-item index="/products">
+          <el-menu-item index="/products" @click="router.push('/products')">
             <span>{{ $t('products.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/categories">
+          <el-menu-item index="/categories" @click="router.push('/categories')">
             <span>{{ $t('categories.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/brands">
+          <el-menu-item index="/brands" @click="router.push('/brands')">
             <span>{{ $t('brands.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/inventory">
+          <el-menu-item index="/inventory" @click="router.push('/inventory')">
             <span>{{ $t('inventory.title') }}</span>
           </el-menu-item>
         </el-sub-menu>
@@ -67,7 +66,7 @@
             <el-icon><List /></el-icon>
             <span>{{ $t('orders.title') }}</span>
           </template>
-          <el-menu-item index="/orders">
+          <el-menu-item index="/orders" @click="router.push('/orders')">
             <span>{{ $t('orders.title') }}</span>
             <el-badge
               v-if="pendingOrders > 0"
@@ -75,10 +74,10 @@
               class="menu-badge"
             />
           </el-menu-item>
-          <el-menu-item index="/fulfillment/shipments">
+          <el-menu-item index="/fulfillment/shipments" @click="router.push('/fulfillment/shipments')">
             <span>{{ $t('fulfillment.shipments') }}</span>
           </el-menu-item>
-          <el-menu-item index="/fulfillment/refunds">
+          <el-menu-item index="/fulfillment/refunds" @click="router.push('/fulfillment/refunds')">
             <span>{{ $t('fulfillment.refunds') }}</span>
             <el-badge
               v-if="pendingRefunds > 0"
@@ -87,19 +86,19 @@
               type="warning"
             />
           </el-menu-item>
-          <el-menu-item index="/fulfillment/statistics">
+          <el-menu-item index="/fulfillment/statistics" @click="router.push('/fulfillment/statistics')">
             <span>{{ $t('fulfillment.statistics') }}</span>
           </el-menu-item>
         </el-sub-menu>
 
-        <el-menu-item index="/users">
+        <el-menu-item index="/users" @click="router.push('/users')">
           <el-icon><User /></el-icon>
           <template #title>
             <span>{{ $t('users.title') }}</span>
           </template>
         </el-menu-item>
 
-        <el-menu-item index="/reviews">
+        <el-menu-item index="/reviews" @click="router.push('/reviews')">
           <el-icon><ChatDotRound /></el-icon>
           <template #title>
             <span>{{ $t('reviews.title') }}</span>
@@ -112,14 +111,14 @@
           </template>
         </el-menu-item>
 
-        <el-menu-item index="/admin-users">
+        <el-menu-item index="/admin-users" @click="router.push('/admin-users')">
           <el-icon><UserFilled /></el-icon>
           <template #title>
             <span>{{ $t('adminUsers.title') }}</span>
           </template>
         </el-menu-item>
 
-        <el-menu-item index="/promotions">
+        <el-menu-item index="/promotions" @click="router.push('/promotions')">
           <el-icon><Ticket /></el-icon>
           <template #title>
             <span>{{ $t('promotions.title') }}</span>
@@ -131,25 +130,25 @@
             <el-icon><Shop /></el-icon>
             <span>{{ $t('shop.title') }}</span>
           </template>
-          <el-menu-item index="/shop">
+          <el-menu-item index="/shop" @click="router.push('/shop')">
             <span>{{ $t('shop.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/settings/markets">
+          <el-menu-item index="/settings/markets" @click="router.push('/settings/markets')">
             <span>{{ $t('settings.markets.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/storefront/themes">
+          <el-menu-item index="/storefront/themes" @click="router.push('/storefront/themes')">
             <span>{{ $t('storefront.themes') }}</span>
           </el-menu-item>
-          <el-menu-item index="/storefront/pages">
+          <el-menu-item index="/storefront/pages" @click="router.push('/storefront/pages')">
             <span>{{ $t('storefront.pages') }}</span>
           </el-menu-item>
-          <el-menu-item index="/storefront/seo">
+          <el-menu-item index="/storefront/seo" @click="router.push('/storefront/seo')">
             <span>{{ $t('storefront.seo') }}</span>
           </el-menu-item>
-          <el-menu-item index="/shipping">
+          <el-menu-item index="/shipping" @click="router.push('/shipping')">
             <span>{{ $t('shipping.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/payment">
+          <el-menu-item index="/payment" @click="router.push('/payment')">
             <span>{{ $t('payments.title') }}</span>
           </el-menu-item>
         </el-sub-menu>

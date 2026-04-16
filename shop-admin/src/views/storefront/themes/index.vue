@@ -309,7 +309,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Picture, Check } from '@element-plus/icons-vue'
@@ -337,6 +337,7 @@ const previewDialogVisible = ref(false)
 const previewThemeData = ref<ThemeItem | null>(null)
 const auditLogs = ref<ThemeAuditLog[]>([])
 const auditLoading = ref(false)
+const isMounted = ref(false)
 
 const configForm = reactive({
   primary_color: '#6366F1',
@@ -349,26 +350,36 @@ const fetchThemes = async () => {
   loading.value = true
   try {
     const res = await listThemes()
-    themes.value = res.themes || []
+    if (isMounted.value) {
+      themes.value = res.themes || []
+    }
   } catch (error) {
-    ElMessage.error(t('storefront.loadThemesFailed'))
+    if (isMounted.value) {
+      ElMessage.error(t('storefront.loadThemesFailed'))
+    }
   } finally {
-    loading.value = false
+    if (isMounted.value) {
+      loading.value = false
+    }
   }
 }
 
 const fetchCurrentTheme = async () => {
   try {
     const res = await getCurrentTheme()
-    currentTheme.value = res
-    if (res.config) {
-      configForm.primary_color = res.config.primary_color || '#6366F1'
-      configForm.secondary_color = res.config.secondary_color || '#818CF8'
-      configForm.font_family = res.config.font_family || 'inter'
-      configForm.button_style = res.config.button_style || 'rounded'
+    if (isMounted.value) {
+      currentTheme.value = res
+      if (res.config) {
+        configForm.primary_color = res.config.primary_color || '#6366F1'
+        configForm.secondary_color = res.config.secondary_color || '#818CF8'
+        configForm.font_family = res.config.font_family || 'inter'
+        configForm.button_style = res.config.button_style || 'rounded'
+      }
     }
   } catch (error) {
-    ElMessage.error(t('storefront.loadCurrentThemeFailed'))
+    if (isMounted.value) {
+      ElMessage.error(t('storefront.loadCurrentThemeFailed'))
+    }
   }
 }
 
@@ -390,16 +401,20 @@ const applyTheme = async (themeId: number) => {
     )
     switchLoading.value = true
     await switchTheme({ theme_id: themeId })
-    ElMessage.success(t('storefront.themeSwitchSuccess'))
-    previewDialogVisible.value = false
-    await fetchThemes()
-    await fetchCurrentTheme()
+    if (isMounted.value) {
+      ElMessage.success(t('storefront.themeSwitchSuccess'))
+      previewDialogVisible.value = false
+      await fetchThemes()
+      await fetchCurrentTheme()
+    }
   } catch (error: unknown) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && isMounted.value) {
       ElMessage.error((error as Error).message || t('storefront.themeSwitchFailed'))
     }
   } finally {
-    switchLoading.value = false
+    if (isMounted.value) {
+      switchLoading.value = false
+    }
   }
 }
 
@@ -444,11 +459,17 @@ const fetchAuditLogs = async () => {
   auditLoading.value = true
   try {
     const res = await getThemeAuditLogs()
-    auditLogs.value = res.logs || []
+    if (isMounted.value) {
+      auditLogs.value = res.logs || []
+    }
   } catch (error) {
-    ElMessage.error(t('storefront.loadAuditLogsFailed'))
+    if (isMounted.value) {
+      ElMessage.error(t('storefront.loadAuditLogsFailed'))
+    }
   } finally {
-    auditLoading.value = false
+    if (isMounted.value) {
+      auditLoading.value = false
+    }
   }
 }
 
@@ -480,8 +501,13 @@ watch(activeTab, (newTab) => {
 })
 
 onMounted(() => {
+  isMounted.value = true
   fetchThemes()
   fetchCurrentTheme()
+})
+
+onUnmounted(() => {
+  isMounted.value = false
 })
 </script>
 

@@ -17,14 +17,14 @@ func NewReplyRepository() review.ReplyRepository {
 }
 
 type replyModel struct {
-	ID        int64  `gorm:"column:id;primaryKey"`
-	ReviewID  int64  `gorm:"column:review_id;not null;uniqueIndex"`
-	TenantID  int64  `gorm:"column:tenant_id;not null"`
-	AdminID   int64  `gorm:"column:admin_id;not null"`
-	AdminName string `gorm:"column:admin_name;size:100;not null"`
-	Content   string `gorm:"column:content;type:text;not null"`
-	CreatedAt int64  `gorm:"column:created_at;not null"`
-	UpdatedAt int64  `gorm:"column:updated_at;not null"`
+	ID        int64     `gorm:"column:id;primaryKey"`
+	ReviewID  int64     `gorm:"column:review_id;not null;uniqueIndex"`
+	TenantID  int64     `gorm:"column:tenant_id;not null"`
+	AdminID   int64     `gorm:"column:admin_id;not null"`
+	AdminName string    `gorm:"column:admin_name;size:100;not null"`
+	Content   string    `gorm:"column:content;type:text;not null"`
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (replyModel) TableName() string {
@@ -39,12 +39,8 @@ func (m *replyModel) toEntity() *review.ReviewReply {
 		AdminName: m.AdminName,
 		Content:   m.Content,
 	}
-	if m.CreatedAt > 0 {
-		entity.CreatedAt = time.Unix(m.CreatedAt, 0)
-	}
-	if m.UpdatedAt > 0 {
-		entity.UpdatedAt = time.Unix(m.UpdatedAt, 0)
-	}
+	entity.CreatedAt = m.CreatedAt
+	entity.UpdatedAt = m.UpdatedAt
 	return entity
 }
 
