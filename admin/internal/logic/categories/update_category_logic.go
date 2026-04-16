@@ -68,7 +68,11 @@ func (l *UpdateCategoryLogic) UpdateCategory(req *types.UpdateCategoryReq) (resp
 	}
 
 	// Get product count
-	productCount, _ := l.svcCtx.CategoryRepo.GetProductCount(l.ctx, l.svcCtx.DB, category.ID)
+	productCount, err := l.svcCtx.CategoryRepo.GetProductCount(l.ctx, l.svcCtx.DB, category.ID)
+	if err != nil {
+		l.Logger.Errorf("failed to get product count for category %d: %v", category.ID, err)
+		productCount = 0
+	}
 
 	return &types.CategoryDetailResp{
 		ID:             category.ID,

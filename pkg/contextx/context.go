@@ -10,10 +10,18 @@ import (
 type contextKey string
 
 const (
-	userIDKey   contextKey = "user_id"
-	tenantIDKey contextKey = "tenant_id"
-	userTypeKey contextKey = "user_type"
-	userNameKey contextKey = "user_name"
+	userIDKey    contextKey = "user_id"
+	tenantIDKey  contextKey = "tenant_id"
+	userTypeKey  contextKey = "user_type"
+	userNameKey  contextKey = "user_name"
+	userEmailKey contextKey = "user_email"
+)
+
+// User type constants
+const (
+	UserTypePlatformAdmin = 1 // 平台超管
+	UserTypeTenantAdmin   = 2 // 租户管理员
+	UserTypeTenantUser    = 3 // 租户用户
 )
 
 // SetUserID 设置用户ID到 context
@@ -49,9 +57,13 @@ func GetUserType(ctx context.Context) (int, bool) {
 	return userType, ok
 }
 
-// GetCurrentUserID 获取当前用户ID，如果不存在返回0
+// GetCurrentUserID 获取当前用户ID，如果不存在返回0并带有错误信息
+// 注意：返回 0 可能表示未认证，调用方应该检查是否为平台管理员
 func GetCurrentUserID(ctx context.Context) int64 {
-	userID, _ := GetUserID(ctx)
+	userID, ok := GetUserID(ctx)
+	if !ok {
+		return 0
+	}
 	return userID
 }
 
@@ -100,7 +112,7 @@ func GetCurrentUserName(ctx context.Context) string {
 // IsPlatformAdmin 检查当前用户是否为平台管理员
 func IsPlatformAdmin(ctx context.Context) bool {
 	userType, ok := GetUserType(ctx)
-	return ok && userType == 1 // 1 = 平台超管
+	return ok && userType == UserTypePlatformAdmin
 }
 
 // GetTenantIDWithAdmin 获取租户ID，平台管理员返回0表示可访问所有数据

@@ -7,6 +7,7 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
@@ -30,9 +31,10 @@ func NewCreatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 
 func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (resp *types.CreatePromotionResp, err error) {
 	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

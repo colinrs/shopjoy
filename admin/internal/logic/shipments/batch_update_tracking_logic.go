@@ -31,9 +31,10 @@ func NewBatchUpdateTrackingLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTrackingReq) (resp *types.BatchUpdateTrackingResp, err error) {
 	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

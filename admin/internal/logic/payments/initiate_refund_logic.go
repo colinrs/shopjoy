@@ -6,6 +6,7 @@ import (
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -28,8 +29,11 @@ func NewInitiateRefundLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ini
 
 func (l *InitiateRefundLogic) InitiateRefund(req *types.InitiateRefundReq) (resp *types.InitiateRefundResp, err error) {
 	// Get tenant ID and admin ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	if tenantID == 0 {
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}
 	adminID := contextx.GetCurrentUserID(l.ctx)

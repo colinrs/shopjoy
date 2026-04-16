@@ -5,6 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -27,9 +28,10 @@ func NewDeleteProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Dele
 
 func (l *DeleteProductLogic) DeleteProduct(req *types.GetProductReq) (resp *types.CreateProductResp, err error) {
 	// Get tenant ID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

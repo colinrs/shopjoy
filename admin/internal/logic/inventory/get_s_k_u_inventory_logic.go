@@ -5,6 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -25,7 +26,13 @@ func NewGetSKUInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetSKUInventoryLogic) GetSKUInventory(req *types.GetSKUInventoryReq) (resp *types.SKUInventoryResp, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
 
 	// Get warehouse inventory for the SKU
 	warehouseInventories, err := l.svcCtx.WarehouseInventoryRepo.FindBySKU(

@@ -10,6 +10,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -36,9 +37,10 @@ func NewExportFulfillmentStatisticsLogic(ctx context.Context, svcCtx *svc.Servic
 
 func (l *ExportFulfillmentStatisticsLogic) ExportFulfillmentStatistics(req *types.ExportFulfillmentStatisticsReq) error {
 	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

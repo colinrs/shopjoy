@@ -48,7 +48,11 @@ func (l *ListBrandsLogic) ListBrands(req *types.ListBrandReq) (resp *types.ListB
 
 	list := make([]types.BrandDetailResp, 0, len(brands))
 	for _, b := range brands {
-		productCount, _ := l.svcCtx.BrandRepo.GetProductCount(l.ctx, l.svcCtx.DB, b.ID)
+		productCount, err := l.svcCtx.BrandRepo.GetProductCount(l.ctx, l.svcCtx.DB, b.ID)
+		if err != nil {
+			l.Logger.Errorf("failed to get product count for brand %d: %v", b.ID, err)
+			productCount = 0
+		}
 		list = append(list, *toBrandDetailResp(b, productCount))
 	}
 

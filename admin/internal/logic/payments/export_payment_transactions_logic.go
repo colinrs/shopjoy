@@ -38,9 +38,10 @@ func NewExportPaymentTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 func (l *ExportPaymentTransactionsLogic) ExportPaymentTransactions(req *types.ExportPaymentTransactionsReq) error {
 	// Get tenantID from context
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-
-	// Platform admin can access all data
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}

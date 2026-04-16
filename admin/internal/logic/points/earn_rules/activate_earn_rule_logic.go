@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -27,7 +28,13 @@ func NewActivateEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) A
 }
 
 func (l *ActivateEarnRuleLogic) ActivateEarnRule(req *types.ActivateEarnRuleReq) (resp *types.EarnRule, err error) {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return nil, code.ErrUnauthorized
+	}
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
 	userID, _ := contextx.GetUserID(l.ctx)
 
 	if err := l.svcCtx.PointsService.ActivateEarnRule(l.ctx, shared.TenantID(tenantID), req.ID, userID); err != nil {

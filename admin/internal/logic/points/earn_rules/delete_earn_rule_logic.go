@@ -5,6 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -26,7 +27,10 @@ func NewDeleteEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Del
 }
 
 func (l *DeleteEarnRuleLogic) DeleteEarnRule(req *types.DeleteEarnRuleReq) error {
-	tenantID, _ := contextx.GetTenantID(l.ctx)
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+		return code.ErrUnauthorized
+	}
 	if contextx.IsPlatformAdmin(l.ctx) {
 		tenantID = 0
 	}
