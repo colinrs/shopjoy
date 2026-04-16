@@ -148,7 +148,7 @@
           <el-menu-item index="/shipping" @click="router.push('/shipping')">
             <span>{{ $t('shipping.title') }}</span>
           </el-menu-item>
-          <el-menu-item index="/payment" @click="router.push('/payment')">
+          <el-menu-item index="/payments" @click="router.push('/payments')">
             <span>{{ $t('payments.title') }}</span>
           </el-menu-item>
         </el-sub-menu>

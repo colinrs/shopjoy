@@ -36,7 +36,7 @@
       <div class="current-theme-content">
         <div class="theme-preview">
           <el-image
-            :src="currentTheme.theme.preview_image || currentTheme.theme.thumbnail"
+            :src="currentTheme?.theme?.preview_image || currentTheme?.theme?.thumbnail"
             fit="cover"
             class="preview-image"
           >
@@ -50,9 +50,9 @@
           </el-image>
         </div>
         <div class="theme-info">
-          <h3>{{ currentTheme.theme.name }}</h3>
+          <h3>{{ currentTheme?.theme?.name }}</h3>
           <p class="theme-desc">
-            {{ currentTheme.theme.description }}
+            {{ currentTheme?.theme?.description }}
           </p>
 
           <!-- Theme Config -->
