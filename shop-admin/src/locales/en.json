@@ -42,7 +42,21 @@
     "languageZH": "中文",
     "defaultAdmin": "Admin",
     "logout": "Logout",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "add": "Add",
+    "address": "Address",
+    "avatar": "Avatar",
+    "avatarUrl": "Avatar URL",
+    "back": "Back",
+    "clearSelection": "Clear Selection",
+    "disabled": "Disabled",
+    "enabled": "Enabled",
+    "exportSuccess": "Export successful",
+    "items": "Items",
+    "preview": "Preview",
+    "remove": "Remove",
+    "tips": "Tips",
+    "warningConfirm": "Confirm"
   },
   "status": {
     "success": "Success",
@@ -179,7 +193,6 @@
     "adjustmentType": "Adjustment Type",
     "decreasePrice": "Decrease Price",
     "increasePrice": "Increase Price",
-    "amount": "Amount",
     "maximum": "Maximum:",
     "originalAmount": "Original Amount",
     "newPayAmount": "New Pay Amount",
@@ -243,7 +256,9 @@
     "endDate": "End Date",
     "unshipped": "Unshipped",
     "noOrders": "No Orders",
-    "noOrdersDesc": "There are no orders at the moment"
+    "noOrdersDesc": "There are no orders at the moment",
+    "batchCancel": "Batch Cancel",
+    "noCancellableOrders": "No cancellable orders selected"
   },
   "users": {
     "title": "Users",
@@ -316,8 +331,6 @@
     "loadUserDetailFailed": "Failed to load user details",
     "confirmEnableUser": "Confirm enable this user",
     "confirmDisableUser": "Confirm disable this user",
-    "enabled": "Enabled",
-    "disabled": "Disabled",
     "addressList": "Address List",
     "loadAddressFailed": "Failed to load addresses",
     "noAddresses": "No addresses",
@@ -335,7 +348,16 @@
     "orders": "Orders",
     "points": "Points",
     "noUsers": "No Users",
-    "noUsersDesc": "There are no users at the moment"
+    "noUsersDesc": "There are no users at the moment",
+    "batchActivate": "Batch Activate",
+    "batchActivateFailed": "Failed to batch activate",
+    "batchSuspend": "Batch Suspend",
+    "deleteWarning": "Are you sure you want to delete this user?",
+    "enterUsername": "Enter username",
+    "orderCountMax": "Maximum order count",
+    "orderCountMin": "Minimum order count",
+    "suspendReasonLengthError": "Suspend reason must be 5-200 characters",
+    "suspendReasonRequired": "Please enter the suspend reason"
   },
   "products": {
     "title": "Products",
@@ -557,7 +579,8 @@
     "langZhCN": "Simplified Chinese",
     "langJa": "Japanese",
     "langKo": "Korean",
-    "langEs": "Spanish"
+    "langEs": "Spanish",
+    "notOnAnyMarket": "Not on any market"
   },
   "payments": {
     "title": "Payments",
@@ -604,7 +627,6 @@
     "partialRefund": "Partial Refund",
     "refundFullAmount": "Refund full amount",
     "refundPartOfAmount": "Refund part of amount",
-    "refundAmount": "Refund Amount",
     "maxRefundable": "Max refundable",
     "refundReason": "Refund Reason",
     "selectRefundReason": "Select refund reason",
@@ -639,7 +661,8 @@
     "transactionCreated": "Transaction Created",
     "paymentSucceeded": "Payment Succeeded",
     "paymentFailed": "Payment Failed",
-    "internalId": "Internal ID"
+    "internalId": "Internal ID",
+    "refundType": "Refund Type"
   },
   "points": {
     "title": "Points",
@@ -769,7 +792,7 @@
     "enterPointsAmount": "Please enter points amount",
     "pointsMustBePositive": "Points must be greater than 0",
     "enterReasonAtLeast5": "Reason must be at least 5 characters",
-    "loadAccountsFailed": "Failed to load accounts",
+    "loadAccountsFailed": "Failed to load accounts list",
     "accountDetail": "Account Detail",
     "manualAdjust": "Manual Adjust",
     "noDescription": "No description",
@@ -796,7 +819,6 @@
     "completed": "Completed",
     "cancelled": "Cancelled",
     "rangeSeparator": "to",
-    "user": "User",
     "coupon": "Coupon",
     "pointsUsed": "Points Used",
     "exchangeTime": "Exchange Time",
@@ -828,7 +850,6 @@
     "backToAccountList": "Back to Account List",
     "userPointsAccount": "Points Account for User #{{userId}}",
     "accountOverview": "Account Overview",
-    "adjustPoints": "Adjust Points",
     "availableBalance": "Available Balance",
     "frozenPoints": "Frozen Points",
     "cumulativeEarned": "Total Earned",
@@ -841,7 +862,26 @@
     "totalAccounts": "Total Accounts",
     "totalBalance": "Total Balance",
     "searchUserIdOrEmail": "Search user ID or email",
-    "loadAccountsFailed": "Failed to load accounts list"
+    "actions": "Actions",
+    "activate": "Activate",
+    "activeUsers": "Active Users",
+    "couponCode": "Coupon Code",
+    "deactivate": "Deactivate",
+    "deleteSuccess": "Deleted successfully",
+    "edit": "Edit",
+    "endTime": "End Time",
+    "fixedAmountLabel": "Fixed Amount",
+    "images": "Images",
+    "limitPerUser": "Limit Per User",
+    "loadCouponsFailed": "Failed to load coupons",
+    "noUpperLimit": "No upper limit",
+    "percentageLabel": "Percentage",
+    "pointsRequired": "Points Required",
+    "reasonInput": "Reason",
+    "startTime": "Start Time",
+    "status": "Status",
+    "stock": "Stock",
+    "unlimitedText": "Unlimited"
   },
   "promotions": {
     "title": "Promotions",
@@ -1012,7 +1052,6 @@
     "deactivateSuccess": "Deactivated successfully",
     "activityName": "Activity Name",
     "activityDesc": "Activity Description",
-    "buyXGetY": "Buy X Get Y",
     "selectCouponType": "Select coupon type",
     "enterDiscountValue": "Enter discount value",
     "selectValidityPeriod": "Select validity period",
@@ -1084,7 +1123,8 @@
     "issueConfirm": "Confirm issuing coupon to user?",
     "issueConfirmText": "Are you sure you want to issue coupon \"{couponName}\" to user ID {userId}?",
     "userSearchPlaceholder": "Search user ID or name",
-    "currentCoupon": "Current Coupon"
+    "currentCoupon": "Current Coupon",
+    "selectPromotionType": "Select Promotion Type"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1322,7 +1362,14 @@
     "noShipments": "No Shipments",
     "noShipmentsDesc": "There are no shipments at the moment",
     "noRefunds": "No Refunds",
-    "noRefundsDesc": "There are no refunds at the moment"
+    "noRefundsDesc": "There are no refunds at the moment",
+    "batchUpdateTracking": "Batch Update Tracking",
+    "batchUpdateTrackingFailed": "Failed to batch update tracking",
+    "enterCarrierCode": "Enter carrier code",
+    "selectAtLeastOneShipment": "Please select at least one shipment",
+    "selectCarrierForBatch": "Select carrier for batch shipment",
+    "trackingNumberLengthError": "Tracking number must be 10-20 characters",
+    "updateShipmentFailed": "Failed to update shipment"
   },
   "refundReasons": {
     "title": "Refund Reasons",
@@ -1341,7 +1388,8 @@
     "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"?",
     "deleteSuccess": "Deleted successfully",
     "deleteFailed": "Failed to delete",
-    "readOnlyMessage": "Refund reasons are read-only in this version"
+    "readOnlyMessage": "Refund reasons are read-only in this version",
+    "deleteConfirm": "Confirm Delete"
   },
   "adminUsers": {
     "title": "Admin Users",
@@ -1424,7 +1472,8 @@
     "deleteSuccess": "Deleted successfully",
     "createSuccess": "Created successfully",
     "createFailed": "Failed to create",
-    "loadDataFailed": "Failed to load data"
+    "loadDataFailed": "Failed to load data",
+    "updatedAt": "Updated At"
   },
   "inventory": {
     "title": "Inventory",
@@ -1656,7 +1705,10 @@
     "marketVisibility": "Market Visibility",
     "configureMarket": "Configure",
     "noMarketVisibility": "No market visibility configured",
-    "statistics": "Statistics"
+    "statistics": "Statistics",
+    "createdAt": "Created At",
+    "disabled": "Disabled",
+    "enabled": "Enabled"
   },
   "reviews": {
     "title": "Reviews",
@@ -1773,12 +1825,10 @@
     "batchApproveFailed": "Failed to batch approve reviews",
     "loadStatsFailed": "Failed to load review statistics",
     "ratingDistribution": "Rating Distribution",
-    "totalReviews": "Total Reviews",
     "qualityRating": "Quality Rating",
     "valueRating": "Value Rating",
     "withImageReviews": "With Images",
-    "replyCount": "Replies",
-    "replyRate": "Reply Rate"
+    "replyCount": "Replies"
   },
   "shipping": {
     "title": "Shipping Templates",
@@ -1917,10 +1967,43 @@
     "pleaseCompleteAddressAndProducts": "Please complete address and add products",
     "calculationComplete": "Calculation complete",
     "calculationFailed": "Calculation failed",
-    "itemsUnit": "items"
+    "itemsUnit": "items",
+    "addCategory": "Add Category",
+    "addCategoryFailed": "Failed to add category",
+    "addCategorySuccess": "Category added successfully",
+    "addProduct": "Add Product",
+    "addProductFailed": "Failed to add product",
+    "addProductSuccess": "Product added successfully",
+    "addZoneFailed": "Failed to add zone",
+    "addZoneSuccess": "Zone added successfully",
+    "all": "All",
+    "cannotDeleteDefault": "Cannot delete default template",
+    "create": "Create",
+    "createFailed": "Failed to create",
+    "createSuccess": "Created successfully",
+    "deleteFailed": "Failed to delete",
+    "deleteSuccess": "Deleted successfully",
+    "deleteZoneFailed": "Failed to delete zone",
+    "deleteZoneSuccess": "Zone deleted successfully",
+    "loadTemplateFailed": "Failed to load template",
+    "removeCategoryFailed": "Failed to remove category",
+    "removeCategorySuccess": "Category removed successfully",
+    "removeProductFailed": "Failed to remove product",
+    "removeProductSuccess": "Product removed successfully",
+    "saveFailed": "Failed to save",
+    "saveSuccess": "Saved successfully",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "setAsDefaultFailed": "Failed to set as default",
+    "setAsDefaultSuccess": "Set as default successfully",
+    "status": "Status",
+    "updateStatusFailed": "Failed to update status",
+    "updateZoneFailed": "Failed to update zone",
+    "updateZoneSuccess": "Zone updated successfully",
+    "warning": "Warning"
   },
   "storefront": {
-    "title": "Storefront",
+    "title": "Title",
     "themes": "Themes",
     "themeManagement": "Theme Management",
     "selectAndCustomizeTheme": "Select and customize your store theme",
@@ -2079,7 +2162,6 @@
     "imageList": "Image List",
     "imageUrl": "Image URL",
     "addImage": "Add Image",
-    "title": "Title",
     "blockTitle": "Block Title",
     "columns": "Columns",
     "column2": "2 Columns",
@@ -2105,9 +2187,6 @@
     "noConfigurableOptions": "No configurable options for this block type",
     "loadProductsFailed": "Failed to load products",
     "home": "Home",
-    "productPage": "Product Page",
-    "collectionPage": "Collection Page",
-    "customPage": "Custom Page",
     "unknown": "Unknown",
     "pageTypeGlobal": "Global Settings",
     "pageTypeHome": "Home Page",
@@ -2130,7 +2209,8 @@
     "product": "Product",
     "productGridDefaultTitle": "Product Grid",
     "hotProductsDefaultTitle": "Hot Products",
-    "clickToEditContent": "Click to edit content..."
+    "clickToEditContent": "Click to edit content...",
+    "themeSwitchFailed": "Failed to switch theme"
   },
   "settings": {
     "markets": {

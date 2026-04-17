@@ -57,7 +57,7 @@
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="-"
+            :range-separator="$t('common.to')"
             :start-placeholder="$t('points.startDate')"
             :end-placeholder="$t('points.endDate')"
             value-format="YYYY-MM-DD"

@@ -152,13 +152,6 @@
             <span>{{ $t('payments.title') }}</span>
           </el-menu-item>
         </el-sub-menu>
-
-        <el-menu-item index="/analytics">
-          <el-icon><TrendCharts /></el-icon>
-          <template #title>
-            <span>{{ $t('dashboard.title') }}</span>
-          </template>
-        </el-menu-item>
       </el-menu>
       
       <!-- Sidebar Footer -->
@@ -373,7 +366,7 @@ import { ElMessage } from 'element-plus'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import {
   ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
-  TrendCharts, Expand, Fold, FullScreen, Bell, ArrowDown,
+  Expand, Fold, FullScreen, Bell, ArrowDown,
   Setting, SwitchButton, Moon, Sunny, ChatDotRound
 } from '@element-plus/icons-vue'
 import { useLocale, t } from '@/plugins/i18n'

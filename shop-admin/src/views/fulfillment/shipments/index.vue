@@ -148,7 +148,7 @@
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="to"
+            :range-separator="$t('common.to')"
             :start-placeholder="$t('fulfillment.startDate')"
             :end-placeholder="$t('fulfillment.endDate')"
             class="date-picker"

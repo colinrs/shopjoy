@@ -73,7 +73,7 @@ export interface LowStockSKU {
 
 // Warehouse API functions
 export function getWarehouses() {
-  return request<Warehouse[]>({
+  return request<{ list: Warehouse[] }>({
     url: '/api/v1/warehouses',
     method: 'get'
   })

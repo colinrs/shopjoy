@@ -140,7 +140,7 @@
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="to"
+            :range-separator="$t('common.to')"
             :start-placeholder="$t('fulfillment.startDate')"
             :end-placeholder="$t('fulfillment.endDate')"
             class="date-picker"
@@ -456,7 +456,7 @@ const refundList = ref<Refund[]>([])
 const loadRefundReasons = async () => {
   try {
     const res = await getRefundReasonList()
-    refundReasons.value = res
+    refundReasons.value = res.list || []
   } catch (error) {
     ElMessage.error(t('fulfillment.loadRefundReasonsFailed'))
   }

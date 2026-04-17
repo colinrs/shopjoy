@@ -16,13 +16,13 @@
           size="default"
           @change="loadData"
         >
-          <el-radio-button label="7">
+          <el-radio-button value="7">
             {{ $t('payments.period7d') }}
           </el-radio-button>
-          <el-radio-button label="30">
+          <el-radio-button value="30">
             {{ $t('payments.period30d') }}
           </el-radio-button>
-          <el-radio-button label="90">
+          <el-radio-button value="90">
             {{ $t('payments.period90d') }}
           </el-radio-button>
         </el-radio-group>
