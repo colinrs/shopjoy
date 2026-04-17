@@ -261,7 +261,7 @@ export const getCarrierList = () => {
 }
 
 export const getRefundReasonList = () => {
-  return request.get<RefundReason[]>('/api/v1/refund-reasons')
+  return request.get<{ list: RefundReason[] }>('/api/v1/refund-reasons')
 }
 
 // Statistics

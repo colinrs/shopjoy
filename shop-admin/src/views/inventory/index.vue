@@ -360,7 +360,7 @@
               <el-input
                 v-model="adjustForm.remark"
                 type="textarea"
-                rows="3"
+                :rows="3"
                 :placeholder="$t('inventory.enterRemark')"
                 style="width: 400px"
               />
@@ -474,7 +474,7 @@
           <el-input
             v-model="warehouseForm.address"
             type="textarea"
-            rows="2"
+            :rows="2"
             :placeholder="$t('inventory.addressPlaceholder')"
           />
         </el-form-item>
@@ -557,9 +557,6 @@
             <el-select
               v-model="batchSafetyStockForm.sku_codes"
               multiple
-              filterable
-              allow-create
-              default-first-option
               :placeholder="$t('inventory.enterSKUCode')"
               style="width: 100%"
             >
@@ -901,7 +898,7 @@ const loadWarehouses = async () => {
   warehouseLoading.value = true
   try {
     const res = await getWarehouses()
-    warehouseList.value = res || []
+    warehouseList.value = res.list || []
   } catch (error) {
     handleError(error, t('inventory.loadWarehouseFailed'))
   } finally {

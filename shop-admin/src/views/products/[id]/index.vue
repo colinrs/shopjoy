@@ -499,7 +499,7 @@ const handlePushToMarketSuccess = () => {
 const loadWarehouses = async () => {
   try {
     const response = await getWarehouses()
-    warehouses.value = response || []
+    warehouses.value = response.list || []
   } catch (error) {
     handleError(error)
   }
