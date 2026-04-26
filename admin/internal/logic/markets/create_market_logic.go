@@ -50,6 +50,13 @@ func (l *CreateMarketLogic) CreateMarket(req *types.CreateMarketReq) (resp *type
 
 	// Persist
 	repo := persistence.NewMarketRepository()
+
+	// Check if market with same code already exists
+	existing, err := repo.FindByCode(l.ctx, l.svcCtx.DB, req.Code)
+	if err == nil && existing != nil {
+		return nil, code.ErrMarketDuplicate
+	}
+
 	if err := repo.Create(l.ctx, l.svcCtx.DB, m); err != nil {
 		return nil, code.ErrMarketDuplicate
 	}
