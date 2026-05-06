@@ -29,11 +29,8 @@ func NewGetEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetEar
 
 func (l *GetEarnRuleLogic) GetEarnRule(req *types.GetEarnRuleReq) (resp *types.EarnRule, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	rule, err := l.svcCtx.PointsService.GetEarnRule(l.ctx, shared.TenantID(tenantID), req.ID)

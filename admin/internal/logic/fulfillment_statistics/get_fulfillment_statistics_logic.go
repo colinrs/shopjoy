@@ -32,11 +32,8 @@ func NewGetFulfillmentStatisticsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 func (l *GetFulfillmentStatisticsLogic) GetFulfillmentStatistics(req *types.GetRefundStatisticsReq) (resp *types.FulfillmentStatisticsResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Parse time range

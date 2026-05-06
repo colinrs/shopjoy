@@ -31,11 +31,8 @@ func NewCancelShipmentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Can
 func (l *CancelShipmentLogic) CancelShipment(req *types.CancelShipmentReq) (resp *types.CancelShipmentResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Get user ID from context for audit

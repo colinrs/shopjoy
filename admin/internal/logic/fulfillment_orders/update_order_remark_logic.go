@@ -29,11 +29,8 @@ func NewUpdateOrderRemarkLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *UpdateOrderRemarkLogic) UpdateOrderRemark(req *types.UpdateOrderRemarkReq) (resp *types.UpdateOrderRemarkResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Truncate remark to 500 characters (using rune count for UTF-8 safety)

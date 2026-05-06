@@ -30,11 +30,8 @@ func NewGetAccountTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceCont
 
 func (l *GetAccountTransactionsLogic) GetAccountTransactions(req *types.ListAccountTransactionsReq) (resp *types.ListPointsTransactionsResp, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	query := points.PointsTransactionQuery{

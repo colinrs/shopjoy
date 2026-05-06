@@ -29,11 +29,8 @@ func NewGetAccountLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetAcco
 
 func (l *GetAccountLogic) GetAccount(req *types.GetAccountReq) (resp *types.PointsAccount, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	account, err := l.svcCtx.PointsService.GetAccount(l.ctx, shared.TenantID(tenantID), req.ID)

@@ -29,11 +29,8 @@ func NewDeleteProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceC
 func (l *DeleteProductLocalizationLogic) DeleteProductLocalization(req *types.GetProductLocalizationReq) (resp *types.CreateProductResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Delete localization

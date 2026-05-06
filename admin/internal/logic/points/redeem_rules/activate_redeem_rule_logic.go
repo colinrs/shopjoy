@@ -29,11 +29,8 @@ func NewActivateRedeemRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *ActivateRedeemRuleLogic) ActivateRedeemRule(req *types.ActivateRedeemRuleReq) (resp *types.RedeemRule, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 	userID, _ := contextx.GetUserID(l.ctx)
 

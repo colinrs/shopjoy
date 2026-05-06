@@ -34,6 +34,8 @@
     "fullscreen": "全屏",
     "notifications": "通知",
     "superAdmin": "超级管理员",
+    "tenantId": "租户ID",
+    "tenantIdPlaceholder": "请输入租户ID",
     "profile": "个人中心",
     "accountSettings": "账号设置",
     "logoutSuccess": "退出登录成功",

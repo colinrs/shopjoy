@@ -32,11 +32,8 @@ func NewCreateEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cre
 
 func (l *CreateEarnRuleLogic) CreateEarnRule(req *types.CreateEarnRuleReq) (resp *types.EarnRule, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 	userID, _ := contextx.GetUserID(l.ctx)
 

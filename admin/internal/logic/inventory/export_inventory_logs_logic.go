@@ -36,11 +36,8 @@ func NewExportInventoryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *ExportInventoryLogsLogic) ExportInventoryLogs(req *types.GetInventoryLogsReq) error {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// For export, use a large page size to get all records

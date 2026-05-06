@@ -34,6 +34,8 @@
     "fullscreen": "Fullscreen",
     "notifications": "Notifications",
     "superAdmin": "Super Admin",
+    "tenantId": "Tenant ID",
+    "tenantIdPlaceholder": "Enter Tenant ID",
     "profile": "Profile",
     "accountSettings": "Account Settings",
     "logoutSuccess": "Logout successful",

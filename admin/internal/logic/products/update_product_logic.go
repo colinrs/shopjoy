@@ -31,11 +31,8 @@ func NewUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upda
 func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *types.ProductDetailResp, err error) {
 	// 从 context 获取 tenantID
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// 解析价格字符串（单位：元）

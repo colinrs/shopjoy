@@ -29,11 +29,8 @@ func NewGetRedemptionLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetR
 
 func (l *GetRedemptionLogic) GetRedemption(req *types.GetRedemptionReq) (resp *types.PointsRedemption, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	redemption, err := l.svcCtx.PointsService.GetRedemption(l.ctx, shared.TenantID(tenantID), req.ID)

@@ -35,11 +35,8 @@ func NewDashboardHelper(ctx context.Context, svcCtx *svc.ServiceContext) *Dashbo
 // GetTenantID extracts tenant ID from context
 func (h *DashboardHelper) GetTenantID() (shared.TenantID, bool) {
 	tenantID, ok := contextx.GetTenantID(h.ctx)
-	if !ok && !contextx.IsPlatformAdmin(h.ctx) {
+	if !ok {
 		return 0, false
-	}
-	if contextx.IsPlatformAdmin(h.ctx) {
-		tenantID = 0
 	}
 	return shared.TenantID(tenantID), true
 }

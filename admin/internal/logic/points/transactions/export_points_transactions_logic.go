@@ -38,11 +38,8 @@ func NewExportPointsTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 func (l *ExportPointsTransactionsLogic) ExportPointsTransactions(req *types.ExportPointsTransactionsReq) error {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Build query

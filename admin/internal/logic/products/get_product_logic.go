@@ -29,11 +29,8 @@ func NewGetProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetProd
 func (l *GetProductLogic) GetProduct(req *types.GetProductReq) (resp *types.ProductDetailResp, err error) {
 	// 从 context 获取 tenantID
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	productResp, err := l.svcCtx.ProductService.GetProduct(l.ctx, shared.TenantID(tenantID), req.ID)

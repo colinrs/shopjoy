@@ -29,11 +29,8 @@ func NewPutOnSaleLogic(ctx context.Context, svcCtx *svc.ServiceContext) PutOnSal
 func (l *PutOnSaleLogic) PutOnSale(req *types.PutOnSaleReq) (resp *types.ProductDetailResp, err error) {
 	// 从 context 获取 tenantID
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	productResp, err := l.svcCtx.ProductService.PutOnSale(l.ctx, shared.TenantID(tenantID), req.ID)
