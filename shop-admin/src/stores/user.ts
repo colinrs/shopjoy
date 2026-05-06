@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { AdminUser } from '@/api/admin-user'
 
 /**
@@ -10,7 +10,19 @@ export type UserInfo = AdminUser
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
-  const userInfo = ref<UserInfo | null>(null)
+
+  // Restore userInfo from localStorage if available
+  const savedUserInfo = localStorage.getItem('user_info')
+  const userInfo = ref<UserInfo | null>(savedUserInfo ? JSON.parse(savedUserInfo) : null)
+
+  // Persist userInfo to localStorage whenever it changes
+  watch(userInfo, (val) => {
+    if (val) {
+      localStorage.setItem('user_info', JSON.stringify(val))
+    } else {
+      localStorage.removeItem('user_info')
+    }
+  }, { deep: true })
 
   const setToken = (newToken: string) => {
     token.value = newToken
@@ -21,6 +33,8 @@ export const useUserStore = defineStore('user', () => {
     token.value = ''
     userInfo.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('user_info')
+    localStorage.removeItem('target_tenant_id')
   }
 
   return {

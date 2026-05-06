@@ -29,11 +29,8 @@ func NewDeleteSKULogic(ctx context.Context, svcCtx *svc.ServiceContext) DeleteSK
 func (l *DeleteSKULogic) DeleteSKU(req *types.GetSKUReq) (resp *types.CreateSKUResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Delete SKU

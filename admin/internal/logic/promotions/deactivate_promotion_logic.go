@@ -29,11 +29,8 @@ func NewDeactivatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext
 func (l *DeactivatePromotionLogic) DeactivatePromotion(req *types.DeactivatePromotionReq) (resp *types.PromotionDetailResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	err = l.svcCtx.PromotionApp.DeactivatePromotion(l.ctx, shared.TenantID(tenantID), req.ID)

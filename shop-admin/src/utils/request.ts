@@ -25,9 +25,15 @@ axiosInstance.interceptors.request.use(
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
-    // Use tenant_id from userInfo if available, otherwise fall back to localStorage or default '1'
-    const tenantId = userStore.userInfo?.tenant_id || localStorage.getItem('tenant_id') || '1'
-    config.headers['X-Tenant-ID'] = String(tenantId)
+    // For SuperAdmin, use target_tenant_id if set; otherwise use default tenant_id
+    const targetTenantId = localStorage.getItem('target_tenant_id')
+    let tenantId: string
+    if (userStore.userInfo?.type === 1 && targetTenantId) {
+      tenantId = targetTenantId
+    } else {
+      tenantId = String(userStore.userInfo?.tenant_id || localStorage.getItem('tenant_id') || '1')
+    }
+    config.headers['X-Tenant-ID'] = tenantId
     return config
   },
   (error: AxiosError) => {

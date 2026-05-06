@@ -28,11 +28,8 @@ func NewDeleteRedeemRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) D
 
 func (l *DeleteRedeemRuleLogic) DeleteRedeemRule(req *types.DeleteRedeemRuleReq) error {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	return l.svcCtx.PointsService.DeleteRedeemRule(l.ctx, shared.TenantID(tenantID), req.ID)

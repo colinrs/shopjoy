@@ -29,11 +29,8 @@ func NewGetTransactionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 
 func (l *GetTransactionLogic) GetTransaction(req *types.GetPointsTransactionReq) (resp *types.PointsTransaction, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	transaction, err := l.svcCtx.PointsService.GetTransaction(l.ctx, shared.TenantID(tenantID), req.ID)

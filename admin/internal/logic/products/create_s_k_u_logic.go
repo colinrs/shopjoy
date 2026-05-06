@@ -32,11 +32,8 @@ func NewCreateSKULogic(ctx context.Context, svcCtx *svc.ServiceContext) CreateSK
 func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateSKUResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Generate SKU ID

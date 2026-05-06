@@ -32,11 +32,8 @@ func NewCreateProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceC
 func (l *CreateProductLocalizationLogic) CreateProductLocalization(req *types.CreateProductLocalizationReq) (resp *types.CreateProductResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Generate ID

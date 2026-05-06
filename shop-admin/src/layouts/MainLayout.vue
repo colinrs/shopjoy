@@ -188,6 +188,28 @@
         </div>
         
         <div class="header-right">
+          <!-- SuperAdmin Tenant ID Input -->
+          <div
+            v-if="isSuperAdmin"
+            class="super-admin-tenant"
+          >
+            <el-icon
+              class="super-admin-tenant-icon"
+              color="#E6A23C"
+            >
+              <Warning />
+            </el-icon>
+            <span class="super-admin-tenant-label">{{ $t('common.tenantId') }}:</span>
+            <el-input-number
+              v-model="targetTenantId"
+              :min="1"
+              :placeholder="$t('common.tenantIdPlaceholder')"
+              controls-position="right"
+              size="small"
+              class="super-admin-tenant-input"
+            />
+          </div>
+
           <!-- Search -->
           <div class="header-search">
             <el-input
@@ -359,7 +381,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
@@ -367,7 +389,7 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 import {
   ShoppingBag, DataLine, Goods, List, User, UserFilled, Ticket, Shop,
   Expand, Fold, FullScreen, Bell, ArrowDown,
-  Setting, SwitchButton, Moon, Sunny, ChatDotRound
+  Setting, SwitchButton, Moon, Sunny, ChatDotRound, Warning
 } from '@element-plus/icons-vue'
 import { useLocale, t } from '@/plugins/i18n'
 
@@ -380,6 +402,32 @@ const handleLocaleChange = (lang: string) => {
 
 const router = useRouter()
 const userStore = useUserStore()
+
+const isSuperAdmin = computed(() => userStore.userInfo?.type === 1)
+const targetTenantId = ref<number | undefined>(undefined)
+
+// Restore target tenant_id from localStorage on mount
+const initTargetTenantId = () => {
+  const saved = localStorage.getItem('target_tenant_id')
+  if (saved) {
+    targetTenantId.value = Number(saved)
+  }
+}
+
+// When targetTenantId changes, update localStorage immediately
+watch(targetTenantId, (val) => {
+  if (val && val > 0) {
+    localStorage.setItem('target_tenant_id', String(val))
+  } else {
+    localStorage.removeItem('target_tenant_id')
+  }
+})
+
+const logout = () => {
+  userStore.clearToken()
+  router.push('/login')
+  ElMessage.success(t('common.logoutSuccess'))
+}
 
 const isCollapse = ref(false)
 const searchQuery = ref('')
@@ -472,14 +520,9 @@ const goToSettings = () => {
   ElMessage.info(t('common.accountSettings'))
 }
 
-const logout = () => {
-  userStore.clearToken()
-  router.push('/login')
-  ElMessage.success(t('common.logoutSuccess'))
-}
-
 onMounted(() => {
   initTheme()
+  initTargetTenantId()
 })
 </script>
 
@@ -662,6 +705,29 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* SuperAdmin Tenant ID Input */
+.super-admin-tenant {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #FDF6EC;
+  border: 1px solid #E6A23C;
+  border-radius: 6px;
+  margin-right: 8px;
+}
+
+.super-admin-tenant-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #E6A23C;
+  white-space: nowrap;
+}
+
+.super-admin-tenant-input {
+  width: 140px;
 }
 
 .header-search {

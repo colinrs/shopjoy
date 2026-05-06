@@ -33,11 +33,8 @@ func NewListProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPr
 func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.ListProductResp, err error) {
 	// 从 context 获取 tenantID
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	queryReq := appProduct.QueryProductRequest{

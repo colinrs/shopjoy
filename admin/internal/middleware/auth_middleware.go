@@ -4,6 +4,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -58,9 +59,20 @@ func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Re
 			// Set user info to context
 			ctx := r.Context()
 			ctx = contextx.SetUserID(ctx, claims.UserID)
-			ctx = contextx.SetTenantID(ctx, claims.TenantID)
 			ctx = contextx.SetUserType(ctx, claims.Type)
-			ctx = tenant.WithContext(ctx, shared.TenantID(claims.TenantID))
+
+			// For platform admins, allow overriding tenant_id via X-Tenant-ID header
+			tenantID := claims.TenantID
+			if claims.Type == 1 {
+				if headerTenantID := r.Header.Get("X-Tenant-ID"); headerTenantID != "" {
+					var id int64
+					if _, err := fmt.Sscanf(headerTenantID, "%d", &id); err == nil && id > 0 {
+						tenantID = id
+					}
+				}
+			}
+			ctx = contextx.SetTenantID(ctx, tenantID)
+			ctx = tenant.WithContext(ctx, shared.TenantID(tenantID))
 
 			// Fetch username from database for audit logging
 			if adminUserRepo != nil && db != nil {

@@ -27,11 +27,8 @@ func NewRestoreVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Res
 
 func (l *RestoreVersionLogic) RestoreVersion(req *types.RestoreVersionRequest) error {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 	userID, _ := contextx.GetUserID(l.ctx)
 

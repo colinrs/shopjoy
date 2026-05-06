@@ -28,11 +28,8 @@ func NewGetVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetVers
 
 func (l *GetVersionLogic) GetVersion(req *types.GetVersionRequest) (resp *types.VersionDetailResponse, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	result, err := l.svcCtx.VersionService.GetVersion(l.ctx, shared.TenantID(tenantID), req.PageID, req.Version)

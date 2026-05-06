@@ -39,11 +39,8 @@ func NewExportOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext, w htt
 func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Build query request

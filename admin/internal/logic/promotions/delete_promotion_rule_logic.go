@@ -29,11 +29,8 @@ func NewDeletePromotionRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext
 func (l *DeletePromotionRuleLogic) DeletePromotionRule(req *types.DeletePromotionRuleReq) (resp *types.CreatePromotionResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Note: This would require additional implementation in the app service

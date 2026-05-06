@@ -29,11 +29,8 @@ func NewGetShipmentLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetShi
 func (l *GetShipmentLogic) GetShipment(req *types.GetShipmentReq) (resp *types.ShipmentDetailResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Get shipment

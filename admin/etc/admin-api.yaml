@@ -24,4 +24,10 @@ JWT:
   AccessExpiry: 3600
   RefreshExpiry: 7200
 
-StripeWebhookSecret: "aaaa"  
+StripeWebhookSecret: "aaaa"
+
+Telemetry:
+  Name: admin-api
+  Endpoint: 192.168.0.100:4317
+  Sampler: 1.0      # 1.0 = 全量采样
+  Batcher: otlpgrpc

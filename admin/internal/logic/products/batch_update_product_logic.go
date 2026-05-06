@@ -32,13 +32,8 @@ func NewBatchUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProductReq) (resp *types.BatchUpdateProductResp, err error) {
 	// 从 context 获取 tenantID
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-
-	// 平台管理员设置 tenantID = 0 以访问所有数据
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// 验证 UpdateFields 至少提供一个字段

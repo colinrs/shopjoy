@@ -28,11 +28,8 @@ func NewDeleteEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Del
 
 func (l *DeleteEarnRuleLogic) DeleteEarnRule(req *types.DeleteEarnRuleReq) error {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	return l.svcCtx.PointsService.DeleteEarnRule(l.ctx, shared.TenantID(tenantID), req.ID)

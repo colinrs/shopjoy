@@ -30,11 +30,8 @@ func NewGetProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceCont
 func (l *GetProductLocalizationLogic) GetProductLocalization(req *types.GetProductLocalizationReq) (resp *types.ProductLocalizationResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Find localization

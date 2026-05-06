@@ -29,11 +29,8 @@ func NewGetPaymentStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 func (l *GetPaymentStatsLogic) GetPaymentStats(req *types.GetPaymentStatsReq) (resp *types.PaymentStatsResp, err error) {
 	// Get tenant ID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Get payment stats from service

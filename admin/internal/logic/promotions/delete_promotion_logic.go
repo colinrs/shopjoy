@@ -29,11 +29,8 @@ func NewDeletePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) De
 func (l *DeletePromotionLogic) DeletePromotion(req *types.DeletePromotionReq) (resp *types.CreatePromotionResp, err error) {
 	// Get tenantID from context
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	err = l.svcCtx.PromotionApp.DeletePromotion(l.ctx, shared.TenantID(tenantID), req.ID)

@@ -29,11 +29,8 @@ func NewGetPointsStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 
 func (l *GetPointsStatsLogic) GetPointsStats(req *types.GetPointsStatsReq) (resp *types.PointsStats, err error) {
 	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok && !contextx.IsPlatformAdmin(l.ctx) {
+	if !ok {
 		return nil, code.ErrUnauthorized
-	}
-	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
 	}
 
 	// Calculate time range based on period
