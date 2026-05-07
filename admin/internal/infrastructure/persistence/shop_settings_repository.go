@@ -82,6 +82,8 @@ func (r *shopSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *shop
 		}).Error
 }
 
+func (*shopSettingsModel) TableName() string { return "shop_settings" }
+
 type shopSettingsModel struct {
 	ID              int64     `gorm:"column:id;primaryKey"`
 	TenantID        int64     `gorm:"column:tenant_id;not null;uniqueIndex"`
@@ -211,6 +213,8 @@ func (r *businessHoursRepo) SaveBatch(ctx context.Context, db *gorm.DB, shopID i
 	})
 }
 
+func (*businessHoursModel) TableName() string { return "shop_business_hours" }
+
 type businessHoursModel struct {
 	ID        int64     `gorm:"column:id;primaryKey"`
 	ShopID    int64     `gorm:"column:shop_id;not null;index"`
@@ -308,6 +312,8 @@ func (r *notificationSettingsRepo) Save(ctx context.Context, db *gorm.DB, settin
 			"updated_at":          model.UpdatedAt,
 		}).Error
 }
+
+func (*notificationSettingsModel) TableName() string { return "shop_notification_settings" }
 
 type notificationSettingsModel struct {
 	ID                int64     `gorm:"column:id;primaryKey"`
@@ -414,6 +420,8 @@ func (r *paymentSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *s
 		}).Error
 }
 
+func (*paymentSettingsModel) TableName() string { return "shop_payment_settings" }
+
 type paymentSettingsModel struct {
 	ID              int64     `gorm:"column:id;primaryKey"`
 	ShopID          int64     `gorm:"column:shop_id;not null;uniqueIndex"`
@@ -503,6 +511,8 @@ func (r *shippingSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *
 			"updated_at":              model.UpdatedAt,
 		}).Error
 }
+
+func (*shippingSettingsModel) TableName() string { return "shop_shipping_settings" }
 
 type shippingSettingsModel struct {
 	ID                    int64     `gorm:"column:id;primaryKey"`

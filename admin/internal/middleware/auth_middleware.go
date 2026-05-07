@@ -63,7 +63,7 @@ func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Re
 
 			// For platform admins, allow overriding tenant_id via X-Tenant-ID header
 			tenantID := claims.TenantID
-			if claims.Type == 1 {
+			if claims.Type == contextx.UserTypePlatformAdmin {
 				if headerTenantID := r.Header.Get("X-Tenant-ID"); headerTenantID != "" {
 					var id int64
 					if _, err := fmt.Sscanf(headerTenantID, "%d", &id); err == nil && id > 0 {

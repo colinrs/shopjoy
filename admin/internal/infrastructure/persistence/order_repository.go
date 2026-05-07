@@ -411,17 +411,55 @@ func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, tenantID sha
 	return orders, nil
 }
 
+// statusCountRow intermediate struct for scanning raw SQL results
+type statusCountRow struct {
+	Status int    `gorm:"column:status"`
+	Count  int64  `gorm:"column:count"`
+}
+
+// statusToOrderStatus maps database TINYINT status to domain OrderStatus
+func statusToOrderStatus(status int) fulfillment.OrderStatus {
+	switch status {
+	case 0:
+		return fulfillment.OrderStatusPendingPayment
+	case 1:
+		return fulfillment.OrderStatusPaid
+	case 2:
+		return fulfillment.OrderStatusPendingPayment // pending_shipment → treat as pending
+	case 3:
+		return fulfillment.OrderStatusShipped
+	case 4:
+		return fulfillment.OrderStatusDelivered
+	case 5:
+		return fulfillment.OrderStatusCancelled
+	case 6:
+		return fulfillment.OrderStatusRefunded // refunding → treat as refunded
+	case 7:
+		return fulfillment.OrderStatusRefunded
+	default:
+		return fulfillment.OrderStatusPendingPayment
+	}
+}
+
 // CountByStatus 按状态统计订单数量
 func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]fulfillment.OrderStatusCount, error) {
 	query := db.WithContext(ctx).Model(&orderModel{}).
 		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64())
 
-	var results []fulfillment.OrderStatusCount
+	var rows []statusCountRow
 	err := query.Select("status, COUNT(*) as count").
 		Group("status").
-		Scan(&results).Error
+		Scan(&rows).Error
 	if err != nil {
 		return nil, err
+	}
+
+	results := make([]fulfillment.OrderStatusCount, 0, len(rows))
+	for _, row := range rows {
+		results = append(results, fulfillment.OrderStatusCount{
+			Status: statusToOrderStatus(row.Status),
+			Count:  row.Count,
+		})
 	}
 	return results, nil
 }
