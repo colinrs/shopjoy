@@ -413,8 +413,8 @@ func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, tenantID sha
 
 // statusCountRow intermediate struct for scanning raw SQL results
 type statusCountRow struct {
-	Status int    `gorm:"column:status"`
-	Count  int64  `gorm:"column:count"`
+	Status int   `gorm:"column:status"`
+	Count  int64 `gorm:"column:count"`
 }
 
 // statusToOrderStatus maps database TINYINT status to domain OrderStatus
