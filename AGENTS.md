@@ -96,8 +96,7 @@ E-commerce platform with admin management and shop APIs. Built with go-zero micr
 
 ### Root Makefile (build all services)
 ```bash
-# Generate API code for all services
-make gen-go-api
+# Generate API code for all services (runs `make api` in each service)
 make api
 
 # Build all services
@@ -459,7 +458,7 @@ func RateLimitMiddleware() rest.Middleware {
 **Schema consolidation:** Each domain keeps a single `schema.sql` containing the complete definition of all tables in that domain. When a migration alters fields/indexes, merge the change into `schema.sql` and delete the migrations directory.
 
 **Migration file naming:** `{YYYYMMDD}{seq}_{action}_{object}.sql`
-- Examples: `2026032401_create_reviews.sql`, `2026032201_alter_promotions_add_scope.sql`
+- Examples: `2026040801_create_carriers.sql`, `2026040802_create_refund_reasons.sql`
 
 ### Domain Mapping
 
