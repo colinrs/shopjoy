@@ -3,7 +3,7 @@
 **Generated:** 2026-03-18
 **Commit:** Latest
 **Branch:** main
-**Go Version:** 1.24.0
+**Go Version:** 1.25.0  (per go.mod)
 **Node Version:** 18+
 
 ## OVERVIEW
@@ -15,19 +15,49 @@ E-commerce platform with admin management and shop APIs. Built with go-zero micr
 ```
 ./
 ├── admin/              # Admin management API service (go-zero)
+│   ├── desc/           # API definition files (.api)
+│   └── internal/
+│       ├── application/    # Application layer (use-case orchestration)
+│       ├── domain/         # Domain layer (entities, value objects, repo interfaces)
+│       ├── infrastructure/ # Infrastructure layer (repository implementations)
+│       ├── handler/        # HTTP handlers (auto-generated + custom)
+│       ├── logic/          # Business logic (scaffolded by goctl, safe to edit)
+│       ├── middleware/     # Middleware implementations
+│       ├── svc/            # Service context (dependency injection)
+│       ├── config/         # Configuration structs
+│       ├── types/          # Request/response types (auto-generated)
+│       └── utils/
 ├── shop/               # Shop/e-commerce API service (go-zero)
+│   ├── desc/           # API definition files (.api)
+│   └── internal/
+│       ├── application/    # Application layer (cart, order, payment services)
+│       ├── domain/         # Domain layer (cart, order, payment entities)
+│       ├── infrastructure/ # Infrastructure layer (persistence repositories)
+│       ├── handler/        # HTTP handlers
+│       ├── logic/          # Business logic
+│       ├── svc/            # Service context
+│       ├── config/         # Configuration structs
+│       └── types/          # Request/response types (auto-generated)
 ├── pkg/                # Shared packages
-│   ├── cache/          # Cache abstraction (Redis, Ristretto)
-│   ├── client/         # Client utilities (etcd)
-│   ├── code/           # Error codes and definitions
-│   ├── codec/          # Serialization (sonic JSON)
-│   ├── gosafe/         # Safe goroutine utilities
-│   ├── httpc/          # HTTP client utilities
-│   ├── httpy/          # HTTP parsing utilities
-│   ├── infra/          # Infrastructure (DB, Redis, metrics)
-│   ├── response/       # HTTP response handlers
-│   ├── snowflake/      # ID generation
-│   └── utils/          # General utilities
+│   ├── application/   # Shared application-layer helpers
+│   ├── asyncq/        # Async queue (asynq, Redis-based)
+│   ├── auth/          # JWT authentication
+│   ├── cache/         # Cache abstraction (Redis, Ristretto)
+│   ├── client/        # Client utilities (etcd)
+│   ├── code/          # Error codes and definitions
+│   ├── codec/         # Serialization (sonic JSON)
+│   ├── contextx/      # Context utilities
+│   ├── domain/        # Shared domain primitives (Money, TenantID, DomainEvent)
+│   ├── gosafe/        # Safe goroutine utilities
+│   ├── httpc/         # HTTP client utilities
+│   ├── httpy/         # HTTP parsing utilities
+│   ├── infra/         # Infrastructure (DB, Redis, metrics)
+│   ├── rest/          # REST helpers
+│   ├── response/      # HTTP response handlers
+│   ├── sku/           # SKU code generation
+│   ├── snowflake/     # ID generation
+│   ├── tenant/        # Multi-tenant context management
+│   └── utils/         # General utilities
 ├── shop-admin/         # Admin frontend (Vue3 + Element Plus)
 │   ├── src/
 │   │   ├── views/      # Page components
@@ -76,6 +106,8 @@ make build
 # Run linter
 golangci-lint run --timeout=10m
 ```
+
+**After any code change, you MUST run `make build` to verify compilation succeeds.** Do not use `go build` directly — the Makefile is the canonical build entry point.
 
 ### Service Makefile (shop/ or admin/)
 ```bash
@@ -144,6 +176,20 @@ npm run build
 - `@heroicons/vue` - Heroicons icon library
 - `tailwindcss` - CSS framework (via CDN)
 
+### Database Setup
+
+```bash
+# Start MySQL + Redis via Docker
+docker-compose up -d mysql redis
+
+# Bootstrap schemas + seed data (sql/ is organized by business domain)
+bash sql/init.sh
+# or run the combined init script directly:
+# mysql -u root -p < sql/init.sql
+```
+
+**Note:** README references `scripts/migrate.go`, but that file does not currently exist in `scripts/` (only `gen_bcrypt.go` is present). Use `sql/init.sh` / `sql/init.sql` for DB setup.
+
 ### Testing
 ```bash
 # Backend tests
@@ -199,6 +245,33 @@ make api
 - `internal/middleware/*_middleware.go` - Middleware scaffolds
 
 **Why:** The Makefile ensures consistent code generation with proper flags and style settings.
+
+### MANDATORY: Frontend Synchronization After API Changes
+
+When backend `.api` definitions change, you **MUST** also update the corresponding frontend code. This step is mandatory and must not be skipped — any backend change that omits frontend updates is incomplete and will cause runtime bugs.
+
+- **`src/api/{module}.ts`** — Update TypeScript type definitions to match backend request/response types
+- **`src/views/{module}/**/*.vue`** — Update all enum value comparisons in template logic (`v-if`, `v-show`, status checks)
+- **`src/components/**`** — Update any components that use the affected enum values
+
+### Enum Conventions (Backend is source of truth)
+
+| Type | Rule |
+|------|------|
+| MUST | Enum values must be defined in backend `.api` files with inline comments |
+| MUST | Frontend TypeScript types must match backend enum values exactly |
+| MUST | When backend enum changes, frontend must be updated accordingly |
+| MUST NOT | Frontend define its own enum values independent of backend |
+| MUST NOT | Modify backend enum values to match frontend existing usage |
+
+Example of proper enum documentation in `.api` files:
+```go
+type OrderStatus int // 0=pending_payment, 1=paid, 2=pending_shipment, 3=shipped, 4=completed, 5=cancelled
+```
+
+### VAT/GST Rates
+
+VAT/GST rates are returned as **strings** from the backend. Frontend handlers must implement string↔number conversion when displaying or computing with rate values.
 
 ### Middleware Configuration in API Files
 
@@ -362,6 +435,49 @@ func RateLimitMiddleware() rest.Middleware {
 
 **IMPORTANT:** Always use `*code.Err` type for errors that need specific HTTP status codes. The `pkg/response/response.go` handler will automatically use the correct HTTP status from `Err.HTTPCode`.
 
+**Business Error Code Ranges by Module** (see `pkg/code/code.go` for the full list):
+
+| Module | Code Range |
+|--------|------------|
+| Admin User | 10xxx |
+| User | 11xxx |
+| Product | 30xxx |
+| Order | 40xxx |
+| Payment | 50xxx |
+| Cart | 60xxx |
+| Coupon | 70xxx |
+| Promotion | 80xxx |
+| Tenant | 90xxx |
+| Role | 100xxx |
+| Shop | 110xxx |
+| Fulfillment | 120xxx |
+
+**DO NOT** create local error variables with `errors.New()` in application or domain layers — define all business errors centrally in `pkg/code/code.go`.
+
+### SQL Conventions
+
+**Schema consolidation:** Each domain keeps a single `schema.sql` containing the complete definition of all tables in that domain. When a migration alters fields/indexes, merge the change into `schema.sql` and delete the migrations directory.
+
+**Migration file naming:** `{YYYYMMDD}{seq}_{action}_{object}.sql`
+- Examples: `2026032401_create_reviews.sql`, `2026032201_alter_promotions_add_scope.sql`
+
+### Domain Mapping
+
+Docs, SQL, and code are organized by the same domains:
+
+| Domain | Docs | SQL | Code |
+|--------|------|-----|------|
+| user | `docs/domains/user/` | `sql/user/` | `domain/{user,adminuser,role,tenant}/` |
+| product | `docs/domains/product/` | `sql/product/` | `domain/{product,market}/` |
+| order | `docs/domains/order/` | `sql/order/` | `domain/{order,cart}/` |
+| promotion | `docs/domains/promotion/` | `sql/promotion/` | `domain/{promotion,coupon}/` |
+| points | `docs/domains/points/` | `sql/points/` | TBD |
+| shop | `docs/domains/shop/` | `sql/shop/` | `handler/shop/` |
+| storefront | `docs/domains/storefront/` | `sql/storefront/` | `domain/storefront/` |
+| fulfillment | `docs/domains/fulfillment/` | `sql/fulfillment/` | `domain/fulfillment/` |
+| payment | `docs/domains/payment/` | `sql/payment/` | `domain/payment/` |
+| review | `docs/domains/review/` | `sql/review/` | `domain/review/` |
+
 ### Error Handling (Vue)
 - Use try-catch for async operations
 - Display user-friendly error messages
@@ -435,16 +551,22 @@ service shop-api {
 ```
 
 ### Money Handling
-- **ALWAYS** use `github.com/shopspring/decimal` for all monetary calculations
+- **ALWAYS** use `github.com/shopspring/decimal` for all monetary calculations internally
 - **NEVER** use `float64` or `int` for money - precision loss is unacceptable
-- Store in database as `DECIMAL(19,4)` or string if needed
+- Store in database as `DECIMAL(19,4)`
+- **API layer convention:** expose money as `string` representing 元 (e.g. `"1.99"` for 1.99 元). Convert string↔`decimal.Decimal` at the handler boundary.
 
 ```go
 import "github.com/shopspring/decimal"
 
-// Good
+// Good - decimal for internal calc
 price := decimal.NewFromFloat(99.99)
 total := price.Mul(decimal.NewFromInt(quantity))
+
+// API response - string of 元
+type Response {
+    Total string `json:"total"`  // "99.99"
+}
 
 // Bad - precision loss
 price := 99.99  // float64
@@ -452,23 +574,25 @@ total := price * float64(quantity)
 ```
 
 ### Time Handling
+- **ALWAYS** use `time.Time` in Go and `TIMESTAMP` in the database
 - **ALWAYS** store and return UTC time in backend
 - **NEVER** store local time in database
 - Frontend is responsible for timezone conversion and display
 - Use `time.Now().UTC()` for current time
 
 ```go
-// Good - store UTC
+// Good - time.Time in Go, UTC
 now := time.Now().UTC()
-createdAt := now.Format("2006-01-02 15:04:05")
+createdAt := now  // store as time.Time; DB column is TIMESTAMP
 
-// API response - UTC format
+// API response - UTC ISO format
 type Response {
-    CreatedAt string `json:"created_at"`  // "2024-01-15 08:30:00"
+    CreatedAt time.Time `json:"created_at"`  // serialized as UTC ISO string
 }
 
-// Bad - storing local time
+// Bad - storing local time, or pre-formatting to string in the struct
 now := time.Now()  // Depends on server timezone
+createdAt := now.Format("2006-01-02 15:04:05")  // loses type info
 ```
 
 ### Frontend Styling Guidelines
