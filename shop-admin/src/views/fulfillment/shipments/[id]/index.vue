@@ -593,7 +593,7 @@ const timeline = computed<TimelineEvent[]>(() => {
 const loadShipment = async () => {
   const id = route.params.id
   try {
-    const res = await getShipmentDetail(Number(id))
+    const res = await getShipmentDetail(id as string)
     shipment.value = res
   } catch (error) {
     ElMessage.error(t('fulfillment.loadShipmentDetailsFailed'))

@@ -165,9 +165,9 @@ const loadTransactions = async () => {
       page: searchParams.page,
       page_size: searchParams.page_size
     }
-    // Parse user_id from string input to number
+    // Parse user_id from string input
     if (userIdInput.value && /^\d+$/.test(userIdInput.value.trim())) {
-      params.user_id = parseInt(userIdInput.value.trim(), 10)
+      params.user_id = userIdInput.value.trim()
     }
     if (searchParams.type) params.type = searchParams.type
     if (searchParams.start_time) params.start_time = searchParams.start_time
@@ -204,9 +204,9 @@ const handlePageChange = (page: number, pageSize: number) => {
 
 const handleExport = async () => {
   try {
-    // Parse user_id from string input to number
+    // Parse user_id from string input
     const userId = userIdInput.value && /^\d+$/.test(userIdInput.value.trim())
-      ? parseInt(userIdInput.value.trim(), 10)
+      ? userIdInput.value.trim()
       : undefined
 
     const { url, params } = exportPointsTransactionsUrl({

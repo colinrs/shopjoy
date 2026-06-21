@@ -32,10 +32,10 @@ export interface OrderListParams {
 
 // Order item
 export interface OrderItem {
-  order_item_id: number
-  product_id: number
+  order_item_id: string
+  product_id: string
   product_name: string
-  sku_id: number
+  sku_id: string
   sku_name: string
   image: string
   quantity: number
@@ -63,7 +63,7 @@ export interface PaymentInfo {
 
 // Shipment info
 export interface ShipmentInfo {
-  shipment_id: number
+  shipment_id: string
   shipment_no: string
   carrier_code: string
   carrier_name: string
@@ -75,7 +75,7 @@ export interface ShipmentInfo {
 
 // Order list item
 export interface Order {
-  order_id: number
+  order_id: string
   order_no: string
   status: OrderStatus
   status_text: string
@@ -83,7 +83,7 @@ export interface Order {
   fulfillment_text: string
   refund_status: string
   refund_text: string
-  user_id: number
+  user_id: string
   user_name: string
   user_phone: string
   total_amount: string
@@ -108,7 +108,7 @@ export interface OrderDetail extends Order {
 
 // Ship order request item
 export interface ShipOrderItem {
-  order_item_id: number
+  order_item_id: string
   quantity: number
 }
 
@@ -126,7 +126,7 @@ export interface ShipOrderRequest {
 
 // Ship order response
 export interface ShipOrderResponse {
-  shipment_id: number
+  shipment_id: string
   shipment_no: string
 }
 
@@ -138,7 +138,7 @@ export interface AdjustPriceRequest {
 
 // Adjust price response
 export interface AdjustPriceResponse {
-  order_id: number
+  order_id: string
   original_amount: string
   adjust_amount: string
   new_pay_amount: string
@@ -154,7 +154,7 @@ export interface UpdateOrderRemarkRequest {
 // Export orders parameters
 export interface ExportOrdersParams {
   order_no?: string
-  user_id?: number
+  user_id?: string
   status?: OrderStatus
   fulfillment_status?: FulfillmentStatus
   refund_status?: string
@@ -177,28 +177,28 @@ export const getOrderList = (params: OrderListParams) => {
 /**
  * Get order detail with fulfillment information
  */
-export const getOrderDetail = (orderId: number) => {
+export const getOrderDetail = (orderId: string) => {
   return request.get<OrderDetail>(`/api/v1/orders/${orderId}`)
 }
 
 /**
  * Ship order (create shipment from order)
  */
-export const shipOrder = (orderId: number, data: ShipOrderRequest) => {
+export const shipOrder = (orderId: string, data: ShipOrderRequest) => {
   return request.put<ShipOrderResponse>(`/api/v1/orders/${orderId}/ship`, data)
 }
 
 /**
  * Update order remark
  */
-export const updateOrderRemark = (orderId: number, data: UpdateOrderRemarkRequest) => {
-  return request.put<{ order_id: number }>(`/api/v1/orders/${orderId}/remark`, data)
+export const updateOrderRemark = (orderId: string, data: UpdateOrderRemarkRequest) => {
+  return request.put<{ order_id: string }>(`/api/v1/orders/${orderId}/remark`, data)
 }
 
 /**
  * Adjust order price
  */
-export const adjustOrderPrice = (orderId: number, data: AdjustPriceRequest) => {
+export const adjustOrderPrice = (orderId: string, data: AdjustPriceRequest) => {
   return request.put<AdjustPriceResponse>(`/api/v1/orders/${orderId}/adjust-price`, data)
 }
 
@@ -215,14 +215,14 @@ export const exportOrders = (params: ExportOrdersParams) => {
 /**
  * Cancel order
  */
-export const cancelOrder = (orderId: number, reason: string) => {
+export const cancelOrder = (orderId: string, reason: string) => {
   return request.put<void>(`/api/v1/orders/${orderId}/cancel`, { reason })
 }
 
 /**
  * Remind payment
  */
-export const remindPayment = (orderId: number) => {
+export const remindPayment = (orderId: string) => {
   return request.post<void>(`/api/v1/orders/${orderId}/remind-payment`)
 }
 
@@ -231,11 +231,11 @@ export const remindPayment = (orderId: number) => {
  * Note: Use batchCreateShipments from fulfillment.ts for the actual API call
  */
 export const batchShipOrders = (data: {
-  order_ids: number[]
+  order_ids: string[]
   carrier_code: string
   tracking_no_start: string
 }) => {
-  return request.post<{ shipments: { order_id: number; shipment_id: number }[] }>(
+  return request.post<{ shipments: { order_id: string; shipment_id: string }[] }>(
     '/api/v1/shipments/batch',
     {
       order_ids: data.order_ids,
@@ -249,14 +249,14 @@ export const batchShipOrders = (data: {
 
 // Batch cancel order request
 export interface BatchCancelOrderRequest {
-  order_ids: number[]
+  order_ids: string[]
   reason: string
 }
 
 // Batch cancel order response
 export interface BatchCancelOrderResponse {
   success: number[]
-  failed: { order_id: number; code: number; message: string }[]
+  failed: { order_id: string; code: number; message: string }[]
 }
 
 // Batch cancel orders

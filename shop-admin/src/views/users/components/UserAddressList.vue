@@ -93,7 +93,7 @@ import { t } from '@/plugins/i18n'
 import { getUserAddresses, type UserAddress } from '@/api/user'
 
 const props = defineProps<{
-  userId?: number
+  userId?: string
 }>()
 
 const loading = ref(false)

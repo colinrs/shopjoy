@@ -3,6 +3,7 @@ package shipments
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -10,6 +11,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -46,12 +48,18 @@ func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTra
 
 	// Initialize response
 	resp = &types.BatchUpdateTrackingResp{
-		Success: make([]int64, 0, len(req.ShipmentIDs)),
+		Success: make([]string, 0, len(req.ShipmentIDs)),
 		Failed:  make([]types.BatchTrackingFail, 0),
 	}
 
+	// Parse shipment IDs (string -> int64)
+	shipmentIDs, err := utils.ParseInt64Slice(req.ShipmentIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
 	// Process each shipment
-	for _, shipmentID := range req.ShipmentIDs {
+	for _, shipmentID := range shipmentIDs {
 		// Build update request
 		var weight decimal.Decimal
 		if req.Weight != nil {
@@ -93,7 +101,7 @@ func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTra
 				})
 			}
 		} else {
-			resp.Success = append(resp.Success, shipmentID)
+			resp.Success = append(resp.Success, strconv.FormatInt(shipmentID, 10))
 		}
 	}
 

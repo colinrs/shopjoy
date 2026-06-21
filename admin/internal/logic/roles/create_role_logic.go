@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -61,7 +62,11 @@ func (l *CreateRoleLogic) CreateRole(req *types.CreateRoleRequest) (resp *types.
 
 	// Assign permissions if provided
 	if len(req.PermissionIDs) > 0 {
-		if err := l.svcCtx.PermissionRepo.AssignToRole(l.ctx, l.svcCtx.DB, newRole.ID, req.PermissionIDs); err != nil {
+		permissionIDs, err := utils.ParseInt64Slice(req.PermissionIDs)
+		if err != nil {
+			return nil, code.ErrParam
+		}
+		if err := l.svcCtx.PermissionRepo.AssignToRole(l.ctx, l.svcCtx.DB, newRole.ID, permissionIDs); err != nil {
 			l.Logger.Errorf("failed to assign permissions: %v", err)
 		}
 	}

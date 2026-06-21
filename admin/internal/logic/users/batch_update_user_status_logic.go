@@ -3,11 +3,13 @@ package users
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/tenant"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,11 +35,17 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 	}
 
 	resp = &types.BatchUpdateUserStatusResp{
-		Success: make([]int64, 0, len(req.UserIDs)),
+		Success: make([]string, 0, len(req.UserIDs)),
 		Failed:  make([]types.BatchStatusFail, 0),
 	}
 
-	for _, userID := range req.UserIDs {
+	// Parse user IDs (string -> int64)
+	userIDs, err := utils.ParseInt64Slice(req.UserIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
+	for _, userID := range userIDs {
 		var updateErr error
 		switch req.Status {
 		case 1: // activate
@@ -62,7 +70,7 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 			continue
 		}
 
-		resp.Success = append(resp.Success, userID)
+		resp.Success = append(resp.Success, strconv.FormatInt(userID, 10))
 	}
 
 	return resp, nil

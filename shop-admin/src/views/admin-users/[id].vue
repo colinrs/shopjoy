@@ -234,7 +234,7 @@ const editLoading = ref(false)
 const editFormRef = ref()
 const editFormData = ref<UpdateAdminUserParams>({})
 
-const userId = () => parseInt(route.params.id as string)
+const userId = () => route.params.id as string
 
 const loadAdminUser = async () => {
   loading.value = true

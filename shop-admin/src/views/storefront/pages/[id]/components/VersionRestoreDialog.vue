@@ -96,7 +96,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   modelValue: boolean
-  pageId: number
+  pageId: string
   version: VersionItem | null
 }>()
 

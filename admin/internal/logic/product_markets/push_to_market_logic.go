@@ -13,6 +13,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -50,9 +51,14 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 	repo := persistence.NewProductMarketRepository()
 	marketRepo := persistence.NewMarketRepository()
 
+	marketIDs, err := utils.ParseInt64Slice(req.MarketIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
 	var success, failed []int64
 
-	for i, marketID := range req.MarketIDs {
+	for i, marketID := range marketIDs {
 		// Validate market exists
 		market, err := marketRepo.FindByID(l.ctx, db, marketID)
 		if err != nil || !market.IsActive {
@@ -94,7 +100,7 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 	}
 
 	return &types.PushToMarketResp{
-		Success: success,
-		Failed:  failed,
+		Success: utils.FormatInt64Slice(success),
+		Failed:  utils.FormatInt64Slice(failed),
 	}, nil
 }

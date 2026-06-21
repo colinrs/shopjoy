@@ -8,9 +8,9 @@ export type ReviewStatus = 'pending' | 'approved' | 'hidden'
 // ==================== Review Interfaces ====================
 
 export interface ReviewListItem {
-  id: number
-  order_id: number
-  product_id: number
+  id: string
+  order_id: string
+  product_id: string
   product_name: string
   sku_code: string
   user_name: string
@@ -29,7 +29,7 @@ export interface ReviewListItem {
 }
 
 export interface ListReviewsParams {
-  product_id?: number
+  product_id?: string
   status?: string
   rating_min?: number
   rating_max?: number
@@ -49,13 +49,13 @@ export interface ListReviewsResponse {
 }
 
 export interface ReviewDetail {
-  id: number
-  tenant_id: number
-  order_id: number
-  product_id: number
+  id: string
+  tenant_id: string
+  order_id: string
+  product_id: string
   product_name: string
   sku_code: string
-  user_id: number
+  user_id: string
   user_name: string
   is_anonymous: boolean
   is_verified: boolean
@@ -73,7 +73,7 @@ export interface ReviewDetail {
 }
 
 export interface ReviewReply {
-  id: number
+  id: string
   content: string
   admin_name: string
   created_at: string
@@ -99,7 +99,7 @@ export interface ReviewStats {
 }
 
 export interface ProductStats {
-  product_id: number
+  product_id: string
   total_reviews: number
   average_rating: string
   quality_avg_rating: string
@@ -133,11 +133,11 @@ export interface ToggleFeaturedRequest {
 }
 
 export interface BatchApproveRequest {
-  ids: number[]
+  ids: string[]
 }
 
 export interface BatchHideRequest {
-  ids: number[]
+  ids: string[]
   reason?: string
 }
 
@@ -157,53 +157,53 @@ export function getReviewList(params: ListReviewsParams) {
   })
 }
 
-export function getReviewDetail(id: number) {
+export function getReviewDetail(id: string) {
   return request<ReviewDetail>({
     url: `/api/v1/reviews/${id}`,
     method: 'get'
   })
 }
 
-export function approveReview(id: number) {
-  return request<{ id: number; status: string; updated_at: string }>({
+export function approveReview(id: string) {
+  return request<{ id: string; status: string; updated_at: string }>({
     url: `/api/v1/reviews/${id}/approve`,
     method: 'put',
     data: {}
   })
 }
 
-export function hideReview(id: number, data: HideReviewRequest) {
-  return request<{ id: number; status: string; updated_at: string }>({
+export function hideReview(id: string, data: HideReviewRequest) {
+  return request<{ id: string; status: string; updated_at: string }>({
     url: `/api/v1/reviews/${id}/hide`,
     method: 'put',
     data
   })
 }
 
-export function showReview(id: number) {
-  return request<{ id: number; status: string; updated_at: string }>({
+export function showReview(id: string) {
+  return request<{ id: string; status: string; updated_at: string }>({
     url: `/api/v1/reviews/${id}/show`,
     method: 'put',
     data: {}
   })
 }
 
-export function deleteReview(id: number) {
-  return request<{ id: number; status: string; deleted_at: string }>({
+export function deleteReview(id: string) {
+  return request<{ id: string; status: string; deleted_at: string }>({
     url: `/api/v1/reviews/${id}`,
     method: 'delete'
   })
 }
 
-export function toggleFeatured(id: number, data: ToggleFeaturedRequest) {
-  return request<{ id: number; is_featured: boolean; updated_at: string }>({
+export function toggleFeatured(id: string, data: ToggleFeaturedRequest) {
+  return request<{ id: string; is_featured: boolean; updated_at: string }>({
     url: `/api/v1/reviews/${id}/featured`,
     method: 'put',
     data
   })
 }
 
-export function createReply(id: number, data: CreateReplyRequest) {
+export function createReply(id: string, data: CreateReplyRequest) {
   return request<ReviewReply>({
     url: `/api/v1/reviews/${id}/reply`,
     method: 'post',
@@ -211,7 +211,7 @@ export function createReply(id: number, data: CreateReplyRequest) {
   })
 }
 
-export function updateReply(id: number, data: UpdateReplyRequest) {
+export function updateReply(id: string, data: UpdateReplyRequest) {
   return request<ReviewReply>({
     url: `/api/v1/reviews/${id}/reply`,
     method: 'put',
@@ -219,7 +219,7 @@ export function updateReply(id: number, data: UpdateReplyRequest) {
   })
 }
 
-export function deleteReply(id: number) {
+export function deleteReply(id: string) {
   return request<{ success: boolean }>({
     url: `/api/v1/reviews/${id}/reply`,
     method: 'delete'
@@ -249,7 +249,7 @@ export function getReviewStats() {
   })
 }
 
-export function getProductStats(productId: number) {
+export function getProductStats(productId: string) {
   return request<ProductStats>({
     url: `/api/v1/reviews/product/${productId}/stats`,
     method: 'get'

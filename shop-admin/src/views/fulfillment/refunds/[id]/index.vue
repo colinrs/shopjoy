@@ -502,7 +502,7 @@ const timeline = computed(() => {
 const loadRefund = async () => {
   const id = route.params.id
   try {
-    const res = await getRefundDetail(Number(id))
+    const res = await getRefundDetail(id as string)
     refund.value = res
   } catch (error) {
     ElMessage.error(t('fulfillment.loadRefundDetailsFailed'))

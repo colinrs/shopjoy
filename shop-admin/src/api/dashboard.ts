@@ -45,7 +45,7 @@ export interface OrderStatusDistribution {
 
 // Top product item
 export interface TopProductItem {
-  product_id: number
+  product_id: string
   product_name: string
   image: string
   sales: number
@@ -60,7 +60,7 @@ export interface TopProductsResponse {
 
 // Pending order item
 export interface PendingOrderItem {
-  order_id: number
+  order_id: string
   order_no: string
   pay_amount: string
   status: string
@@ -77,7 +77,7 @@ export interface PendingOrdersResponse {
 
 // Activity item
 export interface ActivityItem {
-  id: number
+  id: string
   type: string // 'order_created' | 'payment_received' | 'product_low_stock' etc.
   content: string
   time: string

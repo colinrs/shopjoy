@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -36,10 +37,16 @@ func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq)
 	}
 	tenantID := shared.TenantID(tenantIDRaw)
 
+	// Parse order IDs (string -> int64)
+	orderIDs, err := utils.ParseInt64Slice(req.OrderIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
 	var success []int64
 	var failed []types.BatchCancelFail
 
-	for _, orderID := range req.OrderIDs {
+	for _, orderID := range orderIDs {
 		failEntry := types.BatchCancelFail{
 			OrderID: orderID,
 		}
@@ -86,7 +93,7 @@ func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq)
 	}
 
 	resp = &types.BatchCancelOrderResp{
-		Success: success,
+		Success: utils.FormatInt64Slice(success),
 		Failed:  failed,
 	}
 

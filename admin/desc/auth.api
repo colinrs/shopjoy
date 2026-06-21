@@ -25,7 +25,7 @@ type (
 		Mobile   string `json:"mobile,optional"`
 		RealName string `json:"real_name" validate:"required"`
 		Password string `json:"password" validate:"required,min=6"`
-		TenantID int64  `json:"tenant_id,optional"` // 默认为0，创建平台超管时使用
+		TenantID int64  `json:"tenant_id,optional,string"` // 默认为0，创建平台超管时使用
 	}
 	RegisterTenantAdminResponse {
 		AccessToken  string        `json:"access_token"`

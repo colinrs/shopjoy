@@ -131,7 +131,7 @@ import { t } from '@/plugins/i18n'
 
 const props = defineProps<{
   modelValue: boolean
-  orderId: number
+  orderId: string
   currentAmount: string
   currency: string
 }>()

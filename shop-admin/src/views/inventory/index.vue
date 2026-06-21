@@ -726,7 +726,7 @@ const isEditWarehouse = ref(false)
 const warehouseSaveLoading = ref(false)
 const warehouseFormRef = ref()
 const warehouseForm = reactive({
-  id: 0,
+  id: '',
   code: '',
   name: '',
   country: '',
@@ -742,7 +742,7 @@ const warehouseRules = {
 const activeTab = ref('logs')
 const adjustForm = reactive({
   sku_code: '',
-  warehouse_id: 0,
+  warehouse_id: '',
   quantity: 0,
   remark: ''
 })
@@ -910,7 +910,7 @@ const loadWarehouses = async () => {
 const handleAddWarehouse = () => {
   isEditWarehouse.value = false
   Object.assign(warehouseForm, {
-    id: 0,
+    id: '',
     code: '',
     name: '',
     country: '',

@@ -10,6 +10,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -48,7 +49,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 		p, err := decimal.NewFromString(*req.UpdateFields.Price)
 		if err != nil {
 			return &types.BatchUpdateProductResp{
-				Success: []int64{},
+				Success: []string{},
 				Failed: []types.BatchProductFail{
 					{ProductID: 0, Code: code.ErrProductInvalidPrice.Code, Message: code.ErrProductInvalidPrice.Msg},
 				},
@@ -63,7 +64,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 		s := parseBatchStatus(*req.UpdateFields.Status)
 		if s == nil {
 			return &types.BatchUpdateProductResp{
-				Success: []int64{},
+				Success: []string{},
 				Failed: []types.BatchProductFail{
 					{ProductID: 0, Code: code.ErrProductInvalidStatusTransition.Code, Message: code.ErrProductInvalidStatusTransition.Msg},
 				},
@@ -72,9 +73,15 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 		status = s
 	}
 
+	// 解析 ProductIDs (string -> int64)
+	productIDs, err := utils.ParseInt64Slice(req.ProductIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
 	// 构建批量更新请求
 	batchReq := appProduct.BatchUpdateProductRequest{
-		ProductIDs: req.ProductIDs,
+		ProductIDs: productIDs,
 		Fields: appProduct.BatchProductFields{
 			Price:      price,
 			Stock:      req.UpdateFields.Stock,
@@ -100,7 +107,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 	}
 
 	return &types.BatchUpdateProductResp{
-		Success: successIDs,
+		Success: utils.FormatInt64Slice(successIDs),
 		Failed:  failedResult,
 	}, nil
 }

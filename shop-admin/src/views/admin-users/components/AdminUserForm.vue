@@ -148,7 +148,7 @@ watch(formData, (val) => {
       real_name: val.real_name,
       password: val.password,
       type: val.type,
-      tenant_id: val.tenant_id
+      tenant_id: val.tenant_id?.toString()
     })
   }
 }, { deep: true })

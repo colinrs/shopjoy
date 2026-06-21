@@ -10,7 +10,7 @@ export interface TierConfig {
 
 // Earn Rule
 export interface EarnRule {
-  id: number
+  id: string
   name: string
   description: string
   scenario: 'ORDER_PAYMENT' | 'SIGN_IN' | 'PRODUCT_REVIEW' | 'FIRST_ORDER'
@@ -31,10 +31,10 @@ export interface EarnRule {
 
 // Redeem Rule
 export interface RedeemRule {
-  id: number
+  id: string
   name: string
   description: string
-  coupon_id: number
+  coupon_id: string
   coupon_name: string
   points_required: number
   total_stock: number
@@ -49,8 +49,8 @@ export interface RedeemRule {
 
 // Points Account
 export interface PointsAccount {
-  id: number
-  user_id: number
+  id: string
+  user_id: string
   user_email?: string
   balance: number
   frozen_balance: number
@@ -63,9 +63,9 @@ export interface PointsAccount {
 
 // Points Transaction
 export interface PointsTransaction {
-  id: number
-  user_id: number
-  account_id: number
+  id: string
+  user_id: string
+  account_id: string
   points: number              // Positive = earn, negative = deduct
   balance_after: number
   type: 'EARN' | 'REDEEM' | 'ADJUST' | 'EXPIRE' | 'FREEZE' | 'UNFREEZE'
@@ -78,12 +78,12 @@ export interface PointsTransaction {
 
 // Points Redemption
 export interface PointsRedemption {
-  id: number
-  user_id: number
-  redeem_rule_id: number
-  coupon_id: number
+  id: string
+  user_id: string
+  redeem_rule_id: string
+  coupon_id: string
   coupon_name: string
-  user_coupon_id: number | null
+  user_coupon_id: string | null
   points_used: number
   status: 'pending' | 'completed' | 'cancelled'
   created_at: string
@@ -112,7 +112,7 @@ export interface TrendDataPoint {
 
 // Top User
 export interface TopUser {
-  user_id: number
+  user_id: string
   user_email?: string
   points_earned: number
   created_at: string
@@ -154,7 +154,7 @@ export interface CreateEarnRuleParams {
 }
 
 export interface UpdateEarnRuleParams extends CreateEarnRuleParams {
-  id: number
+  id: string
 }
 
 export interface ListRedeemRulesParams {
@@ -167,7 +167,7 @@ export interface ListRedeemRulesParams {
 export interface CreateRedeemRuleParams {
   name: string
   description?: string
-  coupon_id: number
+  coupon_id: string
   points_required: number
   total_stock?: number
   per_user_limit?: number
@@ -177,21 +177,21 @@ export interface CreateRedeemRuleParams {
 }
 
 export interface UpdateRedeemRuleParams extends CreateRedeemRuleParams {
-  id: number
+  id: string
 }
 
 export interface ListAccountsParams {
   page?: number
   page_size?: number
-  user_id?: number
+  user_id?: string
   email?: string
 }
 
 export interface ListTransactionsParams {
   page?: number
   page_size?: number
-  user_id?: number
-  account_id?: number
+  user_id?: string
+  account_id?: string
   type?: string
   start_time?: string
   end_time?: string
@@ -200,7 +200,7 @@ export interface ListTransactionsParams {
 export interface ListRedemptionsParams {
   page?: number
   page_size?: number
-  user_id?: number
+  user_id?: string
   status?: string
   start_time?: string
   end_time?: string
@@ -213,7 +213,7 @@ export interface AdjustPointsParams {
 }
 
 export interface AdjustPointsResponse {
-  transaction_id: number
+  transaction_id: string
   points: number
   balance_after: number
   created_at: string
@@ -321,7 +321,7 @@ export const getEarnRules = (params: ListEarnRulesParams) => {
 /**
  * Get earn rule detail
  */
-export const getEarnRule = (id: number) => {
+export const getEarnRule = (id: string) => {
   return request.get<EarnRule>(`/api/v1/points/earn-rules/${id}`)
 }
 
@@ -343,21 +343,21 @@ export const updateEarnRule = (data: UpdateEarnRuleParams) => {
 /**
  * Delete earn rule
  */
-export const deleteEarnRule = (id: number) => {
+export const deleteEarnRule = (id: string) => {
   return request.delete(`/api/v1/points/earn-rules/${id}`)
 }
 
 /**
  * Activate earn rule
  */
-export const activateEarnRule = (id: number) => {
+export const activateEarnRule = (id: string) => {
   return request.post<EarnRule>(`/api/v1/points/earn-rules/${id}/activate`)
 }
 
 /**
  * Deactivate earn rule
  */
-export const deactivateEarnRule = (id: number) => {
+export const deactivateEarnRule = (id: string) => {
   return request.post<EarnRule>(`/api/v1/points/earn-rules/${id}/deactivate`)
 }
 
@@ -373,7 +373,7 @@ export const getRedeemRules = (params: ListRedeemRulesParams) => {
 /**
  * Get redeem rule detail
  */
-export const getRedeemRule = (id: number) => {
+export const getRedeemRule = (id: string) => {
   return request.get<RedeemRule>(`/api/v1/points/redeem-rules/${id}`)
 }
 
@@ -395,21 +395,21 @@ export const updateRedeemRule = (data: UpdateRedeemRuleParams) => {
 /**
  * Delete redeem rule
  */
-export const deleteRedeemRule = (id: number) => {
+export const deleteRedeemRule = (id: string) => {
   return request.delete(`/api/v1/points/redeem-rules/${id}`)
 }
 
 /**
  * Activate redeem rule
  */
-export const activateRedeemRule = (id: number) => {
+export const activateRedeemRule = (id: string) => {
   return request.post<RedeemRule>(`/api/v1/points/redeem-rules/${id}/activate`)
 }
 
 /**
  * Deactivate redeem rule
  */
-export const deactivateRedeemRule = (id: number) => {
+export const deactivateRedeemRule = (id: string) => {
   return request.post<RedeemRule>(`/api/v1/points/redeem-rules/${id}/deactivate`)
 }
 
@@ -425,28 +425,28 @@ export const getPointsAccounts = (params: ListAccountsParams) => {
 /**
  * Get account detail
  */
-export const getPointsAccount = (id: number) => {
+export const getPointsAccount = (id: string) => {
   return request.get<PointsAccount>(`/api/v1/points/accounts/${id}`)
 }
 
 /**
  * Get account by user ID
  */
-export const getAccountByUser = (userId: number) => {
+export const getAccountByUser = (userId: string) => {
   return request.get<PointsAccount>(`/api/v1/points/accounts/by-user/${userId}`)
 }
 
 /**
  * Get account transactions
  */
-export const getAccountTransactions = (accountId: number, params: Omit<ListTransactionsParams, 'account_id'>) => {
+export const getAccountTransactions = (accountId: string, params: Omit<ListTransactionsParams, 'account_id'>) => {
   return request.get<TransactionsListResponse>(`/api/v1/points/accounts/${accountId}/transactions`, { params })
 }
 
 /**
  * Manual points adjustment
  */
-export const adjustPoints = (accountId: number, data: AdjustPointsParams) => {
+export const adjustPoints = (accountId: string, data: AdjustPointsParams) => {
   return request.post<AdjustPointsResponse>(`/api/v1/points/accounts/${accountId}/adjust`, data)
 }
 
@@ -462,7 +462,7 @@ export const getTransactions = (params: ListTransactionsParams) => {
 /**
  * Get transaction detail
  */
-export const getTransaction = (id: number) => {
+export const getTransaction = (id: string) => {
   return request.get<PointsTransaction>(`/api/v1/points/transactions/${id}`)
 }
 
@@ -478,7 +478,7 @@ export const getRedemptions = (params: ListRedemptionsParams) => {
 /**
  * Get redemption detail
  */
-export const getRedemption = (id: number) => {
+export const getRedemption = (id: string) => {
   return request.get<PointsRedemption>(`/api/v1/points/redemptions/${id}`)
 }
 
@@ -489,7 +489,7 @@ export const getRedemption = (id: number) => {
  * This reuses the promotion API to get active coupons
  */
 export interface AvailableCoupon {
-  id: number
+  id: string
   code: string
   name: string
   discount_value: string
@@ -505,7 +505,7 @@ export const getAvailableCoupons = (params: { page?: number; page_size?: number;
 
 // Export types
 export interface ExportPointsTransactionsParams {
-  user_id?: number
+  user_id?: string
   type?: string
   start_time?: string
   end_time?: string

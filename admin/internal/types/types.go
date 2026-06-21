@@ -26,7 +26,7 @@ type ActivateUserRequest struct {
 }
 
 type ActivityItem struct {
-	ID       int64  `json:"id"`
+	ID       int64  `json:"id,string"`
 	Type     string `json:"type"` // order_created, payment_received, product_low_stock, etc.
 	Content  string `json:"content"`
 	Time     string `json:"time"`
@@ -41,7 +41,7 @@ type AddDecorationRequest struct {
 }
 
 type AddDecorationResponse struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	BlockType   string `json:"block_type"`
 	BlockConfig string `json:"block_config"` // JSON string
 	SortOrder   int    `json:"sort_order"`
@@ -54,7 +54,7 @@ type AdjustOrderPriceReq struct {
 }
 
 type AdjustOrderPriceResp struct {
-	OrderID        int64  `json:"order_id"`
+	OrderID        int64  `json:"order_id,string"`
 	OriginalAmount string `json:"original_amount"`
 	AdjustAmount   string `json:"adjust_amount"`
 	NewPayAmount   string `json:"new_pay_amount"`
@@ -70,7 +70,7 @@ type AdjustPointsReq struct {
 }
 
 type AdjustPointsResp struct {
-	TransactionID int64  `json:"transaction_id"`
+	TransactionID int64  `json:"transaction_id,string"`
 	Points        int64  `json:"points"`
 	BalanceAfter  int64  `json:"balance_after"`
 	CreatedAt     string `json:"created_at"`
@@ -78,7 +78,7 @@ type AdjustPointsResp struct {
 
 type AdjustStockReq struct {
 	SKUCode     string `json:"sku_code"`
-	WarehouseID int64  `json:"warehouse_id"`
+	WarehouseID int64  `json:"warehouse_id,string"`
 	Quantity    int    `json:"quantity"` // positive = increase, negative = decrease
 	Remark      string `json:"remark,optional"`
 }
@@ -107,8 +107,8 @@ type AdminUserIDRequest struct {
 }
 
 type AdminUserInfo struct {
-	ID        int64  `json:"id"`
-	TenantID  int64  `json:"tenant_id"`
+	ID        int64  `json:"id,string"`
+	TenantID  int64  `json:"tenant_id,string"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`
 	Mobile    string `json:"mobile"`
@@ -129,18 +129,18 @@ type ApproveReviewReq struct {
 }
 
 type ApproveReviewResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Status    string `json:"status"`
 	UpdatedAt string `json:"updated_at"`
 }
 
 type AssignRolesRequest struct {
-	ID      int64   `path:"id"`
-	RoleIDs []int64 `json:"role_ids"`
+	ID      int64    `path:"id"`
+	RoleIDs []string `json:"role_ids"`
 }
 
 type BatchApproveReq struct {
-	IDs []int64 `json:"ids"`
+	IDs []string `json:"ids"`
 }
 
 type BatchApproveResp struct {
@@ -150,18 +150,18 @@ type BatchApproveResp struct {
 }
 
 type BatchCancelFail struct {
-	OrderID int64  `json:"order_id"`
+	OrderID int64  `json:"order_id,string"`
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 type BatchCancelOrderReq struct {
-	OrderIDs []int64 `json:"order_ids" binding:"required,min=1,max=100"`
-	Reason   string  `json:"reason" binding:"required,min=5,max=200"`
+	OrderIDs []string `json:"order_ids" binding:"required,min=1,max=100"`
+	Reason   string   `json:"reason" binding:"required,min=5,max=200"`
 }
 
 type BatchCancelOrderResp struct {
-	Success []int64           `json:"success"`
+	Success []string          `json:"success"`
 	Failed  []BatchCancelFail `json:"failed"`
 }
 
@@ -179,8 +179,8 @@ type BatchCreateShipmentsResp struct {
 }
 
 type BatchHideReq struct {
-	IDs    []int64 `json:"ids"`
-	Reason string  `json:"reason,optional"`
+	IDs    []string `json:"ids"`
+	Reason string   `json:"reason,optional"`
 }
 
 type BatchHideResp struct {
@@ -190,50 +190,50 @@ type BatchHideResp struct {
 }
 
 type BatchProductFail struct {
-	ProductID int64  `json:"product_id"`
+	ProductID int64  `json:"product_id,string"`
 	Code      int    `json:"code"`
 	Message   string `json:"message"`
 }
 
 type BatchProductFields struct {
-	Price      *string `json:"price,omitempty"`       // 价格，单位：元，如 "1.99" 表示 1.99 元
-	Stock      *int    `json:"stock,omitempty"`       // 库存
-	Status     *string `json:"status,omitempty"`      // draft, on_sale, off_sale
-	CategoryID *int64  `json:"category_id,omitempty"` // 分类ID
+	Price      *string `json:"price,omitempty"`              // 价格，单位：元，如 "1.99" 表示 1.99 元
+	Stock      *int    `json:"stock,omitempty"`              // 库存
+	Status     *string `json:"status,omitempty"`             // draft, on_sale, off_sale
+	CategoryID *int64  `json:"category_id,omitempty,string"` // 分类ID
 }
 
 type BatchShipmentItemReq struct {
-	OrderID    int64  `json:"order_id"`
+	OrderID    int64  `json:"order_id,string"`
 	TrackingNo string `json:"tracking_no"`
 }
 
 type BatchShipmentResultResp struct {
-	OrderID    int64  `json:"order_id"`
-	ShipmentID int64  `json:"shipment_id,optional"`
+	OrderID    int64  `json:"order_id,string"`
+	ShipmentID int64  `json:"shipment_id,optional,string"`
 	ShipmentNo string `json:"shipment_no,optional"`
 	Success    bool   `json:"success"`
 	Error      string `json:"error,optional"`
 }
 
 type BatchStatusFail struct {
-	UserID  int64  `json:"user_id"`
+	UserID  int64  `json:"user_id,string"`
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 type BatchTrackingFail struct {
-	ShipmentID int64  `json:"shipment_id"`
+	ShipmentID int64  `json:"shipment_id,string"`
 	Code       int    `json:"code"`
 	Message    string `json:"message"`
 }
 
 type BatchUpdateProductReq struct {
-	ProductIDs   []int64            `json:"product_ids" binding:"required,min=1,max=100"`
+	ProductIDs   []string           `json:"product_ids" binding:"required,min=1,max=100"`
 	UpdateFields BatchProductFields `json:"update_fields"`
 }
 
 type BatchUpdateProductResp struct {
-	Success []int64            `json:"success"`
+	Success []string           `json:"success"`
 	Failed  []BatchProductFail `json:"failed"`
 }
 
@@ -242,35 +242,35 @@ type BatchUpdateSafetyStockReq struct {
 }
 
 type BatchUpdateTrackingReq struct {
-	ShipmentIDs []int64 `json:"shipment_ids" binding:"required,min=1,max=100"`
-	CarrierCode string  `json:"carrier_code" binding:"required"`
-	TrackingNo  string  `json:"tracking_no" binding:"required"`
-	Weight      *string `json:"weight,omitempty"`
+	ShipmentIDs []string `json:"shipment_ids" binding:"required,min=1,max=100"`
+	CarrierCode string   `json:"carrier_code" binding:"required"`
+	TrackingNo  string   `json:"tracking_no" binding:"required"`
+	Weight      *string  `json:"weight,omitempty"`
 }
 
 type BatchUpdateTrackingResp struct {
-	Success []int64             `json:"success"`
+	Success []string            `json:"success"`
 	Failed  []BatchTrackingFail `json:"failed"`
 }
 
 type BatchUpdateUserStatusReq struct {
-	UserIDs []int64 `json:"user_ids" binding:"required,min=1,max=100"`
-	Status  int     `json:"status" binding:"required,oneof=1 2"` // 1=启用, 2=禁用
-	Reason  string  `json:"reason" binding:"omitempty,max=200"`
+	UserIDs []string `json:"user_ids" binding:"required,min=1,max=100"`
+	Status  int      `json:"status" binding:"required,oneof=1 2"` // 1=启用, 2=禁用
+	Reason  string   `json:"reason" binding:"omitempty,max=200"`
 }
 
 type BatchUpdateUserStatusResp struct {
-	Success []int64           `json:"success"`
+	Success []string          `json:"success"`
 	Failed  []BatchStatusFail `json:"failed"`
 }
 
 type BlockOrderItem struct {
-	ID        int64 `json:"id"`
+	ID        int64 `json:"id,string"`
 	SortOrder int   `json:"sort_order"`
 }
 
 type BrandDetailResp struct {
-	ID               int64  `json:"id"`
+	ID               int64  `json:"id,string"`
 	Name             string `json:"name"`
 	Logo             string `json:"logo"`
 	Description      string `json:"description"`
@@ -286,12 +286,12 @@ type BrandDetailResp struct {
 }
 
 type BrandMarketItemResp struct {
-	MarketID  int64 `json:"market_id"`
+	MarketID  int64 `json:"market_id,string"`
 	IsVisible bool  `json:"is_visible"`
 }
 
 type BrandMarketVisibilityResp struct {
-	BrandID int64                 `json:"brand_id"`
+	BrandID int64                 `json:"brand_id,string"`
 	Markets []BrandMarketItemResp `json:"markets"`
 }
 
@@ -310,7 +310,7 @@ type CalculateShippingFeeReq struct {
 type CalculateShippingFeeResp struct {
 	ShippingFee  string               `json:"shipping_fee"`
 	Currency     string               `json:"currency"`
-	TemplateID   int64                `json:"template_id"`
+	TemplateID   int64                `json:"template_id,string"`
 	TemplateName string               `json:"template_name"`
 	ZoneName     string               `json:"zone_name"`
 	FeeDetail    FeeCalculationDetail `json:"fee_detail"`
@@ -323,8 +323,8 @@ type CalculatorAddress struct {
 }
 
 type CalculatorItem struct {
-	ProductID int64  `json:"product_id"`
-	SKUID     int64  `json:"sku_id,optional"`
+	ProductID int64  `json:"product_id,string"`
+	SKUID     int64  `json:"sku_id,optional,string"`
 	Quantity  int    `json:"quantity"`
 	Weight    int    `json:"weight"` // grams
 	Price     string `json:"price"`  // unit price
@@ -336,7 +336,7 @@ type CancelOrderReq struct {
 }
 
 type CancelOrderResp struct {
-	OrderID     int64  `json:"order_id"`
+	OrderID     int64  `json:"order_id,string"`
 	OrderNo     string `json:"order_no"`
 	Status      string `json:"status"`
 	StatusText  string `json:"status_text"`
@@ -350,7 +350,7 @@ type CancelShipmentReq struct {
 }
 
 type CancelShipmentResp struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	ShipmentNo  string `json:"shipment_no"`
 	Status      string `json:"status"`
 	StatusText  string `json:"status_text"`
@@ -367,7 +367,7 @@ type CarrierPerformanceStats struct {
 }
 
 type CarrierResp struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	TrackingURL string `json:"tracking_url"`
@@ -376,8 +376,8 @@ type CarrierResp struct {
 }
 
 type CategoryDetailResp struct {
-	ID             int64  `json:"id"`
-	ParentID       int64  `json:"parent_id"`
+	ID             int64  `json:"id,string"`
+	ParentID       int64  `json:"parent_id,string"`
 	Name           string `json:"name"`
 	Code           string `json:"code"`
 	Level          int    `json:"level"`
@@ -393,17 +393,17 @@ type CategoryDetailResp struct {
 }
 
 type CategoryMarketItemResp struct {
-	MarketID  int64 `json:"market_id"`
+	MarketID  int64 `json:"market_id,string"`
 	IsVisible bool  `json:"is_visible"`
 }
 
 type CategoryMarketVisibilityResp struct {
-	CategoryID int64                    `json:"category_id"`
+	CategoryID int64                    `json:"category_id,string"`
 	Markets    []CategoryMarketItemResp `json:"markets"`
 }
 
 type CategorySortItem struct {
-	ID   int64 `json:"id"`
+	ID   int64 `json:"id,string"`
 	Sort int   `json:"sort"`
 }
 
@@ -411,8 +411,8 @@ type CategoryTreeReq struct {
 }
 
 type CategoryTreeResp struct {
-	ID             int64               `json:"id"`
-	ParentID       int64               `json:"parent_id"`
+	ID             int64               `json:"id,string"`
+	ParentID       int64               `json:"parent_id,string"`
 	Name           string              `json:"name"`
 	Code           string              `json:"code"`
 	Level          int                 `json:"level"`
@@ -437,7 +437,7 @@ type ChannelDistributionResp struct {
 }
 
 type CouponDetailResp struct {
-	ID             int64  `json:"id"`
+	ID             int64  `json:"id,string"`
 	Code           string `json:"code"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
@@ -459,24 +459,24 @@ type CouponDetailResp struct {
 }
 
 type CouponUsageResp struct {
-	ID             int64  `json:"id"`
-	CouponID       int64  `json:"coupon_id"`
-	UserID         int64  `json:"user_id"`
-	OrderID        int64  `json:"order_id"`
+	ID             int64  `json:"id,string"`
+	CouponID       int64  `json:"coupon_id,string"`
+	UserID         int64  `json:"user_id,string"`
+	OrderID        int64  `json:"order_id,string"`
 	DiscountAmount string `json:"discount_amount"`
 	UsedAt         string `json:"used_at"`
 }
 
 type CreateAdminUserRequest struct {
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Password string  `json:"password" validate:"min=6"`
-	Mobile   string  `json:"mobile,optional"`
-	RealName string  `json:"real_name,optional"`
-	Avatar   string  `json:"avatar,optional"`
-	Type     int     `json:"type"`               // 1=平台超管 2=商家管理员 3=商家子账号
-	TenantID int64   `json:"tenant_id,optional"` // 平台超管可指定租户
-	RoleIDs  []int64 `json:"role_ids,optional"`
+	Username string   `json:"username"`
+	Email    string   `json:"email"`
+	Password string   `json:"password" validate:"min=6"`
+	Mobile   string   `json:"mobile,optional"`
+	RealName string   `json:"real_name,optional"`
+	Avatar   string   `json:"avatar,optional"`
+	Type     int      `json:"type"`                      // 1=平台超管 2=商家管理员 3=商家子账号
+	TenantID int64    `json:"tenant_id,optional,string"` // 平台超管可指定租户
+	RoleIDs  []string `json:"role_ids,optional"`
 }
 
 type CreateBrandReq struct {
@@ -491,12 +491,12 @@ type CreateBrandReq struct {
 }
 
 type CreateBrandResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreateCategoryReq struct {
 	Name           string `json:"name"`
-	ParentID       int64  `json:"parent_id,optional"`
+	ParentID       int64  `json:"parent_id,optional,string"`
 	Code           string `json:"code,optional"`
 	Icon           string `json:"icon,optional"`
 	Image          string `json:"image,optional"`
@@ -506,7 +506,7 @@ type CreateCategoryReq struct {
 }
 
 type CreateCategoryResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreateCouponReq struct {
@@ -527,7 +527,7 @@ type CreateCouponReq struct {
 }
 
 type CreateCouponResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreateEarnRuleReq struct {
@@ -563,11 +563,11 @@ type CreatePageRequest struct {
 }
 
 type CreatePageResponse struct {
-	PageID int64 `json:"page_id"`
+	PageID int64 `json:"page_id,string"`
 }
 
 type CreateProductLocalizationReq struct {
-	ProductID    int64  `json:"product_id"`
+	ProductID    int64  `json:"product_id,string"`
 	LanguageCode string `json:"language_code"`
 	Name         string `json:"name,optional"`
 	Description  string `json:"description,optional"`
@@ -579,7 +579,7 @@ type CreateProductReq struct {
 	Price           string   `json:"price"` // 价格，单位：元，如 "1.99" 表示 1.99 元
 	Currency        string   `json:"currency,optional"`
 	CostPrice       string   `json:"cost_price,optional"` // 成本价，单位：元
-	CategoryID      int64    `json:"category_id"`
+	CategoryID      int64    `json:"category_id,string"`
 	SKU             string   `json:"sku" validate:"required"`
 	Brand           string   `json:"brand,optional"`
 	Tags            []string `json:"tags,optional"`
@@ -596,7 +596,7 @@ type CreateProductReq struct {
 }
 
 type CreateProductResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreatePromotionReq struct {
@@ -611,14 +611,14 @@ type CreatePromotionReq struct {
 	MaxDiscount    string   `json:"max_discount,optional"`     // Using string for decimal precision
 	UsageLimit     int      `json:"usage_limit,optional"`
 	PerUserLimit   int      `json:"per_user_limit,optional"`
-	ProductIDs     []int64  `json:"product_ids,optional"`
-	CategoryIDs    []int64  `json:"category_ids,optional"`
-	MarketIDs      []int64  `json:"market_ids,optional"`
+	ProductIDs     []string `json:"product_ids,optional"`
+	CategoryIDs    []string `json:"category_ids,optional"`
+	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
 }
 
 type CreatePromotionResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreatePromotionRulesReq struct {
@@ -627,13 +627,13 @@ type CreatePromotionRulesReq struct {
 }
 
 type CreatePromotionRulesResp struct {
-	IDs []int64 `json:"ids"`
+	IDs []string `json:"ids"`
 }
 
 type CreateRedeemRuleReq struct {
 	Name           string `json:"name"`
 	Description    string `json:"description,optional"`
-	CouponID       int64  `json:"coupon_id"`
+	CouponID       int64  `json:"coupon_id,string"`
 	PointsRequired int64  `json:"points_required"`
 	TotalStock     int64  `json:"total_stock,optional,default=0"`
 	PerUserLimit   int    `json:"per_user_limit,optional,default=1"`
@@ -648,27 +648,27 @@ type CreateReplyReq struct {
 }
 
 type CreateReplyResp struct {
-	ID        int64  `json:"id"`
-	ReviewID  int64  `json:"review_id"`
+	ID        int64  `json:"id,string"`
+	ReviewID  int64  `json:"review_id,string"`
 	Content   string `json:"content"`
-	AdminID   int64  `json:"admin_id"`
+	AdminID   int64  `json:"admin_id,string"`
 	AdminName string `json:"admin_name"`
 	CreatedAt string `json:"created_at"`
 }
 
 type CreateRoleRequest struct {
-	Name          string  `json:"name" validate:"required"`
-	Code          string  `json:"code" validate:"required"`
-	Description   string  `json:"description,optional"`
-	PermissionIDs []int64 `json:"permission_ids,optional"`
+	Name          string   `json:"name" validate:"required"`
+	Code          string   `json:"code" validate:"required"`
+	Description   string   `json:"description,optional"`
+	PermissionIDs []string `json:"permission_ids,optional"`
 }
 
 type CreateRoleResponse struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreateSKUReq struct {
-	ProductID      int64             `json:"product_id"`
+	ProductID      int64             `json:"product_id,string"`
 	Code           string            `json:"code"`
 	Price          string            `json:"price"` // SKU价格，单位：元
 	Currency       string            `json:"currency,optional"`
@@ -679,11 +679,11 @@ type CreateSKUReq struct {
 }
 
 type CreateSKUResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CreateShipmentReq struct {
-	OrderID      int64             `json:"order_id"`
+	OrderID      int64             `json:"order_id,string"`
 	CarrierCode  string            `json:"carrier_code"`
 	CarrierName  string            `json:"carrier_name,optional"` // For custom carrier
 	TrackingNo   string            `json:"tracking_no"`
@@ -695,7 +695,7 @@ type CreateShipmentReq struct {
 }
 
 type CreateShipmentResp struct {
-	ID         int64  `json:"id"`
+	ID         int64  `json:"id,string"`
 	ShipmentNo string `json:"shipment_no"`
 }
 
@@ -705,7 +705,7 @@ type CreateShippingTemplateReq struct {
 }
 
 type CreateShippingTemplateResp struct {
-	ID   int64  `json:"id"`
+	ID   int64  `json:"id,string"`
 	Name string `json:"name"`
 }
 
@@ -724,9 +724,9 @@ type CreateShippingZoneReq struct {
 }
 
 type CreateTemplateMappingReq struct {
-	TemplateID int64  `json:"template_id"`
+	TemplateID int64  `json:"template_id,string"`
 	TargetType string `json:"target_type"` // product, category
-	TargetID   int64  `json:"target_id"`
+	TargetID   int64  `json:"target_id,string"`
 }
 
 type CreateWarehouseReq struct {
@@ -738,14 +738,14 @@ type CreateWarehouseReq struct {
 }
 
 type CreateWarehouseResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type CurrentThemeResponse struct {
 	Theme     *ThemeItem     `json:"theme"`
 	Config    ThemeConfigDTO `json:"config"`
 	ChangedAt string         `json:"changed_at,omitempty"` // RFC3339 format
-	ChangedBy int64          `json:"changed_by,omitempty"`
+	ChangedBy int64          `json:"changed_by,omitempty,string"`
 }
 
 type DashboardOverviewRequest struct {
@@ -775,7 +775,7 @@ type DeactivateRedeemRuleReq struct {
 }
 
 type DecorationDTO struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	BlockType   string `json:"block_type"`   // banner, product_grid, text, image, video, etc
 	BlockConfig string `json:"block_config"` // JSON string
 	SortOrder   int    `json:"sort_order"`
@@ -824,7 +824,7 @@ type DeleteReviewReq struct {
 }
 
 type DeleteReviewResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Status    string `json:"status"`
 	DeletedAt string `json:"deleted_at"`
 }
@@ -854,7 +854,7 @@ type DeleteUserRequest struct {
 }
 
 type EarnRule struct {
-	ID               int64         `json:"id"`
+	ID               int64         `json:"id,string"`
 	Name             string        `json:"name"`
 	Description      string        `json:"description"`
 	Scenario         string        `json:"scenario"`         // ORDER_PAYMENT, SIGN_IN, PRODUCT_REVIEW, FIRST_ORDER
@@ -955,8 +955,8 @@ type ExportUsersRequest struct {
 }
 
 type ExtendedUserResponse struct {
-	ID            int64  `json:"id"`
-	TenantID      int64  `json:"tenant_id"`
+	ID            int64  `json:"id,string"`
+	TenantID      int64  `json:"tenant_id,string"`
 	Email         string `json:"email"`
 	Phone         string `json:"phone"`
 	Name          string `json:"name"`
@@ -1225,7 +1225,7 @@ type GetUserRequest struct {
 }
 
 type GetUserResponse struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
 	Name      string `json:"name"`
@@ -1254,7 +1254,7 @@ type HideReviewReq struct {
 }
 
 type HideReviewResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Status    string `json:"status"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -1268,7 +1268,7 @@ type InitiateRefundReq struct {
 }
 
 type InitiateRefundResp struct {
-	RefundID        int64  `json:"refund_id"`
+	RefundID        int64  `json:"refund_id,string"`
 	RefundNo        string `json:"refund_no"`
 	Amount          string `json:"amount"`
 	Currency        string `json:"currency"`
@@ -1278,27 +1278,27 @@ type InitiateRefundResp struct {
 }
 
 type InventoryLogResp struct {
-	ID             int64  `json:"id"`
+	ID             int64  `json:"id,string"`
 	SKUCode        string `json:"sku_code"`
-	ProductID      int64  `json:"product_id"`
-	WarehouseID    int64  `json:"warehouse_id"`
+	ProductID      int64  `json:"product_id,string"`
+	WarehouseID    int64  `json:"warehouse_id,string"`
 	ChangeType     string `json:"change_type"`
 	ChangeQuantity int    `json:"change_quantity"`
 	BeforeStock    int    `json:"before_stock"`
 	AfterStock     int    `json:"after_stock"`
 	OrderNo        string `json:"order_no"`
 	Remark         string `json:"remark"`
-	OperatorID     int64  `json:"operator_id"`
+	OperatorID     int64  `json:"operator_id,string"`
 	CreatedAt      string `json:"created_at"`
 }
 
 type IssueUserCouponReq struct {
-	UserID   int64 `json:"user_id"`
-	CouponID int64 `json:"coupon_id"`
+	UserID   int64 `json:"user_id,string"`
+	CouponID int64 `json:"coupon_id,string"`
 }
 
 type IssueUserCouponResp struct {
-	ID int64 `json:"id"`
+	ID int64 `json:"id,string"`
 }
 
 type ListAccountTransactionsReq struct {
@@ -1798,14 +1798,14 @@ type ListWarehouseResp struct {
 
 type LowStockSKUResp struct {
 	SKUCode        string `json:"sku_code"`
-	ProductID      int64  `json:"product_id"`
+	ProductID      int64  `json:"product_id,string"`
 	ProductName    string `json:"product_name"`
 	AvailableStock int    `json:"available_stock"`
 	SafetyStock    int    `json:"safety_stock"`
 }
 
 type MarketResponse struct {
-	ID              int64     `json:"id"`
+	ID              int64     `json:"id,string"`
 	Code            string    `json:"code"`
 	Name            string    `json:"name"`
 	Currency        string    `json:"currency"`
@@ -1820,7 +1820,7 @@ type MarketResponse struct {
 
 type MoveCategoryReq struct {
 	ID          int64 `path:"id"`
-	NewParentID int64 `json:"new_parent_id"`
+	NewParentID int64 `json:"new_parent_id,string"`
 }
 
 type NotificationSettings struct {
@@ -1835,7 +1835,7 @@ type NotificationSettings struct {
 }
 
 type OrderFulfillmentDetailResp struct {
-	OrderID           int64                       `json:"order_id"`
+	OrderID           int64                       `json:"order_id,string"`
 	OrderNo           string                      `json:"order_no"`
 	Status            string                      `json:"status"`
 	FulfillmentStatus string                      `json:"fulfillment_status"` // 0=pending, 1=partial_shipped, 2=shipped, 3=delivered
@@ -1844,7 +1844,7 @@ type OrderFulfillmentDetailResp struct {
 	RefundText        string                      `json:"refund_text"`
 	TotalAmount       string                      `json:"total_amount"`
 	Currency          string                      `json:"currency"`
-	UserID            int64                       `json:"user_id"`
+	UserID            int64                       `json:"user_id,string"`
 	UserName          string                      `json:"user_name,optional"`
 	UserPhone         string                      `json:"user_phone,optional"`
 	ShippingAddress   *OrderShippingAddress       `json:"shipping_address,optional"`
@@ -1859,9 +1859,9 @@ type OrderFulfillmentDetailResp struct {
 }
 
 type OrderFulfillmentItemResp struct {
-	OrderItemID int64  `json:"order_item_id"`
-	ProductID   int64  `json:"product_id"`
-	SKUID       int64  `json:"sku_id"`
+	OrderItemID int64  `json:"order_item_id,string"`
+	ProductID   int64  `json:"product_id,string"`
+	SKUID       int64  `json:"sku_id,string"`
 	ProductName string `json:"product_name"`
 	SKUName     string `json:"sku_name"`
 	Image       string `json:"image"`
@@ -1873,7 +1873,7 @@ type OrderFulfillmentItemResp struct {
 }
 
 type OrderPaymentResp struct {
-	PaymentID         int64                `json:"payment_id"`
+	PaymentID         int64                `json:"payment_id,string"`
 	PaymentNo         string               `json:"payment_no"`
 	PaymentMethod     string               `json:"payment_method"`
 	PaymentMethodText string               `json:"payment_method_text"`
@@ -1922,7 +1922,7 @@ type PageDetailResponse struct {
 }
 
 type PageListItem struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	PageType    string `json:"page_type"` // home, product, collection, custom
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
@@ -1932,12 +1932,12 @@ type PageListItem struct {
 
 type PageSEOConfigResponse struct {
 	PageType string `json:"page_type"`
-	PageID   *int64 `json:"page_id,omitempty"`
+	PageID   *int64 `json:"page_id,omitempty,string"`
 	SEOConfigDTO
 }
 
 type PaymentRefundResp struct {
-	ID              int64  `json:"id"`
+	ID              int64  `json:"id,string"`
 	RefundNo        string `json:"refund_no"`
 	ChannelRefundID string `json:"channel_refund_id"`
 	Amount          string `json:"amount"`
@@ -1966,7 +1966,7 @@ type PaymentStatsResp struct {
 }
 
 type PendingOrderItem struct {
-	OrderID    int64  `json:"order_id"`
+	OrderID    int64  `json:"order_id,string"`
 	OrderNo    string `json:"order_no"`
 	PayAmount  string `json:"pay_amount"`
 	Status     string `json:"status"`
@@ -1985,20 +1985,20 @@ type PendingOrdersResponse struct {
 }
 
 type PermissionInfo struct {
-	ID       int64  `json:"id"`
+	ID       int64  `json:"id,string"`
 	Name     string `json:"name"`
 	Code     string `json:"code"`
 	Type     int8   `json:"type"` // 0=menu, 1=button, 2=api
 	TypeText string `json:"type_text"`
-	ParentID int64  `json:"parent_id"`
+	ParentID int64  `json:"parent_id,string"`
 	Path     string `json:"path"`
 	Icon     string `json:"icon"`
 	Sort     int    `json:"sort"`
 }
 
 type PointsAccount struct {
-	ID            int64  `json:"id"`
-	UserID        int64  `json:"user_id"`
+	ID            int64  `json:"id,string"`
+	UserID        int64  `json:"user_id,string"`
 	UserEmail     string `json:"user_email,optional"`
 	Balance       int64  `json:"balance"`
 	FrozenBalance int64  `json:"frozen_balance"`
@@ -2010,12 +2010,12 @@ type PointsAccount struct {
 }
 
 type PointsRedemption struct {
-	ID           int64  `json:"id"`
-	UserID       int64  `json:"user_id"`
-	RedeemRuleID int64  `json:"redeem_rule_id"`
-	CouponID     int64  `json:"coupon_id"`
+	ID           int64  `json:"id,string"`
+	UserID       int64  `json:"user_id,string"`
+	RedeemRuleID int64  `json:"redeem_rule_id,string"`
+	CouponID     int64  `json:"coupon_id,string"`
 	CouponName   string `json:"coupon_name"`
-	UserCouponID int64  `json:"user_coupon_id,optional"`
+	UserCouponID int64  `json:"user_coupon_id,optional,string"`
 	PointsUsed   int64  `json:"points_used"`
 	Status       string `json:"status"` // pending, completed, cancelled
 	CreatedAt    string `json:"created_at"`
@@ -2034,9 +2034,9 @@ type PointsStats struct {
 }
 
 type PointsTransaction struct {
-	ID            int64  `json:"id"`
-	UserID        int64  `json:"user_id"`
-	AccountID     int64  `json:"account_id"`
+	ID            int64  `json:"id,string"`
+	UserID        int64  `json:"user_id,string"`
+	AccountID     int64  `json:"account_id,string"`
 	Points        int64  `json:"points"` // Positive = earn, negative = deduct
 	BalanceAfter  int64  `json:"balance_after"`
 	Type          string `json:"type"` // EARN, REDEEM, ADJUST, EXPIRE, FREEZE, UNFREEZE
@@ -2058,7 +2058,7 @@ type PointsTrendResp struct {
 }
 
 type ProblemProductStats struct {
-	ProductID   int64  `json:"product_id"`
+	ProductID   int64  `json:"product_id,string"`
 	ProductName string `json:"product_name"`
 	Image       string `json:"image"`
 	TotalSales  int64  `json:"total_sales"`
@@ -2067,7 +2067,7 @@ type ProblemProductStats struct {
 }
 
 type ProductDetailResp struct {
-	ID              int64               `json:"id"`
+	ID              int64               `json:"id,string"`
 	Name            string              `json:"name"`
 	Description     string              `json:"description"`
 	Price           string              `json:"price"` // 价格，单位：元
@@ -2075,7 +2075,7 @@ type ProductDetailResp struct {
 	CostPrice       string              `json:"cost_price"` // 成本价，单位：元
 	Stock           int                 `json:"stock"`
 	Status          string              `json:"status"` // draft, on_sale, off_sale, deleted
-	CategoryID      int64               `json:"category_id"`
+	CategoryID      int64               `json:"category_id,string"`
 	CreatedAt       string              `json:"created_at"`
 	UpdatedAt       string              `json:"updated_at"`
 	SKU             string              `json:"sku"`
@@ -2095,8 +2095,8 @@ type ProductDetailResp struct {
 }
 
 type ProductLocalizationResp struct {
-	ID           int64  `json:"id"`
-	ProductID    int64  `json:"product_id"`
+	ID           int64  `json:"id,string"`
+	ProductID    int64  `json:"product_id,string"`
 	LanguageCode string `json:"language_code"`
 	Name         string `json:"name"`
 	Description  string `json:"description"`
@@ -2105,7 +2105,7 @@ type ProductLocalizationResp struct {
 }
 
 type ProductMarketInfo struct {
-	MarketID   int64  `json:"market_id"`
+	MarketID   int64  `json:"market_id,string"`
 	MarketCode string `json:"market_code"`
 	MarketName string `json:"market_name"`
 	IsEnabled  bool   `json:"is_enabled"`
@@ -2114,9 +2114,9 @@ type ProductMarketInfo struct {
 }
 
 type ProductMarketResp struct {
-	ID                  int64  `json:"id"`
-	ProductID           int64  `json:"product_id"`
-	MarketID            int64  `json:"market_id"`
+	ID                  int64  `json:"id,string"`
+	ProductID           int64  `json:"product_id,string"`
+	MarketID            int64  `json:"market_id,string"`
 	MarketCode          string `json:"market_code"`
 	MarketName          string `json:"market_name"`
 	IsEnabled           bool   `json:"is_enabled"`
@@ -2132,7 +2132,7 @@ type ProductStatsReq struct {
 }
 
 type ProductStatsResp struct {
-	ProductID          int64               `json:"product_id"`
+	ProductID          int64               `json:"product_id,string"`
 	TotalReviews       int                 `json:"total_reviews"`
 	AverageRating      string              `json:"average_rating"`
 	QualityAvgRating   string              `json:"quality_avg_rating"`
@@ -2144,7 +2144,7 @@ type ProductStatsResp struct {
 }
 
 type PromotionDetailResp struct {
-	ID             int64    `json:"id"`
+	ID             int64    `json:"id,string"`
 	Name           string   `json:"name"`
 	Description    string   `json:"description"`
 	Type           string   `json:"type"`   // discount, coupon, flash_sale, bundle, buy_x_get_y
@@ -2158,9 +2158,9 @@ type PromotionDetailResp struct {
 	UsageLimit     int      `json:"usage_limit"`
 	UsedCount      int      `json:"used_count"`
 	PerUserLimit   int      `json:"per_user_limit"`
-	ProductIDs     []int64  `json:"product_ids"`
-	CategoryIDs    []int64  `json:"category_ids"`
-	MarketIDs      []int64  `json:"market_ids"`
+	ProductIDs     []string `json:"product_ids"`
+	CategoryIDs    []string `json:"category_ids"`
+	MarketIDs      []string `json:"market_ids"`
 	Tags           []string `json:"tags"`
 	CreatedAt      string   `json:"created_at"`
 	UpdatedAt      string   `json:"updated_at"`
@@ -2176,8 +2176,8 @@ type PromotionRuleReq struct {
 }
 
 type PromotionRuleResp struct {
-	ID            int64  `json:"id"`
-	PromotionID   int64  `json:"promotion_id"`
+	ID            int64  `json:"id,string"`
+	PromotionID   int64  `json:"promotion_id,string"`
 	RuleType      string `json:"rule_type"`
 	Operator      string `json:"operator"`
 	Value         string `json:"value"`
@@ -2194,13 +2194,13 @@ type PublishPageRequest struct {
 
 type PushToMarketReq struct {
 	ProductID int64    `path:"id"`
-	MarketIDs []int64  `json:"market_ids"`
+	MarketIDs []string `json:"market_ids"`
 	Prices    []string `json:"prices"` // Price per market, same order as market_ids
 }
 
 type PushToMarketResp struct {
-	Success []int64 `json:"success"` // Market IDs successfully added
-	Failed  []int64 `json:"failed"`  // Market IDs that failed
+	Success []string `json:"success"` // Market IDs successfully added
+	Failed  []string `json:"failed"`  // Market IDs that failed
 }
 
 type PutOnSaleReq struct {
@@ -2224,10 +2224,10 @@ type RecentActivitiesResponse struct {
 }
 
 type RedeemRule struct {
-	ID             int64  `json:"id"`
+	ID             int64  `json:"id,string"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
-	CouponID       int64  `json:"coupon_id"`
+	CouponID       int64  `json:"coupon_id,string"`
 	CouponName     string `json:"coupon_name"`
 	PointsRequired int64  `json:"points_required"`
 	TotalStock     int64  `json:"total_stock"`
@@ -2253,10 +2253,10 @@ type RefundDailyStats struct {
 }
 
 type RefundDetailResp struct {
-	ID             int64                  `json:"id"`
+	ID             int64                  `json:"id,string"`
 	RefundNo       string                 `json:"refund_no"`
-	OrderID        int64                  `json:"order_id"`
-	UserID         int64                  `json:"user_id"`
+	OrderID        int64                  `json:"order_id,string"`
+	UserID         int64                  `json:"user_id,string"`
 	UserName       string                 `json:"user_name,optional"`
 	UserPhone      string                 `json:"user_phone,optional"`
 	Type           string                 `json:"type"` // 1=full_refund, 2=partial_refund
@@ -2271,7 +2271,7 @@ type RefundDetailResp struct {
 	Currency       string                 `json:"currency"`
 	RejectReason   string                 `json:"reject_reason,optional"`
 	ApprovedAt     string                 `json:"approved_at,optional"`
-	ApprovedBy     int64                  `json:"approved_by,optional"`
+	ApprovedBy     int64                  `json:"approved_by,optional,string"`
 	ApprovedByName string                 `json:"approved_by_name,optional"`
 	CompletedAt    string                 `json:"completed_at,optional"`
 	CreatedAt      string                 `json:"created_at"`
@@ -2282,8 +2282,8 @@ type RefundDetailResp struct {
 }
 
 type RefundOrderItemResp struct {
-	ID          int64  `json:"id"`
-	ProductID   int64  `json:"product_id"`
+	ID          int64  `json:"id,string"`
+	ProductID   int64  `json:"product_id,string"`
 	ProductName string `json:"product_name"`
 	SKUName     string `json:"sku_name"`
 	Image       string `json:"image"`
@@ -2292,7 +2292,7 @@ type RefundOrderItemResp struct {
 }
 
 type RefundProductStats struct {
-	ProductID   int64  `json:"product_id"`
+	ProductID   int64  `json:"product_id,string"`
 	ProductName string `json:"product_name"`
 	RefundCount int64  `json:"refund_count"`
 	RefundRate  string `json:"refund_rate"`
@@ -2304,7 +2304,7 @@ type RefundRateTrend struct {
 }
 
 type RefundReasonResp struct {
-	ID       int64  `json:"id"`
+	ID       int64  `json:"id,string"`
 	Code     string `json:"code"`
 	Name     string `json:"name"`
 	Sort     int    `json:"sort"`
@@ -2352,7 +2352,7 @@ type RegisterTenantAdminRequest struct {
 	Mobile   string `json:"mobile,optional"`
 	RealName string `json:"real_name" validate:"required"`
 	Password string `json:"password" validate:"required,min=6"`
-	TenantID int64  `json:"tenant_id,optional"` // 默认为0，创建平台超管时使用
+	TenantID int64  `json:"tenant_id,optional,string"` // 默认为0，创建平台超管时使用
 }
 
 type RegisterTenantAdminResponse struct {
@@ -2372,7 +2372,7 @@ type RemindPaymentReq struct {
 }
 
 type RemindPaymentResp struct {
-	OrderID    int64  `json:"order_id"`
+	OrderID    int64  `json:"order_id,string"`
 	OrderNo    string `json:"order_no"`
 	RemindedAt string `json:"reminded_at"`
 	Message    string `json:"message"`
@@ -2389,8 +2389,8 @@ type ReorderBlocksRequest struct {
 }
 
 type ReorderZonesReq struct {
-	TemplateID int64   `path:"template_id"`
-	ZoneIDs    []int64 `json:"zone_ids"`
+	TemplateID int64    `path:"template_id"`
+	ZoneIDs    []string `json:"zone_ids"`
 }
 
 type ResetAdminPasswordResponse struct {
@@ -2411,13 +2411,13 @@ type RestoreVersionRequest struct {
 }
 
 type ReviewDetailResp struct {
-	ID            int64            `json:"id"`
-	TenantID      int64            `json:"tenant_id"`
-	OrderID       int64            `json:"order_id"`
-	ProductID     int64            `json:"product_id"`
+	ID            int64            `json:"id,string"`
+	TenantID      int64            `json:"tenant_id,string"`
+	OrderID       int64            `json:"order_id,string"`
+	ProductID     int64            `json:"product_id,string"`
 	ProductName   string           `json:"product_name"`
 	SKUCode       string           `json:"sku_code"`
-	UserID        int64            `json:"user_id"`
+	UserID        int64            `json:"user_id,string"`
 	UserName      string           `json:"user_name"`
 	IsAnonymous   bool             `json:"is_anonymous"`
 	IsVerified    bool             `json:"is_verified"`
@@ -2435,9 +2435,9 @@ type ReviewDetailResp struct {
 }
 
 type ReviewListItem struct {
-	ID            int64    `json:"id"`
-	OrderID       int64    `json:"order_id"`
-	ProductID     int64    `json:"product_id"`
+	ID            int64    `json:"id,string"`
+	OrderID       int64    `json:"order_id,string"`
+	ProductID     int64    `json:"product_id,string"`
 	ProductName   string   `json:"product_name"`
 	SKUCode       string   `json:"sku_code"`
 	UserName      string   `json:"user_name"`
@@ -2456,7 +2456,7 @@ type ReviewListItem struct {
 }
 
 type ReviewReplyResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Content   string `json:"content"`
 	AdminName string `json:"admin_name"`
 	CreatedAt string `json:"created_at"`
@@ -2489,7 +2489,7 @@ type RoleIDRequest struct {
 }
 
 type RoleInfo struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"id,string"`
 	Name        string `json:"name"`
 	Code        string `json:"code"`
 	Description string `json:"description"`
@@ -2512,8 +2512,8 @@ type SEOConfigDTO struct {
 }
 
 type SKUDetailResp struct {
-	ID             int64             `json:"id"`
-	ProductID      int64             `json:"product_id"`
+	ID             int64             `json:"id,string"`
+	ProductID      int64             `json:"product_id,string"`
 	Code           string            `json:"code"`
 	Price          string            `json:"price"` // SKU价格，单位：元
 	Currency       string            `json:"currency"`
@@ -2531,7 +2531,7 @@ type SKUDetailResp struct {
 
 type SKUInventoryResp struct {
 	SKUCode        string                        `json:"sku_code"`
-	ProductID      int64                         `json:"product_id"`
+	ProductID      int64                         `json:"product_id,string"`
 	TotalStock     int                           `json:"total_stock"`
 	AvailableStock int                           `json:"available_stock"`
 	LockedStock    int                           `json:"locked_stock"`
@@ -2567,15 +2567,15 @@ type SaveDraftRequest struct {
 }
 
 type SetBrandMarketVisibilityReq struct {
-	BrandID   int64   `path:"id"`
-	MarketIDs []int64 `json:"market_ids"`
-	Visible   bool    `json:"visible"`
+	BrandID   int64    `path:"id"`
+	MarketIDs []string `json:"market_ids"`
+	Visible   bool     `json:"visible"`
 }
 
 type SetCategoryMarketVisibilityReq struct {
-	CategoryID int64   `path:"id"`
-	MarketIDs  []int64 `json:"market_ids"`
-	Visible    bool    `json:"visible"`
+	CategoryID int64    `path:"id"`
+	MarketIDs  []string `json:"market_ids"`
+	Visible    bool     `json:"visible"`
 }
 
 type SetDefaultTemplateReq struct {
@@ -2599,14 +2599,14 @@ type ShipOrderReq struct {
 }
 
 type ShipOrderResp struct {
-	ShipmentID int64  `json:"shipment_id"`
+	ShipmentID int64  `json:"shipment_id,string"`
 	ShipmentNo string `json:"shipment_no"`
 }
 
 type ShipmentDetailResp struct {
-	ID            int64               `json:"id"`
+	ID            int64               `json:"id,string"`
 	ShipmentNo    string              `json:"shipment_no"`
-	OrderID       int64               `json:"order_id"`
+	OrderID       int64               `json:"order_id,string"`
 	Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	Carrier       string              `json:"carrier"`
 	CarrierCode   string              `json:"carrier_code"`
@@ -2621,21 +2621,21 @@ type ShipmentDetailResp struct {
 	Items         []*ShipmentItemResp `json:"items"`
 	CreatedAt     string              `json:"created_at"`
 	UpdatedAt     string              `json:"updated_at"`
-	CreatedBy     int64               `json:"created_by"`
+	CreatedBy     int64               `json:"created_by,string"`
 	CreatedByName string              `json:"created_by_name,optional"`
 }
 
 type ShipmentItemReq struct {
-	OrderItemID int64 `json:"order_item_id"`
+	OrderItemID int64 `json:"order_item_id,string"`
 	Quantity    int   `json:"quantity"`
 }
 
 type ShipmentItemResp struct {
-	ID          int64  `json:"id"`
-	ShipmentID  int64  `json:"shipment_id"`
-	OrderItemID int64  `json:"order_item_id"`
-	ProductID   int64  `json:"product_id"`
-	SKUID       int64  `json:"sku_id"`
+	ID          int64  `json:"id,string"`
+	ShipmentID  int64  `json:"shipment_id,string"`
+	OrderItemID int64  `json:"order_item_id,string"`
+	ProductID   int64  `json:"product_id,string"`
+	SKUID       int64  `json:"sku_id,string"`
 	ProductName string `json:"product_name"`
 	SKUName     string `json:"sku_name"`
 	Image       string `json:"image"`
@@ -2649,7 +2649,7 @@ type ShippingSettings struct {
 }
 
 type ShippingTemplateDetailResp struct {
-	ID        int64                    `json:"id"`
+	ID        int64                    `json:"id,string"`
 	Name      string                   `json:"name"`
 	IsDefault bool                     `json:"is_default"`
 	IsActive  bool                     `json:"is_active"`
@@ -2660,7 +2660,7 @@ type ShippingTemplateDetailResp struct {
 }
 
 type ShippingTemplateListItem struct {
-	ID            int64  `json:"id"`
+	ID            int64  `json:"id,string"`
 	Name          string `json:"name"`
 	IsDefault     bool   `json:"is_default"`
 	IsActive      bool   `json:"is_active"`
@@ -2671,8 +2671,8 @@ type ShippingTemplateListItem struct {
 }
 
 type ShippingZoneDetail struct {
-	ID                  int64    `json:"id"`
-	TemplateID          int64    `json:"template_id"`
+	ID                  int64    `json:"id,string"`
+	TemplateID          int64    `json:"template_id,string"`
 	Name                string   `json:"name"`
 	Regions             []string `json:"regions"`               // City codes
 	FeeType             string   `json:"fee_type"`              // fixed, by_count, by_weight, free
@@ -2686,7 +2686,7 @@ type ShippingZoneDetail struct {
 }
 
 type ShopSettings struct {
-	ID              int64  `json:"id"`
+	ID              int64  `json:"id,string"`
 	Name            string `json:"name"`
 	Code            string `json:"code"`
 	Logo            string `json:"logo"`
@@ -2717,7 +2717,7 @@ type ShowReviewReq struct {
 }
 
 type ShowReviewResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Status    string `json:"status"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -2732,7 +2732,7 @@ type SuspendUserWithReasonRequest struct {
 }
 
 type SwitchThemeRequest struct {
-	ThemeID int64 `json:"theme_id"`
+	ThemeID int64 `json:"theme_id,string"`
 }
 
 type TakeOffSaleReq struct {
@@ -2747,19 +2747,19 @@ type TaxConfig struct {
 }
 
 type TemplateMappingDetail struct {
-	ID         int64  `json:"id"`
-	TemplateID int64  `json:"template_id"`
+	ID         int64  `json:"id,string"`
+	TemplateID int64  `json:"template_id,string"`
 	TargetType string `json:"target_type"` // product, category
-	TargetID   int64  `json:"target_id"`
+	TargetID   int64  `json:"target_id,string"`
 	TargetName string `json:"target_name,optional"`
 }
 
 type ThemeAuditLog struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Action    string `json:"action"` // switch, update_config
-	ThemeID   int64  `json:"theme_id"`
+	ThemeID   int64  `json:"theme_id,string"`
 	ThemeName string `json:"theme_name"`
-	UserID    int64  `json:"user_id"`
+	UserID    int64  `json:"user_id,string"`
 	UserName  string `json:"user_name"`
 	CreatedAt string `json:"created_at"` // RFC3339 format
 }
@@ -2789,7 +2789,7 @@ type ThemeConfigSchemaField struct {
 }
 
 type ThemeItem struct {
-	ID            int64              `json:"id"`
+	ID            int64              `json:"id,string"`
 	Code          string             `json:"code"`
 	Name          string             `json:"name"`
 	Description   string             `json:"description"`
@@ -2817,13 +2817,13 @@ type ToggleFeaturedReq struct {
 }
 
 type ToggleFeaturedResp struct {
-	ID         int64  `json:"id"`
+	ID         int64  `json:"id,string"`
 	IsFeatured bool   `json:"is_featured"`
 	UpdatedAt  string `json:"updated_at"`
 }
 
 type TopProductItem struct {
-	ProductID   int64  `json:"product_id"`
+	ProductID   int64  `json:"product_id,string"`
 	ProductName string `json:"product_name"`
 	Image       string `json:"image"`
 	Sales       int64  `json:"sales"`
@@ -2841,7 +2841,7 @@ type TopProductsResponse struct {
 }
 
 type TopUser struct {
-	UserID       int64  `json:"user_id"`
+	UserID       int64  `json:"user_id,string"`
 	UserEmail    string `json:"user_email,optional"`
 	PointsEarned int64  `json:"points_earned"`
 	CreatedAt    string `json:"created_at"`
@@ -2853,9 +2853,9 @@ type TopUsersResp struct {
 }
 
 type TransactionResp struct {
-	ID                   int64  `json:"id"`
+	ID                   int64  `json:"id,string"`
 	TransactionID        string `json:"transaction_id"`
-	OrderID              int64  `json:"order_id"`
+	OrderID              int64  `json:"order_id,string"`
 	OrderNo              string `json:"order_no"`
 	PaymentMethod        string `json:"payment_method"`
 	PaymentMethodText    string `json:"payment_method_text"`
@@ -2993,7 +2993,7 @@ type UpdateOrderRemarkReq struct {
 }
 
 type UpdateOrderRemarkResp struct {
-	OrderID int64 `json:"order_id"`
+	OrderID int64 `json:"order_id,string"`
 }
 
 type UpdatePageSEORequest struct {
@@ -3024,12 +3024,12 @@ type UpdateProductMarketReq struct {
 }
 
 type UpdateProductReq struct {
-	ID              int64    `json:"id"`
+	ID              int64    `json:"id,string"`
 	Name            string   `json:"name"`
 	Description     string   `json:"description,optional"`
 	Price           string   `json:"price"` // 价格，单位：元
 	Currency        string   `json:"currency,optional"`
-	CategoryID      int64    `json:"category_id"`
+	CategoryID      int64    `json:"category_id,string"`
 	SKU             string   `json:"sku,optional"`
 	Brand           string   `json:"brand,optional"`
 	Tags            []string `json:"tags,optional"`
@@ -3046,7 +3046,7 @@ type UpdateProductReq struct {
 }
 
 type UpdateProfileRequest struct {
-	UserID   int64  `json:"user_id"`
+	UserID   int64  `json:"user_id,string"`
 	RealName string `json:"real_name,optional"`
 	Avatar   string `json:"avatar,optional"`
 	Mobile   string `json:"mobile,optional"`
@@ -3066,9 +3066,9 @@ type UpdatePromotionReq struct {
 	MaxDiscount    string   `json:"max_discount,optional"`
 	UsageLimit     int      `json:"usage_limit,optional"`
 	PerUserLimit   int      `json:"per_user_limit,optional"`
-	ProductIDs     []int64  `json:"product_ids,optional"`
-	CategoryIDs    []int64  `json:"category_ids,optional"`
-	MarketIDs      []int64  `json:"market_ids,optional"`
+	ProductIDs     []string `json:"product_ids,optional"`
+	CategoryIDs    []string `json:"category_ids,optional"`
+	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
 }
 
@@ -3086,7 +3086,7 @@ type UpdateRedeemRuleReq struct {
 	ID             int64  `path:"id"`
 	Name           string `json:"name"`
 	Description    string `json:"description,optional"`
-	CouponID       int64  `json:"coupon_id"`
+	CouponID       int64  `json:"coupon_id,string"`
 	PointsRequired int64  `json:"points_required"`
 	TotalStock     int64  `json:"total_stock,optional"`
 	PerUserLimit   int    `json:"per_user_limit,optional"`
@@ -3100,18 +3100,18 @@ type UpdateReplyReq struct {
 }
 
 type UpdateReplyResp struct {
-	ID        int64  `json:"id"`
-	ReviewID  int64  `json:"review_id"`
+	ID        int64  `json:"id,string"`
+	ReviewID  int64  `json:"review_id,string"`
 	Content   string `json:"content"`
-	AdminID   int64  `json:"admin_id"`
+	AdminID   int64  `json:"admin_id,string"`
 	AdminName string `json:"admin_name"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
 
 type UpdateRolePermissionsRequest struct {
-	ID            int64   `path:"id"`
-	PermissionIDs []int64 `json:"permission_ids"`
+	ID            int64    `path:"id"`
+	PermissionIDs []string `json:"permission_ids"`
 }
 
 type UpdateRoleRequest struct {
@@ -3144,7 +3144,7 @@ type UpdateSKUReq struct {
 
 type UpdateSKUStockReq struct {
 	SKUCode        string `json:"sku_code"`
-	WarehouseID    int64  `json:"warehouse_id,optional"` // 0 = all warehouses
+	WarehouseID    int64  `json:"warehouse_id,optional,string"` // 0 = all warehouses
 	AvailableStock int    `json:"available_stock"`
 	Remark         string `json:"remark,optional"`
 }
@@ -3256,8 +3256,8 @@ type UserAddressListResponse struct {
 }
 
 type UserAddressResponse struct {
-	ID         int64  `json:"id"`
-	UserID     int64  `json:"user_id"`
+	ID         int64  `json:"id,string"`
+	UserID     int64  `json:"user_id,string"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
 	Country    string `json:"country"`
@@ -3272,9 +3272,9 @@ type UserAddressResponse struct {
 }
 
 type UserCouponDetailResp struct {
-	ID             int64  `json:"id"`
-	UserID         int64  `json:"user_id"`
-	CouponID       int64  `json:"coupon_id"`
+	ID             int64  `json:"id,string"`
+	UserID         int64  `json:"user_id,string"`
+	CouponID       int64  `json:"coupon_id,string"`
 	CouponCode     string `json:"coupon_code"`
 	CouponName     string `json:"coupon_name"`
 	DiscountType   string `json:"discount_type"`
@@ -3285,13 +3285,13 @@ type UserCouponDetailResp struct {
 	EndTime        string `json:"end_time"`
 	Status         string `json:"status"` // unused, used, expired
 	UsedAt         string `json:"used_at,optional"`
-	OrderID        int64  `json:"order_id,optional"`
+	OrderID        int64  `json:"order_id,optional,string"`
 	CreatedAt      string `json:"created_at"`
 }
 
 type UserDetailResponse struct {
-	ID             int64                `json:"id"`
-	TenantID       int64                `json:"tenant_id"`
+	ID             int64                `json:"id,string"`
+	TenantID       int64                `json:"tenant_id,string"`
 	Email          string               `json:"email"`
 	Phone          string               `json:"phone"`
 	Name           string               `json:"name"`
@@ -3338,14 +3338,14 @@ type VersionDetailResponse struct {
 }
 
 type VersionListItem struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Version   int    `json:"version"`
-	CreatedBy int64  `json:"created_by"`
+	CreatedBy int64  `json:"created_by,string"`
 	CreatedAt string `json:"created_at"` // RFC3339 format
 }
 
 type WarehouseDetailResp struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"id,string"`
 	Code      string `json:"code"`
 	Name      string `json:"name"`
 	Country   string `json:"country"`
@@ -3357,7 +3357,7 @@ type WarehouseDetailResp struct {
 }
 
 type WarehouseInventoryItemResp struct {
-	WarehouseID    int64  `json:"warehouse_id"`
+	WarehouseID    int64  `json:"warehouse_id,string"`
 	WarehouseName  string `json:"warehouse_name"`
 	AvailableStock int    `json:"available_stock"`
 	LockedStock    int    `json:"locked_stock"`

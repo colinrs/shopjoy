@@ -372,7 +372,7 @@ const selectedCategories = ref<CategoryTree[]>([])
 const selectedCategoryIds = ref<number[]>([])
 
 // Computed
-const templateId = computed(() => Number(route.params.id))
+const templateId = computed(() => route.params.id as string)
 const isActive = computed({
   get: () => template.value?.is_active ?? true,
   set: () => {}
@@ -447,7 +447,7 @@ const handleZoneUpdate = async (zone: ShippingZone) => {
   }
 }
 
-const handleZoneDelete = async (zoneId: number) => {
+const handleZoneDelete = async (zoneId: string) => {
   try {
     await deleteShippingZone(zoneId)
     ElMessage.success(t('shipping.deleteZoneSuccess'))

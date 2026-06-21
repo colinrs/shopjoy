@@ -548,7 +548,7 @@ const stats = ref<UserStats>({
 const userList = ref<User[]>([])
 
 const editForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   avatar: ''
 })

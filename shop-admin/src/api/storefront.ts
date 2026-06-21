@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // ========== Theme Types ==========
 
 export interface ThemeItem {
-  id: number
+  id: string
   code: string
   name: string
   description: string
@@ -30,7 +30,7 @@ export interface CurrentThemeResponse {
 }
 
 export interface SwitchThemeRequest {
-  theme_id: number
+  theme_id: string
 }
 
 export interface UpdateThemeConfigRequest {
@@ -40,7 +40,7 @@ export interface UpdateThemeConfigRequest {
 // ========== Page Types ==========
 
 export interface PageItem {
-  id: number
+  id: string
   page_type: string
   name: string
   slug: string
@@ -54,14 +54,14 @@ export interface ListPagesResponse {
 
 // API returns block_config as JSON string, but we use object internally
 export interface DecorationDTOAPI {
-  id: number
+  id: string
   block_type: string
   block_config: string // JSON string from API
   sort_order: number
 }
 
 export interface DecorationDTO {
-  id: number
+  id: string
   block_type: string
   block_config: Record<string, any> // Parsed object for internal use
   sort_order: number
@@ -96,13 +96,13 @@ export interface UpdateDecorationRequest {
 }
 
 export interface ReorderBlocksRequest {
-  block_orders: { id: number; sort_order: number }[]
+  block_orders: { id: string; sort_order: number }[]
 }
 
 // ========== Version Types ==========
 
 export interface VersionItem {
-  id: number
+  id: string
   version: number
   created_by: number
   created_at: string
@@ -134,7 +134,7 @@ export interface SEOConfigDTO {
 
 export interface PageSEOConfigDTO {
   page_type: string
-  page_id?: number
+  page_id?: string
   config: SEOConfigDTO
 }
 
@@ -183,11 +183,11 @@ export function updateThemeConfig(data: UpdateThemeConfigRequest) {
 // ========== Theme Audit Log API ==========
 
 export interface ThemeAuditLog {
-  id: number
+  id: string
   action: string
-  theme_id: number
+  theme_id: string
   theme_name: string
-  user_id: number
+  user_id: string
   user_name: string
   created_at: string
 }
@@ -213,7 +213,7 @@ export interface CreatePageRequest {
 }
 
 export interface CreatePageResponse {
-  page_id: number
+  page_id: string
 }
 
 export function listPages() {
@@ -256,7 +256,7 @@ function stringifyDecoration(d: DecorationDTO): { block_type: string; block_conf
   }
 }
 
-export async function getPage(id: number): Promise<PageDetailResponse> {
+export async function getPage(id: string): Promise<PageDetailResponse> {
   const res = await request<PageDetailResponseAPI>({
     url: `/api/v1/pages/${id}`,
     method: 'get'
@@ -278,7 +278,7 @@ export async function getPageBySlug(slug: string): Promise<PageDetailResponse> {
   }
 }
 
-export function saveDraft(pageId: number, blocks: DecorationDTO[]) {
+export function saveDraft(pageId: string, blocks: DecorationDTO[]) {
   return request({
     url: `/api/v1/pages/${pageId}/draft`,
     method: 'put',
@@ -288,14 +288,14 @@ export function saveDraft(pageId: number, blocks: DecorationDTO[]) {
   })
 }
 
-export function publishPage(pageId: number) {
+export function publishPage(pageId: string) {
   return request({
     url: `/api/v1/pages/${pageId}/publish`,
     method: 'put'
   })
 }
 
-export function unpublishPage(pageId: number) {
+export function unpublishPage(pageId: string) {
   return request({
     url: `/api/v1/pages/${pageId}/unpublish`,
     method: 'put'
@@ -304,7 +304,7 @@ export function unpublishPage(pageId: number) {
 
 // ========== Decoration API ==========
 
-export async function addDecoration(pageId: number, data: { block_type: string; block_config: Record<string, any>; sort_order: number }): Promise<DecorationDTO> {
+export async function addDecoration(pageId: string, data: { block_type: string; block_config: Record<string, any>; sort_order: number }): Promise<DecorationDTO> {
   const res = await request<DecorationDTOAPI>({
     url: `/api/v1/pages/${pageId}/decorations`,
     method: 'post',
@@ -317,7 +317,7 @@ export async function addDecoration(pageId: number, data: { block_type: string; 
   return parseDecoration(res)
 }
 
-export function updateDecoration(decorationId: number, blockConfig: Record<string, any>) {
+export function updateDecoration(decorationId: string, blockConfig: Record<string, any>) {
   return request({
     url: `/api/v1/decorations/${decorationId}`,
     method: 'put',
@@ -327,14 +327,14 @@ export function updateDecoration(decorationId: number, blockConfig: Record<strin
   })
 }
 
-export function deleteDecoration(decorationId: number) {
+export function deleteDecoration(decorationId: string) {
   return request({
     url: `/api/v1/decorations/${decorationId}`,
     method: 'delete'
   })
 }
 
-export function reorderBlocks(pageId: number, data: ReorderBlocksRequest) {
+export function reorderBlocks(pageId: string, data: ReorderBlocksRequest) {
   return request({
     url: `/api/v1/pages/${pageId}/blocks/reorder`,
     method: 'put',
@@ -344,7 +344,7 @@ export function reorderBlocks(pageId: number, data: ReorderBlocksRequest) {
 
 // ========== Version API ==========
 
-export function listVersions(pageId: number, page: number = 1, pageSize: number = 20) {
+export function listVersions(pageId: string, page: number = 1, pageSize: number = 20) {
   return request<ListVersionsResponse>({
     url: `/api/v1/pages/${pageId}/versions`,
     method: 'get',
@@ -352,14 +352,14 @@ export function listVersions(pageId: number, page: number = 1, pageSize: number 
   })
 }
 
-export function getVersion(pageId: number, version: number) {
+export function getVersion(pageId: string, version: number) {
   return request<VersionDetailResponse>({
     url: `/api/v1/pages/${pageId}/versions/${version}`,
     method: 'get'
   })
 }
 
-export function restoreVersion(pageId: number, data: RestoreVersionRequest) {
+export function restoreVersion(pageId: string, data: RestoreVersionRequest) {
   return request({
     url: `/api/v1/pages/${pageId}/restore`,
     method: 'put',
@@ -391,7 +391,7 @@ export function listPageSEO() {
   })
 }
 
-export function getPageSEO(pageType: string, pageId?: number) {
+export function getPageSEO(pageType: string, pageId?: string) {
   return request<PageSEOConfigDTO>({
     url: `/api/v1/seo/pages/${pageType}`,
     method: 'get',
@@ -399,7 +399,7 @@ export function getPageSEO(pageType: string, pageId?: number) {
   })
 }
 
-export function updatePageSEO(pageType: string, data: UpdateSEOConfigRequest, pageId?: number) {
+export function updatePageSEO(pageType: string, data: UpdateSEOConfigRequest, pageId?: string) {
   return request({
     url: `/api/v1/seo/pages/${pageType}`,
     method: 'put',

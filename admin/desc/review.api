@@ -21,9 +21,9 @@ type (
 		PageSize  int    `form:"page_size,default=20"`
 	}
 	ReviewListItem {
-		ID            int64    `json:"id"`
-		OrderID       int64    `json:"order_id"`
-		ProductID     int64    `json:"product_id"`
+		ID            int64    `json:"id,string"`
+		OrderID       int64    `json:"order_id,string"`
+		ProductID     int64    `json:"product_id,string"`
 		ProductName   string   `json:"product_name"`
 		SKUCode       string   `json:"sku_code"`
 		UserName      string   `json:"user_name"`
@@ -51,13 +51,13 @@ type (
 		ID int64 `path:"id"`
 	}
 	ReviewDetailResp {
-		ID            int64            `json:"id"`
-		TenantID      int64            `json:"tenant_id"`
-		OrderID       int64            `json:"order_id"`
-		ProductID     int64            `json:"product_id"`
+		ID            int64            `json:"id,string"`
+		TenantID      int64            `json:"tenant_id,string"`
+		OrderID       int64            `json:"order_id,string"`
+		ProductID     int64            `json:"product_id,string"`
 		ProductName   string           `json:"product_name"`
 		SKUCode       string           `json:"sku_code"`
-		UserID        int64            `json:"user_id"`
+		UserID        int64            `json:"user_id,string"`
 		UserName      string           `json:"user_name"`
 		IsAnonymous   bool             `json:"is_anonymous"`
 		IsVerified    bool             `json:"is_verified"`
@@ -74,7 +74,7 @@ type (
 		Reply         *ReviewReplyResp `json:"reply,optional"`
 	}
 	ReviewReplyResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Content   string `json:"content"`
 		AdminName string `json:"admin_name"`
 		CreatedAt string `json:"created_at"`
@@ -85,7 +85,7 @@ type (
 		ID int64 `path:"id"`
 	}
 	ApproveReviewResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Status    string `json:"status"`
 		UpdatedAt string `json:"updated_at"`
 	}
@@ -95,7 +95,7 @@ type (
 		Reason string `json:"reason,optional"`
 	}
 	HideReviewResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Status    string `json:"status"`
 		UpdatedAt string `json:"updated_at"`
 	}
@@ -104,7 +104,7 @@ type (
 		ID int64 `path:"id"`
 	}
 	ShowReviewResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Status    string `json:"status"`
 		UpdatedAt string `json:"updated_at"`
 	}
@@ -113,7 +113,7 @@ type (
 		ID int64 `path:"id"`
 	}
 	DeleteReviewResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Status    string `json:"status"`
 		DeletedAt string `json:"deleted_at"`
 	}
@@ -123,7 +123,7 @@ type (
 		IsFeatured bool  `json:"is_featured"`
 	}
 	ToggleFeaturedResp {
-		ID         int64  `json:"id"`
+		ID         int64  `json:"id,string"`
 		IsFeatured bool   `json:"is_featured"`
 		UpdatedAt  string `json:"updated_at"`
 	}
@@ -133,10 +133,10 @@ type (
 		Content string `json:"content"`
 	}
 	CreateReplyResp {
-		ID        int64  `json:"id"`
-		ReviewID  int64  `json:"review_id"`
+		ID        int64  `json:"id,string"`
+		ReviewID  int64  `json:"review_id,string"`
 		Content   string `json:"content"`
-		AdminID   int64  `json:"admin_id"`
+		AdminID   int64  `json:"admin_id,string"`
 		AdminName string `json:"admin_name"`
 		CreatedAt string `json:"created_at"`
 	}
@@ -146,10 +146,10 @@ type (
 		Content string `json:"content"`
 	}
 	UpdateReplyResp {
-		ID        int64  `json:"id"`
-		ReviewID  int64  `json:"review_id"`
+		ID        int64  `json:"id,string"`
+		ReviewID  int64  `json:"review_id,string"`
 		Content   string `json:"content"`
-		AdminID   int64  `json:"admin_id"`
+		AdminID   int64  `json:"admin_id,string"`
 		AdminName string `json:"admin_name"`
 		CreatedAt string `json:"created_at"`
 		UpdatedAt string `json:"updated_at"`
@@ -163,7 +163,7 @@ type (
 	}
 	// Batch Approve
 	BatchApproveReq {
-		IDs []int64 `json:"ids"`
+		IDs []string `json:"ids"`
 	}
 	BatchApproveResp {
 		SuccessCount int      `json:"success_count"`
@@ -172,8 +172,8 @@ type (
 	}
 	// Batch Hide
 	BatchHideReq {
-		IDs    []int64 `json:"ids"`
-		Reason string  `json:"reason,optional"`
+		IDs    []string `json:"ids"`
+		Reason string   `json:"reason,optional"`
 	}
 	BatchHideResp {
 		SuccessCount int      `json:"success_count"`
@@ -213,7 +213,7 @@ type (
 		Rating5 int `json:"5"` // 5 stars count
 	}
 	ProductStatsResp {
-		ProductID          int64               `json:"product_id"`
+		ProductID          int64               `json:"product_id,string"`
 		TotalReviews       int                 `json:"total_reviews"`
 		AverageRating      string              `json:"average_rating"`
 		QualityAvgRating   string              `json:"quality_avg_rating"`

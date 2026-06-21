@@ -68,14 +68,14 @@ const props = defineProps<AdjustStockDialogProps>()
 const emit = defineEmits<AdjustStockDialogEmits>()
 
 const adjustStockForm = reactive<AdjustStockFormData>({
-  warehouse_id: 0,
+  warehouse_id: '',
   quantity: 0,
   remark: ''
 })
 
 watch(() => props.visible, (newVal) => {
   if (newVal) {
-    adjustStockForm.warehouse_id = props.warehouses.find(w => w.is_default)?.id || props.warehouses[0]?.id || 0
+    adjustStockForm.warehouse_id = props.warehouses.find(w => w.is_default)?.id || props.warehouses[0]?.id || ''
     adjustStockForm.quantity = 0
     adjustStockForm.remark = ''
   }

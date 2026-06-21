@@ -247,7 +247,7 @@ const route = useRoute()
 const router = useRouter()
 const { handleError } = useErrorHandler()
 
-const productId = computed(() => Number(route.params.id))
+const productId = computed(() => route.params.id as string)
 
 // State
 const loading = ref(false)
@@ -276,7 +276,7 @@ const variantsLoading = ref(false)
 const variantDialogVisible = ref(false)
 const isEditVariant = ref(false)
 const variantForm = reactive<VariantFormData>({
-  id: 0,
+  id: '',
   code: '',
   price: 0,
   currency: 'USD',
@@ -298,7 +298,7 @@ const productForm = reactive<ProductFormData>({
   cost_price: '0',
   stock: 0,
   status: 'draft',
-  category_id: 0,
+  category_id: '',
   sku: '',
   brand: '',
   tags: [],
@@ -351,7 +351,7 @@ const loadProduct = async () => {
       cost_price: data.cost_price || '0',
       stock: data.stock || 0,
       status: data.status || 'draft',
-      category_id: data.category_id || 0,
+      category_id: data.category_id || '',
       sku: data.sku || '',
       brand: data.brand || '',
       tags: data.tags || [],
@@ -528,7 +528,7 @@ const loadLocalizations = async () => {
 // Show variant dialog
 const handleShowVariantDialog = () => {
   isEditVariant.value = false
-  variantForm.id = 0
+  variantForm.id = ''
   variantForm.code = ''
   variantForm.price = parseFloat(productForm.price) || 0
   variantForm.currency = productForm.currency

@@ -2,8 +2,8 @@ import request from '@/utils/request'
 
 // Admin User interface
 export interface AdminUser {
-  id: number
-  tenant_id: number
+  id: string
+  tenant_id: string
   email: string
   mobile: string
   real_name: string
@@ -20,7 +20,7 @@ export interface AdminUserDetail extends AdminUser {
 }
 
 export interface AdminRole {
-  id: number
+  id: string
   name: string
   code: string
 }
@@ -43,7 +43,7 @@ export function registerTenantAdmin(data: {
   mobile?: string
   real_name: string
   password: string
-  tenant_id?: number
+  tenant_id?: string
 }) {
   return request({
     url: '/api/v1/auth/register',
@@ -59,7 +59,7 @@ export interface GetAdminUsersParams {
   keyword?: string
   type?: number
   status?: number
-  tenant_id?: number
+  tenant_id?: string
 }
 
 export function getAdminUsers(params: GetAdminUsersParams) {
@@ -70,7 +70,7 @@ export function getAdminUsers(params: GetAdminUsersParams) {
   })
 }
 
-export function getAdminUserDetail(id: number) {
+export function getAdminUserDetail(id: string) {
   return request<AdminUserDetail>({
     url: `/api/v1/admin-users/${id}`,
     method: 'get'
@@ -83,7 +83,7 @@ export interface CreateAdminUserParams {
   real_name: string
   password: string
   type: number
-  tenant_id?: number
+  tenant_id?: string
 }
 
 export function createAdminUser(data: CreateAdminUserParams) {
@@ -101,7 +101,7 @@ export interface UpdateAdminUserParams {
   avatar?: string
 }
 
-export function updateAdminUser(id: number, data: UpdateAdminUserParams) {
+export function updateAdminUser(id: string, data: UpdateAdminUserParams) {
   return request<AdminUser>({
     url: `/api/v1/admin-users/${id}`,
     method: 'put',
@@ -109,21 +109,21 @@ export function updateAdminUser(id: number, data: UpdateAdminUserParams) {
   })
 }
 
-export function deleteAdminUser(id: number) {
+export function deleteAdminUser(id: string) {
   return request({
     url: `/api/v1/admin-users/${id}`,
     method: 'delete'
   })
 }
 
-export function resetAdminPassword(id: number) {
+export function resetAdminPassword(id: string) {
   return request<{ temporary_password: string }>({
     url: `/api/v1/admin-users/${id}/reset-password`,
     method: 'post'
   })
 }
 
-export function assignRoles(id: number, roleIds: number[]) {
+export function assignRoles(id: string, roleIds: string[]) {
   return request({
     url: `/api/v1/admin-users/${id}/roles`,
     method: 'put',
@@ -145,7 +145,7 @@ export function getAvailableRoles() {
   })
 }
 
-export function disableAdminUser(id: number) {
+export function disableAdminUser(id: string) {
   return request({
     url: `/api/v1/admin-users/${id}/disable`,
     method: 'post',
@@ -153,7 +153,7 @@ export function disableAdminUser(id: number) {
   })
 }
 
-export function enableAdminUser(id: number) {
+export function enableAdminUser(id: string) {
   return request({
     url: `/api/v1/admin-users/${id}/enable`,
     method: 'post',
@@ -174,7 +174,7 @@ export function changeAdminPassword(data: {
 }
 
 export function updateAdminProfile(data: {
-  user_id: number
+  user_id: string
   real_name?: string
   avatar?: string
   mobile?: string
@@ -189,7 +189,7 @@ export function updateAdminProfile(data: {
 
 // Customer/User APIs
 export interface Customer {
-  id: number
+  id: string
   name: string
   email: string
   mobile?: string
@@ -211,14 +211,14 @@ export function getCustomerList(params: {
   })
 }
 
-export function getCustomerDetail(id: number) {
+export function getCustomerDetail(id: string) {
   return request({
     url: `/api/v1/users/${id}`,
     method: 'get'
   })
 }
 
-export function updateCustomer(id: number, data: {
+export function updateCustomer(id: string, data: {
   name: string
   avatar?: string
 }) {

@@ -55,7 +55,7 @@ type (
 		Period string `form:"period,default=week"` // week, month, all
 	}
 	TopProductItem {
-		ProductID   int64  `json:"product_id"`
+		ProductID   int64  `json:"product_id,string"`
 		ProductName string `json:"product_name"`
 		Image       string `json:"image"`
 		Sales       int64  `json:"sales"`
@@ -70,7 +70,7 @@ type (
 		Limit int `form:"limit,default=5"`
 	}
 	PendingOrderItem {
-		OrderID    int64  `json:"order_id"`
+		OrderID    int64  `json:"order_id,string"`
 		OrderNo    string `json:"order_no"`
 		PayAmount  string `json:"pay_amount"`
 		Status     string `json:"status"`
@@ -87,7 +87,7 @@ type (
 		Limit int `form:"limit,default=10"`
 	}
 	ActivityItem {
-		ID       int64  `json:"id"`
+		ID       int64  `json:"id,string"`
 		Type     string `json:"type"` // order_created, payment_received, product_low_stock, etc.
 		Content  string `json:"content"`
 		Time     string `json:"time"`

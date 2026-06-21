@@ -9,9 +9,9 @@ info (
 type (
 	// ProductMarket response
 	ProductMarketResp {
-		ID                  int64  `json:"id"`
-		ProductID           int64  `json:"product_id"`
-		MarketID            int64  `json:"market_id"`
+		ID                  int64  `json:"id,string"`
+		ProductID           int64  `json:"product_id,string"`
+		MarketID            int64  `json:"market_id,string"`
 		MarketCode          string `json:"market_code"`
 		MarketName          string `json:"market_name"`
 		IsEnabled           bool   `json:"is_enabled"`
@@ -40,12 +40,12 @@ type (
 	// Push to market request
 	PushToMarketReq {
 		ProductID int64    `path:"id"`
-		MarketIDs []int64  `json:"market_ids"`
+		MarketIDs []string `json:"market_ids"`
 		Prices    []string `json:"prices"` // Price per market, same order as market_ids
 	}
 	PushToMarketResp {
-		Success []int64 `json:"success"` // Market IDs successfully added
-		Failed  []int64 `json:"failed"` // Market IDs that failed
+		Success []string `json:"success"` // Market IDs successfully added
+		Failed  []string `json:"failed"` // Market IDs that failed
 	}
 	// Remove from market
 	RemoveFromMarketReq {

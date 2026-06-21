@@ -200,7 +200,7 @@ const loadAccounts = async () => {
     if (searchQuery.value) {
       const query = searchQuery.value.trim()
       if (/^\d+$/.test(query)) {
-        params.user_id = parseInt(query)
+        params.user_id = query
       } else if (query.includes('@')) {
         params.email = query
       }

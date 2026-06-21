@@ -12,7 +12,7 @@ export interface ProductFormData {
   cost_price: string
   stock: number
   status: 'draft' | 'on_sale' | 'off_sale' | 'deleted'
-  category_id: number
+  category_id: string
   sku: string
   brand: string
   tags: string[]
@@ -30,13 +30,13 @@ export interface ProductFormData {
 
 // Push to market form
 export interface PushToMarketFormData {
-  selectedMarkets: number[]
+  selectedMarkets: string[]
   price: number
 }
 
 // Variant form
 export interface VariantFormData {
-  id: number
+  id: string
   code: string
   price: number
   currency: string
@@ -48,7 +48,7 @@ export interface VariantFormData {
 
 // Adjust stock form
 export interface AdjustStockFormData {
-  warehouse_id: number
+  warehouse_id: string
   quantity: number
   remark: string
 }
@@ -67,7 +67,7 @@ export interface SupportedLanguage {
 
 // Product Detail Props for parent component
 export interface ProductDetailProps {
-  productId: number
+  productId: string
 }
 
 // Product Detail Emits
@@ -91,7 +91,7 @@ export interface ProductInfoTabEmits {
 
 // Product Markets Tab
 export interface ProductMarketsTabProps {
-  productId: number
+  productId: string
   productMarkets: ProductMarket[]
   markets: Market[]
   loading: boolean
@@ -105,7 +105,7 @@ export interface ProductMarketsTabEmits {
 
 // Product Variants Tab
 export interface ProductVariantsTabProps {
-  productId: number
+  productId: string
   defaultPrice: string
   defaultCurrency: string
   loading: boolean
@@ -117,7 +117,7 @@ export interface ProductVariantsTabEmits {
 
 // Product Pricing Tab
 export interface ProductPricingTabProps {
-  productId: number
+  productId: string
   productMarkets: ProductMarket[]
   loading: boolean
 }
@@ -128,7 +128,7 @@ export interface ProductPricingTabEmits {
 
 // Product Localization Tab
 export interface ProductLocalizationTabProps {
-  productId: number
+  productId: string
   productName: string
   productDescription: string
   loading: boolean
@@ -140,7 +140,7 @@ export interface ProductLocalizationTabEmits {
 
 // Product Inventory Tab
 export interface ProductInventoryTabProps {
-  productId: number
+  productId: string
   sku: string
   loading: boolean
 }
@@ -151,14 +151,14 @@ export interface ProductInventoryTabEmits {
 
 // Product Reviews Tab
 export interface ProductReviewsTabProps {
-  productId: number
+  productId: string
   loading: boolean
 }
 
 // Dialog props and emits
 export interface PushToMarketDialogProps {
   visible: boolean
-  productId: number
+  productId: string
   productMarkets: ProductMarket[]
   markets: Market[]
   productPrice: string
@@ -193,7 +193,7 @@ export interface AdjustStockDialogEmits {
 
 export interface VariantDialogProps {
   visible: boolean
-  productId: number
+  productId: string
   isEdit: boolean
   variant: VariantFormData
   loading: boolean

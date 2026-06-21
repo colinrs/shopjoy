@@ -388,7 +388,7 @@ const previewTheme = (theme: ThemeItem) => {
   previewDialogVisible.value = true
 }
 
-const applyTheme = async (themeId: number) => {
+const applyTheme = async (themeId: string) => {
   try {
     await ElMessageBox.confirm(
       t('storefront.confirmSwitchTheme'),

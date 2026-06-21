@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 // Role interface matching backend RoleInfo
 export interface Role {
-  id: number
+  id: string
   name: string
   code: string
   description: string
@@ -15,12 +15,12 @@ export interface Role {
 
 // Permission interface matching backend PermissionInfo
 export interface Permission {
-  id: number
+  id: string
   name: string
   code: string
   type: number // 0=menu, 1=button, 2=api
   type_text: string
-  parent_id: number
+  parent_id: string
   path: string
   icon: string
   sort: number
@@ -53,7 +53,7 @@ export interface CreateRoleParams {
   name: string
   code: string
   description?: string
-  permission_ids?: number[]
+  permission_ids?: string[]
 }
 
 // Update role request
@@ -64,7 +64,7 @@ export interface UpdateRoleParams {
 
 // Update role permissions request
 export interface UpdateRolePermissionsParams {
-  permission_ids: number[]
+  permission_ids: string[]
 }
 
 // Update role status request
@@ -82,7 +82,7 @@ export function getRoleList(params: ListRolesParams) {
 }
 
 // Get role detail with permissions
-export function getRoleDetail(id: number) {
+export function getRoleDetail(id: string) {
   return request<RoleWithPermissions>({
     url: `/api/v1/roles/${id}`,
     method: 'get'
@@ -91,7 +91,7 @@ export function getRoleDetail(id: number) {
 
 // Create role
 export function createRole(data: CreateRoleParams) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/roles',
     method: 'post',
     data
@@ -99,7 +99,7 @@ export function createRole(data: CreateRoleParams) {
 }
 
 // Update role
-export function updateRole(id: number, data: UpdateRoleParams) {
+export function updateRole(id: string, data: UpdateRoleParams) {
   return request<Role>({
     url: `/api/v1/roles/${id}`,
     method: 'put',
@@ -108,7 +108,7 @@ export function updateRole(id: number, data: UpdateRoleParams) {
 }
 
 // Delete role
-export function deleteRole(id: number) {
+export function deleteRole(id: string) {
   return request({
     url: `/api/v1/roles/${id}`,
     method: 'delete'
@@ -116,7 +116,7 @@ export function deleteRole(id: number) {
 }
 
 // Update role status
-export function updateRoleStatus(id: number, data: UpdateRoleStatusParams) {
+export function updateRoleStatus(id: string, data: UpdateRoleStatusParams) {
   return request<Role>({
     url: `/api/v1/roles/${id}/status`,
     method: 'put',
@@ -125,7 +125,7 @@ export function updateRoleStatus(id: number, data: UpdateRoleStatusParams) {
 }
 
 // Update role permissions
-export function updateRolePermissions(id: number, data: UpdateRolePermissionsParams) {
+export function updateRolePermissions(id: string, data: UpdateRolePermissionsParams) {
   return request({
     url: `/api/v1/roles/${id}/permissions`,
     method: 'put',

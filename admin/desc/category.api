@@ -10,7 +10,7 @@ type (
 	// Create category request
 	CreateCategoryReq {
 		Name           string `json:"name"`
-		ParentID       int64  `json:"parent_id,optional"`
+		ParentID       int64  `json:"parent_id,optional,string"`
 		Code           string `json:"code,optional"`
 		Icon           string `json:"icon,optional"`
 		Image          string `json:"image,optional"`
@@ -20,7 +20,7 @@ type (
 	}
 	// Create category response
 	CreateCategoryResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	// Update category request
 	UpdateCategoryReq {
@@ -35,8 +35,8 @@ type (
 	}
 	// Category detail response
 	CategoryDetailResp {
-		ID             int64  `json:"id"`
-		ParentID       int64  `json:"parent_id"`
+		ID             int64  `json:"id,string"`
+		ParentID       int64  `json:"parent_id,string"`
 		Name           string `json:"name"`
 		Code           string `json:"code"`
 		Level          int    `json:"level"`
@@ -52,8 +52,8 @@ type (
 	}
 	// Category tree response
 	CategoryTreeResp {
-		ID             int64               `json:"id"`
-		ParentID       int64               `json:"parent_id"`
+		ID             int64               `json:"id,string"`
+		ParentID       int64               `json:"parent_id,string"`
 		Name           string              `json:"name"`
 		Code           string              `json:"code"`
 		Level          int                 `json:"level"`
@@ -93,13 +93,13 @@ type (
 	}
 	// Category sort item
 	CategorySortItem {
-		ID   int64 `json:"id"`
+		ID   int64 `json:"id,string"`
 		Sort int   `json:"sort"`
 	}
 	// Move category request
 	MoveCategoryReq {
 		ID          int64 `path:"id"`
-		NewParentID int64 `json:"new_parent_id"`
+		NewParentID int64 `json:"new_parent_id,string"`
 	}
 	// Get category product count request
 	GetCategoryProductCountReq {
@@ -111,9 +111,9 @@ type (
 	}
 	// Set category market visibility request
 	SetCategoryMarketVisibilityReq {
-		CategoryID int64   `path:"id"`
-		MarketIDs  []int64 `json:"market_ids"`
-		Visible    bool    `json:"visible"`
+		CategoryID int64    `path:"id"`
+		MarketIDs  []string `json:"market_ids"`
+		Visible    bool     `json:"visible"`
 	}
 	// Get category market visibility request
 	GetCategoryMarketVisibilityReq {
@@ -121,12 +121,12 @@ type (
 	}
 	// Category market visibility response
 	CategoryMarketVisibilityResp {
-		CategoryID int64                    `json:"category_id"`
+		CategoryID int64                    `json:"category_id,string"`
 		Markets    []CategoryMarketItemResp `json:"markets"`
 	}
 	// Category market item response
 	CategoryMarketItemResp {
-		MarketID  int64 `json:"market_id"`
+		MarketID  int64 `json:"market_id,string"`
 		IsVisible bool  `json:"is_visible"`
 	}
 )

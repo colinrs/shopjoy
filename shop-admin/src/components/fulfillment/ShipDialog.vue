@@ -247,7 +247,7 @@ const visible = computed({
 
 const formRef = ref()
 const submitting = ref(false)
-const selectedItems = ref<number[]>([])
+const selectedItems = ref<string[]>([])
 
 const form = reactive({
   carrier_code: '',
@@ -257,7 +257,7 @@ const form = reactive({
   weight: '0',
   currency: 'CNY',
   remark: '',
-  items: [] as { order_item_id: number; quantity: number }[]
+  items: [] as { order_item_id: string; quantity: number }[]
 })
 
 const rules = {
@@ -284,16 +284,16 @@ const handleCarrierChange = (code: string) => {
   }
 }
 
-const isItemSelected = (id: number) => {
+const isItemSelected = (id: string) => {
   return selectedItems.value.includes(id)
 }
 
-const getItemQuantity = (id: number) => {
+const getItemQuantity = (id: string) => {
   const item = form.items.find(i => i.order_item_id === id)
   return item?.quantity || 1
 }
 
-const setItemQuantity = (id: number, quantity: number) => {
+const setItemQuantity = (id: string, quantity: number) => {
   const item = form.items.find(i => i.order_item_id === id)
   if (item) {
     item.quantity = quantity

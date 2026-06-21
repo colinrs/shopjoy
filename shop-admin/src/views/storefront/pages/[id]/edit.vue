@@ -278,7 +278,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-const pageId = Number(route.params.id)
+const pageId = route.params.id as string
 const pageLoading = ref(true)
 const saving = ref(false)
 const publishing = ref(false)
@@ -362,7 +362,7 @@ const onDrop = async () => {
   if (draggedBlockType) {
     // Add new block
     const newBlock: DecorationDTO = {
-      id: 0,
+      id: '',
       block_type: draggedBlockType,
       block_config: getDefaultConfig(draggedBlockType),
       sort_order: blocks.value.length

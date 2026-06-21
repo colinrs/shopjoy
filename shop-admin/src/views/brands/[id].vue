@@ -339,7 +339,7 @@ const { handleError } = useErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
-const brandId = Number(route.params.id)
+const brandId = route.params.id as string
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -349,11 +349,11 @@ const formRef = ref()
 const brand = ref<Brand | null>(null)
 const editDialogVisible = ref(false)
 const showMarketDialog = ref(false)
-const marketVisibility = ref<{ market_id: number; is_visible: boolean }[]>([])
+const marketVisibility = ref<{ market_id: string; is_visible: boolean }[]>([])
 const availableMarkets = ref<(Market & { selected: boolean })[]>([])
 
 const brandForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   logo: '',
   description: '',
@@ -411,7 +411,7 @@ const loadMarkets = async () => {
   }
 }
 
-const getMarketName = (marketId: number) => {
+const getMarketName = (marketId: string) => {
   const market = availableMarkets.value.find(m => m.id === marketId)
   return market?.name || `Market ${marketId}`
 }

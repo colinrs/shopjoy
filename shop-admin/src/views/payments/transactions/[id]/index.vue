@@ -278,7 +278,7 @@ const loadData = async () => {
   error.value = false
 
   try {
-    const res = await getTransactionDetail(Number(id))
+    const res = await getTransactionDetail(id as string)
     transaction.value = res
   } catch (err) {
     console.error('Failed to load transaction detail:', err)

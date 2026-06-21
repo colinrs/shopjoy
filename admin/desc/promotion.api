@@ -20,13 +20,13 @@ type (
 		MaxDiscount    string   `json:"max_discount,optional"` // Using string for decimal precision
 		UsageLimit     int      `json:"usage_limit,optional"`
 		PerUserLimit   int      `json:"per_user_limit,optional"`
-		ProductIDs     []int64  `json:"product_ids,optional"`
-		CategoryIDs    []int64  `json:"category_ids,optional"`
-		MarketIDs      []int64  `json:"market_ids,optional"`
+		ProductIDs     []string `json:"product_ids,optional"`
+		CategoryIDs    []string `json:"category_ids,optional"`
+		MarketIDs      []string `json:"market_ids,optional"`
 		Tags           []string `json:"tags,optional"`
 	}
 	CreatePromotionResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	UpdatePromotionReq {
 		ID             int64    `path:"id"`
@@ -41,16 +41,16 @@ type (
 		MaxDiscount    string   `json:"max_discount,optional"`
 		UsageLimit     int      `json:"usage_limit,optional"`
 		PerUserLimit   int      `json:"per_user_limit,optional"`
-		ProductIDs     []int64  `json:"product_ids,optional"`
-		CategoryIDs    []int64  `json:"category_ids,optional"`
-		MarketIDs      []int64  `json:"market_ids,optional"`
+		ProductIDs     []string `json:"product_ids,optional"`
+		CategoryIDs    []string `json:"category_ids,optional"`
+		MarketIDs      []string `json:"market_ids,optional"`
 		Tags           []string `json:"tags,optional"`
 	}
 	GetPromotionReq {
 		ID int64 `path:"id"`
 	}
 	PromotionDetailResp {
-		ID             int64    `json:"id"`
+		ID             int64    `json:"id,string"`
 		Name           string   `json:"name"`
 		Description    string   `json:"description"`
 		Type           string   `json:"type"` // discount, coupon, flash_sale, bundle, buy_x_get_y
@@ -64,9 +64,9 @@ type (
 		UsageLimit     int      `json:"usage_limit"`
 		UsedCount      int      `json:"used_count"`
 		PerUserLimit   int      `json:"per_user_limit"`
-		ProductIDs     []int64  `json:"product_ids"`
-		CategoryIDs    []int64  `json:"category_ids"`
-		MarketIDs      []int64  `json:"market_ids"`
+		ProductIDs     []string `json:"product_ids"`
+		CategoryIDs    []string `json:"category_ids"`
+		MarketIDs      []string `json:"market_ids"`
 		Tags           []string `json:"tags"`
 		CreatedAt      string   `json:"created_at"`
 		UpdatedAt      string   `json:"updated_at"`
@@ -108,14 +108,14 @@ type (
 		Rules       []PromotionRuleReq `json:"rules"`
 	}
 	CreatePromotionRulesResp {
-		IDs []int64 `json:"ids"`
+		IDs []string `json:"ids"`
 	}
 	GetPromotionRulesReq {
 		PromotionID int64 `path:"id"`
 	}
 	PromotionRuleResp {
-		ID            int64  `json:"id"`
-		PromotionID   int64  `json:"promotion_id"`
+		ID            int64  `json:"id,string"`
+		PromotionID   int64  `json:"promotion_id,string"`
 		RuleType      string `json:"rule_type"`
 		Operator      string `json:"operator"`
 		Value         string `json:"value"`
@@ -159,7 +159,7 @@ type (
 		MarketIDs      string `json:"market_ids,optional"` // JSON array as string
 	}
 	CreateCouponResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	UpdateCouponReq {
 		ID             int64  `path:"id"`
@@ -182,7 +182,7 @@ type (
 		ID int64 `path:"id"`
 	}
 	CouponDetailResp {
-		ID             int64  `json:"id"`
+		ID             int64  `json:"id,string"`
 		Code           string `json:"code"`
 		Name           string `json:"name"`
 		Description    string `json:"description"`
@@ -235,10 +235,10 @@ type (
 		PageSize int   `form:"page_size,default=20"`
 	}
 	CouponUsageResp {
-		ID             int64  `json:"id"`
-		CouponID       int64  `json:"coupon_id"`
-		UserID         int64  `json:"user_id"`
-		OrderID        int64  `json:"order_id"`
+		ID             int64  `json:"id,string"`
+		CouponID       int64  `json:"coupon_id,string"`
+		UserID         int64  `json:"user_id,string"`
+		OrderID        int64  `json:"order_id,string"`
 		DiscountAmount string `json:"discount_amount"`
 		UsedAt         string `json:"used_at"`
 	}
@@ -250,11 +250,11 @@ type (
 	}
 	// User Coupon types
 	IssueUserCouponReq {
-		UserID   int64 `json:"user_id"`
-		CouponID int64 `json:"coupon_id"`
+		UserID   int64 `json:"user_id,string"`
+		CouponID int64 `json:"coupon_id,string"`
 	}
 	IssueUserCouponResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	ListUserCouponsReq {
 		UserID   int64  `form:"user_id,optional"`
@@ -264,9 +264,9 @@ type (
 		PageSize int    `form:"page_size,default=20"`
 	}
 	UserCouponDetailResp {
-		ID             int64  `json:"id"`
-		UserID         int64  `json:"user_id"`
-		CouponID       int64  `json:"coupon_id"`
+		ID             int64  `json:"id,string"`
+		UserID         int64  `json:"user_id,string"`
+		CouponID       int64  `json:"coupon_id,string"`
 		CouponCode     string `json:"coupon_code"`
 		CouponName     string `json:"coupon_name"`
 		DiscountType   string `json:"discount_type"`
@@ -277,7 +277,7 @@ type (
 		EndTime        string `json:"end_time"`
 		Status         string `json:"status"` // unused, used, expired
 		UsedAt         string `json:"used_at,optional"`
-		OrderID        int64  `json:"order_id,optional"`
+		OrderID        int64  `json:"order_id,optional,string"`
 		CreatedAt      string `json:"created_at"`
 	}
 	ListUserCouponsResp {

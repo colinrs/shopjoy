@@ -238,7 +238,7 @@ const emit = defineEmits<{
 const localConfig = reactive<Record<string, any>>({ ...props.config })
 
 // Product options for product_grid selector
-const productOptions = ref<Array<{ id: number; name: string; sku_code: string }>>([])
+const productOptions = ref<Array<{ id: string; name: string; sku_code: string }>>([])
 const loadingProducts = ref(false)
 
 // Load product options

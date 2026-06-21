@@ -118,7 +118,7 @@ const loading = ref(false)
 const submitLoading = ref(false)
 const searchQuery = ref('')
 const allPermissions = ref<Permission[]>([])
-const selectedPermissionIds = ref<number[]>([])
+const selectedPermissionIds = ref<string[]>([])
 
 const treeProps = {
   children: 'children',
@@ -127,7 +127,7 @@ const treeProps = {
 
 // Build permission tree from flat list
 const permissionTree = computed(() => {
-  const map = new Map<number, Permission & { children?: Permission[] }>()
+  const map = new Map<string, Permission & { children?: Permission[] }>()
   const roots: (Permission & { children?: Permission[] })[] = []
 
   // First pass: create map
@@ -138,7 +138,7 @@ const permissionTree = computed(() => {
   // Second pass: build tree
   allPermissions.value.forEach(p => {
     const node = map.get(p.id)!
-    if (p.parent_id === 0 || !map.has(p.parent_id)) {
+    if (p.parent_id === '0' || !map.has(p.parent_id)) {
       roots.push(node)
     } else {
       const parent = map.get(p.parent_id)
@@ -160,7 +160,7 @@ const filterNode = (query: string, data: Permission) => {
          data.code.toLowerCase().includes(query.toLowerCase())
 }
 
-const handleCheck = (_data: Permission, { checkedKeys }: { checkedKeys: number[] }) => {
+const handleCheck = (_data: Permission, { checkedKeys }: { checkedKeys: string[] }) => {
   selectedPermissionIds.value = checkedKeys
 }
 

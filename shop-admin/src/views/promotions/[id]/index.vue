@@ -658,8 +658,8 @@ const loading = ref(false)
 const saving = ref(false)
 const activating = ref(false)
 
-const promotionId = computed(() => Number(route.params.id))
-const isEdit = computed(() => promotionId.value > 0)
+const promotionId = computed(() => route.params.id as string)
+const isEdit = computed(() => !!promotionId.value)
 
 const promotionForm = reactive({
   name: '',
@@ -671,8 +671,8 @@ const promotionForm = reactive({
   max_discount_num: 0,
   dateRange: [] as string[],
   scope_type: 'storewide' as 'storewide' | 'products' | 'categories' | 'brands',
-  product_ids: [] as number[],
-  category_ids: [] as number[],
+  product_ids: [] as string[],
+  category_ids: [] as string[],
   usage_limit: 0,
   per_user_limit: 0,
   status: 'pending' as string
@@ -685,8 +685,8 @@ const rules = {
   dateRange: [{ required: true, message: t('promotions.selectTimePeriod'), trigger: 'change' }]
 }
 
-const productOptions = ref<{ id: number; name: string }[]>([])
-const categoryOptions = ref<{ id: number; name: string }[]>([])
+const productOptions = ref<{ id: string; name: string }[]>([])
+const categoryOptions = ref<{ id: string; name: string }[]>([])
 
 const loadPromotion = async () => {
   if (!promotionId.value) return

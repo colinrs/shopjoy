@@ -10,7 +10,7 @@ type (
 	// ===================== Shipping Template Types =====================
 	// Shipping template list item
 	ShippingTemplateListItem {
-		ID            int64  `json:"id"`
+		ID            int64  `json:"id,string"`
 		Name          string `json:"name"`
 		IsDefault     bool   `json:"is_default"`
 		IsActive      bool   `json:"is_active"`
@@ -40,7 +40,7 @@ type (
 	}
 	// Create shipping template response
 	CreateShippingTemplateResp {
-		ID   int64  `json:"id"`
+		ID   int64  `json:"id,string"`
 		Name string `json:"name"`
 	}
 	// Update shipping template request
@@ -56,8 +56,8 @@ type (
 	// ===================== Shipping Zone Types =====================
 	// Shipping zone detail
 	ShippingZoneDetail {
-		ID                  int64    `json:"id"`
-		TemplateID          int64    `json:"template_id"`
+		ID                  int64    `json:"id,string"`
+		TemplateID          int64    `json:"template_id,string"`
 		Name                string   `json:"name"`
 		Regions             []string `json:"regions"` // City codes
 		FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
@@ -107,16 +107,16 @@ type (
 	}
 	// Reorder zones request
 	ReorderZonesReq {
-		TemplateID int64   `path:"template_id"`
-		ZoneIDs    []int64 `json:"zone_ids"`
+		TemplateID int64    `path:"template_id"`
+		ZoneIDs    []string `json:"zone_ids"`
 	}
 	// ===================== Template Mapping Types =====================
 	// Template mapping detail
 	TemplateMappingDetail {
-		ID         int64  `json:"id"`
-		TemplateID int64  `json:"template_id"`
+		ID         int64  `json:"id,string"`
+		TemplateID int64  `json:"template_id,string"`
 		TargetType string `json:"target_type"` // product, category
-		TargetID   int64  `json:"target_id"`
+		TargetID   int64  `json:"target_id,string"`
 		TargetName string `json:"target_name,optional"`
 	}
 	// List template mappings request
@@ -129,9 +129,9 @@ type (
 	}
 	// Create template mapping request
 	CreateTemplateMappingReq {
-		TemplateID int64  `json:"template_id"`
+		TemplateID int64  `json:"template_id,string"`
 		TargetType string `json:"target_type"` // product, category
-		TargetID   int64  `json:"target_id"`
+		TargetID   int64  `json:"target_id,string"`
 	}
 	// Delete template mapping request
 	DeleteTemplateMappingReq {
@@ -146,8 +146,8 @@ type (
 	}
 	// Calculator item
 	CalculatorItem {
-		ProductID int64  `json:"product_id"`
-		SKUID     int64  `json:"sku_id,optional"`
+		ProductID int64  `json:"product_id,string"`
+		SKUID     int64  `json:"sku_id,optional,string"`
 		Quantity  int    `json:"quantity"`
 		Weight    int    `json:"weight"` // grams
 		Price     string `json:"price"` // unit price
@@ -171,7 +171,7 @@ type (
 	CalculateShippingFeeResp {
 		ShippingFee  string               `json:"shipping_fee"`
 		Currency     string               `json:"currency"`
-		TemplateID   int64                `json:"template_id"`
+		TemplateID   int64                `json:"template_id,string"`
 		TemplateName string               `json:"template_name"`
 		ZoneName     string               `json:"zone_name"`
 		FeeDetail    FeeCalculationDetail `json:"fee_detail"`
@@ -179,7 +179,7 @@ type (
 	// ===================== Template Detail (with zones and mappings) =====================
 	// Template detail response
 	ShippingTemplateDetailResp {
-		ID        int64                    `json:"id"`
+		ID        int64                    `json:"id,string"`
 		Name      string                   `json:"name"`
 		IsDefault bool                     `json:"is_default"`
 		IsActive  bool                     `json:"is_active"`

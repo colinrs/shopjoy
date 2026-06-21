@@ -323,7 +323,7 @@ const { handleError } = useErrorHandler()
 const route = useRoute()
 const router = useRouter()
 
-const categoryId = Number(route.params.id)
+const categoryId = route.params.id as string
 
 const loading = ref(false)
 const saveLoading = ref(false)
@@ -333,11 +333,11 @@ const formRef = ref()
 const category = ref<Category | null>(null)
 const editDialogVisible = ref(false)
 const showMarketDialog = ref(false)
-const marketVisibility = ref<{ market_id: number; is_visible: boolean }[]>([])
+const marketVisibility = ref<{ market_id: string; is_visible: boolean }[]>([])
 const availableMarkets = ref<(Market & { selected: boolean })[]>([])
 
 const categoryForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   code: '',
   sort: 0,
@@ -394,7 +394,7 @@ const loadMarkets = async () => {
   }
 }
 
-const getMarketName = (marketId: number) => {
+const getMarketName = (marketId: string) => {
   const market = availableMarkets.value.find(m => m.id === marketId)
   return market?.name || `Market ${marketId}`
 }

@@ -1001,9 +1001,8 @@
           :label="$t('promotions.userId')"
           required
         >
-          <el-input-number
+          <el-input
             v-model="issueForm.user_id"
-            :min="1"
             :placeholder="$t('promotions.enterUserId')"
             style="width: 100%"
           />
@@ -1088,7 +1087,7 @@ const usageList = ref<CouponUsage[]>([])
 const usageLoading = ref(false)
 const usageTotal = ref(0)
 const usageParams = reactive({
-  id: 0,
+  id: '',
   page: 1,
   page_size: 10
 })
@@ -1116,8 +1115,8 @@ const generatedCodes = ref<string[]>([])
 const issueDialogVisible = ref(false)
 const issueLoading = ref(false)
 const issueForm = reactive({
-  user_id: 0 as number,
-  coupon_id: 0 as number,
+  user_id: '' as string,
+  coupon_id: '' as string,
   coupon_name: ''
 })
 
@@ -1127,7 +1126,7 @@ const isEditCoupon = ref(false)
 const saveLoading = ref(false)
 const couponFormRef = ref()
 const couponForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   code: '',
   description: '',
@@ -1153,7 +1152,7 @@ const promotionDialogVisible = ref(false)
 const isEditPromotion = ref(false)
 const promotionFormRef = ref()
 const promotionForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   description: '',
   type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
@@ -1325,7 +1324,7 @@ const handleTabChange = (tab: string) => {
 const handleAddCoupon = () => {
   isEditCoupon.value = false
   Object.assign(couponForm, {
-    id: 0,
+    id: '',
     name: '',
     code: '',
     description: '',
@@ -1383,7 +1382,7 @@ const handleDeleteCoupon = async (row: Coupon) => {
 }
 
 const handleIssueToUser = (row: Coupon) => {
-  issueForm.user_id = 0
+  issueForm.user_id = ''
   issueForm.coupon_id = row.id
   issueForm.coupon_name = row.name
   issueDialogVisible.value = true
@@ -1518,7 +1517,7 @@ const handleCopyAllCodes = async () => {
 const handleAddPromotion = () => {
   isEditPromotion.value = false
   Object.assign(promotionForm, {
-    id: 0,
+    id: '',
     name: '',
     description: '',
     type: 'discount',

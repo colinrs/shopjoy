@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 // Types
 export interface ShippingTemplate {
-  id: number
+  id: string
   name: string
   is_default: boolean
   is_active: boolean
@@ -13,8 +13,8 @@ export interface ShippingTemplate {
 }
 
 export interface ShippingZone {
-  id: number
-  template_id: number
+  id: string
+  template_id: string
   name: string
   regions: string[]
   fee_type: 'fixed' | 'by_count' | 'by_weight' | 'free'
@@ -28,10 +28,10 @@ export interface ShippingZone {
 }
 
 export interface TemplateMapping {
-  id: number
-  template_id: number
+  id: string
+  template_id: string
   target_type: 'product' | 'category'
-  target_id: number
+  target_id: string
   target_name?: string
 }
 
@@ -79,8 +79,8 @@ export interface CalculateRequest {
     district_code: string
   }
   items: Array<{
-    product_id: number
-    sku_id?: number
+    product_id: string
+    sku_id?: string
     quantity: number
     weight: number
     price: string
@@ -100,7 +100,7 @@ export interface FeeDetail {
 export interface CalculateResult {
   shipping_fee: string
   currency: string
-  template_id: number
+  template_id: string
   template_name: string
   zone_name: string
   fee_detail: FeeDetail
@@ -121,54 +121,54 @@ export const getShippingTemplates = (params?: TemplateListParams) => {
   return request.get<{ list: ShippingTemplate[]; total: number }>('/api/v1/shipping-templates', { params })
 }
 
-export const getShippingTemplate = (id: number) => {
+export const getShippingTemplate = (id: string) => {
   return request.get<TemplateDetail>(`/api/v1/shipping-templates/${id}`)
 }
 
 export const createShippingTemplate = (data: CreateTemplateRequest) => {
-  return request.post<{ id: number; name: string }>('/api/v1/shipping-templates', data)
+  return request.post<{ id: string; name: string }>('/api/v1/shipping-templates', data)
 }
 
-export const updateShippingTemplate = (id: number, data: UpdateTemplateRequest) => {
+export const updateShippingTemplate = (id: string, data: UpdateTemplateRequest) => {
   return request.put<ShippingTemplate>(`/api/v1/shipping-templates/${id}`, data)
 }
 
-export const deleteShippingTemplate = (id: number) => {
+export const deleteShippingTemplate = (id: string) => {
   return request.delete(`/api/v1/shipping-templates/${id}`)
 }
 
-export const setDefaultTemplate = (id: number) => {
+export const setDefaultTemplate = (id: string) => {
   return request.put(`/api/v1/shipping-templates/${id}/set-default`)
 }
 
 // Zones
-export const createShippingZone = (templateId: number, data: CreateZoneRequest) => {
+export const createShippingZone = (templateId: string, data: CreateZoneRequest) => {
   return request.post<ShippingZone>(`/api/v1/shipping-templates/${templateId}/zones`, data)
 }
 
-export const updateShippingZone = (id: number, data: UpdateZoneRequest) => {
+export const updateShippingZone = (id: string, data: UpdateZoneRequest) => {
   return request.put<ShippingZone>(`/api/v1/shipping-zones/${id}`, data)
 }
 
-export const deleteShippingZone = (id: number) => {
+export const deleteShippingZone = (id: string) => {
   return request.delete(`/api/v1/shipping-zones/${id}`)
 }
 
-export const reorderZones = (templateId: number, zoneIds: number[]) => {
+export const reorderZones = (templateId: string, zoneIds: string[]) => {
   return request.put(`/api/v1/shipping-templates/${templateId}/zones/reorder`, { zone_ids: zoneIds })
 }
 
 // Mappings
-export const getTemplateMappings = async (templateId: number) => {
+export const getTemplateMappings = async (templateId: string) => {
   const res = await request.get<{ list: TemplateMapping[] }>(`/api/v1/shipping-templates/${templateId}/mappings`)
   return res.list || []
 }
 
-export const createTemplateMapping = (data: { template_id: number; target_type: 'product' | 'category'; target_id: number }) => {
+export const createTemplateMapping = (data: { template_id: string; target_type: 'product' | 'category'; target_id: string }) => {
   return request.post<TemplateMapping>('/api/v1/shipping-template-mappings', data)
 }
 
-export const deleteTemplateMapping = (id: number) => {
+export const deleteTemplateMapping = (id: string) => {
   return request.delete(`/api/v1/shipping-template-mappings/${id}`)
 }
 

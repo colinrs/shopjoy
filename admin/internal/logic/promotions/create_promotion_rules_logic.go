@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -72,6 +73,6 @@ func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromot
 	_ = p // promotion retrieved for validation
 
 	return &types.CreatePromotionRulesResp{
-		IDs: ids,
+		IDs: utils.FormatInt64Slice(ids),
 	}, nil
 }

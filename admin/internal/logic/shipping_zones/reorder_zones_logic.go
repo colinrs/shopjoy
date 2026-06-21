@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -42,5 +43,9 @@ func (l *ReorderZonesLogic) ReorderZones(req *types.ReorderZonesReq) error {
 	}
 
 	// Reorder zones
-	return l.svcCtx.ShippingRepo.ReorderZones(l.ctx, l.svcCtx.DB, req.TemplateID, req.ZoneIDs)
+	zoneIDs, err := utils.ParseInt64Slice(req.ZoneIDs)
+	if err != nil {
+		return code.ErrParam
+	}
+	return l.svcCtx.ShippingRepo.ReorderZones(l.ctx, l.svcCtx.DB, req.TemplateID, zoneIDs)
 }

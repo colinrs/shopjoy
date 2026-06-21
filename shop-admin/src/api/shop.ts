@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // ===================== Shop Settings Types =====================
 
 export interface ShopSettings {
-  id: number
+  id: string
   name: string
   code: string
   logo: string

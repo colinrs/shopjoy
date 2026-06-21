@@ -21,9 +21,9 @@ export interface ChannelDistribution {
 }
 
 export interface Transaction {
-  id: number
+  id: string
   transaction_id: string
-  order_id: number
+  order_id: string
   order_no: string
   payment_method: string
   payment_method_text: string
@@ -61,9 +61,9 @@ export interface TransactionListResponse {
 }
 
 export interface OrderPayment {
-  payment_id: number
+  payment_id: string
   payment_no: string
-  order_id: number
+  order_id: string
   order_no: string
   payment_method: string
   payment_method_text: string
@@ -81,7 +81,7 @@ export interface OrderPayment {
 }
 
 export interface PaymentRefund {
-  id: number
+  id: string
   refund_no: string
   channel_refund_id: string
   amount: string
@@ -102,7 +102,7 @@ export interface InitiateRefundParams {
 }
 
 export interface InitiateRefundResponse {
-  refund_id: number
+  refund_id: string
   refund_no: string
   amount: string
   currency: string
@@ -131,21 +131,21 @@ export const getTransactionList = (params: TransactionListParams) => {
 /**
  * Get transaction detail by ID
  */
-export const getTransactionDetail = (id: number) => {
+export const getTransactionDetail = (id: string) => {
   return request.get<Transaction>(`/api/v1/payments/transactions/${id}`)
 }
 
 /**
  * Get payment details for an order
  */
-export const getOrderPayment = (orderId: number) => {
+export const getOrderPayment = (orderId: string) => {
   return request.get<OrderPayment>(`/api/v1/orders/${orderId}/payment`)
 }
 
 /**
  * Initiate a refund for an order
  */
-export const initiateRefund = (orderId: number, data: InitiateRefundParams) => {
+export const initiateRefund = (orderId: string, data: InitiateRefundParams) => {
   return request.post<InitiateRefundResponse>(`/api/v1/orders/${orderId}/refund`, data)
 }
 

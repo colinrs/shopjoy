@@ -25,9 +25,9 @@ export type RefundStatus = '0' | '1' | '2' | '3' | '4'
 export type OrderRefundStatus = '0' | '1' | '2' | '3' | '4'
 
 export interface Shipment {
-  id: number
+  id: string
   shipment_no: string
-  order_id: number
+  order_id: string
   order_no: string
   status: ShipmentStatus
   carrier: string
@@ -48,9 +48,9 @@ export interface Shipment {
 }
 
 export interface ShipmentItem {
-  id: number
-  product_id: number
-  sku_id: number
+  id: string
+  product_id: string
+  sku_id: string
   product_name: string
   sku_name: string
   image: string
@@ -58,7 +58,7 @@ export interface ShipmentItem {
 }
 
 export interface CreateShipmentRequest {
-  order_id: number
+  order_id: string
   carrier_code: string
   carrier?: string
   tracking_no: string
@@ -67,7 +67,7 @@ export interface CreateShipmentRequest {
   weight?: string
   remark?: string
   items: {
-    order_item_id: number
+    order_item_id: string
     quantity: number
   }[]
 }
@@ -93,11 +93,11 @@ export interface ShipmentListParams {
 }
 
 export interface Refund {
-  id: number
+  id: string
   refund_no: string
-  order_id: number
+  order_id: string
   order_no: string
-  user_id: number
+  user_id: string
   user_name: string
   user_phone: string
   type: RefundType
@@ -121,8 +121,8 @@ export interface Refund {
 }
 
 export interface RefundOrderItem {
-  id: number
-  product_id: number
+  id: string
+  product_id: string
   product_name: string
   sku_name: string
   image: string
@@ -151,7 +151,7 @@ export interface Carrier {
 }
 
 export interface RefundReason {
-  id: number
+  id: string
   code: string
   name: string
   sort: number
@@ -180,7 +180,7 @@ export interface FulfillmentStatistics {
     percentage: number
   }[]
   problem_products: {
-    product_id: number
+    product_id: string
     product_name: string
     image: string
     total_sales: number
@@ -203,7 +203,7 @@ export const getShipmentList = (params: ShipmentListParams) => {
   return request.get<{ list: Shipment[]; total: number }>('/api/v1/shipments', { params })
 }
 
-export const getShipmentDetail = (id: number) => {
+export const getShipmentDetail = (id: string) => {
   return request.get<Shipment>(`/api/v1/shipments/${id}`)
 }
 
@@ -212,7 +212,7 @@ export const createShipment = (data: CreateShipmentRequest) => {
 }
 
 export interface BatchCreateShipmentItem {
-  order_id: number
+  order_id: string
   tracking_no: string
 }
 
@@ -226,15 +226,15 @@ export const batchCreateShipments = (data: BatchCreateShipmentsRequest) => {
   return request.post<Shipment[]>('/api/v1/shipments/batch', data)
 }
 
-export const updateShipmentStatus = (id: number, status: ShipmentStatus) => {
+export const updateShipmentStatus = (id: string, status: ShipmentStatus) => {
   return request.put(`/api/v1/shipments/${id}/status`, { status })
 }
 
-export const updateShipment = (id: number, data: UpdateShipmentRequest) => {
+export const updateShipment = (id: string, data: UpdateShipmentRequest) => {
   return request.put<Shipment>(`/api/v1/shipments/${id}`, data)
 }
 
-export const getOrderShipments = (orderId: number) => {
+export const getOrderShipments = (orderId: string) => {
   return request.get<Shipment[]>(`/api/v1/orders/${orderId}/shipments`)
 }
 
@@ -243,15 +243,15 @@ export const getRefundList = (params: RefundListParams) => {
   return request.get<{ list: Refund[]; total: number }>('/api/v1/refunds', { params })
 }
 
-export const getRefundDetail = (id: number) => {
+export const getRefundDetail = (id: string) => {
   return request.get<Refund>(`/api/v1/refunds/${id}`)
 }
 
-export const approveRefund = (refundId: number) => {
+export const approveRefund = (refundId: string) => {
   return request.put(`/api/v1/refunds/${refundId}/approve`)
 }
 
-export const rejectRefund = (refundId: number, rejectReason: string) => {
+export const rejectRefund = (refundId: string, rejectReason: string) => {
   return request.put(`/api/v1/refunds/${refundId}/reject`, { reject_reason: rejectReason })
 }
 
@@ -366,7 +366,7 @@ export async function exportFulfillmentStatistics(params: ExportFulfillmentStati
 
 // Batch Update Tracking
 export interface BatchUpdateTrackingRequest {
-  shipment_ids: number[]
+  shipment_ids: string[]
   carrier_code: string
   tracking_no: string
   weight?: string
@@ -374,7 +374,7 @@ export interface BatchUpdateTrackingRequest {
 
 export interface BatchUpdateTrackingResponse {
   success: number[]
-  failed: { shipment_id: number; code: number; message: string }[]
+  failed: { shipment_id: string; code: number; message: string }[]
 }
 
 export const batchUpdateTracking = (data: BatchUpdateTrackingRequest) => {
@@ -383,7 +383,7 @@ export const batchUpdateTracking = (data: BatchUpdateTrackingRequest) => {
 
 // Cancel Shipment
 export interface CancelShipmentResponse {
-  id: number
+  id: string
   shipment_no: string
   status: string
   status_text: string
@@ -391,6 +391,6 @@ export interface CancelShipmentResponse {
   reason: string
 }
 
-export const cancelShipment = (id: number, reason: string) => {
+export const cancelShipment = (id: string, reason: string) => {
   return request.put<CancelShipmentResponse>(`/api/v1/shipments/${id}/cancel`, { reason })
 }

@@ -339,7 +339,7 @@ const brandList = ref<Brand[]>([])
 const formRef = ref()
 
 const brandForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   logo: '',
   description: '',
@@ -362,7 +362,7 @@ const handleSearch = () => {
 const handleAdd = () => {
   isEdit.value = false
   Object.assign(brandForm, {
-    id: 0,
+    id: '',
     name: '',
     logo: '',
     description: '',

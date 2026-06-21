@@ -17,7 +17,7 @@ type (
 	}
 	// Create warehouse response
 	CreateWarehouseResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	// Update warehouse request
 	UpdateWarehouseReq {
@@ -29,7 +29,7 @@ type (
 	}
 	// Warehouse detail response
 	WarehouseDetailResp {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Code      string `json:"code"`
 		Name      string `json:"name"`
 		Country   string `json:"country"`
@@ -61,14 +61,14 @@ type (
 	// Update SKU stock request
 	UpdateSKUStockReq {
 		SKUCode        string `json:"sku_code"`
-		WarehouseID    int64  `json:"warehouse_id,optional"` // 0 = all warehouses
+		WarehouseID    int64  `json:"warehouse_id,optional,string"` // 0 = all warehouses
 		AvailableStock int    `json:"available_stock"`
 		Remark         string `json:"remark,optional"`
 	}
 	// Adjust stock request (positive = increase, negative = decrease)
 	AdjustStockReq {
 		SKUCode     string `json:"sku_code"`
-		WarehouseID int64  `json:"warehouse_id"`
+		WarehouseID int64  `json:"warehouse_id,string"`
 		Quantity    int    `json:"quantity"` // positive = increase, negative = decrease
 		Remark      string `json:"remark,optional"`
 	}
@@ -79,7 +79,7 @@ type (
 	// SKU inventory response
 	SKUInventoryResp {
 		SKUCode        string                        `json:"sku_code"`
-		ProductID      int64                         `json:"product_id"`
+		ProductID      int64                         `json:"product_id,string"`
 		TotalStock     int                           `json:"total_stock"`
 		AvailableStock int                           `json:"available_stock"`
 		LockedStock    int                           `json:"locked_stock"`
@@ -89,7 +89,7 @@ type (
 	}
 	// Warehouse inventory item response
 	WarehouseInventoryItemResp {
-		WarehouseID    int64  `json:"warehouse_id"`
+		WarehouseID    int64  `json:"warehouse_id,string"`
 		WarehouseName  string `json:"warehouse_name"`
 		AvailableStock int    `json:"available_stock"`
 		LockedStock    int    `json:"locked_stock"`
@@ -104,17 +104,17 @@ type (
 	}
 	// Inventory log response
 	InventoryLogResp {
-		ID             int64  `json:"id"`
+		ID             int64  `json:"id,string"`
 		SKUCode        string `json:"sku_code"`
-		ProductID      int64  `json:"product_id"`
-		WarehouseID    int64  `json:"warehouse_id"`
+		ProductID      int64  `json:"product_id,string"`
+		WarehouseID    int64  `json:"warehouse_id,string"`
 		ChangeType     string `json:"change_type"`
 		ChangeQuantity int    `json:"change_quantity"`
 		BeforeStock    int    `json:"before_stock"`
 		AfterStock     int    `json:"after_stock"`
 		OrderNo        string `json:"order_no"`
 		Remark         string `json:"remark"`
-		OperatorID     int64  `json:"operator_id"`
+		OperatorID     int64  `json:"operator_id,string"`
 		CreatedAt      string `json:"created_at"`
 	}
 	// List inventory logs response
@@ -130,7 +130,7 @@ type (
 	// Low stock SKU response
 	LowStockSKUResp {
 		SKUCode        string `json:"sku_code"`
-		ProductID      int64  `json:"product_id"`
+		ProductID      int64  `json:"product_id,string"`
 		ProductName    string `json:"product_name"`
 		AvailableStock int    `json:"available_stock"`
 		SafetyStock    int    `json:"safety_stock"`

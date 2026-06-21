@@ -70,11 +70,11 @@ type Coupon = AvailableCoupon & {
 }
 
 const props = defineProps<{
-  modelValue: number
+  modelValue: string
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: number]
+  'update:modelValue': [value: string]
   change: [coupon: Coupon]
 }>()
 
@@ -103,7 +103,7 @@ const searchCoupons = (keyword: string) => {
   loadCoupons(keyword)
 }
 
-const handleSelect = (value: number) => {
+const handleSelect = (value: string) => {
   emit('update:modelValue', value)
   const coupon = couponList.value.find(c => c.id === value)
   if (coupon) {

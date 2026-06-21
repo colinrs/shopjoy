@@ -246,7 +246,7 @@ const props = defineProps<{
   modelValue: boolean
   order: OrderPayment | null
   maxRefundable: number  // In cents
-  orderId: number
+  orderId: string
 }>()
 
 const emit = defineEmits<{

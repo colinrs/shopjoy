@@ -967,7 +967,7 @@ const hideLoading = ref(false)
 const hideForm = reactive({
   reason: ''
 })
-const hideReviewId = ref<number | null>(null)
+const hideReviewId = ref<string | null>(null)
 const isBatchHide = ref(false)
 
 // Methods

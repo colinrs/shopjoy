@@ -335,7 +335,7 @@ const { handleError } = useErrorHandler()
 
 const props = defineProps<{
   modelValue: boolean
-  orderId: number
+  orderId: string
 }>()
 
 const emit = defineEmits<{

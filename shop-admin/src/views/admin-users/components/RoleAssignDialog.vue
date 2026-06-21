@@ -65,7 +65,7 @@ const emit = defineEmits<{
 const loading = ref(false)
 const assigning = ref(false)
 const roles = ref<AdminRole[]>([])
-const selectedRoleIds = ref<number[]>([])
+const selectedRoleIds = ref<string[]>([])
 
 const visible = ref(props.visible)
 

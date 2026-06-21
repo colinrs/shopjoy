@@ -100,7 +100,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  edit: [id: number]
+  edit: [id: string]
   delete: [template: ShippingTemplate]
   'set-default': [template: ShippingTemplate]
 }>()

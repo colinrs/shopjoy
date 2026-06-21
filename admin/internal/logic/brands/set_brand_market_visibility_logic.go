@@ -11,6 +11,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -51,9 +52,13 @@ func (l *SetBrandMarketVisibilityLogic) SetBrandMarketVisibility(req *types.SetB
 
 	// Create new market visibility entries
 	if len(req.MarketIDs) > 0 {
-		items := make([]*product.BrandMarket, 0, len(req.MarketIDs))
+		marketIDs, err := utils.ParseInt64Slice(req.MarketIDs)
+		if err != nil {
+			return nil, code.ErrParam
+		}
+		items := make([]*product.BrandMarket, 0, len(marketIDs))
 		now := time.Now().UTC()
-		for _, marketID := range req.MarketIDs {
+		for _, marketID := range marketIDs {
 			id, _ := l.svcCtx.IDGen.NextID(l.ctx)
 			items = append(items, &product.BrandMarket{
 				Model:     application.Model{ID: id, CreatedAt: now, UpdatedAt: now},

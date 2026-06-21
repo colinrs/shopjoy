@@ -108,7 +108,7 @@ const router = useRouter()
 const user = ref<UserDetail | null>(null)
 const loading = ref(false)
 
-const userId = () => parseInt(route.params.id as string)
+const userId = () => route.params.id as string
 
 const loadUser = async () => {
   loading.value = true

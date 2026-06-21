@@ -19,8 +19,8 @@ export type UserCouponStatus = 'unused' | 'used' | 'expired'
 // ==================== Promotion Interfaces ====================
 
 export interface PromotionRule {
-  id: number
-  promotion_id: number
+  id: string
+  promotion_id: string
   rule_type: string
   operator: string
   value: string
@@ -32,7 +32,7 @@ export interface PromotionRule {
 }
 
 export interface Promotion {
-  id: number
+  id: string
   name: string
   description: string
   type: PromotionType
@@ -46,9 +46,9 @@ export interface Promotion {
   usage_limit: number
   used_count: number
   per_user_limit: number
-  product_ids: number[]
-  category_ids: number[]
-  market_ids: number[]
+  product_ids: string[]
+  category_ids: string[]
+  market_ids: string[]
   tags: string[]
   created_at: string
   updated_at: string
@@ -60,7 +60,7 @@ export interface ListPromotionsParams {
   name?: string
   type?: PromotionType
   status?: PromotionStatus
-  market_id?: number
+  market_id?: string
 }
 
 export interface ListPromotionsResponse {
@@ -82,18 +82,18 @@ export interface CreatePromotionRequest {
   max_discount?: string
   usage_limit?: number
   per_user_limit?: number
-  product_ids?: number[]
-  category_ids?: number[]
-  market_ids?: number[]
+  product_ids?: string[]
+  category_ids?: string[]
+  market_ids?: string[]
   tags?: string[]
 }
 
 export interface CreatePromotionResponse {
-  id: number
+  id: string
 }
 
 export interface UpdatePromotionRequest {
-  id: number
+  id: string
   name: string
   description?: string
   type: PromotionType
@@ -105,14 +105,14 @@ export interface UpdatePromotionRequest {
   max_discount?: string
   usage_limit?: number
   per_user_limit?: number
-  product_ids?: number[]
-  category_ids?: number[]
-  market_ids?: number[]
+  product_ids?: string[]
+  category_ids?: string[]
+  market_ids?: string[]
   tags?: string[]
 }
 
 export interface CreatePromotionRulesRequest {
-  promotion_id: number
+  promotion_id: string
   rules: PromotionRuleRequest[]
 }
 
@@ -135,7 +135,7 @@ export interface ListPromotionRulesResponse {
 }
 
 export interface UpdatePromotionRuleRequest {
-  id: number
+  id: string
   rule_type: string
   operator: string
   value: string
@@ -147,7 +147,7 @@ export interface UpdatePromotionRuleRequest {
 // ==================== Coupon Interfaces ====================
 
 export interface Coupon {
-  id: number
+  id: string
   code: string
   name: string
   description: string
@@ -202,11 +202,11 @@ export interface CreateCouponRequest {
 }
 
 export interface CreateCouponResponse {
-  id: number
+  id: string
 }
 
 export interface UpdateCouponRequest {
-  id: number
+  id: string
   code: string
   name: string
   description?: string
@@ -236,16 +236,16 @@ export interface GenerateCouponCodesResponse {
 }
 
 export interface CouponUsage {
-  id: number
-  coupon_id: number
-  user_id: number
-  order_id: number
+  id: string
+  coupon_id: string
+  user_id: string
+  order_id: string
   discount_amount: string
   used_at: string
 }
 
 export interface ListCouponUsageParams {
-  id: number
+  id: string
   page: number
   page_size: number
 }
@@ -260,9 +260,9 @@ export interface ListCouponUsageResponse {
 // ==================== User Coupon Interfaces ====================
 
 export interface UserCoupon {
-  id: number
-  user_id: number
-  coupon_id: number
+  id: string
+  user_id: string
+  coupon_id: string
   coupon_code: string
   coupon_name: string
   discount_type: string
@@ -273,15 +273,15 @@ export interface UserCoupon {
   end_time: string
   status: UserCouponStatus
   used_at?: string
-  order_id?: number
+  order_id?: string
   created_at: string
 }
 
 export interface ListUserCouponsParams {
   page: number
   page_size: number
-  user_id?: number
-  coupon_id?: number
+  user_id?: string
+  coupon_id?: string
   status?: UserCouponStatus
 }
 
@@ -293,12 +293,12 @@ export interface ListUserCouponsResponse {
 }
 
 export interface IssueUserCouponRequest {
-  user_id: number
-  coupon_id: number
+  user_id: string
+  coupon_id: string
 }
 
 export interface IssueUserCouponResponse {
-  id: number
+  id: string
 }
 
 // ==================== Promotion API Functions ====================
@@ -319,7 +319,7 @@ export function createPromotion(data: CreatePromotionRequest) {
   })
 }
 
-export function getPromotion(id: number) {
+export function getPromotion(id: string) {
   return request<Promotion>({
     url: `/api/v1/promotions/${id}`,
     method: 'get'
@@ -334,14 +334,14 @@ export function updatePromotion(data: UpdatePromotionRequest) {
   })
 }
 
-export function deletePromotion(id: number) {
-  return request<{ id: number }>({
+export function deletePromotion(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/promotions/${id}`,
     method: 'delete'
   })
 }
 
-export function activatePromotion(id: number) {
+export function activatePromotion(id: string) {
   return request<Promotion>({
     url: `/api/v1/promotions/${id}/activate`,
     method: 'post',
@@ -349,7 +349,7 @@ export function activatePromotion(id: number) {
   })
 }
 
-export function deactivatePromotion(id: number) {
+export function deactivatePromotion(id: string) {
   return request<Promotion>({
     url: `/api/v1/promotions/${id}/deactivate`,
     method: 'post',
@@ -357,14 +357,14 @@ export function deactivatePromotion(id: number) {
   })
 }
 
-export function getPromotionRules(promotionId: number) {
+export function getPromotionRules(promotionId: string) {
   return request<ListPromotionRulesResponse>({
     url: `/api/v1/promotions/${promotionId}/rules`,
     method: 'get'
   })
 }
 
-export function createPromotionRules(promotionId: number, data: PromotionRuleRequest[]) {
+export function createPromotionRules(promotionId: string, data: PromotionRuleRequest[]) {
   return request<CreatePromotionRulesResponse>({
     url: `/api/v1/promotions/${promotionId}/rules`,
     method: 'post',
@@ -380,8 +380,8 @@ export function updatePromotionRule(data: UpdatePromotionRuleRequest) {
   })
 }
 
-export function deletePromotionRule(id: number) {
-  return request<{ id: number }>({
+export function deletePromotionRule(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/promotion-rules/${id}`,
     method: 'delete'
   })
@@ -405,7 +405,7 @@ export function createCoupon(data: CreateCouponRequest) {
   })
 }
 
-export function getCoupon(id: number) {
+export function getCoupon(id: string) {
   return request<Coupon>({
     url: `/api/v1/coupons/${id}`,
     method: 'get'
@@ -420,8 +420,8 @@ export function updateCoupon(data: UpdateCouponRequest) {
   })
 }
 
-export function deleteCoupon(id: number) {
-  return request<{ id: number }>({
+export function deleteCoupon(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/coupons/${id}`,
     method: 'delete'
   })
@@ -435,7 +435,7 @@ export function generateCouponCodes(data: GenerateCouponCodesRequest) {
   })
 }
 
-export function getCouponUsage(id: number, params: { page: number; page_size: number }) {
+export function getCouponUsage(id: string, params: { page: number; page_size: number }) {
   return request<ListCouponUsageResponse>({
     url: `/api/v1/coupons/${id}/usage`,
     method: 'get',

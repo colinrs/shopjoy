@@ -9,7 +9,7 @@ info (
 type (
 	// ===================== Role Types =====================
 	RoleInfo {
-		ID          int64  `json:"id"`
+		ID          int64  `json:"id,string"`
 		Name        string `json:"name"`
 		Code        string `json:"code"`
 		Description string `json:"description"`
@@ -20,12 +20,12 @@ type (
 		UpdatedAt   string `json:"updated_at"`
 	}
 	PermissionInfo {
-		ID       int64  `json:"id"`
+		ID       int64  `json:"id,string"`
 		Name     string `json:"name"`
 		Code     string `json:"code"`
 		Type     int8   `json:"type"` // 0=menu, 1=button, 2=api
 		TypeText string `json:"type_text"`
-		ParentID int64  `json:"parent_id"`
+		ParentID int64  `json:"parent_id,string"`
 		Path     string `json:"path"`
 		Icon     string `json:"icon"`
 		Sort     int    `json:"sort"`
@@ -49,13 +49,13 @@ type (
 		PageSize int         `json:"page_size"`
 	}
 	CreateRoleRequest {
-		Name          string  `json:"name" validate:"required"`
-		Code          string  `json:"code" validate:"required"`
-		Description   string  `json:"description,optional"`
-		PermissionIDs []int64 `json:"permission_ids,optional"`
+		Name          string   `json:"name" validate:"required"`
+		Code          string   `json:"code" validate:"required"`
+		Description   string   `json:"description,optional"`
+		PermissionIDs []string `json:"permission_ids,optional"`
 	}
 	CreateRoleResponse {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	UpdateRoleRequest {
 		ID          int64  `path:"id"`
@@ -66,8 +66,8 @@ type (
 		ID int64 `path:"id"`
 	}
 	UpdateRolePermissionsRequest {
-		ID            int64   `path:"id"`
-		PermissionIDs []int64 `json:"permission_ids"`
+		ID            int64    `path:"id"`
+		PermissionIDs []string `json:"permission_ids"`
 	}
 	UpdateRoleStatusRequest {
 		ID     int64 `path:"id"`

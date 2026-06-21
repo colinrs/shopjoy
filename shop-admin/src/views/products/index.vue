@@ -948,8 +948,8 @@ const pushToMarketDialogVisible = ref(false)
 const isEdit = ref(false)
 const searchQuery = ref('')
 const filterStatus = ref('')
-const filterCategory = ref<number | ''>('')
-const selectedMarket = ref<number | ''>('')
+const filterCategory = ref<string | ''>('')
+const selectedMarket = ref<string | ''>('')
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
@@ -968,7 +968,7 @@ const categories = ref<CategoryTree[]>([])
 
 // Push to market form
 const pushToMarketForm = reactive({
-  selectedMarkets: [] as number[],
+  selectedMarkets: [] as string[],
   price: 0
 })
 
@@ -976,13 +976,13 @@ const pushToMarketForm = reactive({
 const availableMarkets = computed(() => markets.value.filter(m => m.is_active))
 
 const productForm = reactive({
-  id: null as number | null,
+  id: null as string | null,
   name: '',
   price: 0,
   original_price: 0,
   stock: 0,
   category: '',
-  category_id: 0,
+  category_id: '',
   image: '',
   images: [] as string[],
   description: '',
@@ -1103,7 +1103,7 @@ const handleCommand = async (cmd: string, row: Product) => {
           price: row.price || '0',
           currency: row.currency || 'USD',
           cost_price: row.cost_price || '',
-          category_id: row.category_id || 0,
+          category_id: row.category_id || '',
           sku: row.sku ? `${row.sku}-copy` : `${row.id}-copy`,
           brand: row.brand || '',
           tags: row.tags || [],

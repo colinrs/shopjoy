@@ -135,7 +135,7 @@
                         :placeholder="$t('shipping.selectProduct')"
                         filterable
                         clearable
-                        @change="(val: number) => handleProductSelect(item, val)"
+                        @change="(val: string) => handleProductSelect(item, val)"
                       >
                         <el-option
                           v-for="p in products"
@@ -299,7 +299,7 @@ const { handleError } = useErrorHandler()
 
 // Types
 interface TestItem {
-  product_id: number | null
+  product_id: string | null
   quantity: number
   weight: number
   price: number
@@ -421,7 +421,7 @@ const removeTestItem = (index: number) => {
   testItems.value.splice(index, 1)
 }
 
-const handleProductSelect = (item: TestItem, productId: number | null) => {
+const handleProductSelect = (item: TestItem, productId: string | null) => {
   if (productId) {
     const product = products.value.find(p => p.id === productId)
     if (product) {
@@ -446,7 +446,7 @@ const calculateShipping = async () => {
         district_code: address.district_code
       },
       items: testItems.value.map(item => ({
-        product_id: item.product_id || 0,
+        product_id: item.product_id || '',
         quantity: item.quantity,
         weight: item.weight,
         price: String(item.price)

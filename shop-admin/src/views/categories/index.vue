@@ -285,8 +285,8 @@ const formRef = ref()
 // Drag state
 const dragState = reactive({
   dragging: false,
-  sourceId: null as number | null,
-  targetId: null as number | null
+  sourceId: null as string | null,
+  targetId: null as string | null
 })
 
 // Check if sort order has changed
@@ -295,7 +295,7 @@ const hasSortChanges = computed(() => {
 })
 
 const categoryForm = reactive({
-  id: 0,
+  id: '',
   name: '',
   code: '',
   sort: 0,
@@ -303,7 +303,7 @@ const categoryForm = reactive({
   image: '',
   seo_title: '',
   seo_description: '',
-  parent_id: 0
+  parent_id: ''
 })
 
 const formRules = {
@@ -327,7 +327,7 @@ const handleAddRoot = () => {
   isEdit.value = false
   parentCategory.value = null
   Object.assign(categoryForm, {
-    id: 0,
+    id: '',
     name: '',
     code: '',
     sort: 0,
@@ -335,7 +335,7 @@ const handleAddRoot = () => {
     image: '',
     seo_title: '',
     seo_description: '',
-    parent_id: 0
+    parent_id: ''
   })
   dialogVisible.value = true
 }
@@ -344,7 +344,7 @@ const handleAddChild = (row: CategoryTree) => {
   isEdit.value = false
   parentCategory.value = row
   Object.assign(categoryForm, {
-    id: 0,
+    id: '',
     name: '',
     code: '',
     sort: 0,
@@ -479,7 +479,7 @@ const handleDrop = (event: DragEvent, targetRow: CategoryTree) => {
   handleDragEnd()
 }
 
-const findNodeById = (nodes: CategoryTree[], id: number): CategoryTree | null => {
+const findNodeById = (nodes: CategoryTree[], id: string): CategoryTree | null => {
   for (const node of nodes) {
     if (node.id === id) {
       return node
@@ -494,8 +494,8 @@ const findNodeById = (nodes: CategoryTree[], id: number): CategoryTree | null =>
   return null
 }
 
-const getSiblings = (nodes: CategoryTree[], parentId: number): CategoryTree[] => {
-  if (parentId === 0) {
+const getSiblings = (nodes: CategoryTree[], parentId: string): CategoryTree[] => {
+  if (!parentId || parentId === '0') {
     return nodes
   }
   for (const node of nodes) {
@@ -525,7 +525,7 @@ const handleSaveSort = async () => {
   sortLoading.value = true
   try {
     // Collect all sort changes
-    const sorts: { id: number; sort: number }[] = []
+    const sorts: { id: string; sort: number }[] = []
     collectSorts(categoryTree.value, sorts)
 
     if (sorts.length > 0) {
@@ -541,7 +541,7 @@ const handleSaveSort = async () => {
   }
 }
 
-const collectSorts = (nodes: CategoryTree[], result: { id: number; sort: number }[]) => {
+const collectSorts = (nodes: CategoryTree[], result: { id: string; sort: number }[]) => {
   for (const node of nodes) {
     result.push({ id: node.id, sort: node.sort })
     if (node.children && node.children.length > 0) {

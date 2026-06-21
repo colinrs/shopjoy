@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 export interface Brand {
-  id: number
+  id: string
   name: string
   logo: string
   description: string
@@ -40,7 +40,7 @@ export interface CreateBrandRequest {
 }
 
 export interface UpdateBrandRequest {
-  id: number
+  id: string
   name: string
   logo?: string
   description?: string
@@ -61,7 +61,7 @@ export function getBrands(params?: ListBrandRequest) {
 }
 
 // Get brand detail
-export function getBrand(id: number) {
+export function getBrand(id: string) {
   return request<Brand>({
     url: `/api/v1/brands/${id}`,
     method: 'get'
@@ -70,7 +70,7 @@ export function getBrand(id: number) {
 
 // Create brand
 export function createBrand(data: CreateBrandRequest) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/brands',
     method: 'post',
     data
@@ -87,15 +87,15 @@ export function updateBrand(data: UpdateBrandRequest) {
 }
 
 // Delete brand
-export function deleteBrand(id: number) {
-  return request<{ id: number }>({
+export function deleteBrand(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/brands/${id}`,
     method: 'delete'
   })
 }
 
 // Update brand status
-export function updateBrandStatus(id: number, status: number) {
+export function updateBrandStatus(id: string, status: number) {
   return request<Brand>({
     url: `/api/v1/brands/${id}/status`,
     method: 'put',
@@ -104,7 +104,7 @@ export function updateBrandStatus(id: number, status: number) {
 }
 
 // Toggle brand page
-export function toggleBrandPage(id: number, enabled: boolean) {
+export function toggleBrandPage(id: string, enabled: boolean) {
   return request<Brand>({
     url: `/api/v1/brands/${id}/toggle-page`,
     method: 'put',
@@ -113,7 +113,7 @@ export function toggleBrandPage(id: number, enabled: boolean) {
 }
 
 // Get brand product count
-export function getBrandProductCount(id: number) {
+export function getBrandProductCount(id: string) {
   return request<{ count: number }>({
     url: `/api/v1/brands/${id}/product-count`,
     method: 'get'
@@ -122,19 +122,19 @@ export function getBrandProductCount(id: number) {
 
 // Brand market visibility
 export interface BrandMarketVisibility {
-  brand_id: number
-  markets: { market_id: number; is_visible: boolean }[]
+  brand_id: string
+  markets: { market_id: string; is_visible: boolean }[]
 }
 
-export function getBrandMarketVisibility(id: number) {
+export function getBrandMarketVisibility(id: string) {
   return request<BrandMarketVisibility>({
     url: `/api/v1/brands/${id}/market-visibility`,
     method: 'get'
   })
 }
 
-export function setBrandMarketVisibility(id: number, market_ids: number[], visible: boolean) {
-  return request<{ id: number }>({
+export function setBrandMarketVisibility(id: string, market_ids: string[], visible: boolean) {
+  return request<{ id: string }>({
     url: `/api/v1/brands/${id}/market-visibility`,
     method: 'put',
     data: { id, market_ids, visible }

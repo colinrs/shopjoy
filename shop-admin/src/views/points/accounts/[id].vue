@@ -185,7 +185,7 @@ const adjustLoading = ref(false)
 
 // Load functions
 const loadAccount = async () => {
-  const id = parseInt(route.params.id as string)
+  const id = route.params.id as string
   if (!id) return
 
   loading.value = true

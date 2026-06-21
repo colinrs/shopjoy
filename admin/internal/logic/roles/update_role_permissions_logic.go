@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -43,5 +44,9 @@ func (l *UpdateRolePermissionsLogic) UpdateRolePermissions(req *types.UpdateRole
 	}
 
 	// Update permissions
-	return l.svcCtx.PermissionRepo.AssignToRole(l.ctx, l.svcCtx.DB, req.ID, req.PermissionIDs)
+	permissionIDs, err := utils.ParseInt64Slice(req.PermissionIDs)
+	if err != nil {
+		return code.ErrParam
+	}
+	return l.svcCtx.PermissionRepo.AssignToRole(l.ctx, l.svcCtx.DB, req.ID, permissionIDs)
 }

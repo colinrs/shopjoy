@@ -172,7 +172,7 @@ const uploadRef = ref()
 const fileList = ref<UploadFile[]>([])
 const submitting = ref(false)
 const parsedData = ref<BatchUpdateTrackingRequest[]>([])
-const errors = ref<{ shipment_id: number; message: string }[]>([])
+const errors = ref<{ shipment_id: string; message: string }[]>([])
 
 // CSV Template download
 const downloadTemplate = () => {
@@ -199,9 +199,9 @@ const parseCSV = (content: string): BatchUpdateTrackingRequest[] => {
   for (let i = 1; i < lines.length; i++) {
     const parts = lines[i].split(',').map(p => p.trim())
     if (parts.length >= 3) {
-      const shipmentId = parseInt(parts[0], 10)
-      if (isNaN(shipmentId)) {
-        errors.value.push({ shipment_id: 0, message: `Invalid shipment_id: ${parts[0]}` })
+      const shipmentId = parts[0]
+      if (!shipmentId) {
+        errors.value.push({ shipment_id: '', message: `Invalid shipment_id: ${parts[0]}` })
         continue
       }
       data.push({
@@ -256,7 +256,7 @@ const handleSubmit = async () => {
   submitting.value = true
   let successCount = 0
   let failedCount = 0
-  const failedErrors: { shipment_id: number; message: string }[] = []
+  const failedErrors: { shipment_id: string; message: string }[] = []
 
   try {
     // Process each shipment individually

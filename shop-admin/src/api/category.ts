@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
 export interface Category {
-  id: number
-  parent_id: number
+  id: string
+  parent_id: string
   name: string
   code: string
   level: number
@@ -23,7 +23,7 @@ export interface CategoryTree extends Category {
 
 export interface CreateCategoryRequest {
   name: string
-  parent_id?: number
+  parent_id?: string
   code?: string
   icon?: string
   image?: string
@@ -33,7 +33,7 @@ export interface CreateCategoryRequest {
 }
 
 export interface UpdateCategoryRequest {
-  id: number
+  id: string
   name: string
   code?: string
   icon?: string
@@ -44,7 +44,7 @@ export interface UpdateCategoryRequest {
 }
 
 export interface ListCategoryRequest {
-  parent_id?: number
+  parent_id?: string
 }
 
 export interface ListCategoryResponse {
@@ -52,17 +52,17 @@ export interface ListCategoryResponse {
 }
 
 export interface UpdateCategoryStatusRequest {
-  id: number
+  id: string
   status: number // 0=disabled, 1=enabled
 }
 
 export interface UpdateCategorySortRequest {
-  sorts: { id: number; sort: number }[]
+  sorts: { id: string; sort: number }[]
 }
 
 export interface MoveCategoryRequest {
-  id: number
-  new_parent_id: number
+  id: string
+  new_parent_id: string
 }
 
 // Get category tree
@@ -83,7 +83,7 @@ export function getCategories(params?: ListCategoryRequest) {
 }
 
 // Get category detail
-export function getCategory(id: number) {
+export function getCategory(id: string) {
   return request<Category>({
     url: `/api/v1/categories/${id}`,
     method: 'get'
@@ -92,7 +92,7 @@ export function getCategory(id: number) {
 
 // Create category
 export function createCategory(data: CreateCategoryRequest) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/categories',
     method: 'post',
     data
@@ -109,15 +109,15 @@ export function updateCategory(data: UpdateCategoryRequest) {
 }
 
 // Delete category
-export function deleteCategory(id: number) {
-  return request<{ id: number }>({
+export function deleteCategory(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/categories/${id}`,
     method: 'delete'
   })
 }
 
 // Update category status
-export function updateCategoryStatus(id: number, status: number) {
+export function updateCategoryStatus(id: string, status: number) {
   return request<Category>({
     url: `/api/v1/categories/${id}/status`,
     method: 'put',
@@ -126,8 +126,8 @@ export function updateCategoryStatus(id: number, status: number) {
 }
 
 // Update category sort
-export function updateCategorySort(sorts: { id: number; sort: number }[]) {
-  return request<{ id: number }>({
+export function updateCategorySort(sorts: { id: string; sort: number }[]) {
+  return request<{ id: string }>({
     url: '/api/v1/categories/sort',
     method: 'put',
     data: { sorts }
@@ -135,7 +135,7 @@ export function updateCategorySort(sorts: { id: number; sort: number }[]) {
 }
 
 // Move category
-export function moveCategory(id: number, new_parent_id: number) {
+export function moveCategory(id: string, new_parent_id: string) {
   return request<Category>({
     url: `/api/v1/categories/${id}/move`,
     method: 'put',
@@ -144,7 +144,7 @@ export function moveCategory(id: number, new_parent_id: number) {
 }
 
 // Get category product count
-export function getCategoryProductCount(id: number) {
+export function getCategoryProductCount(id: string) {
   return request<{ count: number }>({
     url: `/api/v1/categories/${id}/product-count`,
     method: 'get'
@@ -153,19 +153,19 @@ export function getCategoryProductCount(id: number) {
 
 // Category market visibility
 export interface CategoryMarketVisibility {
-  category_id: number
-  markets: { market_id: number; is_visible: boolean }[]
+  category_id: string
+  markets: { market_id: string; is_visible: boolean }[]
 }
 
-export function getCategoryMarketVisibility(id: number) {
+export function getCategoryMarketVisibility(id: string) {
   return request<CategoryMarketVisibility>({
     url: `/api/v1/categories/${id}/market-visibility`,
     method: 'get'
   })
 }
 
-export function setCategoryMarketVisibility(id: number, market_ids: number[], visible: boolean) {
-  return request<{ id: number }>({
+export function setCategoryMarketVisibility(id: string, market_ids: string[], visible: boolean) {
+  return request<{ id: string }>({
     url: `/api/v1/categories/${id}/market-visibility`,
     method: 'put',
     data: { id, market_ids, visible }

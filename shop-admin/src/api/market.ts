@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 export interface Market {
-  id: number
+  id: string
   code: string
   name: string
   currency: string
@@ -39,7 +39,7 @@ export interface CreateMarketRequest {
 }
 
 export interface UpdateMarketRequest {
-  id: number
+  id: string
   name?: string
   is_active?: boolean
   is_default?: boolean
@@ -58,7 +58,7 @@ export function getMarkets() {
   })
 }
 
-export function getMarket(id: number) {
+export function getMarket(id: string) {
   return request<Market>({
     url: `/api/v1/markets/${id}`,
     method: 'get'
@@ -81,7 +81,7 @@ export function updateMarket(data: UpdateMarketRequest) {
   })
 }
 
-export function deleteMarket(id: number) {
+export function deleteMarket(id: string) {
   return request({
     url: `/api/v1/markets/${id}`,
     method: 'delete'

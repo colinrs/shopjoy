@@ -36,7 +36,7 @@ type (
 		Period string           `json:"period"`
 	}
 	TopUser {
-		UserID       int64  `json:"user_id"`
+		UserID       int64  `json:"user_id,string"`
 		UserEmail    string `json:"user_email,optional"`
 		PointsEarned int64  `json:"points_earned"`
 		CreatedAt    string `json:"created_at"`
@@ -67,7 +67,7 @@ type (
 		Ratio     string `json:"ratio"` // Points per currency unit
 	}
 	EarnRule {
-		ID               int64         `json:"id"`
+		ID               int64         `json:"id,string"`
 		Name             string        `json:"name"`
 		Description      string        `json:"description"`
 		Scenario         string        `json:"scenario"` // ORDER_PAYMENT, SIGN_IN, PRODUCT_REVIEW, FIRST_ORDER
@@ -150,10 +150,10 @@ type (
 	}
 	// ===================== Redeem Rule Types =====================
 	RedeemRule {
-		ID             int64  `json:"id"`
+		ID             int64  `json:"id,string"`
 		Name           string `json:"name"`
 		Description    string `json:"description"`
-		CouponID       int64  `json:"coupon_id"`
+		CouponID       int64  `json:"coupon_id,string"`
 		CouponName     string `json:"coupon_name"`
 		PointsRequired int64  `json:"points_required"`
 		TotalStock     int64  `json:"total_stock"`
@@ -186,7 +186,7 @@ type (
 	CreateRedeemRuleReq {
 		Name           string `json:"name"`
 		Description    string `json:"description,optional"`
-		CouponID       int64  `json:"coupon_id"`
+		CouponID       int64  `json:"coupon_id,string"`
 		PointsRequired int64  `json:"points_required"`
 		TotalStock     int64  `json:"total_stock,optional,default=0"`
 		PerUserLimit   int    `json:"per_user_limit,optional,default=1"`
@@ -198,7 +198,7 @@ type (
 		ID             int64  `path:"id"`
 		Name           string `json:"name"`
 		Description    string `json:"description,optional"`
-		CouponID       int64  `json:"coupon_id"`
+		CouponID       int64  `json:"coupon_id,string"`
 		PointsRequired int64  `json:"points_required"`
 		TotalStock     int64  `json:"total_stock,optional"`
 		PerUserLimit   int    `json:"per_user_limit,optional"`
@@ -219,8 +219,8 @@ type (
 	}
 	// ===================== Points Account Types =====================
 	PointsAccount {
-		ID            int64  `json:"id"`
-		UserID        int64  `json:"user_id"`
+		ID            int64  `json:"id,string"`
+		UserID        int64  `json:"user_id,string"`
 		UserEmail     string `json:"user_email,optional"`
 		Balance       int64  `json:"balance"`
 		FrozenBalance int64  `json:"frozen_balance"`
@@ -263,9 +263,9 @@ type (
 	}
 	// ===================== Points Transaction Types =====================
 	PointsTransaction {
-		ID            int64  `json:"id"`
-		UserID        int64  `json:"user_id"`
-		AccountID     int64  `json:"account_id"`
+		ID            int64  `json:"id,string"`
+		UserID        int64  `json:"user_id,string"`
+		AccountID     int64  `json:"account_id,string"`
 		Points        int64  `json:"points"` // Positive = earn, negative = deduct
 		BalanceAfter  int64  `json:"balance_after"`
 		Type          string `json:"type"` // EARN, REDEEM, ADJUST, EXPIRE, FREEZE, UNFREEZE
@@ -313,19 +313,19 @@ type (
 		Reason         string `json:"reason"`
 	}
 	AdjustPointsResp {
-		TransactionID int64  `json:"transaction_id"`
+		TransactionID int64  `json:"transaction_id,string"`
 		Points        int64  `json:"points"`
 		BalanceAfter  int64  `json:"balance_after"`
 		CreatedAt     string `json:"created_at"`
 	}
 	// ===================== Redemption Types =====================
 	PointsRedemption {
-		ID           int64  `json:"id"`
-		UserID       int64  `json:"user_id"`
-		RedeemRuleID int64  `json:"redeem_rule_id"`
-		CouponID     int64  `json:"coupon_id"`
+		ID           int64  `json:"id,string"`
+		UserID       int64  `json:"user_id,string"`
+		RedeemRuleID int64  `json:"redeem_rule_id,string"`
+		CouponID     int64  `json:"coupon_id,string"`
 		CouponName   string `json:"coupon_name"`
-		UserCouponID int64  `json:"user_coupon_id,optional"`
+		UserCouponID int64  `json:"user_coupon_id,optional,string"`
 		PointsUsed   int64  `json:"points_used"`
 		Status       string `json:"status"` // pending, completed, cancelled
 		CreatedAt    string `json:"created_at"`

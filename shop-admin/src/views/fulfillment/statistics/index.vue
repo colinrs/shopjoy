@@ -389,7 +389,7 @@ const stats = ref({
 
 const refundRateChange = ref(0)
 
-const problemProducts = ref<{ product_id: number; product_name: string; image: string; total_sales: number; refund_count: number; refund_rate: number }[]>([])
+const problemProducts = ref<{ product_id: string; product_name: string; image: string; total_sales: number; refund_count: number; refund_rate: number }[]>([])
 
 const carrierPerformance = ref<{ carrier_code: string; carrier_name: string; total_shipments: number; delivery_success_rate: number; avg_delivery_time: number }[]>([])
 

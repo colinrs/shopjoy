@@ -6,7 +6,9 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/application/adminuser"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,6 +30,11 @@ func NewCreateAdminUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserRequest) (resp *types.AdminUserInfo, err error) {
 	operatorID := contextx.GetCurrentUserID(l.ctx)
 
+	roleIDs, err := utils.ParseInt64Slice(req.RoleIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
 	createReq := adminuser.CreateAdminUserRequest{
 		TenantID: req.TenantID,
 		Username: req.Username,
@@ -37,7 +44,7 @@ func (l *CreateAdminUserLogic) CreateAdminUser(req *types.CreateAdminUserRequest
 		RealName: req.RealName,
 		Avatar:   req.Avatar,
 		Type:     req.Type,
-		RoleIDs:  req.RoleIDs,
+		RoleIDs:  roleIDs,
 	}
 
 	user, err := l.svcCtx.AdminUserService.Create(l.ctx, operatorID, createReq)

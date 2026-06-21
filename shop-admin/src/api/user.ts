@@ -5,8 +5,8 @@ export type UserStatus = 0 | 1 | 2 | 3
 
 // User interface matching backend GetUserResponse
 export interface User {
-  id: number
-  tenant_id: number
+  id: string
+  tenant_id: string
   email: string
   phone: string
   name: string
@@ -40,8 +40,8 @@ export interface UserDetail extends ExtendedUser {
 
 // User address
 export interface UserAddress {
-  id: number
-  user_id: number
+  id: string
+  user_id: string
   name: string
   phone: string
   country: string
@@ -109,7 +109,7 @@ export interface ListUserAddressesResponse {
 }
 
 // Get user info
-export function getUserInfo(id: number) {
+export function getUserInfo(id: string) {
   return request<User>({
     url: `/api/v1/users/${id}`,
     method: 'get'
@@ -126,7 +126,7 @@ export function getUserList(params: ListUsersParams) {
 }
 
 // Update user info
-export function updateUser(id: number, data: UpdateUserParams) {
+export function updateUser(id: string, data: UpdateUserParams) {
   return request<User>({
     url: `/api/v1/users/${id}`,
     method: 'put',
@@ -135,7 +135,7 @@ export function updateUser(id: number, data: UpdateUserParams) {
 }
 
 // Suspend user
-export function suspendUser(id: number) {
+export function suspendUser(id: string) {
   return request<User>({
     url: `/api/v1/users/${id}/suspend`,
     method: 'post'
@@ -143,7 +143,7 @@ export function suspendUser(id: number) {
 }
 
 // Activate user
-export function activateUser(id: number) {
+export function activateUser(id: string) {
   return request<User>({
     url: `/api/v1/users/${id}/activate`,
     method: 'post'
@@ -151,7 +151,7 @@ export function activateUser(id: number) {
 }
 
 // Delete user (soft delete)
-export function deleteUser(id: number) {
+export function deleteUser(id: string) {
   return request({
     url: `/api/v1/users/${id}`,
     method: 'delete'
@@ -159,7 +159,7 @@ export function deleteUser(id: number) {
 }
 
 // Reset user password
-export function resetUserPassword(id: number) {
+export function resetUserPassword(id: string) {
   return request<ResetPasswordResponse>({
     url: `/api/v1/users/${id}/reset-password`,
     method: 'post'
@@ -190,7 +190,7 @@ export function getUserStatsEnhanced() {
 }
 
 // Get user detail with full information
-export function getUserDetail(id: number) {
+export function getUserDetail(id: string) {
   return request<UserDetail>({
     url: `/api/v1/users/${id}/detail`,
     method: 'get'
@@ -198,7 +198,7 @@ export function getUserDetail(id: number) {
 }
 
 // Get user addresses
-export function getUserAddresses(id: number, params?: { page?: number; page_size?: number }) {
+export function getUserAddresses(id: string, params?: { page?: number; page_size?: number }) {
   return request<ListUserAddressesResponse>({
     url: `/api/v1/users/${id}/addresses`,
     method: 'get',
@@ -207,7 +207,7 @@ export function getUserAddresses(id: number, params?: { page?: number; page_size
 }
 
 // Suspend user with reason
-export function suspendUserWithReason(id: number, reason: string) {
+export function suspendUserWithReason(id: string, reason: string) {
   return request<User>({
     url: `/api/v1/users/${id}/suspend-reason`,
     method: 'post',
@@ -238,7 +238,7 @@ export function getUserListEnhanced(params: ListUsersParams) {
 
 // Batch update user status request
 export interface BatchUpdateUserStatusRequest {
-  user_ids: number[]
+  user_ids: string[]
   status: UserStatus  // 1=activate, 2=suspend
   reason?: string
 }
@@ -246,7 +246,7 @@ export interface BatchUpdateUserStatusRequest {
 // Batch update user status response
 export interface BatchUpdateUserStatusResponse {
   success: number[]
-  failed: { user_id: number; code: number; message: string }[]
+  failed: { user_id: string; code: number; message: string }[]
 }
 
 // Batch update user status

@@ -269,7 +269,7 @@ const handleConfirmCreate = async () => {
   })
 }
 
-const handleEdit = (id: number) => {
+const handleEdit = (id: string) => {
   router.push(`/shipping/${id}`)
 }
 

@@ -9,7 +9,7 @@ info (
 // ==================== Theme APIs ====================
 type (
 	ThemeItem {
-		ID            int64              `json:"id"`
+		ID            int64              `json:"id,string"`
 		Code          string             `json:"code"`
 		Name          string             `json:"name"`
 		Description   string             `json:"description"`
@@ -41,14 +41,14 @@ type (
 		Theme     *ThemeItem     `json:"theme"`
 		Config    ThemeConfigDTO `json:"config"`
 		ChangedAt string         `json:"changed_at,omitempty"` // RFC3339 format
-		ChangedBy int64          `json:"changed_by,omitempty"`
+		ChangedBy int64          `json:"changed_by,omitempty,string"`
 	}
 	ThemeAuditLog {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Action    string `json:"action"` // switch, update_config
-		ThemeID   int64  `json:"theme_id"`
+		ThemeID   int64  `json:"theme_id,string"`
 		ThemeName string `json:"theme_name"`
-		UserID    int64  `json:"user_id"`
+		UserID    int64  `json:"user_id,string"`
 		UserName  string `json:"user_name"`
 		CreatedAt string `json:"created_at"` // RFC3339 format
 	}
@@ -63,7 +63,7 @@ type (
 		ButtonStyle    string `json:"button_style"`
 	}
 	SwitchThemeRequest {
-		ThemeID int64 `json:"theme_id"`
+		ThemeID int64 `json:"theme_id,string"`
 	}
 	UpdateThemeConfigRequest {
 		Config ThemeConfigDTO `json:"config"`
@@ -73,7 +73,7 @@ type (
 // ==================== Page APIs ====================
 type (
 	PageListItem {
-		ID          int64  `json:"id"`
+		ID          int64  `json:"id,string"`
 		PageType    string `json:"page_type"` // home, product, collection, custom
 		Name        string `json:"name"`
 		Slug        string `json:"slug"`
@@ -86,7 +86,7 @@ type (
 		PageType string `json:"page_type"` // home, product, collection, custom
 	}
 	CreatePageResponse {
-		PageID int64 `json:"page_id"`
+		PageID int64 `json:"page_id,string"`
 	}
 	ListPagesRequest {
 		Page     int `form:"page,default=1"`
@@ -109,7 +109,7 @@ type (
 		Decorations []*DecorationDTO `json:"decorations"`
 	}
 	DecorationDTO {
-		ID          int64  `json:"id"`
+		ID          int64  `json:"id,string"`
 		BlockType   string `json:"block_type"` // banner, product_grid, text, image, video, etc
 		BlockConfig string `json:"block_config"` // JSON string
 		SortOrder   int    `json:"sort_order"`
@@ -136,7 +136,7 @@ type (
 		SortOrder   int    `json:"sort_order,optional"`
 	}
 	AddDecorationResponse {
-		ID          int64  `json:"id"`
+		ID          int64  `json:"id,string"`
 		BlockType   string `json:"block_type"`
 		BlockConfig string `json:"block_config"` // JSON string
 		SortOrder   int    `json:"sort_order"`
@@ -153,7 +153,7 @@ type (
 		BlockOrders []BlockOrderItem `json:"block_orders"`
 	}
 	BlockOrderItem {
-		ID        int64 `json:"id"`
+		ID        int64 `json:"id,string"`
 		SortOrder int   `json:"sort_order"`
 	}
 )
@@ -166,9 +166,9 @@ type (
 		PageSize int   `form:"page_size,default=20"`
 	}
 	VersionListItem {
-		ID        int64  `json:"id"`
+		ID        int64  `json:"id,string"`
 		Version   int    `json:"version"`
-		CreatedBy int64  `json:"created_by"`
+		CreatedBy int64  `json:"created_by,string"`
 		CreatedAt string `json:"created_at"` // RFC3339 format
 	}
 	ListVersionsResponse {
@@ -206,7 +206,7 @@ type (
 	}
 	PageSEOConfigResponse {
 		PageType string `json:"page_type"`
-		PageID   *int64 `json:"page_id,omitempty"`
+		PageID   *int64 `json:"page_id,omitempty,string"`
 		SEOConfigDTO
 	}
 	UpdatePageSEORequest {

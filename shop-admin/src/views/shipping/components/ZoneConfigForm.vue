@@ -201,7 +201,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   update: [zone: ShippingZone]
-  delete: [zoneId: number]
+  delete: [zoneId: string]
   save: [zone: CreateZoneRequest]
   cancel: []
 }>()

@@ -389,7 +389,7 @@ const formRef = ref()
 const marketList = ref<Market[]>([])
 
 const marketForm = reactive({
-  id: undefined as number | undefined,
+  id: undefined as string | undefined,
   code: '',
   name: '',
   currency: 'USD',

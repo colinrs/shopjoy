@@ -133,7 +133,7 @@ const isEdit = computed(() => !!props.rule)
 const form = reactive({
   name: '',
   description: '',
-  coupon_id: 0,
+  coupon_id: '',
   coupon_name: '',
   points_required: 500,
   total_stock: 100,
@@ -162,7 +162,7 @@ watch(() => props.rule, (rule) => {
     // Reset form
     form.name = ''
     form.description = ''
-    form.coupon_id = 0
+    form.coupon_id = ''
     form.coupon_name = ''
     form.points_required = 500
     form.total_stock = 100
@@ -171,7 +171,7 @@ watch(() => props.rule, (rule) => {
   }
 }, { immediate: true })
 
-const handleCouponChange = (coupon: { id: number; name: string }) => {
+const handleCouponChange = (coupon: { id: string; name: string }) => {
   form.coupon_id = coupon.id
   form.coupon_name = coupon.name
 }

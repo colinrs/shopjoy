@@ -146,7 +146,7 @@ const emit = defineEmits<VariantDialogEmits>()
 
 const variantFormRef = ref()
 const variantForm = reactive<VariantFormData>({
-  id: 0,
+  id: '',
   code: '',
   price: 0,
   currency: 'USD',

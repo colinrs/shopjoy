@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 // Warehouse types
 export interface Warehouse {
-  id: number
+  id: string
   code: string
   name: string
   country: string
@@ -22,7 +22,7 @@ export interface CreateWarehouseRequest {
 }
 
 export interface UpdateWarehouseRequest {
-  id: number
+  id: string
   name: string
   country?: string
   address?: string
@@ -31,7 +31,7 @@ export interface UpdateWarehouseRequest {
 
 // Inventory types
 export interface WarehouseInventoryItem {
-  warehouse_id: number
+  warehouse_id: string
   warehouse_name: string
   available_stock: number
   locked_stock: number
@@ -39,7 +39,7 @@ export interface WarehouseInventoryItem {
 
 export interface SKUInventory {
   sku_code: string
-  product_id: number
+  product_id: string
   total_stock: number
   available_stock: number
   locked_stock: number
@@ -49,23 +49,23 @@ export interface SKUInventory {
 }
 
 export interface InventoryLog {
-  id: number
+  id: string
   sku_code: string
-  product_id: number
-  warehouse_id: number
+  product_id: string
+  warehouse_id: string
   change_type: string
   change_quantity: number
   before_stock: number
   after_stock: number
   order_no: string
   remark: string
-  operator_id: number
+  operator_id: string
   created_at: string
 }
 
 export interface LowStockSKU {
   sku_code: string
-  product_id: number
+  product_id: string
   product_name: string
   available_stock: number
   safety_stock: number
@@ -79,7 +79,7 @@ export function getWarehouses() {
   })
 }
 
-export function getWarehouse(id: number) {
+export function getWarehouse(id: string) {
   return request<Warehouse>({
     url: `/api/v1/warehouses/${id}`,
     method: 'get'
@@ -87,7 +87,7 @@ export function getWarehouse(id: number) {
 }
 
 export function createWarehouse(data: CreateWarehouseRequest) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/warehouses',
     method: 'post',
     data
@@ -102,7 +102,7 @@ export function updateWarehouse(data: UpdateWarehouseRequest) {
   })
 }
 
-export function updateWarehouseStatus(id: number, status: number) {
+export function updateWarehouseStatus(id: string, status: number) {
   return request<Warehouse>({
     url: `/api/v1/warehouses/${id}/status`,
     method: 'put',
@@ -110,15 +110,15 @@ export function updateWarehouseStatus(id: number, status: number) {
   })
 }
 
-export function setDefaultWarehouse(id: number) {
+export function setDefaultWarehouse(id: string) {
   return request<Warehouse>({
     url: `/api/v1/warehouses/${id}/default`,
     method: 'put'
   })
 }
 
-export function deleteWarehouse(id: number) {
-  return request<{ id: number }>({
+export function deleteWarehouse(id: string) {
+  return request<{ id: string }>({
     url: `/api/v1/warehouses/${id}`,
     method: 'delete'
   })
@@ -134,11 +134,11 @@ export function getSKUInventory(skuCode: string) {
 
 export function updateSKUStock(data: {
   sku_code: string
-  warehouse_id?: number
+  warehouse_id?: string
   available_stock: number
   remark?: string
 }) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/inventory/stock',
     method: 'put',
     data
@@ -147,11 +147,11 @@ export function updateSKUStock(data: {
 
 export function adjustStock(data: {
   sku_code: string
-  warehouse_id: number
+  warehouse_id: string
   quantity: number
   remark?: string
 }) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/inventory/adjust',
     method: 'post',
     data
@@ -162,7 +162,7 @@ export function getInventoryLogs(params?: {
   page?: number
   page_size?: number
   sku_code?: string
-  product_id?: number
+  product_id?: string
   type?: string
 }) {
   return request<{ list: InventoryLog[]; total: number }>({
@@ -174,7 +174,7 @@ export function getInventoryLogs(params?: {
 
 export interface ExportInventoryLogsParams {
   sku_code?: string
-  product_id?: number
+  product_id?: string
   type?: string
   [key: string]: unknown
 }
@@ -198,7 +198,7 @@ export function getLowStockSKUs(params?: { page?: number; page_size?: number }) 
 }
 
 export function batchUpdateSafetyStock(items: { sku_code: string; safety_stock: number }[]) {
-  return request<{ id: number }>({
+  return request<{ id: string }>({
     url: '/api/v1/inventory/safety-stock',
     method: 'put',
     data: { items }

@@ -10,7 +10,7 @@ type (
 	// ===================== Shop Settings Types =====================
 	ShopSettings {
 		// Basic Info
-		ID          int64  `json:"id"`
+		ID          int64  `json:"id,string"`
 		Name        string `json:"name"`
 		Code        string `json:"code"`
 		Logo        string `json:"logo"`

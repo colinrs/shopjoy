@@ -20,7 +20,7 @@ type (
 	}
 	// Create brand response
 	CreateBrandResp {
-		ID int64 `json:"id"`
+		ID int64 `json:"id,string"`
 	}
 	// Update brand request
 	UpdateBrandReq {
@@ -36,7 +36,7 @@ type (
 	}
 	// Brand detail response
 	BrandDetailResp {
-		ID               int64  `json:"id"`
+		ID               int64  `json:"id,string"`
 		Name             string `json:"name"`
 		Logo             string `json:"logo"`
 		Description      string `json:"description"`
@@ -86,9 +86,9 @@ type (
 	}
 	// Set brand market visibility request
 	SetBrandMarketVisibilityReq {
-		BrandID   int64   `path:"id"`
-		MarketIDs []int64 `json:"market_ids"`
-		Visible   bool    `json:"visible"`
+		BrandID   int64    `path:"id"`
+		MarketIDs []string `json:"market_ids"`
+		Visible   bool     `json:"visible"`
 	}
 	// Get brand market visibility request
 	GetBrandMarketVisibilityReq {
@@ -96,12 +96,12 @@ type (
 	}
 	// Brand market visibility response
 	BrandMarketVisibilityResp {
-		BrandID int64                 `json:"brand_id"`
+		BrandID int64                 `json:"brand_id,string"`
 		Markets []BrandMarketItemResp `json:"markets"`
 	}
 	// Brand market item response
 	BrandMarketItemResp {
-		MarketID  int64 `json:"market_id"`
+		MarketID  int64 `json:"market_id,string"`
 		IsVisible bool  `json:"is_visible"`
 	}
 )

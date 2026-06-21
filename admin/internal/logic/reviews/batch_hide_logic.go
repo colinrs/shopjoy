@@ -5,8 +5,10 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,7 +34,12 @@ func (l *BatchHideLogic) BatchHide(req *types.BatchHideReq) (resp *types.BatchHi
 		return nil, err
 	}
 
-	result, err := l.svcCtx.ReviewService.BatchHide(l.ctx, shared.TenantID(tenantID), req.IDs, req.Reason)
+	ids, err := utils.ParseInt64Slice(req.IDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
+	result, err := l.svcCtx.ReviewService.BatchHide(l.ctx, shared.TenantID(tenantID), ids, req.Reason)
 	if err != nil {
 		return nil, err
 	}

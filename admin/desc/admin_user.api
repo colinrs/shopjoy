@@ -8,8 +8,8 @@ info (
 
 type (
 	AdminUserInfo {
-		ID        int64  `json:"id"`
-		TenantID  int64  `json:"tenant_id"`
+		ID        int64  `json:"id,string"`
+		TenantID  int64  `json:"tenant_id,string"`
 		Username  string `json:"username"`
 		Email     string `json:"email"`
 		Mobile    string `json:"mobile"`
@@ -38,7 +38,7 @@ type (
 		ID int64 `path:"id"`
 	}
 	UpdateProfileRequest {
-		UserID   int64  `json:"user_id"`
+		UserID   int64  `json:"user_id,string"`
 		RealName string `json:"real_name,optional"`
 		Avatar   string `json:"avatar,optional"`
 		Mobile   string `json:"mobile,optional"`
@@ -51,15 +51,15 @@ type (
 	}
 	// Create Admin User
 	CreateAdminUserRequest {
-		Username string  `json:"username"`
-		Email    string  `json:"email"`
-		Password string  `json:"password" validate:"min=6"`
-		Mobile   string  `json:"mobile,optional"`
-		RealName string  `json:"real_name,optional"`
-		Avatar   string  `json:"avatar,optional"`
-		Type     int     `json:"type"` // 1=平台超管 2=商家管理员 3=商家子账号
-		TenantID int64   `json:"tenant_id,optional"` // 平台超管可指定租户
-		RoleIDs  []int64 `json:"role_ids,optional"`
+		Username string   `json:"username"`
+		Email    string   `json:"email"`
+		Password string   `json:"password" validate:"min=6"`
+		Mobile   string   `json:"mobile,optional"`
+		RealName string   `json:"real_name,optional"`
+		Avatar   string   `json:"avatar,optional"`
+		Type     int      `json:"type"` // 1=平台超管 2=商家管理员 3=商家子账号
+		TenantID int64    `json:"tenant_id,optional,string"` // 平台超管可指定租户
+		RoleIDs  []string `json:"role_ids,optional"`
 	}
 	// Update Admin User
 	UpdateAdminUserRequest {
@@ -71,8 +71,8 @@ type (
 	}
 	// Assign Roles
 	AssignRolesRequest {
-		ID      int64   `path:"id"`
-		RoleIDs []int64 `json:"role_ids"`
+		ID      int64    `path:"id"`
+		RoleIDs []string `json:"role_ids"`
 	}
 	// Reset Password Response
 	ResetAdminPasswordResponse {
