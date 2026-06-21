@@ -71,15 +71,8 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 	return convertToProductDetailResp(productResp), nil
 }
 
-func parseDecimal(s string) decimal.Decimal {
-	if s == "" {
-		return decimal.Zero
-	}
-	d, err := decimal.NewFromString(s)
-	if err != nil {
-		return decimal.Zero
-	}
-	return d
+func parseDecimal(f float64) decimal.Decimal {
+	return decimal.NewFromFloat(f)
 }
 
 func convertToProductDetailResp(p *appProduct.ProductResponse) *types.ProductDetailResp {

@@ -587,11 +587,11 @@ type CreateProductReq struct {
 	IsMatrixProduct bool     `json:"is_matrix_product,optional"`
 	HSCode          string   `json:"hs_code,optional"`
 	COO             string   `json:"coo,optional"`
-	Weight          string   `json:"weight,optional"`
+	Weight          float64  `json:"weight,optional"`
 	WeightUnit      string   `json:"weight_unit,optional"`
-	Length          string   `json:"length,optional"`
-	Width           string   `json:"width,optional"`
-	Height          string   `json:"height,optional"`
+	Length          float64  `json:"length,optional"`
+	Width           float64  `json:"width,optional"`
+	Height          float64  `json:"height,optional"`
 	DangerousGoods  []string `json:"dangerous_goods,optional"`
 }
 
@@ -3037,11 +3037,11 @@ type UpdateProductReq struct {
 	IsMatrixProduct bool     `json:"is_matrix_product,optional"`
 	HSCode          string   `json:"hs_code,optional"`
 	COO             string   `json:"coo,optional"`
-	Weight          string   `json:"weight,optional"`
+	Weight          float64  `json:"weight,optional"`
 	WeightUnit      string   `json:"weight_unit,optional"`
-	Length          string   `json:"length,optional"`
-	Width           string   `json:"width,optional"`
-	Height          string   `json:"height,optional"`
+	Length          float64  `json:"length,optional"`
+	Width           float64  `json:"width,optional"`
+	Height          float64  `json:"height,optional"`
 	DangerousGoods  []string `json:"dangerous_goods,optional"`
 }
 

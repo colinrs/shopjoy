@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -42,6 +43,7 @@ func (categoryModel) TableName() string {
 
 func (m *categoryModel) toEntity() *product.Category {
 	return &product.Category{
+		Model:          application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
 		TenantID:       shared.TenantID(m.TenantID),
 		ParentID:       m.ParentID,
 		Name:           m.Name,

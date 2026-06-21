@@ -51,28 +51,45 @@ func (l *GetCategoryTreeLogic) GetCategoryTree(req *types.CategoryTreeReq) (resp
 }
 
 func buildCategoryTree(categories []*product.Category, parentID int64, productCountMap map[int64]int64) []*types.CategoryTreeResp {
+	return buildCategoryTreeRecursive(categories, parentID, productCountMap, make(map[int64]bool))
+}
+
+// buildCategoryTreeRecursive builds the category tree with a visited-set cycle
+// guard. In a well-formed tree each ID appears at most once, so a global
+// visited set is sufficient: if a node's ID has already been emitted anywhere
+// in the tree, encountering it again means the parent_id chain contains a
+// cycle (e.g. a row with parent_id == id, or A -> B -> A). Skipping it
+// terminates what would otherwise be infinite recursion.
+func buildCategoryTreeRecursive(categories []*product.Category, parentID int64, productCountMap map[int64]int64, visited map[int64]bool) []*types.CategoryTreeResp {
 	var result []*types.CategoryTreeResp
 	for _, c := range categories {
-		if c.ParentID == parentID {
-			node := &types.CategoryTreeResp{
-				ID:             c.ID,
-				ParentID:       c.ParentID,
-				Name:           c.Name,
-				Code:           c.Code,
-				Level:          c.Level,
-				Sort:           c.Sort,
-				Icon:           c.Icon,
-				Image:          c.Image,
-				SeoTitle:       c.SeoTitle,
-				SeoDescription: c.SeoDescription,
-				Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
-				ProductCount:   productCountMap[c.ID],
-				CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
-				UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),
-				Children:       buildCategoryTree(categories, c.ID, productCountMap),
-			}
-			result = append(result, node)
+		if c.ParentID != parentID {
+			continue
 		}
+		if visited[c.ID] {
+			// Cycle detected: this ID was already emitted. Skip to break the loop.
+			logx.Errorf("[buildCategoryTree] cycle detected: category id=%d references an ancestor (parent_id=%d); skipping to avoid infinite recursion", c.ID, c.ParentID)
+			continue
+		}
+		visited[c.ID] = true
+		node := &types.CategoryTreeResp{
+			ID:             c.ID,
+			ParentID:       c.ParentID,
+			Name:           c.Name,
+			Code:           c.Code,
+			Level:          c.Level,
+			Sort:           c.Sort,
+			Icon:           c.Icon,
+			Image:          c.Image,
+			SeoTitle:       c.SeoTitle,
+			SeoDescription: c.SeoDescription,
+			Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
+			ProductCount:   productCountMap[c.ID],
+			CreatedAt:      c.Audit.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:      c.Audit.UpdatedAt.Format(time.RFC3339),
+			Children:       buildCategoryTreeRecursive(categories, c.ID, productCountMap, visited),
+		}
+		result = append(result, node)
 	}
 	return result
 }

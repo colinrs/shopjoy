@@ -133,7 +133,11 @@ func ToDomainMoney(amount decimal.Decimal, currency string) product.Money {
 
 // ToDomainMoneyFromString 从字符串（单位：元）转换为领域层的 Money
 // 例如 "1.99" 表示 1.99 元
+// 空字符串视为 0（用于可选的成本价等字段）
 func ToDomainMoneyFromString(amountStr, currency string) (product.Money, error) {
+	if amountStr == "" {
+		return product.NewMoney(decimal.Zero, currency), nil
+	}
 	amount, err := decimal.NewFromString(amountStr)
 	if err != nil {
 		return product.Money{}, err

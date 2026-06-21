@@ -69,8 +69,9 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 		return nil, err
 	}
 
+	now := time.Now().UTC()
 	category := &product.Category{
-		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
+		Model:          application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
 		TenantID:       shared.TenantID(tenantID),
 		ParentID:       req.ParentID,
 		Name:           req.Name,
@@ -82,6 +83,10 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 		SeoTitle:       req.SeoTitle,
 		SeoDescription: req.SeoDescription,
 		Status:         product.CategoryStatusEnabled,
+		Audit: shared.AuditInfo{
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 	}
 
 	if err := l.svcCtx.CategoryRepo.Create(l.ctx, l.svcCtx.DB, category); err != nil {
