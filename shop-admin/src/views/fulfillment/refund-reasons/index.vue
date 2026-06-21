@@ -189,7 +189,7 @@ const loadReasons = async () => {
   loading.value = true
   try {
     const data = await getRefundReasonList()
-    reasons.value = data || []
+    reasons.value = data.list || []
   } catch (error) {
     handleError(error, t('refundReasons.loadFailed'))
   } finally {

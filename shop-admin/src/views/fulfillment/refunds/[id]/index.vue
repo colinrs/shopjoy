@@ -512,7 +512,7 @@ const loadRefund = async () => {
 const loadRefundReasons = async () => {
   try {
     const res = await getRefundReasonList()
-    refundReasons.value = res
+    refundReasons.value = res.list || []
   } catch (error) {
     ElMessage.error(t('fulfillment.loadRefundReasonsFailed'))
   }
