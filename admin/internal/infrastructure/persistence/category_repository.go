@@ -18,23 +18,23 @@ func NewCategoryRepository() product.CategoryRepository {
 }
 
 type categoryModel struct {
-	ID             int64  `gorm:"column:id;primaryKey"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;index"`
-	ParentID       int64  `gorm:"column:parent_id;default:0;index"`
-	Name           string `gorm:"column:name;type:varchar(100);not null"`
-	Code           string `gorm:"column:code;type:varchar(50)"`
-	Level          int    `gorm:"column:level;not null;default:1"`
-	Sort           int    `gorm:"column:sort;default:0"`
-	Icon           string `gorm:"column:icon;type:varchar(500)"`
-	Image          string `gorm:"column:image;type:varchar(500)"`
-	SeoTitle       string `gorm:"column:seo_title;type:varchar(200)"`
-	SeoDescription string `gorm:"column:seo_description;type:varchar(500)"`
-	Status         int8   `gorm:"column:status;not null;default:1"`
-	CreatedAt      int64  `gorm:"column:created_at;not null"`
-	UpdatedAt      int64  `gorm:"column:updated_at;not null"`
-	CreatedBy      int64  `gorm:"column:created_by"`
-	UpdatedBy      int64  `gorm:"column:updated_by"`
-	DeletedAt      *int64 `gorm:"column:deleted_at;index"`
+	ID             int64     `gorm:"column:id;primaryKey"`
+	TenantID       int64     `gorm:"column:tenant_id;not null;index"`
+	ParentID       int64     `gorm:"column:parent_id;default:0;index"`
+	Name           string    `gorm:"column:name;type:varchar(100);not null"`
+	Code           string    `gorm:"column:code;type:varchar(50)"`
+	Level          int       `gorm:"column:level;not null;default:1"`
+	Sort           int       `gorm:"column:sort;default:0"`
+	Icon           string    `gorm:"column:icon;type:varchar(500)"`
+	Image          string    `gorm:"column:image;type:varchar(500)"`
+	SeoTitle       string    `gorm:"column:seo_title;type:varchar(200)"`
+	SeoDescription string    `gorm:"column:seo_description;type:varchar(500)"`
+	Status         int8      `gorm:"column:status;not null;default:1"`
+	CreatedAt      time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt      time.Time `gorm:"column:updated_at;not null"`
+	CreatedBy      int64     `gorm:"column:created_by"`
+	UpdatedBy      int64     `gorm:"column:updated_by"`
+	DeletedAt      *int64    `gorm:"column:deleted_at;index"`
 }
 
 func (categoryModel) TableName() string {
@@ -43,7 +43,7 @@ func (categoryModel) TableName() string {
 
 func (m *categoryModel) toEntity() *product.Category {
 	return &product.Category{
-		Model:          application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model:          application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:       shared.TenantID(m.TenantID),
 		ParentID:       m.ParentID,
 		Name:           m.Name,
@@ -56,8 +56,8 @@ func (m *categoryModel) toEntity() *product.Category {
 		SeoDescription: m.SeoDescription,
 		Status:         product.CategoryStatus(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -78,8 +78,8 @@ func fromCategoryEntity(c *product.Category) *categoryModel {
 		SeoTitle:       c.SeoTitle,
 		SeoDescription: c.SeoDescription,
 		Status:         int8(c.Status), // #nosec G115 // status values are small (tinyint range)
-		CreatedAt:      c.Audit.CreatedAt.Unix(),
-		UpdatedAt:      c.Audit.UpdatedAt.Unix(),
+		CreatedAt:      c.Audit.CreatedAt,
+		UpdatedAt:      c.Audit.UpdatedAt,
 		CreatedBy:      c.Audit.CreatedBy,
 		UpdatedBy:      c.Audit.UpdatedBy,
 	}

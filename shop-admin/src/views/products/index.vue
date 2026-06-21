@@ -415,6 +415,17 @@
                   />
                 </el-form-item>
               </el-col>
+              <el-col :span="12">
+                <el-form-item
+                  :label="$t('products.sku')"
+                  prop="sku"
+                >
+                  <el-input
+                    v-model="productForm.sku"
+                    :placeholder="$t('products.enterSKU')"
+                  />
+                </el-form-item>
+              </el-col>
               <el-col :span="24">
                 <el-form-item :label="$t('products.productImage')">
                   <el-upload
@@ -996,7 +1007,8 @@ const formRules = {
   name: [{ required: true, message: '', trigger: 'blur' }],
   price: [{ required: true, message: '', trigger: 'blur' }],
   stock: [{ required: true, message: '', trigger: 'blur' }],
-  category_id: [{ required: true, message: '', trigger: 'change' }]
+  category_id: [{ required: true, message: '', trigger: 'change' }],
+  sku: [{ required: true, message: t('products.enterSKU'), trigger: 'blur' }]
 }
 
 const formatPrice = (price: string) => {
@@ -1092,7 +1104,7 @@ const handleCommand = async (cmd: string, row: Product) => {
           currency: row.currency || 'USD',
           cost_price: row.cost_price || '',
           category_id: row.category_id || 0,
-          sku: row.sku ? `${row.sku}-copy` : '',
+          sku: row.sku ? `${row.sku}-copy` : `${row.id}-copy`,
           brand: row.brand || '',
           tags: row.tags || [],
           images: row.images || [],

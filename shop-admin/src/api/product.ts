@@ -84,7 +84,7 @@ export interface CreateProductRequest {
   cost_price?: string
   category_id: number
   // New fields
-  sku?: string
+  sku: string
   brand?: string
   tags?: string[]
   images?: string[]

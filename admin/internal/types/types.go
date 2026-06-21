@@ -580,7 +580,7 @@ type CreateProductReq struct {
 	Currency        string   `json:"currency,optional"`
 	CostPrice       string   `json:"cost_price,optional"` // 成本价，单位：元
 	CategoryID      int64    `json:"category_id"`
-	SKU             string   `json:"sku,optional"`
+	SKU             string   `json:"sku" validate:"required"`
 	Brand           string   `json:"brand,optional"`
 	Tags            []string `json:"tags,optional"`
 	Images          []string `json:"images,optional"`
