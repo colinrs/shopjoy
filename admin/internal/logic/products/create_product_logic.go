@@ -51,6 +51,7 @@ func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *t
 		Currency:    req.Currency,
 		CostPrice:   costPrice.Amount,
 		CategoryID:  req.CategoryID,
+		Stock:       req.Stock,
 		SKU:         req.SKU,
 	}
 

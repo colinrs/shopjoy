@@ -110,6 +110,7 @@
           name="variants"
         >
           <ProductVariantsTab
+            ref="variantsTabRef"
             :product-id="productId"
             :default-price="productForm.price"
             :default-currency="productForm.currency"
@@ -151,10 +152,12 @@
           name="inventory"
         >
           <ProductInventoryTab
+            ref="inventoryTabRef"
             :product-id="productId"
             :sku="productForm.sku"
             :loading="inventoryLoading"
             @inventory-change="handleShowAdjustStockDialog"
+            @go-to-variants="handleGoToVariants"
           />
         </el-tab-pane>
 
@@ -207,7 +210,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Check, Hide, View } from '@element-plus/icons-vue'
@@ -275,6 +278,8 @@ const reviewsLoading = ref(false)
 const variantsLoading = ref(false)
 const variantDialogVisible = ref(false)
 const isEditVariant = ref(false)
+const variantsTabRef = ref()
+const inventoryTabRef = ref()
 const variantForm = reactive<VariantFormData>({
   id: '',
   code: '',
@@ -510,6 +515,11 @@ const handleShowAdjustStockDialog = () => {
   adjustStockDialogVisible.value = true
 }
 
+// Switch to Variants tab (triggered from Inventory tab when no SKU)
+const handleGoToVariants = () => {
+  activeTab.value = 'variants'
+}
+
 // Handle adjust stock success
 const handleAdjustStockSuccess = () => {
   loadProduct()
@@ -539,9 +549,12 @@ const handleShowVariantDialog = () => {
   variantDialogVisible.value = true
 }
 
-// Handle variant success
-const handleVariantSuccess = () => {
-  loadProductMarkets()
+// Handle variant success — refresh product (updates productForm.sku), variants list, and inventory
+const handleVariantSuccess = async () => {
+  await loadProduct()
+  variantsTabRef.value?.loadVariants()
+  await nextTick()
+  inventoryTabRef.value?.loadInventoryData()
 }
 
 // Initialize

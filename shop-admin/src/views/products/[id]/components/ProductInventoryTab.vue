@@ -3,166 +3,191 @@
     v-loading="inventoryLoading"
     class="inventory-section"
   >
-    <!-- Inventory Overview -->
-    <div class="inventory-overview">
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <el-statistic
-            :title="$t('products.totalStock')"
-            :value="skuInventory?.total_stock || 0"
-          />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            :title="$t('products.availableStock')"
-            :value="skuInventory?.available_stock || 0"
-          />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            :title="$t('products.lockedStock')"
-            :value="skuInventory?.locked_stock || 0"
-          />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            :title="$t('products.safetyStock')"
-            :value="skuInventory?.safety_stock || 0"
-          />
-        </el-col>
-      </el-row>
-    </div>
-
-    <!-- Warehouse Inventory -->
-    <div class="warehouse-inventory">
-      <div class="section-header">
-        <h3 class="section-title">
-          {{ $t('products.warehouseInventory') }}
-        </h3>
+    <!-- Guided empty state when no SKU exists -->
+    <div
+      v-if="!props.sku"
+      class="guided-empty"
+    >
+      <el-empty
+        :description="$t('products.noSkuTitle')"
+        :image-size="120"
+      >
+        <p class="guided-empty-hint">
+          {{ $t('products.noSkuHint') }}
+        </p>
         <el-button
           type="primary"
-          size="small"
-          @click="handleShowAdjustStockDialog"
+          size="large"
+          @click="handleGoToVariants"
         >
-          <el-icon><Edit /></el-icon>
-          {{ $t('products.adjustStock') }}
+          {{ $t('products.goToVariants') }}
         </el-button>
-      </div>
-      <el-table
-        :data="skuInventory?.warehouses || []"
-        stripe
-      >
-        <el-table-column
-          :label="$t('products.warehouse')"
-          min-width="150"
-        >
-          <template #default="{ row }">
-            <span>{{ row.warehouse_name || `${$t('products.warehouse')} ${row.warehouse_id}` }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('products.availableStock')"
-          prop="available_stock"
-          width="120"
-          align="center"
-        />
-        <el-table-column
-          :label="$t('products.lockedStock')"
-          prop="locked_stock"
-          width="120"
-          align="center"
-        />
-        <el-table-column
-          :label="$t('products.totalStock')"
-          width="120"
-          align="center"
-        >
-          <template #default="{ row }">
-            {{ row.available_stock + row.locked_stock }}
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-empty
-        v-if="!skuInventory?.warehouses?.length"
-        :description="$t('products.noWarehouseInventory')"
-      />
+      </el-empty>
     </div>
 
-    <!-- Inventory Logs -->
-    <div class="inventory-logs">
-      <h3 class="section-title">
-        {{ $t('products.inventoryChangeLog') }}
-      </h3>
-      <el-table
-        :data="inventoryLogs"
-        stripe
-      >
-        <el-table-column
-          :label="$t('products.time')"
-          width="180"
+    <!-- Inventory content (only when SKU exists) -->
+    <template v-else>
+      <!-- Inventory Overview -->
+      <div class="inventory-overview">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-statistic
+              :title="$t('products.totalStock')"
+              :value="skuInventory?.total_stock || 0"
+            />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic
+              :title="$t('products.availableStock')"
+              :value="skuInventory?.available_stock || 0"
+            />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic
+              :title="$t('products.lockedStock')"
+              :value="skuInventory?.locked_stock || 0"
+            />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic
+              :title="$t('products.safetyStock')"
+              :value="skuInventory?.safety_stock || 0"
+            />
+          </el-col>
+        </el-row>
+      </div>
+
+      <!-- Warehouse Inventory -->
+      <div class="warehouse-inventory">
+        <div class="section-header">
+          <h3 class="section-title">
+            {{ $t('products.warehouseInventory') }}
+          </h3>
+          <el-button
+            type="primary"
+            size="small"
+            @click="handleShowAdjustStockDialog"
+          >
+            <el-icon><Edit /></el-icon>
+            {{ $t('products.adjustStock') }}
+          </el-button>
+        </div>
+        <el-table
+          :data="skuInventory?.warehouses || []"
+          stripe
         >
-          <template #default="{ row }">
-            {{ row.created_at }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('products.type')"
-          width="100"
+          <el-table-column
+            :label="$t('products.warehouse')"
+            min-width="150"
+          >
+            <template #default="{ row }">
+              <span>{{ row.warehouse_name || `${$t('products.warehouse')} ${row.warehouse_id}` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('products.availableStock')"
+            prop="available_stock"
+            width="120"
+            align="center"
+          />
+          <el-table-column
+            :label="$t('products.lockedStock')"
+            prop="locked_stock"
+            width="120"
+            align="center"
+          />
+          <el-table-column
+            :label="$t('products.totalStock')"
+            width="120"
+            align="center"
+          >
+            <template #default="{ row }">
+              {{ row.available_stock + row.locked_stock }}
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty
+          v-if="!skuInventory?.warehouses?.length"
+          :description="$t('products.noWarehouseInventory')"
+        />
+      </div>
+
+      <!-- Inventory Logs -->
+      <div class="inventory-logs">
+        <h3 class="section-title">
+          {{ $t('products.inventoryChangeLog') }}
+        </h3>
+        <el-table
+          :data="inventoryLogs"
+          stripe
         >
-          <template #default="{ row }">
-            <el-tag
-              :type="getLogTypeStyle(row.change_type)"
-              size="small"
-            >
-              {{ getLogTypeText(row.change_type) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('products.changeQuantity')"
-          width="120"
-          align="right"
-        >
-          <template #default="{ row }">
-            <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
-              {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('products.beforeChange')"
-          prop="before_stock"
-          width="100"
-          align="center"
+          <el-table-column
+            :label="$t('products.time')"
+            width="180"
+          >
+            <template #default="{ row }">
+              {{ row.created_at }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('products.type')"
+            width="100"
+          >
+            <template #default="{ row }">
+              <el-tag
+                :type="getLogTypeStyle(row.change_type)"
+                size="small"
+              >
+                {{ getLogTypeText(row.change_type) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('products.changeQuantity')"
+            width="120"
+            align="right"
+          >
+            <template #default="{ row }">
+              <span :class="row.change_quantity >= 0 ? 'text-success' : 'text-danger'">
+                {{ row.change_quantity >= 0 ? '+' : '' }}{{ row.change_quantity }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('products.beforeChange')"
+            prop="before_stock"
+            width="100"
+            align="center"
+          />
+          <el-table-column
+            :label="$t('products.afterChange')"
+            prop="after_stock"
+            width="100"
+            align="center"
+          />
+          <el-table-column
+            :label="$t('products.remark')"
+            prop="remark"
+            min-width="150"
+          />
+        </el-table>
+        <el-pagination
+          v-if="inventoryLogsTotal > 0"
+          class="pagination"
+          background
+          layout="total, prev, pager, next"
+          :total="inventoryLogsTotal"
+          :page-size="inventoryLogsPageSize"
+          :current-page="inventoryLogsPage"
+          @current-change="handleInventoryLogsPageChange"
         />
-        <el-table-column
-          :label="$t('products.afterChange')"
-          prop="after_stock"
-          width="100"
-          align="center"
-        />
-        <el-table-column
-          :label="$t('products.remark')"
-          prop="remark"
-          min-width="150"
-        />
-      </el-table>
-      <el-pagination
-        v-if="inventoryLogsTotal > 0"
-        class="pagination"
-        background
-        layout="total, prev, pager, next"
-        :total="inventoryLogsTotal"
-        :page-size="inventoryLogsPageSize"
-        :current-page="inventoryLogsPage"
-        @current-change="handleInventoryLogsPageChange"
-      />
-    </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import { getSKUInventory, getInventoryLogs, type SKUInventory, type InventoryLog } from '@/api/inventory'
 import { t } from '@/plugins/i18n'
@@ -213,6 +238,10 @@ const handleShowAdjustStockDialog = () => {
   emit('inventory-change')
 }
 
+const handleGoToVariants = () => {
+  emit('go-to-variants')
+}
+
 const getLogTypeStyle = (type: string) => {
   const styles: Record<string, string> = {
     manual: 'primary',
@@ -237,6 +266,13 @@ onMounted(() => {
   loadInventoryData()
 })
 
+// Auto-reload when sku changes (e.g. after first SKU is created)
+watch(() => props.sku, (newSku, oldSku) => {
+  if (newSku && newSku !== oldSku) {
+    loadInventoryData()
+  }
+})
+
 defineExpose({
   loadInventoryData,
   getSkuInventory: () => skuInventory.value
@@ -246,6 +282,20 @@ defineExpose({
 <style scoped>
 .inventory-section {
   padding: 0;
+}
+
+.guided-empty {
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.guided-empty-hint {
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  max-width: 420px;
 }
 
 .inventory-overview {

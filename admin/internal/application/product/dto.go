@@ -15,6 +15,7 @@ type CreateProductRequest struct {
 	Currency    string
 	CostPrice   decimal.Decimal
 	CategoryID  int64
+	Stock       int
 	SKU         string
 }
 

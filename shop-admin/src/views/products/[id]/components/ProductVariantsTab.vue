@@ -3,145 +3,160 @@
     v-loading="loading"
     class="variants-section"
   >
-    <div class="section-header">
-      <h3 class="section-title">
-        {{ $t('products.productVariants') }}
-      </h3>
-      <el-button
-        type="primary"
-        size="small"
-        @click="handleShowAddVariantDialog"
-      >
-        <el-icon><Plus /></el-icon>
-        {{ $t('products.addVariant') }}
-      </el-button>
-    </div>
-    <el-table
-      :data="variants"
-      stripe
+    <!-- Guided empty state when no variants -->
+    <div
+      v-if="variants.length === 0 && !loading"
+      class="guided-empty"
     >
-      <el-table-column
-        :label="$t('products.skuCode')"
-        prop="code"
-        min-width="150"
-      />
-      <el-table-column
-        :label="$t('products.attributes')"
-        min-width="200"
+      <el-empty
+        :description="$t('products.noVariants')"
+        :image-size="120"
       >
-        <template #default="{ row }">
-          <div class="attribute-tags">
+        <p class="guided-empty-hint">
+          {{ $t('products.noVariantsHint') }}
+        </p>
+        <el-button
+          type="primary"
+          size="large"
+          @click="handleShowAddVariantDialog"
+        >
+          <el-icon><Plus /></el-icon>
+          {{ $t('products.createFirstVariant') }}
+        </el-button>
+      </el-empty>
+    </div>
+
+    <!-- Variants table (only when there are variants) -->
+    <template v-else>
+      <div class="section-header">
+        <h3 class="section-title">
+          {{ $t('products.productVariants') }}
+        </h3>
+        <el-button
+          type="primary"
+          size="small"
+          @click="handleShowAddVariantDialog"
+        >
+          <el-icon><Plus /></el-icon>
+          {{ $t('products.addVariant') }}
+        </el-button>
+      </div>
+      <el-table
+        :data="variants"
+        stripe
+      >
+        <el-table-column
+          :label="$t('products.skuCode')"
+          prop="code"
+          min-width="150"
+        />
+        <el-table-column
+          :label="$t('products.attributes')"
+          min-width="200"
+        >
+          <template #default="{ row }">
+            <div class="attribute-tags">
+              <el-tag
+                v-for="(value, key) in row.attributes"
+                :key="key"
+                size="small"
+                class="attribute-tag"
+              >
+                {{ key }}: {{ value }}
+              </el-tag>
+              <span
+                v-if="Object.keys(row.attributes || {}).length === 0"
+                class="text-muted"
+              >-</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('products.price')"
+          width="120"
+          align="right"
+        >
+          <template #default="{ row }">
+            {{ row.currency }} {{ row.price }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('products.stock')"
+          prop="stock"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.availableStock')"
+          prop="available_stock"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('products.safetyStock')"
+          prop="safety_stock"
+          width="100"
+          align="center"
+        />
+        <el-table-column
+          :label="$t('common.status')"
+          width="100"
+          align="center"
+        >
+          <template #default="{ row }">
             <el-tag
-              v-for="(value, key) in row.attributes"
-              :key="key"
+              :type="row.status === 'enabled' ? 'success' : 'info'"
               size="small"
-              class="attribute-tag"
             >
-              {{ key }}: {{ value }}
+              {{ row.status === 'enabled' ? $t('common.enabled') : $t('common.disabled') }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('products.stockAlert')"
+          width="100"
+          align="center"
+        >
+          <template #default="{ row }">
+            <el-tag
+              v-if="row.is_low_stock"
+              type="danger"
+              size="small"
+            >
+              {{ $t('products.lowStock') }}
             </el-tag>
             <span
-              v-if="Object.keys(row.attributes || {}).length === 0"
+              v-else
               class="text-muted"
             >-</span>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('products.price')"
-        width="120"
-        align="right"
-      >
-        <template #default="{ row }">
-          {{ row.currency }} {{ row.price }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('products.stock')"
-        prop="stock"
-        width="100"
-        align="center"
-      />
-      <el-table-column
-        :label="$t('products.availableStock')"
-        prop="available_stock"
-        width="100"
-        align="center"
-      />
-      <el-table-column
-        :label="$t('products.safetyStock')"
-        prop="safety_stock"
-        width="100"
-        align="center"
-      />
-      <el-table-column
-        :label="$t('common.status')"
-        width="100"
-        align="center"
-      >
-        <template #default="{ row }">
-          <el-tag
-            :type="row.status === 'enabled' ? 'success' : 'info'"
-            size="small"
-          >
-            {{ row.status === 'enabled' ? $t('common.enabled') : $t('common.disabled') }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('products.stockAlert')"
-        width="100"
-        align="center"
-      >
-        <template #default="{ row }">
-          <el-tag
-            v-if="row.is_low_stock"
-            type="danger"
-            size="small"
-          >
-            {{ $t('products.lowStock') }}
-          </el-tag>
-          <span
-            v-else
-            class="text-muted"
-          >-</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="$t('common.actions')"
-        width="120"
-        align="center"
-      >
-        <template #default="{ row }">
-          <el-button
-            type="primary"
-            link
-            size="small"
-            @click="handleEditVariant(row)"
-          >
-            {{ $t('common.edit') }}
-          </el-button>
-          <el-button
-            type="danger"
-            link
-            size="small"
-            @click="handleDeleteVariant(row)"
-          >
-            {{ $t('common.delete') }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-empty
-      v-if="variants.length === 0 && !loading"
-      :description="$t('products.noVariants')"
-    >
-      <el-button
-        type="primary"
-        @click="handleShowAddVariantDialog"
-      >
-        {{ $t('products.addVariant') }}
-      </el-button>
-    </el-empty>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('common.actions')"
+          width="120"
+          align="center"
+        >
+          <template #default="{ row }">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="handleEditVariant(row)"
+            >
+              {{ $t('common.edit') }}
+            </el-button>
+            <el-button
+              type="danger"
+              link
+              size="small"
+              @click="handleDeleteVariant(row)"
+            >
+              {{ $t('common.delete') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </template>
   </div>
 </template>
 
@@ -217,6 +232,20 @@ defineExpose({
 <style scoped>
 .variants-section {
   padding: 0;
+}
+
+.guided-empty {
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.guided-empty-hint {
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  max-width: 420px;
 }
 
 .section-header {

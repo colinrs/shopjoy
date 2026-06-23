@@ -43,10 +43,9 @@
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.categoryId')">
-            <el-input-number
+            <el-input
               v-model="localForm.category_id"
-              :min="0"
-              style="width: 100%"
+              :placeholder="$t('products.categoryId')"
             />
           </el-form-item>
         </el-col>
@@ -66,10 +65,11 @@
             prop="price"
           >
             <el-input-number
-              v-model="localForm.price"
+              :model-value="localForm.price === '' ? 0 : Number(localForm.price)"
               :min="0"
               :precision="2"
               style="width: 100%"
+              @update:model-value="localForm.price = String($event)"
             />
           </el-form-item>
         </el-col>
@@ -101,10 +101,11 @@
         <el-col :span="12">
           <el-form-item :label="$t('products.costPrice')">
             <el-input-number
-              v-model="localForm.cost_price"
+              :model-value="localForm.cost_price === '' ? 0 : Number(localForm.cost_price)"
               :min="0"
               :precision="2"
               style="width: 100%"
+              @update:model-value="localForm.cost_price = String($event)"
             />
           </el-form-item>
         </el-col>

@@ -147,6 +147,7 @@ export interface ProductInventoryTabProps {
 
 export interface ProductInventoryTabEmits {
   (e: 'inventory-change'): void
+  (e: 'go-to-variants'): void
 }
 
 // Product Reviews Tab

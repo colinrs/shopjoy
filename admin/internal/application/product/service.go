@@ -49,6 +49,7 @@ func (s *service) CreateProduct(ctx context.Context, tenantID shared.TenantID, r
 	}
 	p.ID = id
 	p.SKU = req.SKU
+	p.Stock = req.Stock
 
 	p.CostPrice = ToDomainMoney(req.CostPrice, req.Currency)
 

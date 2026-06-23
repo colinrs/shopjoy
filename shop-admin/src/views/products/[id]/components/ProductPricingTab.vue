@@ -130,10 +130,6 @@ const pricingData = ref<PricingRowData[]>([])
 const pricingSaveLoading = ref(false)
 const loading = ref(false)
 
-watch(() => props.productMarkets, (newVal) => {
-  preparePricingData(newVal)
-}, { immediate: true })
-
 const preparePricingData = (markets: ProductMarket[]) => {
   pricingData.value = markets.map(pm => ({
     ...pm,
@@ -141,6 +137,10 @@ const preparePricingData = (markets: ProductMarket[]) => {
     compare_at_price_value: parseFloat(pm.compare_at_price) || 0
   }))
 }
+
+watch(() => props.productMarkets, (newVal) => {
+  preparePricingData(newVal)
+}, { immediate: true })
 
 const handleSavePricing = async () => {
   pricingSaveLoading.value = true

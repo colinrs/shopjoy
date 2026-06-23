@@ -83,6 +83,7 @@ export interface CreateProductRequest {
   currency?: string
   cost_price?: string
   category_id: string
+  stock: number
   // New fields
   sku: string
   brand?: string
