@@ -1,15 +1,4 @@
 {
-  "enabledPlugins": {
-    "context7@claude-plugins-official": true
-  },
-  "permissions": {
-    "allow": [
-      "Bash(*)"
-    ],
-    "deny": [
-      "Bash(*rm*)"
-    ]
-  },
   "hooks": {
     "PostToolUse": [
       {

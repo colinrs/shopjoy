@@ -60,3 +60,5 @@ __debug_*
 
 .codegraph
 .understand-anything
+# Added by code-review-graph
+.code-review-graph/
