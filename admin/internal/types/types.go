@@ -286,8 +286,9 @@ type BrandDetailResp struct {
 }
 
 type BrandMarketItemResp struct {
-	MarketID  int64 `json:"market_id,string"`
-	IsVisible bool  `json:"is_visible"`
+	MarketID   int64  `json:"market_id,string"`
+	MarketName string `json:"market_name"`
+	IsVisible  bool   `json:"is_visible"`
 }
 
 type BrandMarketVisibilityResp struct {

@@ -8,7 +8,7 @@ export interface Brand {
   website: string
   trademark_number: string
   trademark_country: string
-  enable_page: number // 0=disabled, 1=enabled
+  enable_page: boolean
   sort: number
   status: number
   product_count: number
@@ -123,7 +123,7 @@ export function getBrandProductCount(id: string) {
 // Brand market visibility
 export interface BrandMarketVisibility {
   brand_id: string
-  markets: { market_id: string; is_visible: boolean }[]
+  markets: { market_id: string; market_name: string; is_visible: boolean }[]
 }
 
 export function getBrandMarketVisibility(id: string) {

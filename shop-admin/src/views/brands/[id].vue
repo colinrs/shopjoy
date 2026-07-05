@@ -104,8 +104,6 @@
             <el-descriptions-item :label="$t('brands.brandPage')">
               <el-switch
                 v-model="brand.enable_page"
-                :active-value="1"
-                :inactive-value="0"
                 @change="handleTogglePage"
               />
             </el-descriptions-item>
@@ -145,7 +143,7 @@
               :type="m.is_visible ? 'success' : 'info'"
               class="market-tag"
             >
-              {{ getMarketName(m.market_id) }}
+              {{ m.market_name }}
             </el-tag>
           </div>
           <el-empty
@@ -329,7 +327,8 @@ import {
   toggleBrandPage,
   getBrandMarketVisibility,
   setBrandMarketVisibility,
-  type Brand
+  type Brand,
+  type BrandMarketVisibility
 } from '@/api/brand'
 import { getMarkets, type Market } from '@/api/market'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -349,7 +348,7 @@ const formRef = ref()
 const brand = ref<Brand | null>(null)
 const editDialogVisible = ref(false)
 const showMarketDialog = ref(false)
-const marketVisibility = ref<{ market_id: string; is_visible: boolean }[]>([])
+const marketVisibility = ref<BrandMarketVisibility['markets']>([])
 const availableMarkets = ref<(Market & { selected: boolean })[]>([])
 
 const brandForm = reactive({
@@ -411,11 +410,6 @@ const loadMarkets = async () => {
   }
 }
 
-const getMarketName = (marketId: string) => {
-  const market = availableMarkets.value.find(m => m.id === marketId)
-  return market?.name || `Market ${marketId}`
-}
-
 const handleEdit = () => {
   if (!brand.value) return
   Object.assign(brandForm, {
@@ -426,7 +420,7 @@ const handleEdit = () => {
     website: brand.value.website || '',
     trademark_number: brand.value.trademark_number || '',
     trademark_country: brand.value.trademark_country || '',
-    enable_page: brand.value.enable_page === 1,
+    enable_page: brand.value.enable_page,
     sort: brand.value.sort || 0
   })
   editDialogVisible.value = true
@@ -465,12 +459,12 @@ const handleSave = async () => {
 const handleTogglePage = async () => {
   if (!brand.value) return
   try {
-    await toggleBrandPage(brand.value.id, brand.value.enable_page === 1)
-    ElMessage.success(brand.value.enable_page === 1 ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
+    await toggleBrandPage(brand.value.id, brand.value.enable_page)
+    ElMessage.success(brand.value.enable_page ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
   } catch (error) {
     handleError(error, t('brands.operationFailed'))
     // Revert the change
-    brand.value.enable_page = brand.value.enable_page === 1 ? 0 : 1
+    brand.value.enable_page = !brand.value.enable_page
   }
 }
 

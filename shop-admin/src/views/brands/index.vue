@@ -432,7 +432,7 @@ const handleTogglePage = async (row: Brand, enabled: boolean) => {
     ElMessage.success(enabled ? t('brands.enabledPageSuccess') : t('brands.disabledPageSuccess'))
   } catch (error) {
     handleError(error, t('brands.operationFailed'))
-    row.enable_page = enabled ? 0 : 1
+    row.enable_page = !enabled
   }
 }
 

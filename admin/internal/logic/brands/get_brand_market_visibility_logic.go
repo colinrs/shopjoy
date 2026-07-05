@@ -48,11 +48,33 @@ func (l *GetBrandMarketVisibilityLogic) GetBrandMarketVisibility(req *types.GetB
 	}
 
 	marketItems := make([]types.BrandMarketItemResp, 0, len(markets))
-	for _, m := range markets {
-		marketItems = append(marketItems, types.BrandMarketItemResp{
-			MarketID:  m.MarketID,
-			IsVisible: m.IsVisible,
-		})
+	if len(markets) > 0 {
+		marketIDs := make([]int64, 0, len(markets))
+		for _, m := range markets {
+			marketIDs = append(marketIDs, m.MarketID)
+		}
+
+		marketEntities, err := l.svcCtx.MarketRepo.FindByIDs(l.ctx, l.svcCtx.DB, marketIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		marketNameMap := make(map[int64]string, len(marketEntities))
+		for _, market := range marketEntities {
+			marketNameMap[market.ID] = market.Name
+		}
+
+		for _, m := range markets {
+			name, ok := marketNameMap[m.MarketID]
+			if !ok || name == "" {
+				name = "Unknown"
+			}
+			marketItems = append(marketItems, types.BrandMarketItemResp{
+				MarketID:   m.MarketID,
+				MarketName: name,
+				IsVisible:  m.IsVisible,
+			})
+		}
 	}
 
 	return &types.BrandMarketVisibilityResp{
