@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `skus` (
     `available_stock` INT NOT NULL DEFAULT 0 COMMENT '可用库存',
     `locked_stock` INT NOT NULL DEFAULT 0 COMMENT '锁定库存',
     `safety_stock` INT NOT NULL DEFAULT 0 COMMENT '安全库存阈值',
-    `presale_enabled` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启预售',
+    `pre_sale_enabled` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启预售',
     `attributes` JSON COMMENT '属性',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

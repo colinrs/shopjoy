@@ -17,14 +17,14 @@ func NewProductLocalizationRepository() product.ProductLocalizationRepository {
 }
 
 type productLocalizationModel struct {
-	ID           int64  `gorm:"column:id;primaryKey"`
-	TenantID     int64  `gorm:"column:tenant_id;not null;index"`
-	ProductID    int64  `gorm:"column:product_id;not null;index"`
-	LanguageCode string `gorm:"column:language_code;not null;size:10"`
-	Name         string `gorm:"column:name;not null;size:255"`
-	Description  string `gorm:"column:description;type:text"`
-	CreatedAt    int64  `gorm:"column:created_at;not null"`
-	UpdatedAt    int64  `gorm:"column:updated_at;not null"`
+	ID           int64     `gorm:"column:id;primaryKey"`
+	TenantID     int64     `gorm:"column:tenant_id;not null;index"`
+	ProductID    int64     `gorm:"column:product_id;not null;index"`
+	LanguageCode string    `gorm:"column:language_code;not null;size:10"`
+	Name         string    `gorm:"column:name;not null;size:255"`
+	Description  string    `gorm:"column:description;type:text"`
+	CreatedAt    time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt    time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (productLocalizationModel) TableName() string {
@@ -33,7 +33,11 @@ func (productLocalizationModel) TableName() string {
 
 func (m *productLocalizationModel) toEntity() *product.ProductLocalization {
 	return &product.ProductLocalization{
-		Model:        application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
+		},
 		TenantID:     shared.TenantID(m.TenantID),
 		ProductID:    m.ProductID,
 		LanguageCode: m.LanguageCode,
@@ -50,8 +54,8 @@ func fromProductLocalizationEntity(pl *product.ProductLocalization) *productLoca
 		LanguageCode: pl.LanguageCode,
 		Name:         pl.Name,
 		Description:  pl.Description,
-		CreatedAt:    pl.Model.CreatedAt.Unix(),
-		UpdatedAt:    pl.Model.UpdatedAt.Unix(),
+		CreatedAt:    pl.Model.CreatedAt,
+		UpdatedAt:    pl.Model.UpdatedAt,
 	}
 }
 

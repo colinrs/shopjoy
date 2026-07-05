@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
@@ -17,22 +18,22 @@ func NewBrandRepository() product.BrandRepository {
 }
 
 type brandModel struct {
-	ID               int64  `gorm:"column:id;primaryKey"`
-	TenantID         int64  `gorm:"column:tenant_id;not null;index"`
-	Name             string `gorm:"column:name;type:varchar(100);not null"`
-	Logo             string `gorm:"column:logo;type:varchar(500)"`
-	Description      string `gorm:"column:description;type:text"`
-	Website          string `gorm:"column:website;type:varchar(500)"`
-	Sort             int    `gorm:"column:sort;default:0"`
-	EnablePage       bool   `gorm:"column:enable_page;default:false"`
-	TrademarkNumber  string `gorm:"column:trademark_number;type:varchar(100)"`
-	TrademarkCountry string `gorm:"column:trademark_country;type:varchar(10)"`
-	Status           int8   `gorm:"column:status;not null;default:1"`
-	CreatedAt        int64  `gorm:"column:created_at;not null"`
-	UpdatedAt        int64  `gorm:"column:updated_at;not null"`
-	CreatedBy        int64  `gorm:"column:created_by"`
-	UpdatedBy        int64  `gorm:"column:updated_by"`
-	DeletedAt        *int64 `gorm:"column:deleted_at;index"`
+	ID               int64      `gorm:"column:id;primaryKey"`
+	TenantID         int64      `gorm:"column:tenant_id;not null;index"`
+	Name             string     `gorm:"column:name;type:varchar(100);not null"`
+	Logo             string     `gorm:"column:logo;type:varchar(500)"`
+	Description      string     `gorm:"column:description;type:text"`
+	Website          string     `gorm:"column:website;type:varchar(500)"`
+	Sort             int        `gorm:"column:sort;default:0"`
+	EnablePage       bool       `gorm:"column:enable_page;default:false"`
+	TrademarkNumber  string     `gorm:"column:trademark_number;type:varchar(100)"`
+	TrademarkCountry string     `gorm:"column:trademark_country;type:varchar(10)"`
+	Status           int8       `gorm:"column:status;not null;default:1"`
+	CreatedAt        time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time  `gorm:"column:updated_at;not null"`
+	CreatedBy        int64      `gorm:"column:created_by"`
+	UpdatedBy        int64      `gorm:"column:updated_by"`
+	DeletedAt        *time.Time `gorm:"column:deleted_at;index"`
 }
 
 func (brandModel) TableName() string {
@@ -41,6 +42,11 @@ func (brandModel) TableName() string {
 
 func (m *brandModel) toEntity() *product.Brand {
 	return &product.Brand{
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
+		},
 		TenantID:         shared.TenantID(m.TenantID),
 		Name:             m.Name,
 		Logo:             m.Logo,
@@ -52,8 +58,8 @@ func (m *brandModel) toEntity() *product.Brand {
 		TrademarkCountry: m.TrademarkCountry,
 		Status:           shared.Status(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -73,8 +79,8 @@ func fromBrandEntity(b *product.Brand) *brandModel {
 		TrademarkNumber:  b.TrademarkNumber,
 		TrademarkCountry: b.TrademarkCountry,
 		Status:           int8(b.Status), // #nosec G115 // status values are small (tinyint range)
-		CreatedAt:        b.Audit.CreatedAt.Unix(),
-		UpdatedAt:        b.Audit.UpdatedAt.Unix(),
+		CreatedAt:        b.Audit.CreatedAt,
+		UpdatedAt:        b.Audit.UpdatedAt,
 		CreatedBy:        b.Audit.CreatedBy,
 		UpdatedBy:        b.Audit.UpdatedBy,
 	}

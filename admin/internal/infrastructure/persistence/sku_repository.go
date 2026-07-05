@@ -27,8 +27,8 @@ type skuModel struct {
 	PreSaleEnabled bool            `gorm:"column:pre_sale_enabled;not null;default:false"`
 	Attributes     string          `gorm:"column:attributes;type:text"`
 	Status         int             `gorm:"column:status;not null;default:1"`
-	CreatedAt      int64           `gorm:"column:created_at;not null"`
-	UpdatedAt      int64           `gorm:"column:updated_at;not null"`
+	CreatedAt      time.Time       `gorm:"column:created_at;not null"`
+	UpdatedAt      time.Time       `gorm:"column:updated_at;not null"`
 }
 
 func (m *skuModel) TableName() string {
@@ -54,8 +54,8 @@ func (m *skuModel) toEntity() *product.SKU {
 		Attributes:     attributes,
 		Status:         shared.Status(m.Status),
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
@@ -77,8 +77,8 @@ func fromSKUEntity(sku *product.SKU) *skuModel {
 		PreSaleEnabled: sku.PreSaleEnabled,
 		Attributes:     string(attributesJSON),
 		Status:         int(sku.Status),
-		CreatedAt:      sku.Audit.CreatedAt.Unix(),
-		UpdatedAt:      sku.Audit.UpdatedAt.Unix(),
+		CreatedAt:      sku.Audit.CreatedAt,
+		UpdatedAt:      sku.Audit.UpdatedAt,
 	}
 }
 

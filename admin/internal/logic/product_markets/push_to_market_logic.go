@@ -37,14 +37,13 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 	db := l.svcCtx.DB
 
 	// Get tenant ID from context
-	tid, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tid == 0 {
-		return nil, code.ErrTenantNotFound
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok {
+		return nil, code.ErrUnauthorized
 	}
-
 	// Validate product exists
 	productRepo := persistence.NewProductRepository()
-	if _, err := productRepo.FindByID(l.ctx, db, shared.TenantID(tid), req.ProductID); err != nil {
+	if _, err := productRepo.FindByID(l.ctx, db, shared.TenantID(tenantID), req.ProductID); err != nil {
 		return nil, err
 	}
 
@@ -85,7 +84,7 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 
 		// Create ProductMarket
 		pm := &product.ProductMarket{
-			TenantID:  tid,
+			TenantID:  tenantID,
 			ProductID: req.ProductID,
 			MarketID:  marketID,
 			Price:     price,

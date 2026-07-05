@@ -17,13 +17,13 @@ func NewBrandMarketRepository() product.BrandMarketRepository {
 }
 
 type brandMarketModel struct {
-	ID        int64 `gorm:"column:id;primaryKey"`
-	TenantID  int64 `gorm:"column:tenant_id;not null;index"`
-	BrandID   int64 `gorm:"column:brand_id;not null;index"`
-	MarketID  int64 `gorm:"column:market_id;not null;index"`
-	IsVisible bool  `gorm:"column:is_visible;not null;default:true"`
-	CreatedAt int64 `gorm:"column:created_at;not null"`
-	UpdatedAt int64 `gorm:"column:updated_at;not null"`
+	ID        int64     `gorm:"column:id;primaryKey"`
+	TenantID  int64     `gorm:"column:tenant_id;not null;index"`
+	BrandID   int64     `gorm:"column:brand_id;not null;index"`
+	MarketID  int64     `gorm:"column:market_id;not null;index"`
+	IsVisible bool      `gorm:"column:is_visible;not null;default:true"`
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (brandMarketModel) TableName() string {
@@ -32,7 +32,7 @@ func (brandMarketModel) TableName() string {
 
 func (m *brandMarketModel) toEntity() *product.BrandMarket {
 	return &product.BrandMarket{
-		Model:     application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model:     application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:  shared.TenantID(m.TenantID),
 		BrandID:   m.BrandID,
 		MarketID:  m.MarketID,
@@ -47,8 +47,8 @@ func fromBrandMarketEntity(bm *product.BrandMarket) *brandMarketModel {
 		BrandID:   bm.BrandID,
 		MarketID:  bm.MarketID,
 		IsVisible: bm.IsVisible,
-		CreatedAt: bm.Model.CreatedAt.Unix(),
-		UpdatedAt: bm.Model.UpdatedAt.Unix(),
+		CreatedAt: bm.Model.CreatedAt,
+		UpdatedAt: bm.Model.UpdatedAt,
 	}
 }
 
