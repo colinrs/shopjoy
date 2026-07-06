@@ -19,17 +19,17 @@ func NewUserCouponRepository() promotion.UserCouponRepository {
 
 // userCouponModel represents the database model for UserCoupon
 type userCouponModel struct {
-	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID   int64  `gorm:"column:tenant_id;not null;index"`
-	UserID     int64  `gorm:"column:user_id;not null;index"`
-	CouponID   int64  `gorm:"column:coupon_id;not null;index"`
-	Status     int    `gorm:"column:status;not null;index"`
-	UsedAt     *int64 `gorm:"column:used_at"`
-	OrderID    int64  `gorm:"column:order_id"`
-	ReceivedAt int64  `gorm:"column:received_at;not null"`
-	ExpireAt   int64  `gorm:"column:expire_at;not null;index"`
-	CreatedAt  int64  `gorm:"column:created_at"`
-	UpdatedAt  int64  `gorm:"column:updated_at"`
+	ID         int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID   int64      `gorm:"column:tenant_id;not null;index"`
+	UserID     int64      `gorm:"column:user_id;not null;index"`
+	CouponID   int64      `gorm:"column:coupon_id;not null;index"`
+	Status     int        `gorm:"column:status;not null;index"`
+	UsedAt     *time.Time `gorm:"column:used_at"`
+	OrderID    int64      `gorm:"column:order_id"`
+	ReceivedAt time.Time  `gorm:"column:received_at;not null"`
+	ExpireAt   time.Time  `gorm:"column:expire_at;not null;index"`
+	CreatedAt  time.Time  `gorm:"column:created_at"`
+	UpdatedAt  time.Time  `gorm:"column:updated_at"`
 }
 
 func (userCouponModel) TableName() string {
@@ -37,46 +37,34 @@ func (userCouponModel) TableName() string {
 }
 
 func (m *userCouponModel) toEntity() *promotion.UserCoupon {
-	var usedAt *time.Time
-	if m.UsedAt != nil {
-		t := time.Unix(*m.UsedAt, 0)
-		usedAt = &t
-	}
-
 	return &promotion.UserCoupon{
 		ID:         m.ID,
 		TenantID:   shared.TenantID(m.TenantID),
 		UserID:     m.UserID,
 		CouponID:   m.CouponID,
 		Status:     promotion.UserCouponStatus(m.Status),
-		UsedAt:     usedAt,
+		UsedAt:     m.UsedAt,
 		OrderID:    m.OrderID,
-		ReceivedAt: time.Unix(m.ReceivedAt, 0),
-		ExpireAt:   time.Unix(m.ExpireAt, 0),
-		CreatedAt:  time.Unix(m.CreatedAt, 0),
-		UpdatedAt:  time.Unix(m.UpdatedAt, 0),
+		ReceivedAt: m.ReceivedAt,
+		ExpireAt:   m.ExpireAt,
+		CreatedAt:  m.CreatedAt,
+		UpdatedAt:  m.UpdatedAt,
 	}
 }
 
 func fromUserCouponEntity(uc *promotion.UserCoupon) *userCouponModel {
-	var usedAt *int64
-	if uc.UsedAt != nil {
-		ts := uc.UsedAt.Unix()
-		usedAt = &ts
-	}
-
 	return &userCouponModel{
 		ID:         uc.ID,
 		TenantID:   uc.TenantID.Int64(),
 		UserID:     uc.UserID,
 		CouponID:   uc.CouponID,
 		Status:     int(uc.Status),
-		UsedAt:     usedAt,
+		UsedAt:     uc.UsedAt,
 		OrderID:    uc.OrderID,
-		ReceivedAt: uc.ReceivedAt.Unix(),
-		ExpireAt:   uc.ExpireAt.Unix(),
-		CreatedAt:  uc.CreatedAt.Unix(),
-		UpdatedAt:  uc.UpdatedAt.Unix(),
+		ReceivedAt: uc.ReceivedAt,
+		ExpireAt:   uc.ExpireAt,
+		CreatedAt:  uc.CreatedAt,
+		UpdatedAt:  uc.UpdatedAt,
 	}
 }
 

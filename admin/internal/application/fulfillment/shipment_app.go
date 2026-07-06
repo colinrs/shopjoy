@@ -661,13 +661,3 @@ func FormatMoneyToInt64(s string) int64 {
 func FormatInt64ToMoney(v int64) string {
 	return fmt.Sprintf("%d", v)
 }
-
-// int64PtrToTimePtr converts *int64 (unix timestamp) to *time.Time
-// Deprecated: This function is no longer needed as entities now use *time.Time
-func int64PtrToTimePtr(v *int64) *time.Time {
-	if v == nil {
-		return nil
-	}
-	t := time.Unix(*v, 0)
-	return &t
-}

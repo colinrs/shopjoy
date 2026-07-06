@@ -37,22 +37,22 @@ type orderModel struct {
 	AdjustAmount      decimal.Decimal `gorm:"column:adjust_amount;type:decimal(19,4);not null;default:0"`
 	AdjustReason      string          `gorm:"column:adjust_reason;not null;default:''"`
 	AdjustedBy        int64           `gorm:"column:adjusted_by;not null;default:0"`
-	AdjustedAt        *int64          `gorm:"column:adjusted_at"`
+	AdjustedAt        *time.Time      `gorm:"column:adjusted_at"`
 	Version           int             `gorm:"column:version;not null;default:1"`
 	PaymentMethod     string          `gorm:"column:payment_method;not null;default:''"`
 	Source            string          `gorm:"column:source;not null;default:''"`
 	ReceiverName      string          `gorm:"column:receiver_name;not null"`
 	ReceiverPhone     string          `gorm:"column:receiver_phone;not null"`
 	ReceiverAddress   string          `gorm:"column:receiver_address;not null"`
-	PaidAt            *int64          `gorm:"column:paid_at"`
-	ShippedAt         *int64          `gorm:"column:shipped_at"`
-	DeliveredAt       *int64          `gorm:"column:delivered_at"`
-	CancelledAt       *int64          `gorm:"column:cancelled_at"`
+	PaidAt            *time.Time      `gorm:"column:paid_at"`
+	ShippedAt         *time.Time      `gorm:"column:shipped_at"`
+	DeliveredAt       *time.Time      `gorm:"column:delivered_at"`
+	CancelledAt       *time.Time      `gorm:"column:cancelled_at"`
 	CreatedBy         int64           `gorm:"column:created_by;not null"`
 	UpdatedBy         int64           `gorm:"column:updated_by;not null"`
-	DeletedAt         *int64          `gorm:"column:deleted_at;index"`
-	CreatedAt         int64           `gorm:"column:created_at;not null"`
-	UpdatedAt         int64           `gorm:"column:updated_at;not null"`
+	DeletedAt         *time.Time      `gorm:"column:deleted_at;index"`
+	CreatedAt         time.Time       `gorm:"column:created_at;not null"`
+	UpdatedAt         time.Time       `gorm:"column:updated_at;not null"`
 }
 
 func (orderModel) TableName() string {
@@ -60,28 +60,6 @@ func (orderModel) TableName() string {
 }
 
 func (m *orderModel) toEntity() *fulfillment.Order {
-	var paidAt, shippedAt, deliveredAt, cancelledAt, adjustedAt *time.Time
-	if m.PaidAt != nil {
-		t := time.Unix(*m.PaidAt, 0).UTC()
-		paidAt = &t
-	}
-	if m.ShippedAt != nil {
-		t := time.Unix(*m.ShippedAt, 0).UTC()
-		shippedAt = &t
-	}
-	if m.DeliveredAt != nil {
-		t := time.Unix(*m.DeliveredAt, 0).UTC()
-		deliveredAt = &t
-	}
-	if m.CancelledAt != nil {
-		t := time.Unix(*m.CancelledAt, 0).UTC()
-		cancelledAt = &t
-	}
-	if m.AdjustedAt != nil {
-		t := time.Unix(*m.AdjustedAt, 0).UTC()
-		adjustedAt = &t
-	}
-
 	return &fulfillment.Order{
 		ID:                m.ID,
 		TenantID:          shared.TenantID(m.TenantID),
@@ -101,20 +79,20 @@ func (m *orderModel) toEntity() *fulfillment.Order {
 		AdjustAmount:      m.AdjustAmount,
 		AdjustReason:      m.AdjustReason,
 		AdjustedBy:        m.AdjustedBy,
-		AdjustedAt:        adjustedAt,
+		AdjustedAt:        m.AdjustedAt,
 		Version:           m.Version,
 		PaymentMethod:     m.PaymentMethod,
 		Source:            m.Source,
 		ReceiverName:      m.ReceiverName,
 		ReceiverPhone:     m.ReceiverPhone,
 		ReceiverAddress:   m.ReceiverAddress,
-		PaidAt:            paidAt,
-		ShippedAt:         shippedAt,
-		DeliveredAt:       deliveredAt,
-		CancelledAt:       cancelledAt,
+		PaidAt:            m.PaidAt,
+		ShippedAt:         m.ShippedAt,
+		DeliveredAt:       m.DeliveredAt,
+		CancelledAt:       m.CancelledAt,
 		Audit: shared.AuditInfo{
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
-			UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 			CreatedBy: m.CreatedBy,
 			UpdatedBy: m.UpdatedBy,
 		},
@@ -123,31 +101,6 @@ func (m *orderModel) toEntity() *fulfillment.Order {
 }
 
 func fromOrderEntity(o *fulfillment.Order) *orderModel {
-	var paidAt, shippedAt, deliveredAt, cancelledAt, adjustedAt, deletedAt *int64
-	if o.PaidAt != nil {
-		ts := o.PaidAt.Unix()
-		paidAt = &ts
-	}
-	if o.ShippedAt != nil {
-		ts := o.ShippedAt.Unix()
-		shippedAt = &ts
-	}
-	if o.DeliveredAt != nil {
-		ts := o.DeliveredAt.Unix()
-		deliveredAt = &ts
-	}
-	if o.CancelledAt != nil {
-		ts := o.CancelledAt.Unix()
-		cancelledAt = &ts
-	}
-	if o.AdjustedAt != nil {
-		ts := o.AdjustedAt.Unix()
-		adjustedAt = &ts
-	}
-	if o.DeletedAt != nil {
-		deletedAt = o.DeletedAt
-	}
-
 	return &orderModel{
 		ID:                o.ID,
 		TenantID:          o.TenantID.Int64(),
@@ -167,22 +120,22 @@ func fromOrderEntity(o *fulfillment.Order) *orderModel {
 		AdjustAmount:      o.AdjustAmount,
 		AdjustReason:      o.AdjustReason,
 		AdjustedBy:        o.AdjustedBy,
-		AdjustedAt:        adjustedAt,
+		AdjustedAt:        o.AdjustedAt,
 		Version:           o.Version,
 		PaymentMethod:     o.PaymentMethod,
 		Source:            o.Source,
 		ReceiverName:      o.ReceiverName,
 		ReceiverPhone:     o.ReceiverPhone,
 		ReceiverAddress:   o.ReceiverAddress,
-		PaidAt:            paidAt,
-		ShippedAt:         shippedAt,
-		DeliveredAt:       deliveredAt,
-		CancelledAt:       cancelledAt,
+		PaidAt:            o.PaidAt,
+		ShippedAt:         o.ShippedAt,
+		DeliveredAt:       o.DeliveredAt,
+		CancelledAt:       o.CancelledAt,
 		CreatedBy:         o.Audit.CreatedBy,
 		UpdatedBy:         o.Audit.UpdatedBy,
-		DeletedAt:         deletedAt,
-		CreatedAt:         o.Audit.CreatedAt.Unix(),
-		UpdatedAt:         o.Audit.UpdatedAt.Unix(),
+		DeletedAt:         o.DeletedAt,
+		CreatedAt:         o.Audit.CreatedAt,
+		UpdatedAt:         o.Audit.UpdatedAt,
 	}
 }
 
@@ -246,10 +199,10 @@ func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.T
 		dbQuery = dbQuery.Where("refund_status = ?", query.RefundStatus)
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
 	}
 
 	var total int64
@@ -332,7 +285,7 @@ func (r *orderRepo) CountTodayOrders(ctx context.Context, db *gorm.DB, tenantID 
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	query := db.WithContext(ctx).Model(&orderModel{}).
-		Where("created_at >= ? AND created_at < ? AND deleted_at IS NULL", startOfDay.Unix(), endOfDay.Unix())
+		Where("created_at >= ? AND created_at < ? AND deleted_at IS NULL", startOfDay, endOfDay)
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
 	}
@@ -351,7 +304,7 @@ func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID share
 
 	query := db.WithContext(ctx).Model(&orderModel{}).
 		Where("created_at >= ? AND created_at < ? AND status IN ? AND deleted_at IS NULL",
-			startOfDay.Unix(), endOfDay.Unix(),
+			startOfDay, endOfDay,
 			[]string{"paid", "shipped", "delivered"})
 	if tenantID != 0 {
 		query = query.Where("tenant_id = ?", tenantID.Int64())
@@ -390,10 +343,10 @@ func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, tenantID sha
 		dbQuery = dbQuery.Where("refund_status = ?", query.RefundStatus)
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime.Unix())
+		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime.Unix())
+		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
 	}
 
 	var models []orderModel
@@ -539,7 +492,7 @@ func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB, tenantID
 
 	query := db.WithContext(ctx).Model(&orderModel{}).
 		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
-			tenantID.Int64(), statusStrings, start.Unix(), end.Unix())
+			tenantID.Int64(), statusStrings, start, end)
 
 	var result struct {
 		Total decimal.Decimal
@@ -558,7 +511,7 @@ func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, tenantID s
 		Where("o.tenant_id = ? AND o.status IN ? AND o.deleted_at IS NULL", tenantID.Int64(), statusStrings)
 
 	if !startTime.IsZero() {
-		query = query.Where("o.paid_at >= ?", startTime.Unix())
+		query = query.Where("o.paid_at >= ?", startTime)
 	}
 
 	var results []*fulfillment.TopProduct
@@ -578,10 +531,10 @@ func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB, tenantID sh
 
 	var results []*fulfillment.DailySalesTrend
 	err := db.WithContext(ctx).Model(&orderModel{}).
-		Select("FROM_UNIXTIME(paid_at, '%Y-%m-%d') as date, SUM(pay_amount) as sales, COUNT(*) as orders").
+		Select("DATE(paid_at) as date, SUM(pay_amount) as sales, COUNT(*) as orders").
 		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
-			tenantID.Int64(), statusStrings, startDate.Unix(), endDate.Unix()).
-		Group("FROM_UNIXTIME(paid_at, '%Y-%m-%d')").
+			tenantID.Int64(), statusStrings, startDate, endDate).
+		Group("DATE(paid_at)").
 		Scan(&results).Error
 	if err != nil {
 		return nil, err
@@ -610,7 +563,7 @@ type orderItemModel struct {
 	UnitPrice   decimal.Decimal `gorm:"column:unit_price;type:decimal(19,4);not null"`
 	TotalPrice  decimal.Decimal `gorm:"column:total_price;type:decimal(19,4);not null"`
 	Currency    string          `gorm:"column:currency;not null;default:'CNY'"`
-	CreatedAt   int64           `gorm:"column:created_at;not null"`
+	CreatedAt   time.Time       `gorm:"column:created_at;not null"`
 }
 
 func (orderItemModel) TableName() string {
@@ -631,7 +584,7 @@ func (m *orderItemModel) toEntity() fulfillment.OrderItem {
 		UnitPrice:   m.UnitPrice,
 		TotalPrice:  m.TotalPrice,
 		Currency:    m.Currency,
-		CreatedAt:   time.Unix(m.CreatedAt, 0).UTC(),
+		CreatedAt:   m.CreatedAt,
 	}
 }
 

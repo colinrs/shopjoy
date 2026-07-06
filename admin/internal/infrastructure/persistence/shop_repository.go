@@ -18,24 +18,24 @@ func NewShopRepository() storefront.ShopRepository {
 }
 
 type shopModel struct {
-	ID             int64  `gorm:"column:id;primaryKey"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;uniqueIndex"`
-	Name           string `gorm:"column:name;type:varchar(255);not null"`
-	Description    string `gorm:"column:description;type:text"`
-	Logo           string `gorm:"column:logo;type:varchar(500)"`
-	Banner         string `gorm:"column:banner;type:varchar(500)"`
-	ContactPhone   string `gorm:"column:contact_phone;type:varchar(20)"`
-	ContactEmail   string `gorm:"column:contact_email;type:varchar(255)"`
-	Address        string `gorm:"column:address;type:text"`
-	SocialLinks    string `gorm:"column:social_links;type:json"`
-	SEOTitle       string `gorm:"column:seo_title;type:varchar(255)"`
-	SEODescription string `gorm:"column:seo_description;type:text"`
-	SEOKeywords    string `gorm:"column:seo_keywords;type:varchar(500)"`
-	Status         int8   `gorm:"column:status;not null;default:1;index"`
-	CurrentThemeID *int64 `gorm:"column:current_theme_id"`
-	ThemeConfig    string `gorm:"column:theme_config;type:text"`
-	CreatedAt      int64  `gorm:"column:created_at;not null"`
-	UpdatedAt      int64  `gorm:"column:updated_at;not null"`
+	ID             int64     `gorm:"column:id;primaryKey"`
+	TenantID       int64     `gorm:"column:tenant_id;not null;uniqueIndex"`
+	Name           string    `gorm:"column:name;type:varchar(255);not null"`
+	Description    string    `gorm:"column:description;type:text"`
+	Logo           string    `gorm:"column:logo;type:varchar(500)"`
+	Banner         string    `gorm:"column:banner;type:varchar(500)"`
+	ContactPhone   string    `gorm:"column:contact_phone;type:varchar(20)"`
+	ContactEmail   string    `gorm:"column:contact_email;type:varchar(255)"`
+	Address        string    `gorm:"column:address;type:text"`
+	SocialLinks    string    `gorm:"column:social_links;type:json"`
+	SEOTitle       string    `gorm:"column:seo_title;type:varchar(255)"`
+	SEODescription string    `gorm:"column:seo_description;type:text"`
+	SEOKeywords    string    `gorm:"column:seo_keywords;type:varchar(500)"`
+	Status         int8      `gorm:"column:status;not null;default:1;index"`
+	CurrentThemeID *int64    `gorm:"column:current_theme_id"`
+	ThemeConfig    string    `gorm:"column:theme_config;type:text"`
+	CreatedAt      time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt      time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (shopModel) TableName() string {
@@ -75,8 +75,8 @@ func (m *shopModel) toEntity() *storefront.Shop {
 		ThemeConfig:    themeConfig,
 	}
 	shop.ID = m.ID
-	shop.CreatedAt = time.Unix(m.CreatedAt, 0).UTC()
-	shop.UpdatedAt = time.Unix(m.UpdatedAt, 0).UTC()
+	shop.CreatedAt = m.CreatedAt
+	shop.UpdatedAt = m.UpdatedAt
 	return shop
 }
 
@@ -105,8 +105,8 @@ func fromShopEntity(s *storefront.Shop) *shopModel {
 		Status:         int8(s.Status), // #nosec G115 // status values are small (tinyint range)
 		CurrentThemeID: s.CurrentThemeID,
 		ThemeConfig:    themeConfig,
-		CreatedAt:      s.CreatedAt.Unix(),
-		UpdatedAt:      s.UpdatedAt.Unix(),
+		CreatedAt:      s.CreatedAt,
+		UpdatedAt:      s.UpdatedAt,
 	}
 }
 

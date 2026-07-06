@@ -148,7 +148,7 @@ type Order struct {
 	CancelledBy int64      `gorm:"column:cancelled_by;not null;default:0"` // 取消操作人ID
 	// Audit info
 	Audit     shared.AuditInfo `gorm:"embedded"`
-	DeletedAt *int64           `gorm:"column:deleted_at;index"`
+	DeletedAt *time.Time       `gorm:"column:deleted_at;index"`
 	// Relations
 	Items []OrderItem `gorm:"foreignKey:OrderID"`
 }

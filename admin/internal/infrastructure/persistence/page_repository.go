@@ -37,7 +37,7 @@ type pageModel struct {
 	UpdatedAt   time.Time  `gorm:"column:updated_at;not null"`
 	CreatedBy   int64      `gorm:"column:created_by;not null;default:0"`
 	UpdatedBy   int64      `gorm:"column:updated_by;not null;default:0"`
-	DeletedAt   *int64     `gorm:"column:deleted_at;index"`
+	DeletedAt   *time.Time `gorm:"column:deleted_at;index"`
 }
 
 func (pageModel) TableName() string {
@@ -71,6 +71,11 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 		isPublished = 1
 	}
 
+	var deletedAt *time.Time
+	if p.Model.DeletedAt.Valid {
+		deletedAt = &p.Model.DeletedAt.Time
+	}
+
 	return &pageModel{
 		ID:          p.Model.ID,
 		TenantID:    p.TenantID.Int64(),
@@ -90,6 +95,7 @@ func fromPageEntity(p *storefront.Page) *pageModel {
 		UpdatedAt:   p.Model.UpdatedAt,
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
+		DeletedAt:   deletedAt,
 	}
 }
 

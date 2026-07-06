@@ -18,17 +18,17 @@ func NewWarehouseRepository() product.WarehouseRepository {
 }
 
 type warehouseModel struct {
-	ID        int64  `gorm:"column:id;primaryKey"`
-	TenantID  int64  `gorm:"column:tenant_id;not null;index"`
-	Code      string `gorm:"column:code;type:varchar(50);not null"`
-	Name      string `gorm:"column:name;type:varchar(100);not null"`
-	Country   string `gorm:"column:country;type:varchar(10)"`
-	Address   string `gorm:"column:address;type:varchar(500)"`
-	IsDefault bool   `gorm:"column:is_default;default:false"`
-	Status    int8   `gorm:"column:status;not null;default:1"`
-	CreatedAt int64  `gorm:"column:created_at;not null"`
-	UpdatedAt int64  `gorm:"column:updated_at;not null"`
-	DeletedAt *int64 `gorm:"column:deleted_at"`
+	ID        int64      `gorm:"column:id;primaryKey"`
+	TenantID  int64      `gorm:"column:tenant_id;not null;index"`
+	Code      string     `gorm:"column:code;type:varchar(50);not null"`
+	Name      string     `gorm:"column:name;type:varchar(100);not null"`
+	Country   string     `gorm:"column:country;type:varchar(10)"`
+	Address   string     `gorm:"column:address;type:varchar(500)"`
+	IsDefault bool       `gorm:"column:is_default;default:false"`
+	Status    int8       `gorm:"column:status;not null;default:1"`
+	CreatedAt time.Time  `gorm:"column:created_at;not null"`
+	UpdatedAt time.Time  `gorm:"column:updated_at;not null"`
+	DeletedAt *time.Time `gorm:"column:deleted_at"`
 }
 
 func (warehouseModel) TableName() string {
@@ -37,7 +37,7 @@ func (warehouseModel) TableName() string {
 
 func (m *warehouseModel) toEntity() *product.Warehouse {
 	return &product.Warehouse{
-		Model:     application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model:     application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:  shared.TenantID(m.TenantID),
 		Code:      m.Code,
 		Name:      m.Name,
@@ -58,8 +58,8 @@ func fromWarehouseEntity(w *product.Warehouse) *warehouseModel {
 		Address:   w.Address,
 		IsDefault: w.IsDefault,
 		Status:    int8(w.Status), // #nosec G115 // status values are small (tinyint range)
-		CreatedAt: w.Model.CreatedAt.Unix(),
-		UpdatedAt: w.Model.UpdatedAt.Unix(),
+		CreatedAt: w.Model.CreatedAt,
+		UpdatedAt: w.Model.UpdatedAt,
 	}
 }
 

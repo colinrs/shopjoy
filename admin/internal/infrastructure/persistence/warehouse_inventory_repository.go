@@ -18,14 +18,14 @@ func NewWarehouseInventoryRepository() product.WarehouseInventoryRepository {
 }
 
 type warehouseInventoryModel struct {
-	ID             int64  `gorm:"column:id;primaryKey"`
-	TenantID       int64  `gorm:"column:tenant_id;not null;index"`
-	SKUCode        string `gorm:"column:sku_code;type:varchar(50);not null;index"`
-	WarehouseID    int64  `gorm:"column:warehouse_id;not null;index"`
-	AvailableStock int    `gorm:"column:available_stock;not null;default:0"`
-	LockedStock    int    `gorm:"column:locked_stock;not null;default:0"`
-	CreatedAt      int64  `gorm:"column:created_at;not null"`
-	UpdatedAt      int64  `gorm:"column:updated_at;not null"`
+	ID             int64     `gorm:"column:id;primaryKey"`
+	TenantID       int64     `gorm:"column:tenant_id;not null;index"`
+	SKUCode        string    `gorm:"column:sku_code;type:varchar(50);not null;index"`
+	WarehouseID    int64     `gorm:"column:warehouse_id;not null;index"`
+	AvailableStock int       `gorm:"column:available_stock;not null;default:0"`
+	LockedStock    int       `gorm:"column:locked_stock;not null;default:0"`
+	CreatedAt      time.Time `gorm:"column:created_at;not null"`
+	UpdatedAt      time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (warehouseInventoryModel) TableName() string {
@@ -34,7 +34,7 @@ func (warehouseInventoryModel) TableName() string {
 
 func (m *warehouseInventoryModel) toEntity() *product.WarehouseInventory {
 	return &product.WarehouseInventory{
-		Model:          application.Model{ID: m.ID, CreatedAt: time.Unix(m.CreatedAt, 0).UTC(), UpdatedAt: time.Unix(m.UpdatedAt, 0).UTC()},
+		Model:          application.Model{ID: m.ID, CreatedAt: m.CreatedAt, UpdatedAt: m.UpdatedAt},
 		TenantID:       shared.TenantID(m.TenantID),
 		SKUCode:        m.SKUCode,
 		WarehouseID:    m.WarehouseID,
@@ -51,8 +51,8 @@ func fromWarehouseInventoryEntity(wi *product.WarehouseInventory) *warehouseInve
 		WarehouseID:    wi.WarehouseID,
 		AvailableStock: wi.AvailableStock,
 		LockedStock:    wi.LockedStock,
-		CreatedAt:      wi.Model.CreatedAt.Unix(),
-		UpdatedAt:      wi.Model.UpdatedAt.Unix(),
+		CreatedAt:      wi.Model.CreatedAt,
+		UpdatedAt:      wi.Model.UpdatedAt,
 	}
 }
 
