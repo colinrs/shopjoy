@@ -314,6 +314,33 @@ export function getSKU(id: string) {
   })
 }
 
+// SKU Search (lightweight, used by dropdown components)
+export interface SearchSKUItem {
+  sku_code: string
+  product_id: string
+  product_name: string
+  safety_stock: number
+}
+
+export interface SearchSKUsResponse {
+  list: SearchSKUItem[]
+  total: number
+}
+
+export interface SearchSKUsParams {
+  keyword?: string
+  page?: number
+  page_size?: number
+}
+
+export function searchSKUs(params: SearchSKUsParams) {
+  return request<SearchSKUsResponse>({
+    url: '/api/v1/skus/search',
+    method: 'get',
+    params
+  })
+}
+
 // Product Localization API functions
 
 export interface ProductLocalization {
