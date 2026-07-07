@@ -82,10 +82,9 @@
           name="logs"
         >
           <div class="filter-bar">
-            <el-input
+            <SkuSearchSelect
               v-model="logFilter.sku_code"
               :placeholder="$t('inventory.skuCode')"
-              clearable
               style="width: 180px"
             />
             <el-select
@@ -324,7 +323,7 @@
               :label="$t('inventory.skuCode')"
               required
             >
-              <el-input
+              <SkuSearchSelect
                 v-model="adjustForm.sku_code"
                 :placeholder="$t('inventory.skuCode')"
                 style="width: 300px"
@@ -554,19 +553,13 @@
           label-width="120px"
         >
           <el-form-item :label="$t('inventory.selectSKU')">
-            <el-select
+            <SkuSearchSelect
               v-model="batchSafetyStockForm.sku_codes"
               multiple
               :placeholder="$t('inventory.enterSKUCode')"
               style="width: 100%"
-            >
-              <el-option
-                v-for="item in lowStockList"
-                :key="item.sku_code"
-                :label="item.sku_code"
-                :value="item.sku_code"
-              />
-            </el-select>
+              @change="handleBatchSkuSelect"
+            />
           </el-form-item>
           <el-form-item :label="$t('inventory.safetyStockValue')">
             <el-input-number
@@ -699,6 +692,8 @@ import {
 import { downloadFile } from '@/utils/download'
 import { t } from '@/plugins/i18n'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import SkuSearchSelect from '@/components/SkuSearchSelect.vue'
+import type { SearchSKUItem } from '@/api/product'
 
 const { handleError } = useErrorHandler()
 
@@ -775,16 +770,30 @@ const editSafetyStockForm = reactive({
   safety_stock: 0
 })
 
+// Records selected SKU details (for batch dialog table)
+const selectedSkuDetailsMap = ref<Map<string, SearchSKUItem>>(new Map())
+
 // Show batch safety stock dialog
 const showBatchSafetyStockDialog = () => {
   batchSafetyStockForm.sku_codes = []
   batchSafetyStockForm.safety_stock = 0
+  selectedSkuDetailsMap.value = new Map()
   batchSafetyStockDialogVisible.value = true
 }
 
-// Get selected SKU details
-const getSelectedSkuDetails = () => {
-  return lowStockList.value.filter(item => batchSafetyStockForm.sku_codes.includes(item.sku_code))
+const handleBatchSkuSelect = (items: SearchSKUItem[]) => {
+  const map = new Map<string, SearchSKUItem>()
+  for (const item of items) {
+    map.set(item.sku_code, item)
+  }
+  selectedSkuDetailsMap.value = map
+}
+
+// Get selected SKU details — sourced from selectedSkuDetailsMap
+const getSelectedSkuDetails = (): SearchSKUItem[] => {
+  return batchSafetyStockForm.sku_codes
+    .map(code => selectedSkuDetailsMap.value.get(code))
+    .filter((item): item is SearchSKUItem => !!item)
 }
 
 // Handle batch update safety stock

@@ -28,19 +28,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { CSSProperties } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { searchSKUs, type SearchSKUItem } from '@/api/product'
 
 const { t } = useI18n()
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     modelValue: string | string[]
     multiple?: boolean
     placeholder?: string
     clearable?: boolean
-    style?: string
+    style?: string | CSSProperties
   }>(),
   {
     multiple: false,
