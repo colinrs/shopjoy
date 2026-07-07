@@ -116,4 +116,3 @@ func (r *inventoryLogRepo) Find(ctx context.Context, db *gorm.DB, tenantID share
 	}
 	return result, total, nil
 }
-
