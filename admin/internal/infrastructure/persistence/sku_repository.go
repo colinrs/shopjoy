@@ -268,3 +268,61 @@ func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared
 	}
 	return skus, total, nil
 }
+
+// Search returns a lightweight SKU item list joined with product name for the dropdown.
+// Only enabled SKUs are returned, filtered by LIKE on sku code.
+func (r *skuRepo) Search(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, keyword string, page, pageSize int) ([]*product.SKUItem, int64, error) {
+	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
+		Select("skus.code AS sku_code, skus.product_id, products.name AS product_name, skus.safety_stock").
+		Joins("LEFT JOIN products ON products.id = skus.product_id").
+		Where("skus.status = ?", shared.StatusEnabled)
+
+	if tenantID != 0 {
+		dbQuery = dbQuery.Where("skus.tenant_id = ?", tenantID.Int64())
+	}
+
+	if keyword != "" {
+		dbQuery = dbQuery.Where("skus.code LIKE ?", "%"+keyword+"%")
+	}
+
+	var total int64
+	if err := dbQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+	offset := (page - 1) * pageSize
+
+	type row struct {
+		SKUCode     string `gorm:"column:sku_code"`
+		ProductID   int64  `gorm:"column:product_id"`
+		ProductName string `gorm:"column:product_name"`
+		SafetyStock int    `gorm:"column:safety_stock"`
+	}
+	var rows []row
+	if err := dbQuery.Order("skus.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Scan(&rows).Error; err != nil {
+		return nil, 0, err
+	}
+
+	items := make([]*product.SKUItem, len(rows))
+	for i, r := range rows {
+		items[i] = &product.SKUItem{
+			SKUCode:     r.SKUCode,
+			ProductID:   r.ProductID,
+			ProductName: r.ProductName,
+			SafetyStock: r.SafetyStock,
+		}
+	}
+	return items, total, nil
+}

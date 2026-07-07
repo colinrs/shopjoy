@@ -282,6 +282,7 @@ type SKURepository interface {
 	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*SKU, error)
 	FindList(ctx context.Context, db *gorm.DB, query SKUQuery) ([]*SKU, int64, error)
 	FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*SKU, int64, error)
+	Search(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, keyword string, page, pageSize int) ([]*SKUItem, int64, error)
 }
 
 // SKUQuery for SKU search
@@ -291,4 +292,12 @@ type SKUQuery struct {
 	ProductID int64
 	Code      string
 	Status    shared.Status
+}
+
+// SKUItem is a lightweight DTO used by the SKU search dropdown
+type SKUItem struct {
+	SKUCode     string
+	ProductID   int64
+	ProductName string
+	SafetyStock int
 }
