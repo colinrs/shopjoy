@@ -206,6 +206,24 @@ type (
 		List  []*SKUDetailResp `json:"list"`
 		Total int64            `json:"total"`
 	}
+	// Search SKUs request (used in dropdown)
+	SearchSKUsReq {
+		Keyword  string `form:"keyword,optional"`
+		Page     int    `form:"page,default=1"`
+		PageSize int    `form:"page_size,default=20"`
+	}
+	// Search SKU item (lightweight for dropdown)
+	SearchSKUItem {
+		SKUCode     string `json:"sku_code"`
+		ProductID   int64  `json:"product_id,string"`
+		ProductName string `json:"product_name"`
+		SafetyStock int    `json:"safety_stock"`
+	}
+	// Search SKUs response
+	SearchSKUsResp {
+		List  []*SearchSKUItem `json:"list"`
+		Total int64            `json:"total"`
+	}
 	// Product Localization types
 	CreateProductLocalizationReq {
 		ProductID    int64  `json:"product_id,string"`
@@ -296,6 +314,10 @@ service admin-api {
 	@doc "删除SKU变体"
 	@handler DeleteSKUHandler
 	delete /api/v1/skus/:id (GetSKUReq) returns (CreateSKUResp)
+
+	@doc "搜索SKU（下拉选择用）"
+	@handler SearchSKUsHandler
+	get /api/v1/skus/search (SearchSKUsReq) returns (SearchSKUsResp)
 
 	// Product Localization endpoints
 	@doc "创建商品本地化"

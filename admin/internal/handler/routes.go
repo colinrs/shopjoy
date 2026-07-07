@@ -1056,6 +1056,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/api/v1/skus/:id",
 					Handler: products.DeleteSKUHandler(serverCtx),
 				},
+				{
+					// 搜索SKU（下拉选择用）
+					Method:  http.MethodGet,
+					Path:    "/api/v1/skus/search",
+					Handler: products.SearchSKUsHandler(serverCtx),
+				},
 			}...,
 		),
 	)

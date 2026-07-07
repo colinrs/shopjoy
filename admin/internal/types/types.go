@@ -2569,6 +2569,24 @@ type SaveDraftRequest struct {
 	Blocks []*DecorationInput `json:"blocks"`
 }
 
+type SearchSKUItem struct {
+	SKUCode     string `json:"sku_code"`
+	ProductID   int64  `json:"product_id,string"`
+	ProductName string `json:"product_name"`
+	SafetyStock int    `json:"safety_stock"`
+}
+
+type SearchSKUsReq struct {
+	Keyword  string `form:"keyword,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+}
+
+type SearchSKUsResp struct {
+	List  []*SearchSKUItem `json:"list"`
+	Total int64            `json:"total"`
+}
+
 type SetBrandMarketVisibilityReq struct {
 	BrandID   int64    `path:"id"`
 	MarketIDs []string `json:"market_ids"`
@@ -3142,7 +3160,7 @@ type UpdateSKUReq struct {
 	Stock          int               `json:"stock,optional"`
 	SafetyStock    int               `json:"safety_stock,optional"`
 	PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
-	Status         string            `json:"status,optional"`
+	Status         string            `json:"status,optional"` // enabled, disabled
 	Attributes     map[string]string `json:"attributes,optional"`
 }
 
