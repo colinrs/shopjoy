@@ -8,6 +8,9 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +31,28 @@ func NewSearchSKUsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Search
 }
 
 func (l *SearchSKUsLogic) SearchSKUs(req *types.SearchSKUsReq) (resp *types.SearchSKUsResp, err error) {
-	// todo: add your logic here and delete this line
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok {
+		return nil, code.ErrUnauthorized
+	}
 
-	return
+	items, total, err := l.svcCtx.SKURepo.Search(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Keyword, req.Page, req.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]*types.SearchSKUItem, len(items))
+	for i, item := range items {
+		list[i] = &types.SearchSKUItem{
+			SKUCode:     item.SKUCode,
+			ProductID:   item.ProductID,
+			ProductName: item.ProductName,
+			SafetyStock: item.SafetyStock,
+		}
+	}
+
+	return &types.SearchSKUsResp{
+		List:  list,
+		Total: total,
+	}, nil
 }
