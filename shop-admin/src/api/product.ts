@@ -23,6 +23,7 @@ export interface Product {
   stock: number
   status: ProductStatus
   category_id: string
+  category_path: string
   created_at: string
   updated_at: string
   // Compliance fields
@@ -93,11 +94,11 @@ export interface CreateProductRequest {
   // Compliance fields
   hs_code?: string
   coo?: string
-  weight?: string
+  weight?: number
   weight_unit?: string
-  length?: string
-  width?: string
-  height?: string
+  length?: number
+  width?: number
+  height?: number
   dangerous_goods?: string[]
 }
 
@@ -121,11 +122,11 @@ export interface UpdateProductRequest {
   // Compliance fields
   hs_code?: string
   coo?: string
-  weight?: string
+  weight?: number
   weight_unit?: string
-  length?: string
-  width?: string
-  height?: string
+  length?: number
+  width?: number
+  height?: number
   dangerous_goods?: string[]
 }
 
@@ -227,7 +228,7 @@ export function pushToMarket(productId: string, data: PushToMarketRequest) {
 }
 
 export function removeFromMarket(productId: string, marketId: string) {
-  return request({
+  return request<ProductMarket>({
     url: `/api/v1/products/${productId}/markets/${marketId}`,
     method: 'delete'
   })
@@ -272,6 +273,7 @@ export interface UpdateSKURequest {
   stock?: number
   safety_stock?: number
   pre_sale_enabled?: boolean
+  status?: string
   attributes?: Record<string, string>
 }
 

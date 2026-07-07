@@ -38,5 +38,7 @@ func (l *GetProductLogic) GetProduct(req *types.GetProductReq) (resp *types.Prod
 		return nil, err
 	}
 
-	return convertToProductDetailResp(productResp), nil
+	resp = convertToProductDetailResp(productResp)
+	resp.CategoryPath = buildCategoryPath(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), productResp.CategoryID)
+	return resp, nil
 }

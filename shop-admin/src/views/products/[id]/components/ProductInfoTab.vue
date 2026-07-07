@@ -35,18 +35,39 @@
         </el-col>
         <el-col :span="12">
           <el-form-item :label="$t('products.brand')">
-            <el-input
+            <el-select
               v-model="localForm.brand"
-              :placeholder="$t('products.enterBrand')"
-            />
+              filterable
+              clearable
+              :loading="brandsLoading"
+              :placeholder="$t('products.selectBrand')"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="brand in props.brands"
+                :key="brand.id"
+                :label="brand.name"
+                :value="brand.name"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item :label="$t('products.categoryId')">
-            <el-input
-              v-model="localForm.category_id"
-              :placeholder="$t('products.categoryId')"
-            />
+          <el-form-item :label="$t('products.categoryPath')">
+            <el-tooltip
+              :content="`${$t('products.deepestCategoryId')}: ${localForm.category_id || '-'}`"
+              placement="top"
+              :disabled="!localForm.category_id"
+            >
+              <el-cascader
+                v-model="localForm.category_id"
+                :options="categoryOptions"
+                :props="categoryCascaderProps"
+                :loading="categoriesLoading"
+                :placeholder="$t('products.selectCategory')"
+                style="width: 100%"
+              />
+            </el-tooltip>
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -292,29 +313,62 @@
           </div>
           <div
             class="add-image"
-            @click="handleAddImage"
+            @click="handleShowAddImage"
           >
             <el-icon><Plus /></el-icon>
             <span>{{ $t('products.addImage') }}</span>
           </div>
         </div>
       </el-form-item>
+      <div class="save-actions">
+        <el-button
+          type="primary"
+          :disabled="!isDirty"
+          :loading="saveLoading"
+          @click="handleSave"
+        >
+          <el-icon><Check /></el-icon>
+          {{ $t('products.saveChanges') }}
+        </el-button>
+      </div>
     </div>
   </el-form>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { Picture, Plus, Close } from '@element-plus/icons-vue'
+import { Picture, Plus, Close, Check } from '@element-plus/icons-vue'
 import { t } from '@/plugins/i18n'
+import type { FormInstance } from 'element-plus'
 import type { ProductInfoTabProps, ProductInfoTabEmits, ProductFormData } from '../types'
+import type { CategoryTree } from '@/api/category'
 
 const props = defineProps<ProductInfoTabProps>()
 const emit = defineEmits<ProductInfoTabEmits>()
 
-const formRef = computed(() => props.formRef)
+const formRef = ref<FormInstance>()
 
 const localForm = ref<ProductFormData>({ ...props.productForm })
+
+const categoryOptions = computed(() => {
+  const transform = (nodes: CategoryTree[]): CategoryTree[] => {
+    return nodes.map(node => {
+      const children = node.children?.length ? transform(node.children) : undefined
+      return {
+        ...node,
+        children
+      } as CategoryTree
+    })
+  }
+  return transform(props.categories)
+})
+
+const categoryCascaderProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  emitPath: false
+}
 
 watch(() => props.productForm, (newVal) => {
   localForm.value = { ...newVal }
@@ -329,8 +383,12 @@ const formRules = {
   price: [{ required: true, message: () => t('products.enterPrice'), trigger: 'blur' }]
 }
 
-const handleAddImage = () => {
-  emit('save') // Trigger parent to show add image dialog
+const handleShowAddImage = () => {
+  emit('show-add-image')
+}
+
+const handleSave = () => {
+  emit('save')
 }
 
 const handleRemoveImage = (index: number) => {
@@ -421,5 +479,22 @@ defineExpose({
 .add-image:hover {
   border-color: #409EFF;
   color: #409EFF;
+}
+
+.category-path-display {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #374151;
+  font-size: 13px;
+  line-height: 32px;
+}
+
+.save-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
 }
 </style>

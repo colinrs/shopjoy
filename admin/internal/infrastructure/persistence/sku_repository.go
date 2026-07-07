@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
@@ -42,6 +43,11 @@ func (m *skuModel) toEntity() *product.SKU {
 	}
 
 	return &product.SKU{
+		Model: application.Model{
+			ID:        m.ID,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
+		},
 		TenantID:       shared.TenantID(m.TenantID),
 		ProductID:      m.ProductID,
 		Code:           m.Code,

@@ -134,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Close } from '@element-plus/icons-vue'
 import { createSKU, updateSKU, type CreateSKURequest } from '@/api/product'
@@ -174,7 +174,7 @@ watch(() => props.visible, (newVal) => {
   }
 })
 
-const isEdit = props.isEdit
+const isEdit = computed(() => props.isEdit)
 
 const handleClose = () => {
   emit('update:visible', false)
@@ -214,7 +214,7 @@ const handleSave = async () => {
       attributes: variantForm.attributes
     }
 
-    if (isEdit) {
+    if (isEdit.value) {
       await updateSKU({ ...data, id: variantForm.id })
       ElMessage.success(t('products.variantUpdateSuccess'))
     } else {
@@ -226,7 +226,7 @@ const handleSave = async () => {
     handleClose()
   } catch (error) {
     console.error('Failed to save variant:', error)
-    ElMessage.error(isEdit ? t('products.variantUpdateFailed') : t('products.variantCreateFailed'))
+    ElMessage.error(isEdit.value ? t('products.variantUpdateFailed') : t('products.variantCreateFailed'))
   }
 }
 </script>

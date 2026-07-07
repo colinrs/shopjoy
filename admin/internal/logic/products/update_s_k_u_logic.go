@@ -72,6 +72,14 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 	if req.Attributes != nil {
 		sku.Attributes = req.Attributes
 	}
+	if req.Status != "" {
+		switch req.Status {
+		case "enabled":
+			sku.Status = shared.StatusEnabled
+		case "disabled":
+			sku.Status = shared.StatusDisabled
+		}
+	}
 	sku.Audit.UpdatedAt = time.Now().UTC()
 
 	// Save

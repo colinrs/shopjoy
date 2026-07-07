@@ -1,7 +1,9 @@
-import type { FormInstance } from 'element-plus'
 import type { Product, ProductMarket } from '@/api/product'
 import type { Warehouse } from '@/api/inventory'
 import type { Market } from '@/api/market'
+
+import type { CategoryTree } from '@/api/category'
+import type { Brand } from '@/api/brand'
 
 // Product form data for basic info tab
 export interface ProductFormData {
@@ -80,12 +82,18 @@ export interface ProductDetailEmits {
 export interface ProductInfoTabProps {
   product: Product | null
   productForm: ProductFormData
-  formRef: FormInstance | null
   loading: boolean
+  isDirty: boolean
+  saveLoading: boolean
+  categories: CategoryTree[]
+  brands: Brand[]
+  categoriesLoading: boolean
+  brandsLoading: boolean
 }
 
 export interface ProductInfoTabEmits {
   (e: 'update:productForm', value: ProductFormData): void
+  (e: 'show-add-image'): void
   (e: 'save'): void
 }
 
@@ -113,6 +121,7 @@ export interface ProductVariantsTabProps {
 
 export interface ProductVariantsTabEmits {
   (e: 'variants-change'): void
+  (e: 'edit-variant', value: VariantFormData): void
 }
 
 // Product Pricing Tab

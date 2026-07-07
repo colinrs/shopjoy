@@ -105,10 +105,12 @@
         >
           <template #default="{ row }">
             <el-tag
-              :type="row.status === 'enabled' ? 'success' : 'info'"
+              :type="getStatusType(row.status)"
               size="small"
+              class="status-tag"
+              @click="handleToggleStatus(row)"
             >
-              {{ row.status === 'enabled' ? $t('common.enabled') : $t('common.disabled') }}
+              {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -164,9 +166,9 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getSKUsByProduct, deleteSKU, type SKU } from '@/api/product'
+import { getSKUsByProduct, deleteSKU, updateSKU, type SKU } from '@/api/product'
 import { t } from '@/plugins/i18n'
-import type { ProductVariantsTabProps, ProductVariantsTabEmits } from '../types'
+import type { ProductVariantsTabProps, ProductVariantsTabEmits, VariantFormData } from '../types'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps<ProductVariantsTabProps>()
@@ -188,13 +190,43 @@ const loadVariants = async () => {
   }
 }
 
+const getStatusType = (status: string) => {
+  return status === '1' || status === 'enabled' ? 'success' : 'info'
+}
+
+const getStatusText = (status: string) => {
+  return status === '1' || status === 'enabled' ? t('common.enabled') : t('common.disabled')
+}
+
+const skuToVariantForm = (sku: SKU): VariantFormData => ({
+  id: sku.id,
+  code: sku.code,
+  price: parseFloat(sku.price) || 0,
+  currency: sku.currency,
+  stock: sku.stock,
+  safety_stock: sku.safety_stock,
+  pre_sale_enabled: sku.pre_sale_enabled,
+  attributes: { ...sku.attributes }
+})
+
 const handleShowAddVariantDialog = () => {
   emit('variants-change')
 }
 
-// eslint-disable-next-line no-unused-vars
-const handleEditVariant = (_row: SKU) => {
-  emit('variants-change')
+const handleEditVariant = (row: SKU) => {
+  emit('edit-variant', skuToVariantForm(row))
+}
+
+const handleToggleStatus = async (row: SKU) => {
+  const newStatus = getStatusType(row.status) === 'success' ? 'disabled' : 'enabled'
+  try {
+    await updateSKU({ id: row.id, status: newStatus })
+    ElMessage.success(t('products.statusUpdateSuccess'))
+    loadVariants()
+    emit('variants-change')
+  } catch (error) {
+    handleError(error, t('products.statusUpdateFailed'))
+  }
 }
 
 const handleDeleteVariant = async (row: SKU) => {
@@ -268,5 +300,14 @@ defineExpose({
 .text-muted {
   color: #9CA3AF;
   font-size: 12px;
+}
+
+.status-tag {
+  cursor: pointer;
+  user-select: none;
+}
+
+.status-tag:hover {
+  opacity: 0.85;
 }
 </style>

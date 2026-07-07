@@ -2078,6 +2078,7 @@ type ProductDetailResp struct {
 	Stock           int                 `json:"stock"`
 	Status          string              `json:"status"` // draft, on_sale, off_sale, deleted
 	CategoryID      int64               `json:"category_id,string"`
+	CategoryPath    string              `json:"category_path,optional"`
 	CreatedAt       string              `json:"created_at"`
 	UpdatedAt       string              `json:"updated_at"`
 	SKU             string              `json:"sku"`
@@ -3141,6 +3142,7 @@ type UpdateSKUReq struct {
 	Stock          int               `json:"stock,optional"`
 	SafetyStock    int               `json:"safety_stock,optional"`
 	PreSaleEnabled bool              `json:"pre_sale_enabled,optional"`
+	Status         string            `json:"status,optional"`
 	Attributes     map[string]string `json:"attributes,optional"`
 }
 

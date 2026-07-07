@@ -21,38 +21,15 @@
               v-if="product"
               :type="getStatusType(product.status)"
               size="small"
+              class="status-tag"
+              :loading="statusLoading"
+              @click="handleToggleStatus"
             >
               {{ getStatusText(product.status) }}
             </el-tag>
           </h2>
         </div>
-        <div class="header-right">
-          <el-button
-            v-if="product?.status === 'on_sale'"
-            :loading="statusLoading"
-            @click="handleTakeOffSale"
-          >
-            <el-icon><Hide /></el-icon>
-            {{ $t('products.offSale') }}
-          </el-button>
-          <el-button
-            v-else-if="product?.status === 'off_sale' || product?.status === 'draft'"
-            type="success"
-            :loading="statusLoading"
-            @click="handlePutOnSale"
-          >
-            <el-icon><View /></el-icon>
-            {{ $t('products.onSale') }}
-          </el-button>
-          <el-button
-            type="primary"
-            :loading="saveLoading"
-            @click="handleSave"
-          >
-            <el-icon><Check /></el-icon>
-            {{ $t('products.saveChanges') }}
-          </el-button>
-        </div>
+        <div class="header-right" />
       </div>
     </el-card>
 
@@ -79,12 +56,19 @@
           name="basic"
         >
           <ProductInfoTab
+            ref="productInfoTabRef"
             :product="product"
             :product-form="productForm"
-            :form-ref="formRef"
             :loading="loading"
+            :is-dirty="isDirty"
+            :save-loading="saveLoading"
+            :categories="categories"
+            :brands="brands"
+            :categories-loading="categoriesLoading"
+            :brands-loading="brandsLoading"
             @update:product-form="handleProductFormUpdate"
-            @save="handleShowAddImageDialog"
+            @show-add-image="handleShowAddImageDialog"
+            @save="handleSave"
           />
         </el-tab-pane>
 
@@ -116,6 +100,7 @@
             :default-currency="productForm.currency"
             :loading="variantsLoading"
             @variants-change="handleShowVariantDialog"
+            @edit-variant="handleEditVariant"
           />
         </el-tab-pane>
 
@@ -210,10 +195,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { ArrowLeft, Check, Hide, View } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { getProductStatusType } from '@/utils/status'
 import {
   getProduct,
@@ -230,6 +215,8 @@ import {
   type Warehouse
 } from '@/api/inventory'
 import { t } from '@/plugins/i18n'
+import { getCategoryTree, type CategoryTree } from '@/api/category'
+import { getBrands, type Brand } from '@/api/brand'
 import {
   ProductInfoTab,
   ProductMarketsTab,
@@ -262,10 +249,29 @@ const activeTab = ref('basic')
 const product = ref<Product | null>(null)
 const productMarkets = ref<ProductMarket[]>([])
 const markets = ref<Market[]>([])
+const categories = ref<CategoryTree[]>([])
+const brands = ref<Brand[]>([])
+const categoriesLoading = ref(false)
+const brandsLoading = ref(false)
 const pushToMarketDialogVisible = ref(false)
 const addImageDialogVisible = ref(false)
 const adjustStockDialogVisible = ref(false)
-const formRef = ref()
+const productInfoTabRef = ref()
+const originalForm = ref<ProductFormData | null>(null)
+
+const deepEqual = (a: unknown, b: unknown): boolean => {
+  if (a === b) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || a == null || b == null) return false
+  const keysA = Object.keys(a as object)
+  const keysB = Object.keys(b as object)
+  if (keysA.length !== keysB.length) return false
+  return keysA.every(key => deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+}
+
+const isDirty = computed(() => {
+  if (!originalForm.value) return false
+  return !deepEqual(productForm, originalForm.value)
+})
 
 // Inventory state
 const inventoryLoading = ref(false)
@@ -371,6 +377,7 @@ const loadProduct = async () => {
       height: data.height || '',
       dangerous_goods: data.dangerous_goods || []
     })
+    originalForm.value = JSON.parse(JSON.stringify(productForm))
   } catch (error) {
     handleError(error, t('products.loadFailed'))
   } finally {
@@ -398,6 +405,41 @@ const loadMarkets = async () => {
     markets.value = response.list || []
   } catch (error) {
     handleError(error, t('products.loadMarketsFailed'))
+  }
+}
+
+// Load category tree
+const loadCategories = async () => {
+  categoriesLoading.value = true
+  try {
+    const data = await getCategoryTree()
+    categories.value = data || []
+  } catch (error) {
+    handleError(error, t('products.loadCategoriesFailed'))
+  } finally {
+    categoriesLoading.value = false
+  }
+}
+
+// Load enabled brands
+const loadBrands = async () => {
+  brandsLoading.value = true
+  try {
+    const response = await getBrands({ status: 1, page_size: 1000 })
+    brands.value = response.list || []
+  } catch (error) {
+    handleError(error, t('products.loadBrandsFailed'))
+  } finally {
+    brandsLoading.value = false
+  }
+}
+
+const handleToggleStatus = async () => {
+  if (!product.value || statusLoading.value) return
+  if (product.value.status === 'on_sale') {
+    await handleTakeOffSale()
+  } else {
+    await handlePutOnSale()
   }
 }
 
@@ -431,10 +473,8 @@ const handleTakeOffSale = async () => {
 
 // Save product
 const handleSave = async () => {
-  if (!formRef.value) return
-
   try {
-    await formRef.value.validate()
+    await productInfoTabRef.value?.validate()
   } catch {
     return
   }
@@ -455,15 +495,16 @@ const handleSave = async () => {
       is_matrix_product: productForm.is_matrix_product,
       hs_code: productForm.hs_code,
       coo: productForm.coo,
-      weight: productForm.weight,
+      weight: parseFloat(productForm.weight) || 0,
       weight_unit: productForm.weight_unit,
-      length: productForm.length,
-      width: productForm.width,
-      height: productForm.height,
+      length: parseFloat(productForm.length) || 0,
+      width: parseFloat(productForm.width) || 0,
+      height: parseFloat(productForm.height) || 0,
       dangerous_goods: productForm.dangerous_goods
     })
     ElMessage.success(t('products.updateSuccess'))
-    loadProduct()
+    await loadProduct()
+    originalForm.value = JSON.parse(JSON.stringify(productForm))
   } catch (error) {
     handleError(error, t('products.updateFailed'))
   } finally {
@@ -549,6 +590,20 @@ const handleShowVariantDialog = () => {
   variantDialogVisible.value = true
 }
 
+// Edit existing variant
+const handleEditVariant = (variant: VariantFormData) => {
+  isEditVariant.value = true
+  variantForm.id = variant.id
+  variantForm.code = variant.code
+  variantForm.price = variant.price
+  variantForm.currency = variant.currency
+  variantForm.stock = variant.stock
+  variantForm.safety_stock = variant.safety_stock
+  variantForm.pre_sale_enabled = variant.pre_sale_enabled
+  variantForm.attributes = { ...variant.attributes }
+  variantDialogVisible.value = true
+}
+
 // Handle variant success — refresh product (updates productForm.sku), variants list, and inventory
 const handleVariantSuccess = async () => {
   await loadProduct()
@@ -557,12 +612,47 @@ const handleVariantSuccess = async () => {
   inventoryTabRef.value?.loadInventoryData()
 }
 
+const beforeUnloadHandler = (e: BeforeUnloadEvent) => {
+  if (isDirty.value) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
+
 // Initialize
 onMounted(() => {
   loadProduct()
   loadProductMarkets()
   loadMarkets()
+  loadCategories()
+  loadBrands()
   loadWarehouses()
+  window.addEventListener('beforeunload', beforeUnloadHandler)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', beforeUnloadHandler)
+})
+
+onBeforeRouteLeave(async (_to, _from, next) => {
+  if (!isDirty.value) {
+    next()
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('products.unsavedChangesConfirm'),
+      t('common.warning'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning'
+      }
+    )
+    next()
+  } catch {
+    next(false)
+  }
 })
 </script>
 
@@ -595,6 +685,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.status-tag {
+  cursor: pointer;
+  user-select: none;
+}
+
+.status-tag:hover {
+  opacity: 0.85;
 }
 
 .header-right {

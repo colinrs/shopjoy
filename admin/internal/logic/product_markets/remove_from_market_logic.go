@@ -5,6 +5,7 @@ package product_markets
 
 import (
 	"context"
+	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -27,14 +28,46 @@ func NewRemoveFromMarketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *RemoveFromMarketLogic) RemoveFromMarket(req *types.RemoveFromMarketReq) error {
+func (l *RemoveFromMarketLogic) RemoveFromMarket(req *types.RemoveFromMarketReq) (resp *types.ProductMarketResp, err error) {
 	db := l.svcCtx.DB
 	repo := persistence.NewProductMarketRepository()
 
 	pm, err := repo.FindByProductAndMarket(l.ctx, db, req.ProductID, req.MarketID, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return repo.Delete(l.ctx, db, pm.ID)
+	marketRepo := persistence.NewMarketRepository()
+	market, err := marketRepo.FindByID(l.ctx, db, pm.MarketID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := repo.Delete(l.ctx, db, pm.ID); err != nil {
+		return nil, err
+	}
+
+	var compareAtPrice string
+	if pm.CompareAtPrice != nil {
+		compareAtPrice = pm.CompareAtPrice.String()
+	}
+
+	var publishedAt string
+	if pm.PublishedAt != nil {
+		publishedAt = pm.PublishedAt.Format(time.RFC3339)
+	}
+
+	return &types.ProductMarketResp{
+		ID:                  pm.ID,
+		ProductID:           pm.ProductID,
+		MarketID:            pm.MarketID,
+		MarketCode:          market.Code,
+		MarketName:          market.Name,
+		IsEnabled:           pm.IsEnabled,
+		Price:               pm.Price.String(),
+		CompareAtPrice:      compareAtPrice,
+		Currency:            market.Currency,
+		StockAlertThreshold: pm.StockAlertThreshold,
+		PublishedAt:         publishedAt,
+	}, nil
 }

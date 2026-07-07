@@ -73,6 +73,6 @@ service admin-api {
 
 	@doc "从市场移除商品"
 	@handler RemoveFromMarketHandler
-	delete /api/v1/products/:id/markets/:market_id (RemoveFromMarketReq)
+	delete /api/v1/products/:id/markets/:market_id (RemoveFromMarketReq) returns (ProductMarketResp)
 }
 

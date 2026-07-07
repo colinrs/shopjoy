@@ -22,11 +22,11 @@ func RemoveFromMarketHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := product_markets.NewRemoveFromMarketLogic(r.Context(), svcCtx)
-		err := l.RemoveFromMarket(&req)
+		resp, err := l.RemoveFromMarket(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			httpx.Ok(w)
+			httpx.OkJson(w, resp)
 		}
 	}
 }

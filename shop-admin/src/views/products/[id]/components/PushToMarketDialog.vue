@@ -13,7 +13,7 @@
     >
       <el-form-item
         :label="$t('products.market')"
-        prop="markets"
+        prop="selectedMarkets"
         required
       >
         <el-checkbox-group v-model="pushToMarketForm.selectedMarkets">

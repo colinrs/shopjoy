@@ -264,12 +264,21 @@
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('products.categoryId')"
-          width="100"
+          :label="$t('products.categoryPath')"
+          min-width="200"
           align="center"
         >
           <template #default="{ row }">
-            {{ row.category_id || '-' }}
+            <el-tooltip
+              v-if="row.category_id"
+              :content="`${$t('products.deepestCategoryId')}: ${row.category_id}`"
+              placement="top"
+            >
+              <span class="category-path">
+                {{ formatCategoryPath(getCategoryPath(row.category_id)) || row.category_id || '-' }}
+              </span>
+            </el-tooltip>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -1021,6 +1030,27 @@ const getStockType = (stock: number) => {
   return 'success'
 }
 
+const getCategoryPath = (categoryId: string): CategoryTree[] => {
+  const findPath = (nodes: CategoryTree[], path: CategoryTree[]): CategoryTree[] | null => {
+    for (const node of nodes) {
+      if (node.id === categoryId) {
+        return [...path, node]
+      }
+      if (node.children?.length) {
+        const result = findPath(node.children, [...path, node])
+        if (result) return result
+      }
+    }
+    return null
+  }
+  return findPath(categories.value, []) || []
+}
+
+const formatCategoryPath = (path: CategoryTree[]): string => {
+  if (!path.length) return ''
+  return path.map(category => category.name).join(' -> ')
+}
+
 const handleSearch = () => {
   currentPage.value = 1
   loadProducts()
@@ -1112,11 +1142,11 @@ const handleCommand = async (cmd: string, row: Product) => {
           is_matrix_product: row.is_matrix_product || false,
           hs_code: row.hs_code || '',
           coo: row.coo || '',
-          weight: row.weight || '',
+          weight: parseFloat(row.weight) || 0,
           weight_unit: row.weight_unit || 'kg',
-          length: row.length || '',
-          width: row.width || '',
-          height: row.height || '',
+          length: parseFloat(row.length) || 0,
+          width: parseFloat(row.width) || 0,
+          height: parseFloat(row.height) || 0,
           dangerous_goods: row.dangerous_goods || []
         })
         ElMessage.success(t('products.copySuccess'))
@@ -1345,11 +1375,11 @@ const handleSave = async () => {
           is_matrix_product: productForm.is_matrix_product,
           hs_code: productForm.hs_code,
           coo: productForm.coo,
-          weight: productForm.weight,
+          weight: parseFloat(productForm.weight) || 0,
           weight_unit: productForm.weight_unit,
-          length: productForm.length,
-          width: productForm.width,
-          height: productForm.height,
+          length: parseFloat(productForm.length) || 0,
+          width: parseFloat(productForm.width) || 0,
+          height: parseFloat(productForm.height) || 0,
           dangerous_goods: productForm.dangerous_goods
         })
         dialogVisible.value = false
@@ -1656,6 +1686,16 @@ onMounted(() => {
   color: #F59E0B;
   margin-top: 8px;
   line-height: 1.4;
+}
+
+.category-path {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #374151;
+  font-size: 13px;
 }
 
 /* Pagination */

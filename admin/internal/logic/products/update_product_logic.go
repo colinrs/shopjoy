@@ -68,7 +68,9 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 		return nil, err
 	}
 
-	return convertToProductDetailResp(productResp), nil
+	resp = convertToProductDetailResp(productResp)
+	resp.CategoryPath = buildCategoryPath(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), productResp.CategoryID)
+	return resp, nil
 }
 
 func parseDecimal(f float64) decimal.Decimal {
