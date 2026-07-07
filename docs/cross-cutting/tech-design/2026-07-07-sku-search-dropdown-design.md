@@ -45,15 +45,19 @@ GET /api/v1/skus/search?keyword={keyword}&page={page}&page_size={page_size}
 
 ```json
 {
-  "list": [
-    {
-      "sku_code": "SKU-RED-001",
-      "product_id": "10001",
-      "product_name": "示例商品",
-      "safety_stock": 50
-    }
-  ],
-  "total": 128
+  "code": 0,
+  "message": "",
+  "data": {
+    "list": [
+      {
+        "sku_code": "SKU-RED-001",
+        "product_id": "10001",
+        "product_name": "示例商品",
+        "safety_stock": 50
+      }
+    ],
+    "total": 128
+  }
 }
 ```
 
