@@ -2432,5 +2432,8 @@
     "viewPermissionsTitle": "查看权限",
     "noPermissions": "暂无权限",
     "close": "关闭"
+  },
+  "sidebar": {
+    "loadBadgesFailed": "加载侧边栏角标失败"
   }
 }

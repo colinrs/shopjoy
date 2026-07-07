@@ -392,6 +392,9 @@ import {
   Setting, SwitchButton, Moon, Sunny, ChatDotRound, Warning
 } from '@element-plus/icons-vue'
 import { useLocale, t } from '@/plugins/i18n'
+import { getOrderStatusDistribution } from '@/api/dashboard'
+import { getFulfillmentSummary } from '@/api/fulfillment'
+import { getReviewStats } from '@/api/review'
 
 const { locale } = useLocale()
 
@@ -433,9 +436,27 @@ const isCollapse = ref(false)
 const searchQuery = ref('')
 const notificationVisible = ref(false)
 const hasNewData = ref(true)
-const pendingOrders = ref(5)
-const pendingRefunds = ref(8)
-const pendingReviews = ref(12)
+const pendingOrders = ref(0)
+const pendingRefunds = ref(0)
+const pendingReviews = ref(0)
+
+const loadSidebarBadges = async () => {
+  try {
+    const [orderDist, fulfillment, reviewStats] = await Promise.all([
+      getOrderStatusDistribution(),
+      getFulfillmentSummary(),
+      getReviewStats()
+    ])
+
+    pendingOrders.value =
+      orderDist.list.find(item => item.status === 'pending_payment')?.count ?? 0
+    pendingRefunds.value = fulfillment.pending_refund ?? 0
+    pendingReviews.value = reviewStats.pending_reviews ?? 0
+  } catch (error) {
+    // Sidebar badge is decorative; fail silently and keep previous values
+    console.warn('Failed to load sidebar badges:', error)
+  }
+}
 const isDarkMode = ref(false)
 
 const notifications = ref([
@@ -523,6 +544,7 @@ const goToSettings = () => {
 onMounted(() => {
   initTheme()
   initTargetTenantId()
+  loadSidebarBadges()
 })
 </script>
 

@@ -2432,5 +2432,8 @@
     "viewPermissionsTitle": "View Permissions",
     "noPermissions": "No permissions",
     "close": "Close"
+  },
+  "sidebar": {
+    "loadBadgesFailed": "Failed to load sidebar badges"
   }
 }
