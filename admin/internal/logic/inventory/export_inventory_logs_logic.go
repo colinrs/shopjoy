@@ -46,23 +46,12 @@ func (l *ExportInventoryLogsLogic) ExportInventoryLogs(req *types.GetInventoryLo
 			Page:     1,
 			PageSize: 10000, // Limit for export
 		},
+		ProductID:  req.ProductID,
 		SKUCode:    req.SKUCode,
 		ChangeType: req.Type,
 	}
 
-	var logs []*product.InventoryLog
-	var total int64
-	var err error
-
-	if req.ProductID > 0 {
-		logs, total, err = l.svcCtx.InventoryLogRepo.FindByProduct(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ProductID, query)
-	} else if req.SKUCode != "" {
-		logs, total, err = l.svcCtx.InventoryLogRepo.FindBySKU(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.SKUCode, query)
-	} else {
-		// No filter - get all (limited)
-		logs, total, err = l.svcCtx.InventoryLogRepo.FindAll(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
-	}
-
+	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
 	if err != nil {
 		return err
 	}

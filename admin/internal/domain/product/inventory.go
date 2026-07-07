@@ -113,14 +113,15 @@ type WarehouseInventoryRepository interface {
 // InventoryLogRepository interface
 type InventoryLogRepository interface {
 	Create(ctx context.Context, db *gorm.DB, log *InventoryLog) error
-	FindBySKU(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, skuCode string, query InventoryLogQuery) ([]*InventoryLog, int64, error)
-	FindByProduct(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64, query InventoryLogQuery) ([]*InventoryLog, int64, error)
-	FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query InventoryLogQuery) ([]*InventoryLog, int64, error)
+	Find(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query InventoryLogQuery) ([]*InventoryLog, int64, error)
 }
 
-// InventoryLogQuery for querying inventory logs
+// InventoryLogQuery for querying inventory logs.
+// Optional fields (ProductID, SKUCode, ChangeType) are filter conditions;
+// when zero-valued, no filter is applied for that field.
 type InventoryLogQuery struct {
 	shared.PageQuery
+	ProductID  int64
 	SKUCode    string
 	ChangeType string
 	StartTime  time.Time

@@ -38,25 +38,12 @@ func (l *GetInventoryLogsLogic) GetInventoryLogs(req *types.GetInventoryLogsReq)
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
+		ProductID:  req.ProductID,
 		SKUCode:    req.SKUCode,
 		ChangeType: req.Type,
 	}
 
-	var logs []*product.InventoryLog
-	var total int64
-
-	if req.ProductID > 0 {
-		logs, total, err = l.svcCtx.InventoryLogRepo.FindByProduct(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ProductID, query)
-	} else if req.SKUCode != "" {
-		logs, total, err = l.svcCtx.InventoryLogRepo.FindBySKU(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.SKUCode, query)
-	} else {
-		// Return empty result if no filter
-		return &types.ListInventoryLogsResp{
-			List:  []*types.InventoryLogResp{},
-			Total: 0,
-		}, nil
-	}
-
+	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
 	if err != nil {
 		return nil, err
 	}
