@@ -55,10 +55,13 @@ func (l *ListRefundsLogic) ListRefunds(req *types.ListRefundsReq) (resp *types.L
 		PageSize:   req.PageSize,
 		OrderID:    req.OrderID,
 		UserID:     req.UserID,
-		Status:     fulfillment.ParseRefundStatus(req.Status),
 		ReasonType: req.ReasonType,
 		StartTime:  startTime,
 		EndTime:    endTime,
+	}
+	if req.Status != "" {
+		status := fulfillment.ParseRefundStatus(req.Status)
+		queryReq.Status = &status
 	}
 
 	listResp, err := l.svcCtx.RefundApp.ListRefunds(l.ctx, shared.TenantID(tenantID), queryReq)

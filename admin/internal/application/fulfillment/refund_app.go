@@ -49,12 +49,13 @@ type RefundListResponse struct {
 
 // QueryRefundRequest represents the refund query request
 type QueryRefundRequest struct {
-	Page       int
-	PageSize   int
-	RefundNo   string
-	OrderID    int64
-	UserID     int64
-	Status     fulfillment.RefundStatus
+	Page     int
+	PageSize int
+	RefundNo string
+	OrderID  int64
+	UserID   int64
+	// Status 为 nil 表示不过滤状态；指向 fulfillment.RefundStatusXxx 表示按该状态过滤。
+	Status     *fulfillment.RefundStatus
 	ReasonType string
 	StartTime  time.Time
 	EndTime    time.Time
@@ -160,12 +161,10 @@ func (a *refundApp) ListRefunds(ctx context.Context, tenantID shared.TenantID, r
 		RefundNo:   req.RefundNo,
 		OrderID:    req.OrderID,
 		UserID:     req.UserID,
+		Status:     req.Status,
 		ReasonType: req.ReasonType,
 		StartTime:  req.StartTime,
 		EndTime:    req.EndTime,
-	}
-	if req.Status.IsValid() {
-		query.Status = req.Status
 	}
 	query.PageQuery.Validate()
 

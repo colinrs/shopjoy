@@ -101,22 +101,26 @@ func (s RefundStatus) IsValid() bool {
 	return s >= RefundStatusPending && s <= RefundStatusCancelled
 }
 
-// ParseRefundStatus parses a string to RefundStatus
+// ParseRefundStatus parses a string to RefundStatus.
+// Accepts both the lowercase enum name (e.g. "pending") and the numeric
+// string form used by the HTTP API and the frontend (e.g. "0"). Unknown
+// values return an invalid sentinel (one past Cancelled) so callers can
+// distinguish "unset filter" from "filter by Pending".
 func ParseRefundStatus(s string) RefundStatus {
 	switch s {
-	case "pending":
+	case "pending", "0":
 		return RefundStatusPending
-	case "approved":
+	case "approved", "1":
 		return RefundStatusApproved
-	case "rejected":
+	case "rejected", "2":
 		return RefundStatusRejected
-	case "completed":
+	case "completed", "3":
 		return RefundStatusCompleted
-	case "cancelled":
+	case "cancelled", "4":
 		return RefundStatusCancelled
-	default:
-		return RefundStatusPending
 	}
+	// Unknown / empty → invalid sentinel so IsValid() returns false.
+	return RefundStatus(int(RefundStatusCancelled) + 1)
 }
 
 // RefundType 退款类型
@@ -623,10 +627,12 @@ type ShipmentQuery struct {
 // RefundQuery 退款查询参数
 type RefundQuery struct {
 	shared.PageQuery
-	RefundNo   string
-	OrderID    int64
-	UserID     int64
-	Status     RefundStatus
+	RefundNo string
+	OrderID  int64
+	UserID   int64
+	// Status 为 nil 表示不过滤状态；指向 RefundStatusXxx 表示按该状态过滤。
+	// 使用指针是为了区分"未指定"与"值为 0（Pending）"。
+	Status     *RefundStatus
 	ReasonType string
 	StartTime  time.Time
 	EndTime    time.Time

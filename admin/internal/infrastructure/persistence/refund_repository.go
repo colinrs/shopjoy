@@ -211,8 +211,8 @@ func (r *refundRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID sha
 		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
 	}
 
-	if query.Status.IsValid() {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil && query.Status.IsValid() {
+		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}
 	if !query.StartTime.IsZero() {
 		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
@@ -261,8 +261,8 @@ func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 	if query.UserID > 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
 	}
-	if query.Status.IsValid() {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil && query.Status.IsValid() {
+		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}
 	if query.ReasonType != "" {
 		dbQuery = dbQuery.Where("reason_type = ?", query.ReasonType)

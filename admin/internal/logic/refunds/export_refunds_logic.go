@@ -59,10 +59,13 @@ func (l *ExportRefundsLogic) ExportRefunds(req *types.ExportRefundsReq) error {
 		Page:       1,
 		PageSize:   10001, // Check if exceeds limit
 		RefundNo:   req.RefundNo,
-		Status:     fulfillment.ParseRefundStatus(req.Status),
 		ReasonType: req.ReasonType,
 		StartTime:  startTime,
 		EndTime:    endTime,
+	}
+	if req.Status != "" {
+		status := fulfillment.ParseRefundStatus(req.Status)
+		queryReq.Status = &status
 	}
 
 	// Get refunds for export
