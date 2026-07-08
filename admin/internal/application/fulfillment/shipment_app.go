@@ -54,12 +54,13 @@ type UpdateShipmentRequest struct {
 
 // QueryShipmentRequest 查询发货单请求
 type QueryShipmentRequest struct {
-	Page              int
-	PageSize          int
-	ShipmentNo        string
-	OrderID           int64
-	TrackingNo        string
-	Status            fulfillment.ShipmentStatus
+	Page       int
+	PageSize   int
+	ShipmentNo string
+	OrderID    int64
+	TrackingNo string
+	// Status 为 nil 表示不过滤状态；指向 ShipmentStatusXxx 表示按该状态过滤。
+	Status            *fulfillment.ShipmentStatus
 	CarrierCode       string
 	FulfillmentStatus int8
 	StartTime         time.Time

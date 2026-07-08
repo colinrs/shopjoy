@@ -210,8 +210,8 @@ func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
 	}
-	if query.Status.IsValid() {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil && query.Status.IsValid() {
+		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}
 	if query.CarrierCode != "" {
 		dbQuery = dbQuery.Where("carrier_code = ?", query.CarrierCode)

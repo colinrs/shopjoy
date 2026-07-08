@@ -52,9 +52,10 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 		CarrierCode: req.CarrierCode,
 	}
 
-	// Parse status - convert from string to domain enum
+	// Parse status - convert from string to domain enum pointer
 	if req.Status != "" {
-		queryReq.Status = fulfillment.ParseShipmentStatus(req.Status)
+		status := fulfillment.ParseShipmentStatus(req.Status)
+		queryReq.Status = &status
 	}
 
 	// Parse start time

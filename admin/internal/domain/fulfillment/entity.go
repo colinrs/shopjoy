@@ -610,8 +610,10 @@ func (r *Refund) CanCancel() bool {
 // ShipmentQuery 发货单查询参数
 type ShipmentQuery struct {
 	shared.PageQuery
-	OrderID     int64
-	Status      ShipmentStatus
+	OrderID int64
+	// Status 为 nil 表示不过滤状态；指向 ShipmentStatusXxx 表示按该状态过滤。
+	// 使用指针是为了区分"未指定"与"值为 0（Pending）"。
+	Status      *ShipmentStatus
 	CarrierCode string
 	TrackingNo  string
 	StartTime   time.Time
