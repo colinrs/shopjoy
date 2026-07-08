@@ -72,6 +72,7 @@ type ShipmentResponse struct {
 	ID           int64                   `json:"id"`
 	ShipmentNo   string                  `json:"shipment_no"`
 	OrderID      int64                   `json:"order_id"`
+	OrderNo      string                  `json:"order_no"`
 	Status       int                     `json:"status"`
 	StatusText   string                  `json:"status_text"`
 	Carrier      string                  `json:"carrier"`
@@ -161,6 +162,7 @@ type shipmentApp struct {
 	shipmentRepo     fulfillment.ShipmentRepository
 	shipmentItemRepo fulfillment.ShipmentItemRepository
 	carrierRepo      fulfillment.CarrierRepository
+	orderRepo        fulfillment.OrderRepository
 	idGen            snowflake.Snowflake
 }
 
@@ -170,6 +172,7 @@ func NewShipmentApp(
 	shipmentRepo fulfillment.ShipmentRepository,
 	shipmentItemRepo fulfillment.ShipmentItemRepository,
 	carrierRepo fulfillment.CarrierRepository,
+	orderRepo fulfillment.OrderRepository,
 	idGen snowflake.Snowflake,
 ) ShipmentApp {
 	return &shipmentApp{
@@ -177,6 +180,7 @@ func NewShipmentApp(
 		shipmentRepo:     shipmentRepo,
 		shipmentItemRepo: shipmentItemRepo,
 		carrierRepo:      carrierRepo,
+		orderRepo:        orderRepo,
 		idGen:            idGen,
 	}
 }
@@ -277,7 +281,8 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, tenantID shared.Tenant
 		return nil, err
 	}
 
-	return toShipmentResponse(result, carrier), nil
+	orderNo := a.lookupOrderNo(ctx, tenantID, result.OrderID)
+	return toShipmentResponse(result, carrier, orderNo), nil
 }
 
 func (a *shipmentApp) BatchCreateShipments(ctx context.Context, tenantID shared.TenantID, userID int64, carrierCode, carrierName string, shipments []BatchShipmentItem) (*BatchShipmentResult, error) {
@@ -344,7 +349,8 @@ func (a *shipmentApp) GetShipment(ctx context.Context, tenantID shared.TenantID,
 		log.Printf("GetShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
 
-	return toShipmentResponse(shipment, carrier), nil
+	orderNo := a.lookupOrderNo(ctx, tenantID, shipment.OrderID)
+	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
 func (a *shipmentApp) ListShipments(ctx context.Context, tenantID shared.TenantID, req QueryShipmentRequest) (*ShipmentListResponse, error) {
@@ -403,11 +409,22 @@ func (a *shipmentApp) ListShipments(ctx context.Context, tenantID shared.TenantI
 		carriersMap = make(map[string]*fulfillment.Carrier)
 	}
 
+	// Batch load orders to enrich shipments with order_no (avoid N+1)
+	orderIDs := make([]int64, 0, len(shipments))
+	seenOrderIDs := make(map[int64]bool)
+	for _, s := range shipments {
+		if s.OrderID != 0 && !seenOrderIDs[s.OrderID] {
+			orderIDs = append(orderIDs, s.OrderID)
+			seenOrderIDs[s.OrderID] = true
+		}
+	}
+	orderNoMap := a.lookupOrderNos(ctx, tenantID, orderIDs)
+
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
 		s.Items = itemsMap[s.ID]
 		carrier := carriersMap[s.CarrierCode]
-		list[i] = toShipmentResponse(s, carrier)
+		list[i] = toShipmentResponse(s, carrier, orderNoMap[s.OrderID])
 	}
 
 	return &ShipmentListResponse{
@@ -467,7 +484,8 @@ func (a *shipmentApp) UpdateShipment(ctx context.Context, tenantID shared.Tenant
 	if err != nil {
 		log.Printf("UpdateShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
-	return toShipmentResponse(shipment, carrier), nil
+	orderNo := a.lookupOrderNo(ctx, tenantID, shipment.OrderID)
+	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
 func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error) {
@@ -517,7 +535,8 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.
 	if err != nil {
 		log.Printf("UpdateShipmentStatus: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
-	return toShipmentResponse(shipment, carrier), nil
+	orderNo := a.lookupOrderNo(ctx, tenantID, shipment.OrderID)
+	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
 func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID int64) ([]*ShipmentResponse, error) {
@@ -558,11 +577,14 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.Ten
 		carriersMap = make(map[string]*fulfillment.Carrier)
 	}
 
+	// All shipments share the same orderID — one lookup is enough.
+	orderNo := a.lookupOrderNo(ctx, tenantID, orderID)
+
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
 		s.Items = itemsMap[s.ID]
 		carrier := carriersMap[s.CarrierCode]
-		list[i] = toShipmentResponse(s, carrier)
+		list[i] = toShipmentResponse(s, carrier, orderNo)
 	}
 
 	return list, nil
@@ -598,11 +620,14 @@ func (a *shipmentApp) CancelShipment(ctx context.Context, tenantID shared.Tenant
 		log.Printf("CancelShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
 
-	return toShipmentResponse(shipment, carrier), nil
+	orderNo := a.lookupOrderNo(ctx, tenantID, shipment.OrderID)
+	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
-// toShipmentResponse 转换为响应DTO
-func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *ShipmentResponse {
+// toShipmentResponse 转换为响应DTO.
+// orderNo comes from the related Order entity (loaded by callers to avoid N+1).
+// Pass an empty string when no order is associated (e.g., orphaned records).
+func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier, orderNo string) *ShipmentResponse {
 	items := make([]*ShipmentItemResponse, len(s.Items))
 	for i, item := range s.Items {
 		items[i] = &ShipmentItemResponse{
@@ -627,6 +652,7 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		ID:           s.ID,
 		ShipmentNo:   s.ShipmentNo,
 		OrderID:      s.OrderID,
+		OrderNo:      orderNo,
 		Status:       int(s.Status),
 		StatusText:   s.Status.String(),
 		Carrier:      s.Carrier,
@@ -643,6 +669,39 @@ func toShipmentResponse(s *fulfillment.Shipment, carrier *fulfillment.Carrier) *
 		CreatedAt:    s.CreatedAt,
 		UpdatedAt:    s.UpdatedAt,
 	}
+}
+
+// lookupOrderNo returns the order_no for a single order, or "" if the order
+// is missing. Used at the read boundary to enrich shipment responses.
+func (a *shipmentApp) lookupOrderNo(ctx context.Context, tenantID shared.TenantID, orderID int64) string {
+	if orderID == 0 {
+		return ""
+	}
+	order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, orderID)
+	if err != nil || order == nil {
+		return ""
+	}
+	return order.OrderNo
+}
+
+// lookupOrderNos batch-loads orders to avoid N+1 queries on list endpoints.
+// Returns a map keyed by order ID; missing orders are omitted.
+func (a *shipmentApp) lookupOrderNos(ctx context.Context, tenantID shared.TenantID, orderIDs []int64) map[int64]string {
+	result := make(map[int64]string, len(orderIDs))
+	if len(orderIDs) == 0 {
+		return result
+	}
+	for _, id := range orderIDs {
+		if id == 0 {
+			continue
+		}
+		order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, id)
+		if err != nil || order == nil {
+			continue
+		}
+		result[id] = order.OrderNo
+	}
+	return result
 }
 
 // FormatMoneyToInt64 parses a money string to int64 (cents)

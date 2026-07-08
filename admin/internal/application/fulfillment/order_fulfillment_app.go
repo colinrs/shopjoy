@@ -259,7 +259,7 @@ func (a *orderFulfillmentApp) ListOrders(ctx context.Context, tenantID shared.Te
 	for i, o := range orders {
 		detail := toOrderFulfillmentDetail(o)
 		detail.Items = toOrderFulfillmentItems(itemsMap[o.ID])
-		detail.Shipments = buildShipmentResponses(shipmentMap[o.ID], shipmentItemsMap, carrierMap)
+		detail.Shipments = buildShipmentResponses(shipmentMap[o.ID], shipmentItemsMap, carrierMap, o.OrderNo)
 		detail.Refund = pickLatestRefund(refundMap[o.ID])
 		list[i] = detail
 	}
@@ -377,7 +377,7 @@ func (a *orderFulfillmentApp) loadAndAttachShipments(ctx context.Context, tenant
 	shipmentItemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
 	carrierMap, _ := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
 
-	detail.Shipments = buildShipmentResponses(shipments, shipmentItemsMap, carrierMap)
+	detail.Shipments = buildShipmentResponses(shipments, shipmentItemsMap, carrierMap, detail.OrderNo)
 	return nil
 }
 
@@ -513,7 +513,12 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.Ten
 		return nil, err
 	}
 
-	return toShipmentResponse(result, carrier), nil
+	// Look up order_no so the response includes it (used by frontend detail page)
+	var orderNo string
+	if order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, result.OrderID); err == nil && order != nil {
+		orderNo = order.OrderNo
+	}
+	return toShipmentResponse(result, carrier, orderNo), nil
 }
 
 func (a *orderFulfillmentApp) GetFulfillmentSummary(ctx context.Context, tenantID shared.TenantID) (*FulfillmentSummary, error) {
@@ -728,11 +733,14 @@ func toOrderFulfillmentDetail(o *fulfillment.Order) *OrderFulfillmentDetail {
 
 // buildShipmentResponses converts already-loaded shipments to DTOs using
 // the pre-loaded shipment-items map (keyed by shipment ID) and carriers map
-// (keyed by carrier code). Returns nil when shipments is empty.
+// (keyed by carrier code). orderNo is provided by the caller because all
+// shipments in a single call share the same parent order — avoids an extra
+// query per shipment. Returns nil when shipments is empty.
 func buildShipmentResponses(
 	shipments []*fulfillment.Shipment,
 	shipmentItemsMap map[int64][]fulfillment.ShipmentItem,
 	carrierMap map[string]*fulfillment.Carrier,
+	orderNo string,
 ) []*ShipmentResponse {
 	if len(shipments) == 0 {
 		return nil
@@ -740,7 +748,7 @@ func buildShipmentResponses(
 	result := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
 		s.Items = shipmentItemsMap[s.Model.ID]
-		result[i] = toShipmentResponse(s, carrierMap[s.CarrierCode])
+		result[i] = toShipmentResponse(s, carrierMap[s.CarrierCode], orderNo)
 	}
 	return result
 }

@@ -81,15 +81,34 @@ func (r *shipmentItemRepo) BatchCreate(ctx context.Context, db *gorm.DB, items [
 	return db.WithContext(ctx).Create(&models).Error
 }
 
-// FindByShipmentID finds all items for a shipment with tenant isolation
+// FindByShipmentID finds all items for a shipment with tenant isolation.
+// Joins order_items so product_name / sku_name / image are populated. The
+// shipment_items table does not store these columns — order_items is the
+// single source of truth (NULLIF keeps blank order values from leaking out).
 func (r *shipmentItemRepo) FindByShipmentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentID int64) ([]fulfillment.ShipmentItem, error) {
-	query := db.WithContext(ctx).Where("shipment_id = ?", shipmentID)
+	query := db.WithContext(ctx).
+		Table("shipment_items si").
+		Select(`si.id              AS id,
+		        si.tenant_id       AS tenant_id,
+		        si.shipment_id     AS shipment_id,
+		        si.order_item_id   AS order_item_id,
+		        si.product_id      AS product_id,
+		        si.sku_id          AS sku_id,
+		        NULLIF(oi.product_name, '') AS product_name,
+		        NULLIF(oi.sku_name, '')     AS sku_name,
+		        NULLIF(oi.image, '')        AS image,
+		        si.quantity        AS quantity,
+		        si.created_at      AS created_at`).
+		Joins("LEFT JOIN order_items oi ON oi.id = si.order_item_id AND oi.deleted_at IS NULL").
+		Where("si.shipment_id = ?", shipmentID).
+		Where("si.deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
+		query = query.Where("si.tenant_id = ?", tenantID.Int64())
 	}
+
 	var models []shipmentItemModel
-	err := query.Order("id ASC").Find(&models).Error
+	err := query.Order("si.id ASC").Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
@@ -132,20 +151,38 @@ func (r *shipmentItemRepo) DeleteByShipmentID(ctx context.Context, db *gorm.DB, 
 }
 
 // FindByShipmentIDs finds all items for multiple shipments with tenant isolation
-// Returns a map keyed by shipment ID
+// Returns a map keyed by shipment ID.
+// Joins order_items so product_name / sku_name / image are populated. The
+// shipment_items table does not store these columns — order_items is the
+// single source of truth (NULLIF keeps blank order values from leaking out).
 func (r *shipmentItemRepo) FindByShipmentIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentIDs []int64) (map[int64][]fulfillment.ShipmentItem, error) {
 	if len(shipmentIDs) == 0 {
 		return make(map[int64][]fulfillment.ShipmentItem), nil
 	}
 
-	query := db.WithContext(ctx).Where("shipment_id IN ?", shipmentIDs)
+	query := db.WithContext(ctx).
+		Table("shipment_items si").
+		Select(`si.id              AS id,
+		        si.tenant_id       AS tenant_id,
+		        si.shipment_id     AS shipment_id,
+		        si.order_item_id   AS order_item_id,
+		        si.product_id      AS product_id,
+		        si.sku_id          AS sku_id,
+		        NULLIF(oi.product_name, '') AS product_name,
+		        NULLIF(oi.sku_name, '')     AS sku_name,
+		        NULLIF(oi.image, '')        AS image,
+		        si.quantity        AS quantity,
+		        si.created_at      AS created_at`).
+		Joins("LEFT JOIN order_items oi ON oi.id = si.order_item_id AND oi.deleted_at IS NULL").
+		Where("si.shipment_id IN ?", shipmentIDs).
+		Where("si.deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
+		query = query.Where("si.tenant_id = ?", tenantID.Int64())
 	}
 
 	var models []shipmentItemModel
-	err := query.Order("id ASC").Find(&models).Error
+	err := query.Order("si.id ASC").Find(&models).Error
 	if err != nil {
 		return nil, err
 	}

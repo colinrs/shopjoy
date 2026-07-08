@@ -6,7 +6,6 @@ import (
 	"time"
 
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
-	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/utils"
 )
@@ -28,11 +27,17 @@ func toShipmentDetailResp(s *appfulfillment.ShipmentResponse) *types.ShipmentDet
 		}
 	}
 
+	// Status is returned as a numeric string ("0"-"5") to match the API spec
+	// (admin/desc/fulfillment.api comment) and the frontend TS type
+	// ShipmentStatus in shop-admin/src/api/fulfillment.ts. We deliberately
+	// do NOT use ShipmentStatus(s.Status).String() here — that returns
+	// text values like "delivered" which break the page's === comparisons.
 	return &types.ShipmentDetailResp{
 		ID:           s.ID,
 		ShipmentNo:   s.ShipmentNo,
 		OrderID:      s.OrderID,
-		Status:       fulfillment.ShipmentStatus(s.Status).String(),
+		OrderNo:      s.OrderNo,
+		Status:       strconv.Itoa(s.Status),
 		Carrier:      s.Carrier,
 		CarrierCode:  s.CarrierCode,
 		TrackingNo:   s.TrackingNo,

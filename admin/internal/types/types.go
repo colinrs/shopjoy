@@ -2629,6 +2629,7 @@ type ShipmentDetailResp struct {
 	ID            int64               `json:"id,string"`
 	ShipmentNo    string              `json:"shipment_no"`
 	OrderID       int64               `json:"order_id,string"`
+	OrderNo       string              `json:"order_no"`
 	Status        string              `json:"status"` // 0=pending, 1=shipped, 2=in_transit, 3=delivered, 4=failed, 5=cancelled
 	Carrier       string              `json:"carrier"`
 	CarrierCode   string              `json:"carrier_code"`

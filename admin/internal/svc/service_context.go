@@ -161,7 +161,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	orderItemRepo := persistence.NewOrderItemRepository()
 
 	// Fulfillment application services
-	shipmentApp := appfulfillment.NewShipmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, idGen)
+	shipmentApp := appfulfillment.NewShipmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, orderRepo, idGen)
 	carrierApp := appfulfillment.NewCarrierApp(db, carrierRepo)
 	// Use DefaultOrderValidator until order service integration is complete
 	orderFulfillmentApp := appfulfillment.NewOrderFulfillmentApp(db, shipmentRepo, shipmentItemRepo, carrierRepo, refundRepo, orderRepo, orderItemRepo, idGen, &appfulfillment.DefaultOrderValidator{})
