@@ -182,63 +182,67 @@
         :label="$t('common.actions')"
         width="200"
         fixed="right"
+        align="left"
       >
         <template #default="{ row }">
-          <el-button
-            v-if="canShip(row)"
-            type="primary"
-            size="small"
-            @click="handleShip(row)"
-          >
-            {{ $t('orders.ship') }}
-          </el-button>
-          <el-button
-            v-if="row.status === 'pending_payment'"
-            type="warning"
-            size="small"
-            @click="handleRemind(row)"
-          >
-            {{ $t('orders.remind') }}
-          </el-button>
-          <el-button
-            type="primary"
-            link
-            size="small"
-            @click="handleDetail(row)"
-          >
-            {{ $t('common.detail') }}
-          </el-button>
-          <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+          <div class="action-buttons">
+            <el-button
+              v-if="canShip(row)"
+              type="primary"
+              size="small"
+              @click="handleShip(row)"
+            >
+              {{ $t('orders.ship') }}
+            </el-button>
+            <el-button
+              v-if="row.status === 'pending_payment'"
+              type="warning"
+              size="small"
+              @click="handleRemind(row)"
+            >
+              {{ $t('orders.remind') }}
+            </el-button>
             <el-button
               type="primary"
               link
               size="small"
+              @click="handleDetail(row)"
             >
-              {{ $t('common.more') }}<el-icon class="el-icon--right">
-                <ArrowDown />
-              </el-icon>
+              {{ $t('common.detail') }}
             </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="remark">
-                  <el-icon><Edit /></el-icon>{{ $t('orders.editRemark') }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-if="row.status === 'pending_payment'"
-                  command="adjust"
-                >
-                  <el-icon><PriceTag /></el-icon>{{ $t('orders.adjustPrice') }}
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-if="canCancel(row)"
-                  command="cancel"
-                  divided
-                >
-                  <el-icon><Close /></el-icon>{{ $t('orders.cancelOrder') }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+            <el-dropdown @command="(cmd: string) => handleCommand(cmd, row)">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                class="action-dropdown-trigger"
+              >
+                {{ $t('common.more') }}<el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="remark">
+                    <el-icon><Edit /></el-icon>{{ $t('orders.editRemark') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="row.status === 'pending_payment'"
+                    command="adjust"
+                  >
+                    <el-icon><PriceTag /></el-icon>{{ $t('orders.adjustPrice') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="canCancel(row)"
+                    command="cancel"
+                    divided
+                  >
+                    <el-icon><Close /></el-icon>{{ $t('orders.cancelOrder') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </template>
       </el-table-column>
     </Table>
@@ -513,6 +517,32 @@ defineExpose({
   font-size: 13px;
   color: #6B7280;
   font-family: 'Fira Code', monospace;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.action-buttons .el-button + .el-button {
+  margin-left: 0;
+}
+
+.action-buttons .el-dropdown {
+  margin-left: 0;
+}
+
+.action-dropdown-trigger {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.action-dropdown-trigger .el-icon--right {
+  margin-left: 2px;
 }
 
 /* Tags */
