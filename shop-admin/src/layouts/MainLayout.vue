@@ -449,12 +449,12 @@ const loadSidebarBadges = async () => {
     ])
 
     pendingOrders.value =
-      orderDist.list.find(item => item.status === 'pending_payment')?.count ?? 0
+      orderDist.list.find(item => item.status === 'pending_shipment')?.count ?? 0
     pendingRefunds.value = fulfillment.pending_refund ?? 0
     pendingReviews.value = reviewStats.pending_reviews ?? 0
   } catch (error) {
     // Sidebar badge is decorative; fail silently and keep previous values
-    console.warn('Failed to load sidebar badges:', error)
+    console.warn(t('sidebar.loadBadgesFailed'), error)
   }
 }
 const isDarkMode = ref(false)

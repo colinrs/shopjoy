@@ -496,6 +496,52 @@ func TestSplit(t *testing.T) {
 }
 ```
 
+### 16. Function Length Limit
+
+**Functions should not exceed 80 lines. Long functions are hard to read, test, and maintain.**
+
+```go
+// BAD: 150-line function doing too many things
+func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderFulfillmentDetail, error) {
+    // ... 50 lines of loading shipments, refunds, items
+    // ... 40 lines of building shipments response
+    // ... 30 lines of building refunds response
+    // ... 30 lines of error handling, mapping
+}
+
+// GOOD: Decomposed into focused helpers, each under 80 lines
+func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderFulfillmentDetail, error) {
+    order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, orderID)
+    if err != nil {
+        return nil, err
+    }
+
+    detail := a.buildOrderDetail(ctx, order)
+    if err := a.populateShipments(ctx, detail); err != nil {
+        return nil, err
+    }
+    if err := a.populateRefunds(ctx, detail); err != nil {
+        return nil, err
+    }
+    return detail, nil
+}
+
+func (a *orderFulfillmentApp) buildOrderDetail(ctx context.Context, order *fulfillment.Order) *OrderFulfillmentDetail {
+    // 30 lines, focused on a single responsibility
+}
+```
+
+**Why 80 lines?**
+- Forces single-responsibility principle
+- Easier to write unit tests for focused functions
+- Easier code review (one concern at a time)
+- Easier to extract and reuse
+
+**When to refactor:**
+- Function exceeds 80 lines → extract helper functions
+- Function has more than 3 levels of nesting → extract inner logic
+- Function has multiple unrelated concerns → split by responsibility
+
 ## Common Mistakes
 
 ### Loop Iterator Variables (Go < 1.22)
@@ -631,3 +677,4 @@ Before submitting Go code:
 - [ ] Defer not used in loops (use helper function)
 - [ ] Maps initialized before use
 - [ ] Table-driven tests for multiple test cases
+- [ ] No function exceeds 80 lines (decompose into focused helpers)

@@ -154,6 +154,7 @@ func toOrderFulfillmentDetailResp(o *appfulfillment.OrderFulfillmentDetail) *typ
 		Items:             items,
 		Shipments:         shipments,
 		Refund:            refund,
+		Remark:            o.Remark,
 		PaidAt:            utils.FormatTimeToRFC3339(o.PaidAt),
 		ShippedAt:         utils.FormatTimeToRFC3339(o.ShippedAt),
 		DeliveredAt:       utils.FormatTimeToRFC3339(o.DeliveredAt),

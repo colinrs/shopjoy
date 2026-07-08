@@ -262,9 +262,12 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 
 // UpdateRemark 更新商家备注
 func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64, remark string) error {
-	result := db.WithContext(ctx).Model(&orderModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", orderID, tenantID.Int64()).
-		Update("merchant_remark", remark)
+	query := db.WithContext(ctx).Model(&orderModel{}).Where("id = ? AND deleted_at IS NULL", orderID)
+	if tenantID.Int64() != 0 {
+		query = query.Where("tenant_id = ?", tenantID.Int64())
+	}
+
+	result := query.Update("merchant_remark", remark)
 
 	if result.Error != nil {
 		return result.Error

@@ -424,12 +424,13 @@ type (
 		TotalAmount       string                      `json:"total_amount"`
 		Currency          string                      `json:"currency"`
 		UserID            int64                       `json:"user_id,string"`
-		UserName          string                      `json:"user_name,optional"`
-		UserPhone         string                      `json:"user_phone,optional"`
+		UserName          string                      `json:"user_name,optional"` // mirrors receiver_name
+		UserPhone         string                      `json:"user_phone,optional"` // mirrors receiver_phone
 		ShippingAddress   *OrderShippingAddress       `json:"shipping_address,optional"`
 		Items             []*OrderFulfillmentItemResp `json:"items"`
 		Shipments         []*ShipmentDetailResp       `json:"shipments,optional"`
 		Refund            *RefundDetailResp           `json:"refund,optional"`
+		Remark            string                      `json:"remark,optional"` // 用户备注
 		PaidAt            string                      `json:"paid_at,optional"`
 		ShippedAt         string                      `json:"shipped_at,optional"`
 		DeliveredAt       string                      `json:"delivered_at,optional"`

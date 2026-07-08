@@ -99,6 +99,7 @@ type OrderFulfillmentDetail struct {
 	Items             []*OrderFulfillmentItem
 	Shipments         []*ShipmentResponse
 	Refund            *RefundResponse
+	Remark            string
 	PaidAt            *time.Time
 	ShippedAt         *time.Time
 	DeliveredAt       *time.Time
@@ -231,70 +232,163 @@ func NewOrderFulfillmentApp(
 }
 
 func (a *orderFulfillmentApp) ListOrders(ctx context.Context, tenantID shared.TenantID, req QueryOrderRequest) (*OrderListResponse, error) {
-	// This is a placeholder implementation
-	// In a real implementation, this would query the order service/database
-	// For now, we return an empty list
+	orders, total, err := a.orderRepo.FindList(ctx, a.db, tenantID, buildOrderQuery(req))
+	if err != nil {
+		return nil, err
+	}
+	if len(orders) == 0 {
+		return &OrderListResponse{
+			List:     []*OrderFulfillmentDetail{},
+			Total:    total,
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		}, nil
+	}
+
+	orderIDs := collectOrderIDs(orders)
+	itemsMap, err := a.orderItemRepo.FindByOrderIDs(ctx, a.db, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	shipmentMap := a.loadShipmentsByOrder(ctx, tenantID, orderIDs)
+	shipmentItemsMap, carrierMap := a.preloadShipmentContexts(ctx, tenantID, shipmentMap)
+	refundMap := a.loadRefundsByOrder(ctx, tenantID, orderIDs)
+
+	list := make([]*OrderFulfillmentDetail, len(orders))
+	for i, o := range orders {
+		detail := toOrderFulfillmentDetail(o)
+		detail.Items = toOrderFulfillmentItems(itemsMap[o.ID])
+		detail.Shipments = buildShipmentResponses(shipmentMap[o.ID], shipmentItemsMap, carrierMap)
+		detail.Refund = pickLatestRefund(refundMap[o.ID])
+		list[i] = detail
+	}
+
 	return &OrderListResponse{
-		List:     []*OrderFulfillmentDetail{},
-		Total:    0,
+		List:     list,
+		Total:    total,
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	}, nil
 }
 
+// loadShipmentsByOrder loads shipments for each order. Returns map keyed by
+// orderID. Errors for individual orders are swallowed to avoid failing the
+// whole list. NOTE: This is an N+1 query pattern; fixing it requires adding
+// ShipmentRepository.FindByOrderIDs (separate change, out of scope).
+func (a *orderFulfillmentApp) loadShipmentsByOrder(ctx context.Context, tenantID shared.TenantID, orderIDs []int64) map[int64][]*fulfillment.Shipment {
+	shipmentMap := make(map[int64][]*fulfillment.Shipment, len(orderIDs))
+	for _, orderID := range orderIDs {
+		shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
+		if err != nil {
+			continue
+		}
+		if len(shipments) > 0 {
+			shipmentMap[orderID] = shipments
+		}
+	}
+	return shipmentMap
+}
+
+// preloadShipmentContexts batches the loading of shipment items (keyed by
+// shipment ID) and carriers (keyed by carrier code) across all loaded shipments.
+// Returns empty maps when there are no shipments.
+func (a *orderFulfillmentApp) preloadShipmentContexts(
+	ctx context.Context,
+	tenantID shared.TenantID,
+	shipmentMap map[int64][]*fulfillment.Shipment,
+) (map[int64][]fulfillment.ShipmentItem, map[string]*fulfillment.Carrier) {
+	shipmentItemsMap := make(map[int64][]fulfillment.ShipmentItem)
+	carrierMap := make(map[string]*fulfillment.Carrier)
+
+	if len(shipmentMap) == 0 {
+		return shipmentItemsMap, carrierMap
+	}
+
+	shipmentIDs := make([]int64, 0)
+	carrierCodes := make([]string, 0)
+	for _, shipments := range shipmentMap {
+		for _, s := range shipments {
+			shipmentIDs = append(shipmentIDs, s.Model.ID)
+			carrierCodes = append(carrierCodes, s.CarrierCode)
+		}
+	}
+	shipmentItemsMap, _ = a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
+	carrierMap, _ = a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
+	return shipmentItemsMap, carrierMap
+}
+
+// loadRefundsByOrder loads refunds per order. Returns map keyed by orderID;
+// errors for individual orders are swallowed. Same N+1 caveat as loadShipmentsByOrder.
+func (a *orderFulfillmentApp) loadRefundsByOrder(ctx context.Context, tenantID shared.TenantID, orderIDs []int64) map[int64][]*fulfillment.Refund {
+	refundMap := make(map[int64][]*fulfillment.Refund, len(orderIDs))
+	for _, orderID := range orderIDs {
+		refunds, err := a.refundRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
+		if err != nil {
+			continue
+		}
+		if len(refunds) > 0 {
+			refundMap[orderID] = refunds
+		}
+	}
+	return refundMap
+}
+
 func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderFulfillmentDetail, error) {
-	// Get shipments for the order
-	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
+	order, err := a.orderRepo.FindByID(ctx, a.db, tenantID, orderID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get refunds for the order
-	refunds, err := a.refundRepo.FindByOrderID(ctx, a.db, tenantID, orderID)
+	itemsMap, err := a.orderItemRepo.FindByOrderIDs(ctx, a.db, []int64{orderID})
 	if err != nil {
 		return nil, err
 	}
 
-	// Build response
-	detail := &OrderFulfillmentDetail{
-		OrderID: orderID,
+	detail := toOrderFulfillmentDetail(order)
+	detail.Items = toOrderFulfillmentItems(itemsMap[order.ID])
+
+	if err := a.loadAndAttachShipments(ctx, tenantID, detail); err != nil {
+		return nil, err
+	}
+	if err := a.loadAndAttachRefund(ctx, tenantID, detail); err != nil {
+		return nil, err
+	}
+	return detail, nil
+}
+
+// loadAndAttachShipments loads shipments + their items + carriers, attaching them to detail.Shipments.
+func (a *orderFulfillmentApp) loadAndAttachShipments(ctx context.Context, tenantID shared.TenantID, detail *OrderFulfillmentDetail) error {
+	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, tenantID, detail.OrderID)
+	if err != nil {
+		return err
+	}
+	if len(shipments) == 0 {
+		detail.Shipments = nil
+		return nil
 	}
 
-	// Batch load shipment items to avoid N+1 queries
 	shipmentIDs := make([]int64, len(shipments))
-	for i, s := range shipments {
-		shipmentIDs[i] = s.Model.ID
-	}
-	itemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
-
-	// Batch load carriers to avoid N+1 queries
 	carrierCodes := make([]string, len(shipments))
 	for i, s := range shipments {
+		shipmentIDs[i] = s.Model.ID
 		carrierCodes[i] = s.CarrierCode
 	}
+	shipmentItemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, tenantID, shipmentIDs)
 	carrierMap, _ := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
 
-	// Convert shipments
-	detail.Shipments = make([]*ShipmentResponse, len(shipments))
-	for i, s := range shipments {
-		s.Items = itemsMap[s.Model.ID]
-		carrier := carrierMap[s.CarrierCode]
-		detail.Shipments[i] = toShipmentResponse(s, carrier)
-	}
+	detail.Shipments = buildShipmentResponses(shipments, shipmentItemsMap, carrierMap)
+	return nil
+}
 
-	// Convert refunds
-	if len(refunds) > 0 {
-		// Get the latest refund
-		latestRefund := refunds[0]
-		for _, r := range refunds {
-			if r.Model.CreatedAt.After(latestRefund.Model.CreatedAt) {
-				latestRefund = r
-			}
-		}
-		detail.Refund = toRefundResponse(latestRefund)
+// loadAndAttachRefund loads refunds for the order and attaches the latest one to detail.Refund.
+func (a *orderFulfillmentApp) loadAndAttachRefund(ctx context.Context, tenantID shared.TenantID, detail *OrderFulfillmentDetail) error {
+	refunds, err := a.refundRepo.FindByOrderID(ctx, a.db, tenantID, detail.OrderID)
+	if err != nil {
+		return err
 	}
-
-	return detail, nil
+	detail.Refund = pickLatestRefund(refunds)
+	return nil
 }
 
 func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, tenantID shared.TenantID, userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error) {
@@ -564,4 +658,131 @@ func toRefundResponse(r *fulfillment.Refund) *RefundResponse {
 		CreatedAt:    r.Model.CreatedAt,
 		UpdatedAt:    r.Model.UpdatedAt,
 	}
+}
+
+// toOrderShippingAddress maps the order's receiver fields into a shipping address DTO.
+func toOrderShippingAddress(o *fulfillment.Order) *OrderShippingAddress {
+	return &OrderShippingAddress{
+		ReceiverName:  o.ReceiverName,
+		ReceiverPhone: o.ReceiverPhone,
+		Address:       o.ReceiverAddress,
+		FullAddress:   o.ReceiverAddress,
+	}
+}
+
+// toOrderFulfillmentItem maps a single OrderItem into its DTO form.
+func toOrderFulfillmentItem(item fulfillment.OrderItem) *OrderFulfillmentItem {
+	return &OrderFulfillmentItem{
+		OrderItemID: item.ID,
+		ProductID:   item.ProductID,
+		SKUID:       item.SKUID,
+		ProductName: item.ProductName,
+		SKUName:     item.SKUName,
+		Image:       item.Image,
+		Quantity:    item.Quantity,
+		UnitPrice:   item.UnitPrice,
+		Currency:    item.Currency,
+	}
+}
+
+// toOrderFulfillmentItems maps a slice of OrderItem into DTOs.
+// Returns nil when items is empty so JSON encoding produces "items": null
+// only when expected; callers that need [] can substitute empty slice.
+func toOrderFulfillmentItems(items []fulfillment.OrderItem) []*OrderFulfillmentItem {
+	if len(items) == 0 {
+		return nil
+	}
+	result := make([]*OrderFulfillmentItem, len(items))
+	for i, item := range items {
+		result[i] = toOrderFulfillmentItem(item)
+	}
+	return result
+}
+
+// toOrderFulfillmentDetail builds the base detail (no items, shipments, refund) from an Order.
+// Items, shipments, and refund are attached separately so this mapper can be reused
+// before those related records are loaded.
+func toOrderFulfillmentDetail(o *fulfillment.Order) *OrderFulfillmentDetail {
+	return &OrderFulfillmentDetail{
+		OrderID:           o.ID,
+		OrderNo:           o.OrderNo,
+		Status:            string(o.Status),
+		FulfillmentStatus: int8(o.FulfillmentStatus),
+		FulfillmentText:   o.FulfillmentStatus.Text(),
+		RefundStatus:      int8(o.RefundStatus),
+		RefundText:        o.RefundStatus.Text(),
+		TotalAmount:       o.TotalAmount,
+		Currency:          o.Currency,
+		UserID:            o.UserID,
+		UserName:          o.ReceiverName,  // user_name mirrors receiver_name
+		UserPhone:         o.ReceiverPhone, // user_phone mirrors receiver_phone
+		ShippingAddress:   toOrderShippingAddress(o),
+		Remark:            o.Remark, // 用户备注
+		PaidAt:            o.PaidAt,
+		ShippedAt:         o.ShippedAt,
+		DeliveredAt:       o.DeliveredAt,
+		CreatedAt:         o.Audit.CreatedAt,
+		UpdatedAt:         o.Audit.UpdatedAt,
+	}
+}
+
+// buildShipmentResponses converts already-loaded shipments to DTOs using
+// the pre-loaded shipment-items map (keyed by shipment ID) and carriers map
+// (keyed by carrier code). Returns nil when shipments is empty.
+func buildShipmentResponses(
+	shipments []*fulfillment.Shipment,
+	shipmentItemsMap map[int64][]fulfillment.ShipmentItem,
+	carrierMap map[string]*fulfillment.Carrier,
+) []*ShipmentResponse {
+	if len(shipments) == 0 {
+		return nil
+	}
+	result := make([]*ShipmentResponse, len(shipments))
+	for i, s := range shipments {
+		s.Items = shipmentItemsMap[s.Model.ID]
+		result[i] = toShipmentResponse(s, carrierMap[s.CarrierCode])
+	}
+	return result
+}
+
+// pickLatestRefund returns the most recent refund's DTO, or nil if none exist.
+// "Latest" is defined by the largest CreatedAt timestamp.
+func pickLatestRefund(refunds []*fulfillment.Refund) *RefundResponse {
+	if len(refunds) == 0 {
+		return nil
+	}
+	latest := refunds[0]
+	for _, r := range refunds[1:] {
+		if r.Model.CreatedAt.After(latest.Model.CreatedAt) {
+			latest = r
+		}
+	}
+	return toRefundResponse(latest)
+}
+
+// buildOrderQuery converts a QueryOrderRequest into the repository's OrderQuery.
+func buildOrderQuery(req QueryOrderRequest) fulfillment.OrderQuery {
+	return fulfillment.OrderQuery{
+		PageQuery: shared.PageQuery{
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		},
+		OrderNo:           req.OrderNo,
+		UserID:            req.UserID,
+		UserName:          req.UserName,
+		Status:            fulfillment.OrderStatus(req.Status),
+		FulfillmentStatus: fulfillment.OrderFulfillmentStatus(req.FulfillmentStatus),
+		RefundStatus:      fulfillment.OrderRefundStatus(req.RefundStatus),
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
+	}
+}
+
+// collectOrderIDs extracts the IDs from a slice of orders in order.
+func collectOrderIDs(orders []*fulfillment.Order) []int64 {
+	ids := make([]int64, len(orders))
+	for i, o := range orders {
+		ids[i] = o.ID
+	}
+	return ids
 }
