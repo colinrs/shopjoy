@@ -18,17 +18,17 @@ func NewShipmentItemRepository() fulfillment.ShipmentItemRepository {
 
 // shipmentItemModel represents the database model for ShipmentItem
 type shipmentItemModel struct {
-	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID    int64  `gorm:"column:tenant_id;not null;index"`
-	ShipmentID  int64  `gorm:"column:shipment_id;not null;index"`
-	OrderItemID int64  `gorm:"column:order_item_id;not null;index"`
-	ProductID   int64  `gorm:"column:product_id;not null;index"`
-	SKUID       int64  `gorm:"column:sku_id;not null;index"`
-	ProductName string `gorm:"column:product_name;size:255;not null;default:''"`
-	SKUName     string `gorm:"column:sku_name;size:255;not null;default:''"`
-	Image       string `gorm:"column:image;size:500;not null;default:''"`
-	Quantity    int    `gorm:"column:quantity;not null;default:1"`
-	CreatedAt   int64  `gorm:"column:created_at;not null"`
+	ID          int64     `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID    int64     `gorm:"column:tenant_id;not null;index"`
+	ShipmentID  int64     `gorm:"column:shipment_id;not null;index"`
+	OrderItemID int64     `gorm:"column:order_item_id;not null;index"`
+	ProductID   int64     `gorm:"column:product_id;not null;index"`
+	SKUID       int64     `gorm:"column:sku_id;not null;index"`
+	ProductName string    `gorm:"column:product_name;size:255;not null;default:''"`
+	SKUName     string    `gorm:"column:sku_name;size:255;not null;default:''"`
+	Image       string    `gorm:"column:image;size:500;not null;default:''"`
+	Quantity    int       `gorm:"column:quantity;not null;default:1"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null"`
 }
 
 func (shipmentItemModel) TableName() string {
@@ -39,7 +39,7 @@ func (m *shipmentItemModel) toEntity() fulfillment.ShipmentItem {
 	return fulfillment.ShipmentItem{
 		Model: application.Model{
 			ID:        m.ID,
-			CreatedAt: time.Unix(m.CreatedAt, 0).UTC(),
+			CreatedAt: m.CreatedAt,
 		},
 		TenantID:    shared.TenantID(m.TenantID),
 		ShipmentID:  m.ShipmentID,
@@ -65,7 +65,7 @@ func fromShipmentItemEntity(item fulfillment.ShipmentItem) *shipmentItemModel {
 		SKUName:     item.SKUName,
 		Image:       item.Image,
 		Quantity:    item.Quantity,
-		CreatedAt:   item.Model.CreatedAt.Unix(),
+		CreatedAt:   item.Model.CreatedAt,
 	}
 }
 
