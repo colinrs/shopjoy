@@ -21,8 +21,8 @@ MySQL:
 
 JWT:
   Secret: "ncjancjabjkacam"
-  AccessExpiry: 3600
-  RefreshExpiry: 7200
+  AccessExpiry: 36000000
+  RefreshExpiry: 72000000
 
 StripeWebhookSecret: "aaaa"
 
