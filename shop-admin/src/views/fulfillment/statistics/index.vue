@@ -214,6 +214,7 @@
               <el-button
                 type="primary"
                 link
+                @click="handleViewAllProducts"
               >
                 {{ $t('common.viewAll') }}
               </el-button>
@@ -303,6 +304,7 @@
               <el-button
                 type="primary"
                 link
+                @click="handleViewAllCarriers"
               >
                 {{ $t('common.viewAll') }}
               </el-button>
@@ -361,6 +363,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   Download, RefreshRight, Money, Van, Clock, TrendCharts, PieChart,
@@ -373,6 +376,7 @@ import { downloadFile } from '@/utils/download'
 
 const timeRange = ref('30')
 const chartLoading = ref(false)
+const router = useRouter()
 const trendChartRef = ref<HTMLElement | null>(null)
 const reasonChartRef = ref<HTMLElement | null>(null)
 let trendChart: echarts.ECharts | null = null
@@ -604,6 +608,14 @@ const handleExport = async () => {
     console.error('Export failed:', error)
     // Error message is handled by downloadFile utility
   }
+}
+
+const handleViewAllProducts = () => {
+  router.push('/fulfillment/refunds')
+}
+
+const handleViewAllCarriers = () => {
+  router.push('/fulfillment/shipments')
 }
 
 onMounted(() => {
