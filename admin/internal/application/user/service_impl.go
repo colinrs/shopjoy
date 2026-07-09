@@ -271,7 +271,7 @@ func toUserResponse(u *domain.User) *UserResponse {
 		Avatar:    u.Avatar,
 		Gender:    int(u.Gender),
 		Status:    int(u.Status),
-		CreatedAt: u.Audit.CreatedAt.Format(time.RFC3339),
+		CreatedAt: u.Model.CreatedAt.Format(time.RFC3339),
 	}
 
 	if u.Birthday != nil {
@@ -524,7 +524,7 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID,
 			statusText = "inactive"
 		}
 		csvContent += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
-			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Audit.CreatedAt.Format(time.RFC3339))
+			u.ID, sanitizeCSVField(u.Email), sanitizeCSVField(u.Phone), sanitizeCSVField(u.Name), statusText, u.Model.CreatedAt.Format(time.RFC3339))
 	}
 
 	return []byte(csvContent), nil
@@ -556,8 +556,8 @@ func toUserDetailResponse(u *domain.User) *UserDetailResponse {
 		GenderText:     getGenderText(u.Gender),
 		Status:         int(u.Status),
 		StatusText:     getStatusText(u.Status),
-		CreatedAt:      u.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      u.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:      u.Model.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      u.Model.UpdatedAt.Format(time.RFC3339),
 		LastOrderAt:    "",  // Will be set by caller if needed
 		DefaultAddress: nil, // Will be set by caller if needed
 	}
@@ -583,7 +583,7 @@ func toExtendedUserResponse(u *domain.User) *ExtendedUserResponse {
 		Avatar:     u.Avatar,
 		Status:     int(u.Status),
 		StatusText: getStatusText(u.Status),
-		CreatedAt:  u.Audit.CreatedAt.Format(time.RFC3339),
+		CreatedAt:  u.Model.CreatedAt.Format(time.RFC3339),
 	}
 
 	if u.LastLogin != nil {

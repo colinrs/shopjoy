@@ -270,7 +270,7 @@ func (s *themeService) GetCurrentTheme(ctx context.Context, tenantID shared.Tena
 			IsCurrent:    true,
 		},
 		Config:    *config,
-		ChangedAt: shop.Audit.UpdatedAt.UTC().Format(time.RFC3339),
+		ChangedAt: shop.Model.UpdatedAt.UTC().Format(time.RFC3339),
 		ChangedBy: shop.Audit.UpdatedBy,
 	}, nil
 }

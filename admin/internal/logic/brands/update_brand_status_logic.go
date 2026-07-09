@@ -48,7 +48,7 @@ func (l *UpdateBrandStatusLogic) UpdateBrandStatus(req *types.UpdateBrandStatusR
 	} else {
 		brand.Disable()
 	}
-	brand.Audit.UpdatedAt = time.Now().UTC()
+	brand.Model.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.BrandRepo.Update(l.ctx, l.svcCtx.DB, brand); err != nil {
 		return nil, err

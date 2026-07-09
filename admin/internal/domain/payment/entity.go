@@ -180,7 +180,7 @@ func (p *Payment) MarkSuccess(channelPaymentID string, fee decimal.Decimal, feeC
 	p.TransactionFee = fee
 	p.FeeCurrency = feeCurrency
 	p.PaidAt = &now
-	p.Audit.UpdatedAt = now
+	p.Model.UpdatedAt = now
 	return nil
 }
 
@@ -193,7 +193,7 @@ func (p *Payment) MarkFailed(reason string) error {
 	p.Status = PaymentStatusFailed
 	p.FailedAt = &now
 	p.FailedReason = reason
-	p.Audit.UpdatedAt = now
+	p.Model.UpdatedAt = now
 	return nil
 }
 
@@ -208,7 +208,7 @@ func (p *Payment) MarkRefunded(partial bool) error {
 	} else {
 		p.Status = PaymentStatusRefunded
 	}
-	p.Audit.UpdatedAt = now
+	p.Model.UpdatedAt = now
 	return nil
 }
 

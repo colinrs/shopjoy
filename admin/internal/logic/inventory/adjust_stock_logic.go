@@ -82,7 +82,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 			return nil, code.ErrInventoryInsufficientStock
 		}
 		inventory.AvailableStock = newStock
-		inventory.Audit.UpdatedAt = time.Now().UTC()
+		inventory.Model.UpdatedAt = time.Now().UTC()
 		if err := l.svcCtx.WarehouseInventoryRepo.Update(l.ctx, l.svcCtx.DB, inventory); err != nil {
 			return nil, err
 		}

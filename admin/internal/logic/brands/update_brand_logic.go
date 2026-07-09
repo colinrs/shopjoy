@@ -63,7 +63,7 @@ func (l *UpdateBrandLogic) UpdateBrand(req *types.UpdateBrandReq) (resp *types.B
 	brand.TrademarkCountry = req.TrademarkCountry
 	brand.EnablePage = req.EnablePage
 	brand.Sort = req.Sort
-	brand.Audit.UpdatedAt = time.Now().UTC()
+	brand.Model.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.BrandRepo.Update(l.ctx, l.svcCtx.DB, brand); err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func toBrandDetailResp(brand *product.Brand, productCount int64) *types.BrandDet
 		Sort:             brand.Sort,
 		Status:           int8(brand.Status), // #nosec G115 // status values are small (tinyint range)
 		ProductCount:     productCount,
-		CreatedAt:        brand.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:        brand.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:        brand.Model.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:        brand.Model.UpdatedAt.Format(time.RFC3339),
 	}
 }

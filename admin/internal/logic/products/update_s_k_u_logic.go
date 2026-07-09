@@ -80,7 +80,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 			sku.Status = shared.StatusDisabled
 		}
 	}
-	sku.Audit.UpdatedAt = time.Now().UTC()
+	sku.Model.UpdatedAt = time.Now().UTC()
 
 	// Save
 	if err := l.svcCtx.SKURepo.Update(l.ctx, l.svcCtx.DB, sku); err != nil {
@@ -101,7 +101,7 @@ func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDeta
 		Attributes:     sku.Attributes,
 		Status:         strconv.Itoa(int(sku.Status)),
 		IsLowStock:     sku.IsLowStock(),
-		CreatedAt:      sku.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      sku.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:      sku.Model.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      sku.Model.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

@@ -179,7 +179,7 @@ func toOrderResponse(o *order.Order) *OrderResponse {
 		Currency:       o.Currency,
 		Remark:         o.Remark,
 		ExpireAt:       o.ExpireAt,
-		CreatedAt:      o.Audit.CreatedAt,
+		CreatedAt:      o.Model.CreatedAt,
 		Address: AddressResponse{
 			Name:     o.Address.Name,
 			Phone:    o.Address.Phone,

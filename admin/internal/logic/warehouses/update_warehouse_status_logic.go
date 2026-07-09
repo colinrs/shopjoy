@@ -48,7 +48,7 @@ func (l *UpdateWarehouseStatusLogic) UpdateWarehouseStatus(req *types.UpdateWare
 	} else {
 		warehouse.Disable()
 	}
-	warehouse.Audit.UpdatedAt = time.Now().UTC()
+	warehouse.Model.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.WarehouseRepo.Update(l.ctx, l.svcCtx.DB, warehouse); err != nil {
 		return nil, err

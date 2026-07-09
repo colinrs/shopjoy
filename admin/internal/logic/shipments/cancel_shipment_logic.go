@@ -35,6 +35,11 @@ func (l *CancelShipmentLogic) CancelShipment(req *types.CancelShipmentReq) (resp
 		return nil, code.ErrUnauthorized
 	}
 
+	// Platform admins operate across all tenants; pass tenantID=0 to bypass tenant scoping.
+	if contextx.IsPlatformAdmin(l.ctx) {
+		tenantID = 0
+	}
+
 	// Get user ID from context for audit
 	userID, _ := contextx.GetUserID(l.ctx)
 

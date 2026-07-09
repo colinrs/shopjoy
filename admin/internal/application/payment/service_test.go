@@ -817,7 +817,7 @@ func TestHandleWebhook_ExistingUnprocessedEvent(t *testing.T) {
 			findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 				return &payment.Payment{
 					Model:            application.Model{ID: 1},
-					Status:           payment.PaymentStatusSuccess,
+					Status:           payment.PaymentStatusPending,
 					ChannelPaymentID: "pi_existing",
 				}, nil
 			},
@@ -899,7 +899,7 @@ func TestHandleWebhook_EventCreation(t *testing.T) {
 			findByChannelPaymentIDFunc: func(ctx context.Context, db *gorm.DB, channelPaymentID string) (*payment.Payment, error) {
 				return &payment.Payment{
 					Model:            application.Model{ID: 1},
-					Status:           payment.PaymentStatusSuccess,
+					Status:           payment.PaymentStatusPending,
 					ChannelPaymentID: "pi_create_test",
 				}, nil
 			},

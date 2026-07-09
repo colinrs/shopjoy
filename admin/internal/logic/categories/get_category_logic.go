@@ -61,7 +61,7 @@ func (l *GetCategoryLogic) GetCategory(req *types.GetCategoryReq) (resp *types.C
 		SeoDescription: category.SeoDescription,
 		Status:         int8(category.Status), // #nosec G115 // status values are small (tinyint range)
 		ProductCount:   productCount,
-		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:      category.Model.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      category.Model.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

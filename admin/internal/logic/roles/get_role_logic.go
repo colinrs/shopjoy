@@ -70,8 +70,8 @@ func (l *GetRoleLogic) GetRole(req *types.RoleIDRequest) (resp *types.RoleWithPe
 			Status:      int8(r.Status), // #nosec G115 // status values are small (tinyint range)
 			StatusText:  getStatusText(r.Status),
 			IsSystem:    r.IsSystem,
-			CreatedAt:   r.Audit.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   r.Audit.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:   r.Model.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   r.Model.UpdatedAt.Format(time.RFC3339),
 		},
 		Permissions: permList,
 	}, nil

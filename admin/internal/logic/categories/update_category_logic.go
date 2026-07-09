@@ -61,7 +61,7 @@ func (l *UpdateCategoryLogic) UpdateCategory(req *types.UpdateCategoryReq) (resp
 	category.Image = req.Image
 	category.SeoTitle = req.SeoTitle
 	category.SeoDescription = req.SeoDescription
-	category.Audit.UpdatedAt = time.Now().UTC()
+	category.Model.UpdatedAt = time.Now().UTC()
 
 	if err := l.svcCtx.CategoryRepo.Update(l.ctx, l.svcCtx.DB, category); err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (l *UpdateCategoryLogic) UpdateCategory(req *types.UpdateCategoryReq) (resp
 		SeoDescription: category.SeoDescription,
 		Status:         int8(category.Status), // #nosec G115 // status values are small (tinyint range)
 		ProductCount:   productCount,
-		CreatedAt:      category.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      category.Audit.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:      category.Model.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      category.Model.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

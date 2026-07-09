@@ -58,8 +58,8 @@ func (l *ListSKUsByProductLogic) ListSKUsByProduct(req *types.ListSKUsByProductR
 			Attributes:     sku.Attributes,
 			Status:         strconv.Itoa(int(sku.Status)),
 			IsLowStock:     sku.IsLowStock(),
-			CreatedAt:      sku.Audit.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:      sku.Audit.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:      sku.Model.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:      sku.Model.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

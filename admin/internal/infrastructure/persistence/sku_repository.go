@@ -83,8 +83,8 @@ func fromSKUEntity(sku *product.SKU) *skuModel {
 		PreSaleEnabled: sku.PreSaleEnabled,
 		Attributes:     string(attributesJSON),
 		Status:         int(sku.Status),
-		CreatedAt:      sku.Audit.CreatedAt,
-		UpdatedAt:      sku.Audit.UpdatedAt,
+		CreatedAt:      sku.Model.CreatedAt,
+		UpdatedAt:      sku.Model.UpdatedAt,
 	}
 }
 
