@@ -131,6 +131,6 @@ func toOperationLogItem(l *user.OperationLog) *OperationLogListItem {
 		Reason:       l.Reason,
 		IPAddress:    l.IPAddress,
 		UserAgent:    l.UserAgent,
-		CreatedAt:    l.Audit.CreatedAt.Format(time.RFC3339),
+		CreatedAt:    l.CreatedAt.Format(time.RFC3339),
 	}
 }

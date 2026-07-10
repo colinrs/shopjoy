@@ -23,6 +23,14 @@ func (r *OperationLogRepositoryImpl) Create(ctx context.Context, db *gorm.DB, lo
 	if log.UpdatedAt.IsZero() {
 		log.UpdatedAt = now
 	}
+	// AuditInfo is embedded — populate it so both the column data and the
+	// in-memory entity carry the timestamps callers read via l.Audit.CreatedAt.
+	if log.Audit.CreatedAt.IsZero() {
+		log.Audit.CreatedAt = now
+	}
+	if log.Audit.UpdatedAt.IsZero() {
+		log.Audit.UpdatedAt = now
+	}
 	return db.WithContext(ctx).Create(log).Error
 }
 
