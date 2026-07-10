@@ -62,3 +62,4 @@ __debug_*
 .understand-anything
 # Added by code-review-graph
 .code-review-graph/
+.gstack/
