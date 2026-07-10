@@ -2,7 +2,6 @@ package products
 
 import (
 	"context"
-	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -43,15 +42,7 @@ func (l *ListProductLocalizationsByProductLogic) ListProductLocalizationsByProdu
 	// Convert to response
 	list := make([]*types.ProductLocalizationResp, len(localizations))
 	for i, loc := range localizations {
-		list[i] = &types.ProductLocalizationResp{
-			ID:           loc.ID,
-			ProductID:    loc.ProductID,
-			LanguageCode: loc.LanguageCode,
-			Name:         loc.Name,
-			Description:  loc.Description,
-			CreatedAt:    loc.AuditInfo.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:    loc.AuditInfo.UpdatedAt.Format(time.RFC3339),
-		}
+		list[i] = toProductLocalizationResp(loc)
 	}
 
 	return &types.ListProductLocalizationsResp{

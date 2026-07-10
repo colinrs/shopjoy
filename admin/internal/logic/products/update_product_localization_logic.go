@@ -47,20 +47,12 @@ func (l *UpdateProductLocalizationLogic) UpdateProductLocalization(req *types.Up
 	if req.Description != "" {
 		localization.Description = req.Description
 	}
-	localization.AuditInfo.UpdatedAt = time.Now().UTC()
+	localization.Model.UpdatedAt = time.Now().UTC()
 
 	// Save
 	if err := l.svcCtx.ProductLocalizationRepo.Update(l.ctx, l.svcCtx.DB, localization); err != nil {
 		return nil, err
 	}
 
-	return &types.ProductLocalizationResp{
-		ID:           localization.ID,
-		ProductID:    localization.ProductID,
-		LanguageCode: localization.LanguageCode,
-		Name:         localization.Name,
-		Description:  localization.Description,
-		CreatedAt:    localization.AuditInfo.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    localization.AuditInfo.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	return toProductLocalizationResp(localization), nil
 }
