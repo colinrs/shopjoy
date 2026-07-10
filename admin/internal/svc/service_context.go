@@ -24,6 +24,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
@@ -96,6 +97,8 @@ type ServiceContext struct {
 	PointsAccountRepo     points.PointsAccountRepository
 	PointsTransactionRepo points.PointsTransactionRepository
 	PointsRedemptionRepo  points.PointsRedemptionRepository
+	// User operation logs (audit trail for admin-side user mutations)
+	OperationLogRepo user.OperationLogRepository
 	// Shop Settings
 	ShopSettingsRepo         shop.ShopSettingsRepository
 	BusinessHoursRepo        shop.BusinessHoursRepository
@@ -288,6 +291,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PointsAccountRepo:     pointsAccountRepo,
 		PointsTransactionRepo: pointsTransactionRepo,
 		PointsRedemptionRepo:  pointsRedemptionRepo,
+		// User operation logs (audit trail)
+		OperationLogRepo: persistence.NewOperationLogRepository(),
 		// Shop settings
 		ShopSettingsRepo:         shopSettingsRepo,
 		BusinessHoursRepo:        businessHoursRepo,
