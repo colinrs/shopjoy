@@ -4,6 +4,7 @@ import (
 	"context"
 
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -41,6 +42,8 @@ func (l *SuspendUserWithReasonLogic) SuspendUserWithReason(req *types.SuspendUse
 	if err := l.svcCtx.UserService.SuspendWithReason(l.ctx, suspendReq); err != nil {
 		return nil, err
 	}
+
+	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionSuspendWithReason, req.Reason)
 
 	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, tenantID, req.ID)
 	if err != nil {

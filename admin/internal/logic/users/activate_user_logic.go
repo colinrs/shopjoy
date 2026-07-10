@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -34,6 +35,8 @@ func (l *ActivateUserLogic) ActivateUser(req *types.ActivateUserRequest) (resp *
 	if err := l.svcCtx.UserService.Activate(l.ctx, tenantID, req.ID); err != nil {
 		return nil, err
 	}
+
+	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionActivateUser, "")
 
 	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, tenantID, req.ID)
 	if err != nil {

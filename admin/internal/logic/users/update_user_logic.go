@@ -4,6 +4,7 @@ import (
 	"context"
 
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -43,6 +44,8 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.
 	if err != nil {
 		return nil, err
 	}
+
+	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionUpdateUser, "")
 
 	return &types.GetUserResponse{
 		ID:        userResp.ID,

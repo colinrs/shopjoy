@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -35,6 +36,8 @@ func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordRequest) (res
 	if err != nil {
 		return nil, err
 	}
+
+	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionResetPassword, "")
 
 	return &types.ResetPasswordResponse{
 		TemporaryPassword: tempPassword,
