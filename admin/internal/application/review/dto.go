@@ -10,6 +10,7 @@ import (
 // ListReviewsRequest list reviews request
 type ListReviewsRequest struct {
 	ProductID int64
+	UserID    int64
 	Status    string
 	RatingMin *int
 	RatingMax *int

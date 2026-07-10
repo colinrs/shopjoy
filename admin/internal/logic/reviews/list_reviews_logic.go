@@ -37,6 +37,7 @@ func (l *ListReviewsLogic) ListReviews(req *types.ListReviewsReq) (resp *types.L
 
 	listReq := appReview.ListReviewsRequest{
 		ProductID: req.ProductID,
+		UserID:    req.UserID,
 		Status:    req.Status,
 		HasImage:  req.HasImage,
 		Keyword:   req.Keyword,

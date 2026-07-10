@@ -1619,6 +1619,7 @@ type ListRegionsResp struct {
 
 type ListReviewsReq struct {
 	ProductID int64  `form:"product_id,optional"`
+	UserID    int64  `form:"user_id,optional"`
 	Status    string `form:"status,optional"`
 	RatingMin int    `form:"rating_min,optional"`
 	RatingMax int    `form:"rating_max,optional"`

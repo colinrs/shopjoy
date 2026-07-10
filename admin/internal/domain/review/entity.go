@@ -293,6 +293,7 @@ func (s *StringArray) Scan(value interface{}) error {
 type Query struct {
 	TenantID  shared.TenantID
 	ProductID int64
+	UserID    int64
 	Status    *Status
 	RatingMin *int
 	RatingMax *int
