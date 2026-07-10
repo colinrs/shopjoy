@@ -49,10 +49,11 @@ type OperationLogQuery struct {
 }
 
 func (q OperationLogQuery) Offset() int {
-	if q.Page <= 0 {
-		q.Page = 1
+	page := q.Page
+	if page <= 0 {
+		page = 1
 	}
-	return (q.Page - 1) * q.PageSize
+	return (page - 1) * q.PageSize
 }
 
 func (q OperationLogQuery) Limit() int {
