@@ -291,3 +291,24 @@ CREATE TABLE IF NOT EXISTS `user_addresses` (
     INDEX `idx_tenant_user` (`tenant_id`, `user_id`),
     INDEX `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户收货地址表';
+
+-- ============================================
+-- User Operation Logs (user_operation_logs)
+-- ============================================
+CREATE TABLE IF NOT EXISTS `user_operation_logs` (
+    `id` BIGINT NOT NULL,
+    `tenant_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `action` VARCHAR(64) NOT NULL,
+    `operator_id` BIGINT NOT NULL DEFAULT 0,
+    `operator_name` VARCHAR(64) NOT NULL DEFAULT 'system',
+    `reason` VARCHAR(500) NOT NULL DEFAULT '',
+    `ip_address` VARCHAR(64) NOT NULL DEFAULT '',
+    `user_agent` VARCHAR(500) NOT NULL DEFAULT '',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    INDEX `idx_uol_user_id` (`user_id`, `created_at`),
+    INDEX `idx_uol_tenant` (`tenant_id`, `created_at`),
+    INDEX `idx_uol_action` (`action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户操作日志表';
