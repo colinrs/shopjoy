@@ -169,7 +169,8 @@ Repository: `if req.UserID > 0 { query = query.Where("user_id = ?", req.UserID) 
 
 ### `UserOrderList.vue` (new)
 
-- Columns: 订单号 / 状态 / 商品数 / 总金额 / 下单时间 / 操作（查看详情链接到 `/orders/{id}`）
+- Columns: 订单号 / 状态 / 商品数 / 总金额 / 下单时间 / 操作
+- 操作 cell: 单一 link button `查看详情` → `router.push('/orders/' + row.order_id)`
 - Pagination: `el-pagination`, page_size=10
 - API: `GET /api/v1/orders?user_id={id}&page=&page_size=`
 - Status badge colors per existing `getStatusType` helper
@@ -179,10 +180,12 @@ Repository: `if req.UserID > 0 { query = query.Where("user_id = ?", req.UserID) 
 - Columns: 时间 / 类型 (EARN/REDEEM/EXPIRE/ADJUST/FREEZE/UNFREEZE) / 积分变化 (正绿负红, +x/−x) / 余额 / 说明 / 关联（reference_type:id）
 - Pagination: page_size=10
 - API: `GET /api/v1/points/transactions?user_id={id}&page=&page_size=`
+- 关联 cell: 当 `reference_type='ORDER'` 时显示 `订单: {reference_id}` link → `/orders/{reference_id}`；其他类型显示纯文本 `{reference_type}:{reference_id}` 或 `—`（空时）
 
 ### `UserReviewList.vue` (new)
 
-- Columns: 商品 / 评分 (1-5 stars) / 内容 (truncate 80 chars) / 状态 / 时间 / 操作（查看链接到 `/reviews`）
+- Columns: 商品 / 评分 (1-5 stars) / 内容 (truncate 80 chars) / 状态 / 时间 / 操作
+- 操作 cell: 单一 link button `查看` → `router.push('/reviews?product_id=' + row.product_id)`（复用 reviews 列表的 product 过滤）
 - Anonymous reviews: replace `user_name` with `i18n.users.reviews.anonymous`
 - Pagination: page_size=10
 - API: `GET /api/v1/reviews?user_id={id}&page=&page_size=` (after backend extension)
@@ -281,6 +284,7 @@ users:
       CREATE_USER: '创建用户'
       UPDATE_USER: '更新资料'
       SUSPEND_USER: '禁用用户'
+      SUSPEND_WITH_REASON: '禁用用户（带原因）'
       ACTIVATE_USER: '启用用户'
       DELETE_USER: '删除用户'
       RESET_PASSWORD: '重置密码'
