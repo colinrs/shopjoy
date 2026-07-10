@@ -6,7 +6,7 @@
           <span class="product-name">{{ row.product_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用户" width="100" align="center">
+      <el-table-column :label="$t('users.reviewsColumns.user')" width="100" align="center">
         <template #default="{ row }">
           <span v-if="row.is_anonymous" class="anonymous">{{ $t('users.reviewsColumns.anonymous') }}</span>
           <span v-else>{{ row.user_name || '-' }}</span>
@@ -38,7 +38,7 @@
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.actions')" width="100" align="center" fixed="right">
+      <el-table-column :label="$t('common.actions')" width="80" align="center" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="goReviews(row)">
             {{ $t('common.view') }}

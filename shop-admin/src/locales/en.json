@@ -3,6 +3,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "view": "View",
     "delete": "Delete",
     "edit": "Edit",
     "search": "Search",
@@ -375,6 +376,7 @@
     },
     "reviewsColumns": {
       "product": "Product",
+      "user": "User",
       "rating": "Rating",
       "content": "Content",
       "status": "Status",

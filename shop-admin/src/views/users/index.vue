@@ -233,7 +233,7 @@
       >
         <el-table-column
           :label="$t('users.userInfo')"
-          min-width="250"
+          min-width="260"
         >
           <template #default="{ row }">
             <div class="user-cell">
@@ -282,10 +282,12 @@
           align="center"
         >
           <template #default="{ row }">
-            <el-switch
-              :model-value="row.status === 1"
-              @change="(val: boolean) => confirmStatusChange(row, val)"
-            />
+            <div class="status-switch-wrapper">
+              <el-switch
+                :model-value="row.status === 1"
+                @change="(val: boolean) => confirmStatusChange(row, val)"
+              />
+            </div>
           </template>
         </el-table-column>
         <el-table-column
@@ -324,50 +326,52 @@
           fixed="right"
         >
           <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleEdit(row)"
-            >
-              {{ $t('common.edit') }}
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleDetail(row)"
-            >
-              {{ $t('users.viewDetail') }}
-            </el-button>
-            <el-dropdown
-              trigger="click"
-              @command="(cmd: string) => handleCommand(cmd, row)"
-            >
+            <div class="actions-cell">
               <el-button
                 type="primary"
                 link
                 size="small"
+                @click.stop="handleEdit(row)"
               >
-                {{ $t('users.more') }}<el-icon class="el-icon--right">
-                  <ArrowDown />
-                </el-icon>
+                {{ $t('common.edit') }}
               </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">
-                    {{ $t('users.resetPassword') }}
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    divided
-                    command="delete"
-                    style="color: #EF4444;"
-                  >
-                    {{ $t('users.deleteAccount') }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click.stop="handleDetail(row)"
+              >
+                {{ $t('users.viewDetail') }}
+              </el-button>
+              <el-dropdown
+                trigger="click"
+                @command="(cmd: string) => handleCommand(cmd, row)"
+              >
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                >
+                  {{ $t('users.more') }}<el-icon class="el-icon--right">
+                    <ArrowDown />
+                  </el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="resetPassword">
+                      {{ $t('users.resetPassword') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      divided
+                      command="delete"
+                      style="color: #EF4444;"
+                    >
+                      {{ $t('users.deleteAccount') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </template>
         </el-table-column>
       </Table>
@@ -1033,8 +1037,34 @@ onMounted(() => {
 }
 
 /* Switch */
+.status-switch-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
 :deep(.el-switch.is-checked .el-switch__core) {
   background-color: #10B981;
+}
+
+/* Actions cell */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.actions-cell .el-button {
+  padding: 0;
+  margin: 0;
+}
+
+.actions-cell .el-dropdown {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Dialog */

@@ -375,6 +375,7 @@
     },
     "reviewsColumns": {
       "product": "商品",
+      "user": "用户",
       "rating": "评分",
       "content": "内容",
       "status": "状态",
