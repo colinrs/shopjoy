@@ -138,7 +138,9 @@ func TestUploadSignLogic_DefaultCategory(t *testing.T) {
 	}}
 	svcCtx := newSignServiceContext(signer, &fakeIDGen{id: 1})
 
-	l := uploads.NewUploadSignLogic(context.Background(), svcCtx)
+	ctx := contextx.SetTenantID(context.Background(), 1)
+	ctx = contextx.SetUserID(ctx, 1)
+	l := uploads.NewUploadSignLogic(ctx, svcCtx)
 	if _, err := l.UploadSign(&types.UploadSignRequest{}); err != nil {
 		t.Fatalf("UploadSign() unexpected err: %v", err)
 	}
@@ -151,7 +153,9 @@ func TestUploadSignLogic_BadStorage(t *testing.T) {
 	signer := &fakeSigner{err: errors.New("boom")}
 	svcCtx := newSignServiceContext(signer, &fakeIDGen{id: 1})
 
-	l := uploads.NewUploadSignLogic(context.Background(), svcCtx)
+	ctx := contextx.SetTenantID(context.Background(), 1)
+	ctx = contextx.SetUserID(ctx, 1)
+	l := uploads.NewUploadSignLogic(ctx, svcCtx)
 	_, err := l.UploadSign(&types.UploadSignRequest{Category: "product"})
 
 	if !errors.Is(err, code.ErrUploadSignFailed) {
@@ -163,9 +167,40 @@ func TestUploadSignLogic_NonSignerStorage(t *testing.T) {
 	// A storage implementation that doesn't support Sign (e.g., local-only)
 	// must surface a provider error.
 	svcCtx := newSignServiceContext(nonSignerStorage{}, &fakeIDGen{id: 1})
-	l := uploads.NewUploadSignLogic(context.Background(), svcCtx)
+
+	ctx := contextx.SetTenantID(context.Background(), 1)
+	ctx = contextx.SetUserID(ctx, 1)
+	l := uploads.NewUploadSignLogic(ctx, svcCtx)
 	_, err := l.UploadSign(&types.UploadSignRequest{Category: "product"})
 	if !errors.Is(err, code.ErrUploadProviderError) {
 		t.Fatalf("UploadSign() err = %v, want %v", err, code.ErrUploadProviderError)
+	}
+}
+
+// TestUploadSignLogic_MissingAuthContext verifies that the cross-tenant guard
+// rejects forged (unauthenticated) requests, even before signing.
+func TestUploadSignLogic_MissingAuthContext(t *testing.T) {
+	signer := &fakeSigner{sig: storage.Signature{
+		CloudName: "demo", APIKey: "k", Timestamp: "1",
+		Signature: "s", Folder: "f", PublicID: "p",
+	}}
+	svcCtx := newSignServiceContext(signer, &fakeIDGen{id: 1})
+
+	cases := []struct {
+		name string
+		ctx  context.Context
+	}{
+		{"no-tenant-no-user", context.Background()},
+		{"tenant-only", contextx.SetTenantID(context.Background(), 1)},
+		{"user-only", contextx.SetUserID(context.Background(), 1)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			l := uploads.NewUploadSignLogic(tc.ctx, svcCtx)
+			_, err := l.UploadSign(&types.UploadSignRequest{Category: "product"})
+			if !errors.Is(err, code.ErrUploadCrossTenantAccess) {
+				t.Fatalf("err = %v, want %v", err, code.ErrUploadCrossTenantAccess)
+			}
+		})
 	}
 }

@@ -38,17 +38,23 @@ func (l *UploadSignLogic) UploadSign(req *types.UploadSignRequest) (resp *types.
 	if cat == "" {
 		cat = storage.CategoryProduct
 	}
+
+	// Resolve tenant/user from auth context. Reject forged requests (no auth
+	// context at all) before signing — otherwise an unauthenticated caller
+	// could mint Cloudinary signatures for arbitrary folders.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	userID, _ := contextx.GetUserID(l.ctx)
+	if userID == 0 || tenantID == 0 {
+		l.Logger.Errorf("upload sign rejected: missing auth context (user_id=%d, tenant_id=%d)", userID, tenantID)
+		return nil, code.ErrUploadCrossTenantAccess
+	}
+
 	// Storage may not be configured (e.g., local dev with localStorage only),
 	// in which case signing is not supported.
 	signer, ok := l.svcCtx.Storage.(storage.Signer)
 	if !ok || signer == nil {
 		return nil, code.ErrUploadProviderError
 	}
-
-	// Resolve tenant from auth context. Platform admins may have tenantID=0,
-	// which downstream storage adapters accept as the "platform" bucket.
-	tenantID, _ := contextx.GetTenantID(l.ctx)
-	userID, _ := contextx.GetUserID(l.ctx)
 
 	sig, err := signer.Sign(l.ctx, storage.SignParams{
 		Category:  cat,
