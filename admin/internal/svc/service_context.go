@@ -19,6 +19,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
+	"github.com/colinrs/shopjoy/admin/internal/domain/media"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
@@ -88,6 +89,8 @@ type ServiceContext struct {
 	AdminUserRepo  adminuser.Repository
 	// Shipping
 	ShippingRepo persistence.ShippingTemplateRepository
+	// Media
+	MediaRepo media.Repository
 	// Storage
 	Storage storage.Storage
 	// Points
@@ -232,6 +235,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// User operation logs repository
 	operationLogRepo := persistence.NewOperationLogRepository()
 
+	// Media repository
+	mediaRepo := persistence.NewMediaAssetRepository(db)
+
 	return &ServiceContext{
 		Config:                  c,
 		DB:                      db,
@@ -283,10 +289,22 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		// Shipping
 		ShippingRepo: persistence.NewShippingTemplateRepository(),
 
+		// Media
+		MediaRepo: mediaRepo,
+
 		// Storage
 		Storage: storage.MustNewStorage(storage.Config{
-			Type: storage.StorageTypeLocal,
-		}),
+			Type:  storage.StorageType(c.Storage.Type),
+			Local: storage.LocalConfig{BasePath: c.Storage.Local.BasePath},
+			Cloudinary: storage.CloudinaryConfig{
+				CloudName:    c.Storage.Cloudinary.CloudName,
+				APIKey:       c.Storage.Cloudinary.APIKey,
+				APISecret:    c.Storage.Cloudinary.APISecret,
+				UploadPreset: c.Storage.Cloudinary.UploadPreset,
+				Environment:  c.Storage.Cloudinary.Environment,
+				Secure:       c.Storage.Cloudinary.Secure,
+			},
+		}, mediaRepo, idGen),
 
 		// Points repositories and service
 		PointsService:         pointsService,
