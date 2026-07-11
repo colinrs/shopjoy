@@ -56,6 +56,7 @@ SCHEMA_ORDER=(
     "points"
     "shop"
     "review"
+    "admin"
 )
 
 # 日志函数
