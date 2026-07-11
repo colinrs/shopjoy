@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,14 +24,9 @@ func NewGetCategoryMarketVisibilityLogic(ctx context.Context, svcCtx *svc.Servic
 }
 
 func (l *GetCategoryMarketVisibilityLogic) GetCategoryMarketVisibility(req *types.GetCategoryMarketVisibilityReq) (resp *types.CategoryMarketVisibilityResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Verify category exists
-	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.CategoryID)
+	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.CategoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +35,7 @@ func (l *GetCategoryMarketVisibilityLogic) GetCategoryMarketVisibility(req *type
 	}
 
 	// Get market visibility
-	markets, err := l.svcCtx.CategoryMarketRepo.FindByCategory(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.CategoryID)
+	markets, err := l.svcCtx.CategoryMarketRepo.FindByCategory(l.ctx, l.svcCtx.DB, req.CategoryID)
 	if err != nil {
 		return nil, err
 	}

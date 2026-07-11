@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,13 +24,8 @@ func NewDeleteReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) Delete
 }
 
 func (l *DeleteReplyLogic) DeleteReply(req *types.DeleteReplyReq) (resp *types.DeleteReplyResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	if err := l.svcCtx.ReviewService.DeleteReply(l.ctx, shared.TenantID(tenantID), req.ID); err != nil {
+	if err := l.svcCtx.ReviewService.DeleteReply(l.ctx, req.ID); err != nil {
 		return nil, err
 	}
 

@@ -105,7 +105,7 @@ func (r *reviewRepo) Update(ctx context.Context, db *gorm.DB, rev *review.Review
 	model := fromReviewEntity(rev)
 	return db.WithContext(ctx).
 		Model(&reviewModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", rev.ID, rev.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", rev.ID).
 		Updates(map[string]interface{}{
 			"status":        model.Status,
 			"is_featured":   model.IsFeatured,
@@ -114,11 +114,8 @@ func (r *reviewRepo) Update(ctx context.Context, db *gorm.DB, rev *review.Review
 		}).Error
 }
 
-func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&reviewModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -131,11 +128,8 @@ func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	return nil
 }
 
-func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*review.Review, error) {
+func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*review.Review, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model reviewModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -147,15 +141,12 @@ func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.
 	return model.toEntity(), nil
 }
 
-func (r *reviewRepo) FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*review.Review, error) {
+func (r *reviewRepo) FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*review.Review, error) {
 	if len(ids) == 0 {
 		return []*review.Review{}, nil
 	}
 
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var models []reviewModel
 	err := query.Where("id IN ?", ids).Find(&models).Error
@@ -174,10 +165,6 @@ func (r *reviewRepo) FindList(ctx context.Context, db *gorm.DB, query review.Que
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&reviewModel{}).Where("deleted_at IS NULL")
-
-	if query.TenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", query.TenantID.Int64())
-	}
 
 	if query.ProductID > 0 {
 		dbQuery = dbQuery.Where("product_id = ?", query.ProductID)
@@ -228,7 +215,7 @@ func (r *reviewRepo) FindList(ctx context.Context, db *gorm.DB, query review.Que
 	return reviews, total, nil
 }
 
-func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64, status review.Status, reason string) (int64, error) {
+func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []int64, status review.Status, reason string) (int64, error) {
 	if len(ids) == 0 {
 		return 0, nil
 	}
@@ -237,9 +224,6 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantI
 		Where("id IN ?", ids).
 		Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	// Filter by valid status transitions
 	switch status {
@@ -257,12 +241,9 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantI
 	return result.RowsAffected, result.Error
 }
 
-func (r *reviewRepo) FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*review.Review, error) {
+func (r *reviewRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*review.Review, error) {
 	dbQuery := db.WithContext(ctx).Model(&reviewModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	dbQuery = dbQuery.Where("product_id = ?", productID)
 
 	var models []reviewModel

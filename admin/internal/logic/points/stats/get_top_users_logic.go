@@ -6,9 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,10 +25,6 @@ func NewGetTopUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetTop
 }
 
 func (l *GetTopUsersLogic) GetTopUsers(req *types.GetTopUsersReq) (resp *types.TopUsersResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Calculate time range based on period
 	var startTime, endTime time.Time
@@ -59,7 +52,7 @@ func (l *GetTopUsersLogic) GetTopUsers(req *types.GetTopUsersReq) (resp *types.T
 		limit = 100
 	}
 
-	topUsers, err := l.svcCtx.PointsService.GetTopUsers(l.ctx, shared.TenantID(tenantID), startTime, endTime, limit)
+	topUsers, err := l.svcCtx.PointsService.GetTopUsers(l.ctx, startTime, endTime, limit)
 	if err != nil {
 		return nil, err
 	}

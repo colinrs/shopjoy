@@ -11,8 +11,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -36,11 +34,6 @@ func NewExportPointsTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *ExportPointsTransactionsLogic) ExportPointsTransactions(req *types.ExportPointsTransactionsReq) error {
-	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Build query
 	query := points.PointsTransactionQuery{
@@ -74,7 +67,7 @@ func (l *ExportPointsTransactionsLogic) ExportPointsTransactions(req *types.Expo
 	}
 
 	// Get transactions for export
-	transactions, total, err := l.svcCtx.PointsService.ExportTransactions(l.ctx, shared.TenantID(tenantID), query)
+	transactions, total, err := l.svcCtx.PointsService.ExportTransactions(l.ctx, query)
 	if err != nil {
 		return err
 	}

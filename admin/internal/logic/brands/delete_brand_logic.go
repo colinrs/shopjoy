@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,14 +24,9 @@ func NewDeleteBrandLogic(ctx context.Context, svcCtx *svc.ServiceContext) Delete
 }
 
 func (l *DeleteBrandLogic) DeleteBrand(req *types.GetBrandReq) (resp *types.CreateBrandResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Find brand
-	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +44,7 @@ func (l *DeleteBrandLogic) DeleteBrand(req *types.GetBrandReq) (resp *types.Crea
 	}
 
 	// Delete brand
-	if err := l.svcCtx.BrandRepo.Delete(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID); err != nil {
+	if err := l.svcCtx.BrandRepo.Delete(l.ctx, l.svcCtx.DB, req.ID); err != nil {
 		return nil, err
 	}
 

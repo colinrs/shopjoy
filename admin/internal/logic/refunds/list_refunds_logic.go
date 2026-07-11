@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,11 +27,6 @@ func NewListRefundsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListRe
 }
 
 func (l *ListRefundsLogic) ListRefunds(req *types.ListRefundsReq) (resp *types.ListRefundsResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Parse time filters
 	var startTime, endTime time.Time
@@ -64,7 +57,7 @@ func (l *ListRefundsLogic) ListRefunds(req *types.ListRefundsReq) (resp *types.L
 		queryReq.Status = &status
 	}
 
-	listResp, err := l.svcCtx.RefundApp.ListRefunds(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.RefundApp.ListRefunds(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

@@ -11,8 +11,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -37,13 +35,9 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 	db := l.svcCtx.DB
 
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 	// Validate product exists
 	productRepo := persistence.NewProductRepository()
-	if _, err := productRepo.FindByID(l.ctx, db, shared.TenantID(tenantID), req.ProductID); err != nil {
+	if _, err := productRepo.FindByID(l.ctx, db, req.ProductID); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +78,6 @@ func (l *PushToMarketLogic) PushToMarket(req *types.PushToMarketReq) (resp *type
 
 		// Create ProductMarket
 		pm := &product.ProductMarket{
-			TenantID:  tenantID,
 			ProductID: req.ProductID,
 			MarketID:  marketID,
 			Price:     price,

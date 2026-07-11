@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +27,6 @@ func NewListRedeemRulesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Li
 }
 
 func (l *ListRedeemRulesLogic) ListRedeemRules(req *types.ListRedeemRulesReq) (resp *types.ListRedeemRulesResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	query := points.RedeemRuleQuery{
 		PageQuery: shared.PageQuery{
@@ -51,7 +45,7 @@ func (l *ListRedeemRulesLogic) ListRedeemRules(req *types.ListRedeemRulesReq) (r
 		}
 	}
 
-	rules, total, stats, err := l.svcCtx.PointsService.ListRedeemRules(l.ctx, shared.TenantID(tenantID), query)
+	rules, total, stats, err := l.svcCtx.PointsService.ListRedeemRules(l.ctx, query)
 	if err != nil {
 		return nil, err
 	}

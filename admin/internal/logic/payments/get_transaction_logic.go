@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +25,9 @@ func NewGetTransactionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 
 func (l *GetTransactionLogic) GetTransaction(req *types.GetTransactionReq) (resp *types.TransactionResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get transaction from service
-	txn, err := l.svcCtx.PaymentService.GetTransaction(l.ctx, shared.TenantID(tenantID), req.ID)
+	txn, err := l.svcCtx.PaymentService.GetTransaction(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

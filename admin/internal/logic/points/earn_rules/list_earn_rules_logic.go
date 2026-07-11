@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
@@ -30,10 +28,6 @@ func NewListEarnRulesLogic(ctx context.Context, svcCtx *svc.ServiceContext) List
 }
 
 func (l *ListEarnRulesLogic) ListEarnRules(req *types.ListEarnRulesReq) (resp *types.ListEarnRulesResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	query := points.EarnRuleQuery{
 		PageQuery: shared.PageQuery{
@@ -56,7 +50,7 @@ func (l *ListEarnRulesLogic) ListEarnRules(req *types.ListEarnRulesReq) (resp *t
 		}
 	}
 
-	rules, total, stats, err := l.svcCtx.PointsService.ListEarnRules(l.ctx, shared.TenantID(tenantID), query)
+	rules, total, stats, err := l.svcCtx.PointsService.ListEarnRules(l.ctx, query)
 	if err != nil {
 		return nil, err
 	}

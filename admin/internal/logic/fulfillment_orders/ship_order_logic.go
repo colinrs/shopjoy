@@ -6,9 +6,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,10 +28,6 @@ func NewShipOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) ShipOrde
 
 func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrderResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
@@ -65,7 +59,7 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) (resp *types.ShipOrd
 	}
 
 	// Ship order
-	shipmentResp, err := l.svcCtx.OrderFulfillmentApp.ShipOrder(l.ctx, shared.TenantID(tenantID), userID, req.ID, shipReq)
+	shipmentResp, err := l.svcCtx.OrderFulfillmentApp.ShipOrder(l.ctx, userID, req.ID, shipReq)
 	if err != nil {
 		return nil, err
 	}

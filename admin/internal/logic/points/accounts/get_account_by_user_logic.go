@@ -6,9 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,12 +25,8 @@ func NewGetAccountByUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) G
 }
 
 func (l *GetAccountByUserLogic) GetAccountByUser(req *types.GetAccountByUserReq) (resp *types.PointsAccount, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
-	account, err := l.svcCtx.PointsService.GetAccountByUser(l.ctx, shared.TenantID(tenantID), req.UserID)
+	account, err := l.svcCtx.PointsService.GetAccountByUser(l.ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}

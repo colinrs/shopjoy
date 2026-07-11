@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +28,6 @@ func NewCalculateShippingFeeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShippingFeeReq) (resp *types.CalculateShippingFeeResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Validate input
 	if len(req.Items) == 0 {
@@ -76,7 +71,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	}
 
 	// Find template using priority: Product > Category > Default
-	template, zone := l.findTemplateForItems(tenantID, req.Address.CityCode, req.Items)
+	template, zone := l.findTemplateForItems(req.Address.CityCode, req.Items)
 	if template == nil || zone == nil {
 		return nil, code.ErrShippingTemplateNotFound
 	}
@@ -104,12 +99,12 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 }
 
 // findTemplateForItems finds the appropriate template and zone using priority: Product > Category > Default
-func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID int64, cityCode string, reqItems []types.CalculatorItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
+func (l *CalculateShippingFeeLogic) findTemplateForItems( cityCode string, reqItems []types.CalculatorItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
 	// Priority 1: Check for product-specific template
 	for _, item := range reqItems {
 		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.ProductID)
 		if err == nil && mapping != nil {
-			template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, mapping.TemplateID)
+			template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, mapping.TemplateID)
 			if err == nil && template != nil && template.IsActive {
 				zone := l.findZoneForCity(int64(template.ID), cityCode)
 				if zone != nil {
@@ -124,7 +119,7 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID int64, cityCod
 	// For now, we skip this step as products would need category info
 
 	// Priority 3: Use default template
-	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefault(l.ctx, l.svcCtx.DB, tenantID)
+	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefault(l.ctx, l.svcCtx.DB)
 	if err == nil && defaultTemplate != nil {
 		zone := l.findZoneForCity(int64(defaultTemplate.ID), cityCode)
 		if zone != nil {
@@ -139,7 +134,7 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID int64, cityCod
 func (l *CalculateShippingFeeLogic) findZoneForCity(templateID int64, cityCode string) *shipping.ShippingZone {
 	// Try to find zone matching the city code
 	if cityCode != "" {
-		zones, err := l.svcCtx.ShippingRepo.FindZoneByCityCode(l.ctx, l.svcCtx.DB, templateID, cityCode)
+		zones, err := l.svcCtx.ShippingRepo.FindZoneByCityCode(l.ctx, l.svcCtx.DB, cityCode)
 		if err == nil && len(zones) > 0 {
 			return zones[0]
 		}

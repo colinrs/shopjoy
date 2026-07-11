@@ -6,9 +6,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,10 +26,6 @@ func NewListPromotionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 
 func (l *ListPromotionsLogic) ListPromotions(req *types.ListPromotionsReq) (resp *types.ListPromotionsResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	queryReq := apppromotion.QueryPromotionRequest{
 		Name:     req.Name,
@@ -42,7 +35,7 @@ func (l *ListPromotionsLogic) ListPromotions(req *types.ListPromotionsReq) (resp
 		PageSize: req.PageSize,
 	}
 
-	listResp, err := l.svcCtx.PromotionApp.ListPromotions(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.PromotionApp.ListPromotions(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

@@ -682,6 +682,32 @@ type BadRepository struct {
 }
 ```
 
+### Tenant Isolation (TenantScopePlugin)
+
+租户隔离通过 `TenantScopePlugin` 自动处理，**不要手动传递 tenantID**：
+
+```go
+// CORRECT - Plugin 自动注入 WHERE tenant_id = ?
+func (r *userRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*User, error) {
+    var model userModel
+    err := db.WithContext(ctx).First(&model, id).Error
+    return &model, err
+}
+
+// WRONG - 手动传递 tenantID（已废弃）
+func (r *userRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*User, error) {
+    // ...
+}
+```
+
+**关键规则：**
+- Repository 方法**不要**接收 `tenantID` 参数
+- Logic/Application 层**不要**从 ctx 提取 tenantID 传给 Repository
+- Plugin 自动从 ctx 读取 tenantID（middleware 已设置）
+- Create 操作 Plugin 自动填充 `tenant_id` 列
+- 新增表需在 `pkg/infra/tenant_tables.go` 注册
+- 跳过租户过滤：`db.WithContext(infra.SkipTenantScope(ctx))`
+
 ### Transaction Control
 
 **ALWAYS** start transactions in Application/Domain layer, NEVER in Repository:

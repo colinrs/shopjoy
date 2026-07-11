@@ -111,7 +111,7 @@ func (r *shipmentRepo) Update(ctx context.Context, db *gorm.DB, s *fulfillment.S
 	model := fromShipmentEntity(s)
 	return db.WithContext(ctx).
 		Model(&shipmentModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", s.ID, s.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", s.ID).
 		Updates(map[string]interface{}{
 			"status":            model.Status,
 			"carrier":           model.Carrier,
@@ -128,11 +128,8 @@ func (r *shipmentRepo) Update(ctx context.Context, db *gorm.DB, s *fulfillment.S
 }
 
 // FindByID finds a shipment by ID
-func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model shipmentModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -145,11 +142,8 @@ func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // FindByShipmentNo finds a shipment by shipment number
-func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, shipmentNo string) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB,  shipmentNo string) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("shipment_no = ? AND deleted_at IS NULL", shipmentNo)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model shipmentModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -162,11 +156,8 @@ func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB, tenant
 }
 
 // FindByOrderID finds all shipments for an order
-func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) ([]*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("order_id = ? AND deleted_at IS NULL", orderID)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var models []shipmentModel
 	err := query.Order("created_at DESC").Find(&models).Error
 	if err != nil {
@@ -181,11 +172,8 @@ func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID 
 }
 
 // FindByTrackingNo finds a shipment by tracking number
-func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, trackingNo string) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB,  trackingNo string) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("tracking_no = ? AND deleted_at IS NULL", trackingNo)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model shipmentModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -198,14 +186,11 @@ func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB, tenant
 }
 
 // FindList finds shipments with pagination and filters
-func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query fulfillment.ShipmentQuery) ([]*fulfillment.Shipment, int64, error) {
+func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillment.ShipmentQuery) ([]*fulfillment.Shipment, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&shipmentModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -248,11 +233,8 @@ func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // Delete soft deletes a shipment
-func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -266,11 +248,8 @@ func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // CountByStatus counts shipments by status
-func (r *shipmentRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, status fulfillment.ShipmentStatus) (int64, error) {
+func (r *shipmentRepo) CountByStatus(ctx context.Context, db *gorm.DB,  status fulfillment.ShipmentStatus) (int64, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("status = ? AND deleted_at IS NULL", status)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var count int64
 	err := query.Count(&count).Error
 	return count, err

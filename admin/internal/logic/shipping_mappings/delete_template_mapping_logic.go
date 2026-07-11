@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,10 +26,6 @@ func NewDeleteTemplateMappingLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *DeleteTemplateMappingLogic) DeleteTemplateMapping(req *types.DeleteTemplateMappingReq) error {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Find existing mapping
 	mapping, err := l.svcCtx.ShippingRepo.FindMappingByID(l.ctx, l.svcCtx.DB, req.ID)
@@ -39,7 +34,7 @@ func (l *DeleteTemplateMappingLogic) DeleteTemplateMapping(req *types.DeleteTemp
 	}
 
 	// Verify template belongs to tenant through the mapping
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, mapping.TemplateID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, mapping.TemplateID)
 	if err != nil {
 		return code.ErrShippingTemplateNotFound
 	}

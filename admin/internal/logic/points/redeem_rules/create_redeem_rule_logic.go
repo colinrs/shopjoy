@@ -6,10 +6,8 @@ import (
 
 	apppoints "github.com/colinrs/shopjoy/admin/internal/application/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,12 +27,8 @@ func NewCreateRedeemRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) C
 }
 
 func (l *CreateRedeemRuleLogic) CreateRedeemRule(req *types.CreateRedeemRuleReq) (resp *types.RedeemRule, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	userID, _ := contextx.GetUserID(l.ctx)
 
+	userID, _ := contextx.GetUserID(l.ctx)
 	createReq := apppoints.CreateRedeemRuleRequest{
 		Name:           req.Name,
 		Description:    req.Description,
@@ -57,7 +51,7 @@ func (l *CreateRedeemRuleLogic) CreateRedeemRule(req *types.CreateRedeemRuleReq)
 		}
 	}
 
-	rule, err := l.svcCtx.PointsService.CreateRedeemRule(l.ctx, shared.TenantID(tenantID), createReq, userID)
+	rule, err := l.svcCtx.PointsService.CreateRedeemRule(l.ctx, createReq, userID)
 	if err != nil {
 		return nil, err
 	}

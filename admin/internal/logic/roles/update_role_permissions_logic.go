@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,11 +27,9 @@ func NewUpdateRolePermissionsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *UpdateRolePermissionsLogic) UpdateRolePermissions(req *types.UpdateRolePermissionsRequest) error {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Verify role exists
-	r, err := l.svcCtx.RoleRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	r, err := l.svcCtx.RoleRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return err
 	}

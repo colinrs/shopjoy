@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
 type contextKey string
@@ -44,6 +45,13 @@ func SetTenantID(ctx context.Context, tenantID int64) context.Context {
 func GetTenantID(ctx context.Context) (int64, bool) {
 	tenantID, ok := ctx.Value(tenantIDKey).(int64)
 	return tenantID, ok
+}
+
+// GetTenantIDValueObject 从 context 获取租户ID（返回 shared.TenantID 值对象）
+// 供 infrastructure 层和 Plugin 使用
+func GetTenantIDValueObject(ctx context.Context) (shared.TenantID, bool) {
+	id, ok := GetTenantID(ctx)
+	return shared.TenantID(id), ok
 }
 
 // SetUserType 设置用户类型到 context

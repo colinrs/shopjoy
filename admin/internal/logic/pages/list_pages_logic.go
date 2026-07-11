@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,13 +23,8 @@ func NewListPagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPage
 }
 
 func (l *ListPagesLogic) ListPages(req *types.ListPagesRequest) (resp *types.ListPagesResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	result, err := l.svcCtx.PageService.ListPages(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
+	result, err := l.svcCtx.PageService.ListPages(l.ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}

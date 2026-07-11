@@ -115,7 +115,7 @@ func (r *pageRepo) Create(ctx context.Context, db *gorm.DB, page *storefront.Pag
 func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Page) error {
 	model := fromPageEntity(page)
 	return db.WithContext(ctx).Model(&pageModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", page.Model.ID, page.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", page.Model.ID).
 		Updates(map[string]interface{}{
 			"name":            model.Name,
 			"slug":            model.Slug,
@@ -134,17 +134,17 @@ func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Pag
 		}).Error
 }
 
-func (r *pageRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *pageRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&pageModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*storefront.Page, error) {
+func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -155,10 +155,10 @@ func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, slug string) (*storefront.Page, error) {
+func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB,  slug string) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
-		Where("slug = ? AND tenant_id = ? AND deleted_at IS NULL", slug, tenantID.Int64()).
+		Where("slug = ? AND deleted_at IS NULL", slug).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -169,10 +169,10 @@ func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB, tenantID shared.
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageType storefront.PageType) (*storefront.Page, error) {
+func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB,  pageType storefront.PageType) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
-		Where("type = ? AND tenant_id = ? AND deleted_at IS NULL", int(pageType), tenantID.Int64()).
+		Where("type = ? AND deleted_at IS NULL", int(pageType)).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -183,10 +183,10 @@ func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB, tenantID shared.
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*storefront.Page, int64, error) {
+func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*storefront.Page, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageModel{}).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -194,7 +194,7 @@ func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.Ten
 	var models []pageModel
 	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Order("sort ASC, id DESC").
 		Offset(offset).
 		Limit(pageSize).
@@ -210,10 +210,10 @@ func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.Ten
 	return pages, total, nil
 }
 
-func (r *pageRepo) CountAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+func (r *pageRepo) CountAll(ctx context.Context, db *gorm.DB) (int64, error) {
 	var total int64
 	err := db.WithContext(ctx).Model(&pageModel{}).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Count(&total).Error
 	return total, err
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,9 +25,5 @@ func NewGetOrderStatusDistributionLogic(ctx context.Context, svcCtx *svc.Service
 
 func (l *GetOrderStatusDistributionLogic) GetOrderStatusDistribution(req *types.OrderStatusDistributionRequest) (resp *types.OrderStatusDistributionResponse, err error) {
 	helper := NewDashboardHelper(l.ctx, l.svcCtx)
-	tenantID, ok := helper.GetTenantID()
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	return helper.GetOrderStatusDistribution(tenantID)
+	return helper.GetOrderStatusDistribution()
 }

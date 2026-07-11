@@ -7,8 +7,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,13 +28,9 @@ func NewUpdateSKULogic(ctx context.Context, svcCtx *svc.ServiceContext) UpdateSK
 
 func (l *UpdateSKULogic) UpdateSKU(req *types.UpdateSKUReq) (resp *types.SKUDetailResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Find SKU
-	sku, err := l.svcCtx.SKURepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	sku, err := l.svcCtx.SKURepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}

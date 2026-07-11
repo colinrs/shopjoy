@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,14 +26,8 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) UpdateU
 }
 
 func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.GetUserResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
 	updateReq := appUser.UpdateUserRequest{
 		ID:       req.ID,
-		TenantID: tenantID,
 		Name:     req.Name,
 		Avatar:   req.Avatar,
 	}
@@ -45,7 +37,7 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionUpdateUser, "")
+	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionUpdateUser, "")
 
 	return &types.GetUserResponse{
 		ID:        userResp.ID,

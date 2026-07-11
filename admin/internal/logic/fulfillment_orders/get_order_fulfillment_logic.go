@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +25,9 @@ func NewGetOrderFulfillmentLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *GetOrderFulfillmentLogic) GetOrderFulfillment(req *types.GetOrderFulfillmentReq) (resp *types.OrderFulfillmentDetailResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get order fulfillment detail
-	detail, err := l.svcCtx.OrderFulfillmentApp.GetOrderFulfillment(l.ctx, shared.TenantID(tenantID), req.ID)
+	detail, err := l.svcCtx.OrderFulfillmentApp.GetOrderFulfillment(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -7,8 +7,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,11 +26,6 @@ func NewCreateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Creat
 }
 
 func (l *CreateCouponLogic) CreateCoupon(req *types.CreateCouponReq) (resp *types.CreateCouponResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Parse time
 	startAt, err := time.Parse(time.RFC3339, req.StartTime)
@@ -58,7 +51,7 @@ func (l *CreateCouponLogic) CreateCoupon(req *types.CreateCouponReq) (resp *type
 		EndAt:        endAt,
 	}
 
-	couponResp, err := l.svcCtx.CouponApp.CreateCoupon(l.ctx, shared.TenantID(tenantID), createReq)
+	couponResp, err := l.svcCtx.CouponApp.CreateCoupon(l.ctx, createReq)
 	if err != nil {
 		return nil, err
 	}

@@ -96,7 +96,7 @@ func (r *earnRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.Ear
 	model := fromEarnRuleEntity(rule)
 	return db.WithContext(ctx).
 		Model(&earnRuleModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", rule.ID, rule.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", rule.ID).
 		Updates(map[string]interface{}{
 			"name":              model.Name,
 			"description":       model.Description,
@@ -116,11 +116,8 @@ func (r *earnRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.Ear
 		}).Error
 }
 
-func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&earnRuleModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 	if result.Error != nil {
@@ -132,11 +129,8 @@ func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.
 	return nil
 }
 
-func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.EarnRule, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model earnRuleModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -148,14 +142,11 @@ func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID share
 	return model.toEntity(), nil
 }
 
-func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
+func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&earnRuleModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))
@@ -191,11 +182,8 @@ func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 	return rules, total, nil
 }
 
-func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, scenario points.EarnScenario) ([]*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB,  scenario points.EarnScenario) ([]*points.EarnRule, error) {
 	query := db.WithContext(ctx).Model(&earnRuleModel{}).Where("deleted_at IS NULL AND scenario = ?", scenario)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var models []earnRuleModel
 	err := query.Order("priority DESC, created_at DESC").Find(&models).Error
@@ -210,11 +198,8 @@ func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB, tenantID
 	return rules, nil
 }
 
-func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status points.EarnRuleStatus) error {
+func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status points.EarnRuleStatus) error {
 	query := db.WithContext(ctx).Model(&earnRuleModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	return query.Updates(map[string]interface{}{
 		"status":     status,
@@ -222,11 +207,8 @@ func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID s
 	}).Error
 }
 
-func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*points.EarnRuleStats, error) {
+func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB) (*points.EarnRuleStats, error) {
 	query := db.WithContext(ctx).Model(&earnRuleModel{}).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var total, active int64
 	if err := query.Count(&total).Error; err != nil {
@@ -234,9 +216,6 @@ func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID share
 	}
 
 	activeQuery := db.WithContext(ctx).Model(&earnRuleModel{}).Where("deleted_at IS NULL AND status = ?", points.EarnRuleStatusActive)
-	if tenantID != 0 {
-		activeQuery = activeQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if err := activeQuery.Count(&active).Error; err != nil {
 		return nil, err
 	}
@@ -317,7 +296,7 @@ func (r *redeemRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.R
 	model := fromRedeemRuleEntity(rule)
 	return db.WithContext(ctx).
 		Model(&redeemRuleModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", rule.ID, rule.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", rule.ID).
 		Updates(map[string]interface{}{
 			"name":            model.Name,
 			"description":     model.Description,
@@ -333,11 +312,8 @@ func (r *redeemRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.R
 		}).Error
 }
 
-func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 	if result.Error != nil {
@@ -349,11 +325,8 @@ func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID share
 	return nil
 }
 
-func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.RedeemRule, error) {
+func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.RedeemRule, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model redeemRuleModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -365,14 +338,11 @@ func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID sha
 	return model.toEntity(), nil
 }
 
-func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.RedeemRuleQuery) ([]*points.RedeemRule, int64, error) {
+func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.RedeemRuleQuery) ([]*points.RedeemRule, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))
@@ -402,11 +372,8 @@ func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID sha
 	return rules, total, nil
 }
 
-func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status points.RedeemRuleStatus) error {
+func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status points.RedeemRuleStatus) error {
 	query := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	return query.Updates(map[string]interface{}{
 		"status":     status,
@@ -414,19 +381,13 @@ func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID
 	}).Error
 }
 
-func (r *redeemRuleRepo) IncrementUsedStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, quantity int64) error {
+func (r *redeemRuleRepo) IncrementUsedStock(ctx context.Context, db *gorm.DB,  id int64, quantity int64) error {
 	query := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	return query.UpdateColumn("used_stock", gorm.Expr("used_stock + ?", quantity)).Error
 }
 
-func (r *redeemRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*points.RedeemRuleStats, error) {
+func (r *redeemRuleRepo) GetStats(ctx context.Context, db *gorm.DB) (*points.RedeemRuleStats, error) {
 	query := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var total, active int64
 	if err := query.Count(&total).Error; err != nil {
@@ -434,18 +395,12 @@ func (r *redeemRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID sha
 	}
 
 	activeQuery := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("deleted_at IS NULL AND status = ?", points.RedeemRuleStatusActive)
-	if tenantID != 0 {
-		activeQuery = activeQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if err := activeQuery.Count(&active).Error; err != nil {
 		return nil, err
 	}
 
 	var totalRedeemed int64
 	sumQuery := db.WithContext(ctx).Model(&redeemRuleModel{}).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		sumQuery = sumQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	sumQuery.Select("COALESCE(SUM(used_stock), 0)").Scan(&totalRedeemed)
 
 	return &points.RedeemRuleStats{
@@ -513,7 +468,7 @@ func (r *pointsAccountRepo) Update(ctx context.Context, db *gorm.DB, account *po
 	model := fromPointsAccountEntity(account)
 	return db.WithContext(ctx).
 		Model(&pointsAccountModel{}).
-		Where("id = ? AND tenant_id = ?", account.ID, account.TenantID.Int64()).
+		Where("id = ?", account.ID).
 		Updates(map[string]interface{}{
 			"balance":        model.Balance,
 			"frozen_balance": model.FrozenBalance,
@@ -524,11 +479,8 @@ func (r *pointsAccountRepo) Update(ctx context.Context, db *gorm.DB, account *po
 		}).Error
 }
 
-func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsAccount, error) {
 	query := db.WithContext(ctx)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model pointsAccountModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -540,11 +492,8 @@ func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID 
 	return model.toEntity(), nil
 }
 
-func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) (*points.PointsAccount, error) {
 	query := db.WithContext(ctx).Where("user_id = ?", userID)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model pointsAccountModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -556,14 +505,11 @@ func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenan
 	return model.toEntity(), nil
 }
 
-func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
+func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&pointsAccountModel{})
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.UserID > 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
@@ -592,11 +538,8 @@ func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB, tenantID 
 	return accounts, total, nil
 }
 
-func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*points.PointsAccountStats, error) {
+func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB) (*points.PointsAccountStats, error) {
 	query := db.WithContext(ctx).Model(&pointsAccountModel{})
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var total, totalBalance, active int64
 	if err := query.Count(&total).Error; err != nil {
@@ -604,15 +547,9 @@ func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID 
 	}
 
 	sumQuery := db.WithContext(ctx).Model(&pointsAccountModel{})
-	if tenantID != 0 {
-		sumQuery = sumQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	sumQuery.Select("COALESCE(SUM(balance), 0)").Scan(&totalBalance)
 
 	activeQuery := db.WithContext(ctx).Model(&pointsAccountModel{}).Where("balance > 0")
-	if tenantID != 0 {
-		activeQuery = activeQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if err := activeQuery.Count(&active).Error; err != nil {
 		return nil, err
 	}
@@ -687,11 +624,8 @@ func (r *pointsTransactionRepo) Create(ctx context.Context, db *gorm.DB, transac
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.PointsTransaction, error) {
+func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsTransaction, error) {
 	query := db.WithContext(ctx)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model pointsTransactionModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -703,14 +637,11 @@ func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, tenan
 	return model.toEntity(), nil
 }
 
-func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
+func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&pointsTransactionModel{})
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.UserID > 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
@@ -749,12 +680,9 @@ func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenan
 	return transactions, total, nil
 }
 
-func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
+func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
 	dbQuery := db.WithContext(ctx).Model(&pointsTransactionModel{})
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.StartTime != nil {
 		dbQuery = dbQuery.Where("created_at >= ?", *query.StartTime)
@@ -766,9 +694,6 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 	var totalEarned, totalRedeemed int64
 
 	earnQuery := db.WithContext(ctx).Model(&pointsTransactionModel{}).Where("type = ?", points.TransactionTypeEarn)
-	if tenantID != 0 {
-		earnQuery = earnQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if query.StartTime != nil {
 		earnQuery = earnQuery.Where("created_at >= ?", *query.StartTime)
 	}
@@ -778,9 +703,6 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 	earnQuery.Select("COALESCE(SUM(points), 0)").Scan(&totalEarned)
 
 	redeemQuery := db.WithContext(ctx).Model(&pointsTransactionModel{}).Where("type = ?", points.TransactionTypeRedeem)
-	if tenantID != 0 {
-		redeemQuery = redeemQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if query.StartTime != nil {
 		redeemQuery = redeemQuery.Where("created_at >= ?", *query.StartTime)
 	}
@@ -856,7 +778,7 @@ func (r *pointsRedemptionRepo) Update(ctx context.Context, db *gorm.DB, redempti
 	model := fromPointsRedemptionEntity(redemption)
 	return db.WithContext(ctx).
 		Model(&pointsRedemptionModel{}).
-		Where("id = ? AND tenant_id = ?", redemption.ID, redemption.TenantID.Int64()).
+		Where("id = ?", redemption.ID).
 		Updates(map[string]interface{}{
 			"user_coupon_id": model.UserCouponID,
 			"status":         model.Status,
@@ -865,11 +787,8 @@ func (r *pointsRedemptionRepo) Update(ctx context.Context, db *gorm.DB, redempti
 		}).Error
 }
 
-func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.PointsRedemption, error) {
+func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsRedemption, error) {
 	query := db.WithContext(ctx)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model pointsRedemptionModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -881,14 +800,11 @@ func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB, tenant
 	return model.toEntity(), nil
 }
 
-func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsRedemptionQuery) ([]*points.PointsRedemption, int64, error) {
+func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsRedemptionQuery) ([]*points.PointsRedemption, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&pointsRedemptionModel{})
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.UserID > 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
@@ -924,12 +840,9 @@ func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB, tenant
 	return redemptions, total, nil
 }
 
-func (r *pointsRedemptionRepo) CountByUserAndRule(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID, ruleID int64) (int64, error) {
+func (r *pointsRedemptionRepo) CountByUserAndRule(ctx context.Context, db *gorm.DB,  userID, ruleID int64) (int64, error) {
 	query := db.WithContext(ctx).Model(&pointsRedemptionModel{}).
 		Where("user_id = ? AND redeem_rule_id = ?", userID, ruleID)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {

@@ -84,7 +84,7 @@ type Repository interface {
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Market, error)
 	FindActive(ctx context.Context, db *gorm.DB) ([]*Market, error)
 	FindDefault(ctx context.Context, db *gorm.DB) (*Market, error)
-	ClearDefault(ctx context.Context, db *gorm.DB, tenantID int64) error
+	ClearDefault(ctx context.Context, db *gorm.DB) error
 }
 
 // Query 查询条件

@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,13 +26,9 @@ func NewListTemplateMappingsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *ListTemplateMappingsLogic) ListTemplateMappings(req *types.ListTemplateMappingsReq) (resp *types.ListTemplateMappingsResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Verify template exists and belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.TemplateID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.TemplateID)
 	if err != nil {
 		return nil, err
 	}

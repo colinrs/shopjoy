@@ -32,11 +32,11 @@ type ProductLocalizationRepository interface {
 	// Update 更新商品本地化记录
 	Update(ctx context.Context, db *gorm.DB, localization *ProductLocalization) error
 	// Delete 删除商品本地化记录
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
 	// FindByID 根据ID查找商品本地化记录
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*ProductLocalization, error)
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*ProductLocalization, error)
 	// FindByProductID 根据商品ID查找所有本地化记录
-	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*ProductLocalization, error)
+	FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*ProductLocalization, error)
 	// FindByProductAndLanguage 根据商品ID和语言代码查找本地化记录
-	FindByProductAndLanguage(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64, languageCode string) (*ProductLocalization, error)
+	FindByProductAndLanguage(ctx context.Context, db *gorm.DB,  productID int64, languageCode string) (*ProductLocalization, error)
 }

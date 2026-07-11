@@ -138,7 +138,7 @@ func (r *couponRepo) Update(ctx context.Context, db *gorm.DB, c *promotion.Coupo
 	model := fromCouponEntity(c)
 	return db.WithContext(ctx).
 		Model(&couponModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", c.ID, c.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", c.ID).
 		Updates(map[string]interface{}{
 			"name":           model.Name,
 			"code":           model.Code,
@@ -163,12 +163,9 @@ func (r *couponRepo) Update(ctx context.Context, db *gorm.DB, c *promotion.Coupo
 }
 
 // Delete soft deletes a coupon
-func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&couponModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -182,12 +179,9 @@ func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Te
 }
 
 // FindByID finds a coupon by ID
-func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*promotion.Coupon, error) {
+func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.Coupon, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model couponModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -200,12 +194,9 @@ func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // FindByCode finds a coupon by code
-func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, codeStr string) (*promotion.Coupon, error) {
+func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB,  codeStr string) (*promotion.Coupon, error) {
 	query := db.WithContext(ctx).Model(&couponModel{}).Where("code = ? AND deleted_at IS NULL", codeStr)
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model couponModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -218,15 +209,12 @@ func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // FindList finds coupons with pagination and filters
-func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query promotion.CouponQuery) ([]*promotion.Coupon, int64, error) {
+func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion.CouponQuery) ([]*promotion.Coupon, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&couponModel{}).Where("deleted_at IS NULL")
 
 	// Tenant filter: Platform admin (TenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))
@@ -263,15 +251,12 @@ func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // IncrementUsage atomically increments the used_count of a coupon
-func (r *couponRepo) IncrementUsage(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *couponRepo) IncrementUsage(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).
 		Model(&couponModel{}).
 		Where("id = ? AND deleted_at IS NULL", id)
 
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	result := query.Update("used_count", gorm.Expr("used_count + 1"))
 	if result.Error != nil {

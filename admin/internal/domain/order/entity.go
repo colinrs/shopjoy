@@ -170,11 +170,11 @@ type ShippingAddress struct {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, order *Order) error
 	Update(ctx context.Context, db *gorm.DB, order *Order) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Order, error)
-	FindByOrderNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderNo string) (*Order, error)
-	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query Query) ([]*Order, int64, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query Query) ([]*Order, int64, error)
-	UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status Status) error
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Order, error)
+	FindByOrderNo(ctx context.Context, db *gorm.DB,  orderNo string) (*Order, error)
+	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, query Query) ([]*Order, int64, error)
+	FindList(ctx context.Context, db *gorm.DB,  query Query) ([]*Order, int64, error)
+	UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status Status) error
 }
 
 type Query struct {

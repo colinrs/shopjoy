@@ -9,7 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -28,13 +27,9 @@ func NewUpdateShopSettingsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateShopSettingsLogic) UpdateShopSettings(req *types.UpdateShopSettingsRequest) (resp *types.ShopSettings, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tenantID == 0 {
-		return nil, code.ErrTenantInvalidID
-	}
 
 	// Find existing settings
-	settings, err := l.svcCtx.ShopSettingsRepo.FindByTenantID(l.ctx, l.svcCtx.DB, tenantID)
+	settings, err := l.svcCtx.ShopSettingsRepo.FindByTenantID(l.ctx, l.svcCtx.DB)
 	if err != nil {
 		l.Logger.Errorf("find shop settings error: %v", err)
 		return nil, code.ErrInternalServer
@@ -43,8 +38,7 @@ func (l *UpdateShopSettingsLogic) UpdateShopSettings(req *types.UpdateShopSettin
 	if settings == nil {
 		// Create new settings if not exists
 		settings = &shop.ShopSettings{
-			TenantID: tenantID,
-			Code:     generateShopCode(tenantID),
+			Code:     generateShopCode(),
 			Status:   1,
 			Plan:     0,
 		}
@@ -101,6 +95,6 @@ func (l *UpdateShopSettingsLogic) UpdateShopSettings(req *types.UpdateShopSettin
 	return toShopSettingsResponse(settings), nil
 }
 
-func generateShopCode(tenantID int64) string {
-	return fmt.Sprintf("shop-%d", tenantID)
+func generateShopCode() string {
+	return fmt.Sprintf("shop-%d", time.Now().UnixNano())
 }

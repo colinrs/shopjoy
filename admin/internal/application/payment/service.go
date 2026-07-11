@@ -20,15 +20,15 @@ import (
 // Service is the payment application service interface
 type Service interface {
 	// GetPaymentStats returns payment statistics
-	GetPaymentStats(ctx context.Context, tenantID shared.TenantID, period string) (*PaymentStatsDTO, error)
+	GetPaymentStats(ctx context.Context,  period string) (*PaymentStatsDTO, error)
 	// ListTransactions returns a list of payment transactions
-	ListTransactions(ctx context.Context, tenantID shared.TenantID, req ListTransactionsRequest) (*ListTransactionsResponse, error)
+	ListTransactions(ctx context.Context,  req ListTransactionsRequest) (*ListTransactionsResponse, error)
 	// GetTransaction returns a single transaction by ID
-	GetTransaction(ctx context.Context, tenantID shared.TenantID, id int64) (*TransactionDTO, error)
+	GetTransaction(ctx context.Context,  id int64) (*TransactionDTO, error)
 	// GetOrderPayment returns payment details for an order
-	GetOrderPayment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderPaymentDTO, error)
+	GetOrderPayment(ctx context.Context,  orderID int64) (*OrderPaymentDTO, error)
 	// InitiateRefund initiates a refund for an order
-	InitiateRefund(ctx context.Context, tenantID shared.TenantID, adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error)
+	InitiateRefund(ctx context.Context,  adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error)
 	// HandleWebhook handles Stripe webhook events
 	HandleWebhook(ctx context.Context, event *WebhookEvent) error
 }
@@ -40,6 +40,7 @@ type service struct {
 	transactionRepo     payment.PaymentTransactionRepository
 	webhookEventRepo    payment.WebhookEventRepository
 	paymentSettingsRepo shop.PaymentSettingsRepository
+	shopSettingsRepo    shop.ShopSettingsRepository
 	idGen               snowflake.Snowflake
 }
 
@@ -51,6 +52,7 @@ func NewService(
 	transactionRepo payment.PaymentTransactionRepository,
 	webhookEventRepo payment.WebhookEventRepository,
 	paymentSettingsRepo shop.PaymentSettingsRepository,
+	shopSettingsRepo shop.ShopSettingsRepository,
 	idGen snowflake.Snowflake,
 ) Service {
 	return &service{
@@ -60,12 +62,13 @@ func NewService(
 		transactionRepo:     transactionRepo,
 		webhookEventRepo:    webhookEventRepo,
 		paymentSettingsRepo: paymentSettingsRepo,
+		shopSettingsRepo:    shopSettingsRepo,
 		idGen:               idGen,
 	}
 }
 
 // GetPaymentStats returns payment statistics
-func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID, period string) (*PaymentStatsDTO, error) {
+func (s *service) GetPaymentStats(ctx context.Context,  period string) (*PaymentStatsDTO, error) {
 	// Parse period to get time range
 	now := time.Now().UTC()
 	var startTime time.Time
@@ -81,7 +84,7 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 	}
 
 	// Get transaction stats
-	success, pending, failed, err := s.transactionRepo.GetStats(ctx, s.db, tenantID)
+	success, pending, failed, err := s.transactionRepo.GetStats(ctx, s.db)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +98,7 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		StartTime: todayStart,
 		EndTime:   now,
 	}
-	todayTxns, _, err := s.transactionRepo.FindList(ctx, s.db, tenantID, todayQuery)
+	todayTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  todayQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +115,7 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		StartTime: yesterdayStart,
 		EndTime:   todayStart,
 	}
-	yesterdayTxns, _, err := s.transactionRepo.FindList(ctx, s.db, tenantID, yesterdayQuery)
+	yesterdayTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  yesterdayQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +140,7 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 		StartTime: startTime,
 		EndTime:   now,
 	}
-	periodTxns, _, err := s.transactionRepo.FindList(ctx, s.db, tenantID, periodQuery)
+	periodTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  periodQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +198,7 @@ func (s *service) GetPaymentStats(ctx context.Context, tenantID shared.TenantID,
 }
 
 // ListTransactions returns a list of payment transactions
-func (s *service) ListTransactions(ctx context.Context, tenantID shared.TenantID, req ListTransactionsRequest) (*ListTransactionsResponse, error) {
+func (s *service) ListTransactions(ctx context.Context,  req ListTransactionsRequest) (*ListTransactionsResponse, error) {
 	query := payment.TransactionQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -220,7 +223,7 @@ func (s *service) ListTransactions(ctx context.Context, tenantID shared.TenantID
 
 	query.PageQuery.Validate()
 
-	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, tenantID, query)
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db,  query)
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +234,7 @@ func (s *service) ListTransactions(ctx context.Context, tenantID shared.TenantID
 	}
 
 	// Get stats
-	success, pending, failed, err := s.transactionRepo.GetStats(ctx, s.db, tenantID)
+	success, pending, failed, err := s.transactionRepo.GetStats(ctx, s.db)
 	if err != nil {
 		return nil, err
 	}
@@ -250,8 +253,8 @@ func (s *service) ListTransactions(ctx context.Context, tenantID shared.TenantID
 }
 
 // GetTransaction returns a single transaction by ID
-func (s *service) GetTransaction(ctx context.Context, tenantID shared.TenantID, id int64) (*TransactionDTO, error) {
-	txn, err := s.transactionRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) GetTransaction(ctx context.Context,  id int64) (*TransactionDTO, error) {
+	txn, err := s.transactionRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return nil, err
 	}
@@ -259,20 +262,20 @@ func (s *service) GetTransaction(ctx context.Context, tenantID shared.TenantID, 
 }
 
 // GetOrderPayment returns payment details for an order
-func (s *service) GetOrderPayment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*OrderPaymentDTO, error) {
-	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db, tenantID, orderID)
+func (s *service) GetOrderPayment(ctx context.Context,  orderID int64) (*OrderPaymentDTO, error) {
+	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db,  orderID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get refunds for this payment
-	refunds, err := s.refundRepo.FindByPaymentID(ctx, s.db, tenantID, paymentEntity.ID)
+	refunds, err := s.refundRepo.FindByPaymentID(ctx, s.db,  paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Calculate total refunded amount
-	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db, tenantID, paymentEntity.ID)
+	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db,  paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +305,7 @@ func (s *service) GetOrderPayment(ctx context.Context, tenantID shared.TenantID,
 }
 
 // InitiateRefund initiates a refund for an order
-func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error) {
+func (s *service) InitiateRefund(ctx context.Context,  adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error) {
 	// Parse amount from string to int64 (cents)
 	// The amount string can be "99.99 USD" or just "99.99"
 	amount, err := parseMoneyString(req.Amount)
@@ -334,7 +337,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Get payment for the order
-	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db, tenantID, req.OrderID)
+	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db,  req.OrderID)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +353,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Calculate refundable amount
-	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db, tenantID, paymentEntity.ID)
+	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db,  paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +375,7 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	refund := payment.NewPaymentRefund(
-		tenantID,
+		
 		req.OrderID,
 		paymentEntity.ID,
 		req.IdempotencyKey,
@@ -404,7 +407,12 @@ func (s *service) InitiateRefund(ctx context.Context, tenantID shared.TenantID, 
 	}
 
 	// Get payment settings to check Stripe configuration
-	paymentSettings, err := s.paymentSettingsRepo.FindByShopID(ctx, tx, int64(tenantID))
+	shopSettings, err := s.shopSettingsRepo.FindByTenantID(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to get shop settings: %w", err)
+	}
+	paymentSettings, err := s.paymentSettingsRepo.FindByShopID(ctx, tx, shopSettings.ID)
 	if err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("failed to get payment settings: %w", err)

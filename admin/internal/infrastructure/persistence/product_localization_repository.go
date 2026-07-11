@@ -66,7 +66,7 @@ func (r *productLocalizationRepo) Create(ctx context.Context, db *gorm.DB, local
 
 func (r *productLocalizationRepo) Update(ctx context.Context, db *gorm.DB, localization *product.ProductLocalization) error {
 	return db.WithContext(ctx).Model(&productLocalizationModel{}).
-		Where("id = ? AND tenant_id = ?", localization.Model.ID, localization.TenantID.Int64()).
+		Where("id = ?", localization.Model.ID).
 		Updates(map[string]any{
 			"language_code": localization.LanguageCode,
 			"name":          localization.Name,
@@ -75,16 +75,16 @@ func (r *productLocalizationRepo) Update(ctx context.Context, db *gorm.DB, local
 		}).Error
 }
 
-func (r *productLocalizationRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *productLocalizationRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	return db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Delete(&productLocalizationModel{}).Error
 }
 
-func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.ProductLocalization, error) {
 	var model productLocalizationModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		First(&model).Error
 	if err != nil {
 		return nil, err
@@ -92,10 +92,10 @@ func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB, ten
 	return model.toEntity(), nil
 }
 
-func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*product.ProductLocalization, error) {
 	var models []productLocalizationModel
 	err := db.WithContext(ctx).
-		Where("product_id = ? AND tenant_id = ?", productID, tenantID.Int64()).
+		Where("product_id = ?", productID).
 		Find(&models).Error
 	if err != nil {
 		return nil, err
@@ -107,10 +107,10 @@ func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.
 	return result, nil
 }
 
-func (r *productLocalizationRepo) FindByProductAndLanguage(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64, languageCode string) (*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByProductAndLanguage(ctx context.Context, db *gorm.DB,  productID int64, languageCode string) (*product.ProductLocalization, error) {
 	var model productLocalizationModel
 	err := db.WithContext(ctx).
-		Where("product_id = ? AND tenant_id = ? AND language_code = ?", productID, tenantID.Int64(), languageCode).
+		Where("product_id = ? AND language_code = ?", productID, languageCode).
 		First(&model).Error
 	if err != nil {
 		return nil, err

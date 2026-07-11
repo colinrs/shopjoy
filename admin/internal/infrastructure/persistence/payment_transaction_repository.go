@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -20,12 +19,9 @@ func (r *paymentTransactionRepository) Create(ctx context.Context, db *gorm.DB, 
 	return db.WithContext(ctx).Create(txn).Error
 }
 
-func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*payment.PaymentTransaction, error) {
+func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
 	query := db.WithContext(ctx).Where("id = ?", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	err := query.First(&txn).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,12 +32,9 @@ func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB
 	return &txn, nil
 }
 
-func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, txnID string) (*payment.PaymentTransaction, error) {
+func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, db *gorm.DB,  txnID string) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
 	query := db.WithContext(ctx).Where("transaction_id = ?", txnID)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	err := query.First(&txn).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -52,14 +45,11 @@ func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, 
 	return &txn, nil
 }
 
-func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
+func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB,  query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&payment.PaymentTransaction{})
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.OrderID > 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -97,7 +87,7 @@ func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB
 	return list, total, nil
 }
 
-func (r *paymentTransactionRepository) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (success, pending, failed int64, err error) {
+func (r *paymentTransactionRepository) GetStats(ctx context.Context, db *gorm.DB) (success, pending, failed int64, err error) {
 	type statsResult struct {
 		Status int64
 		Count  int64
@@ -109,9 +99,6 @@ func (r *paymentTransactionRepository) GetStats(ctx context.Context, db *gorm.DB
 		Select("status, COUNT(*) as count").
 		Group("status")
 
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	err = query.Scan(&results).Error
 	if err != nil {

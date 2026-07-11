@@ -10,8 +10,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -35,10 +33,6 @@ func NewExportInventoryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *ExportInventoryLogsLogic) ExportInventoryLogs(req *types.GetInventoryLogsReq) error {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// For export, use a large page size to get all records
 	query := product.InventoryLogQuery{
@@ -51,7 +45,7 @@ func (l *ExportInventoryLogsLogic) ExportInventoryLogs(req *types.GetInventoryLo
 		ChangeType: req.Type,
 	}
 
-	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
+	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, query)
 	if err != nil {
 		return err
 	}

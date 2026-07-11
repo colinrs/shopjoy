@@ -6,9 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,12 +25,8 @@ func NewGetEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetEar
 }
 
 func (l *GetEarnRuleLogic) GetEarnRule(req *types.GetEarnRuleReq) (resp *types.EarnRule, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
-	rule, err := l.svcCtx.PointsService.GetEarnRule(l.ctx, shared.TenantID(tenantID), req.ID)
+	rule, err := l.svcCtx.PointsService.GetEarnRule(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

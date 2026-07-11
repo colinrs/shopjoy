@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,13 +27,8 @@ func NewHideReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) HideRev
 
 func (l *HideReviewLogic) HideReview(req *types.HideReviewReq) (resp *types.HideReviewResp, err error) {
 	// Get tenantID from context with proper validation
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	if err := l.svcCtx.ReviewService.HideReview(l.ctx, shared.TenantID(tenantID), req.ID, req.Reason); err != nil {
+	if err := l.svcCtx.ReviewService.HideReview(l.ctx, req.ID, req.Reason); err != nil {
 		return nil, err
 	}
 

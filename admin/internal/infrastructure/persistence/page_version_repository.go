@@ -65,10 +65,10 @@ func (r *pageVersionRepo) Create(ctx context.Context, db *gorm.DB, v *storefront
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, page, pageSize int) ([]*storefront.PageVersion, int64, error) {
+func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64, page, pageSize int) ([]*storefront.PageVersion, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageVersionModel{}).
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -76,7 +76,7 @@ func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantI
 	var models []pageVersionModel
 	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Order("version DESC").
 		Offset(offset).
 		Limit(pageSize).
@@ -92,18 +92,18 @@ func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantI
 	return versions, total, nil
 }
 
-func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) (int64, error) {
+func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB,  pageID int64) (int64, error) {
 	var total int64
 	err := db.WithContext(ctx).Model(&pageVersionModel{}).
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Count(&total).Error
 	return total, err
 }
 
-func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, version int) (*storefront.PageVersion, error) {
+func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB,  pageID int64, version int) (*storefront.PageVersion, error) {
 	var model pageVersionModel
 	err := db.WithContext(ctx).
-		Where("page_id = ? AND tenant_id = ? AND version = ?", pageID, tenantID.Int64(), version).
+		Where("page_id = ? AND version = ?", pageID, version).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -114,11 +114,11 @@ func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB, tenant
 	return model.toEntity(), nil
 }
 
-func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64, keepCount int) error {
+func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB,  pageID int64, keepCount int) error {
 	// Get total count
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageVersionModel{}).
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Count(&total).Error; err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB, tenantI
 	var idsToDelete []int64
 	err := db.WithContext(ctx).Model(&pageVersionModel{}).
 		Select("id").
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Order("version ASC").
 		Limit(int(total)-keepCount).
 		Pluck("id", &idsToDelete).Error

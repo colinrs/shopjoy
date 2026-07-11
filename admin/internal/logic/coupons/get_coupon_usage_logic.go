@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,15 +24,9 @@ func NewGetCouponUsageLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetCouponUsageLogic) GetCouponUsage(req *types.GetCouponUsageReq) (resp *types.ListCouponUsageResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Note: This would require a dedicated method in the app service
 	// For now, return empty list
-	_ = shared.TenantID(tenantID)
 
 	return &types.ListCouponUsageResp{
 		List:     []*types.CouponUsageResp{},

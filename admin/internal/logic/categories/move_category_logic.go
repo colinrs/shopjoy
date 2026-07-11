@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -28,14 +26,9 @@ func NewMoveCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) MoveC
 }
 
 func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *types.CategoryDetailResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Find category
-	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +43,7 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 		if req.NewParentID == req.ID {
 			return nil, code.ErrCategoryInvalid
 		}
-		newParent, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.NewParentID)
+		newParent, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.NewParentID)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +55,7 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 
 	// Validate new level doesn't exceed max (3 levels)
 	// Also need to check if category has children - they would go even deeper
-	children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,12 +69,12 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 	}
 
 	// Move category
-	if err := l.svcCtx.CategoryRepo.Move(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID, req.NewParentID); err != nil {
+	if err := l.svcCtx.CategoryRepo.Move(l.ctx, l.svcCtx.DB, req.ID, req.NewParentID); err != nil {
 		return nil, err
 	}
 
 	// Get updated category
-	category, err = l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	category, err = l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +108,7 @@ func (l *MoveCategoryLogic) MoveCategory(req *types.MoveCategoryReq) (resp *type
 func (l *MoveCategoryLogic) getMaxChildDepth(categories []*product.Category, currentDepth int) int {
 	maxDepth := currentDepth
 	for _, cat := range categories {
-		children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, cat.TenantID, cat.ID)
+		children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, cat.ID)
 		if err == nil && len(children) > 0 {
 			childDepth := l.getMaxChildDepth(children, currentDepth+1)
 			if childDepth > maxDepth {

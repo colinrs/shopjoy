@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,18 +26,13 @@ func NewBatchHideLogic(ctx context.Context, svcCtx *svc.ServiceContext) BatchHid
 }
 
 func (l *BatchHideLogic) BatchHide(req *types.BatchHideReq) (resp *types.BatchHideResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	ids, err := utils.ParseInt64Slice(req.IDs)
 	if err != nil {
 		return nil, code.ErrParam
 	}
 
-	result, err := l.svcCtx.ReviewService.BatchHide(l.ctx, shared.TenantID(tenantID), ids, req.Reason)
+	result, err := l.svcCtx.ReviewService.BatchHide(l.ctx, ids, req.Reason)
 	if err != nil {
 		return nil, err
 	}

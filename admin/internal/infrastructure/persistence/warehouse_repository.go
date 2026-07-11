@@ -71,7 +71,7 @@ func (r *warehouseRepo) Create(ctx context.Context, db *gorm.DB, w *product.Ware
 func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Warehouse) error {
 	model := fromWarehouseEntity(w)
 	return db.WithContext(ctx).Model(&warehouseModel{}).
-		Where("id = ? AND tenant_id = ?", w.Model.ID, w.TenantID.Int64()).
+		Where("id = ?", w.Model.ID).
 		Updates(map[string]any{
 			"name":       model.Name,
 			"country":    model.Country,
@@ -82,17 +82,17 @@ func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Ware
 		}).Error
 }
 
-func (r *warehouseRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *warehouseRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&warehouseModel{}).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -103,10 +103,10 @@ func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shar
 	return model.toEntity(), nil
 }
 
-func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB,  code string) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
-		Where("code = ? AND tenant_id = ? AND deleted_at IS NULL", code, tenantID.Int64()).
+		Where("code = ? AND deleted_at IS NULL", code).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -117,10 +117,10 @@ func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID sh
 	return model.toEntity(), nil
 }
 
-func (r *warehouseRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*product.Warehouse, error) {
+func (r *warehouseRepo) FindAll(ctx context.Context, db *gorm.DB) ([]*product.Warehouse, error) {
 	var models []warehouseModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Order("is_default DESC, code ASC").
 		Find(&models).Error
 	if err != nil {
@@ -133,10 +133,10 @@ func (r *warehouseRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID share
 	return warehouses, nil
 }
 
-func (r *warehouseRepo) FindDefault(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindDefault(ctx context.Context, db *gorm.DB) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND is_default = ? AND deleted_at IS NULL", tenantID.Int64(), true).
+		Where("is_default = ? AND deleted_at IS NULL", true).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

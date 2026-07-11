@@ -72,10 +72,9 @@ func (r *themeAuditLogRepo) Create(ctx context.Context, db *gorm.DB, log *storef
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *themeAuditLogRepo) FindByTenantID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*storefront.ThemeAuditLog, int64, error) {
+func (r *themeAuditLogRepo) FindByTenantID(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*storefront.ThemeAuditLog, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&themeAuditLogModel{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -83,7 +82,6 @@ func (r *themeAuditLogRepo) FindByTenantID(ctx context.Context, db *gorm.DB, ten
 	var models []themeAuditLogModel
 	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Order("created_at DESC").
 		Offset(offset).
 		Limit(pageSize).

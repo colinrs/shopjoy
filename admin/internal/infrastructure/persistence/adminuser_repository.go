@@ -69,10 +69,6 @@ func (r *AdminUserRepository) FindList(ctx context.Context, db *gorm.DB, query a
 
 	dbQuery := db.WithContext(ctx).Model(&adminuser.AdminUser{})
 
-	if query.TenantID > 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", query.TenantID)
-	}
-
 	if query.Type > 0 {
 		dbQuery = dbQuery.Where("type = ?", query.Type)
 	}
@@ -116,26 +112,26 @@ func (r *AdminUserRepository) UpdatePassword(ctx context.Context, db *gorm.DB, i
 		Update("password", hashedPassword).Error
 }
 
-func (r *AdminUserRepository) ExistsByUsername(ctx context.Context, db *gorm.DB, tenantID int64, username string) (bool, error) {
+func (r *AdminUserRepository) ExistsByUsername(ctx context.Context, db *gorm.DB,  username string) (bool, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
-		Where("tenant_id = ? AND username = ?", tenantID, username).
+		Where("username = ?", username).
 		Count(&count).Error
 	return count > 0, err
 }
 
-func (r *AdminUserRepository) ExistsByEmail(ctx context.Context, db *gorm.DB, tenantID int64, email string) (bool, error) {
+func (r *AdminUserRepository) ExistsByEmail(ctx context.Context, db *gorm.DB,  email string) (bool, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
-		Where("tenant_id = ? AND email = ?", tenantID, email).
+		Where("email = ?", email).
 		Count(&count).Error
 	return count > 0, err
 }
 
-func (r *AdminUserRepository) CountMainAccount(ctx context.Context, db *gorm.DB, tenantID int64) (int64, error) {
+func (r *AdminUserRepository) CountMainAccount(ctx context.Context, db *gorm.DB) (int64, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
-		Where("tenant_id = ? AND type = ?", tenantID, adminuser.TypeTenantAdmin).
+		Where("type = ?", adminuser.TypeTenantAdmin).
 		Count(&count).Error
 	return count, err
 }

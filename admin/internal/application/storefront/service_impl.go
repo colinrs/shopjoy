@@ -36,9 +36,9 @@ func NewPageService(
 	}
 }
 
-func (s *pageService) CreatePage(ctx context.Context, tenantID shared.TenantID, name, slug, pageType string) (*PageDTO, error) {
+func (s *pageService) CreatePage(ctx context.Context,  name, slug, pageType string) (*PageDTO, error) {
 	// Validate slug uniqueness
-	existingPage, err := s.pageRepo.FindBySlug(ctx, s.db, tenantID, slug)
+	existingPage, err := s.pageRepo.FindBySlug(ctx, s.db,  slug)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,6 @@ func (s *pageService) CreatePage(ctx context.Context, tenantID shared.TenantID, 
 	now := time.Now().UTC()
 	page := &storefront.Page{
 		Model:       application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
-		TenantID:    tenantID,
 		Name:        name,
 		Slug:        slug,
 		Type:        pt,
@@ -85,8 +84,8 @@ func (s *pageService) CreatePage(ctx context.Context, tenantID shared.TenantID, 
 	}, nil
 }
 
-func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageDTO], error) {
-	pages, total, err := s.pageRepo.FindAll(ctx, s.db, tenantID, page, pageSize)
+func (s *pageService) ListPages(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageDTO], error) {
+	pages, total, err := s.pageRepo.FindAll(ctx, s.db,  page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +109,8 @@ func (s *pageService) ListPages(ctx context.Context, tenantID shared.TenantID, p
 	}, nil
 }
 
-func (s *pageService) GetPage(ctx context.Context, tenantID shared.TenantID, pageID int64) (*PageDetailDTO, error) {
-	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+func (s *pageService) GetPage(ctx context.Context, pageID int64) (*PageDetailDTO, error) {
+	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +118,7 @@ func (s *pageService) GetPage(ctx context.Context, tenantID shared.TenantID, pag
 		return nil, code.ErrPageNotFound
 	}
 
-	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db, tenantID, pageID)
+	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db,  pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +136,8 @@ func (s *pageService) GetPage(ctx context.Context, tenantID shared.TenantID, pag
 	}, nil
 }
 
-func (s *pageService) GetPageBySlug(ctx context.Context, tenantID shared.TenantID, slug string) (*PageDetailDTO, error) {
-	page, err := s.pageRepo.FindBySlug(ctx, s.db, tenantID, slug)
+func (s *pageService) GetPageBySlug(ctx context.Context, slug string) (*PageDetailDTO, error) {
+	page, err := s.pageRepo.FindBySlug(ctx, s.db,  slug)
 	if err != nil {
 		return nil, err
 	}
@@ -146,11 +145,11 @@ func (s *pageService) GetPageBySlug(ctx context.Context, tenantID shared.TenantI
 		return nil, code.ErrPageNotFound
 	}
 
-	return s.GetPage(ctx, tenantID, page.Model.ID)
+	return s.GetPage(ctx,  page.Model.ID)
 }
 
-func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, pageID int64, blocks []*DecorationDTO, userID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+func (s *pageService) SaveDraft(ctx context.Context,  pageID int64, blocks []*DecorationDTO, userID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
 	if err != nil {
 		return err
 	}
@@ -160,7 +159,7 @@ func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, p
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Delete existing decorations
-		if err := s.decorationRepo.DeleteByPageID(ctx, tx, tenantID, pageID); err != nil {
+		if err := s.decorationRepo.DeleteByPageID(ctx, tx,  pageID); err != nil {
 			return err
 		}
 
@@ -178,7 +177,6 @@ func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, p
 
 			decoration := &storefront.Decoration{
 				Model:       application.Model{ID: id},
-				TenantID:    tenantID,
 				PageID:      pageID,
 				BlockType:   block.BlockType,
 				BlockConfig: block.BlockConfig,
@@ -201,8 +199,8 @@ func (s *pageService) SaveDraft(ctx context.Context, tenantID shared.TenantID, p
 	})
 }
 
-func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID, pageID int64, userID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+func (s *pageService) PublishPage(ctx context.Context,  pageID int64, userID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
 	if err != nil {
 		return err
 	}
@@ -216,7 +214,7 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Get current decorations for version snapshot
-		decorations, err := s.decorationRepo.FindByPageID(ctx, tx, tenantID, pageID)
+		decorations, err := s.decorationRepo.FindByPageID(ctx, tx,  pageID)
 		if err != nil {
 			return err
 		}
@@ -238,7 +236,6 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 
 		version := &storefront.PageVersion{
 			Model:     application.Model{ID: id},
-			TenantID:  tenantID,
 			PageID:    pageID,
 			Version:   page.Version,
 			Blocks:    blocks,
@@ -250,7 +247,7 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 		}
 
 		// Clean up old versions (keep last 20)
-		if err := s.versionRepo.DeleteOldest(ctx, tx, tenantID, pageID, 20); err != nil {
+		if err := s.versionRepo.DeleteOldest(ctx, tx,  pageID, 20); err != nil {
 			return err
 		}
 
@@ -266,8 +263,8 @@ func (s *pageService) PublishPage(ctx context.Context, tenantID shared.TenantID,
 	})
 }
 
-func (s *pageService) UnpublishPage(ctx context.Context, tenantID shared.TenantID, pageID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+func (s *pageService) UnpublishPage(ctx context.Context,  pageID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
 	if err != nil {
 		return err
 	}
@@ -343,15 +340,15 @@ func NewDecorationService(
 	}
 }
 
-func (s *decorationService) GetDecorations(ctx context.Context, tenantID shared.TenantID, pageID int64) ([]*DecorationDTO, error) {
-	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db, tenantID, pageID)
+func (s *decorationService) GetDecorations(ctx context.Context,  pageID int64) ([]*DecorationDTO, error) {
+	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db,  pageID)
 	if err != nil {
 		return nil, err
 	}
 	return decorationsToDTOs(decorations), nil
 }
 
-func (s *decorationService) AddDecoration(ctx context.Context, tenantID shared.TenantID, pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error) {
+func (s *decorationService) AddDecoration(ctx context.Context,  pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error) {
 	// Validate block type
 	if !isValidBlockType(blockType) {
 		return nil, code.ErrInvalidBlockType
@@ -364,7 +361,6 @@ func (s *decorationService) AddDecoration(ctx context.Context, tenantID shared.T
 
 	decoration := &storefront.Decoration{
 		Model:       application.Model{ID: id},
-		TenantID:    tenantID,
 		PageID:      pageID,
 		BlockType:   blockType,
 		BlockConfig: blockConfig,
@@ -384,8 +380,8 @@ func (s *decorationService) AddDecoration(ctx context.Context, tenantID shared.T
 	}, nil
 }
 
-func (s *decorationService) UpdateDecoration(ctx context.Context, tenantID shared.TenantID, decorationID int64, blockConfig map[string]any) error {
-	decoration, err := s.decorationRepo.FindByID(ctx, s.db, tenantID, decorationID)
+func (s *decorationService) UpdateDecoration(ctx context.Context,  decorationID int64, blockConfig map[string]any) error {
+	decoration, err := s.decorationRepo.FindByID(ctx, s.db,  decorationID)
 	if err != nil {
 		return err
 	}
@@ -397,11 +393,11 @@ func (s *decorationService) UpdateDecoration(ctx context.Context, tenantID share
 	return s.decorationRepo.Update(ctx, s.db, decoration)
 }
 
-func (s *decorationService) DeleteDecoration(ctx context.Context, tenantID shared.TenantID, decorationID int64) error {
-	return s.decorationRepo.Delete(ctx, s.db, tenantID, decorationID)
+func (s *decorationService) DeleteDecoration(ctx context.Context, decorationID int64) error {
+	return s.decorationRepo.Delete(ctx, s.db,  decorationID)
 }
 
-func (s *decorationService) ReorderBlocks(ctx context.Context, tenantID shared.TenantID, pageID int64, orders []BlockOrderDTO) error {
+func (s *decorationService) ReorderBlocks(ctx context.Context,  pageID int64, orders []BlockOrderDTO) error {
 	blockOrders := make([]storefront.BlockOrder, len(orders))
 	for i, o := range orders {
 		blockOrders[i] = storefront.BlockOrder{
@@ -409,7 +405,7 @@ func (s *decorationService) ReorderBlocks(ctx context.Context, tenantID shared.T
 			SortOrder: o.SortOrder,
 		}
 	}
-	return s.decorationRepo.Reorder(ctx, s.db, tenantID, blockOrders)
+	return s.decorationRepo.Reorder(ctx, s.db,  blockOrders)
 }
 
 // isValidBlockType validates that the block type is one of the allowed types
@@ -453,8 +449,8 @@ func NewVersionService(
 	}
 }
 
-func (s *versionService) ListVersions(ctx context.Context, tenantID shared.TenantID, pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error) {
-	versions, total, err := s.versionRepo.FindByPageID(ctx, s.db, tenantID, pageID, page, pageSize)
+func (s *versionService) ListVersions(ctx context.Context,  pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error) {
+	versions, total, err := s.versionRepo.FindByPageID(ctx, s.db,  pageID, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -476,8 +472,8 @@ func (s *versionService) ListVersions(ctx context.Context, tenantID shared.Tenan
 	}, nil
 }
 
-func (s *versionService) GetVersion(ctx context.Context, tenantID shared.TenantID, pageID int64, version int) (*VersionDetailDTO, error) {
-	v, err := s.versionRepo.FindByVersion(ctx, s.db, tenantID, pageID, version)
+func (s *versionService) GetVersion(ctx context.Context,  pageID int64, version int) (*VersionDetailDTO, error) {
+	v, err := s.versionRepo.FindByVersion(ctx, s.db,  pageID, version)
 	if err != nil {
 		return nil, err
 	}
@@ -505,8 +501,8 @@ func (s *versionService) GetVersion(ctx context.Context, tenantID shared.TenantI
 	}, nil
 }
 
-func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.TenantID, pageID int64, version int, userID int64) error {
-	v, err := s.versionRepo.FindByVersion(ctx, s.db, tenantID, pageID, version)
+func (s *versionService) RestoreVersion(ctx context.Context,  pageID int64, version int, userID int64) error {
+	v, err := s.versionRepo.FindByVersion(ctx, s.db,  pageID, version)
 	if err != nil {
 		return err
 	}
@@ -515,7 +511,7 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 	}
 
 	// Get current page to increment version
-	page, err := s.pageRepo.FindByID(ctx, s.db, tenantID, pageID)
+	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
 	if err != nil {
 		return err
 	}
@@ -525,7 +521,7 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Delete existing decorations
-		if err := s.decorationRepo.DeleteByPageID(ctx, tx, tenantID, pageID); err != nil {
+		if err := s.decorationRepo.DeleteByPageID(ctx, tx,  pageID); err != nil {
 			return err
 		}
 
@@ -538,7 +534,6 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 
 			decoration := &storefront.Decoration{
 				Model:       application.Model{ID: id},
-				TenantID:    tenantID,
 				PageID:      pageID,
 				BlockType:   block.BlockType,
 				BlockConfig: block.BlockConfig,
@@ -562,7 +557,6 @@ func (s *versionService) RestoreVersion(ctx context.Context, tenantID shared.Ten
 
 		newVersion := &storefront.PageVersion{
 			Model:     application.Model{ID: newVersionID},
-			TenantID:  tenantID,
 			PageID:    pageID,
 			Version:   newVersionNum,
 			Blocks:    v.Blocks,
@@ -594,8 +588,8 @@ func NewSEOService(
 	}
 }
 
-func (s *seoService) GetGlobalSEO(ctx context.Context, tenantID shared.TenantID) (*SEOConfigDTO, error) {
-	config, err := s.seoRepo.FindByPageType(ctx, s.db, tenantID, "global", nil)
+func (s *seoService) GetGlobalSEO(ctx context.Context) (*SEOConfigDTO, error) {
+	config, err := s.seoRepo.FindByPageType(ctx, s.db,  "global", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -610,7 +604,7 @@ func (s *seoService) GetGlobalSEO(ctx context.Context, tenantID shared.TenantID)
 	}, nil
 }
 
-func (s *seoService) UpdateGlobalSEO(ctx context.Context, tenantID shared.TenantID, config SEOConfigDTO) error {
+func (s *seoService) UpdateGlobalSEO(ctx context.Context,  config SEOConfigDTO) error {
 	// Validate SEO fields
 	if len(config.Title) > 70 {
 		return code.ErrSEOTitleTooLong
@@ -620,7 +614,6 @@ func (s *seoService) UpdateGlobalSEO(ctx context.Context, tenantID shared.Tenant
 	}
 
 	seoConfig := &storefront.SEOConfigEntity{
-		TenantID:    tenantID,
 		PageType:    "global",
 		PageID:      nil,
 		Title:       config.Title,
@@ -630,8 +623,8 @@ func (s *seoService) UpdateGlobalSEO(ctx context.Context, tenantID shared.Tenant
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }
 
-func (s *seoService) GetPageSEO(ctx context.Context, tenantID shared.TenantID, pageType string, pageID *int64) (*PageSEOConfigDTO, error) {
-	config, err := s.seoRepo.FindByPageType(ctx, s.db, tenantID, pageType, pageID)
+func (s *seoService) GetPageSEO(ctx context.Context, pageType string, pageID *int64) (*PageSEOConfigDTO, error) {
+	config, err := s.seoRepo.FindByPageType(ctx, s.db,  pageType, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -654,7 +647,7 @@ func (s *seoService) GetPageSEO(ctx context.Context, tenantID shared.TenantID, p
 	}, nil
 }
 
-func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID, pageType string, pageID *int64, config SEOConfigDTO) error {
+func (s *seoService) UpdatePageSEO(ctx context.Context,  pageType string, pageID *int64, config SEOConfigDTO) error {
 	// Validate SEO fields
 	if len(config.Title) > 70 {
 		return code.ErrSEOTitleTooLong
@@ -664,7 +657,6 @@ func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID
 	}
 
 	seoConfig := &storefront.SEOConfigEntity{
-		TenantID:    tenantID,
 		PageType:    pageType,
 		PageID:      pageID,
 		Title:       config.Title,
@@ -674,8 +666,8 @@ func (s *seoService) UpdatePageSEO(ctx context.Context, tenantID shared.TenantID
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }
 
-func (s *seoService) ListPageSEO(ctx context.Context, tenantID shared.TenantID, page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error) {
-	configs, total, err := s.seoRepo.FindAll(ctx, s.db, tenantID, page, pageSize)
+func (s *seoService) ListPageSEO(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error) {
+	configs, total, err := s.seoRepo.FindAll(ctx, s.db,  page, pageSize)
 	if err != nil {
 		return nil, err
 	}

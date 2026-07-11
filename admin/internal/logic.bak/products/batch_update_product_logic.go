@@ -1,0 +1,130 @@
+package products
+
+import (
+	"context"
+
+	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
+	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/pkg/utils"
+	"github.com/shopspring/decimal"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type BatchUpdateProductLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewBatchUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) BatchUpdateProductLogic {
+	return BatchUpdateProductLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProductReq) (resp *types.BatchUpdateProductResp, err error) {
+	// 从 context 获取 tenantID
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok {
+		return nil, code.ErrUnauthorized
+	}
+
+	// 验证 UpdateFields 至少提供一个字段
+	if req.UpdateFields.Price == nil && req.UpdateFields.Stock == nil &&
+		req.UpdateFields.Status == nil && req.UpdateFields.CategoryID == nil {
+		return nil, code.ErrParam
+	}
+
+	// 解析价格
+	var price *decimal.Decimal
+	if req.UpdateFields.Price != nil {
+		p, err := decimal.NewFromString(*req.UpdateFields.Price)
+		if err != nil {
+			return &types.BatchUpdateProductResp{
+				Success: []string{},
+				Failed: []types.BatchProductFail{
+					{ProductID: 0, Code: code.ErrProductInvalidPrice.Code, Message: code.ErrProductInvalidPrice.Msg},
+				},
+			}, nil
+		}
+		price = &p
+	}
+
+	// 解析状态
+	var status *product.Status
+	if req.UpdateFields.Status != nil {
+		s := parseBatchStatus(*req.UpdateFields.Status)
+		if s == nil {
+			return &types.BatchUpdateProductResp{
+				Success: []string{},
+				Failed: []types.BatchProductFail{
+					{ProductID: 0, Code: code.ErrProductInvalidStatusTransition.Code, Message: code.ErrProductInvalidStatusTransition.Msg},
+				},
+			}, nil
+		}
+		status = s
+	}
+
+	// 解析 ProductIDs (string -> int64)
+	productIDs, err := utils.ParseInt64Slice(req.ProductIDs)
+	if err != nil {
+		return nil, code.ErrParam
+	}
+
+	// 构建批量更新请求
+	batchReq := appProduct.BatchUpdateProductRequest{
+		ProductIDs: productIDs,
+		Fields: appProduct.BatchProductFields{
+			Price:      price,
+			Stock:      req.UpdateFields.Stock,
+			Status:     status,
+			CategoryID: req.UpdateFields.CategoryID,
+		},
+	}
+
+	// 执行批量更新
+	successIDs, failed, err := l.svcCtx.ProductService.BatchUpdateProduct(l.ctx, shared.TenantID(tenantID), batchReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换失败结果
+	failedResult := make([]types.BatchProductFail, len(failed))
+	for i, f := range failed {
+		failedResult[i] = types.BatchProductFail{
+			ProductID: f.ProductID,
+			Code:      f.Code,
+			Message:   f.Message,
+		}
+	}
+
+	return &types.BatchUpdateProductResp{
+		Success: utils.FormatInt64Slice(successIDs),
+		Failed:  failedResult,
+	}, nil
+}
+
+// parseBatchStatus 解析批量更新时的状态字符串
+func parseBatchStatus(s string) *product.Status {
+	switch s {
+	case "draft":
+		status := product.StatusDraft
+		return &status
+	case "on_sale":
+		status := product.StatusOnSale
+		return &status
+	case "off_sale":
+		status := product.StatusOffSale
+		return &status
+	default:
+		return nil
+	}
+}

@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,14 +24,9 @@ func NewDeleteCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) Del
 }
 
 func (l *DeleteCategoryLogic) DeleteCategory(req *types.GetCategoryReq) (resp *types.CreateCategoryResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Find category
-	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	category, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +35,7 @@ func (l *DeleteCategoryLogic) DeleteCategory(req *types.GetCategoryReq) (resp *t
 	}
 
 	// Check if category has children
-	children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID)
+	children, err := l.svcCtx.CategoryRepo.FindByParentID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +53,7 @@ func (l *DeleteCategoryLogic) DeleteCategory(req *types.GetCategoryReq) (resp *t
 	}
 
 	// Delete category
-	if err := l.svcCtx.CategoryRepo.Delete(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID); err != nil {
+	if err := l.svcCtx.CategoryRepo.Delete(l.ctx, l.svcCtx.DB, req.ID); err != nil {
 		return nil, err
 	}
 

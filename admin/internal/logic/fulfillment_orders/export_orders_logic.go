@@ -11,8 +11,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -38,10 +36,6 @@ func NewExportOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext, w htt
 
 func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Build query request
 	queryReq := appfulfillment.QueryOrderRequest{
@@ -81,7 +75,7 @@ func (l *ExportOrdersLogic) ExportOrders(req *types.ExportOrdersReq) error {
 	}
 
 	// Get orders for export
-	rows, total, err := l.svcCtx.OrderFulfillmentApp.ExportOrders(l.ctx, shared.TenantID(tenantID), queryReq)
+	rows, total, err := l.svcCtx.OrderFulfillmentApp.ExportOrders(l.ctx, queryReq)
 	if err != nil {
 		return err
 	}

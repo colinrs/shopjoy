@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,11 +29,6 @@ func NewBatchCancelOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) B
 
 func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq) (resp *types.BatchCancelOrderResp, err error) {
 	// Get tenant ID from context
-	tenantIDRaw, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Parse order IDs (string -> int64)
 	orderIDs, err := utils.ParseInt64Slice(req.OrderIDs)
@@ -52,7 +45,7 @@ func (l *BatchCancelOrderLogic) BatchCancelOrder(req *types.BatchCancelOrderReq)
 		}
 
 		// Get the order
-		order, err := l.svcCtx.OrderRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, orderID)
+		order, err := l.svcCtx.OrderRepo.FindByID(l.ctx, l.svcCtx.DB, orderID)
 		if err != nil {
 			failEntry.Code = code.ErrOrderNotFound.Code
 			failEntry.Message = code.ErrOrderNotFound.Msg

@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,10 +29,6 @@ func NewCreateSKULogic(ctx context.Context, svcCtx *svc.ServiceContext) CreateSK
 
 func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateSKUResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Generate SKU ID
 	id, err := l.svcCtx.IDGen.NextID(l.ctx)
@@ -57,7 +51,7 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		// Auto-generate SKU code
 		// Fetch product to get its SKU prefix
 		productSKUPrefix := ""
-		prod, err := l.svcCtx.ProductRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ProductID)
+		prod, err := l.svcCtx.ProductRepo.FindByID(l.ctx, l.svcCtx.DB, req.ProductID)
 		if err == nil && prod != nil {
 			productSKUPrefix = prod.SKUPrefix
 		}
@@ -67,7 +61,7 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 		tenantSKUPrefix := ""
 
 		skuCode, err = l.svcCtx.SKUGenerator.GenerateWithRetry(
-			tenantID,
+			0,
 			tenantSKUPrefix,
 			productSKUPrefix,
 			3,
@@ -85,7 +79,6 @@ func (l *CreateSKULogic) CreateSKU(req *types.CreateSKUReq) (resp *types.CreateS
 	}
 	sku := &product.SKU{
 		Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
-		TenantID:       shared.TenantID(tenantID),
 		ProductID:      req.ProductID,
 		Code:           skuCode,
 		Price:          shared.NewMoney(priceAmount, currency),

@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,15 +25,9 @@ func NewCreateShippingTemplateLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateShippingTemplateReq) (resp *types.CreateShippingTemplateResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Create template entity
 	template := &shipping.ShippingTemplate{
-		TenantID:  tenantID,
 		Name:      req.Name,
 		IsDefault: req.IsDefault,
 		IsActive:  true,
@@ -42,7 +35,7 @@ func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateSh
 
 	// If setting as default, unset other defaults first
 	if req.IsDefault {
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, l.svcCtx.DB, tenantID); err != nil {
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, l.svcCtx.DB); err != nil {
 			return nil, err
 		}
 	}

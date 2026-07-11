@@ -15,7 +15,6 @@ import (
 // RecordOperationLogInput captures all fields needed to write one log row.
 // OperatorIP and OperatorUA may be empty if not available from context.
 type RecordOperationLogInput struct {
-	TenantID     shared.TenantID
 	UserID       int64
 	Action       string
 	OperatorID   int64
@@ -53,7 +52,7 @@ type OperationLogService interface {
 	// caller MUST treat all returned errors as informational and continue
 	// serving the parent business operation. (Errors are logged internally.)
 	Record(ctx context.Context, db *gorm.DB, input RecordOperationLogInput)
-	List(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query user.OperationLogQuery) (*OperationLogListResp, error)
+	List(ctx context.Context, db *gorm.DB, userID int64, query user.OperationLogQuery) (*OperationLogListResp, error)
 }
 
 type operationLogServiceImpl struct {
@@ -79,7 +78,6 @@ func (s *operationLogServiceImpl) Record(ctx context.Context, db *gorm.DB, input
 	now := time.Now().UTC()
 	entity := &user.OperationLog{
 		Model:        application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
-		TenantID:     input.TenantID,
 		UserID:       input.UserID,
 		Action:       input.Action,
 		OperatorID:   input.OperatorID,
@@ -97,14 +95,13 @@ func (s *operationLogServiceImpl) Record(ctx context.Context, db *gorm.DB, input
 func (s *operationLogServiceImpl) List(
 	ctx context.Context,
 	db *gorm.DB,
-	tenantID shared.TenantID,
 	userID int64,
 	query user.OperationLogQuery,
 ) (*OperationLogListResp, error) {
 	if db == nil {
 		db = s.db
 	}
-	logs, total, err := s.repo.FindByUserID(ctx, db, tenantID, userID, query)
+	logs, total, err := s.repo.FindByUserID(ctx, db,  userID, query)
 	if err != nil {
 		return nil, err
 	}

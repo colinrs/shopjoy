@@ -123,7 +123,7 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 
 	// Only allow updating custom themes (not preset themes)
 	return db.WithContext(ctx).Model(&themeModel{}).
-		Where("id = ? AND tenant_id = ? AND is_preset = 0", theme.Model.ID, theme.TenantID.Int64()).
+		Where("id = ? AND is_preset = 0", theme.Model.ID).
 		Updates(map[string]interface{}{
 			"name":           model.Name,
 			"description":    model.Description,
@@ -138,10 +138,10 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 		}).Error
 }
 
-func (r *themeRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*storefront.Theme, error) {
+func (r *themeRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Theme, error) {
 	var model themeModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND (tenant_id = ? OR is_preset = 1)", id, tenantID.Int64()).
+		Where("id = ?", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -166,10 +166,10 @@ func (r *themeRepo) FindByCode(ctx context.Context, db *gorm.DB, code string) (*
 	return model.toEntity(), nil
 }
 
-func (r *themeRepo) FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*storefront.Theme, error) {
+func (r *themeRepo) FindActive(ctx context.Context, db *gorm.DB) (*storefront.Theme, error) {
 	var model themeModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND is_active = 1", tenantID.Int64()).
+		Where("is_active = 1").
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -180,10 +180,10 @@ func (r *themeRepo) FindActive(ctx context.Context, db *gorm.DB, tenantID shared
 	return model.toEntity(), nil
 }
 
-func (r *themeRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*storefront.Theme, error) {
+func (r *themeRepo) FindAll(ctx context.Context, db *gorm.DB) ([]*storefront.Theme, error) {
 	var models []themeModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? OR is_preset = 1", tenantID.Int64()).
+		Where("1 = 1").
 		Order("is_preset ASC, id ASC").
 		Find(&models).Error
 	if err != nil {
@@ -214,18 +214,18 @@ func (r *themeRepo) FindPresets(ctx context.Context, db *gorm.DB) ([]*storefront
 	return themes, nil
 }
 
-func (r *themeRepo) SetActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *themeRepo) SetActive(ctx context.Context, db *gorm.DB,  id int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Deactivate all themes for this tenant
 		if err := tx.Model(&themeModel{}).
-			Where("tenant_id = ? AND is_custom = 1", tenantID.Int64()).
+			Where("is_custom = 1").
 			Update("is_active", 0).Error; err != nil {
 			return err
 		}
 
 		// Activate the specified theme
 		return tx.Model(&themeModel{}).
-			Where("id = ? AND (tenant_id = ? OR is_preset = 1)", id, tenantID.Int64()).
+			Where("id = ?", id).
 			Update("is_active", 1).Error
 	})
 }

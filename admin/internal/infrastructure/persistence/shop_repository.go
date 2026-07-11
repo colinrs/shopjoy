@@ -118,10 +118,9 @@ func keywordsToString(keywords []string) string {
 	return string(data)
 }
 
-func (r *shopRepo) FindByTenantID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*storefront.Shop, error) {
+func (r *shopRepo) FindByTenantID(ctx context.Context, db *gorm.DB) (*storefront.Shop, error) {
 	var model shopModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ?", tenantID.Int64()).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -138,7 +137,6 @@ func (r *shopRepo) Save(ctx context.Context, db *gorm.DB, shop *storefront.Shop)
 	// Check if exists
 	var existing shopModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ?", model.TenantID).
 		First(&existing).Error
 
 	if err != nil {

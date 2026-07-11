@@ -12,8 +12,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -39,10 +37,6 @@ func NewExportShipmentsLogic(ctx context.Context, svcCtx *svc.ServiceContext, w 
 
 func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) error {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Build query request with large page size for export
 	queryReq := appfulfillment.QueryShipmentRequest{
@@ -75,7 +69,7 @@ func (l *ExportShipmentsLogic) ExportShipments(req *types.ExportShipmentsReq) er
 	}
 
 	// Get shipments for export
-	listResp, err := l.svcCtx.ShipmentApp.ListShipments(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.ShipmentApp.ListShipments(l.ctx, queryReq)
 	if err != nil {
 		return err
 	}

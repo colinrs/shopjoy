@@ -93,7 +93,7 @@ func (r *categoryRepo) Create(ctx context.Context, db *gorm.DB, c *product.Categ
 func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Category) error {
 	model := fromCategoryEntity(c)
 	return db.WithContext(ctx).Model(&categoryModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", c.Model.ID, c.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", c.Model.ID).
 		Updates(map[string]interface{}{
 			"name":            model.Name,
 			"code":            model.Code,
@@ -110,17 +110,17 @@ func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Categ
 		}).Error
 }
 
-func (r *categoryRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *categoryRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&categoryModel{}).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.Category, error) {
+func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Category, error) {
 	var model categoryModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -131,10 +131,10 @@ func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID share
 	return model.toEntity(), nil
 }
 
-func (r *categoryRepo) FindByParentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, parentID int64) ([]*product.Category, error) {
+func (r *categoryRepo) FindByParentID(ctx context.Context, db *gorm.DB,  parentID int64) ([]*product.Category, error) {
 	var models []categoryModel
 	err := db.WithContext(ctx).
-		Where("parent_id = ? AND tenant_id = ? AND deleted_at IS NULL", parentID, tenantID.Int64()).
+		Where("parent_id = ? AND deleted_at IS NULL", parentID).
 		Order("sort ASC").
 		Find(&models).Error
 	if err != nil {
@@ -147,10 +147,10 @@ func (r *categoryRepo) FindByParentID(ctx context.Context, db *gorm.DB, tenantID
 	return categories, nil
 }
 
-func (r *categoryRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*product.Category, error) {
+func (r *categoryRepo) FindAll(ctx context.Context, db *gorm.DB) ([]*product.Category, error) {
 	var models []categoryModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Order("sort ASC").
 		Find(&models).Error
 	if err != nil {
@@ -163,14 +163,14 @@ func (r *categoryRepo) FindAll(ctx context.Context, db *gorm.DB, tenantID shared
 	return categories, nil
 }
 
-func (r *categoryRepo) FindTree(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*product.Category, error) {
-	return r.FindAll(ctx, db, tenantID)
+func (r *categoryRepo) FindTree(ctx context.Context, db *gorm.DB) ([]*product.Category, error) {
+	return r.FindAll(ctx, db)
 }
 
-func (r *categoryRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, code string) (*product.Category, error) {
+func (r *categoryRepo) FindByCode(ctx context.Context, db *gorm.DB,  code string) (*product.Category, error) {
 	var model categoryModel
 	err := db.WithContext(ctx).
-		Where("code = ? AND tenant_id = ? AND deleted_at IS NULL", code, tenantID.Int64()).
+		Where("code = ? AND deleted_at IS NULL", code).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -189,11 +189,11 @@ func (r *categoryRepo) GetProductCount(ctx context.Context, db *gorm.DB, categor
 	return count, err
 }
 
-func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, sorts []product.CategorySort) error {
+func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB,  sorts []product.CategorySort) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, s := range sorts {
 			if err := tx.Model(&categoryModel{}).
-				Where("id = ? AND tenant_id = ?", s.ID, tenantID.Int64()).
+				Where("id = ?", s.ID).
 				Update("sort", s.Sort).Error; err != nil {
 				return err
 			}
@@ -202,11 +202,11 @@ func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB, tenantID sha
 	})
 }
 
-func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, newParentID int64) error {
+func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB,  id int64, newParentID int64) error {
 	// Get current category to calculate level delta
 	var current categoryModel
 	if err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		First(&current).Error; err != nil {
 		return err
 	}
@@ -216,7 +216,7 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	if newParentID > 0 {
 		var parent categoryModel
 		if err := db.WithContext(ctx).
-			Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", newParentID, tenantID.Int64()).
+			Where("id = ? AND deleted_at IS NULL", newParentID).
 			First(&parent).Error; err != nil {
 			return err
 		}
@@ -230,7 +230,7 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.Te
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Update the category itself
 		if err := tx.Model(&categoryModel{}).
-			Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+			Where("id = ?", id).
 			Updates(map[string]interface{}{
 				"parent_id": newParentID,
 				"level":     newLevel,
@@ -240,7 +240,7 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.Te
 
 		// If level changed, update all descendants
 		if levelDelta != 0 {
-			if err := r.updateDescendantLevels(tx, tenantID, id, levelDelta); err != nil {
+			if err := r.updateDescendantLevels(tx, id, levelDelta); err != nil {
 				return err
 			}
 		}
@@ -250,10 +250,10 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, tenantID shared.Te
 }
 
 // updateDescendantLevels recursively updates levels of all descendants
-func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB, tenantID shared.TenantID, parentID int64, levelDelta int) error {
+func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB,  parentID int64, levelDelta int) error {
 	// Get direct children
 	var children []categoryModel
-	if err := tx.Where("parent_id = ? AND tenant_id = ? AND deleted_at IS NULL", parentID, tenantID.Int64()).
+	if err := tx.Where("parent_id = ? AND deleted_at IS NULL", parentID).
 		Find(&children).Error; err != nil {
 		return err
 	}
@@ -262,13 +262,13 @@ func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB, tenantID shared.Tenan
 		// Update this child's level
 		newLevel := child.Level + levelDelta
 		if err := tx.Model(&categoryModel{}).
-			Where("id = ? AND tenant_id = ?", child.ID, tenantID.Int64()).
+			Where("id = ?", child.ID).
 			Update("level", newLevel).Error; err != nil {
 			return err
 		}
 
 		// Recursively update descendants
-		if err := r.updateDescendantLevels(tx, tenantID, child.ID, levelDelta); err != nil {
+		if err := r.updateDescendantLevels(tx, child.ID, levelDelta); err != nil {
 			return err
 		}
 	}

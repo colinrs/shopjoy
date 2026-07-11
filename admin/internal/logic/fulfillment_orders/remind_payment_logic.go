@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,11 +28,9 @@ func NewRemindPaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Remi
 
 func (l *RemindPaymentLogic) RemindPayment(req *types.RemindPaymentReq) (resp *types.RemindPaymentResp, err error) {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Get the order
-	order, err := l.svcCtx.OrderRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	order, err := l.svcCtx.OrderRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}

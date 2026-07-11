@@ -136,7 +136,7 @@ func (s *ShippingSettings) TableName() string {
 // Repository interfaces
 
 type ShopSettingsRepository interface {
-	FindByTenantID(ctx context.Context, db *gorm.DB, tenantID int64) (*ShopSettings, error)
+	FindByTenantID(ctx context.Context, db *gorm.DB) (*ShopSettings, error)
 	Save(ctx context.Context, db *gorm.DB, settings *ShopSettings) error
 }
 

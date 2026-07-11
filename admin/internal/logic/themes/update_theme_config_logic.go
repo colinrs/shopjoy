@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,11 +25,6 @@ func NewUpdateThemeConfigLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *UpdateThemeConfigLogic) UpdateThemeConfig(req *types.UpdateThemeConfigRequest) error {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return err
-	}
 
 	userID, _ := contextx.GetUserID(l.ctx)
 	userName := contextx.GetCurrentUserName(l.ctx)
@@ -42,5 +36,5 @@ func (l *UpdateThemeConfigLogic) UpdateThemeConfig(req *types.UpdateThemeConfigR
 		ButtonStyle:    req.Config.ButtonStyle,
 	}
 
-	return l.svcCtx.ThemeService.UpdateThemeConfig(l.ctx, shared.TenantID(tenantID), config, userID, userName)
+	return l.svcCtx.ThemeService.UpdateThemeConfig(l.ctx, config, userID, userName)
 }

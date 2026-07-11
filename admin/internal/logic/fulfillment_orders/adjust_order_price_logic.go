@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +28,6 @@ func NewAdjustOrderPriceLogic(ctx context.Context, svcCtx *svc.ServiceContext) A
 
 func (l *AdjustOrderPriceLogic) AdjustOrderPrice(req *types.AdjustOrderPriceReq) (resp *types.AdjustOrderPriceResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
@@ -57,7 +52,7 @@ func (l *AdjustOrderPriceLogic) AdjustOrderPrice(req *types.AdjustOrderPriceReq)
 	reason := truncateString(req.Reason, 200)
 
 	// Adjust order price
-	result, err := l.svcCtx.OrderFulfillmentApp.AdjustOrderPrice(l.ctx, shared.TenantID(tenantID), userID, req.ID, adjustAmount, reason)
+	result, err := l.svcCtx.OrderFulfillmentApp.AdjustOrderPrice(l.ctx, userID, req.ID, adjustAmount, reason)
 	if err != nil {
 		return nil, err
 	}

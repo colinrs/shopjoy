@@ -6,8 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,13 +25,8 @@ func NewGetProductStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp *types.ProductStatsResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	stats, err := l.svcCtx.ReviewService.GetProductStats(l.ctx, shared.TenantID(tenantID), req.ProductID)
+	stats, err := l.svcCtx.ReviewService.GetProductStats(l.ctx, req.ProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +41,7 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 	}
 
 	// Calculate ReplyCount and ReplyRate
-	replyCount, replyRate := l.calculateReplyStats(shared.TenantID(tenantID), req.ProductID, stats.TotalReviews)
+	replyCount, replyRate := l.calculateReplyStats(req.ProductID, stats.TotalReviews)
 
 	return &types.ProductStatsResp{
 		ProductID:          stats.ProductID,
@@ -63,13 +56,13 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 	}, nil
 }
 
-func (l *GetProductStatsLogic) calculateReplyStats(tenantID shared.TenantID, productID int64, totalReviews int) (replyCount int, replyRate float64) {
+func (l *GetProductStatsLogic) calculateReplyStats( productID int64, totalReviews int) (replyCount int, replyRate float64) {
 	if totalReviews == 0 {
 		return 0, 0
 	}
 
 	// Get all reviews for this product
-	reviews, err := l.svcCtx.ReviewRepo.FindByProductID(l.ctx, l.svcCtx.DB, tenantID, productID)
+	reviews, err := l.svcCtx.ReviewRepo.FindByProductID(l.ctx, l.svcCtx.DB, productID)
 	if err != nil {
 		l.Logger.Errorf("failed to find reviews for product %d: %v", productID, err)
 		return 0, 0

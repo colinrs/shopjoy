@@ -97,7 +97,7 @@ func (s *CalculationService) CalculateDiscount(
 	}
 
 	// Fetch active promotions filtered by currency
-	promotions, err := s.promotionRepo.FindActiveByCurrency(ctx, db, req.TenantID, req.Currency)
+	promotions, err := s.promotionRepo.FindActiveByCurrency(ctx, db, req.Currency)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (s *CalculationService) applyCoupon(
 	db *gorm.DB,
 	req *CalculateRequest,
 ) (*AppliedCoupon, error) {
-	coupon, err := s.couponRepo.FindByCode(ctx, db, req.TenantID, req.CouponCode)
+	coupon, err := s.couponRepo.FindByCode(ctx, db, req.CouponCode)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (s *CalculationService) applyCoupon(
 		return nil, nil
 	}
 
-	usageCount, err := s.userCouponRepo.CountUsageByUser(ctx, db, req.TenantID, req.UserID, coupon.ID)
+	usageCount, err := s.userCouponRepo.CountUsageByUser(ctx, db, req.UserID, coupon.ID)
 	if err != nil {
 		return nil, err
 	}

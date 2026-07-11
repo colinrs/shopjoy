@@ -6,9 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,10 +25,6 @@ func NewGetPointsStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetPointsStatsLogic) GetPointsStats(req *types.GetPointsStatsReq) (resp *types.PointsStats, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Calculate time range based on period
 	var startTime, endTime *time.Time
@@ -56,7 +49,7 @@ func (l *GetPointsStatsLogic) GetPointsStats(req *types.GetPointsStatsReq) (resp
 		startTime = &t
 	}
 
-	stats, err := l.svcCtx.PointsService.GetStats(l.ctx, shared.TenantID(tenantID), startTime, endTime)
+	stats, err := l.svcCtx.PointsService.GetStats(l.ctx, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 
@@ -33,10 +32,6 @@ func NewBatchUpdateTrackingLogic(ctx context.Context, svcCtx *svc.ServiceContext
 
 func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTrackingReq) (resp *types.BatchUpdateTrackingResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
@@ -83,7 +78,7 @@ func (l *BatchUpdateTrackingLogic) BatchUpdateTracking(req *types.BatchUpdateTra
 		}
 
 		// Update shipment - carrier validation is handled internally by UpdateShipment
-		_, err := l.svcCtx.ShipmentApp.UpdateShipment(l.ctx, shared.TenantID(tenantID), userID, updateReq)
+		_, err := l.svcCtx.ShipmentApp.UpdateShipment(l.ctx, userID, updateReq)
 		if err != nil {
 			// Extract error code and message
 			var codeErr *code.Err

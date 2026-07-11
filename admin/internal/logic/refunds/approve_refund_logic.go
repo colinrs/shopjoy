@@ -4,9 +4,8 @@ import (
 	"context"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,16 +25,11 @@ func NewApproveRefundLogic(ctx context.Context, svcCtx *svc.ServiceContext) Appr
 }
 
 func (l *ApproveRefundLogic) ApproveRefund(req *types.ApproveRefundReq) (resp *types.RefundDetailResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	// Get current user ID for approved_by
 	userID, _ := contextx.GetUserID(l.ctx)
+	// Get current user ID for approved_by
 
-	refundResp, err := l.svcCtx.RefundApp.ApproveRefund(l.ctx, shared.TenantID(tenantID), req.ID, userID)
+	refundResp, err := l.svcCtx.RefundApp.ApproveRefund(l.ctx, req.ID, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,13 +23,8 @@ func NewListPageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPa
 }
 
 func (l *ListPageSEOLogic) ListPageSEO(req *types.ListPageSEOConfigsRequest) (resp *types.ListPageSEOConfigsResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	result, err := l.svcCtx.SEOService.ListPageSEO(l.ctx, shared.TenantID(tenantID), req.Page, req.PageSize)
+	result, err := l.svcCtx.SEOService.ListPageSEO(l.ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}

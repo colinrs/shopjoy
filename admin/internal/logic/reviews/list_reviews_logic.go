@@ -7,9 +7,6 @@ import (
 	appReview "github.com/colinrs/shopjoy/admin/internal/application/review"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,11 +27,6 @@ func NewListReviewsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListRe
 
 func (l *ListReviewsLogic) ListReviews(req *types.ListReviewsReq) (resp *types.ListReviewsResp, err error) {
 	// Get tenantID from context with proper validation
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		l.Logger.Errorf("failed to get tenant ID from context")
-		return nil, code.ErrUnauthorized
-	}
 
 	listReq := appReview.ListReviewsRequest{
 		ProductID: req.ProductID,
@@ -68,7 +60,7 @@ func (l *ListReviewsLogic) ListReviews(req *types.ListReviewsReq) (resp *types.L
 		}
 	}
 
-	listResp, err := l.svcCtx.ReviewService.ListReviews(l.ctx, shared.TenantID(tenantID), listReq)
+	listResp, err := l.svcCtx.ReviewService.ListReviews(l.ctx, listReq)
 	if err != nil {
 		return nil, err
 	}

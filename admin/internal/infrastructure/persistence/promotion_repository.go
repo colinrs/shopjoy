@@ -171,7 +171,7 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 	model := fromPromotionEntity(p)
 	return db.WithContext(ctx).
 		Model(&promotionModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", p.ID, p.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", p.ID).
 		Updates(map[string]interface{}{
 			"name":        model.Name,
 			"description": model.Description,
@@ -190,12 +190,9 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 }
 
 // Delete soft deletes a promotion
-func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&promotionModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -209,12 +206,9 @@ func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared
 }
 
 // FindByID finds a promotion by ID
-func (r *promotionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*promotion.Promotion, error) {
+func (r *promotionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.Promotion, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model promotionModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -227,12 +221,9 @@ func (r *promotionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shar
 }
 
 // FindActive finds all active promotions for a tenant
-func (r *promotionRepo) FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*promotion.Promotion, error) {
+func (r *promotionRepo) FindActive(ctx context.Context, db *gorm.DB) ([]*promotion.Promotion, error) {
 	query := db.WithContext(ctx).Model(&promotionModel{}).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	now := time.Now().UTC()
 	var models []promotionModel
@@ -253,12 +244,9 @@ func (r *promotionRepo) FindActive(ctx context.Context, db *gorm.DB, tenantID sh
 }
 
 // FindActiveByCurrency finds all active promotions for a tenant filtered by currency
-func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, currency string) ([]*promotion.Promotion, error) {
+func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB,  currency string) ([]*promotion.Promotion, error) {
 	query := db.WithContext(ctx).Model(&promotionModel{}).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	now := time.Now().UTC()
 	var models []promotionModel
@@ -280,15 +268,12 @@ func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB, t
 }
 
 // FindList finds promotions with pagination and filters
-func (r *promotionRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query promotion.Query) ([]*promotion.Promotion, int64, error) {
+func (r *promotionRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion.Query) ([]*promotion.Promotion, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&promotionModel{}).Where("deleted_at IS NULL")
 
 	// Tenant filter: Platform admin (TenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))

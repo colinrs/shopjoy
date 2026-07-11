@@ -158,7 +158,7 @@ func (p *Product) TableName() string {
 }
 
 // NewProduct 创建新商品
-func NewProduct(tenantID shared.TenantID, name, description string, price Money, categoryID int64) (*Product, error) {
+func NewProduct(name, description string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
@@ -167,7 +167,6 @@ func NewProduct(tenantID shared.TenantID, name, description string, price Money,
 	}
 
 	return &Product{
-		TenantID:    tenantID,
 		Name:        name,
 		Description: description,
 		Price:       price,
@@ -178,7 +177,7 @@ func NewProduct(tenantID shared.TenantID, name, description string, price Money,
 }
 
 // NewProductWithCompliance 创建带合规信息的商品
-func NewProductWithCompliance(tenantID shared.TenantID, name, description, sku string, price Money, categoryID int64) (*Product, error) {
+func NewProductWithCompliance(name, description, sku string, price Money, categoryID int64) (*Product, error) {
 	if name == "" {
 		return nil, code.ErrProductEmptyName
 	}
@@ -187,7 +186,6 @@ func NewProductWithCompliance(tenantID shared.TenantID, name, description, sku s
 	}
 
 	return &Product{
-		TenantID:    tenantID,
 		SKU:         sku,
 		Name:        name,
 		Description: description,
@@ -309,13 +307,13 @@ type DBProvider interface {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, product *Product) error
 	Update(ctx context.Context, db *gorm.DB, product *Product) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Product, error)
-	FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*Product, error)
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Product, error)
+	FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*Product, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Product, int64, error)
-	UpdateStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, delta int) error
-	Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (bool, error)
-	CountTotal(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error)
+	UpdateStock(ctx context.Context, db *gorm.DB,  id int64, delta int) error
+	Exists(ctx context.Context, db *gorm.DB,  id int64) (bool, error)
+	CountTotal(ctx context.Context, db *gorm.DB) (int64, error)
 }
 
 // Query 查询条件（值对象）

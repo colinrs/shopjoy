@@ -603,12 +603,12 @@ type EarnRuleQuery struct {
 type EarnRuleRepository interface {
 	Create(ctx context.Context, db *gorm.DB, rule *EarnRule) error
 	Update(ctx context.Context, db *gorm.DB, rule *EarnRule) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*EarnRule, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query EarnRuleQuery) ([]*EarnRule, int64, error)
-	FindByScenario(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, scenario EarnScenario) ([]*EarnRule, error)
-	UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status EarnRuleStatus) error
-	GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*EarnRuleStats, error)
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*EarnRule, error)
+	FindList(ctx context.Context, db *gorm.DB,  query EarnRuleQuery) ([]*EarnRule, int64, error)
+	FindByScenario(ctx context.Context, db *gorm.DB,  scenario EarnScenario) ([]*EarnRule, error)
+	UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status EarnRuleStatus) error
+	GetStats(ctx context.Context, db *gorm.DB) (*EarnRuleStats, error)
 }
 
 // EarnRuleStats 积分获取规则统计
@@ -628,12 +628,12 @@ type RedeemRuleQuery struct {
 type RedeemRuleRepository interface {
 	Create(ctx context.Context, db *gorm.DB, rule *RedeemRule) error
 	Update(ctx context.Context, db *gorm.DB, rule *RedeemRule) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*RedeemRule, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query RedeemRuleQuery) ([]*RedeemRule, int64, error)
-	UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status RedeemRuleStatus) error
-	IncrementUsedStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, quantity int64) error
-	GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*RedeemRuleStats, error)
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*RedeemRule, error)
+	FindList(ctx context.Context, db *gorm.DB,  query RedeemRuleQuery) ([]*RedeemRule, int64, error)
+	UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status RedeemRuleStatus) error
+	IncrementUsedStock(ctx context.Context, db *gorm.DB,  id int64, quantity int64) error
+	GetStats(ctx context.Context, db *gorm.DB) (*RedeemRuleStats, error)
 }
 
 // RedeemRuleStats 积分兑换规则统计
@@ -654,10 +654,10 @@ type PointsAccountQuery struct {
 type PointsAccountRepository interface {
 	Create(ctx context.Context, db *gorm.DB, account *PointsAccount) error
 	Update(ctx context.Context, db *gorm.DB, account *PointsAccount) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*PointsAccount, error)
-	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) (*PointsAccount, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query PointsAccountQuery) ([]*PointsAccount, int64, error)
-	GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*PointsAccountStats, error)
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*PointsAccount, error)
+	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) (*PointsAccount, error)
+	FindList(ctx context.Context, db *gorm.DB,  query PointsAccountQuery) ([]*PointsAccount, int64, error)
+	GetStats(ctx context.Context, db *gorm.DB) (*PointsAccountStats, error)
 }
 
 // PointsAccountStats 积分账户统计
@@ -680,9 +680,9 @@ type PointsTransactionQuery struct {
 // PointsTransactionRepository 积分交易仓储接口
 type PointsTransactionRepository interface {
 	Create(ctx context.Context, db *gorm.DB, transaction *PointsTransaction) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*PointsTransaction, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query PointsTransactionQuery) ([]*PointsTransaction, int64, error)
-	GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query PointsTransactionQuery) (*PointsTransactionStats, error)
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*PointsTransaction, error)
+	FindList(ctx context.Context, db *gorm.DB,  query PointsTransactionQuery) ([]*PointsTransaction, int64, error)
+	GetStats(ctx context.Context, db *gorm.DB,  query PointsTransactionQuery) (*PointsTransactionStats, error)
 }
 
 // PointsTransactionStats 积分交易统计
@@ -704,7 +704,7 @@ type PointsRedemptionQuery struct {
 type PointsRedemptionRepository interface {
 	Create(ctx context.Context, db *gorm.DB, redemption *PointsRedemption) error
 	Update(ctx context.Context, db *gorm.DB, redemption *PointsRedemption) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*PointsRedemption, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query PointsRedemptionQuery) ([]*PointsRedemption, int64, error)
-	CountByUserAndRule(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID, ruleID int64) (int64, error)
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*PointsRedemption, error)
+	FindList(ctx context.Context, db *gorm.DB,  query PointsRedemptionQuery) ([]*PointsRedemption, int64, error)
+	CountByUserAndRule(ctx context.Context, db *gorm.DB,  userID, ruleID int64) (int64, error)
 }

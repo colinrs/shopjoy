@@ -6,8 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,11 +24,6 @@ func NewAddDecorationLogic(ctx context.Context, svcCtx *svc.ServiceContext) AddD
 }
 
 func (l *AddDecorationLogic) AddDecoration(req *types.AddDecorationRequest) (resp *types.AddDecorationResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	var blockConfig map[string]any
 	if err := json.Unmarshal([]byte(req.BlockConfig), &blockConfig); err != nil {
@@ -39,7 +32,6 @@ func (l *AddDecorationLogic) AddDecoration(req *types.AddDecorationRequest) (res
 
 	result, err := l.svcCtx.DecorationService.AddDecoration(
 		l.ctx,
-		shared.TenantID(tenantID),
 		req.PageID,
 		req.BlockType,
 		blockConfig,

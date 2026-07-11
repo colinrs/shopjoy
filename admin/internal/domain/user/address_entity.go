@@ -45,6 +45,6 @@ type AddressQuery struct {
 
 // AddressRepository 地址仓储接口
 type AddressRepository interface {
-	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]*UserAddress, error)
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*UserAddress, error)
+	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]*UserAddress, error)
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*UserAddress, error)
 }

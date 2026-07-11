@@ -87,13 +87,13 @@ type QueryPromotionRequest struct {
 
 // PromotionApp 促销应用服务接口
 type PromotionApp interface {
-	CreatePromotion(ctx context.Context, tenantID shared.TenantID, req CreatePromotionRequest) (*PromotionResponse, error)
-	UpdatePromotion(ctx context.Context, tenantID shared.TenantID, req UpdatePromotionRequest) (*PromotionResponse, error)
-	GetPromotion(ctx context.Context, tenantID shared.TenantID, id int64) (*PromotionResponse, error)
-	ListPromotions(ctx context.Context, tenantID shared.TenantID, req QueryPromotionRequest) (*PromotionListResponse, error)
-	DeletePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error
-	ActivatePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error
-	DeactivatePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error
+	CreatePromotion(ctx context.Context,  req CreatePromotionRequest) (*PromotionResponse, error)
+	UpdatePromotion(ctx context.Context,  req UpdatePromotionRequest) (*PromotionResponse, error)
+	GetPromotion(ctx context.Context,  id int64) (*PromotionResponse, error)
+	ListPromotions(ctx context.Context,  req QueryPromotionRequest) (*PromotionListResponse, error)
+	DeletePromotion(ctx context.Context,  id int64) error
+	ActivatePromotion(ctx context.Context,  id int64) error
+	DeactivatePromotion(ctx context.Context,  id int64) error
 }
 
 type promotionApp struct {
@@ -111,7 +111,7 @@ func NewPromotionApp(db *gorm.DB, promotionRepo pkgpromotion.Repository, idGen s
 	}
 }
 
-func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.TenantID, req CreatePromotionRequest) (*PromotionResponse, error) {
+func (a *promotionApp) CreatePromotion(ctx context.Context,  req CreatePromotionRequest) (*PromotionResponse, error) {
 	// Input validation
 	if req.Name == "" {
 		return nil, code.ErrPromotionNameRequired
@@ -142,7 +142,6 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.Tena
 
 		p := &pkgpromotion.Promotion{
 			ID:          id,
-			TenantID:    tenantID,
 			Name:        req.Name,
 			Description: req.Description,
 			Type:        req.Type,
@@ -190,8 +189,8 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, tenantID shared.Tena
 	return toPromotionResponse(result), nil
 }
 
-func (a *promotionApp) UpdatePromotion(ctx context.Context, tenantID shared.TenantID, req UpdatePromotionRequest) (*PromotionResponse, error) {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, tenantID, req.ID)
+func (a *promotionApp) UpdatePromotion(ctx context.Context,  req UpdatePromotionRequest) (*PromotionResponse, error) {
+	p, err := a.promotionRepo.FindByID(ctx, a.db,  req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -214,8 +213,8 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, tenantID shared.Tena
 	return toPromotionResponse(p), nil
 }
 
-func (a *promotionApp) GetPromotion(ctx context.Context, tenantID shared.TenantID, id int64) (*PromotionResponse, error) {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *promotionApp) GetPromotion(ctx context.Context,  id int64) (*PromotionResponse, error) {
+	p, err := a.promotionRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +227,7 @@ func (a *promotionApp) GetPromotion(ctx context.Context, tenantID shared.TenantI
 	return toPromotionResponse(p), nil
 }
 
-func (a *promotionApp) ListPromotions(ctx context.Context, tenantID shared.TenantID, req QueryPromotionRequest) (*PromotionListResponse, error) {
+func (a *promotionApp) ListPromotions(ctx context.Context,  req QueryPromotionRequest) (*PromotionListResponse, error) {
 	query := pkgpromotion.Query{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -244,7 +243,7 @@ func (a *promotionApp) ListPromotions(ctx context.Context, tenantID shared.Tenan
 	}
 	query.PageQuery.Validate()
 
-	promotions, total, err := a.promotionRepo.FindList(ctx, a.db, tenantID, query)
+	promotions, total, err := a.promotionRepo.FindList(ctx, a.db,  query)
 	if err != nil {
 		return nil, err
 	}
@@ -263,8 +262,8 @@ func (a *promotionApp) ListPromotions(ctx context.Context, tenantID shared.Tenan
 	return resp, nil
 }
 
-func (a *promotionApp) DeletePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *promotionApp) DeletePromotion(ctx context.Context,  id int64) error {
+	p, err := a.promotionRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return err
 	}
@@ -276,15 +275,15 @@ func (a *promotionApp) DeletePromotion(ctx context.Context, tenantID shared.Tena
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// Delete promotion (soft delete)
-		if err := a.promotionRepo.Delete(ctx, tx, tenantID, id); err != nil {
+		if err := a.promotionRepo.Delete(ctx, tx,  id); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func (a *promotionApp) ActivatePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *promotionApp) ActivatePromotion(ctx context.Context,  id int64) error {
+	p, err := a.promotionRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return err
 	}
@@ -302,8 +301,8 @@ func (a *promotionApp) ActivatePromotion(ctx context.Context, tenantID shared.Te
 	return a.promotionRepo.Update(ctx, a.db, p)
 }
 
-func (a *promotionApp) DeactivatePromotion(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *promotionApp) DeactivatePromotion(ctx context.Context,  id int64) error {
+	p, err := a.promotionRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return err
 	}

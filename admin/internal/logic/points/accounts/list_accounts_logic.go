@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +27,6 @@ func NewListAccountsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListA
 }
 
 func (l *ListAccountsLogic) ListAccounts(req *types.ListAccountsReq) (resp *types.ListAccountsResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	query := points.PointsAccountQuery{
 		PageQuery: shared.PageQuery{
@@ -43,7 +37,7 @@ func (l *ListAccountsLogic) ListAccounts(req *types.ListAccountsReq) (resp *type
 		Email:  req.Email,
 	}
 
-	accounts, total, stats, err := l.svcCtx.PointsService.ListAccounts(l.ctx, shared.TenantID(tenantID), query)
+	accounts, total, stats, err := l.svcCtx.PointsService.ListAccounts(l.ctx, query)
 	if err != nil {
 		return nil, err
 	}

@@ -103,7 +103,7 @@ func (r *skuRepo) Update(ctx context.Context, db *gorm.DB, sku *product.SKU) err
 	model := fromSKUEntity(sku)
 	return db.WithContext(ctx).
 		Model(&skuModel{}).
-		Where("id = ? AND tenant_id = ?", sku.Model.ID, sku.TenantID.Int64()).
+		Where("id = ?", sku.Model.ID).
 		Updates(map[string]interface{}{
 			"code":             model.Code,
 			"price_amount":     model.PriceAmount,
@@ -119,9 +119,9 @@ func (r *skuRepo) Update(ctx context.Context, db *gorm.DB, sku *product.SKU) err
 		}).Error
 }
 
-func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	result := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Delete(&skuModel{})
 
 	if result.Error != nil {
@@ -133,10 +133,10 @@ func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Tenan
 	return nil
 }
 
-func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.SKU, error) {
+func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.SKU, error) {
 	var model skuModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -147,10 +147,10 @@ func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.Ten
 	return model.toEntity(), nil
 }
 
-func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, skuCode string) (*product.SKU, error) {
+func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB,  skuCode string) (*product.SKU, error) {
 	var model skuModel
 	err := db.WithContext(ctx).
-		Where("code = ? AND tenant_id = ?", skuCode, tenantID.Int64()).
+		Where("code = ?", skuCode).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -161,14 +161,11 @@ func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.T
 	return model.toEntity(), nil
 }
 
-func (r *skuRepo) FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*product.SKU, error) {
+func (r *skuRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*product.SKU, error) {
 	var models []skuModel
 	query := db.WithContext(ctx).Where("product_id = ?", productID)
 
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	err := query.Find(&models).Error
 	if err != nil {
@@ -184,11 +181,6 @@ func (r *skuRepo) FindByProductID(ctx context.Context, db *gorm.DB, tenantID sha
 
 func (r *skuRepo) FindList(ctx context.Context, db *gorm.DB, query product.SKUQuery) ([]*product.SKU, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&skuModel{})
-
-	// Tenant filter: platform admin (TenantID == 0) can access all tenant data
-	if query.TenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", query.TenantID.Int64())
-	}
 
 	if query.ProductID > 0 {
 		dbQuery = dbQuery.Where("product_id = ?", query.ProductID)
@@ -230,15 +222,12 @@ func (r *skuRepo) FindList(ctx context.Context, db *gorm.DB, query product.SKUQu
 }
 
 // FindLowStock finds SKUs where available_stock < safety_stock AND safety_stock > 0
-func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, page, pageSize int) ([]*product.SKU, int64, error) {
+func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*product.SKU, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
 		Where("safety_stock > 0 AND available_stock < safety_stock").
 		Where("status = ?", shared.StatusEnabled)
 
 	// Tenant filter: platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var total int64
 	if err := dbQuery.Count(&total).Error; err != nil {
@@ -271,15 +260,11 @@ func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB, tenantID shared
 
 // Search returns a lightweight SKU item list joined with product name for the dropdown.
 // Only enabled SKUs are returned, filtered by LIKE on sku code.
-func (r *skuRepo) Search(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, keyword string, page, pageSize int) ([]*product.SKUItem, int64, error) {
+func (r *skuRepo) Search(ctx context.Context, db *gorm.DB,  keyword string, page, pageSize int) ([]*product.SKUItem, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
 		Select("skus.code AS sku_code, skus.product_id, products.name AS product_name, skus.safety_stock").
 		Joins("LEFT JOIN products ON products.id = skus.product_id").
 		Where("skus.status = ?", shared.StatusEnabled)
-
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("skus.tenant_id = ?", tenantID.Int64())
-	}
 
 	if keyword != "" {
 		dbQuery = dbQuery.Where("skus.code LIKE ?", "%"+keyword+"%")

@@ -125,14 +125,14 @@ type UserCouponListResponse struct {
 
 // CouponApp 优惠券应用服务接口
 type CouponApp interface {
-	CreateCoupon(ctx context.Context, tenantID shared.TenantID, req CreateCouponRequest) (*CouponResponse, error)
-	UpdateCoupon(ctx context.Context, tenantID shared.TenantID, req UpdateCouponRequest) (*CouponResponse, error)
-	GetCoupon(ctx context.Context, tenantID shared.TenantID, id int64) (*CouponResponse, error)
-	ListCoupons(ctx context.Context, tenantID shared.TenantID, req QueryCouponRequest) (*CouponListResponse, error)
-	DeleteCoupon(ctx context.Context, tenantID shared.TenantID, id int64) error
-	GenerateCouponCodes(ctx context.Context, tenantID shared.TenantID, req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error)
-	IssueCouponToUser(ctx context.Context, tenantID shared.TenantID, req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error)
-	ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error)
+	CreateCoupon(ctx context.Context,  req CreateCouponRequest) (*CouponResponse, error)
+	UpdateCoupon(ctx context.Context,  req UpdateCouponRequest) (*CouponResponse, error)
+	GetCoupon(ctx context.Context,  id int64) (*CouponResponse, error)
+	ListCoupons(ctx context.Context,  req QueryCouponRequest) (*CouponListResponse, error)
+	DeleteCoupon(ctx context.Context,  id int64) error
+	GenerateCouponCodes(ctx context.Context,  req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error)
+	IssueCouponToUser(ctx context.Context,  req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error)
+	ListUserCoupons(ctx context.Context,  userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error)
 }
 
 type couponApp struct {
@@ -157,7 +157,7 @@ func NewCouponApp(
 	}
 }
 
-func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, req CreateCouponRequest) (*CouponResponse, error) {
+func (a *couponApp) CreateCoupon(ctx context.Context,  req CreateCouponRequest) (*CouponResponse, error) {
 	// Input validation
 	if req.Name == "" {
 		return nil, code.ErrCouponNameRequired
@@ -182,7 +182,6 @@ func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, 
 
 	c := &pkgcoupon.Coupon{
 		ID:           id,
-		TenantID:     tenantID,
 		Name:         req.Name,
 		Code:         req.Code,
 		Description:  req.Description,
@@ -211,8 +210,8 @@ func (a *couponApp) CreateCoupon(ctx context.Context, tenantID shared.TenantID, 
 	return toCouponResponse(c), nil
 }
 
-func (a *couponApp) UpdateCoupon(ctx context.Context, tenantID shared.TenantID, req UpdateCouponRequest) (*CouponResponse, error) {
-	c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, req.ID)
+func (a *couponApp) UpdateCoupon(ctx context.Context,  req UpdateCouponRequest) (*CouponResponse, error) {
+	c, err := a.couponRepo.FindByID(ctx, a.db,  req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,15 +238,15 @@ func (a *couponApp) UpdateCoupon(ctx context.Context, tenantID shared.TenantID, 
 	return toCouponResponse(c), nil
 }
 
-func (a *couponApp) GetCoupon(ctx context.Context, tenantID shared.TenantID, id int64) (*CouponResponse, error) {
-	c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *couponApp) GetCoupon(ctx context.Context,  id int64) (*CouponResponse, error) {
+	c, err := a.couponRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return nil, err
 	}
 	return toCouponResponse(c), nil
 }
 
-func (a *couponApp) ListCoupons(ctx context.Context, tenantID shared.TenantID, req QueryCouponRequest) (*CouponListResponse, error) {
+func (a *couponApp) ListCoupons(ctx context.Context,  req QueryCouponRequest) (*CouponListResponse, error) {
 	query := pkgcoupon.CouponQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -263,7 +262,7 @@ func (a *couponApp) ListCoupons(ctx context.Context, tenantID shared.TenantID, r
 	}
 	query.PageQuery.Validate()
 
-	coupons, total, err := a.couponRepo.FindList(ctx, a.db, tenantID, query)
+	coupons, total, err := a.couponRepo.FindList(ctx, a.db,  query)
 	if err != nil {
 		return nil, err
 	}
@@ -282,8 +281,8 @@ func (a *couponApp) ListCoupons(ctx context.Context, tenantID shared.TenantID, r
 	return resp, nil
 }
 
-func (a *couponApp) DeleteCoupon(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, id)
+func (a *couponApp) DeleteCoupon(ctx context.Context,  id int64) error {
+	c, err := a.couponRepo.FindByID(ctx, a.db,  id)
 	if err != nil {
 		return err
 	}
@@ -295,15 +294,15 @@ func (a *couponApp) DeleteCoupon(ctx context.Context, tenantID shared.TenantID, 
 
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// Soft delete coupon
-		if err := a.couponRepo.Delete(ctx, tx, tenantID, id); err != nil {
+		if err := a.couponRepo.Delete(ctx, tx,  id); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func (a *couponApp) GenerateCouponCodes(ctx context.Context, tenantID shared.TenantID, req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error) {
-	c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, req.CouponID)
+func (a *couponApp) GenerateCouponCodes(ctx context.Context,  req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error) {
+	c, err := a.couponRepo.FindByID(ctx, a.db,  req.CouponID)
 	if err != nil {
 		return nil, err
 	}
@@ -319,9 +318,9 @@ func (a *couponApp) GenerateCouponCodes(ctx context.Context, tenantID shared.Ten
 	}, nil
 }
 
-func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.TenantID, req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error) {
+func (a *couponApp) IssueCouponToUser(ctx context.Context,  req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error) {
 	// Find coupon
-	c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, req.CouponID)
+	c, err := a.couponRepo.FindByID(ctx, a.db,  req.CouponID)
 	if err != nil {
 		return nil, err
 	}
@@ -349,7 +348,6 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 		// Create user coupon
 		userCoupon := &pkgcoupon.UserCoupon{
 			ID:         id,
-			TenantID:   tenantID,
 			UserID:     req.UserID,
 			CouponID:   c.ID,
 			Status:     pkgcoupon.UserCouponStatusUnused,
@@ -362,7 +360,7 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 		}
 
 		// Atomically increment coupon usage count (avoid race condition)
-		if err := a.couponRepo.IncrementUsage(ctx, tx, tenantID, c.ID); err != nil {
+		if err := a.couponRepo.IncrementUsage(ctx, tx,  c.ID); err != nil {
 			return err
 		}
 
@@ -380,13 +378,13 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, tenantID shared.Tenan
 	}, nil
 }
 
-func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantID, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error) {
+func (a *couponApp) ListUserCoupons(ctx context.Context,  userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error) {
 	var statusPtr *pkgcoupon.UserCouponStatus
 	if status != 0 {
 		statusPtr = &status
 	}
 
-	userCoupons, err := a.userCouponRepo.FindByUserID(ctx, a.db, tenantID, userID, statusPtr)
+	userCoupons, err := a.userCouponRepo.FindByUserID(ctx, a.db,  userID, statusPtr)
 	if err != nil {
 		return nil, err
 	}
@@ -413,7 +411,7 @@ func (a *couponApp) ListUserCoupons(ctx context.Context, tenantID shared.TenantI
 
 	// Load coupon details
 	for _, uc := range pageUserCoupons {
-		c, err := a.couponRepo.FindByID(ctx, a.db, tenantID, uc.CouponID)
+		c, err := a.couponRepo.FindByID(ctx, a.db,  uc.CouponID)
 		if err != nil {
 			continue
 		}

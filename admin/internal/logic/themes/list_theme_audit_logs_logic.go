@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,14 +23,9 @@ func NewListThemeAuditLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *ListThemeAuditLogsLogic) ListThemeAuditLogs() (resp *types.ListThemeAuditLogsResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Default pagination (API doesn't have request type with pagination yet)
-	result, err := l.svcCtx.ThemeService.ListAuditLogs(l.ctx, shared.TenantID(tenantID), 1, 20)
+	result, err := l.svcCtx.ThemeService.ListAuditLogs(l.ctx, 1, 20)
 	if err != nil {
 		return nil, err
 	}

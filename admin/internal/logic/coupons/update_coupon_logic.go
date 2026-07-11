@@ -7,8 +7,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,11 +26,6 @@ func NewUpdateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Updat
 }
 
 func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *types.CouponDetailResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Parse time
 	startAt, err := time.Parse(time.RFC3339, req.StartTime)
@@ -56,7 +49,7 @@ func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *type
 		EndAt:        endAt,
 	}
 
-	couponResp, err := l.svcCtx.CouponApp.UpdateCoupon(l.ctx, shared.TenantID(tenantID), updateReq)
+	couponResp, err := l.svcCtx.CouponApp.UpdateCoupon(l.ctx, updateReq)
 	if err != nil {
 		return nil, err
 	}

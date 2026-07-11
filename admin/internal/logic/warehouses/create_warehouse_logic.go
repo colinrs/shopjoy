@@ -9,7 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,14 +28,9 @@ func NewCreateWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 }
 
 func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (resp *types.CreateWarehouseResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Check for duplicate code
-	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Code)
+	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, req.Code)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +46,6 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 
 	warehouse := &product.Warehouse{
 		Model:     application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
-		TenantID:  shared.TenantID(tenantID),
 		Code:      req.Code,
 		Name:      req.Name,
 		Country:   req.Country,

@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +25,9 @@ func NewGetOrderPaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 
 func (l *GetOrderPaymentLogic) GetOrderPayment(req *types.GetOrderPaymentReq) (resp *types.OrderPaymentResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get order payment from service
-	payment, err := l.svcCtx.PaymentService.GetOrderPayment(l.ctx, shared.TenantID(tenantID), req.ID)
+	payment, err := l.svcCtx.PaymentService.GetOrderPayment(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +25,9 @@ func NewDeleteProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 func (l *DeleteProductLocalizationLogic) DeleteProductLocalization(req *types.GetProductLocalizationReq) (resp *types.CreateProductResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Delete localization
-	if err := l.svcCtx.ProductLocalizationRepo.Delete(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ID); err != nil {
+	if err := l.svcCtx.ProductLocalizationRepo.Delete(l.ctx, l.svcCtx.DB, req.ID); err != nil {
 		return nil, err
 	}
 

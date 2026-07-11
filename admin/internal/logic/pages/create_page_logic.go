@@ -7,8 +7,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -27,11 +25,6 @@ func NewCreatePageLogic(ctx context.Context, svcCtx *svc.ServiceContext) CreateP
 }
 
 func (l *CreatePageLogic) CreatePage(req *types.CreatePageRequest) (resp *types.CreatePageResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Validate required fields
 	if strings.TrimSpace(req.Name) == "" {
@@ -54,7 +47,7 @@ func (l *CreatePageLogic) CreatePage(req *types.CreatePageRequest) (resp *types.
 	}
 
 	// Create the page
-	pageDTO, err := l.svcCtx.PageService.CreatePage(l.ctx, shared.TenantID(tenantID), req.Name, slug, pageType)
+	pageDTO, err := l.svcCtx.PageService.CreatePage(l.ctx, req.Name, slug, pageType)
 	if err != nil {
 		return nil, err
 	}

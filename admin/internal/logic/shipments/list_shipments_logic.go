@@ -9,9 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,10 +29,6 @@ func NewListShipmentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) List
 
 func (l *ListShipmentsLogic) ListShipments(req *types.ListShipmentsReq) (resp *types.ListShipmentsResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Build query request
 	queryReq := appfulfillment.QueryShipmentRequest{
@@ -74,7 +67,7 @@ func (l *ListShipmentsLogic) ListShipments(req *types.ListShipmentsReq) (resp *t
 	}
 
 	// List shipments
-	listResp, err := l.svcCtx.ShipmentApp.ListShipments(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.ShipmentApp.ListShipments(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

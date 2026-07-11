@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,12 +24,7 @@ func NewGetUserStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetUs
 }
 
 func (l *GetUserStatsLogic) GetUserStats(req *types.UserStatsRequest) (resp *types.UserStatsResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
-	stats, err := l.svcCtx.UserService.GetStats(l.ctx, tenantID)
+	stats, err := l.svcCtx.UserService.GetStats(l.ctx)
 	if err != nil {
 		return nil, err
 	}

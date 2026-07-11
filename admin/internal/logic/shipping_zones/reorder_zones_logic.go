@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -27,14 +26,8 @@ func NewReorderZonesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Reord
 }
 
 func (l *ReorderZonesLogic) ReorderZones(req *types.ReorderZonesReq) error {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return err
-	}
-
 	// Verify template exists and belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.TemplateID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.TemplateID)
 	if err != nil {
 		return err
 	}

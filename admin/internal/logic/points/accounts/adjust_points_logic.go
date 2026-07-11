@@ -6,10 +6,8 @@ import (
 	apppoints "github.com/colinrs/shopjoy/admin/internal/application/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,12 +27,8 @@ func NewAdjustPointsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Adjus
 }
 
 func (l *AdjustPointsLogic) AdjustPoints(req *types.AdjustPointsReq) (resp *types.AdjustPointsResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	userID, _ := contextx.GetUserID(l.ctx)
 
+	userID, _ := contextx.GetUserID(l.ctx)
 	adjustReq := apppoints.AdjustPointsRequest{
 		AccountID:      req.ID,
 		AdjustmentType: points.AdjustmentType(req.AdjustmentType),
@@ -43,7 +37,7 @@ func (l *AdjustPointsLogic) AdjustPoints(req *types.AdjustPointsReq) (resp *type
 		OperatorID:     userID,
 	}
 
-	transaction, err := l.svcCtx.PointsService.AdjustPoints(l.ctx, shared.TenantID(tenantID), adjustReq)
+	transaction, err := l.svcCtx.PointsService.AdjustPoints(l.ctx, adjustReq)
 	if err != nil {
 		return nil, err
 	}

@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,13 +25,8 @@ func NewGetReviewLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetRevie
 
 func (l *GetReviewLogic) GetReview(req *types.GetReviewReq) (resp *types.ReviewDetailResp, err error) {
 	// Get tenantID from context with proper validation
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	detail, err := l.svcCtx.ReviewService.GetReview(l.ctx, shared.TenantID(tenantID), req.ID)
+	detail, err := l.svcCtx.ReviewService.GetReview(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

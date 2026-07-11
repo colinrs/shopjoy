@@ -6,9 +6,7 @@ import (
 	appPayment "github.com/colinrs/shopjoy/admin/internal/application/payment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,10 +27,6 @@ func NewInitiateRefundLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ini
 
 func (l *InitiateRefundLogic) InitiateRefund(req *types.InitiateRefundReq) (resp *types.InitiateRefundResp, err error) {
 	// Get tenant ID and admin ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 	adminID := contextx.GetCurrentUserID(l.ctx)
 
 	// Build request
@@ -45,7 +39,7 @@ func (l *InitiateRefundLogic) InitiateRefund(req *types.InitiateRefundReq) (resp
 	}
 
 	// Initiate refund through service
-	result, err := l.svcCtx.PaymentService.InitiateRefund(l.ctx, shared.TenantID(tenantID), adminID, appReq)
+	result, err := l.svcCtx.PaymentService.InitiateRefund(l.ctx, adminID, appReq)
 	if err != nil {
 		return nil, err
 	}

@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,11 +26,9 @@ func NewDeleteRoleLogic(ctx context.Context, svcCtx *svc.ServiceContext) DeleteR
 
 func (l *DeleteRoleLogic) DeleteRole(req *types.RoleIDRequest) error {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Get role
-	r, err := l.svcCtx.RoleRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	r, err := l.svcCtx.RoleRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return err
 	}
@@ -52,5 +48,5 @@ func (l *DeleteRoleLogic) DeleteRole(req *types.RoleIDRequest) error {
 	}
 
 	// Delete role
-	return l.svcCtx.RoleRepo.Delete(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	return l.svcCtx.RoleRepo.Delete(l.ctx, l.svcCtx.DB, req.ID)
 }

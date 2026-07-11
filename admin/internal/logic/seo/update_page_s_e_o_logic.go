@@ -6,8 +6,6 @@ import (
 	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,11 +24,6 @@ func NewUpdatePageSEOLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upda
 }
 
 func (l *UpdatePageSEOLogic) UpdatePageSEO(req *types.UpdatePageSEORequest) error {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return err
-	}
 
 	config := appStorefront.SEOConfigDTO{
 		Title:       req.Title,
@@ -38,5 +31,5 @@ func (l *UpdatePageSEOLogic) UpdatePageSEO(req *types.UpdatePageSEORequest) erro
 		Keywords:    req.Keywords,
 	}
 
-	return l.svcCtx.SEOService.UpdatePageSEO(l.ctx, shared.TenantID(tenantID), req.PageType, nil, config)
+	return l.svcCtx.SEOService.UpdatePageSEO(l.ctx, req.PageType, nil, config)
 }

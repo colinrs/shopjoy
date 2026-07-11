@@ -66,10 +66,10 @@ func (r *categoryMarketRepo) Update(ctx context.Context, db *gorm.DB, cm *produc
 		}).Error
 }
 
-func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, categoryID int64) ([]*product.CategoryMarket, error) {
+func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) ([]*product.CategoryMarket, error) {
 	var models []categoryMarketModel
 	err := db.WithContext(ctx).
-		Where("category_id = ? AND tenant_id = ?", categoryID, tenantID.Int64()).
+		Where("category_id = ?", categoryID).
 		Find(&models).Error
 	if err != nil {
 		return nil, err
@@ -81,9 +81,9 @@ func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB, te
 	return result, nil
 }
 
-func (r *categoryMarketRepo) DeleteByCategory(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, categoryID int64) error {
+func (r *categoryMarketRepo) DeleteByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) error {
 	return db.WithContext(ctx).
-		Where("category_id = ? AND tenant_id = ?", categoryID, tenantID.Int64()).
+		Where("category_id = ?", categoryID).
 		Delete(&categoryMarketModel{}).Error
 }
 

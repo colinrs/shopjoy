@@ -94,7 +94,7 @@ func (r *brandRepo) Create(ctx context.Context, db *gorm.DB, b *product.Brand) e
 func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) error {
 	model := fromBrandEntity(b)
 	return db.WithContext(ctx).Model(&brandModel{}).
-		Where("id = ? AND tenant_id = ?", b.Model.ID, b.TenantID.Int64()).
+		Where("id = ?", b.Model.ID).
 		Updates(map[string]interface{}{
 			"name":              model.Name,
 			"logo":              model.Logo,
@@ -110,17 +110,17 @@ func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) e
 		}).Error
 }
 
-func (r *brandRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *brandRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&brandModel{}).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.Brand, error) {
+func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Brand, error) {
 	var model brandModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -131,10 +131,10 @@ func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.T
 	return model.toEntity(), nil
 }
 
-func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, name string) (*product.Brand, error) {
+func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB,  name string) (*product.Brand, error) {
 	var model brandModel
 	err := db.WithContext(ctx).
-		Where("name = ? AND tenant_id = ? AND deleted_at IS NULL", name, tenantID.Int64()).
+		Where("name = ? AND deleted_at IS NULL", name).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -145,12 +145,12 @@ func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB, tenantID shared
 	return model.toEntity(), nil
 }
 
-func (r *brandRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query product.BrandQuery) ([]*product.Brand, int64, error) {
+func (r *brandRepo) FindList(ctx context.Context, db *gorm.DB,  query product.BrandQuery) ([]*product.Brand, int64, error) {
 	var models []brandModel
 	var total int64
 
 	tx := db.WithContext(ctx).Model(&brandModel{}).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64())
+		Where("deleted_at IS NULL")
 
 	if query.Name != "" {
 		tx = tx.Where("name LIKE ?", "%"+query.Name+"%")

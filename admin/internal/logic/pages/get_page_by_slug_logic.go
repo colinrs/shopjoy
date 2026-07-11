@@ -6,8 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,13 +25,8 @@ func NewGetPageBySlugLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetP
 }
 
 func (l *GetPageBySlugLogic) GetPageBySlug(req *types.GetPageBySlugRequest) (resp *types.PageDetailResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	result, err := l.svcCtx.PageService.GetPageBySlug(l.ctx, shared.TenantID(tenantID), req.Slug)
+	result, err := l.svcCtx.PageService.GetPageBySlug(l.ctx, req.Slug)
 	if err != nil {
 		return nil, err
 	}

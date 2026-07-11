@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -27,14 +26,9 @@ func NewSetDefaultTemplateLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTemplateReq) (resp *types.ShippingTemplateDetailResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Verify template exists and belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +36,12 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 	// Use transaction to ensure atomicity
 	err = l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
 		// Unset all defaults first
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, tx, tenantID); err != nil {
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, tx); err != nil {
 			return err
 		}
 
 		// Set new default
-		if err := l.svcCtx.ShippingRepo.SetDefault(l.ctx, tx, tenantID, req.ID); err != nil {
+		if err := l.svcCtx.ShippingRepo.SetDefault(l.ctx, tx, req.ID); err != nil {
 			return err
 		}
 
@@ -62,7 +56,7 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 	template.IsDefault = true
 
 	// Get zones and mappings for response
-	template, zones, mappings, err := l.svcCtx.ShippingRepo.FindByIDWithDetails(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	template, zones, mappings, err := l.svcCtx.ShippingRepo.FindByIDWithDetails(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}

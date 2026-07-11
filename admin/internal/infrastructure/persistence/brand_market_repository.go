@@ -66,10 +66,10 @@ func (r *brandMarketRepo) Update(ctx context.Context, db *gorm.DB, bm *product.B
 		}).Error
 }
 
-func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, brandID int64) ([]*product.BrandMarket, error) {
+func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB,  brandID int64) ([]*product.BrandMarket, error) {
 	var models []brandMarketModel
 	err := db.WithContext(ctx).
-		Where("brand_id = ? AND tenant_id = ?", brandID, tenantID.Int64()).
+		Where("brand_id = ?", brandID).
 		Find(&models).Error
 	if err != nil {
 		return nil, err
@@ -81,9 +81,9 @@ func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB, tenantID
 	return result, nil
 }
 
-func (r *brandMarketRepo) DeleteByBrand(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, brandID int64) error {
+func (r *brandMarketRepo) DeleteByBrand(ctx context.Context, db *gorm.DB,  brandID int64) error {
 	return db.WithContext(ctx).
-		Where("brand_id = ? AND tenant_id = ?", brandID, tenantID.Int64()).
+		Where("brand_id = ?", brandID).
 		Delete(&brandMarketModel{}).Error
 }
 

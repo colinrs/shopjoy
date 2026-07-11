@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,15 +25,10 @@ func NewListShippingTemplatesLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippingTemplatesReq) (resp *types.ListShippingTemplatesResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Find templates with stats (single query with subqueries)
 	results, total, err := l.svcCtx.ShippingRepo.FindListWithStats(
-		l.ctx, l.svcCtx.DB, tenantID,
+		l.ctx, l.svcCtx.DB,
 		req.Name, req.IsActive,
 		req.Page, req.PageSize,
 	)

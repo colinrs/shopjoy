@@ -12,8 +12,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -39,15 +37,10 @@ func NewExportProductsLogic(ctx context.Context, svcCtx *svc.ServiceContext, w h
 
 func (l *ExportProductsLogic) ExportProducts(req *types.ExportProductsReq) error {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Build query request - use large page size for export
 	query := product.Query{
-		TenantID:   shared.TenantID(tenantID),
-		Name:       req.Name,
+	Name:       req.Name,
 		CategoryID: req.CategoryID,
 		Status:     parseProductStatus(req.Status),
 		MarketID:   req.MarketID,

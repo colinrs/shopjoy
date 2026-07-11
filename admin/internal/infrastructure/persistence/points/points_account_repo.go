@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -25,15 +24,15 @@ func (r *pointsAccountRepo) Create(ctx context.Context, db *gorm.DB, account *po
 func (r *pointsAccountRepo) Update(ctx context.Context, db *gorm.DB, account *points.PointsAccount) error {
 	return db.WithContext(ctx).
 		Model(&points.PointsAccount{}).
-		Where("id = ? AND tenant_id = ?", account.ID, account.TenantID.Int64()).
+		Where("id = ?", account.ID).
 		Save(account).Error
 }
 
 // FindByID finds a points account by ID
-func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsAccount, error) {
 	var account points.PointsAccount
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -45,10 +44,10 @@ func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID 
 }
 
 // FindByUserID finds a points account by user ID
-func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) (*points.PointsAccount, error) {
 	var account points.PointsAccount
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND user_id = ?", tenantID.Int64(), userID).
+		Where("user_id = ?", userID).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,10 +59,10 @@ func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenan
 }
 
 // FindList finds points accounts with pagination and filters
-func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
+func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
 	query.Validate()
 
-	dbQuery := db.WithContext(ctx).Model(&points.PointsAccount{}).Where("tenant_id = ?", tenantID.Int64())
+	dbQuery := db.WithContext(ctx).Model(&points.PointsAccount{})
 
 	if query.UserID != 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
@@ -89,19 +88,17 @@ func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB, tenantID 
 }
 
 // GetStats gets statistics for points accounts
-func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*points.PointsAccountStats, error) {
+func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB) (*points.PointsAccountStats, error) {
 	stats := &points.PointsAccountStats{}
 
 	// Total accounts
 	if err := db.WithContext(ctx).Model(&points.PointsAccount{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Count(&stats.Total).Error; err != nil {
 		return nil, err
 	}
 
 	// Total balance (sum of all account balances)
 	if err := db.WithContext(ctx).Model(&points.PointsAccount{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Select("COALESCE(SUM(balance), 0)").
 		Scan(&stats.TotalBalance).Error; err != nil {
 		return nil, err
@@ -109,7 +106,7 @@ func (r *pointsAccountRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID 
 
 	// Active accounts (accounts with balance > 0)
 	if err := db.WithContext(ctx).Model(&points.PointsAccount{}).
-		Where("tenant_id = ? AND balance > 0", tenantID.Int64()).
+		Where("balance > 0").
 		Count(&stats.Active).Error; err != nil {
 		return nil, err
 	}

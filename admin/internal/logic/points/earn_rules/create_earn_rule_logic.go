@@ -7,10 +7,8 @@ import (
 	apppoints "github.com/colinrs/shopjoy/admin/internal/application/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,12 +29,8 @@ func NewCreateEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cre
 }
 
 func (l *CreateEarnRuleLogic) CreateEarnRule(req *types.CreateEarnRuleReq) (resp *types.EarnRule, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	userID, _ := contextx.GetUserID(l.ctx)
 
+	userID, _ := contextx.GetUserID(l.ctx)
 	createReq := apppoints.CreateEarnRuleRequest{
 		Name:             req.Name,
 		Description:      req.Description,
@@ -64,7 +58,7 @@ func (l *CreateEarnRuleLogic) CreateEarnRule(req *types.CreateEarnRuleReq) (resp
 		}
 	}
 
-	rule, err := l.svcCtx.PointsService.CreateEarnRule(l.ctx, shared.TenantID(tenantID), createReq, userID)
+	rule, err := l.svcCtx.PointsService.CreateEarnRule(l.ctx, createReq, userID)
 	if err != nil {
 		return nil, err
 	}

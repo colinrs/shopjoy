@@ -6,7 +6,6 @@ import (
 	appUser "github.com/colinrs/shopjoy/admin/internal/application/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
 // recordOperationLog writes one user_operation_logs row via the application
@@ -23,13 +22,11 @@ import (
 func recordOperationLog(
 	ctx context.Context,
 	svcCtx *svc.ServiceContext,
-	tenantID shared.TenantID,
 	userID int64,
 	action string,
 	reason string,
 ) {
 	svcCtx.OperationLogService.Record(ctx, svcCtx.DB, appUser.RecordOperationLogInput{
-		TenantID:     tenantID,
 		UserID:       userID,
 		Action:       action,
 		OperatorID:   contextx.GetCurrentUserID(ctx),

@@ -8,9 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,10 +28,6 @@ func NewListTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) L
 
 func (l *ListTransactionsLogic) ListTransactions(req *types.ListTransactionsReq) (resp *types.ListTransactionsResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Build request
 	appReq := appPayment.ListTransactionsRequest{
@@ -60,7 +53,7 @@ func (l *ListTransactionsLogic) ListTransactions(req *types.ListTransactionsReq)
 	}
 
 	// Get transactions from service
-	result, err := l.svcCtx.PaymentService.ListTransactions(l.ctx, shared.TenantID(tenantID), appReq)
+	result, err := l.svcCtx.PaymentService.ListTransactions(l.ctx, appReq)
 	if err != nil {
 		return nil, err
 	}

@@ -14,14 +14,14 @@ type ShippingTemplateRepository interface {
 	// Template operations
 	Create(ctx context.Context, db *gorm.DB, template *shipping.ShippingTemplate) error
 	Update(ctx context.Context, db *gorm.DB, template *shipping.ShippingTemplate) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, error)
-	FindByIDWithDetails(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
-	FindListWithStats(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error)
-	FindDefault(ctx context.Context, db *gorm.DB, tenantID int64) (*shipping.ShippingTemplate, error)
-	SetDefault(ctx context.Context, db *gorm.DB, tenantID, id int64) error
-	UnsetAllDefault(ctx context.Context, db *gorm.DB, tenantID int64) error
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, error)
+	FindByIDWithDetails(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error)
+	FindList(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
+	FindListWithStats(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error)
+	FindDefault(ctx context.Context, db *gorm.DB) (*shipping.ShippingTemplate, error)
+	SetDefault(ctx context.Context, db *gorm.DB, id int64) error
+	UnsetAllDefault(ctx context.Context, db *gorm.DB) error
 
 	// Zone operations
 	CreateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error
@@ -30,7 +30,7 @@ type ShippingTemplateRepository interface {
 	FindZoneByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingZone, error)
 	FindZonesByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) ([]*shipping.ShippingZone, error)
 	ReorderZones(ctx context.Context, db *gorm.DB, templateID int64, zoneIDs []int64) error
-	FindZoneByCityCode(ctx context.Context, db *gorm.DB, tenantID int64, cityCode string) ([]*shipping.ShippingZone, error)
+	FindZoneByCityCode(ctx context.Context, db *gorm.DB,  cityCode string) ([]*shipping.ShippingZone, error)
 
 	// Zone region operations (for indexed lookup)
 	CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error
@@ -70,9 +70,9 @@ func (r *shippingTemplateRepo) Update(ctx context.Context, db *gorm.DB, template
 }
 
 // Delete 删除运费模板
-func (r *shippingTemplateRepo) Delete(ctx context.Context, db *gorm.DB, tenantID, id int64) error {
+func (r *shippingTemplateRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	result := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID).
+		Where("id = ?", id).
 		Delete(&shipping.ShippingTemplate{})
 	if result.Error != nil {
 		return result.Error
@@ -84,10 +84,10 @@ func (r *shippingTemplateRepo) Delete(ctx context.Context, db *gorm.DB, tenantID
 }
 
 // FindByID 根据ID查找运费模板
-func (r *shippingTemplateRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, error) {
+func (r *shippingTemplateRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, error) {
 	var template shipping.ShippingTemplate
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID).
+		Where("id = ?", id).
 		First(&template).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -99,8 +99,8 @@ func (r *shippingTemplateRepo) FindByID(ctx context.Context, db *gorm.DB, tenant
 }
 
 // FindByIDWithDetails 根据ID查找运费模板详情（包含区域和关联）
-func (r *shippingTemplateRepo) FindByIDWithDetails(ctx context.Context, db *gorm.DB, tenantID, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error) {
-	template, err := r.FindByID(ctx, db, tenantID, id)
+func (r *shippingTemplateRepo) FindByIDWithDetails(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error) {
+	template, err := r.FindByID(ctx, db, id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -119,9 +119,8 @@ func (r *shippingTemplateRepo) FindByIDWithDetails(ctx context.Context, db *gorm
 }
 
 // FindList 查找运费模板列表
-func (r *shippingTemplateRepo) FindList(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
-	query := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
-		Where("tenant_id = ?", tenantID)
+func (r *shippingTemplateRepo) FindList(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
+	query := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
 
 	if name != "" {
 		query = query.Where("name LIKE ?", "%"+name+"%")
@@ -157,10 +156,9 @@ type TemplateWithStats struct {
 }
 
 // FindListWithStats 查找运费模板列表（带统计信息，单次查询）
-func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.DB, tenantID int64, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error) {
+func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error) {
 	// Build base query for count
-	baseQuery := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
-		Where("tenant_id = ?", tenantID)
+	baseQuery := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
 
 	if name != "" {
 		baseQuery = baseQuery.Where("name LIKE ?", "%"+name+"%")
@@ -185,8 +183,7 @@ func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.D
 			(SELECT COUNT(*) FROM shipping_zones z WHERE z.template_id = t.id AND z.deleted_at IS NULL) as zone_count,
 			(SELECT COUNT(*) FROM shipping_template_mappings m WHERE m.template_id = t.id AND m.target_type = 'product') as product_count,
 			(SELECT COUNT(*) FROM shipping_template_mappings m WHERE m.template_id = t.id AND m.target_type = 'category') as category_count
-		`).
-		Where("t.tenant_id = ?", tenantID)
+		`)
 
 	if name != "" {
 		query = query.Where("t.name LIKE ?", "%"+name+"%")
@@ -207,10 +204,10 @@ func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.D
 }
 
 // FindDefault 查找默认运费模板
-func (r *shippingTemplateRepo) FindDefault(ctx context.Context, db *gorm.DB, tenantID int64) (*shipping.ShippingTemplate, error) {
+func (r *shippingTemplateRepo) FindDefault(ctx context.Context, db *gorm.DB) (*shipping.ShippingTemplate, error) {
 	var template shipping.ShippingTemplate
 	err := db.WithContext(ctx).
-		Where("tenant_id = ? AND is_default = ? AND is_active = ?", tenantID, true, true).
+		Where("is_default = ? AND is_active = ?", true, true).
 		First(&template).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -222,16 +219,15 @@ func (r *shippingTemplateRepo) FindDefault(ctx context.Context, db *gorm.DB, ten
 }
 
 // SetDefault 设置默认模板
-func (r *shippingTemplateRepo) SetDefault(ctx context.Context, db *gorm.DB, tenantID, id int64) error {
+func (r *shippingTemplateRepo) SetDefault(ctx context.Context, db *gorm.DB, id int64) error {
 	return db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
-		Where("id = ? AND tenant_id = ?", id, tenantID).
+		Where("id = ?", id).
 		Update("is_default", true).Error
 }
 
 // UnsetAllDefault 取消所有默认模板
-func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB, tenantID int64) error {
+func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
-		Where("tenant_id = ?", tenantID).
 		Update("is_default", false).Error
 }
 
@@ -326,7 +322,7 @@ func (r *shippingTemplateRepo) ReorderZones(ctx context.Context, db *gorm.DB, te
 
 // FindZoneByCityCode 根据城市代码查找匹配的配送区域
 // Uses the junction table for efficient indexed lookup
-func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB, tenantID int64, cityCode string) ([]*shipping.ShippingZone, error) {
+func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB,  cityCode string) ([]*shipping.ShippingZone, error) {
 	// First find zone IDs via junction table (indexed)
 	zoneIDs, err := r.FindZoneIDsByCityCode(ctx, db, cityCode)
 	if err != nil {
@@ -336,10 +332,10 @@ func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.
 		return []*shipping.ShippingZone{}, nil
 	}
 
-	// Then fetch zones with tenant filter
+	// Then fetch zones
 	var zones []*shipping.ShippingZone
 	err = db.WithContext(ctx).
-		Where("id IN ? AND tenant_id = ?", zoneIDs, tenantID).
+		Where("id IN ?", zoneIDs).
 		Order("sort ASC").
 		Find(&zones).Error
 	return zones, err

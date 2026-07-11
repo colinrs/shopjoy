@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +27,6 @@ func NewListRedemptionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Li
 }
 
 func (l *ListRedemptionsLogic) ListRedemptions(req *types.ListRedemptionsReq) (resp *types.ListRedemptionsResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	query := points.PointsRedemptionQuery{
 		PageQuery: shared.PageQuery{
@@ -66,7 +60,7 @@ func (l *ListRedemptionsLogic) ListRedemptions(req *types.ListRedemptionsReq) (r
 		}
 	}
 
-	redemptions, total, err := l.svcCtx.PointsService.ListRedemptions(l.ctx, shared.TenantID(tenantID), query)
+	redemptions, total, err := l.svcCtx.PointsService.ListRedemptions(l.ctx, query)
 	if err != nil {
 		return nil, err
 	}

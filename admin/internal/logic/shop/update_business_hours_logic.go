@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,13 +25,9 @@ func NewUpdateBusinessHoursLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *UpdateBusinessHoursLogic) UpdateBusinessHours(req *types.UpdateBusinessHoursRequest) error {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tenantID == 0 {
-		return code.ErrTenantInvalidID
-	}
 
 	// Find shop settings first to get shop ID
-	settings, err := l.svcCtx.ShopSettingsRepo.FindByTenantID(l.ctx, l.svcCtx.DB, tenantID)
+	settings, err := l.svcCtx.ShopSettingsRepo.FindByTenantID(l.ctx, l.svcCtx.DB)
 	if err != nil {
 		l.Logger.Errorf("find shop settings error: %v", err)
 		return code.ErrInternalServer

@@ -6,7 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,11 +25,6 @@ func NewListBrandsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListBra
 }
 
 func (l *ListBrandsLogic) ListBrands(req *types.ListBrandReq) (resp *types.ListBrandResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	query := product.BrandQuery{
 		PageQuery: shared.PageQuery{
@@ -41,7 +35,7 @@ func (l *ListBrandsLogic) ListBrands(req *types.ListBrandReq) (resp *types.ListB
 		Status: shared.Status(req.Status),
 	}
 
-	brands, total, err := l.svcCtx.BrandRepo.FindList(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
+	brands, total, err := l.svcCtx.BrandRepo.FindList(l.ctx, l.svcCtx.DB, query)
 	if err != nil {
 		return nil, err
 	}

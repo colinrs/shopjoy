@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,14 +23,10 @@ func NewGetSKUInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetSKUInventoryLogic) GetSKUInventory(req *types.GetSKUInventoryReq) (resp *types.SKUInventoryResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get warehouse inventory for the SKU
 	warehouseInventories, err := l.svcCtx.WarehouseInventoryRepo.FindBySKU(
-		l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.SKUCode,
+		l.ctx, l.svcCtx.DB, req.SKUCode,
 	)
 	if err != nil {
 		return nil, err
@@ -49,7 +42,7 @@ func (l *GetSKUInventoryLogic) GetSKUInventory(req *types.GetSKUInventoryReq) (r
 		totalLocked += wi.LockedStock
 
 		// Get warehouse name
-		warehouse, _ := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), wi.WarehouseID)
+		warehouse, _ := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, wi.WarehouseID)
 		warehouseName := ""
 		if warehouse != nil {
 			warehouseName = warehouse.Name

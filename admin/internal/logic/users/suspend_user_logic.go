@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,18 +26,13 @@ func NewSuspendUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) Suspen
 }
 
 func (l *SuspendUserLogic) SuspendUser(req *types.SuspendUserRequest) (resp *types.GetUserResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
-	if err := l.svcCtx.UserService.Suspend(l.ctx, tenantID, req.ID); err != nil {
+	if err := l.svcCtx.UserService.Suspend(l.ctx,  req.ID); err != nil {
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionSuspendUser, "")
+	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionSuspendUser, "")
 
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, tenantID, req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -302,13 +302,13 @@ type Query struct {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, promotion *Promotion) error
 	Update(ctx context.Context, db *gorm.DB, promotion *Promotion) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Promotion, error)
-	FindActive(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]*Promotion, error)
-	FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query Query) ([]*Promotion, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Promotion, error)
+	FindActive(ctx context.Context, db *gorm.DB) ([]*Promotion, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Promotion, int64, error)
 
 	// Extended methods for MVP
-	FindActiveByCurrency(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, currency string) ([]*Promotion, error)
+	FindActiveByCurrency(ctx context.Context, db *gorm.DB, currency string) ([]*Promotion, error)
 	CreateRules(ctx context.Context, db *gorm.DB, rules []PromotionRule) error
 	FindRulesByPromotionID(ctx context.Context, db *gorm.DB, promotionID int64) ([]PromotionRule, error)
 	FindRulesByPromotionIDs(ctx context.Context, db *gorm.DB, promotionIDs []int64) (map[int64][]PromotionRule, error)

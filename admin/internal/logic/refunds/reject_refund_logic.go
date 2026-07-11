@@ -4,9 +4,8 @@ import (
 	"context"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,16 +25,11 @@ func NewRejectRefundLogic(ctx context.Context, svcCtx *svc.ServiceContext) Rejec
 }
 
 func (l *RejectRefundLogic) RejectRefund(req *types.RejectRefundReq) (resp *types.RefundDetailResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	// Get current user ID for updated_by
 	userID, _ := contextx.GetUserID(l.ctx)
+	// Get current user ID for updated_by
 
-	refundResp, err := l.svcCtx.RefundApp.RejectRefund(l.ctx, shared.TenantID(tenantID), req.ID, req.RejectReason, userID)
+	refundResp, err := l.svcCtx.RefundApp.RejectRefund(l.ctx, req.ID, req.RejectReason, userID)
 	if err != nil {
 		return nil, err
 	}

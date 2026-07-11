@@ -6,8 +6,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,11 +25,6 @@ func NewListCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListCo
 }
 
 func (l *ListCouponsLogic) ListCoupons(req *types.ListCouponsReq) (resp *types.ListCouponsResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	queryReq := apppromotion.QueryCouponRequest{
 		Name:     req.Name,
@@ -41,7 +34,7 @@ func (l *ListCouponsLogic) ListCoupons(req *types.ListCouponsReq) (resp *types.L
 		PageSize: req.PageSize,
 	}
 
-	listResp, err := l.svcCtx.CouponApp.ListCoupons(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.CouponApp.ListCoupons(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

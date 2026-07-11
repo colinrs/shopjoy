@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,13 +23,8 @@ func NewListWarehousesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 }
 
 func (l *ListWarehousesLogic) ListWarehouses(req *types.ListWarehouseReq) (resp *types.ListWarehouseResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	warehouses, err := l.svcCtx.WarehouseRepo.FindAll(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID))
+	warehouses, err := l.svcCtx.WarehouseRepo.FindAll(l.ctx, l.svcCtx.DB)
 	if err != nil {
 		return nil, err
 	}

@@ -7,9 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,22 +27,18 @@ func NewCancelShipmentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Can
 }
 
 func (l *CancelShipmentLogic) CancelShipment(req *types.CancelShipmentReq) (resp *types.CancelShipmentResp, err error) {
+	userID, _ := contextx.GetUserID(l.ctx)
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Platform admins operate across all tenants; pass tenantID=0 to bypass tenant scoping.
 	if contextx.IsPlatformAdmin(l.ctx) {
-		tenantID = 0
+		
 	}
 
 	// Get user ID from context for audit
-	userID, _ := contextx.GetUserID(l.ctx)
 
 	// First get the shipment to validate and capture info
-	shipment, err := l.svcCtx.ShipmentApp.GetShipment(l.ctx, shared.TenantID(tenantID), req.ID)
+	shipment, err := l.svcCtx.ShipmentApp.GetShipment(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +47,7 @@ func (l *CancelShipmentLogic) CancelShipment(req *types.CancelShipmentReq) (resp
 	shipmentNo := shipment.ShipmentNo
 
 	// Cancel the shipment using the application layer
-	_, err = l.svcCtx.ShipmentApp.CancelShipment(l.ctx, shared.TenantID(tenantID), userID, req.ID, req.Reason)
+	_, err = l.svcCtx.ShipmentApp.CancelShipment(l.ctx, userID, req.ID, req.Reason)
 	if err != nil {
 		return nil, err
 	}

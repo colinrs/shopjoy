@@ -7,10 +7,7 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,10 +28,6 @@ func NewCreatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 
 func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (resp *types.CreatePromotionResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Parse time
 	startAt, err := time.Parse(time.RFC3339, req.StartTime)
@@ -76,7 +69,7 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 		createReq.Rules = append(createReq.Rules, rule)
 	}
 
-	promotionResp, err := l.svcCtx.PromotionApp.CreatePromotion(l.ctx, shared.TenantID(tenantID), createReq)
+	promotionResp, err := l.svcCtx.PromotionApp.CreatePromotion(l.ctx, createReq)
 	if err != nil {
 		return nil, err
 	}

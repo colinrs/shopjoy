@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 )
 
 type CommandHandler[C any, R any] interface {
@@ -22,7 +22,7 @@ type UnitOfWork interface {
 }
 
 func GetTenantID(ctx context.Context) (shared.TenantID, error) {
-	tenantID, ok := tenant.FromContext(ctx)
+	tenantID, ok := contextx.GetTenantIDValueObject(ctx)
 	if !ok {
 		return 0, shared.ErrInvalidTenantID
 	}
@@ -30,5 +30,9 @@ func GetTenantID(ctx context.Context) (shared.TenantID, error) {
 }
 
 func MustGetTenantID(ctx context.Context) shared.TenantID {
-	return tenant.MustFromContext(ctx)
+	tenantID, ok := contextx.GetTenantIDValueObject(ctx)
+	if !ok {
+		panic("tenant ID not found in context")
+	}
+	return tenantID
 }

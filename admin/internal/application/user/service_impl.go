@@ -31,7 +31,7 @@ func NewService(db *gorm.DB, userRepo domain.Repository, addressRepo domain.Addr
 }
 
 func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
-	exists, err := s.userRepo.Exists(ctx, s.db, req.TenantID, req.Email, req.Phone)
+	exists, err := s.userRepo.Exists(ctx, s.db, req.Email, req.Phone)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (s *ServiceImpl) Register(ctx context.Context, req CreateUserRequest) (*Use
 }
 
 func (s *ServiceImpl) Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db, req.TenantID, req.ID)
+	u, err := s.userRepo.FindByID(ctx, s.db, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequ
 		return code.ErrUserPasswordMismatch
 	}
 
-	u, err := s.userRepo.FindByID(ctx, s.db, req.TenantID, req.UserID)
+	u, err := s.userRepo.FindByID(ctx, s.db, req.UserID)
 	if err != nil {
 		return err
 	}
@@ -122,23 +122,23 @@ func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequ
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) GetByID(ctx context.Context, tenantID shared.TenantID, id int64) (*UserResponse, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) GetByID(ctx context.Context,  id int64) (*UserResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return nil, err
 	}
 	return toUserResponse(u), nil
 }
 
-func (s *ServiceImpl) GetByEmail(ctx context.Context, tenantID shared.TenantID, email string) (*UserResponse, error) {
-	u, err := s.userRepo.FindByEmail(ctx, s.db, tenantID, email)
+func (s *ServiceImpl) GetByEmail(ctx context.Context,  email string) (*UserResponse, error) {
+	u, err := s.userRepo.FindByEmail(ctx, s.db,  email)
 	if err != nil {
 		return nil, err
 	}
 	return toUserResponse(u), nil
 }
 
-func (s *ServiceImpl) List(ctx context.Context, tenantID shared.TenantID, req QueryRequest) (*UserListResponse, error) {
+func (s *ServiceImpl) List(ctx context.Context,  req QueryRequest) (*UserListResponse, error) {
 	query := domain.Query{
 		PageQuery: req.PageQuery,
 		Name:      req.Name,
@@ -148,7 +148,7 @@ func (s *ServiceImpl) List(ctx context.Context, tenantID shared.TenantID, req Qu
 	}
 	query.PageQuery.Validate()
 
-	users, total, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	users, total, err := s.userRepo.FindList(ctx, s.db,  query)
 	if err != nil {
 		return nil, err
 	}
@@ -167,8 +167,8 @@ func (s *ServiceImpl) List(ctx context.Context, tenantID shared.TenantID, req Qu
 	return resp, nil
 }
 
-func (s *ServiceImpl) Suspend(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) Suspend(ctx context.Context,  id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -181,8 +181,8 @@ func (s *ServiceImpl) Suspend(ctx context.Context, tenantID shared.TenantID, id 
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) Activate(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) Activate(ctx context.Context, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -195,8 +195,8 @@ func (s *ServiceImpl) Activate(ctx context.Context, tenantID shared.TenantID, id
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) Delete(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) Delete(ctx context.Context, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -208,8 +208,8 @@ func (s *ServiceImpl) Delete(ctx context.Context, tenantID shared.TenantID, id i
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) ResetPassword(ctx context.Context, tenantID shared.TenantID, id int64) (string, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) ResetPassword(ctx context.Context,  id int64) (string, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return "", err
 	}
@@ -228,8 +228,8 @@ func (s *ServiceImpl) ResetPassword(ctx context.Context, tenantID shared.TenantI
 	return tempPassword, nil
 }
 
-func (s *ServiceImpl) GetStats(ctx context.Context, tenantID shared.TenantID) (*UserStatsResponse, error) {
-	stats, err := s.userRepo.GetStats(ctx, s.db, tenantID)
+func (s *ServiceImpl) GetStats(ctx context.Context) (*UserStatsResponse, error) {
+	stats, err := s.userRepo.GetStats(ctx, s.db)
 	if err != nil {
 		return nil, err
 	}
@@ -286,8 +286,8 @@ func toUserResponse(u *domain.User) *UserResponse {
 }
 
 // GetDetail returns detailed user information with points and order statistics
-func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, id int64) (*UserDetailResponse, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *ServiceImpl) GetDetail(ctx context.Context,  id int64) (*UserDetailResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 	s.db.WithContext(ctx).
 		Table("points_accounts").
 		Select("balance, frozen_balance, total_earned, total_redeemed").
-		Where("user_id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("user_id = ?", id).
 		First(&pointsAccount)
 	resp.PointsBalance = pointsAccount.Balance
 	resp.PointsFrozen = pointsAccount.Frozen
@@ -322,7 +322,7 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 	s.db.WithContext(ctx).
 		Table("orders").
 		Select("COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent, MAX(created_at) as last_order").
-		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("user_id = ? AND deleted_at IS NULL", id).
 		Scan(&orderStats)
 	resp.OrderCount = orderStats.Count
 	// Convert cents to yuan string with 2 decimal places
@@ -335,12 +335,12 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 	var reviewCount int64
 	s.db.WithContext(ctx).
 		Table("reviews").
-		Where("user_id = ? AND tenant_id = ? AND deleted_at IS NULL", id, tenantID.Int64()).
+		Where("user_id = ? AND deleted_at IS NULL", id).
 		Count(&reviewCount)
 	resp.ReviewCount = reviewCount
 
 	// Query default address
-	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, tenantID, id)
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db,  id)
 	if err == nil && len(addresses) > 0 {
 		for _, addr := range addresses {
 			if addr.IsDefault {
@@ -358,7 +358,7 @@ func (s *ServiceImpl) GetDetail(ctx context.Context, tenantID shared.TenantID, i
 }
 
 // ExtendedList returns a list of users with extended information
-func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID, req EnhancedQueryRequest) (*ExtendedListResponse, error) {
+func (s *ServiceImpl) ExtendedList(ctx context.Context,  req EnhancedQueryRequest) (*ExtendedListResponse, error) {
 	query := domain.Query{
 		PageQuery: req.PageQuery,
 		Name:      req.Keyword,
@@ -368,7 +368,7 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID
 	}
 	query.PageQuery.Validate()
 
-	users, total, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	users, total, err := s.userRepo.FindList(ctx, s.db,  query)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +399,7 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID
 		s.db.WithContext(ctx).
 			Table("points_accounts").
 			Select("user_id, balance").
-			Where("user_id IN ? AND tenant_id = ?", userIDs, tenantID.Int64()).
+			Where("user_id IN ?", userIDs).
 			Find(&pointsData)
 		for _, pd := range pointsData {
 			pointsMap[pd.UserID] = struct{ Balance int64 }{Balance: pd.Balance}
@@ -421,7 +421,7 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID
 		s.db.WithContext(ctx).
 			Table("orders").
 			Select("user_id, COUNT(*) as count, COALESCE(SUM(pay_amount), 0) as total_spent").
-			Where("user_id IN ? AND tenant_id = ? AND deleted_at IS NULL", userIDs, tenantID.Int64()).
+			Where("user_id IN ? AND deleted_at IS NULL", userIDs).
 			Group("user_id").
 			Find(&orderData)
 		for _, od := range orderData {
@@ -449,8 +449,8 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context, tenantID shared.TenantID
 }
 
 // GetAddresses returns all addresses for a user
-func (s *ServiceImpl) GetAddresses(ctx context.Context, tenantID shared.TenantID, userID int64) (*AddressListResponse, error) {
-	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, tenantID, userID)
+func (s *ServiceImpl) GetAddresses(ctx context.Context,  userID int64) (*AddressListResponse, error) {
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db,  userID)
 	if err != nil {
 		return nil, err
 	}
@@ -469,22 +469,22 @@ func (s *ServiceImpl) GetAddresses(ctx context.Context, tenantID shared.TenantID
 
 // SuspendWithReason suspends a user with a specific reason
 func (s *ServiceImpl) SuspendWithReason(ctx context.Context, req SuspendUserRequest) error {
-	return s.Suspend(ctx, req.TenantID, req.UserID)
+	return s.Suspend(ctx, req.UserID)
 }
 
 // ActivateUser activates a user
-func (s *ServiceImpl) ActivateUser(ctx context.Context, tenantID shared.TenantID, userID int64) error {
-	return s.Activate(ctx, tenantID, userID)
+func (s *ServiceImpl) ActivateUser(ctx context.Context, userID int64) error {
+	return s.Activate(ctx,  userID)
 }
 
 // DeleteUser deletes a user
-func (s *ServiceImpl) DeleteUser(ctx context.Context, tenantID shared.TenantID, userID int64) error {
-	return s.Delete(ctx, tenantID, userID)
+func (s *ServiceImpl) DeleteUser(ctx context.Context, userID int64) error {
+	return s.Delete(ctx,  userID)
 }
 
 // GetUserStats returns user statistics
-func (s *ServiceImpl) GetUserStats(ctx context.Context, tenantID shared.TenantID) (*UserStats, error) {
-	stats, err := s.userRepo.GetStats(ctx, s.db, tenantID)
+func (s *ServiceImpl) GetUserStats(ctx context.Context) (*UserStats, error) {
+	stats, err := s.userRepo.GetStats(ctx, s.db)
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +498,7 @@ func (s *ServiceImpl) GetUserStats(ctx context.Context, tenantID shared.TenantID
 }
 
 // ExportUsers exports users to a file (placeholder implementation)
-func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID, req EnhancedQueryRequest) ([]byte, error) {
+func (s *ServiceImpl) ExportUsers(ctx context.Context,  req EnhancedQueryRequest) ([]byte, error) {
 	// Get all users matching the criteria
 	query := domain.Query{
 		PageQuery: shared.PageQuery{Page: 1, PageSize: 10000}, // Large page size for export
@@ -508,7 +508,7 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context, tenantID shared.TenantID,
 		Status:    req.Status,
 	}
 
-	users, _, err := s.userRepo.FindList(ctx, s.db, tenantID, query)
+	users, _, err := s.userRepo.FindList(ctx, s.db,  query)
 	if err != nil {
 		return nil, err
 	}

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -37,17 +36,11 @@ func (r *OperationLogRepositoryImpl) Create(ctx context.Context, db *gorm.DB, lo
 func (r *OperationLogRepositoryImpl) FindByUserID(
 	ctx context.Context,
 	db *gorm.DB,
-	tenantID shared.TenantID,
 	userID int64,
 	query user.OperationLogQuery,
 ) ([]*user.OperationLog, int64, error) {
 	q := db.WithContext(ctx).Model(&user.OperationLog{}).
 		Where("user_id = ? AND deleted_at IS NULL", userID)
-
-	// Platform admin (tenantID == 0) sees logs across all tenants.
-	if tenantID != 0 {
-		q = q.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Action != "" {
 		q = q.Where("action = ?", query.Action)

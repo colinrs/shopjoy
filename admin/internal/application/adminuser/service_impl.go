@@ -9,7 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
@@ -284,7 +283,7 @@ func (s *service) Create(ctx context.Context, operatorID int64, req CreateAdminU
 
 	// BR-010: 用户名在租户内唯一
 	if req.Username != "" {
-		exists, err := s.repo.ExistsByUsername(ctx, s.db, targetTenantID, req.Username)
+		exists, err := s.repo.ExistsByUsername(ctx, s.db, req.Username)
 		if err != nil {
 			return nil, err
 		}
@@ -295,7 +294,7 @@ func (s *service) Create(ctx context.Context, operatorID int64, req CreateAdminU
 
 	// BR-011: 邮箱在租户内唯一
 	if req.Email != "" {
-		exists, err := s.repo.ExistsByEmail(ctx, s.db, targetTenantID, req.Email)
+		exists, err := s.repo.ExistsByEmail(ctx, s.db, req.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +305,7 @@ func (s *service) Create(ctx context.Context, operatorID int64, req CreateAdminU
 
 	// BR-012: 每个租户只能有一个主账号 (Type=2)
 	if adminuser.Type(req.Type) == adminuser.TypeTenantAdmin && targetTenantID > 0 {
-		count, err := s.repo.CountMainAccount(ctx, s.db, targetTenantID)
+		count, err := s.repo.CountMainAccount(ctx, s.db)
 		if err != nil {
 			return nil, err
 		}
@@ -339,7 +338,7 @@ func (s *service) Create(ctx context.Context, operatorID int64, req CreateAdminU
 
 		// 分配角色
 		if len(req.RoleIDs) > 0 {
-			if err := s.roleRepo.AssignToUser(ctx, tx, shared.TenantID(targetTenantID), user.ID, req.RoleIDs); err != nil {
+			if err := s.roleRepo.AssignToUser(ctx, tx, user.ID, req.RoleIDs); err != nil {
 				return err
 			}
 		}
@@ -376,7 +375,7 @@ func (s *service) Update(ctx context.Context, operatorID int64, req UpdateAdminU
 	// 更新邮箱（如果提供且不同）
 	if req.Email != "" && req.Email != target.Email {
 		// BR-011: 邮箱在租户内唯一
-		exists, err := s.repo.ExistsByEmail(ctx, s.db, target.TenantID, req.Email)
+		exists, err := s.repo.ExistsByEmail(ctx, s.db, req.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -435,7 +434,7 @@ func (s *service) AssignRoles(ctx context.Context, operatorID int64, req AssignR
 		return code.ErrAdminPermissionDenied
 	}
 
-	return s.roleRepo.AssignToUser(ctx, s.db, shared.TenantID(target.TenantID), req.AdminUserID, req.RoleIDs)
+	return s.roleRepo.AssignToUser(ctx, s.db, req.AdminUserID, req.RoleIDs)
 }
 
 // ResetPassword 重置密码

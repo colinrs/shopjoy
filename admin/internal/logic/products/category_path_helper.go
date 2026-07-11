@@ -7,17 +7,16 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
-func buildCategoryPath(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, categoryID int64) string {
+func buildCategoryPath(ctx context.Context, db *gorm.DB, categoryID int64) string {
 	if categoryID <= 0 {
 		return ""
 	}
 
 	repo := persistence.NewCategoryRepository()
-	categories, err := repo.FindAll(ctx, db, tenantID)
+	categories, err := repo.FindAll(ctx, db)
 	if err != nil {
 		return ""
 	}

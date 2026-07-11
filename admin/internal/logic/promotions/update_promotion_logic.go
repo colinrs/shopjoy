@@ -7,9 +7,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,10 +27,6 @@ func NewUpdatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Up
 
 func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (resp *types.PromotionDetailResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Parse time
 	startAt, err := time.Parse(time.RFC3339, req.StartTime)
@@ -53,7 +46,7 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 		EndAt:       endAt,
 	}
 
-	promotionResp, err := l.svcCtx.PromotionApp.UpdatePromotion(l.ctx, shared.TenantID(tenantID), updateReq)
+	promotionResp, err := l.svcCtx.PromotionApp.UpdatePromotion(l.ctx, updateReq)
 	if err != nil {
 		return nil, err
 	}

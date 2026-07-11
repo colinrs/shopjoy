@@ -64,7 +64,7 @@ func (r *warehouseInventoryRepo) Create(ctx context.Context, db *gorm.DB, wi *pr
 func (r *warehouseInventoryRepo) Update(ctx context.Context, db *gorm.DB, wi *product.WarehouseInventory) error {
 	model := fromWarehouseInventoryEntity(wi)
 	return db.WithContext(ctx).Model(&warehouseInventoryModel{}).
-		Where("id = ? AND tenant_id = ?", wi.Model.ID, wi.TenantID.Int64()).
+		Where("id = ?", wi.Model.ID).
 		Updates(map[string]any{
 			"available_stock": model.AvailableStock,
 			"locked_stock":    model.LockedStock,
@@ -72,10 +72,10 @@ func (r *warehouseInventoryRepo) Update(ctx context.Context, db *gorm.DB, wi *pr
 		}).Error
 }
 
-func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, skuCode string, warehouseID int64) (*product.WarehouseInventory, error) {
+func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB,  skuCode string, warehouseID int64) (*product.WarehouseInventory, error) {
 	var model warehouseInventoryModel
 	err := db.WithContext(ctx).
-		Where("sku_code = ? AND warehouse_id = ? AND tenant_id = ?", skuCode, warehouseID, tenantID.Int64()).
+		Where("sku_code = ? AND warehouse_id = ?", skuCode, warehouseID).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -86,10 +86,10 @@ func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *
 	return model.toEntity(), nil
 }
 
-func (r *warehouseInventoryRepo) FindBySKU(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, skuCode string) ([]*product.WarehouseInventory, error) {
+func (r *warehouseInventoryRepo) FindBySKU(ctx context.Context, db *gorm.DB,  skuCode string) ([]*product.WarehouseInventory, error) {
 	var models []warehouseInventoryModel
 	err := db.WithContext(ctx).
-		Where("sku_code = ? AND tenant_id = ?", skuCode, tenantID.Int64()).
+		Where("sku_code = ?", skuCode).
 		Find(&models).Error
 	if err != nil {
 		return nil, err

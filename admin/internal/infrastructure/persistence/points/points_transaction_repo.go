@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -22,8 +21,8 @@ func (r *pointsTransactionRepo) Create(ctx context.Context, db *gorm.DB, transac
 }
 
 // FindByID finds a points transaction by ID
-func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.PointsTransaction, error) {
-	query := db.WithContext(ctx).Where("tenant_id = ?", tenantID.Int64())
+func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsTransaction, error) {
+	query := db.WithContext(ctx)
 	var transaction points.PointsTransaction
 	err := query.First(&transaction, id).Error
 	if err != nil {
@@ -36,10 +35,10 @@ func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, tenan
 }
 
 // FindList finds points transactions with pagination and filters
-func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
+func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
 	query.Validate()
 
-	dbQuery := db.WithContext(ctx).Model(&points.PointsTransaction{}).Where("tenant_id = ?", tenantID.Int64())
+	dbQuery := db.WithContext(ctx).Model(&points.PointsTransaction{})
 
 	if query.UserID != 0 {
 		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
@@ -75,11 +74,11 @@ func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenan
 }
 
 // GetStats gets statistics for points transactions
-func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
+func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
 	stats := &points.PointsTransactionStats{}
 
 	// Base query with tenant filter
-	dbQuery := db.WithContext(ctx).Model(&points.PointsTransaction{}).Where("tenant_id = ?", tenantID.Int64())
+	dbQuery := db.WithContext(ctx).Model(&points.PointsTransaction{})
 
 	// Apply filters from query
 	if query.UserID != 0 {
@@ -100,7 +99,6 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 
 	// Total earned (sum of positive points from EARN transactions)
 	earnQuery := db.WithContext(ctx).Model(&points.PointsTransaction{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Where("type = ?", points.TransactionTypeEarn)
 	if query.UserID != 0 {
 		earnQuery = earnQuery.Where("user_id = ?", query.UserID)
@@ -120,7 +118,6 @@ func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenan
 
 	// Total redeemed (sum of absolute value of negative points from REDEEM transactions)
 	redeemQuery := db.WithContext(ctx).Model(&points.PointsTransaction{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Where("type = ?", points.TransactionTypeRedeem)
 	if query.UserID != 0 {
 		redeemQuery = redeemQuery.Where("user_id = ?", query.UserID)

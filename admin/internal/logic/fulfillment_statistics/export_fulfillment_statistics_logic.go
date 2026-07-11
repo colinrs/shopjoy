@@ -10,9 +10,6 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -37,10 +34,6 @@ func NewExportFulfillmentStatisticsLogic(ctx context.Context, svcCtx *svc.Servic
 
 func (l *ExportFulfillmentStatisticsLogic) ExportFulfillmentStatistics(req *types.ExportFulfillmentStatisticsReq) error {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Parse time range
 	var startTime, endTime time.Time
@@ -75,13 +68,13 @@ func (l *ExportFulfillmentStatisticsLogic) ExportFulfillmentStatistics(req *type
 	}
 
 	// Get refund statistics
-	refundStats, err := l.svcCtx.RefundApp.GetRefundStatistics(l.ctx, shared.TenantID(tenantID), startTime, endTime)
+	refundStats, err := l.svcCtx.RefundApp.GetRefundStatistics(l.ctx, startTime, endTime)
 	if err != nil {
 		return err
 	}
 
 	// Get fulfillment summary (shipment counts)
-	fulfillmentSummary, err := l.svcCtx.OrderFulfillmentApp.GetFulfillmentSummary(l.ctx, shared.TenantID(tenantID))
+	fulfillmentSummary, err := l.svcCtx.OrderFulfillmentApp.GetFulfillmentSummary(l.ctx)
 	if err != nil {
 		// Fallback to zeros if error
 		fulfillmentSummary = &appfulfillment.FulfillmentSummary{}

@@ -6,9 +6,6 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,10 +27,6 @@ func NewUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upda
 
 func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *types.ProductDetailResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// 解析价格字符串（单位：元）
 	price, err := appProduct.ToDomainMoneyFromString(req.Price, req.Currency)
@@ -63,13 +56,13 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 		DangerousGoods:  req.DangerousGoods,
 	}
 
-	productResp, err := l.svcCtx.ProductService.UpdateProduct(l.ctx, shared.TenantID(tenantID), updateReq)
+	productResp, err := l.svcCtx.ProductService.UpdateProduct(l.ctx, updateReq)
 	if err != nil {
 		return nil, err
 	}
 
 	resp = convertToProductDetailResp(productResp)
-	resp.CategoryPath = buildCategoryPath(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), productResp.CategoryID)
+	resp.CategoryPath = buildCategoryPath(l.ctx, l.svcCtx.DB, productResp.CategoryID)
 	return resp, nil
 }
 

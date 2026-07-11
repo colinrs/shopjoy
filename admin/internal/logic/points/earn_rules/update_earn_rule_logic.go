@@ -7,10 +7,8 @@ import (
 	apppoints "github.com/colinrs/shopjoy/admin/internal/application/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
+	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,12 +29,8 @@ func NewUpdateEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upd
 }
 
 func (l *UpdateEarnRuleLogic) UpdateEarnRule(req *types.UpdateEarnRuleReq) (resp *types.EarnRule, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	userID, _ := contextx.GetUserID(l.ctx)
 
+	userID, _ := contextx.GetUserID(l.ctx)
 	updateReq := apppoints.UpdateEarnRuleRequest{
 		ID:               req.ID,
 		Name:             req.Name,
@@ -65,7 +59,7 @@ func (l *UpdateEarnRuleLogic) UpdateEarnRule(req *types.UpdateEarnRuleReq) (resp
 		}
 	}
 
-	rule, err := l.svcCtx.PointsService.UpdateEarnRule(l.ctx, shared.TenantID(tenantID), updateReq, userID)
+	rule, err := l.svcCtx.PointsService.UpdateEarnRule(l.ctx, updateReq, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -219,7 +219,7 @@ func (ReviewReply) TableName() string {
 }
 
 // NewReviewReply creates a new review reply
-func NewReviewReply(reviewID, tenantID, adminID int64, adminName, content string) (*ReviewReply, error) {
+func NewReviewReply(reviewID, adminID int64, adminName, content string) (*ReviewReply, error) {
 	if content == "" {
 		return nil, code.ErrReviewReplyEmpty
 	}
@@ -229,7 +229,6 @@ func NewReviewReply(reviewID, tenantID, adminID int64, adminName, content string
 
 	return &ReviewReply{
 		ReviewID:  reviewID,
-		TenantID:  tenantID,
 		AdminID:   adminID,
 		AdminName: adminName,
 		Content:   content,
@@ -329,12 +328,12 @@ func (q Query) Limit() int {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, review *Review) error
 	Update(ctx context.Context, db *gorm.DB, review *Review) error
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*Review, error)
-	FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*Review, error)
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
+	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Review, error)
+	FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*Review, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Review, int64, error)
-	FindByProductID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, productID int64) ([]*Review, error)
-	BatchUpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64, status Status, reason string) (int64, error)
+	FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*Review, error)
+	BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []int64, status Status, reason string) (int64, error)
 }
 
 // ReplyRepository 回复仓储接口
@@ -348,9 +347,9 @@ type ReplyRepository interface {
 
 // StatsRepository 统计仓储接口
 type StatsRepository interface {
-	GetByProduct(ctx context.Context, db *gorm.DB, tenantID, productID int64) (*ReviewStats, error)
-	GetOverallStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*OverallStats, error)
-	UpdateProductStats(ctx context.Context, db *gorm.DB, tenantID, productID int64) error
+	GetByProduct(ctx context.Context, db *gorm.DB, productID int64) (*ReviewStats, error)
+	GetOverallStats(ctx context.Context, db *gorm.DB) (*OverallStats, error)
+	UpdateProductStats(ctx context.Context, db *gorm.DB, productID int64) error
 }
 
 // OverallStats 总体统计

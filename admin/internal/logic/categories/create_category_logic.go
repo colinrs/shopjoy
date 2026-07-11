@@ -9,7 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,15 +28,10 @@ func NewCreateCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cre
 }
 
 func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp *types.CreateCategoryResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Check for duplicate code if provided
 	if req.Code != "" {
-		existing, err := l.svcCtx.CategoryRepo.FindByCode(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Code)
+		existing, err := l.svcCtx.CategoryRepo.FindByCode(l.ctx, l.svcCtx.DB, req.Code)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +43,7 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 	// Calculate level based on parent
 	level := 1
 	if req.ParentID > 0 {
-		parent, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.ParentID)
+		parent, err := l.svcCtx.CategoryRepo.FindByID(l.ctx, l.svcCtx.DB, req.ParentID)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +66,6 @@ func (l *CreateCategoryLogic) CreateCategory(req *types.CreateCategoryReq) (resp
 	now := time.Now().UTC()
 	category := &product.Category{
 		Model:          application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
-		TenantID:       shared.TenantID(tenantID),
 		ParentID:       req.ParentID,
 		Name:           req.Name,
 		Code:           req.Code,

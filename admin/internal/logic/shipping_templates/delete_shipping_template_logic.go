@@ -5,7 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"gorm.io/gorm"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -26,14 +25,9 @@ func NewDeleteShippingTemplateLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *DeleteShippingTemplateLogic) DeleteShippingTemplate(req *types.DeleteShippingTemplateReq) error {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return err
-	}
 
 	// Find existing template
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.ID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return err
 	}
@@ -68,6 +62,6 @@ func (l *DeleteShippingTemplateLogic) DeleteShippingTemplate(req *types.DeleteSh
 		}
 
 		// Finally delete the template
-		return l.svcCtx.ShippingRepo.Delete(l.ctx, tx, tenantID, req.ID)
+		return l.svcCtx.ShippingRepo.Delete(l.ctx, tx, req.ID)
 	})
 }

@@ -6,9 +6,6 @@ import (
 	appProduct "github.com/colinrs/shopjoy/admin/internal/application/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,10 +26,6 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) Crea
 
 func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *types.CreateProductResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// 解析价格字符串（单位：元）
 	price, err := appProduct.ToDomainMoneyFromString(req.Price, req.Currency)
@@ -55,7 +48,7 @@ func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *t
 		SKU:         req.SKU,
 	}
 
-	productResp, err := l.svcCtx.ProductService.CreateProduct(l.ctx, shared.TenantID(tenantID), createReq)
+	productResp, err := l.svcCtx.ProductService.CreateProduct(l.ctx, createReq)
 	if err != nil {
 		return nil, err
 	}

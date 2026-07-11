@@ -75,8 +75,8 @@ func (r *userCouponRepo) Create(ctx context.Context, db *gorm.DB, userCoupon *pr
 }
 
 // FindByID finds a user coupon by ID
-func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*promotion.UserCoupon, error) {
-	query := db.WithContext(ctx).Where("tenant_id = ?", tenantID.Int64())
+func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.UserCoupon, error) {
+	query := db.WithContext(ctx)
 	var model userCouponModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -89,9 +89,8 @@ func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 // FindByUserID finds user coupons by user ID, optionally filtered by status
-func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, status *promotion.UserCouponStatus) ([]*promotion.UserCoupon, error) {
+func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, status *promotion.UserCouponStatus) ([]*promotion.UserCoupon, error) {
 	query := db.WithContext(ctx).Model(&userCouponModel{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Where("user_id = ?", userID)
 
 	if status != nil {
@@ -112,10 +111,9 @@ func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID
 }
 
 // FindByUserAndCoupon finds user coupons by user ID and coupon ID
-func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) ([]*promotion.UserCoupon, error) {
+func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB,  userID int64, couponID int64) ([]*promotion.UserCoupon, error) {
 	var models []userCouponModel
 	err := db.WithContext(ctx).Model(&userCouponModel{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Where("user_id = ?", userID).
 		Where("coupon_id = ?", couponID).
 		Order("created_at DESC").
@@ -132,11 +130,11 @@ func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB, t
 }
 
 // MarkUsed marks a user coupon as used
-func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, orderID int64) error {
+func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB,  id int64, orderID int64) error {
 	now := time.Now().UTC()
 	result := db.WithContext(ctx).
 		Model(&userCouponModel{}).
-		Where("id = ? AND tenant_id = ? AND status = ?", id, tenantID.Int64(), promotion.UserCouponStatusUnused).
+		Where("id = ? AND status = ?", id, promotion.UserCouponStatusUnused).
 		Updates(map[string]interface{}{
 			"status":     promotion.UserCouponStatusUsed,
 			"used_at":    now,
@@ -154,10 +152,9 @@ func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 // CountUsageByUser counts how many times a user has used a specific coupon
-func (r *userCouponRepo) CountUsageByUser(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, couponID int64) (int, error) {
+func (r *userCouponRepo) CountUsageByUser(ctx context.Context, db *gorm.DB,  userID int64, couponID int64) (int, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&userCouponModel{}).
-		Where("tenant_id = ?", tenantID.Int64()).
 		Where("user_id = ?", userID).
 		Where("coupon_id = ?", couponID).
 		Where("status = ?", promotion.UserCouponStatusUsed).

@@ -250,12 +250,11 @@ func (r *PaymentRefund) TableName() string {
 }
 
 // NewPaymentRefund 创建退款记录
-func NewPaymentRefund(tenantID shared.TenantID, orderID, paymentID int64, idempotencyKey string, amount decimal.Decimal, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
+func NewPaymentRefund( orderID, paymentID int64, idempotencyKey string, amount decimal.Decimal, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
 	return &PaymentRefund{
-		TenantID:       tenantID,
 		OrderID:        orderID,
 		PaymentID:      paymentID,
-		RefundNo:       GenerateRefundNo(tenantID, 1),
+		RefundNo:       GenerateRefundNo(1),
 		IdempotencyKey: idempotencyKey,
 		Amount:         amount,
 		Currency:       currency,
@@ -283,7 +282,7 @@ func (r *PaymentRefund) MarkFailed() error {
 }
 
 // GenerateRefundNo 生成退款单号
-func GenerateRefundNo(tenantID shared.TenantID, sequence int) string {
+func GenerateRefundNo(sequence int) string {
 	dateStr := time.Now().UTC().Format("20060102")
 	return fmt.Sprintf("PRF%s%06d", dateStr, sequence)
 }

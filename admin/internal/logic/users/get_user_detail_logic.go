@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,12 +24,7 @@ func NewGetUserDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetU
 }
 
 func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserRequest) (resp *types.UserDetailResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
-	detail, err := l.svcCtx.UserService.GetDetail(l.ctx, tenantID, req.ID)
+	detail, err := l.svcCtx.UserService.GetDetail(l.ctx,  req.ID)
 	if err != nil {
 		return nil, err
 	}

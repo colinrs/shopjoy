@@ -7,7 +7,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -26,17 +25,14 @@ func (r *earnRuleRepo) Create(ctx context.Context, db *gorm.DB, rule *points.Ear
 func (r *earnRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.EarnRule) error {
 	return db.WithContext(ctx).
 		Model(&points.EarnRule{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", rule.ID, rule.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", rule.ID).
 		Save(rule).Error
 }
 
 // Delete soft deletes an earn rule
-func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&points.EarnRule{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	result := query.Delete(&points.EarnRule{})
 	if result.Error != nil {
 		return result.Error
@@ -48,12 +44,9 @@ func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // FindByID finds an earn rule by ID
-func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.EarnRule, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var rule points.EarnRule
 	err := query.First(&rule, id).Error
 	if err != nil {
@@ -66,15 +59,12 @@ func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // FindList finds earn rules with pagination and filters
-func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
+func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.EarnRule{}).Where("deleted_at IS NULL")
 
 	// Tenant filter: Platform admin (TenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))
@@ -107,14 +97,11 @@ func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // FindByScenario finds earn rules by scenario
-func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, scenario points.EarnScenario) ([]*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB,  scenario points.EarnScenario) ([]*points.EarnRule, error) {
 	query := db.WithContext(ctx).Model(&points.EarnRule{}).
 		Where("scenario = ? AND deleted_at IS NULL", scenario)
 
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var rules []*points.EarnRule
 	err := query.Order("priority DESC, created_at DESC").Find(&rules).Error
@@ -126,15 +113,12 @@ func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB, tenantID
 }
 
 // UpdateStatus updates the status of an earn rule
-func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, status points.EarnRuleStatus) error {
+func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status points.EarnRuleStatus) error {
 	query := db.WithContext(ctx).
 		Model(&points.EarnRule{}).
 		Where("id = ? AND deleted_at IS NULL", id)
 
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	result := query.Update("status", status)
 	if result.Error != nil {
@@ -147,14 +131,11 @@ func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, tenantID s
 }
 
 // GetStats gets statistics for earn rules
-func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (*points.EarnRuleStats, error) {
+func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB) (*points.EarnRuleStats, error) {
 	stats := &points.EarnRuleStats{}
 
 	baseQuery := db.WithContext(ctx).Model(&points.EarnRule{}).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
-	if tenantID != 0 {
-		baseQuery = baseQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	// Total rules
 	if err := baseQuery.Count(&stats.Total).Error; err != nil {
@@ -164,9 +145,6 @@ func (r *earnRuleRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID share
 	// Active rules
 	activeQuery := db.WithContext(ctx).Model(&points.EarnRule{}).
 		Where("status = ? AND deleted_at IS NULL", points.EarnRuleStatusActive)
-	if tenantID != 0 {
-		activeQuery = activeQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 	if err := activeQuery.Count(&stats.Active).Error; err != nil {
 		return nil, err
 	}

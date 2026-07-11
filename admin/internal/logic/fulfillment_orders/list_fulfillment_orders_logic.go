@@ -9,9 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,10 +30,6 @@ func NewListFulfillmentOrdersLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *ListFulfillmentOrdersLogic) ListFulfillmentOrders(req *types.ListFulfillmentOrdersReq) (resp *types.ListFulfillmentOrdersResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Build query request
 	queryReq := appfulfillment.QueryOrderRequest{
@@ -75,7 +68,7 @@ func (l *ListFulfillmentOrdersLogic) ListFulfillmentOrders(req *types.ListFulfil
 	}
 
 	// List orders
-	listResp, err := l.svcCtx.OrderFulfillmentApp.ListOrders(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.OrderFulfillmentApp.ListOrders(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

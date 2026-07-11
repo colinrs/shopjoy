@@ -5,10 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,13 +27,9 @@ func NewCreatePromotionRulesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromotionRulesReq) (resp *types.CreatePromotionRulesResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get existing promotion
-	p, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, shared.TenantID(tenantID), req.PromotionID)
+	p, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, req.PromotionID)
 	if err != nil {
 		return nil, err
 	}

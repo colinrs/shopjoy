@@ -6,8 +6,6 @@ import (
 	appStorefront "github.com/colinrs/shopjoy/admin/internal/application/storefront"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,11 +24,6 @@ func NewReorderBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext) Reor
 }
 
 func (l *ReorderBlocksLogic) ReorderBlocks(req *types.ReorderBlocksRequest) error {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return err
-	}
 
 	orders := make([]appStorefront.BlockOrderDTO, 0, len(req.BlockOrders))
 	for _, o := range req.BlockOrders {
@@ -40,5 +33,5 @@ func (l *ReorderBlocksLogic) ReorderBlocks(req *types.ReorderBlocksRequest) erro
 		})
 	}
 
-	return l.svcCtx.DecorationService.ReorderBlocks(l.ctx, shared.TenantID(tenantID), req.PageID, orders)
+	return l.svcCtx.DecorationService.ReorderBlocks(l.ctx, req.PageID, orders)
 }

@@ -7,8 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +26,7 @@ func NewSuspendUserWithReasonLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *SuspendUserWithReasonLogic) SuspendUserWithReason(req *types.SuspendUserWithReasonRequest) (resp *types.GetUserResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
 	suspendReq := appUser.SuspendUserRequest{
-		TenantID: tenantID,
 		UserID:   req.ID,
 		Reason:   req.Reason,
 	}
@@ -43,9 +35,9 @@ func (l *SuspendUserWithReasonLogic) SuspendUserWithReason(req *types.SuspendUse
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx, tenantID, req.ID, user.ActionSuspendWithReason, req.Reason)
+	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionSuspendWithReason, req.Reason)
 
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, tenantID, req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
 	if err != nil {
 		return nil, err
 	}

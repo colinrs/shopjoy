@@ -79,9 +79,8 @@ func (r *inventoryLogRepo) Create(ctx context.Context, db *gorm.DB, log *product
 // Find returns inventory logs matching the optional filters in query.
 // Tenant filter is always applied; ProductID, SKUCode, ChangeType, and time
 // range are conditionally added to the query when set.
-func (r *inventoryLogRepo) Find(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query product.InventoryLogQuery) ([]*product.InventoryLog, int64, error) {
-	dbQuery := db.WithContext(ctx).Model(&inventoryLogModel{}).
-		Where("tenant_id = ?", tenantID.Int64())
+func (r *inventoryLogRepo) Find(ctx context.Context, db *gorm.DB,  query product.InventoryLogQuery) ([]*product.InventoryLog, int64, error) {
+	dbQuery := db.WithContext(ctx).Model(&inventoryLogModel{})
 
 	if query.ProductID > 0 {
 		dbQuery = dbQuery.Where("product_id = ?", query.ProductID)

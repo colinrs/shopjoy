@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,13 +26,9 @@ func NewGetFulfillmentSummaryLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *GetFulfillmentSummaryLogic) GetFulfillmentSummary(req *types.GetFulfillmentSummaryReq) (resp *types.FulfillmentSummaryResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get fulfillment summary
-	summary, err := l.svcCtx.OrderFulfillmentApp.GetFulfillmentSummary(l.ctx, shared.TenantID(tenantID))
+	summary, err := l.svcCtx.OrderFulfillmentApp.GetFulfillmentSummary(l.ctx)
 	if err != nil {
 		return nil, err
 	}

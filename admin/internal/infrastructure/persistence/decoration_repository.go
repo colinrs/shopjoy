@@ -82,7 +82,7 @@ func (r *decorationRepo) Update(ctx context.Context, db *gorm.DB, d *storefront.
 	config, _ := json.Marshal(d.BlockConfig)
 
 	return db.WithContext(ctx).Model(&decorationModel{}).
-		Where("id = ? AND tenant_id = ?", d.ID, d.TenantID.Int64()).
+		Where("id = ?", d.ID).
 		Updates(map[string]interface{}{
 			"block_type":   model.BlockType,
 			"block_config": string(config),
@@ -92,16 +92,16 @@ func (r *decorationRepo) Update(ctx context.Context, db *gorm.DB, d *storefront.
 		}).Error
 }
 
-func (r *decorationRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *decorationRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	return db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		Delete(&decorationModel{}).Error
 }
 
-func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*storefront.Decoration, error) {
+func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Decoration, error) {
 	var model decorationModel
 	err := db.WithContext(ctx).
-		Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).
+		Where("id = ?", id).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -112,10 +112,10 @@ func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID sha
 	return model.toEntity(), nil
 }
 
-func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) ([]*storefront.Decoration, error) {
+func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64) ([]*storefront.Decoration, error) {
 	var models []decorationModel
 	err := db.WithContext(ctx).
-		Where("page_id = ? AND tenant_id = ? AND is_active = 1", pageID, tenantID.Int64()).
+		Where("page_id = ? AND is_active = 1", pageID).
 		Order("sort_order ASC, id ASC").
 		Find(&models).Error
 	if err != nil {
@@ -129,11 +129,11 @@ func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB, tenantID
 	return decorations, nil
 }
 
-func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orders []storefront.BlockOrder) error {
+func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB,  orders []storefront.BlockOrder) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, order := range orders {
 			if err := tx.Model(&decorationModel{}).
-				Where("id = ? AND tenant_id = ?", order.ID, tenantID.Int64()).
+				Where("id = ?", order.ID).
 				Update("sort_order", order.SortOrder).Error; err != nil {
 				return err
 			}
@@ -142,8 +142,8 @@ func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB, tenantID shar
 	})
 }
 
-func (r *decorationRepo) DeleteByPageID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, pageID int64) error {
+func (r *decorationRepo) DeleteByPageID(ctx context.Context, db *gorm.DB,  pageID int64) error {
 	return db.WithContext(ctx).
-		Where("page_id = ? AND tenant_id = ?", pageID, tenantID.Int64()).
+		Where("page_id = ?", pageID).
 		Delete(&decorationModel{}).Error
 }

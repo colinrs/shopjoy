@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,14 +24,9 @@ func NewGetBrandMarketVisibilityLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *GetBrandMarketVisibilityLogic) GetBrandMarketVisibility(req *types.GetBrandMarketVisibilityReq) (resp *types.BrandMarketVisibilityResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Verify brand exists
-	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.BrandID)
+	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, req.BrandID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +35,7 @@ func (l *GetBrandMarketVisibilityLogic) GetBrandMarketVisibility(req *types.GetB
 	}
 
 	// Get market visibility
-	markets, err := l.svcCtx.BrandMarketRepo.FindByBrand(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.BrandID)
+	markets, err := l.svcCtx.BrandMarketRepo.FindByBrand(l.ctx, l.svcCtx.DB, req.BrandID)
 	if err != nil {
 		return nil, err
 	}

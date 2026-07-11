@@ -151,7 +151,7 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 	model := fromEntity(p)
 	return db.WithContext(ctx).
 		Model(&productModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", p.ID, p.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", p.ID).
 		Updates(map[string]interface{}{
 			"sku":               model.SKU,
 			"name":              model.Name,
@@ -178,12 +178,9 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 		}).Error
 }
 
-func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *productRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&productModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// 平台管理员 (tenantID == 0) 可删除所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -196,12 +193,9 @@ func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.T
 	return nil
 }
 
-func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*product.Product, error) {
+func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Product, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// 平台管理员 (tenantID == 0) 可访问所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model productModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -213,16 +207,13 @@ func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared
 	return model.toEntity(), nil
 }
 
-func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, ids []int64) ([]*product.Product, error) {
+func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*product.Product, error) {
 	if len(ids) == 0 {
 		return []*product.Product{}, nil
 	}
 
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// 平台管理员 (tenantID == 0) 可访问所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var models []productModel
 	err := query.
@@ -245,11 +236,6 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 	}
 
 	dbQuery := db.WithContext(ctx).Model(&productModel{}).Where("deleted_at IS NULL")
-
-	// 租户过滤：平台管理员 (TenantID == 0) 可访问所有租户数据
-	if query.TenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", query.TenantID.Int64())
-	}
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", fmt.Sprintf("%%%s%%", query.Name))
@@ -293,13 +279,10 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 	return products, total, nil
 }
 
-func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64, delta int) error {
+func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB,  id int64, delta int) error {
 	query := db.WithContext(ctx).Model(&productModel{}).
 		Where("id = ? AND status = ? AND deleted_at IS NULL", id, product.StatusOnSale)
 	// 租户过滤：平台管理员 (tenantID == 0) 可操作所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	result := query.Where("stock + ? >= 0", delta).
 		UpdateColumn("stock", gorm.Expr("stock + ?", delta))
 
@@ -312,13 +295,10 @@ func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, tenantID sha
 	return nil
 }
 
-func (r *productRepo) Exists(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (bool, error) {
+func (r *productRepo) Exists(ctx context.Context, db *gorm.DB,  id int64) (bool, error) {
 	query := db.WithContext(ctx).Model(&productModel{}).
 		Where("id = ? AND deleted_at IS NULL", id)
 	// 租户过滤：平台管理员 (tenantID == 0) 可访问所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var count int64
 	err := query.Count(&count).Error
 	if err != nil {
@@ -327,13 +307,10 @@ func (r *productRepo) Exists(ctx context.Context, db *gorm.DB, tenantID shared.T
 	return count > 0, nil
 }
 
-func (r *productRepo) CountTotal(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+func (r *productRepo) CountTotal(ctx context.Context, db *gorm.DB) (int64, error) {
 	query := db.WithContext(ctx).Model(&productModel{}).
 		Where("deleted_at IS NULL")
 	// 租户过滤：平台管理员 (tenantID == 0) 可访问所有租户数据
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var count int64
 	err := query.Count(&count).Error
 	return count, err

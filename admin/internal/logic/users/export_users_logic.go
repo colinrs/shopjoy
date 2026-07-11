@@ -9,9 +9,7 @@ import (
 	domain "github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -35,11 +33,6 @@ func NewExportUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext, w http
 }
 
 func (l *ExportUsersLogic) ExportUsers(req *types.ExportUsersRequest) error {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return code.ErrTenantInvalidID
-	}
-
 	queryReq := appUser.EnhancedQueryRequest{
 		PageQuery: shared.PageQuery{
 			Page:     1,
@@ -52,7 +45,7 @@ func (l *ExportUsersLogic) ExportUsers(req *types.ExportUsersRequest) error {
 	}
 
 	// Get users for export
-	data, err := l.svcCtx.UserService.ExportUsers(l.ctx, tenantID, queryReq)
+	data, err := l.svcCtx.UserService.ExportUsers(l.ctx,  queryReq)
 	if err != nil {
 		return err
 	}

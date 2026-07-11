@@ -9,8 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,11 +29,6 @@ func NewListUserOperationLogsLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *ListUserOperationLogsLogic) ListUserOperationLogs(req *types.ListUserOperationLogsReq) (resp *types.ListUserOperationLogsResp, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
 	query := user.OperationLogQuery{
 		Page:     req.Page,
 		PageSize: req.PageSize,
@@ -43,7 +36,7 @@ func (l *ListUserOperationLogsLogic) ListUserOperationLogs(req *types.ListUserOp
 		Keyword:  req.Keyword,
 	}
 
-	out, err := l.svcCtx.OperationLogService.List(l.ctx, l.svcCtx.DB, tenantID, req.ID, query)
+	out, err := l.svcCtx.OperationLogService.List(l.ctx, l.svcCtx.DB,  req.ID, query)
 	if err != nil {
 		return nil, err
 	}

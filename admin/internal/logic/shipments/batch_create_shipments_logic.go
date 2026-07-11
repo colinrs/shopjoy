@@ -6,9 +6,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,10 +27,6 @@ func NewBatchCreateShipmentsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *BatchCreateShipmentsLogic) BatchCreateShipments(req *types.BatchCreateShipmentsReq) (resp *types.BatchCreateShipmentsResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
@@ -47,7 +41,7 @@ func (l *BatchCreateShipmentsLogic) BatchCreateShipments(req *types.BatchCreateS
 	}
 
 	// Batch create shipments
-	result, err := l.svcCtx.ShipmentApp.BatchCreateShipments(l.ctx, shared.TenantID(tenantID), userID, req.CarrierCode, req.CarrierName, items)
+	result, err := l.svcCtx.ShipmentApp.BatchCreateShipments(l.ctx, userID, req.CarrierCode, req.CarrierName, items)
 	if err != nil {
 		return nil, err
 	}

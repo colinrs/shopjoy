@@ -118,7 +118,7 @@ func (r *refundRepo) Update(ctx context.Context, db *gorm.DB, refund *fulfillmen
 	model := fromRefundEntity(refund)
 	return db.WithContext(ctx).
 		Model(&refundModel{}).
-		Where("id = ? AND tenant_id = ? AND deleted_at IS NULL", refund.ID, refund.TenantID.Int64()).
+		Where("id = ? AND deleted_at IS NULL", refund.ID).
 		Updates(map[string]any{
 			"status":        model.Status,
 			"reject_reason": model.RejectReason,
@@ -130,11 +130,8 @@ func (r *refundRepo) Update(ctx context.Context, db *gorm.DB, refund *fulfillmen
 }
 
 // FindByID finds a refund by ID
-func (r *refundRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*fulfillment.Refund, error) {
+func (r *refundRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model refundModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -147,11 +144,8 @@ func (r *refundRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // FindByRefundNo finds a refund by refund number
-func (r *refundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, refundNo string) (*fulfillment.Refund, error) {
+func (r *refundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB,  refundNo string) (*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).Where("refund_no = ? AND deleted_at IS NULL", refundNo)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model refundModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -164,11 +158,8 @@ func (r *refundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID s
 }
 
 // FindByOrderID finds all refunds for an order
-func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) ([]*fulfillment.Refund, error) {
+func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) ([]*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).Where("order_id = ? AND deleted_at IS NULL", orderID)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var models []refundModel
 	err := query.Order("created_at DESC").Find(&models).Error
 	if err != nil {
@@ -183,12 +174,9 @@ func (r *refundRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID sh
 }
 
 // FindPendingByOrderID finds the pending refund for an order
-func (r *refundRepo) FindPendingByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*fulfillment.Refund, error) {
+func (r *refundRepo) FindPendingByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) (*fulfillment.Refund, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).
 		Where("order_id = ? AND status = ? AND deleted_at IS NULL", orderID, fulfillment.RefundStatusPending)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model refundModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -201,15 +189,12 @@ func (r *refundRepo) FindPendingByOrderID(ctx context.Context, db *gorm.DB, tena
 }
 
 // FindByUserID finds refunds for a user with pagination
-func (r *refundRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, query fulfillment.RefundQuery) ([]*fulfillment.Refund, int64, error) {
+func (r *refundRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, query fulfillment.RefundQuery) ([]*fulfillment.Refund, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&refundModel{}).
 		Where("user_id = ? AND deleted_at IS NULL", userID)
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.Status != nil && query.Status.IsValid() {
 		dbQuery = dbQuery.Where("status = ?", *query.Status)
@@ -243,14 +228,11 @@ func (r *refundRepo) FindByUserID(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 // FindList finds refunds with pagination and filters
-func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query fulfillment.RefundQuery) ([]*fulfillment.Refund, int64, error) {
+func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillment.RefundQuery) ([]*fulfillment.Refund, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&refundModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -296,11 +278,8 @@ func (r *refundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.
 }
 
 // Delete soft deletes a refund
-func (r *refundRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
+func (r *refundRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	query := db.WithContext(ctx).Model(&refundModel{}).Where("id = ? AND deleted_at IS NULL", id)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
 
@@ -314,11 +293,8 @@ func (r *refundRepo) Delete(ctx context.Context, db *gorm.DB, tenantID shared.Te
 }
 
 // CountByStatus counts refunds by status
-func (r *refundRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, status fulfillment.RefundStatus) (int64, error) {
+func (r *refundRepo) CountByStatus(ctx context.Context, db *gorm.DB,  status fulfillment.RefundStatus) (int64, error) {
 	query := db.WithContext(ctx).Model(&refundModel{}).Where("status = ? AND deleted_at IS NULL", status)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var count int64
 	err := query.Count(&count).Error
 	return count, err

@@ -179,6 +179,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// Review service
 	reviewService := appReview.NewService(db, reviewRepo, replyRepo, idGen)
 
+	// Shop settings repositories
+	shopSettingsRepo := persistence.NewShopSettingsRepository()
+	businessHoursRepo := persistence.NewBusinessHoursRepository()
+	notificationSettingsRepo := persistence.NewNotificationSettingsRepository()
+	shippingSettingsRepo := persistence.NewShippingSettingsRepository()
+
 	// Payment repositories
 	paymentRepo := persistence.NewPaymentRepository()
 	paymentRefundRepo := persistence.NewPaymentRefundRepository()
@@ -187,7 +193,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	paymentSettingsRepo := persistence.NewPaymentSettingsRepository()
 
 	// Payment service
-	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, paymentSettingsRepo, idGen)
+	paymentService := appPayment.NewService(db, paymentRepo, paymentRefundRepo, paymentTransactionRepo, webhookEventRepo, paymentSettingsRepo, shopSettingsRepo, idGen)
 
 	// Storefront repositories
 	themeRepo := persistence.NewThemeRepository()
@@ -225,12 +231,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	// User operation logs repository
 	operationLogRepo := persistence.NewOperationLogRepository()
-
-	// Shop settings repositories
-	shopSettingsRepo := persistence.NewShopSettingsRepository()
-	businessHoursRepo := persistence.NewBusinessHoursRepository()
-	notificationSettingsRepo := persistence.NewNotificationSettingsRepository()
-	shippingSettingsRepo := persistence.NewShippingSettingsRepository()
 
 	return &ServiceContext{
 		Config:                  c,

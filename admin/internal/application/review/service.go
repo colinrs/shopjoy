@@ -8,26 +8,25 @@ import (
 
 	domainReview "github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"gorm.io/gorm"
 )
 
 type Service interface {
-	ListReviews(ctx context.Context, tenantID shared.TenantID, req ListReviewsRequest) (*ListReviewsResponse, error)
-	GetReview(ctx context.Context, tenantID shared.TenantID, id int64) (*ReviewDetailDTO, error)
-	ApproveReview(ctx context.Context, tenantID shared.TenantID, id int64) error
-	HideReview(ctx context.Context, tenantID shared.TenantID, id int64, reason string) error
-	ShowReview(ctx context.Context, tenantID shared.TenantID, id int64) error
-	DeleteReview(ctx context.Context, tenantID shared.TenantID, id int64) error
-	ToggleFeatured(ctx context.Context, tenantID shared.TenantID, id int64, featured bool) error
-	CreateReply(ctx context.Context, tenantID shared.TenantID, adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error)
-	UpdateReply(ctx context.Context, tenantID shared.TenantID, reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error)
-	DeleteReply(ctx context.Context, tenantID shared.TenantID, reviewID int64) error
-	BatchApprove(ctx context.Context, tenantID shared.TenantID, ids []int64) (*BatchOperationResult, error)
-	BatchHide(ctx context.Context, tenantID shared.TenantID, ids []int64, reason string) (*BatchOperationResult, error)
-	GetStats(ctx context.Context, tenantID shared.TenantID) (*domainReview.OverallStats, error)
-	GetProductStats(ctx context.Context, tenantID shared.TenantID, productID int64) (*domainReview.ReviewStats, error)
+	ListReviews(ctx context.Context,  req ListReviewsRequest) (*ListReviewsResponse, error)
+	GetReview(ctx context.Context,  id int64) (*ReviewDetailDTO, error)
+	ApproveReview(ctx context.Context,  id int64) error
+	HideReview(ctx context.Context,  id int64, reason string) error
+	ShowReview(ctx context.Context,  id int64) error
+	DeleteReview(ctx context.Context,  id int64) error
+	ToggleFeatured(ctx context.Context,  id int64, featured bool) error
+	CreateReply(ctx context.Context,  adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error)
+	UpdateReply(ctx context.Context,  reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error)
+	DeleteReply(ctx context.Context,  reviewID int64) error
+	BatchApprove(ctx context.Context,  ids []int64) (*BatchOperationResult, error)
+	BatchHide(ctx context.Context,  ids []int64, reason string) (*BatchOperationResult, error)
+	GetStats(ctx context.Context) (*domainReview.OverallStats, error)
+	GetProductStats(ctx context.Context,  productID int64) (*domainReview.ReviewStats, error)
 }
 
 type service struct {
@@ -46,9 +45,8 @@ func NewService(db *gorm.DB, reviewRepo domainReview.Repository, replyRepo domai
 	}
 }
 
-func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req ListReviewsRequest) (*ListReviewsResponse, error) {
+func (s *service) ListReviews(ctx context.Context,  req ListReviewsRequest) (*ListReviewsResponse, error) {
 	query := domainReview.Query{
-		TenantID:  tenantID,
 		ProductID: req.ProductID,
 		UserID:    req.UserID,
 		HasImage:  req.HasImage,
@@ -126,8 +124,8 @@ func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req
 	}, nil
 }
 
-func (s *service) GetReview(ctx context.Context, tenantID shared.TenantID, id int64) (*ReviewDetailDTO, error) {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) GetReview(ctx context.Context,  id int64) (*ReviewDetailDTO, error) {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +140,8 @@ func (s *service) GetReview(ctx context.Context, tenantID shared.TenantID, id in
 	return FromDomainReview(rev), nil
 }
 
-func (s *service) ApproveReview(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) ApproveReview(ctx context.Context,  id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -155,8 +153,8 @@ func (s *service) ApproveReview(ctx context.Context, tenantID shared.TenantID, i
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) HideReview(ctx context.Context, tenantID shared.TenantID, id int64, reason string) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) HideReview(ctx context.Context,  id int64, reason string) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -168,8 +166,8 @@ func (s *service) HideReview(ctx context.Context, tenantID shared.TenantID, id i
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) ShowReview(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) ShowReview(ctx context.Context,  id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -181,8 +179,8 @@ func (s *service) ShowReview(ctx context.Context, tenantID shared.TenantID, id i
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) DeleteReview(ctx context.Context, tenantID shared.TenantID, id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) DeleteReview(ctx context.Context,  id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -191,11 +189,11 @@ func (s *service) DeleteReview(ctx context.Context, tenantID shared.TenantID, id
 		return err
 	}
 
-	return s.reviewRepo.Delete(ctx, s.db, tenantID, int64(rev.ID))
+	return s.reviewRepo.Delete(ctx, s.db,  int64(rev.ID))
 }
 
-func (s *service) ToggleFeatured(ctx context.Context, tenantID shared.TenantID, id int64, featured bool) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, id)
+func (s *service) ToggleFeatured(ctx context.Context,  id int64, featured bool) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
 	if err != nil {
 		return err
 	}
@@ -207,8 +205,8 @@ func (s *service) ToggleFeatured(ctx context.Context, tenantID shared.TenantID, 
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) CreateReply(ctx context.Context, tenantID shared.TenantID, adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error) {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db, tenantID, reviewID)
+func (s *service) CreateReply(ctx context.Context,  adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error) {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db,  reviewID)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +224,7 @@ func (s *service) CreateReply(ctx context.Context, tenantID shared.TenantID, adm
 		return nil, err
 	}
 
-	reply, err := domainReview.NewReviewReply(reviewID, tenantID.Int64(), adminID, adminName, req.Content)
+	reply, err := domainReview.NewReviewReply(reviewID, adminID, adminName, req.Content)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +242,7 @@ func (s *service) CreateReply(ctx context.Context, tenantID shared.TenantID, adm
 	}, nil
 }
 
-func (s *service) UpdateReply(ctx context.Context, tenantID shared.TenantID, reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error) {
+func (s *service) UpdateReply(ctx context.Context,  reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error) {
 	reply, err := s.replyRepo.FindByReviewID(ctx, s.db, reviewID)
 	if err != nil {
 		return nil, err
@@ -267,11 +265,11 @@ func (s *service) UpdateReply(ctx context.Context, tenantID shared.TenantID, rev
 	}, nil
 }
 
-func (s *service) DeleteReply(ctx context.Context, tenantID shared.TenantID, reviewID int64) error {
+func (s *service) DeleteReply(ctx context.Context,  reviewID int64) error {
 	return s.replyRepo.Delete(ctx, s.db, reviewID)
 }
 
-func (s *service) BatchApprove(ctx context.Context, tenantID shared.TenantID, ids []int64) (*BatchOperationResult, error) {
+func (s *service) BatchApprove(ctx context.Context,  ids []int64) (*BatchOperationResult, error) {
 	if len(ids) == 0 {
 		return nil, code.ErrReviewBatchEmpty
 	}
@@ -279,7 +277,7 @@ func (s *service) BatchApprove(ctx context.Context, tenantID shared.TenantID, id
 		return nil, code.ErrReviewBatchLimitExceeded
 	}
 
-	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db, tenantID, ids, domainReview.StatusApproved, "")
+	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db,  ids, domainReview.StatusApproved, "")
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +289,7 @@ func (s *service) BatchApprove(ctx context.Context, tenantID shared.TenantID, id
 	}, nil
 }
 
-func (s *service) BatchHide(ctx context.Context, tenantID shared.TenantID, ids []int64, reason string) (*BatchOperationResult, error) {
+func (s *service) BatchHide(ctx context.Context,  ids []int64, reason string) (*BatchOperationResult, error) {
 	if len(ids) == 0 {
 		return nil, code.ErrReviewBatchEmpty
 	}
@@ -299,7 +297,7 @@ func (s *service) BatchHide(ctx context.Context, tenantID shared.TenantID, ids [
 		return nil, code.ErrReviewBatchLimitExceeded
 	}
 
-	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db, tenantID, ids, domainReview.StatusHidden, reason)
+	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db,  ids, domainReview.StatusHidden, reason)
 	if err != nil {
 		return nil, err
 	}
@@ -329,17 +327,12 @@ type reviewStatsRow struct {
 	RepliedCount     int64
 }
 
-func (s *service) GetStats(ctx context.Context, tenantID shared.TenantID) (*domainReview.OverallStats, error) {
+func (s *service) GetStats(ctx context.Context) (*domainReview.OverallStats, error) {
 	var row reviewStatsRow
 
 	mainWhere := "deleted_at IS NULL"
 	subWhere := "r2.deleted_at IS NULL"
 	var args []interface{}
-	if tenantID != 0 {
-		mainWhere += " AND tenant_id = ?"
-		subWhere += " AND r2.tenant_id = ?"
-		args = append(args, tenantID.Int64(), tenantID.Int64())
-	}
 
 	query := fmt.Sprintf(`
 		SELECT
@@ -393,7 +386,7 @@ func (s *service) GetStats(ctx context.Context, tenantID shared.TenantID) (*doma
 	}, nil
 }
 
-func (s *service) GetProductStats(ctx context.Context, tenantID shared.TenantID, productID int64) (*domainReview.ReviewStats, error) {
+func (s *service) GetProductStats(ctx context.Context,  productID int64) (*domainReview.ReviewStats, error) {
 	// Implement product stats calculation
 	return &domainReview.ReviewStats{}, nil
 }

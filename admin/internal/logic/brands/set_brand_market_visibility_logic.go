@@ -9,8 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,14 +28,9 @@ func NewSetBrandMarketVisibilityLogic(ctx context.Context, svcCtx *svc.ServiceCo
 }
 
 func (l *SetBrandMarketVisibilityLogic) SetBrandMarketVisibility(req *types.SetBrandMarketVisibilityReq) (resp *types.CreateBrandResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Verify brand exists
-	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.BrandID)
+	brand, err := l.svcCtx.BrandRepo.FindByID(l.ctx, l.svcCtx.DB, req.BrandID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +39,7 @@ func (l *SetBrandMarketVisibilityLogic) SetBrandMarketVisibility(req *types.SetB
 	}
 
 	// Delete existing market visibility for this brand
-	if err := l.svcCtx.BrandMarketRepo.DeleteByBrand(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.BrandID); err != nil {
+	if err := l.svcCtx.BrandMarketRepo.DeleteByBrand(l.ctx, l.svcCtx.DB, req.BrandID); err != nil {
 		return nil, err
 	}
 
@@ -62,7 +55,6 @@ func (l *SetBrandMarketVisibilityLogic) SetBrandMarketVisibility(req *types.SetB
 			id, _ := l.svcCtx.IDGen.NextID(l.ctx)
 			items = append(items, &product.BrandMarket{
 				Model:     application.Model{ID: id, CreatedAt: now, UpdatedAt: now},
-				TenantID:  shared.TenantID(tenantID),
 				BrandID:   req.BrandID,
 				MarketID:  marketID,
 				IsVisible: req.Visible,

@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,10 +24,6 @@ func NewDeleteEarnRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext) Del
 }
 
 func (l *DeleteEarnRuleLogic) DeleteEarnRule(req *types.DeleteEarnRuleReq) error {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
-	return l.svcCtx.PointsService.DeleteEarnRule(l.ctx, shared.TenantID(tenantID), req.ID)
+	return l.svcCtx.PointsService.DeleteEarnRule(l.ctx, req.ID)
 }

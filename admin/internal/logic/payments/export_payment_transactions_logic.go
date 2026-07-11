@@ -12,8 +12,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -38,10 +36,6 @@ func NewExportPaymentTransactionsLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 func (l *ExportPaymentTransactionsLogic) ExportPaymentTransactions(req *types.ExportPaymentTransactionsReq) error {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return code.ErrUnauthorized
-	}
 
 	// Build query request
 	queryReq := appPayment.ListTransactionsRequest{
@@ -69,7 +63,7 @@ func (l *ExportPaymentTransactionsLogic) ExportPaymentTransactions(req *types.Ex
 	}
 
 	// Get transactions for export
-	result, err := l.svcCtx.PaymentService.ListTransactions(l.ctx, shared.TenantID(tenantID), queryReq)
+	result, err := l.svcCtx.PaymentService.ListTransactions(l.ctx, queryReq)
 	if err != nil {
 		return err
 	}

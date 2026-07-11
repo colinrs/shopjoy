@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,13 +23,9 @@ func NewGetLowStockSKUsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetLowStockSKUsLogic) GetLowStockSKUs(req *types.GetLowStockSKUsReq) (resp *types.ListLowStockSKUsResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Find low stock SKUs using SafetyStock threshold
-	skus, total, err := l.svcCtx.SKURepo.FindLowStock(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Page, req.PageSize)
+	skus, total, err := l.svcCtx.SKURepo.FindLowStock(l.ctx, l.svcCtx.DB, req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +48,7 @@ func (l *GetLowStockSKUsLogic) GetLowStockSKUs(req *types.GetLowStockSKUsReq) (r
 	}
 
 	// Fetch products for names
-	products, err := l.svcCtx.ProductRepo.FindByIDs(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), productIDs)
+	products, err := l.svcCtx.ProductRepo.FindByIDs(l.ctx, l.svcCtx.DB, productIDs)
 	if err != nil {
 		return nil, err
 	}

@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,18 +26,13 @@ func NewBatchApproveLogic(ctx context.Context, svcCtx *svc.ServiceContext) Batch
 }
 
 func (l *BatchApproveLogic) BatchApprove(req *types.BatchApproveReq) (resp *types.BatchApproveResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	ids, err := utils.ParseInt64Slice(req.IDs)
 	if err != nil {
 		return nil, code.ErrParam
 	}
 
-	result, err := l.svcCtx.ReviewService.BatchApprove(l.ctx, shared.TenantID(tenantID), ids)
+	result, err := l.svcCtx.ReviewService.BatchApprove(l.ctx, ids)
 	if err != nil {
 		return nil, err
 	}

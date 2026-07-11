@@ -27,15 +27,9 @@ func NewUpdateAdminProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *UpdateAdminProfileLogic) UpdateAdminProfile(req *types.UpdateProfileRequest) (resp *types.AdminUserInfo, err error) {
 	userID := contextx.GetCurrentUserID(l.ctx)
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	updateReq := adminuser.UpdateProfileRequest{
 		UserID:   userID,
-		TenantID: tenantID,
 		RealName: req.RealName,
 		Avatar:   req.Avatar,
 		Mobile:   req.Mobile,

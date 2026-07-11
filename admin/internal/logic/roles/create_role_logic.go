@@ -8,7 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
@@ -31,11 +30,9 @@ func NewCreateRoleLogic(ctx context.Context, svcCtx *svc.ServiceContext) CreateR
 
 func (l *CreateRoleLogic) CreateRole(req *types.CreateRoleRequest) (resp *types.CreateRoleResponse, err error) {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Check if role with same code already exists
-	existingRole, err := l.svcCtx.RoleRepo.FindByCode(l.ctx, l.svcCtx.DB, tenantID, req.Code)
+	existingRole, err := l.svcCtx.RoleRepo.FindByCode(l.ctx, l.svcCtx.DB, req.Code)
 	if err == nil && existingRole != nil {
 		return nil, code.ErrRoleDuplicate
 	}
@@ -43,7 +40,6 @@ func (l *CreateRoleLogic) CreateRole(req *types.CreateRoleRequest) (resp *types.
 	// Create new role
 	now := time.Now().UTC()
 	newRole := &role.Role{
-		TenantID:    tenantID,
 		Name:        req.Name,
 		Code:        req.Code,
 		Description: req.Description,

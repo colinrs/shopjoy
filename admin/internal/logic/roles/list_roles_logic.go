@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,8 +28,6 @@ func NewListRolesLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListRole
 
 func (l *ListRolesLogic) ListRoles(req *types.ListRolesRequest) (resp *types.ListRolesResponse, err error) {
 	// Get tenant ID from context
-	tenantIDRaw, _ := contextx.GetTenantID(l.ctx)
-	tenantID := shared.TenantID(tenantIDRaw)
 
 	// Build query
 	query := role.Query{
@@ -43,7 +40,7 @@ func (l *ListRolesLogic) ListRoles(req *types.ListRolesRequest) (resp *types.Lis
 	}
 
 	// Get roles
-	roles, total, err := l.svcCtx.RoleRepo.FindList(l.ctx, l.svcCtx.DB, tenantID, query)
+	roles, total, err := l.svcCtx.RoleRepo.FindList(l.ctx, l.svcCtx.DB, query)
 	if err != nil {
 		return nil, err
 	}

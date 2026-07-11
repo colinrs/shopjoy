@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,14 +27,8 @@ func NewCreateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZoneReq) (resp *types.ShippingZoneDetail, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
-
 	// Verify template exists and belongs to tenant
-	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, tenantID, req.TemplateID)
+	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.TemplateID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +43,6 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 
 	// Create zone entity
 	zone := &shipping.ShippingZone{
-		TenantID:            tenantID,
 		TemplateID:          req.TemplateID,
 		Name:                req.Name,
 		Regions:             req.Regions,

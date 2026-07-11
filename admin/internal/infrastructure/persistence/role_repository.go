@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
@@ -24,42 +23,42 @@ func (r *RoleRepository) Update(ctx context.Context, db *gorm.DB, role *role.Rol
 	return db.WithContext(ctx).Save(role).Error
 }
 
-func (r *RoleRepository) Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error {
-	return db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).Delete(&role.Role{}).Error
+func (r *RoleRepository) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+	return db.WithContext(ctx).Where("id = ?", id).Delete(&role.Role{}).Error
 }
 
-func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*role.Role, error) {
+func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*role.Role, error) {
 	var rl role.Role
-	err := db.WithContext(ctx).Where("id = ? AND tenant_id = ?", id, tenantID.Int64()).First(&rl).Error
+	err := db.WithContext(ctx).Where("id = ?", id).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, code.ErrRoleNotFound
 	}
 	return &rl, err
 }
 
-func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, codeStr string) (*role.Role, error) {
+func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB,  codeStr string) (*role.Role, error) {
 	var rl role.Role
-	err := db.WithContext(ctx).Where("code = ? AND tenant_id = ?", codeStr, tenantID.Int64()).First(&rl).Error
+	err := db.WithContext(ctx).Where("code = ?", codeStr).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, code.ErrRoleNotFound
 	}
 	return &rl, err
 }
 
-func (r *RoleRepository) FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]*role.Role, error) {
+func (r *RoleRepository) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]*role.Role, error) {
 	var roles []*role.Role
 	err := db.WithContext(ctx).
 		Joins("JOIN user_roles ON user_roles.role_id = roles.id").
-		Where("roles.tenant_id = ? AND user_roles.user_id = ?", tenantID.Int64(), userID).
+		Where("user_roles.user_id = ?", userID).
 		Find(&roles).Error
 	return roles, err
 }
 
-func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query role.Query) ([]*role.Role, int64, error) {
+func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB,  query role.Query) ([]*role.Role, int64, error) {
 	var roles []*role.Role
 	var total int64
 
-	dbQuery := db.WithContext(ctx).Model(&role.Role{}).Where("tenant_id = ?", tenantID.Int64())
+	dbQuery := db.WithContext(ctx).Model(&role.Role{})
 
 	if query.Name != "" {
 		dbQuery = dbQuery.Where("name LIKE ?", "%"+query.Name+"%")
@@ -76,7 +75,7 @@ func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB, tenantID sha
 	return roles, total, err
 }
 
-func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64, roleIDs []int64) error {
+func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB,  userID int64, roleIDs []int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("user_id = ?", userID).Delete(&role.UserRole{}).Error; err != nil {
 			return err
@@ -94,8 +93,8 @@ func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB, tenantID
 	})
 }
 
-func (r *RoleRepository) GetUserRoles(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]*role.Role, error) {
-	return r.FindByUserID(ctx, db, tenantID, userID)
+func (r *RoleRepository) GetUserRoles(ctx context.Context, db *gorm.DB,  userID int64) ([]*role.Role, error) {
+	return r.FindByUserID(ctx, db, userID)
 }
 
 // PermissionRepository implements role.PermissionRepository

@@ -8,9 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,10 +28,6 @@ func NewCreateProductLocalizationLogic(ctx context.Context, svcCtx *svc.ServiceC
 
 func (l *CreateProductLocalizationLogic) CreateProductLocalization(req *types.CreateProductLocalizationReq) (resp *types.CreateProductResp, err error) {
 	// Get tenant ID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Generate ID
 	id, err := l.svcCtx.IDGen.NextID(l.ctx)
@@ -45,7 +38,6 @@ func (l *CreateProductLocalizationLogic) CreateProductLocalization(req *types.Cr
 	// Create localization entity
 	localization := &product.ProductLocalization{
 		Model:        application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
-		TenantID:     shared.TenantID(tenantID),
 		ProductID:    req.ProductID,
 		LanguageCode: req.LanguageCode,
 		Name:         req.Name,

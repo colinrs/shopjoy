@@ -6,9 +6,7 @@ import (
 	appfulfillment "github.com/colinrs/shopjoy/admin/internal/application/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,10 +28,6 @@ func NewUpdateShipmentLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upd
 
 func (l *UpdateShipmentLogic) UpdateShipment(req *types.UpdateShipmentReq) (resp *types.ShipmentDetailResp, err error) {
 	// Get tenantID from context
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// Get user ID from context
 	userID := contextx.GetCurrentUserID(l.ctx)
@@ -53,7 +47,7 @@ func (l *UpdateShipmentLogic) UpdateShipment(req *types.UpdateShipmentReq) (resp
 	}
 
 	// Update shipment
-	shipmentResp, err := l.svcCtx.ShipmentApp.UpdateShipment(l.ctx, shared.TenantID(tenantID), userID, updateReq)
+	shipmentResp, err := l.svcCtx.ShipmentApp.UpdateShipment(l.ctx, userID, updateReq)
 	if err != nil {
 		return nil, err
 	}

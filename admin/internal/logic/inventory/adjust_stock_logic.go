@@ -6,11 +6,10 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -29,14 +28,10 @@ func NewAdjustStockLogic(ctx context.Context, svcCtx *svc.ServiceContext) Adjust
 }
 
 func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.CreateWarehouseResp, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
-	userID, _ := contextx.GetUserID(l.ctx)
 
+	userID, _ := contextx.GetUserID(l.ctx)
 	// Verify warehouse exists
-	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.WarehouseID)
+	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.WarehouseID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +41,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 
 	// Find existing inventory record
 	inventory, err := l.svcCtx.WarehouseInventoryRepo.FindBySKUAndWarehouse(
-		l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.SKUCode, req.WarehouseID,
+		l.ctx, l.svcCtx.DB, req.SKUCode, req.WarehouseID,
 	)
 	if err != nil {
 		return nil, err
@@ -65,7 +60,6 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 		}
 		inventory = &product.WarehouseInventory{
 			Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
-			TenantID:       shared.TenantID(tenantID),
 			SKUCode:        req.SKUCode,
 			WarehouseID:    req.WarehouseID,
 			AvailableStock: newStock,
@@ -92,7 +86,6 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 	logID, _ := l.svcCtx.IDGen.NextID(l.ctx)
 	log := &product.InventoryLog{
 		Model:          application.Model{ID: logID},
-		TenantID:       shared.TenantID(tenantID),
 		SKUCode:        req.SKUCode,
 		ProductID:      0, // Would need to fetch from SKU
 		WarehouseID:    req.WarehouseID,

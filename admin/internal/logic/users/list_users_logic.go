@@ -7,9 +7,7 @@ import (
 	domainUser "github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,11 +27,6 @@ func NewListUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListUser
 }
 
 func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.ListUsersResponse, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
 	queryReq := appUser.QueryRequest{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -44,7 +37,7 @@ func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.Lis
 		Status: domainUser.Status(req.Status),
 	}
 
-	listResp, err := l.svcCtx.UserService.List(l.ctx, tenantID, queryReq)
+	listResp, err := l.svcCtx.UserService.List(l.ctx,  queryReq)
 	if err != nil {
 		return nil, err
 	}

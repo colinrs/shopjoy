@@ -5,8 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,13 +23,8 @@ func NewGetCurrentThemeLogic(ctx context.Context, svcCtx *svc.ServiceContext) Ge
 }
 
 func (l *GetCurrentThemeLogic) GetCurrentTheme() (resp *types.CurrentThemeResponse, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
-	result, err := l.svcCtx.ThemeService.GetCurrentTheme(l.ctx, shared.TenantID(tenantID))
+	result, err := l.svcCtx.ThemeService.GetCurrentTheme(l.ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -42,28 +42,28 @@ func (h *DashboardHelper) GetTenantID() (shared.TenantID, bool) {
 }
 
 // GetOverview retrieves dashboard overview statistics
-func (h *DashboardHelper) GetOverview(tenantID shared.TenantID) (*types.DashboardOverviewResponse, error) {
+func (h *DashboardHelper) GetOverview() (*types.DashboardOverviewResponse, error) {
 	now := time.Now().UTC()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	yesterdayStart := todayStart.Add(-24 * time.Hour)
 	yesterdayEnd := todayStart
 
 	// Get today's orders count
-	todayOrders, err := h.svcCtx.OrderRepo.CountTodayOrders(h.ctx, h.svcCtx.DB, tenantID)
+	todayOrders, err := h.svcCtx.OrderRepo.CountTodayOrders(h.ctx, h.svcCtx.DB)
 	if err != nil {
 		h.Logger.Errorf("failed to get today orders: %v", err)
 		todayOrders = 0
 	}
 
 	// Get today's GMV
-	todayGMV, err := h.svcCtx.OrderRepo.SumTodayGMV(h.ctx, h.svcCtx.DB, tenantID)
+	todayGMV, err := h.svcCtx.OrderRepo.SumTodayGMV(h.ctx, h.svcCtx.DB)
 	if err != nil {
 		h.Logger.Errorf("failed to get today GMV: %v", err)
 		todayGMV = decimal.Zero
 	}
 
 	// Get yesterday's GMV for comparison
-	yesterdayGMV, err := h.getYesterdayGMV(tenantID, yesterdayStart, yesterdayEnd)
+	yesterdayGMV, err := h.getYesterdayGMV( yesterdayStart, yesterdayEnd)
 	if err != nil {
 		h.Logger.Errorf("failed to get yesterday GMV: %v", err)
 		yesterdayGMV = decimal.Zero
@@ -79,21 +79,21 @@ func (h *DashboardHelper) GetOverview(tenantID shared.TenantID) (*types.Dashboar
 	}
 
 	// Get total products
-	totalProducts, err := h.getTotalProducts(tenantID)
+	totalProducts, err := h.getTotalProducts()
 	if err != nil {
 		h.Logger.Errorf("failed to get total products: %v", err)
 		totalProducts = 0
 	}
 
 	// Get total users
-	totalUsers, err := h.getTotalUsers(tenantID)
+	totalUsers, err := h.getTotalUsers()
 	if err != nil {
 		h.Logger.Errorf("failed to get total users: %v", err)
 		totalUsers = 0
 	}
 
 	// Get new users today
-	newUsersToday, err := h.getNewUsersToday(tenantID, todayStart)
+	newUsersToday, err := h.getNewUsersToday( todayStart)
 	if err != nil {
 		h.Logger.Errorf("failed to get new users today: %v", err)
 		newUsersToday = 0
@@ -112,7 +112,7 @@ func (h *DashboardHelper) GetOverview(tenantID shared.TenantID) (*types.Dashboar
 }
 
 // GetSalesTrend retrieves sales trend data
-func (h *DashboardHelper) GetSalesTrend(tenantID shared.TenantID, period string) (*types.SalesTrendResponse, error) {
+func (h *DashboardHelper) GetSalesTrend( period string) (*types.SalesTrendResponse, error) {
 	var days int
 	switch period {
 	case "week":
@@ -125,7 +125,7 @@ func (h *DashboardHelper) GetSalesTrend(tenantID shared.TenantID, period string)
 		days = 7
 	}
 
-	data, err := h.getSalesTrendData(tenantID, days)
+	data, err := h.getSalesTrendData( days)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +138,8 @@ func (h *DashboardHelper) GetSalesTrend(tenantID shared.TenantID, period string)
 }
 
 // GetOrderStatusDistribution returns order counts by status
-func (h *DashboardHelper) GetOrderStatusDistribution(tenantID shared.TenantID) (*types.OrderStatusDistributionResponse, error) {
-	results, err := h.svcCtx.OrderRepo.CountByStatus(h.ctx, h.svcCtx.DB, tenantID)
+func (h *DashboardHelper) GetOrderStatusDistribution() (*types.OrderStatusDistributionResponse, error) {
+	results, err := h.svcCtx.OrderRepo.CountByStatus(h.ctx, h.svcCtx.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +182,7 @@ func (h *DashboardHelper) GetOrderStatusDistribution(tenantID shared.TenantID) (
 }
 
 // GetTopProducts returns top selling products
-func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, period string) (*types.TopProductsResponse, error) {
+func (h *DashboardHelper) GetTopProducts( limit int, period string) (*types.TopProductsResponse, error) {
 	var daysAgo time.Time
 	switch period {
 	case "week":
@@ -195,7 +195,7 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 		daysAgo = time.Now().UTC().AddDate(0, 0, -7)
 	}
 
-	results, err := h.svcCtx.OrderRepo.FindTopProducts(h.ctx, h.svcCtx.DB, tenantID, daysAgo, limit)
+	results, err := h.svcCtx.OrderRepo.FindTopProducts(h.ctx, h.svcCtx.DB, daysAgo, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -218,13 +218,13 @@ func (h *DashboardHelper) GetTopProducts(tenantID shared.TenantID, limit int, pe
 }
 
 // GetPendingOrders returns recent pending payment orders
-func (h *DashboardHelper) GetPendingOrders(tenantID shared.TenantID, limit int) (*types.PendingOrdersResponse, error) {
-	orders, err := h.svcCtx.OrderRepo.FindPendingOrders(h.ctx, h.svcCtx.DB, tenantID, limit)
+func (h *DashboardHelper) GetPendingOrders( limit int) (*types.PendingOrdersResponse, error) {
+	orders, err := h.svcCtx.OrderRepo.FindPendingOrders(h.ctx, h.svcCtx.DB, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	total, err := h.svcCtx.OrderRepo.CountPendingOrders(h.ctx, h.svcCtx.DB, tenantID)
+	total, err := h.svcCtx.OrderRepo.CountPendingOrders(h.ctx, h.svcCtx.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -248,11 +248,11 @@ func (h *DashboardHelper) GetPendingOrders(tenantID shared.TenantID, limit int) 
 }
 
 // GetRecentActivities returns recent system activities
-func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit int) (*types.RecentActivitiesResponse, error) {
+func (h *DashboardHelper) GetRecentActivities( limit int) (*types.RecentActivitiesResponse, error) {
 	activities := make([]*types.ActivityItem, 0, limit)
 
 	// Get recent orders
-	recentOrders, err := h.svcCtx.OrderRepo.FindRecentOrders(h.ctx, h.svcCtx.DB, tenantID, 5)
+	recentOrders, err := h.svcCtx.OrderRepo.FindRecentOrders(h.ctx, h.svcCtx.DB, 5)
 	if err == nil {
 		for _, o := range recentOrders {
 			activities = append(activities, &types.ActivityItem{
@@ -265,7 +265,7 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 	}
 
 	// Get recent payments
-	paidOrders, err := h.svcCtx.OrderRepo.FindRecentPaidOrders(h.ctx, h.svcCtx.DB, tenantID, 5)
+	paidOrders, err := h.svcCtx.OrderRepo.FindRecentPaidOrders(h.ctx, h.svcCtx.DB, 5)
 	if err == nil {
 		for _, o := range paidOrders {
 			activities = append(activities, &types.ActivityItem{
@@ -293,36 +293,36 @@ func (h *DashboardHelper) GetRecentActivities(tenantID shared.TenantID, limit in
 
 // Helper methods
 
-func (h *DashboardHelper) getYesterdayGMV(tenantID shared.TenantID, start, end time.Time) (decimal.Decimal, error) {
+func (h *DashboardHelper) getYesterdayGMV( start, end time.Time) (decimal.Decimal, error) {
 	statuses := []fulfillment.OrderStatus{
 		fulfillment.OrderStatusPaid,
 		fulfillment.OrderStatusShipped,
 		fulfillment.OrderStatusDelivered,
 	}
-	return h.svcCtx.OrderRepo.SumGMVByDateRange(h.ctx, h.svcCtx.DB, tenantID, start, end, statuses)
+	return h.svcCtx.OrderRepo.SumGMVByDateRange(h.ctx, h.svcCtx.DB, start, end, statuses)
 }
 
-func (h *DashboardHelper) getTotalProducts(tenantID shared.TenantID) (int64, error) {
-	return h.svcCtx.ProductRepo.CountTotal(h.ctx, h.svcCtx.DB, tenantID)
+func (h *DashboardHelper) getTotalProducts() (int64, error) {
+	return h.svcCtx.ProductRepo.CountTotal(h.ctx, h.svcCtx.DB)
 }
 
-func (h *DashboardHelper) getTotalUsers(tenantID shared.TenantID) (int64, error) {
-	stats, err := h.svcCtx.UserService.GetStats(h.ctx, tenantID)
+func (h *DashboardHelper) getTotalUsers() (int64, error) {
+	stats, err := h.svcCtx.UserService.GetStats(h.ctx)
 	if err != nil {
 		return 0, err
 	}
 	return stats.Total, nil
 }
 
-func (h *DashboardHelper) getNewUsersToday(tenantID shared.TenantID, todayStart time.Time) (int64, error) {
-	stats, err := h.svcCtx.UserService.GetStats(h.ctx, tenantID)
+func (h *DashboardHelper) getNewUsersToday( todayStart time.Time) (int64, error) {
+	stats, err := h.svcCtx.UserService.GetStats(h.ctx)
 	if err != nil {
 		return 0, err
 	}
 	return stats.NewToday, nil
 }
 
-func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) ([]*types.SalesTrendData, error) {
+func (h *DashboardHelper) getSalesTrendData( days int) ([]*types.SalesTrendData, error) {
 	now := time.Now().UTC()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := todayStart.Add(24 * time.Hour)
@@ -334,7 +334,7 @@ func (h *DashboardHelper) getSalesTrendData(tenantID shared.TenantID, days int) 
 	}
 
 	// Query daily sales
-	results, err := h.svcCtx.OrderRepo.FindSalesTrend(h.ctx, h.svcCtx.DB, tenantID, dates[0], endDate)
+	results, err := h.svcCtx.OrderRepo.FindSalesTrend(h.ctx, h.svcCtx.DB, dates[0], endDate)
 	if err != nil {
 		return nil, err
 	}

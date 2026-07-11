@@ -18,10 +18,9 @@ func NewShopSettingsRepository() shop.ShopSettingsRepository {
 	return &shopSettingsRepo{}
 }
 
-func (r *shopSettingsRepo) FindByTenantID(ctx context.Context, db *gorm.DB, tenantID int64) (*shop.ShopSettings, error) {
+func (r *shopSettingsRepo) FindByTenantID(ctx context.Context, db *gorm.DB) (*shop.ShopSettings, error) {
 	var model shopSettingsModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ?", tenantID).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,7 +35,6 @@ func (r *shopSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *shop
 	// Check if exists
 	var existing shopSettingsModel
 	err := db.WithContext(ctx).
-		Where("tenant_id = ?", settings.TenantID).
 		First(&existing).Error
 
 	if err != nil {

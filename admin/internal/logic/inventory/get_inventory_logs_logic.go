@@ -7,7 +7,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,11 +26,6 @@ func NewGetInventoryLogsLogic(ctx context.Context, svcCtx *svc.ServiceContext) G
 }
 
 func (l *GetInventoryLogsLogic) GetInventoryLogs(req *types.GetInventoryLogsReq) (resp *types.ListInventoryLogsResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	query := product.InventoryLogQuery{
 		PageQuery: shared.PageQuery{
@@ -43,7 +37,7 @@ func (l *GetInventoryLogsLogic) GetInventoryLogs(req *types.GetInventoryLogsReq)
 		ChangeType: req.Type,
 	}
 
-	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), query)
+	logs, total, err := l.svcCtx.InventoryLogRepo.Find(l.ctx, l.svcCtx.DB, query)
 	if err != nil {
 		return nil, err
 	}

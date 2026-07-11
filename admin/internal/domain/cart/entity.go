@@ -56,17 +56,17 @@ func (ci *CartItem) CalculateTotal() {
 // Repository 购物车仓储接口
 type Repository interface {
 	// Cart operations
-	FindOrCreateCart(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID *int64, sessionID string) (*Cart, error)
-	FindByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) (*Cart, error)
-	FindBySessionID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, sessionID string) (*Cart, error)
-	Delete(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	FindOrCreateCart(ctx context.Context, db *gorm.DB,  userID *int64, sessionID string) (*Cart, error)
+	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) (*Cart, error)
+	FindBySessionID(ctx context.Context, db *gorm.DB,  sessionID string) (*Cart, error)
+	Delete(ctx context.Context, db *gorm.DB,  id int64) error
 
 	// CartItem operations
 	AddItem(ctx context.Context, db *gorm.DB, item *CartItem) error
 	UpdateItem(ctx context.Context, db *gorm.DB, item *CartItem) error
-	RemoveItem(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) error
+	RemoveItem(ctx context.Context, db *gorm.DB,  id int64) error
 	FindItemsByCartID(ctx context.Context, db *gorm.DB, cartID int64) ([]CartItem, error)
-	FindItemsByUserID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, userID int64) ([]CartItem, error)
+	FindItemsByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]CartItem, error)
 	ClearItems(ctx context.Context, db *gorm.DB, cartID int64) error
 }
 

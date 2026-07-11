@@ -6,9 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -27,12 +24,8 @@ func NewGetVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetVers
 }
 
 func (l *GetVersionLogic) GetVersion(req *types.GetVersionRequest) (resp *types.VersionDetailResponse, err error) {
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
-	result, err := l.svcCtx.VersionService.GetVersion(l.ctx, shared.TenantID(tenantID), req.PageID, req.Version)
+	result, err := l.svcCtx.VersionService.GetVersion(l.ctx, req.PageID, req.Version)
 	if err != nil {
 		return nil, err
 	}

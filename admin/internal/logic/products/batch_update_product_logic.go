@@ -8,8 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/utils"
 	"github.com/shopspring/decimal"
 
@@ -32,10 +30,6 @@ func NewBatchUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProductReq) (resp *types.BatchUpdateProductResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	// 验证 UpdateFields 至少提供一个字段
 	if req.UpdateFields.Price == nil && req.UpdateFields.Stock == nil &&
@@ -91,7 +85,7 @@ func (l *BatchUpdateProductLogic) BatchUpdateProduct(req *types.BatchUpdateProdu
 	}
 
 	// 执行批量更新
-	successIDs, failed, err := l.svcCtx.ProductService.BatchUpdateProduct(l.ctx, shared.TenantID(tenantID), batchReq)
+	successIDs, failed, err := l.svcCtx.ProductService.BatchUpdateProduct(l.ctx, batchReq)
 	if err != nil {
 		return nil, err
 	}

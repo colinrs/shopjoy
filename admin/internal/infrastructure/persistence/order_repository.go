@@ -140,11 +140,8 @@ func fromOrderEntity(o *fulfillment.Order) *orderModel {
 }
 
 // FindByID 根据ID查询订单
-func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*fulfillment.Order, error) {
+func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulfillment.Order, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model orderModel
 	err := query.First(&model, id).Error
 	if err != nil {
@@ -157,11 +154,8 @@ func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.T
 }
 
 // FindByOrderNo 根据订单号查询订单
-func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderNo string) (*fulfillment.Order, error) {
+func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB,  orderNo string) (*fulfillment.Order, error) {
 	query := db.WithContext(ctx).Model(&orderModel{}).Where("order_no = ? AND deleted_at IS NULL", orderNo)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 	var model orderModel
 	err := query.First(&model).Error
 	if err != nil {
@@ -174,14 +168,11 @@ func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 // FindList 分页查询订单列表
-func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query fulfillment.OrderQuery) ([]*fulfillment.Order, int64, error) {
+func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillment.OrderQuery) ([]*fulfillment.Order, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&orderModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.OrderNo != "" {
 		dbQuery = dbQuery.Where("order_no LIKE ?", escapeLikePattern(query.OrderNo))
@@ -232,8 +223,8 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 
 	// Use optimistic lock: update only if version matches
 	result := db.WithContext(ctx).Model(&orderModel{}).
-		Where("id = ? AND tenant_id = ? AND version = ? AND deleted_at IS NULL",
-			order.ID, order.TenantID.Int64(), order.Version).
+		Where("id = ? AND version = ? AND deleted_at IS NULL",
+			order.ID, order.Version).
 		Updates(map[string]interface{}{
 			"pay_amount":      model.PayAmount,
 			"adjust_amount":   model.AdjustAmount,
@@ -261,11 +252,8 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 }
 
 // UpdateRemark 更新商家备注
-func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64, remark string) error {
+func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB,  orderID int64, remark string) error {
 	query := db.WithContext(ctx).Model(&orderModel{}).Where("id = ? AND deleted_at IS NULL", orderID)
-	if tenantID.Int64() != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	result := query.Update("merchant_remark", remark)
 
@@ -281,7 +269,7 @@ func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB, tenantID shar
 }
 
 // CountTodayOrders 统计今日订单数
-func (r *orderRepo) CountTodayOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+func (r *orderRepo) CountTodayOrders(ctx context.Context, db *gorm.DB) (int64, error) {
 	// Get start and end of today in UTC
 	now := time.Now().UTC()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
@@ -289,9 +277,6 @@ func (r *orderRepo) CountTodayOrders(ctx context.Context, db *gorm.DB, tenantID 
 
 	query := db.WithContext(ctx).Model(&orderModel{}).
 		Where("created_at >= ? AND created_at < ? AND deleted_at IS NULL", startOfDay, endOfDay)
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var count int64
 	err := query.Count(&count).Error
@@ -299,7 +284,7 @@ func (r *orderRepo) CountTodayOrders(ctx context.Context, db *gorm.DB, tenantID 
 }
 
 // SumTodayGMV 统计今日GMV（已支付订单的总金额）
-func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (decimal.Decimal, error) {
+func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB) (decimal.Decimal, error) {
 	// Get start and end of today in UTC
 	now := time.Now().UTC()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
@@ -309,9 +294,6 @@ func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID share
 		Where("created_at >= ? AND created_at < ? AND status IN ? AND deleted_at IS NULL",
 			startOfDay, endOfDay,
 			[]string{"paid", "shipped", "delivered"})
-	if tenantID != 0 {
-		query = query.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	var result struct {
 		Total decimal.Decimal
@@ -321,14 +303,11 @@ func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB, tenantID share
 }
 
 // FindForExport 导出订单（最多10000条）
-func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query fulfillment.OrderQuery) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB,  query fulfillment.OrderQuery) ([]*fulfillment.Order, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&orderModel{}).Where("deleted_at IS NULL")
 
-	if tenantID != 0 {
-		dbQuery = dbQuery.Where("tenant_id = ?", tenantID.Int64())
-	}
 
 	if query.OrderNo != "" {
 		dbQuery = dbQuery.Where("order_no LIKE ?", escapeLikePattern(query.OrderNo))
@@ -398,9 +377,9 @@ func statusToOrderStatus(status int) fulfillment.OrderStatus {
 }
 
 // CountByStatus 按状态统计订单数量
-func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) ([]fulfillment.OrderStatusCount, error) {
+func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB) ([]fulfillment.OrderStatusCount, error) {
 	query := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64())
+		Where("deleted_at IS NULL")
 
 	var rows []statusCountRow
 	err := query.Select("status, COUNT(*) as count").
@@ -421,10 +400,10 @@ func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB, tenantID sha
 }
 
 // FindPendingOrders 查询待付款订单
-func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND status = ? AND deleted_at IS NULL", tenantID.Int64(), string(fulfillment.OrderStatusPendingPayment)).
+		Where("status = ? AND deleted_at IS NULL", string(fulfillment.OrderStatusPendingPayment)).
 		Order("created_at DESC").
 		Limit(limit).
 		Find(&models).Error
@@ -440,19 +419,19 @@ func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB, tenantID
 }
 
 // CountPendingOrders 统计待付款订单数量
-func (r *orderRepo) CountPendingOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, error) {
+func (r *orderRepo) CountPendingOrders(ctx context.Context, db *gorm.DB) (int64, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND status = ? AND deleted_at IS NULL", tenantID.Int64(), string(fulfillment.OrderStatusPendingPayment)).
+		Where("status = ? AND deleted_at IS NULL", string(fulfillment.OrderStatusPendingPayment)).
 		Count(&count).Error
 	return count, err
 }
 
 // FindRecentOrders 查询最近创建的订单
-func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND deleted_at IS NULL", tenantID.Int64()).
+		Where("deleted_at IS NULL").
 		Order("created_at DESC").
 		Limit(limit).
 		Find(&models).Error
@@ -468,10 +447,10 @@ func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB, tenantID 
 }
 
 // FindRecentPaidOrders 查询最近已支付的订单
-func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND paid_at IS NOT NULL AND deleted_at IS NULL", tenantID.Int64()).
+		Where("paid_at IS NOT NULL AND deleted_at IS NULL").
 		Order("paid_at DESC").
 		Limit(limit).
 		Find(&models).Error
@@ -487,15 +466,15 @@ func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB, tenan
 }
 
 // SumGMVByDateRange 按日期范围统计GMV
-func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, start, end time.Time, statuses []fulfillment.OrderStatus) (decimal.Decimal, error) {
+func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB,  start, end time.Time, statuses []fulfillment.OrderStatus) (decimal.Decimal, error) {
 	statusStrings := make([]string, len(statuses))
 	for i, s := range statuses {
 		statusStrings[i] = string(s)
 	}
 
 	query := db.WithContext(ctx).Model(&orderModel{}).
-		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
-			tenantID.Int64(), statusStrings, start, end)
+		Where("status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
+			statusStrings, start, end)
 
 	var result struct {
 		Total decimal.Decimal
@@ -505,13 +484,13 @@ func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB, tenantID
 }
 
 // FindTopProducts 查询热销商品
-func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, startTime time.Time, limit int) ([]*fulfillment.TopProduct, error) {
+func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB,  startTime time.Time, limit int) ([]*fulfillment.TopProduct, error) {
 	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
 
 	query := db.WithContext(ctx).Table("order_items oi").
 		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_amount) as revenue").
 		Joins("JOIN orders o ON o.id = oi.order_id").
-		Where("o.tenant_id = ? AND o.status IN ? AND o.deleted_at IS NULL", tenantID.Int64(), statusStrings)
+		Where("o.status IN ? AND o.deleted_at IS NULL", statusStrings)
 
 	if !startTime.IsZero() {
 		query = query.Where("o.paid_at >= ?", startTime)
@@ -529,14 +508,14 @@ func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, tenantID s
 }
 
 // FindSalesTrend 查询销售趋势
-func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, startDate, endDate time.Time) ([]*fulfillment.DailySalesTrend, error) {
+func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB,  startDate, endDate time.Time) ([]*fulfillment.DailySalesTrend, error) {
 	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
 
 	var results []*fulfillment.DailySalesTrend
 	err := db.WithContext(ctx).Model(&orderModel{}).
 		Select("DATE(paid_at) as date, SUM(pay_amount) as sales, COUNT(*) as orders").
-		Where("tenant_id = ? AND status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
-			tenantID.Int64(), statusStrings, startDate, endDate).
+		Where("status IN ? AND paid_at >= ? AND paid_at < ? AND deleted_at IS NULL",
+			statusStrings, startDate, endDate).
 		Group("DATE(paid_at)").
 		Scan(&results).Error
 	if err != nil {

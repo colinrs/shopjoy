@@ -44,7 +44,7 @@ func (l *UpdateMarketLogic) UpdateMarket(req *types.UpdateMarketReq) (resp *type
 	}
 	if req.IsDefault != nil && *req.IsDefault {
 		// Clear existing default market first
-		if err := repo.ClearDefault(l.ctx, l.svcCtx.DB, m.TenantID); err != nil {
+		if err := repo.ClearDefault(l.ctx, l.svcCtx.DB); err != nil {
 			return nil, err
 		}
 		m.SetAsDefault()

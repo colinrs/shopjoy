@@ -6,8 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,11 +25,6 @@ func NewGetPointsTrendLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetPointsTrendLogic) GetPointsTrend(req *types.GetPointsTrendReq) (resp *types.PointsTrendResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Calculate time range based on period
 	var startTime, endTime time.Time
@@ -56,7 +49,7 @@ func (l *GetPointsTrendLogic) GetPointsTrend(req *types.GetPointsTrendReq) (resp
 		granularity = "daily"
 	}
 
-	trendData, err := l.svcCtx.PointsService.GetTrend(l.ctx, shared.TenantID(tenantID), startTime, endTime, granularity)
+	trendData, err := l.svcCtx.PointsService.GetTrend(l.ctx, startTime, endTime, granularity)
 	if err != nil {
 		return nil, err
 	}

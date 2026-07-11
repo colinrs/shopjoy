@@ -180,8 +180,8 @@ func (r *marketRepo) FindDefault(ctx context.Context, db *gorm.DB) (*market.Mark
 	return model.toEntity(), nil
 }
 
-func (r *marketRepo) ClearDefault(ctx context.Context, db *gorm.DB, tenantID int64) error {
+func (r *marketRepo) ClearDefault(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Model(&marketModel{}).
-		Where("tenant_id = ? AND is_default = ?", tenantID, true).
+		Where("is_default = ?", true).
 		Update("is_default", false).Error
 }

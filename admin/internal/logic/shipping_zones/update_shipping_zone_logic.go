@@ -6,8 +6,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,12 +25,6 @@ func NewUpdateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *UpdateShippingZoneLogic) UpdateShippingZone(req *types.UpdateShippingZoneReq) (resp *types.ShippingZoneDetail, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
-
 	// Find existing zone
 	zone, err := l.svcCtx.ShippingRepo.FindZoneByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
@@ -40,10 +32,6 @@ func (l *UpdateShippingZoneLogic) UpdateShippingZone(req *types.UpdateShippingZo
 	}
 
 	// Verify zone belongs to tenant
-	if zone.TenantID != tenantID {
-		return nil, code.ErrShippingZoneNotFound
-	}
-
 	// Update fields if provided
 	if req.Name != "" {
 		zone.Name = req.Name

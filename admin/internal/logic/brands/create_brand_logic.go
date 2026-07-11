@@ -9,7 +9,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,14 +28,9 @@ func NewCreateBrandLogic(ctx context.Context, svcCtx *svc.ServiceContext) Create
 }
 
 func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.CreateBrandResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
-	}
 
 	// Check for duplicate brand name
-	existing, err := l.svcCtx.BrandRepo.FindByName(l.ctx, l.svcCtx.DB, shared.TenantID(tenantID), req.Name)
+	existing, err := l.svcCtx.BrandRepo.FindByName(l.ctx, l.svcCtx.DB, req.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +46,6 @@ func (l *CreateBrandLogic) CreateBrand(req *types.CreateBrandReq) (resp *types.C
 
 	brand := &product.Brand{
 		Model:            application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
-		TenantID:         shared.TenantID(tenantID),
 		Name:             req.Name,
 		Logo:             req.Logo,
 		Description:      req.Description,

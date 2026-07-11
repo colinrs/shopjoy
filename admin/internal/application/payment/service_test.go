@@ -34,15 +34,15 @@ func (m *mockPaymentRepo) Update(ctx context.Context, db *gorm.DB, p *payment.Pa
 	return nil
 }
 
-func (m *mockPaymentRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*payment.Payment, error) {
+func (m *mockPaymentRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.Payment, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, orderID int64) (*payment.Payment, error) {
+func (m *mockPaymentRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) (*payment.Payment, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentRepo) FindByPaymentNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentNo string) (*payment.Payment, error) {
+func (m *mockPaymentRepo) FindByPaymentNo(ctx context.Context, db *gorm.DB,  paymentNo string) (*payment.Payment, error) {
 	return nil, nil
 }
 
@@ -53,7 +53,7 @@ func (m *mockPaymentRepo) FindByChannelPaymentID(ctx context.Context, db *gorm.D
 	return nil, nil
 }
 
-func (m *mockPaymentRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query payment.PaymentQuery) ([]*payment.Payment, int64, error) {
+func (m *mockPaymentRepo) FindList(ctx context.Context, db *gorm.DB,  query payment.PaymentQuery) ([]*payment.Payment, int64, error) {
 	return nil, 0, nil
 }
 
@@ -68,11 +68,11 @@ func (m *mockRefundRepo) Update(ctx context.Context, db *gorm.DB, r *payment.Pay
 	return nil
 }
 
-func (m *mockRefundRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*payment.PaymentRefund, error) {
+func (m *mockRefundRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.PaymentRefund, error) {
 	return nil, nil
 }
 
-func (m *mockRefundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, refundNo string) (*payment.PaymentRefund, error) {
+func (m *mockRefundRepo) FindByRefundNo(ctx context.Context, db *gorm.DB,  refundNo string) (*payment.PaymentRefund, error) {
 	return nil, nil
 }
 
@@ -80,15 +80,15 @@ func (m *mockRefundRepo) FindByIdempotencyKey(ctx context.Context, db *gorm.DB, 
 	return nil, nil
 }
 
-func (m *mockRefundRepo) FindByPaymentID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) ([]*payment.PaymentRefund, error) {
+func (m *mockRefundRepo) FindByPaymentID(ctx context.Context, db *gorm.DB,  paymentID int64) ([]*payment.PaymentRefund, error) {
 	return nil, nil
 }
 
-func (m *mockRefundRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query payment.RefundQuery) ([]*payment.PaymentRefund, int64, error) {
+func (m *mockRefundRepo) FindList(ctx context.Context, db *gorm.DB,  query payment.RefundQuery) ([]*payment.PaymentRefund, int64, error) {
 	return nil, 0, nil
 }
 
-func (m *mockRefundRepo) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, paymentID int64) (decimal.Decimal, error) {
+func (m *mockRefundRepo) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB,  paymentID int64) (decimal.Decimal, error) {
 	return decimal.Zero, nil
 }
 
@@ -99,19 +99,19 @@ func (m *mockTransactionRepo) Create(ctx context.Context, db *gorm.DB, t *paymen
 	return nil
 }
 
-func (m *mockTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, id int64) (*payment.PaymentTransaction, error) {
+func (m *mockTransactionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.PaymentTransaction, error) {
 	return nil, nil
 }
 
-func (m *mockTransactionRepo) FindByTransactionID(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, txnID string) (*payment.PaymentTransaction, error) {
+func (m *mockTransactionRepo) FindByTransactionID(ctx context.Context, db *gorm.DB,  txnID string) (*payment.PaymentTransaction, error) {
 	return nil, nil
 }
 
-func (m *mockTransactionRepo) FindList(ctx context.Context, db *gorm.DB, tenantID shared.TenantID, query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
+func (m *mockTransactionRepo) FindList(ctx context.Context, db *gorm.DB,  query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
 	return nil, 0, nil
 }
 
-func (m *mockTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, tenantID shared.TenantID) (int64, int64, int64, error) {
+func (m *mockTransactionRepo) GetStats(ctx context.Context, db *gorm.DB) (int64, int64, int64, error) {
 	return 0, 0, 0, nil
 }
 

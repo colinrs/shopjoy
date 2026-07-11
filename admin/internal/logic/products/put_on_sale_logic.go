@@ -5,9 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,12 +25,8 @@ func NewPutOnSaleLogic(ctx context.Context, svcCtx *svc.ServiceContext) PutOnSal
 
 func (l *PutOnSaleLogic) PutOnSale(req *types.PutOnSaleReq) (resp *types.ProductDetailResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
-	productResp, err := l.svcCtx.ProductService.PutOnSale(l.ctx, shared.TenantID(tenantID), req.ID)
+	productResp, err := l.svcCtx.ProductService.PutOnSale(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

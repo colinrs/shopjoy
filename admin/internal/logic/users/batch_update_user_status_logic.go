@@ -8,7 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/tenant"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,11 +28,6 @@ func NewBatchUpdateUserStatusLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdateUserStatusReq) (resp *types.BatchUpdateUserStatusResp, err error) {
-	tenantID, ok := tenant.FromContext(l.ctx)
-	if !ok {
-		return nil, code.ErrTenantInvalidID
-	}
-
 	resp = &types.BatchUpdateUserStatusResp{
 		Success: make([]string, 0, len(req.UserIDs)),
 		Failed:  make([]types.BatchStatusFail, 0),
@@ -49,9 +43,9 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 		var updateErr error
 		switch req.Status {
 		case 1: // activate
-			updateErr = l.svcCtx.UserService.Activate(l.ctx, tenantID, userID)
+			updateErr = l.svcCtx.UserService.Activate(l.ctx,  userID)
 		case 2: // suspend
-			updateErr = l.svcCtx.UserService.Suspend(l.ctx, tenantID, userID)
+			updateErr = l.svcCtx.UserService.Suspend(l.ctx,  userID)
 		default:
 			resp.Failed = append(resp.Failed, types.BatchStatusFail{
 				UserID:  userID,

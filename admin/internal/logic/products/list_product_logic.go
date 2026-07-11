@@ -8,9 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,10 +29,6 @@ func NewListProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListPr
 
 func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.ListProductResp, err error) {
 	// 从 context 获取 tenantID
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok {
-		return nil, code.ErrUnauthorized
-	}
 
 	queryReq := appProduct.QueryProductRequest{
 		Name:       req.Name,
@@ -58,7 +51,7 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 		}
 	}
 
-	listResp, err := l.svcCtx.ProductService.GetProductList(l.ctx, shared.TenantID(tenantID), queryReq)
+	listResp, err := l.svcCtx.ProductService.GetProductList(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}
