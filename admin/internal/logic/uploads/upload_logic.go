@@ -12,6 +12,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -101,28 +102,38 @@ func (l *UploadLogic) Upload(req *types.UploadRequest, file multipart.File, head
 		return nil, code.ErrUploadInvalidCategory
 	}
 
-	// 保存文件
-	fileInfo, err := l.svcCtx.Storage.Save(l.ctx, header, category)
+	// Resolve tenant/user from auth context for storage scoping/audit.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	userID, _ := contextx.GetUserID(l.ctx)
+
+	// Build AssetDraft from multipart header. FromMultipart opens a Reader
+	// that must be closed after Save returns.
+	draft, closer, err := storage.FromMultipart(header, category, tenantID, userID)
 	if err != nil {
+		l.Logger.Errorf("upload: open multipart failed: user_id=%d tenant_id=%d err=%v",
+			userID, tenantID, err)
 		return nil, code.ErrUploadFailed
 	}
+	defer func() { _ = closer.Close() }()
 
-	// 获取访问 URL
-	url, err := l.svcCtx.Storage.GetURL(l.ctx, fileInfo.ID)
+	// Save via new AssetDraft-based interface.
+	asset, err := l.svcCtx.Storage.Save(l.ctx, draft)
 	if err != nil {
+		l.Logger.Errorf("upload: storage save failed: user_id=%d tenant_id=%d err=%v",
+			userID, tenantID, err)
 		return nil, code.ErrUploadFailed
 	}
 
 	return &types.UploadResponse{
-		ID:        fileInfo.ID,
-		URL:       url,
-		Filename:  fileInfo.Name,
-		Category:  string(fileInfo.Category),
-		Size:      fileInfo.Size,
-		MimeType:  fileInfo.MimeType,
-		Width:     fileInfo.Width,
-		Height:    fileInfo.Height,
-		CreatedAt: fileInfo.CreatedAt.Format(time.RFC3339),
+		ID:        asset.ID,
+		URL:       asset.URL,
+		Filename:  asset.Filename,
+		Category:  string(asset.Category),
+		Size:      asset.Size,
+		MimeType:  asset.MimeType,
+		Width:     asset.Width,
+		Height:    asset.Height,
+		CreatedAt: asset.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
 
