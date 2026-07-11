@@ -327,15 +327,11 @@
     "lastOrder": "Last Order",
     "basicInfo": "Basic Info",
     "orderRecords": "Order Records",
-    "orders": {
-      "columns": {
-        "orderNo": "Order No.",
-        "status": "Status",
-        "itemCount": "Items",
-        "totalAmount": "Total Amount",
-        "createdAt": "Order Time"
-      }
-    },
+    "orderNo": "Order No.",
+    "orderStatus": "Status",
+    "orderItemCount": "Items",
+    "orderTotalAmount": "Total Amount",
+    "orderCreatedAt": "Order Time",
     "pointsRecords": "Points Records",
     "reviewRecords": "Review Records",
     "comingSoon": "Coming Soon",

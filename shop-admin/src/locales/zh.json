@@ -327,15 +327,11 @@
     "lastOrder": "最后下单",
     "basicInfo": "基本信息",
     "orderRecords": "订单记录",
-    "orders": {
-      "columns": {
-        "orderNo": "订单号",
-        "status": "状态",
-        "itemCount": "商品数",
-        "totalAmount": "订单金额",
-        "createdAt": "下单时间"
-      }
-    },
+    "orderNo": "订单号",
+    "orderStatus": "状态",
+    "orderItemCount": "商品数",
+    "orderTotalAmount": "订单金额",
+    "orderCreatedAt": "下单时间",
     "pointsRecords": "积分记录",
     "reviewRecords": "评价记录",
     "comingSoon": "功能开发中",

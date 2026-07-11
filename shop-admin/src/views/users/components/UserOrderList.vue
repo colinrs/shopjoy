@@ -1,29 +1,29 @@
 <template>
   <div class="user-order-list">
     <el-table v-loading="loading" :data="orders" stripe>
-      <el-table-column :label="$t('users.orders.columns.orderNo')" min-width="180">
+      <el-table-column :label="$t('users.orderNo')" min-width="180">
         <template #default="{ row }">
           <span class="order-no">{{ row.order_no }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.status')" width="120" align="center">
+      <el-table-column :label="$t('users.orderStatus')" width="120" align="center">
         <template #default="{ row }">
           <el-tag :type="getStatusType(row.status)" size="small">
             {{ row.status }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.itemCount')" width="100" align="center">
+      <el-table-column :label="$t('users.orderItemCount')" width="100" align="center">
         <template #default="{ row }">
           <span>{{ row.item_count ?? '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.totalAmount')" width="140" align="right">
+      <el-table-column :label="$t('users.orderTotalAmount')" width="140" align="right">
         <template #default="{ row }">
           <span class="amount">{{ row.currency }} {{ row.total_amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.createdAt')" width="180">
+      <el-table-column :label="$t('users.orderCreatedAt')" width="180">
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
