@@ -2481,5 +2481,18 @@
   },
   "sidebar": {
     "loadBadgesFailed": "Failed to load sidebar badges"
+  },
+  "upload": {
+    "clickOrDrag": "Click or drag images here",
+    "addImage": "Add Image",
+    "uploadFailed": "Upload failed",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "uploading": "Uploading",
+    "signFailed": "Failed to obtain upload signature",
+    "maxFiles": "Maximum {max} images",
+    "exceedsMaxSize": "Image exceeds max size",
+    "categoryLabel": "Category",
+    "imageHint": "Supports {formats}, max {size} per file"
   }
 }
