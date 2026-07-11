@@ -5,9 +5,14 @@ package uploads
 
 import (
 	"context"
+	"strconv"
+	"time"
 
+	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +33,51 @@ func NewUploadSignLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 }
 
 func (l *UploadSignLogic) UploadSign(req *types.UploadSignRequest) (resp *types.UploadSignResponse, err error) {
-	// todo: add your logic here and delete this line
+	// Default category when caller did not specify one.
+	cat := storage.Category(req.Category)
+	if cat == "" {
+		cat = storage.CategoryProduct
+	}
+	// Storage may not be configured (e.g., local dev with localStorage only),
+	// in which case signing is not supported.
+	signer, ok := l.svcCtx.Storage.(storage.Signer)
+	if !ok || signer == nil {
+		return nil, code.ErrUploadProviderError
+	}
 
-	return
+	// Resolve tenant from auth context. Platform admins may have tenantID=0,
+	// which downstream storage adapters accept as the "platform" bucket.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	userID, _ := contextx.GetUserID(l.ctx)
+
+	sig, err := signer.Sign(l.ctx, storage.SignParams{
+		Category:  cat,
+		TenantID:  tenantID,
+		Filename:  req.Filename,
+		Timestamp: time.Now().UTC().Unix(),
+	})
+	if err != nil {
+		l.Logger.Errorf("upload sign failed: user_id=%d tenant_id=%d category=%s err=%v",
+			userID, tenantID, cat, err)
+		return nil, code.ErrUploadSignFailed
+	}
+
+	// Pre-allocate asset ID so the browser can include it on the confirm step.
+	assetID, err := l.svcCtx.IDGen.NextID(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("upload sign: generate asset id failed: user_id=%d err=%v", userID, err)
+		return nil, code.ErrUploadSignFailed
+	}
+
+	return &types.UploadSignResponse{
+		CloudName:    sig.CloudName,
+		APIKey:       sig.APIKey,
+		Timestamp:    sig.Timestamp,
+		Signature:    sig.Signature,
+		Folder:       sig.Folder,
+		PublicID:     sig.PublicID,
+		UploadPreset: sig.UploadPreset,
+		AssetID:      strconv.FormatInt(assetID, 10),
+		UploadURL:    "https://api.cloudinary.com/v1_1/" + sig.CloudName + "/image/upload",
+	}, nil
 }
