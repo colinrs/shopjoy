@@ -26,10 +26,10 @@ type Asset struct {
 // TableName implements gorm.Tabler.
 func (*Asset) TableName() string { return "media_assets" }
 
-// AsOf returns the asset's primary key as int64.
-//
-// application.Model.ID is an int64 under the hood — keep this assertion in one place.
-func (a *Asset) Tenant() int64      { return a.TenantID }
+// Tenant returns the asset's tenant ID. application.Model.ID is int64.
+func (a *Asset) Tenant() int64 { return a.TenantID }
+
+// SizeInBytes returns the asset's size in bytes.
 func (a *Asset) SizeInBytes() int64 { return a.SizeBytes }
 
 // Now returns current UTC time — re-export to avoid importing "time" in tests later.

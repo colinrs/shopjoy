@@ -70,3 +70,37 @@ func TestMediaAssetRepository_Insert_Duplicate(t *testing.T) {
 		t.Fatalf("expected duplicate error, got %v", err)
 	}
 }
+
+// SoftDelete: rows-affected = 1 → success.
+func TestMediaAssetRepository_SoftDelete_OK(t *testing.T) {
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewMediaAssetRepository(gdb)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE `media_assets` SET `deleted_at`=").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	if err := repo.SoftDelete(context.Background(), 1); err != nil {
+		t.Fatalf("SoftDelete: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// SoftDelete: rows-affected = 0 → "asset not found" (GORM silently succeeds on
+// missing rows; we distinguish via res.RowsAffected instead of the unreachable
+// substring check the original brief prescribed).
+func TestMediaAssetRepository_SoftDelete_NotFound(t *testing.T) {
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewMediaAssetRepository(gdb)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE `media_assets` SET `deleted_at`=").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	err := repo.SoftDelete(context.Background(), 999)
+	if err == nil || !strings.Contains(err.Error(), "asset not found") {
+		t.Fatalf("expected asset-not-found error, got %v", err)
+	}
+}

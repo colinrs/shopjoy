@@ -61,11 +61,15 @@ func (r *mediaAssetRepo) FindByPublicID(ctx context.Context, provider, publicID 
 }
 
 func (r *mediaAssetRepo) SoftDelete(ctx context.Context, id int64) error {
-	if err := r.db.WithContext(ctx).Delete(&media.Asset{}, id).Error; err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			return errors.New("asset not found")
-		}
-		return err
+	// GORM's Delete on a soft-deletable model never returns ErrRecordNotFound
+	// for a missing row — it returns nil with RowsAffected == 0. Use that signal
+	// to distinguish missing-row from successfully-soft-deleted.
+	res := r.db.WithContext(ctx).Delete(&media.Asset{}, id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("asset not found")
 	}
 	return nil
 }
