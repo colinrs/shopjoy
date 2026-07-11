@@ -442,25 +442,11 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item :label="$t('products.productImage')">
-                  <el-upload
-                    class="avatar-uploader"
-                    action="#"
-                    :show-file-list="false"
-                    :auto-upload="false"
-                    :on-change="handleImageChange"
-                  >
-                    <img
-                      v-if="productForm.image"
-                      :src="productForm.image"
-                      class="avatar"
-                    >
-                    <el-icon
-                      v-else
-                      class="avatar-uploader-icon"
-                    >
-                      <Plus />
-                    </el-icon>
-                  </el-upload>
+                  <ImageUploader
+                    v-model:value="productForm.image"
+                    category="product"
+                    :placeholder="$t('products.productImage')"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="24">
@@ -938,15 +924,15 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Download, Picture, ArrowDown } from '@element-plus/icons-vue'
 import { getProductList, getProduct, pushToMarket, putOnSale, takeOffSale, createProduct, deleteProduct, exportProductsUrl, batchUpdateProducts, type Product, type ListProductsParams, type BatchUpdateProductRequest } from '@/api/product'
 import { getMarkets, type Market } from '@/api/market'
 import { getCategoryTree, type CategoryTree } from '@/api/category'
-import { uploadImage } from '@/api/upload'
 import { TableSkeleton } from '@/components/skeleton'
 import Table from '@/components/common/Table.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import ImageUploader from '@/components/ImageUploader.vue'
 import { t } from '@/plugins/i18n'
 import { downloadFile } from '@/utils/download'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -1397,19 +1383,6 @@ const handleSave = async () => {
       }
     }
   })
-}
-
-const handleImageChange = async (file: UploadFile) => {
-  try {
-    if (!file.raw) {
-      handleError(new Error('No file to upload'), t('products.imageUploadFailed'))
-      return
-    }
-    const response = await uploadImage(file.raw, 'product')
-    productForm.image = response.url
-  } catch (error) {
-    handleError(error, t('products.imageUploadFailed'))
-  }
 }
 
 const handleSizeChange = (val: number) => {

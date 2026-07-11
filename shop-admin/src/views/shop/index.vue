@@ -29,28 +29,11 @@
             :rules="shopRules"
           >
             <el-form-item :label="$t('shop.shopLogo')">
-              <el-upload
-                class="logo-uploader"
-                action="#"
-                :show-file-list="false"
-                :auto-upload="false"
-                :on-change="handleLogoChange"
-              >
-                <img
-                  v-if="shopForm.logo"
-                  :src="shopForm.logo"
-                  class="logo-preview"
-                >
-                <div
-                  v-else
-                  class="logo-placeholder"
-                >
-                  <el-icon size="32">
-                    <Plus />
-                  </el-icon>
-                  <span>{{ $t('shop.uploadLogo') }}</span>
-                </div>
-              </el-upload>
+              <ImageUploader
+                v-model:value="shopForm.logo"
+                category="banner"
+                :placeholder="$t('shop.uploadLogo')"
+              />
               <span class="upload-tip">{{ $t('shop.logoTip') }}</span>
             </el-form-item>
 
@@ -473,13 +456,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, type UploadFile } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
-  Shop, Plus, Phone, Message, Location, Link,
+  Shop, Phone, Message, Location, Link,
   InfoFilled, Bell, Operation, Document, Share, Check,
   Clock, Van, CreditCard
 } from '@element-plus/icons-vue'
-import { uploadImage } from '@/api/upload'
 import {
   getShopSettings,
   updateShopSettings,
@@ -496,6 +478,7 @@ import {
   type NotificationSettings
 } from '@/api/shop'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import ImageUploader from '@/components/ImageUploader.vue'
 
 const { t } = useI18n({ useScope: 'global' })
 const { handleError } = useErrorHandler()
@@ -628,20 +611,7 @@ const loadSettings = async () => {
   }
 }
 
-// Handle logo upload
-const handleLogoChange = async (file: UploadFile) => {
-  try {
-    if (!file.raw) {
-      handleError(new Error('No file to upload'), t('shop.logoUploadFailed'))
-      return
-    }
-    const response = await uploadImage(file.raw, 'banner')
-    shopForm.logo = response.url
-    ElMessage.success(t('shop.logoUploadSuccess'))
-  } catch (error) {
-    handleError(error, t('shop.logoUploadFailed'))
-  }
-}
+// Handle logo upload: ImageUploader handles upload internally via v-model.
 
 // View shop page
 const viewShopPage = () => {
