@@ -1691,6 +1691,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AuthMiddleware},
 			[]rest.Route{
 				{
+					// 申请 Cloudinary 签名（前端直传第一步）
+					Method:  http.MethodPost,
+					Path:    "/api/v1/uploads/sign",
+					Handler: uploads.UploadSignHandler(serverCtx),
+				},
+				{
+					// 前端直传后回调确认入库
+					Method:  http.MethodPost,
+					Path:    "/api/v1/uploads/confirm",
+					Handler: uploads.UploadConfirmHandler(serverCtx),
+				},
+				{
 					// 上传图片（后端代理 / 本地落盘保留向后兼容）
 					Method:  http.MethodPost,
 					Path:    "/api/v1/uploads",
@@ -1707,18 +1719,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/api/v1/uploads/:id",
 					Handler: uploads.DeleteUploadHandler(serverCtx),
-				},
-				{
-					// 前端直传后回调确认入库
-					Method:  http.MethodPost,
-					Path:    "/api/v1/uploads/confirm",
-					Handler: uploads.UploadConfirmHandler(serverCtx),
-				},
-				{
-					// 申请 Cloudinary 签名（前端直传第一步）
-					Method:  http.MethodPost,
-					Path:    "/api/v1/uploads/sign",
-					Handler: uploads.UploadSignHandler(serverCtx),
 				},
 			}...,
 		),

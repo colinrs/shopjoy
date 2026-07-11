@@ -75,18 +75,20 @@ type (
 	group:      uploads
 	middleware: AuthMiddleware
 )
+// Route ordering matters: literal paths (/sign, /confirm) MUST come before
+// the parametric :id route so the path trie resolves the literal segment first.
 service admin-api {
 	@doc "申请 Cloudinary 签名（前端直传第一步）"
 	@handler UploadSignHandler
 	post /api/v1/uploads/sign (UploadSignRequest) returns (UploadSignResponse)
 
-	@doc "上传图片（后端代理 / 本地落盘保留向后兼容）"
-	@handler UploadHandler
-	post /api/v1/uploads returns (UploadResponse)
-
 	@doc "前端直传后回调确认入库"
 	@handler UploadConfirmHandler
 	post /api/v1/uploads/confirm (UploadConfirmRequest) returns (UploadConfirmResponse)
+
+	@doc "上传图片（后端代理 / 本地落盘保留向后兼容）"
+	@handler UploadHandler
+	post /api/v1/uploads returns (UploadResponse)
 
 	@doc "获取图片元数据"
 	@handler GetUploadHandler
