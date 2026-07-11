@@ -3,6 +3,7 @@ package review
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	domainReview "github.com/colinrs/shopjoy/admin/internal/domain/review"
@@ -310,10 +311,86 @@ func (s *service) BatchHide(ctx context.Context, tenantID shared.TenantID, ids [
 	}, nil
 }
 
+type reviewStatsRow struct {
+	TotalReviews     int64
+	PendingReviews   int64
+	ApprovedReviews  int64
+	HiddenReviews    int64
+	AverageRating    float64
+	QualityAvgRating float64
+	ValueAvgRating   float64
+	FiveStarCount    int64
+	FourStarCount    int64
+	ThreeStarCount   int64
+	TwoStarCount     int64
+	OneStarCount     int64
+	WithImageCount   int64
+	FeaturedCount    int64
+	RepliedCount     int64
+}
+
 func (s *service) GetStats(ctx context.Context, tenantID shared.TenantID) (*domainReview.OverallStats, error) {
-	// Implement stats calculation from database
-	// This is a simplified implementation
-	return &domainReview.OverallStats{}, nil
+	var row reviewStatsRow
+
+	mainWhere := "deleted_at IS NULL"
+	subWhere := "r2.deleted_at IS NULL"
+	var args []interface{}
+	if tenantID != 0 {
+		mainWhere += " AND tenant_id = ?"
+		subWhere += " AND r2.tenant_id = ?"
+		args = append(args, tenantID.Int64(), tenantID.Int64())
+	}
+
+	query := fmt.Sprintf(`
+		SELECT
+			COUNT(*)                                                        AS total_reviews,
+			SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END)                    AS pending_reviews,
+			SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END)                    AS approved_reviews,
+			SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END)                    AS hidden_reviews,
+			COALESCE(AVG(overall_rating), 0)                                AS average_rating,
+			COALESCE(AVG(quality_rating), 0)                                AS quality_avg_rating,
+			COALESCE(AVG(value_rating), 0)                                  AS value_avg_rating,
+			SUM(CASE WHEN overall_rating >= 4.5 THEN 1 ELSE 0 END)         AS five_star_count,
+			SUM(CASE WHEN overall_rating >= 3.5 AND overall_rating < 4.5 THEN 1 ELSE 0 END) AS four_star_count,
+			SUM(CASE WHEN overall_rating >= 2.5 AND overall_rating < 3.5 THEN 1 ELSE 0 END) AS three_star_count,
+			SUM(CASE WHEN overall_rating >= 1.5 AND overall_rating < 2.5 THEN 1 ELSE 0 END) AS two_star_count,
+			SUM(CASE WHEN overall_rating < 1.5 THEN 1 ELSE 0 END)          AS one_star_count,
+			SUM(CASE WHEN images IS NOT NULL AND images != '[]' AND images != '' THEN 1 ELSE 0 END) AS with_image_count,
+			SUM(CASE WHEN is_featured = true THEN 1 ELSE 0 END)            AS featured_count,
+			(SELECT COUNT(DISTINCT rr.review_id) FROM review_replies rr
+			 INNER JOIN reviews r2 ON rr.review_id = r2.id
+			 WHERE %s)                                                      AS replied_count
+		FROM reviews
+		WHERE %s
+	`, subWhere, mainWhere)
+
+	err := s.db.WithContext(ctx).Raw(query, args...).Scan(&row).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var replyRate float64
+	if row.TotalReviews > 0 {
+		replyRate = float64(row.RepliedCount) / float64(row.TotalReviews) * 100
+	}
+
+	return &domainReview.OverallStats{
+		TotalReviews:     row.TotalReviews,
+		PendingReviews:   row.PendingReviews,
+		ApprovedReviews:  row.ApprovedReviews,
+		HiddenReviews:    row.HiddenReviews,
+		AverageRating:    row.AverageRating,
+		QualityAvgRating: row.QualityAvgRating,
+		ValueAvgRating:   row.ValueAvgRating,
+		FiveStarCount:    row.FiveStarCount,
+		FourStarCount:    row.FourStarCount,
+		ThreeStarCount:   row.ThreeStarCount,
+		TwoStarCount:     row.TwoStarCount,
+		OneStarCount:     row.OneStarCount,
+		WithImageCount:   row.WithImageCount,
+		ReplyRate:        replyRate,
+		FeaturedCount:    row.FeaturedCount,
+	}, nil
 }
 
 func (s *service) GetProductStats(ctx context.Context, tenantID shared.TenantID, productID int64) (*domainReview.ReviewStats, error) {

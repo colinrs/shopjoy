@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
@@ -27,10 +28,10 @@ func NewGetReviewStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Get
 }
 
 func (l *GetReviewStatsLogic) GetReviewStats(req *types.ReviewStatsReq) (resp *types.ReviewStatsResp, err error) {
-	tenantID, err := contextx.MustGetTenantIDForLogic(l.ctx)
-	if err != nil {
-		l.Logger.Errorf("failed to get tenant ID: %v", err)
-		return nil, err
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok {
+		l.Logger.Errorf("failed to get tenant ID from context")
+		return nil, code.ErrUnauthorized
 	}
 
 	stats, err := l.svcCtx.ReviewService.GetStats(l.ctx, shared.TenantID(tenantID))

@@ -1,24 +1,29 @@
 <template>
   <div class="user-order-list">
     <el-table v-loading="loading" :data="orders" stripe>
-      <el-table-column :label="$t('users.orders.columns.orderNo')" min-width="180">
+      <el-table-column :label="$t('users.orderNo')" min-width="180">
         <template #default="{ row }">
           <span class="order-no">{{ row.order_no }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.status')" width="120" align="center">
+      <el-table-column :label="$t('users.orderStatus')" width="120" align="center">
         <template #default="{ row }">
           <el-tag :type="getStatusType(row.status)" size="small">
             {{ row.status }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.totalAmount')" width="140" align="right">
+      <el-table-column :label="$t('users.orderItemCount')" width="100" align="center">
+        <template #default="{ row }">
+          <span>{{ row.item_count ?? '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('users.orderTotalAmount')" width="140" align="right">
         <template #default="{ row }">
           <span class="amount">{{ row.currency }} {{ row.total_amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orders.columns.createdAt')" width="180">
+      <el-table-column :label="$t('users.orderCreatedAt')" width="180">
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
@@ -44,7 +49,8 @@
       />
     </div>
 
-    <el-empty v-if="!loading && orders.length === 0" :description="$t('users.noOrders')" />
+    <el-empty v-if="!loading && orders.length === 0 && !error" :description="$t('users.noOrders')" />
+    <el-empty v-if="!loading && error" :description="error" image-error />
   </div>
 </template>
 
@@ -52,7 +58,6 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserOrders, type UserOrderListItem } from '@/api/user'
-import { ElMessage } from 'element-plus'
 import { t } from '@/plugins/i18n'
 
 const props = defineProps<{ userId?: string }>()
@@ -63,10 +68,12 @@ const orders = ref<UserOrderListItem[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const error = ref<string>('')
 
 const load = async () => {
   if (!props.userId) return
   loading.value = true
+  error.value = ''
   try {
     const res = await getUserOrders(props.userId, {
       page: currentPage.value,
@@ -76,7 +83,7 @@ const load = async () => {
     total.value = res.total || 0
   } catch (err) {
     console.error('Failed to load orders:', err)
-    ElMessage.error(t('users.loadOrdersFailed'))
+    error.value = t('users.loadOrdersFailed')
     orders.value = []
     total.value = 0
   } finally {
