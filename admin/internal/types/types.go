@@ -1222,6 +1222,10 @@ type GetTransactionReq struct {
 	ID int64 `path:"id"`
 }
 
+type GetUploadReq struct {
+	ID string `path:"id"`
+}
+
 type GetUserRequest struct {
 	ID int64 `path:"id"`
 }
@@ -3274,6 +3278,31 @@ type UpdateWarehouseStatusReq struct {
 	Status int8  `json:"status"` // 0=disabled, 1=enabled
 }
 
+type UploadConfirmRequest struct {
+	AssetID  string `json:"asset_id,optional"`
+	PublicID string `json:"public_id"`
+	URL      string `json:"url"`
+	Filename string `json:"filename"`
+	Size     int64  `json:"size"`
+	MimeType string `json:"mime_type"`
+	Width    int    `json:"width"`
+	Height   int    `json:"height"`
+	Format   string `json:"format"`
+	Category string `json:"category"`
+}
+
+type UploadConfirmResponse struct {
+	ID        string `json:"id"`
+	URL       string `json:"url"`
+	Filename  string `json:"filename"`
+	Category  string `json:"category"`
+	Size      int64  `json:"size"`
+	MimeType  string `json:"mime_type"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
+	CreatedAt string `json:"created_at"`
+}
+
 type UploadRequest struct {
 	Category string `form:"category,optional"`
 }
@@ -3288,6 +3317,24 @@ type UploadResponse struct {
 	Width     int    `json:"width"`
 	Height    int    `json:"height"`
 	CreatedAt string `json:"created_at"`
+}
+
+type UploadSignRequest struct {
+	Category string `form:"category,optional"`
+	Filename string `form:"filename,optional"`
+	MimeType string `form:"mime_type,optional"`
+}
+
+type UploadSignResponse struct {
+	CloudName    string `json:"cloud_name"`
+	APIKey       string `json:"api_key"`
+	Timestamp    string `json:"timestamp"`
+	Signature    string `json:"signature"`
+	Folder       string `json:"folder"`
+	PublicID     string `json:"public_id"`
+	UploadPreset string `json:"upload_preset,omitempty"`
+	AssetID      string `json:"asset_id"`
+	UploadURL    string `json:"upload_url"`
 }
 
 type UserAddressListResponse struct {
