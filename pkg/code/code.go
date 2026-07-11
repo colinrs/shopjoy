@@ -392,6 +392,10 @@ var (
 	ErrUploadInvalidCategory     = &Err{HTTPCode: http.StatusBadRequest, Code: 240003, Msg: "invalid category"}
 	ErrUploadFailed              = &Err{HTTPCode: http.StatusInternalServerError, Code: 240004, Msg: "upload failed"}
 	ErrUploadNotFound            = &Err{HTTPCode: http.StatusNotFound, Code: 240005, Msg: "file not found"}
+	ErrUploadSignFailed          = &Err{HTTPCode: http.StatusInternalServerError, Code: 240006, Msg: "upload signing failed"}
+	ErrUploadConfirmFailed       = &Err{HTTPCode: http.StatusBadRequest, Code: 240007, Msg: "upload confirm failed"}
+	ErrUploadProviderError       = &Err{HTTPCode: http.StatusBadGateway, Code: 240008, Msg: "upload provider error"}
+	ErrUploadCrossTenantAccess   = &Err{HTTPCode: http.StatusForbidden, Code: 240009, Msg: "cross-tenant upload access denied"}
 
 	// ==================== Points Module (250xxx) ====================
 	// EarnRule errors (250xxx)
