@@ -284,41 +284,12 @@
         {{ $t('products.productImage') }}
       </h3>
       <el-form-item :label="$t('products.imageUrl')">
-        <div class="image-list">
-          <div
-            v-for="(img, index) in localForm.images"
-            :key="index"
-            class="image-item"
-          >
-            <el-image
-              :src="img"
-              fit="cover"
-              class="product-image"
-            >
-              <template #error>
-                <div class="image-placeholder">
-                  <el-icon><Picture /></el-icon>
-                </div>
-              </template>
-            </el-image>
-            <el-button
-              type="danger"
-              size="small"
-              circle
-              class="remove-btn"
-              @click="handleRemoveImage(index)"
-            >
-              <el-icon><Close /></el-icon>
-            </el-button>
-          </div>
-          <div
-            class="add-image"
-            @click="handleShowAddImage"
-          >
-            <el-icon><Plus /></el-icon>
-            <span>{{ $t('products.addImage') }}</span>
-          </div>
-        </div>
+        <ImageUploader
+          v-model:value="localForm.images"
+          category="product"
+          multiple
+          :max="9"
+        />
       </el-form-item>
       <div class="save-actions">
         <el-button
@@ -337,9 +308,10 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { Picture, Plus, Close, Check } from '@element-plus/icons-vue'
+import { Check } from '@element-plus/icons-vue'
 import { t } from '@/plugins/i18n'
 import type { FormInstance } from 'element-plus'
+import ImageUploader from '@/components/ImageUploader.vue'
 import type { ProductInfoTabProps, ProductInfoTabEmits, ProductFormData } from '../types'
 import type { CategoryTree } from '@/api/category'
 
@@ -383,16 +355,8 @@ const formRules = {
   price: [{ required: true, message: () => t('products.enterPrice'), trigger: 'blur' }]
 }
 
-const handleShowAddImage = () => {
-  emit('show-add-image')
-}
-
 const handleSave = () => {
   emit('save')
-}
-
-const handleRemoveImage = (index: number) => {
-  localForm.value.images.splice(index, 1)
 }
 
 // Expose form ref for parent validation
@@ -424,61 +388,6 @@ defineExpose({
   font-size: 16px;
   font-weight: 600;
   color: #374151;
-}
-
-.image-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.image-item {
-  position: relative;
-  width: 120px;
-  height: 120px;
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  border: 1px solid #E5E7EB;
-}
-
-.image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F3F4F6;
-  color: #9CA3AF;
-}
-
-.remove-btn {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-}
-
-.add-image {
-  width: 120px;
-  height: 120px;
-  border: 2px dashed #D1D5DB;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  color: #9CA3AF;
-  transition: all 0.2s;
-}
-
-.add-image:hover {
-  border-color: #409EFF;
-  color: #409EFF;
 }
 
 .category-path-display {

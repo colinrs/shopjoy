@@ -67,7 +67,6 @@
             :categories-loading="categoriesLoading"
             :brands-loading="brandsLoading"
             @update:product-form="handleProductFormUpdate"
-            @show-add-image="handleShowAddImageDialog"
             @save="handleSave"
           />
         </el-tab-pane>
@@ -170,11 +169,6 @@
       @success="handlePushToMarketSuccess"
     />
 
-    <AddImageDialog
-      v-model:visible="addImageDialogVisible"
-      @add="handleAddImage"
-    />
-
     <AdjustStockDialog
       v-model:visible="adjustStockDialogVisible"
       :sku="productForm.sku"
@@ -226,7 +220,6 @@ import {
   ProductInventoryTab,
   ProductReviewsTab,
   PushToMarketDialog,
-  AddImageDialog,
   AdjustStockDialog,
   VariantDialog
 } from './components'
@@ -254,7 +247,6 @@ const brands = ref<Brand[]>([])
 const categoriesLoading = ref(false)
 const brandsLoading = ref(false)
 const pushToMarketDialogVisible = ref(false)
-const addImageDialogVisible = ref(false)
 const adjustStockDialogVisible = ref(false)
 const productInfoTabRef = ref()
 const originalForm = ref<ProductFormData | null>(null)
@@ -519,16 +511,6 @@ const handleProductFormUpdate = (form: ProductFormData) => {
 
 const handleProductMarketsUpdate = (markets: ProductMarket[]) => {
   productMarkets.value = markets
-}
-
-// Show add image dialog
-const handleShowAddImageDialog = () => {
-  addImageDialogVisible.value = true
-}
-
-// Handle add image
-const handleAddImage = (url: string) => {
-  productForm.images.push(url)
 }
 
 // Show push to market dialog

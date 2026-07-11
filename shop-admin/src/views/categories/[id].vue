@@ -225,15 +225,15 @@
           />
         </el-form-item>
         <el-form-item :label="$t('categories.iconUrl')">
-          <el-input
-            v-model="categoryForm.icon"
-            :placeholder="$t('categories.enterIconUrl')"
+          <ImageUploader
+            v-model:value="categoryForm.icon"
+            category="category"
           />
         </el-form-item>
         <el-form-item :label="$t('categories.imageUrl')">
-          <el-input
-            v-model="categoryForm.image"
-            :placeholder="$t('categories.enterImageUrl')"
+          <ImageUploader
+            v-model:value="categoryForm.image"
+            category="category"
           />
         </el-form-item>
         <el-form-item :label="$t('categories.seoTitle')">
@@ -308,6 +308,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Edit, Picture, Goods } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
+import ImageUploader from '@/components/ImageUploader.vue'
 import {
   getCategory,
   updateCategory,
