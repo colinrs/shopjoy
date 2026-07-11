@@ -31,3 +31,16 @@ Telemetry:
   Endpoint: 192.168.0.100:4317
   Sampler: 1.0      # 1.0 = 全量采样
   Batcher: otlpgrpc
+
+Storage:
+  Type: local           # local | cloudinary (override per-environment via admin-api-local.yaml)
+  Local:
+    BasePath: ./uploads
+  # Cloudinary block:
+  # Cloudinary:
+  #   CloudName: ""        # override in admin-api-local.yaml
+  #   APIKey: ""           # override in admin-api-local.yaml
+  #   APISecret: ""        # override in admin-api-local.yaml (NEVER commit)
+  #   UploadPreset: ""
+  #   Environment: "dev"
+  #   Secure: true
