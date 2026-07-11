@@ -359,7 +359,47 @@
     "orderCountMax": "最大订单数",
     "orderCountMin": "最小订单数",
     "suspendReasonLengthError": "禁用原因长度需在5-200个字符之间",
-    "suspendReasonRequired": "请输入禁用原因"
+    "suspendReasonRequired": "请输入禁用原因",
+    "loadOrdersFailed": "加载订单记录失败",
+    "loadPointsFailed": "加载积分记录失败",
+    "loadReviewsFailed": "加载评价记录失败",
+    "noPoints": "暂无积分流水",
+    "noReviews": "暂无评价",
+    "pointsColumns": {
+      "time": "时间",
+      "type": "类型",
+      "change": "积分变化",
+      "balance": "余额",
+      "description": "说明",
+      "reference": "关联"
+    },
+    "reviewsColumns": {
+      "product": "商品",
+      "user": "用户",
+      "rating": "评分",
+      "content": "内容",
+      "status": "状态",
+      "createdAt": "时间",
+      "anonymous": "匿名用户"
+    },
+    "logFilterAll": "全部动作",
+    "logColumns": {
+      "time": "时间",
+      "action": "动作",
+      "operator": "操作人",
+      "ip": "IP 地址",
+      "reason": "原因",
+      "userAgent": "User Agent"
+    },
+    "logActions": {
+      "CREATE_USER": "创建用户",
+      "UPDATE_USER": "更新资料",
+      "SUSPEND_USER": "禁用用户",
+      "SUSPEND_WITH_REASON": "禁用用户（带原因）",
+      "ACTIVATE_USER": "启用用户",
+      "DELETE_USER": "删除用户",
+      "RESET_PASSWORD": "重置密码"
+    }
   },
   "products": {
     "title": "商品管理",

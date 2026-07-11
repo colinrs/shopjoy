@@ -182,6 +182,9 @@ func (r *reviewRepo) FindList(ctx context.Context, db *gorm.DB, query review.Que
 	if query.ProductID > 0 {
 		dbQuery = dbQuery.Where("product_id = ?", query.ProductID)
 	}
+	if query.UserID > 0 {
+		dbQuery = dbQuery.Where("user_id = ?", query.UserID)
+	}
 	if query.Status != nil && query.Status.IsValid() {
 		dbQuery = dbQuery.Where("status = ?", *query.Status)
 	}

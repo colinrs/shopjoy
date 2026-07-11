@@ -49,6 +49,7 @@ func (s *service) ListReviews(ctx context.Context, tenantID shared.TenantID, req
 	query := domainReview.Query{
 		TenantID:  tenantID,
 		ProductID: req.ProductID,
+		UserID:    req.UserID,
 		HasImage:  req.HasImage,
 		Keyword:   req.Keyword,
 		Page:      req.Page,

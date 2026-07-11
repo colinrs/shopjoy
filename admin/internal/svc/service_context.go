@@ -24,6 +24,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
+	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
 	"github.com/colinrs/shopjoy/admin/internal/middleware"
@@ -96,6 +97,9 @@ type ServiceContext struct {
 	PointsAccountRepo     points.PointsAccountRepository
 	PointsTransactionRepo points.PointsTransactionRepository
 	PointsRedemptionRepo  points.PointsRedemptionRepository
+	// User operation logs (audit trail for admin-side user mutations)
+	OperationLogRepo    user.OperationLogRepository
+	OperationLogService appUser.OperationLogService
 	// Shop Settings
 	ShopSettingsRepo         shop.ShopSettingsRepository
 	BusinessHoursRepo        shop.BusinessHoursRepository
@@ -219,6 +223,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		idGen,
 	)
 
+	// User operation logs repository
+	operationLogRepo := persistence.NewOperationLogRepository()
+
 	// Shop settings repositories
 	shopSettingsRepo := persistence.NewShopSettingsRepository()
 	businessHoursRepo := persistence.NewBusinessHoursRepository()
@@ -288,6 +295,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		PointsAccountRepo:     pointsAccountRepo,
 		PointsTransactionRepo: pointsTransactionRepo,
 		PointsRedemptionRepo:  pointsRedemptionRepo,
+		// User operation logs (audit trail)
+		OperationLogRepo:    operationLogRepo,
+		OperationLogService: appUser.NewOperationLogService(db, operationLogRepo, idGen),
 		// Shop settings
 		ShopSettingsRepo:         shopSettingsRepo,
 		BusinessHoursRepo:        businessHoursRepo,

@@ -1619,6 +1619,7 @@ type ListRegionsResp struct {
 
 type ListReviewsReq struct {
 	ProductID int64  `form:"product_id,optional"`
+	UserID    int64  `form:"user_id,optional"`
 	Status    string `form:"status,optional"`
 	RatingMin int    `form:"rating_min,optional"`
 	RatingMax int    `form:"rating_max,optional"`
@@ -1744,6 +1745,21 @@ type ListUserCouponsResp struct {
 	Total    int64                   `json:"total"`
 	Page     int                     `json:"page"`
 	PageSize int                     `json:"page_size"`
+}
+
+type ListUserOperationLogsReq struct {
+	ID       int64  `path:"id"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Action   string `form:"action,optional"`
+	Keyword  string `form:"keyword,optional"`
+}
+
+type ListUserOperationLogsResp struct {
+	List     []*UserOperationLog `json:"list"`
+	Total    int64               `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 }
 
 type ListUsersEnhancedRequest struct {
@@ -3337,6 +3353,19 @@ type UserDetailResponse struct {
 	UpdatedAt      string               `json:"updated_at"`
 	LastOrderAt    string               `json:"last_order_at"`
 	DefaultAddress *UserAddressResponse `json:"default_address"`
+}
+
+type UserOperationLog struct {
+	ID           int64  `json:"id,string"`
+	UserID       int64  `json:"user_id,string"`
+	Action       string `json:"action"`
+	ActionText   string `json:"action_text"`
+	OperatorID   int64  `json:"operator_id,string"`
+	OperatorName string `json:"operator_name"`
+	Reason       string `json:"reason"`
+	IPAddress    string `json:"ip_address"`
+	UserAgent    string `json:"user_agent"`
+	CreatedAt    string `json:"created_at"`
 }
 
 type UserStatsEnhancedResponse struct {

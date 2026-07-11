@@ -3,6 +3,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "view": "View",
     "delete": "Delete",
     "edit": "Edit",
     "search": "Search",
@@ -359,7 +360,47 @@
     "orderCountMax": "Maximum order count",
     "orderCountMin": "Minimum order count",
     "suspendReasonLengthError": "Suspend reason must be 5-200 characters",
-    "suspendReasonRequired": "Please enter the suspend reason"
+    "suspendReasonRequired": "Please enter the suspend reason",
+    "loadOrdersFailed": "Failed to load orders",
+    "loadPointsFailed": "Failed to load points",
+    "loadReviewsFailed": "Failed to load reviews",
+    "noPoints": "No points transactions",
+    "noReviews": "No reviews",
+    "pointsColumns": {
+      "time": "Time",
+      "type": "Type",
+      "change": "Change",
+      "balance": "Balance",
+      "description": "Description",
+      "reference": "Reference"
+    },
+    "reviewsColumns": {
+      "product": "Product",
+      "user": "User",
+      "rating": "Rating",
+      "content": "Content",
+      "status": "Status",
+      "createdAt": "Created At",
+      "anonymous": "Anonymous"
+    },
+    "logFilterAll": "All actions",
+    "logColumns": {
+      "time": "Time",
+      "action": "Action",
+      "operator": "Operator",
+      "ip": "IP Address",
+      "reason": "Reason",
+      "userAgent": "User Agent"
+    },
+    "logActions": {
+      "CREATE_USER": "Create User",
+      "UPDATE_USER": "Update Profile",
+      "SUSPEND_USER": "Suspend User",
+      "SUSPEND_WITH_REASON": "Suspend (with reason)",
+      "ACTIVATE_USER": "Activate User",
+      "DELETE_USER": "Delete User",
+      "RESET_PASSWORD": "Reset Password"
+    }
   },
   "products": {
     "title": "Products",

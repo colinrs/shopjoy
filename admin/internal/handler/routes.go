@@ -1773,6 +1773,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: users.GetUserDetailHandler(serverCtx),
 				},
 				{
+					// 获取用户操作日志
+					Method:  http.MethodGet,
+					Path:    "/api/v1/users/:id/operation-logs",
+					Handler: users.ListUserOperationLogsHandler(serverCtx),
+				},
+				{
 					// 重置用户密码
 					Method:  http.MethodPost,
 					Path:    "/api/v1/users/:id/reset-password",

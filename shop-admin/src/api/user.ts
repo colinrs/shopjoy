@@ -257,3 +257,113 @@ export function batchUpdateUserStatus(data: BatchUpdateUserStatusRequest) {
     data
   })
 }
+// ===================== User Detail Tab Lists =====================
+
+export interface UserOrderListItem {
+  order_id: string
+  order_no: string
+  status: string
+  fulfillment_status: string
+  total_amount: string
+  currency: string
+  created_at: string
+}
+
+export interface UserOrdersResponse {
+  list: UserOrderListItem[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export function getUserOrders(userId: string, params: { page: number; page_size: number }) {
+  return request<UserOrdersResponse>({
+    url: '/api/v1/orders',
+    method: 'get',
+    params: { ...params, user_id: userId }
+  })
+}
+
+export interface UserPointsTransaction {
+  id: string
+  points: number
+  balance_after: number
+  type: string
+  reference_type: string
+  reference_id: string
+  description: string
+  created_at: string
+}
+
+export interface UserPointsTransactionsResponse {
+  list: UserPointsTransaction[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export function getUserPointsTransactions(userId: string, params: { page: number; page_size: number }) {
+  return request<UserPointsTransactionsResponse>({
+    url: '/api/v1/points/transactions',
+    method: 'get',
+    params: { ...params, user_id: userId }
+  })
+}
+
+export interface UserReviewListItem {
+  id: string
+  product_name: string
+  product_id: string
+  user_name: string
+  is_anonymous: boolean
+  overall_rating: string
+  content: string
+  status: string
+  created_at: string
+}
+
+export interface UserReviewsResponse {
+  list: UserReviewListItem[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export function getUserReviews(userId: string, params: { page: number; page_size: number }) {
+  return request<UserReviewsResponse>({
+    url: '/api/v1/reviews',
+    method: 'get',
+    params: { ...params, user_id: userId }
+  })
+}
+
+export interface UserOperationLogItem {
+  id: string
+  user_id: string
+  action: string
+  action_text: string
+  operator_id: string
+  operator_name: string
+  reason: string
+  ip_address: string
+  user_agent: string
+  created_at: string
+}
+
+export interface UserOperationLogsResponse {
+  list: UserOperationLogItem[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export function getUserOperationLogs(
+  userId: string,
+  params: { page: number; page_size: number; action?: string }
+) {
+  return request<UserOperationLogsResponse>({
+    url: `/api/v1/users/${userId}/operation-logs`,
+    method: 'get',
+    params
+  })
+}
