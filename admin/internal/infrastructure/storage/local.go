@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/media"
 	snowflake "github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type localStorage struct {
@@ -60,6 +62,11 @@ func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, erro
 		return nil, errors.New("path traversal blocked")
 	}
 
+	buf, err := io.ReadAll(draft.Reader)
+	if err != nil {
+		return nil, fmt.Errorf("buffer reader: %w", err)
+	}
+
 	dst, err := os.Create(filePath) //nolint:gosec
 	if err != nil {
 		return nil, fmt.Errorf("create file: %w", err)
@@ -68,18 +75,11 @@ func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, erro
 
 	width, height := 0, 0
 	if ext != ".gif" && ext != ".webp" {
-		if cfg, _, derr := image.DecodeConfig(draft.Reader); derr == nil {
+		if cfg, _, derr := image.DecodeConfig(bytes.NewReader(buf)); derr == nil {
 			width, height = cfg.Width, cfg.Height
 		}
-		if _, ok := draft.Reader.(io.Seeker); !ok {
-			// not a seeker; reader is consumed by DecodeConfig above and
-			// the subsequent io.Copy below will see a drained reader.
-			// Real callers should pass a reader that can be re-read (e.g.
-			// a bytes.Reader) when dimension decoding is required.
-			_ = ok
-		}
 	}
-	if _, err := io.Copy(dst, draft.Reader); err != nil {
+	if _, err := dst.Write(buf); err != nil {
 		return nil, fmt.Errorf("write file: %w", err)
 	}
 
@@ -172,7 +172,15 @@ func (s *localStorage) Delete(ctx context.Context, id string) error {
 	}
 	// Best-effort unlink; ignore not-found errors on disk.
 	full := filepath.Join(s.basePath, asset.PublicID)
-	_ = os.Remove(strings.TrimPrefix(full, s.basePath))
+	rel, err := filepath.Rel(s.basePath, full)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("compute relative path for %s: %v", full, err)
+		return err
+	}
+	if err := os.Remove(filepath.Join(s.basePath, rel)); err != nil && !errors.Is(err, os.ErrNotExist) {
+		logx.WithContext(ctx).Errorf("local delete file failed: id=%s path=%s: %v", id, rel, err)
+		// continue — best-effort. DB soft-delete still happens.
+	}
 	return s.repo.SoftDelete(ctx, asset.ID)
 }
 
