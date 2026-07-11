@@ -81,6 +81,7 @@ export interface CreateAdminUserParams {
   email: string
   mobile?: string
   real_name: string
+  avatar?: string
   password: string
   type: number
   tenant_id?: string

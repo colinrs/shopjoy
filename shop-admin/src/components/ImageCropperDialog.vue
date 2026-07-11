@@ -32,7 +32,9 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import Cropper from 'cropperjs'
-import 'cropperjs/dist/cropper.css'
+
+// cropperjs 2.x bundles styles inline (no separate CSS file). Older 1.x had
+// `cropperjs/dist/cropper.css` but we use 2.x so no import is needed.
 
 interface Props {
   visible: boolean
