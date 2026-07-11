@@ -68,7 +68,8 @@
       />
     </div>
 
-    <el-empty v-if="!loading && logs.length === 0" :description="$t('users.noLogs')" />
+    <el-empty v-if="!loading && logs.length === 0 && !error" :description="$t('users.noLogs')" />
+    <el-empty v-if="!loading && error" :description="error" image-error />
   </div>
 </template>
 
@@ -76,7 +77,6 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getUserOperationLogs, type UserOperationLogItem } from '@/api/user'
-import { ElMessage } from 'element-plus'
 
 const props = defineProps<{ userId?: string }>()
 const { t } = useI18n()
@@ -87,8 +87,10 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const filterAction = ref<string>('')
+const error = ref<string>('')
 
 const actionOptions = [
+  { value: 'CREATE_USER', label: t('users.logActions.CREATE_USER') },
   { value: 'UPDATE_USER', label: t('users.logActions.UPDATE_USER') },
   { value: 'SUSPEND_USER', label: t('users.logActions.SUSPEND_USER') },
   { value: 'SUSPEND_WITH_REASON', label: t('users.logActions.SUSPEND_WITH_REASON') },
@@ -100,6 +102,7 @@ const actionOptions = [
 const load = async () => {
   if (!props.userId) return
   loading.value = true
+  error.value = ''
   try {
     const res = await getUserOperationLogs(props.userId, {
       page: currentPage.value,
@@ -110,7 +113,7 @@ const load = async () => {
     total.value = res.total || 0
   } catch (err) {
     console.error('Failed to load operation logs:', err)
-    ElMessage.error(t('users.loadLogsFailed'))
+    error.value = t('users.loadLogsFailed')
     logs.value = []
     total.value = 0
   } finally {

@@ -51,7 +51,8 @@
       />
     </div>
 
-    <el-empty v-if="!loading && txns.length === 0" :description="$t('users.noPoints')" />
+    <el-empty v-if="!loading && txns.length === 0 && !error" :description="$t('users.noPoints')" />
+    <el-empty v-if="!loading && error" :description="error" image-error />
   </div>
 </template>
 
@@ -59,7 +60,6 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserPointsTransactions, type UserPointsTransaction } from '@/api/user'
-import { ElMessage } from 'element-plus'
 import { t } from '@/plugins/i18n'
 
 const props = defineProps<{ userId?: string }>()
@@ -70,10 +70,12 @@ const txns = ref<UserPointsTransaction[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const error = ref<string>('')
 
 const load = async () => {
   if (!props.userId) return
   loading.value = true
+  error.value = ''
   try {
     const res = await getUserPointsTransactions(props.userId, {
       page: currentPage.value,
@@ -83,7 +85,7 @@ const load = async () => {
     total.value = res.total || 0
   } catch (err) {
     console.error('Failed to load points:', err)
-    ElMessage.error(t('users.loadPointsFailed'))
+    error.value = t('users.loadPointsFailed')
     txns.value = []
     total.value = 0
   } finally {

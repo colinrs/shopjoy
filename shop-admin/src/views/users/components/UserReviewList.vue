@@ -59,7 +59,8 @@
       />
     </div>
 
-    <el-empty v-if="!loading && reviews.length === 0" :description="$t('users.noReviews')" />
+    <el-empty v-if="!loading && reviews.length === 0 && !error" :description="$t('users.noReviews')" />
+    <el-empty v-if="!loading && error" :description="error" image-error />
   </div>
 </template>
 
@@ -68,7 +69,6 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Star } from '@element-plus/icons-vue'
 import { getUserReviews, type UserReviewListItem } from '@/api/user'
-import { ElMessage } from 'element-plus'
 import { t } from '@/plugins/i18n'
 
 const props = defineProps<{ userId?: string }>()
@@ -79,10 +79,12 @@ const reviews = ref<UserReviewListItem[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const error = ref<string>('')
 
 const load = async () => {
   if (!props.userId) return
   loading.value = true
+  error.value = ''
   try {
     const res = await getUserReviews(props.userId, {
       page: currentPage.value,
@@ -92,7 +94,7 @@ const load = async () => {
     total.value = res.total || 0
   } catch (err) {
     console.error('Failed to load reviews:', err)
-    ElMessage.error(t('users.loadReviewsFailed'))
+    error.value = t('users.loadReviewsFailed')
     reviews.value = []
     total.value = 0
   } finally {
