@@ -933,8 +933,11 @@ Authentication endpoints do not require authorization.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/uploads` | Upload file |
-| DELETE | `/uploads/:id` | Delete file |
+| POST | `/uploads/sign` | Issue Cloudinary signature bundle for direct browser upload |
+| POST | `/uploads` | Upload file (server-side proxy / local-disk fallback) |
+| POST | `/uploads/confirm` | Register a direct-uploaded asset (called after browser's Cloudinary POST) |
+| GET | `/uploads/:id` | Fetch asset metadata |
+| DELETE | `/uploads/:id` | Delete file (tenant-scoped) |
 
 #### Upload Categories
 
@@ -943,6 +946,21 @@ Authentication endpoints do not require authorization.
 | product | Product images |
 | banner | Banner images |
 | avatar | User avatars |
+
+#### Storage Backends
+
+`admin/etc/admin-api.yaml` chooses the storage driver via `Storage.Type`:
+
+- `local` — files written to disk under `./uploads/{category}/{YYYY}/{MM}/{DD}/{id}.{ext}`.
+- `cloudinary` — backend signs; browser uploads directly to Cloudinary; admin service records metadata only.
+
+Cloudinary folder = `{Storage.Cloudinary.Environment}/{tenant_id}/{category}`.
+
+#### Direct-upload Flow
+
+1. Client → `POST /uploads/sign` → `{cloud_name, api_key, timestamp, signature, folder, public_id, asset_id, upload_url, …}`.
+2. Browser `POST` form-data to `upload_url` with the signature; Cloudinary responds `{public_id, secure_url, width, height, format, …}`.
+3. Client → `POST /uploads/confirm` with `{asset_id, public_id, url, width, height, format, category, …}` → recorded in `media_assets`.
 
 ---
 
