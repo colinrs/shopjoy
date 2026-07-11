@@ -7,6 +7,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -484,13 +485,18 @@ func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB,  start, 
 }
 
 // FindTopProducts 查询热销商品
-func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB,  startTime time.Time, limit int) ([]*fulfillment.TopProduct, error) {
+func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, startTime time.Time, limit int) ([]*fulfillment.TopProduct, error) {
 	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
 
 	query := db.WithContext(ctx).Table("order_items oi").
 		Select("oi.product_id, oi.product_name, oi.image, SUM(oi.quantity) as sales, SUM(oi.total_amount) as revenue").
-		Joins("JOIN orders o ON o.id = oi.order_id").
-		Where("o.status IN ? AND o.deleted_at IS NULL", statusStrings)
+		Joins("JOIN orders o ON o.id = oi.order_id AND o.deleted_at IS NULL").
+		Where("o.status IN ?", statusStrings)
+
+	// Manual tenant filter for JOINed table (plugin only handles primary table)
+	if tenantID, ok := contextx.GetTenantID(ctx); ok && tenantID != 0 {
+		query = query.Where("o.tenant_id = ?", tenantID)
+	}
 
 	if !startTime.IsZero() {
 		query = query.Where("o.paid_at >= ?", startTime)

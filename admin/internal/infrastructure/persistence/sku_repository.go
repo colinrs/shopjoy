@@ -9,6 +9,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -260,11 +261,16 @@ func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB,  page, pageSize
 
 // Search returns a lightweight SKU item list joined with product name for the dropdown.
 // Only enabled SKUs are returned, filtered by LIKE on sku code.
-func (r *skuRepo) Search(ctx context.Context, db *gorm.DB,  keyword string, page, pageSize int) ([]*product.SKUItem, int64, error) {
+func (r *skuRepo) Search(ctx context.Context, db *gorm.DB, keyword string, page, pageSize int) ([]*product.SKUItem, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
 		Select("skus.code AS sku_code, skus.product_id, products.name AS product_name, skus.safety_stock").
-		Joins("LEFT JOIN products ON products.id = skus.product_id").
+		Joins("LEFT JOIN products ON products.id = skus.product_id AND products.deleted_at IS NULL").
 		Where("skus.status = ?", shared.StatusEnabled)
+
+	// Manual tenant filter for JOINed table (plugin only handles primary table)
+	if tenantID, ok := contextx.GetTenantID(ctx); ok && tenantID != 0 {
+		dbQuery = dbQuery.Where("products.tenant_id = ?", tenantID)
+	}
 
 	if keyword != "" {
 		dbQuery = dbQuery.Where("skus.code LIKE ?", "%"+keyword+"%")
