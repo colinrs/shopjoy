@@ -39,12 +39,12 @@ func (l *UploadSignLogic) UploadSign(req *types.UploadSignRequest) (resp *types.
 		cat = storage.CategoryProduct
 	}
 
-	// Resolve tenant/user from auth context. Reject forged requests (no auth
-	// context at all) before signing — otherwise an unauthenticated caller
-	// could mint Cloudinary signatures for arbitrary folders.
+	// Resolve tenant/user from auth context. Reject only when there is no
+	// authenticated user at all (forged request); platform admins legitimately
+	// have tenantID=0 and must still be able to sign.
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	userID, _ := contextx.GetUserID(l.ctx)
-	if userID == 0 || tenantID == 0 {
+	if userID == 0 {
 		l.Logger.Errorf("upload sign rejected: missing auth context (user_id=%d, tenant_id=%d)", userID, tenantID)
 		return nil, code.ErrUploadCrossTenantAccess
 	}

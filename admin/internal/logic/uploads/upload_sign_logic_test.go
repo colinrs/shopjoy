@@ -178,7 +178,8 @@ func TestUploadSignLogic_NonSignerStorage(t *testing.T) {
 }
 
 // TestUploadSignLogic_MissingAuthContext verifies that the cross-tenant guard
-// rejects forged (unauthenticated) requests, even before signing.
+// rejects forged (unauthenticated) requests, but allows platform admins
+// (tenantID=0) since they're legitimate authenticated users.
 func TestUploadSignLogic_MissingAuthContext(t *testing.T) {
 	signer := &fakeSigner{sig: storage.Signature{
 		CloudName: "demo", APIKey: "k", Timestamp: "1",
@@ -187,19 +188,27 @@ func TestUploadSignLogic_MissingAuthContext(t *testing.T) {
 	svcCtx := newSignServiceContext(signer, &fakeIDGen{id: 1})
 
 	cases := []struct {
-		name string
-		ctx  context.Context
+		name      string
+		ctx       context.Context
+		expectErr error
 	}{
-		{"no-tenant-no-user", context.Background()},
-		{"tenant-only", contextx.SetTenantID(context.Background(), 1)},
-		{"user-only", contextx.SetUserID(context.Background(), 1)},
+		{"no-user", context.Background(), code.ErrUploadCrossTenantAccess},
+		{"tenant-only-no-user", contextx.SetTenantID(context.Background(), 1), code.ErrUploadCrossTenantAccess},
+		{"platform-admin-user-only", contextx.SetUserID(context.Background(), 1), nil}, // tenant_id=0 OK
+		{"tenant-user", contextx.SetTenantID(contextx.SetUserID(context.Background(), 1), 1), nil},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			l := uploads.NewUploadSignLogic(tc.ctx, svcCtx)
 			_, err := l.UploadSign(&types.UploadSignRequest{Category: "product"})
-			if !errors.Is(err, code.ErrUploadCrossTenantAccess) {
-				t.Fatalf("err = %v, want %v", err, code.ErrUploadCrossTenantAccess)
+			if tc.expectErr == nil {
+				if err != nil {
+					t.Fatalf("err = %v, want nil", err)
+				}
+			} else {
+				if !errors.Is(err, tc.expectErr) {
+					t.Fatalf("err = %v, want %v", err, tc.expectErr)
+				}
 			}
 		})
 	}
