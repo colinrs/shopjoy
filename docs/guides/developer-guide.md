@@ -52,6 +52,42 @@ cd ../joy && npm install
 cp .env.example .env
 ```
 
+> **Local-config rule (Cloudinary image storage):**
+>
+> Each Go service has two YAML files:
+>
+> - `<service>/etc/<service>-api.yaml` — checked-in template/structure only. Do NOT add real secrets here.
+> - `<service>/etc/<service>-api-local.yaml` — gitignored (`*local.yaml` rule in root `.gitignore`). Real secrets live here.
+>
+> For local dev copy the template then edit the local file:
+>
+> ```bash
+> cd admin
+> cp etc/admin-api.yaml etc/admin-api-local.yaml
+> # Edit etc/admin-api-local.yaml — add real DB credentials, Cloudinary credentials, etc.
+> ./bin/admin-api -f etc/admin-api-local.yaml
+> ```
+>
+> **Note on env-var expansion:** go-zero's YAML parser does NOT perform shell-style `${VAR:-default}` expansion. Hard-code demo values directly in `admin-api-local.yaml`, or rely on real environment variables set before invoking the binary.
+>
+> **Storage backend** (`admin-api*.yaml`'s `Storage.Type`):
+>
+> - `local` (default) — files in `./uploads/{category}/{YYYY}/{MM}/{DD}/{id}.{ext}`.
+> - `cloudinary` — backend signs; browser uploads directly to Cloudinary; admin records metadata only.
+>
+> For Cloudinary, the block looks like:
+>
+> ```yaml
+> Storage:
+>   Type: cloudinary
+>   Cloudinary:
+>     CloudName: "<your-cloud-name>"
+>     APIKey: "<your-api-key>"
+>     APISecret: "<your-api-secret>"
+>     Environment: dev
+>     Secure: true
+> ```
+
 ---
 
 ## Project Structure
