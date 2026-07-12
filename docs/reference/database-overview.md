@@ -646,6 +646,34 @@ erDiagram
 | created_at | TIMESTAMP | | Creation |
 | updated_at | TIMESTAMP | | Last update |
 
+### Media Assets (`media_assets`)
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | BIGINT | PK | Snowflake ID |
+| public_id | VARCHAR(255) | UNIQUE (provider, public_id) | Driver-side identifier (Cloudinary public_id or local relative path) |
+| url | VARCHAR(1024) | NOT NULL | Public-facing asset URL |
+| filename | VARCHAR(255) | | Original filename |
+| size_bytes | BIGINT | DEFAULT 0 | File size |
+| mime_type | VARCHAR(64) | | MIME type |
+| width | INT | DEFAULT 0 | Image width |
+| height | INT | DEFAULT 0 | Image height |
+| format | VARCHAR(32) | | Image format (jpg/png/webp/...) |
+| category | VARCHAR(32) | INDEX | Business category (product/banner/avatar/common) |
+| provider | VARCHAR(16) | UNIQUE (provider, public_id) | Storage driver (local/cloudinary) |
+| tenant_id | BIGINT | INDEX | Tenant scope |
+| created_by | BIGINT | DEFAULT 0 | Uploader user ID |
+| created_at | TIMESTAMP | | Creation |
+| updated_at | TIMESTAMP | | Last update |
+| deleted_at | TIMESTAMP | NULL | Soft delete |
+
+**Indexes:**
+- `uk_provider_public` UNIQUE (provider, public_id) — prevents duplicate assets from same driver.
+- `idx_tenant_category` (tenant_id, category, deleted_at) — tenant-scoped queries.
+- `idx_created_at` (created_at).
+
+**Storage layer:** abstract `storage.Storage` interface with two drivers (`localStorage`, `cloudinaryStorage`) chosen via `admin/etc/admin-api.yaml` `Storage.Type`. See `docs/cross-cutting/api/api-reference.md` §26.
+
 ---
 
 ## Query Patterns

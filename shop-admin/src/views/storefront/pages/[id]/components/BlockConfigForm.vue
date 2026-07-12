@@ -14,32 +14,12 @@
         />
       </el-form-item>
       <el-form-item :label="$t('storefront.imageList')">
-        <div class="image-list">
-          <div
-            v-for="(_img, idx) in localConfig.images"
-            :key="idx"
-            class="image-item"
-          >
-            <el-input
-              v-model="localConfig.images[idx]"
-              :placeholder="$t('storefront.imageUrl')"
-            />
-            <el-button
-              text
-              type="danger"
-              @click="removeImage(idx)"
-            >
-              <el-icon><Delete /></el-icon>
-            </el-button>
-          </div>
-          <el-button
-            type="primary"
-            text
-            @click="addImage"
-          >
-            <el-icon><Plus /></el-icon> {{ $t('storefront.addImage') }}
-          </el-button>
-        </div>
+        <ImageUploader
+          v-model:value="localConfig.images"
+          category="page-block"
+          multiple
+          :max="20"
+        />
       </el-form-item>
     </template>
 
@@ -222,8 +202,8 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive, onMounted } from 'vue'
-import { Delete, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import ImageUploader from '@/components/ImageUploader.vue'
 import { getProductList, type Product } from '@/api/product'
 
 const props = defineProps<{
@@ -272,38 +252,10 @@ watch(() => props.config, (newConfig) => {
 watch(localConfig, (newConfig) => {
   emit('update', { ...newConfig })
 }, { deep: true })
-
-const addImage = () => {
-  if (!localConfig.images) {
-    localConfig.images = []
-  }
-  localConfig.images.push('')
-}
-
-const removeImage = (index: number) => {
-  localConfig.images.splice(index, 1)
-}
 </script>
 
 <style scoped>
 .block-config-form {
   padding: 0;
-}
-
-.image-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.image-item {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.image-item .el-input {
-  flex: 1;
 }
 </style>

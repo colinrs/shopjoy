@@ -32,6 +32,14 @@
         :placeholder="$t('adminUsers.pleaseEnterRealName')"
       />
     </el-form-item>
+    <el-form-item :label="$t('common.avatar')">
+      <ImageUploader
+        v-model:value="formData.avatar"
+        category="avatar"
+        :crop="true"
+        :crop-ratio="1"
+      />
+    </el-form-item>
     <el-form-item
       v-if="!isEdit"
       :label="$t('adminUsers.initialPassword')"
@@ -83,6 +91,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormInstance, FormRules } from 'element-plus'
+import ImageUploader from '@/components/ImageUploader.vue'
 import type { CreateAdminUserParams, UpdateAdminUserParams, AdminUser } from '@/api/admin-user'
 
 const { t } = useI18n()
@@ -106,6 +115,7 @@ const formData = reactive({
   mobile: '',
   real_name: '',
   password: '',
+  avatar: '',
   type: 2 as number,
   tenant_id: undefined as number | undefined
 })
@@ -129,6 +139,7 @@ watch(() => props.adminUser, (user) => {
     formData.email = user.email || ''
     formData.mobile = user.mobile || ''
     formData.real_name = user.real_name || ''
+    formData.avatar = user.avatar || ''
     formData.type = user.type || 2
   }
 }, { immediate: true })
@@ -139,7 +150,8 @@ watch(formData, (val) => {
     emit('update:modelValue', {
       email: val.email,
       mobile: val.mobile,
-      real_name: val.real_name
+      real_name: val.real_name,
+      avatar: val.avatar || undefined
     })
   } else {
     emit('update:modelValue', {

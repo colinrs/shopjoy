@@ -242,9 +242,9 @@
           </el-col>
           <el-col :span="24">
             <el-form-item :label="$t('brands.logoUrl')">
-              <el-input
-                v-model="brandForm.logo"
-                :placeholder="$t('brands.brandLogoUrl')"
+              <ImageUploader
+                v-model:value="brandForm.logo"
+                category="brand"
               />
             </el-form-item>
           </el-col>
@@ -311,6 +311,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Picture } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
+import ImageUploader from '@/components/ImageUploader.vue'
 import {
   getBrands,
   createBrand,

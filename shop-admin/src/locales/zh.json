@@ -2481,5 +2481,18 @@
   },
   "sidebar": {
     "loadBadgesFailed": "加载侧边栏角标失败"
+  },
+  "upload": {
+    "clickOrDrag": "点击或拖拽图片到此处",
+    "addImage": "添加图片",
+    "uploadFailed": "上传失败",
+    "retry": "重试",
+    "cancel": "取消",
+    "uploading": "上传中",
+    "signFailed": "获取上传签名失败",
+    "maxFiles": "最多上传 {max} 张图片",
+    "exceedsMaxSize": "图片超过最大尺寸",
+    "categoryLabel": "分类",
+    "imageHint": "支持 {formats}，单文件不超过 {size}"
   }
 }

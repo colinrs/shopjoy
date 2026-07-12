@@ -404,6 +404,10 @@ This document lists all error codes used in the ShopJoy API.
 | 240003 | 400 | invalid category | Invalid category |
 | 240004 | 500 | upload failed | Upload failed |
 | 240005 | 404 | file not found | File not found |
+| 240006 | 500 | upload sign failed | Cloudinary signing failed |
+| 240007 | 400 | upload confirm failed | Direct-upload confirm rejected (path/duplicate/expired) |
+| 240008 | 502 | upload provider error | Cloudinary upstream error |
+| 240009 | 403 | upload cross-tenant | Tenant scope mismatch |
 
 ---
 

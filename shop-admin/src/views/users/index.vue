@@ -407,9 +407,9 @@
           />
         </el-form-item>
         <el-form-item :label="$t('common.avatar')">
-          <el-input
-            v-model="editForm.avatar"
-            :placeholder="$t('common.avatarUrl')"
+          <ImageUploader
+            v-model:value="editForm.avatar"
+            category="avatar"
           />
         </el-form-item>
       </el-form>
@@ -477,6 +477,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, ArrowDown, Download, Filter } from '@element-plus/icons-vue'
 import { t } from '@/plugins/i18n'
+import ImageUploader from '@/components/ImageUploader.vue'
 import {
   getUserList,
   getUserListEnhanced,

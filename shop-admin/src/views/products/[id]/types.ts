@@ -93,7 +93,6 @@ export interface ProductInfoTabProps {
 
 export interface ProductInfoTabEmits {
   (e: 'update:productForm', value: ProductFormData): void
-  (e: 'show-add-image'): void
   (e: 'save'): void
 }
 
@@ -178,15 +177,6 @@ export interface PushToMarketDialogProps {
 export interface PushToMarketDialogEmits {
   (e: 'update:visible', value: boolean): void
   (e: 'success'): void
-}
-
-export interface AddImageDialogProps {
-  visible: boolean
-}
-
-export interface AddImageDialogEmits {
-  (e: 'update:visible', value: boolean): void
-  (e: 'add', url: string): void
 }
 
 export interface AdjustStockDialogProps {

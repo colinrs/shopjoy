@@ -328,6 +328,14 @@
             :placeholder="$t('adminUsers.pleaseEnterRealName')"
           />
         </el-form-item>
+        <el-form-item :label="$t('common.avatar')">
+          <ImageUploader
+            v-model:value="formData.avatar"
+            category="avatar"
+            :crop="true"
+            :crop-ratio="1"
+          />
+        </el-form-item>
         <el-form-item
           :label="$t('adminUsers.initialPassword')"
           prop="password"
@@ -454,6 +462,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import RoleAssignDialog from './components/RoleAssignDialog.vue'
+import ImageUploader from '@/components/ImageUploader.vue'
 import {
   getAdminUsers,
   disableAdminUser,
@@ -500,6 +509,7 @@ const formData = reactive<CreateAdminUserParams>({
   email: '',
   mobile: '',
   real_name: '',
+  avatar: '',
   password: '',
   type: 2,
   tenant_id: undefined
@@ -549,6 +559,7 @@ const handleAdd = () => {
     email: '',
     mobile: '',
     real_name: '',
+    avatar: '',
     password: '',
     type: 2,
     tenant_id: undefined
@@ -636,7 +647,11 @@ const handleSubmit = async () => {
     if (valid) {
       submitLoading.value = true
       try {
-        await createAdminUser(formData)
+        const payload: CreateAdminUserParams = {
+          ...formData,
+          avatar: formData.avatar || undefined
+        }
+        await createAdminUser(payload)
         ElMessage.success(t('adminUsers.createSuccess'))
         dialogVisible.value = false
         loadData()

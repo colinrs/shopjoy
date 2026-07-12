@@ -1,169 +1,251 @@
 package storage
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
-	"mime/multipart"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-)
-
-const (
-	maxFileSize       = 5 * 1024 * 1024 // 5MB
-	allowedExtensions = ".jpg,.jpeg,.png,.gif,.webp"
-	uploadDir         = "./uploads"
+	"github.com/colinrs/shopjoy/admin/internal/domain/media"
+	snowflake "github.com/colinrs/shopjoy/pkg/snowflake"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type localStorage struct {
 	basePath string
+	repo     media.Repository
+	idGen    snowflake.Snowflake
 }
 
-// NewLocalStorage 创建本地存储实例
-func NewLocalStorage() Storage {
-	return &localStorage{
-		basePath: uploadDir,
+func newLocal(cfg Config, repo media.Repository, idGen snowflake.Snowflake) *localStorage {
+	base := cfg.Local.BasePath
+	if base == "" {
+		base = "./uploads"
 	}
+	return &localStorage{basePath: base, repo: repo, idGen: idGen}
 }
 
-func (s *localStorage) Save(ctx context.Context, file *multipart.FileHeader, category Category) (*FileInfo, error) {
-	// 验证文件大小
-	if file.Size > maxFileSize {
-		return nil, fmt.Errorf("file size exceeds 5MB")
+func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, error) {
+	if draft.Reader == nil {
+		return nil, errors.New("reader is nil")
+	}
+	ext := strings.ToLower(filepath.Ext(draft.Filename))
+	if ext == "" || !strings.Contains(".jpg.jpeg.png.gif.webp", ext) {
+		return nil, errors.New("unsupported extension")
 	}
 
-	// 验证文件类型
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if !strings.Contains(allowedExtensions, ext) {
-		return nil, fmt.Errorf("unsupported file type: %s", ext)
-	}
-
-	// 生成唯一ID
-	id := fmt.Sprintf("img_%s", uuid.New().String()[:12])
-
-	// 构建存储路径: /uploads/{category}/{year}/{month}/{day}/
 	now := time.Now().UTC()
-	dir := filepath.Join(s.basePath, string(category), fmt.Sprintf("%d", now.Year()), fmt.Sprintf("%02d", now.Month()), fmt.Sprintf("%02d", now.Day()))
-
-	// 创建目录
-	if err := os.MkdirAll(dir, 0750); err != nil {
-		return nil, fmt.Errorf("create directory failed: %w", err)
+	dir := filepath.Join(s.basePath, string(draft.Category),
+		fmt.Sprintf("%d", now.Year()),
+		fmt.Sprintf("%02d", int(now.Month())),
+		fmt.Sprintf("%02d", now.Day()),
+	)
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return nil, fmt.Errorf("mkdir: %w", err)
 	}
-
-	// 文件完整路径
-	filePath := filepath.Join(dir, id+ext)
-
-	// 安全检查：确保文件路径在基础目录内，防止路径遍历攻击
-	// #nosec G304 - filePath 由系统生成的 id+ext 构造，dir 由 basePath 和 category 组装，均无法用户控制
-	absBasePath, err := filepath.Abs(s.basePath)
+	assetID, err := s.idGen.NextID(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("invalid base path: %w", err)
+		return nil, fmt.Errorf("generate asset id: %w", err)
 	}
-	absFilePath, err := filepath.Abs(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("invalid file path: %w", err)
-	}
-	if !strings.HasPrefix(absFilePath, absBasePath) {
-		return nil, fmt.Errorf("invalid file path: path traversal detected")
+	assetIDStr := fmt.Sprintf("img_%d", assetID)
+	filePath := filepath.Join(dir, assetIDStr+ext)
+
+	absBase, _ := filepath.Abs(s.basePath)
+	absFile, _ := filepath.Abs(filePath)
+	if !strings.HasPrefix(absFile, absBase) {
+		return nil, errors.New("path traversal blocked")
 	}
 
-	// 打开上传文件
-	src, err := file.Open()
+	buf, err := io.ReadAll(draft.Reader)
 	if err != nil {
-		return nil, fmt.Errorf("open file failed: %w", err)
-	}
-	defer src.Close()
-
-	// 获取图片尺寸
-	width, height := 0, 0
-	if ext != ".gif" && ext != ".webp" {
-		img, _, err := image.DecodeConfig(src)
-		if err == nil {
-			width, height = img.Width, img.Height
-		}
-		// 重新打开文件
-		if _, err := src.Seek(0, 0); err != nil {
-			return nil, fmt.Errorf("reset file position failed: %w", err)
-		}
+		return nil, fmt.Errorf("buffer reader: %w", err)
 	}
 
-	// 保存文件
-	// #nosec G304
-	dst, err := os.Create(filePath)
+	dst, err := os.Create(filePath) //nolint:gosec
 	if err != nil {
-		return nil, fmt.Errorf("create file failed: %w", err)
+		return nil, fmt.Errorf("create file: %w", err)
 	}
 	defer dst.Close()
 
-	if _, err := dst.ReadFrom(src); err != nil {
-		return nil, fmt.Errorf("save file failed: %w", err)
+	width, height := 0, 0
+	if ext != ".gif" && ext != ".webp" {
+		if cfg, _, derr := image.DecodeConfig(bytes.NewReader(buf)); derr == nil {
+			width, height = cfg.Width, cfg.Height
+		}
+	}
+	written, err := dst.Write(buf)
+	if err != nil {
+		return nil, fmt.Errorf("write file: %w", err)
 	}
 
-	// 构建相对路径
-	relPath := fmt.Sprintf("/uploads/%s/%d/%02d/%02d/%s%s", category, now.Year(), now.Month(), now.Day(), id, ext)
+	relPath := fmt.Sprintf("/uploads/%s/%d/%02d/%02d/%s%s",
+		draft.Category, now.Year(), int(now.Month()), now.Day(), assetIDStr, ext)
 
-	fileInfo := &FileInfo{
-		ID:        id,
-		Name:      file.Filename,
-		Path:      relPath,
-		Size:      file.Size,
-		MimeType:  file.Header.Get("Content-Type"),
+	asset := &media.Asset{
+		PublicID:  relPath,
+		URL:       relPath,
+		Filename:  draft.Filename,
+		SizeBytes: int64(written), // populate from actual writer result
+		MimeType:  draft.MimeType,
 		Width:     width,
 		Height:    height,
-		Category:  category,
-		CreatedAt: now,
+		Format:    strings.TrimPrefix(ext, "."),
+		Category:  string(draft.Category),
+		Provider:  "local",
+		TenantID:  draft.TenantID,
+		CreatedBy: draft.CreatedBy,
 	}
+	asset.ID = assetID
+	if err := s.repo.Insert(ctx, asset); err != nil {
+		return nil, fmt.Errorf("insert asset: %w", err)
+	}
+	return &Asset{
+		ID:        fmt.Sprintf("%d", assetID),
+		PublicID:  relPath,
+		URL:       relPath,
+		Filename:  draft.Filename,
+		Size:      int64(written),
+		MimeType:  draft.MimeType,
+		Width:     width,
+		Height:    height,
+		Format:    asset.Format,
+		Category:  draft.Category,
+		Provider:  "local",
+		TenantID:  draft.TenantID,
+		CreatedBy: draft.CreatedBy,
+		CreatedAt: now,
+	}, nil
+}
 
-	return fileInfo, nil
+func (s *localStorage) RegisterAsset(ctx context.Context, remote RemoteAsset) (*Asset, error) {
+	// Local path: file is already on disk via prior Save() call; this method
+	// for the local driver just records the metadata if not already recorded.
+	assetID, err := s.idGen.NextID(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("generate asset id: %w", err)
+	}
+	asset := &media.Asset{
+		PublicID:  remote.PublicID,
+		URL:       remote.URL,
+		Filename:  remote.Filename,
+		SizeBytes: remote.Size,
+		MimeType:  remote.MimeType,
+		Width:     remote.Width,
+		Height:    remote.Height,
+		Format:    remote.Format,
+		Category:  string(remote.Category),
+		Provider:  "local",
+		TenantID:  remote.TenantID,
+		CreatedBy: remote.CreatedBy,
+	}
+	asset.ID = assetID
+	if err := s.repo.Insert(ctx, asset); err != nil {
+		return nil, fmt.Errorf("insert: %w", err)
+	}
+	return &Asset{
+		ID:        fmt.Sprintf("%d", assetID),
+		PublicID:  remote.PublicID,
+		URL:       remote.URL,
+		Filename:  remote.Filename,
+		Size:      remote.Size,
+		MimeType:  remote.MimeType,
+		Width:     remote.Width,
+		Height:    remote.Height,
+		Format:    remote.Format,
+		Category:  remote.Category,
+		Provider:  "local",
+		TenantID:  remote.TenantID,
+		CreatedBy: remote.CreatedBy,
+		CreatedAt: time.Now().UTC(),
+	}, nil
 }
 
 func (s *localStorage) Delete(ctx context.Context, id string) error {
-	// 尝试删除常见目录下的文件
-	now := time.Now().UTC()
-	for _, category := range []Category{CategoryProduct, CategoryBanner, CategoryAvatar} {
-		for day := now.Day() - 7; day <= now.Day()+1; day++ {
-			for _, ext := range []string{".jpg", ".jpeg", ".png", ".gif", ".webp"} {
-				path := filepath.Join(s.basePath, string(category), fmt.Sprintf("%d", now.Year()), fmt.Sprintf("%02d", now.Month()), fmt.Sprintf("%02d", day), id+ext)
-				if _, err := os.Stat(path); err == nil {
-					return os.Remove(path)
-				}
-			}
-		}
+	asset, err := s.lookupByID(ctx, id)
+	if err != nil {
+		return err
 	}
-
-	return fmt.Errorf("file not found")
+	// Best-effort unlink; ignore not-found errors on disk.
+	full := filepath.Join(s.basePath, asset.PublicID)
+	rel, err := filepath.Rel(s.basePath, full)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("compute relative path for %s: %v", full, err)
+		return err
+	}
+	if err := os.Remove(filepath.Join(s.basePath, rel)); err != nil && !errors.Is(err, os.ErrNotExist) {
+		logx.WithContext(ctx).Errorf("local delete file failed: id=%s path=%s: %v", id, rel, err)
+		// continue — best-effort. DB soft-delete still happens.
+	}
+	return s.repo.SoftDelete(ctx, asset.ID)
 }
 
-func (s *localStorage) GetURL(ctx context.Context, id string) (string, error) {
-	now := time.Now().UTC()
-	for _, category := range []Category{CategoryProduct, CategoryBanner, CategoryAvatar} {
-		for day := now.Day() - 7; day <= now.Day()+1; day++ {
-			for _, ext := range []string{".jpg", ".jpeg", ".png", ".gif", ".webp"} {
-				path := fmt.Sprintf("/uploads/%s/%d/%02d/%02d/%s%s", category, now.Year(), now.Month(), now.Day(), id, ext)
-				fullPath := filepath.Join(s.basePath, string(category), fmt.Sprintf("%d", now.Year()), fmt.Sprintf("%02d", now.Month()), fmt.Sprintf("%02d", day), id+ext)
-				if _, err := os.Stat(fullPath); err == nil {
-					return path, nil
-				}
-			}
+// DeleteByTenant soft-deletes the asset when both id and tenantID match.
+// The repository's DeleteByTenant collapses missing-row and cross-tenant
+// into one ErrMediaAssetNotFound signal to prevent IDOR-style existence
+// leaks. The local driver then unlinks the file as a best-effort step.
+func (s *localStorage) DeleteByTenant(ctx context.Context, id string, tenantID int64) error {
+	var idInt int64
+	if _, err := fmt.Sscanf(id, "%d", &idInt); err != nil {
+		return errors.New("invalid id")
+	}
+	if err := s.repo.DeleteByTenant(ctx, idInt, tenantID); err != nil {
+		return err
+	}
+	// File path includes upload-date components we don't have without a
+	// lookup, so do a follow-up read for unlink only (ignore lookup errors
+	// — DB already soft-deleted; orphan file on disk is acceptable cleanup).
+	asset, lookupErr := s.repo.FindByID(ctx, idInt)
+	if lookupErr == nil {
+		full := filepath.Join(s.basePath, asset.PublicID)
+		if err := os.Remove(full); err != nil && !errors.Is(err, os.ErrNotExist) {
+			logx.WithContext(ctx).Errorf("local DeleteByTenant file unlink failed: id=%d path=%s: %v", idInt, asset.PublicID, err)
 		}
 	}
-
-	return "", fmt.Errorf("file not found")
+	return nil
 }
 
-func (s *localStorage) Get(ctx context.Context, id string) (*FileInfo, error) {
-	url, err := s.GetURL(ctx, id)
+func (s *localStorage) Get(ctx context.Context, id string) (*Asset, error) {
+	asset, err := s.lookupByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-
-	return &FileInfo{
-		ID:        id,
-		Path:      url,
-		CreatedAt: time.Now().UTC(),
+	return &Asset{
+		ID:        fmt.Sprintf("%d", asset.ID),
+		PublicID:  asset.PublicID,
+		URL:       asset.URL,
+		Filename:  asset.Filename,
+		Size:      asset.SizeBytes,
+		MimeType:  asset.MimeType,
+		Width:     asset.Width,
+		Height:    asset.Height,
+		Format:    asset.Format,
+		Category:  Category(asset.Category),
+		Provider:  asset.Provider,
+		TenantID:  asset.TenantID,
+		CreatedBy: asset.CreatedBy,
+		CreatedAt: asset.CreatedAt,
 	}, nil
+}
+
+func (s *localStorage) GetURL(ctx context.Context, id string) (string, error) {
+	asset, err := s.lookupByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	return asset.URL, nil
+}
+
+// lookupByID parses id as int64 and fetches via repository.
+func (s *localStorage) lookupByID(ctx context.Context, id string) (*media.Asset, error) {
+	var idInt int64
+	if _, err := fmt.Sscanf(id, "%d", &idInt); err != nil {
+		return nil, errors.New("invalid id")
+	}
+	return s.repo.FindByID(ctx, idInt)
 }

@@ -8,7 +8,6 @@ info (
 
 type (
 	UploadRequest {
-		// 业务分类：product/banner/avatar
 		Category string `form:"category,optional"`
 	}
 	UploadResponse {
@@ -28,16 +27,72 @@ type (
 	DeleteUploadResp {
 		ID string `json:"id"`
 	}
+	UploadSignRequest {
+		Category string `form:"category,optional"`
+		Filename string `form:"filename,optional"`
+		MimeType string `form:"mime_type,optional"`
+	}
+	UploadSignResponse {
+		CloudName    string `json:"cloud_name"`
+		APIKey       string `json:"api_key"`
+		Timestamp    string `json:"timestamp"`
+		Signature    string `json:"signature"`
+		Folder       string `json:"folder"`
+		PublicID     string `json:"public_id"`
+		UploadPreset string `json:"upload_preset,omitempty"`
+		AssetID      string `json:"asset_id"`
+		UploadURL    string `json:"upload_url"`
+	}
+	UploadConfirmRequest {
+		AssetID  string `json:"asset_id,optional"`
+		PublicID string `json:"public_id"`
+		URL      string `json:"url"`
+		Filename string `json:"filename"`
+		Size     int64  `json:"size"`
+		MimeType string `json:"mime_type"`
+		Width    int    `json:"width"`
+		Height   int    `json:"height"`
+		Format   string `json:"format"`
+		Category string `json:"category"`
+	}
+	UploadConfirmResponse {
+		ID        string `json:"id"`
+		URL       string `json:"url"`
+		Filename  string `json:"filename"`
+		Category  string `json:"category"`
+		Size      int64  `json:"size"`
+		MimeType  string `json:"mime_type"`
+		Width     int    `json:"width"`
+		Height    int    `json:"height"`
+		CreatedAt string `json:"created_at"`
+	}
+	GetUploadReq {
+		ID string `path:"id"`
+	}
 )
 
 @server (
 	group:      uploads
 	middleware: AuthMiddleware
 )
+// Route ordering matters: literal paths (/sign, /confirm) MUST come before
+// the parametric :id route so the path trie resolves the literal segment first.
 service admin-api {
-	@doc "上传图片"
+	@doc "申请 Cloudinary 签名（前端直传第一步）"
+	@handler UploadSignHandler
+	post /api/v1/uploads/sign (UploadSignRequest) returns (UploadSignResponse)
+
+	@doc "前端直传后回调确认入库"
+	@handler UploadConfirmHandler
+	post /api/v1/uploads/confirm (UploadConfirmRequest) returns (UploadConfirmResponse)
+
+	@doc "上传图片（后端代理 / 本地落盘保留向后兼容）"
 	@handler UploadHandler
 	post /api/v1/uploads returns (UploadResponse)
+
+	@doc "获取图片元数据"
+	@handler GetUploadHandler
+	get /api/v1/uploads/:id (GetUploadReq) returns (UploadResponse)
 
 	@doc "删除图片"
 	@handler DeleteUploadHandler
