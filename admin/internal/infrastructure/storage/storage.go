@@ -65,6 +65,11 @@ type Storage interface {
 	Save(ctx context.Context, draft AssetDraft) (*Asset, error)
 	RegisterAsset(ctx context.Context, remote RemoteAsset) (*Asset, error)
 	Delete(ctx context.Context, id string) error
+	// DeleteByTenant deletes the asset only when both id and tenantID match the
+	// stored row. Returns code.ErrUploadNotFound when missing or cross-tenant.
+	// Implementations MUST collapse both signals into the same not-found error
+	// to prevent IDOR-style existence leaks.
+	DeleteByTenant(ctx context.Context, id string, tenantID int64) error
 	Get(ctx context.Context, id string) (*Asset, error)
 	GetURL(ctx context.Context, id string) (string, error)
 }

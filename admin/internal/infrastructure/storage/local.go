@@ -185,6 +185,31 @@ func (s *localStorage) Delete(ctx context.Context, id string) error {
 	return s.repo.SoftDelete(ctx, asset.ID)
 }
 
+// DeleteByTenant soft-deletes the asset when both id and tenantID match.
+// The repository's DeleteByTenant collapses missing-row and cross-tenant
+// into one ErrMediaAssetNotFound signal to prevent IDOR-style existence
+// leaks. The local driver then unlinks the file as a best-effort step.
+func (s *localStorage) DeleteByTenant(ctx context.Context, id string, tenantID int64) error {
+	var idInt int64
+	if _, err := fmt.Sscanf(id, "%d", &idInt); err != nil {
+		return errors.New("invalid id")
+	}
+	if err := s.repo.DeleteByTenant(ctx, idInt, tenantID); err != nil {
+		return err
+	}
+	// File path includes upload-date components we don't have without a
+	// lookup, so do a follow-up read for unlink only (ignore lookup errors
+	// — DB already soft-deleted; orphan file on disk is acceptable cleanup).
+	asset, lookupErr := s.repo.FindByID(ctx, idInt)
+	if lookupErr == nil {
+		full := filepath.Join(s.basePath, asset.PublicID)
+		if err := os.Remove(full); err != nil && !errors.Is(err, os.ErrNotExist) {
+			logx.WithContext(ctx).Errorf("local DeleteByTenant file unlink failed: id=%d path=%s: %v", idInt, asset.PublicID, err)
+		}
+	}
+	return nil
+}
+
 func (s *localStorage) Get(ctx context.Context, id string) (*Asset, error) {
 	asset, err := s.lookupByID(ctx, id)
 	if err != nil {

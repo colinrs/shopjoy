@@ -160,6 +160,29 @@ func (s *cloudinaryStorage) Delete(ctx context.Context, id string) error {
 	return s.repo.SoftDelete(ctx, a.ID)
 }
 
+// DeleteByTenant soft-deletes the asset only when both id and tenantID match.
+// The repository collapses missing-row and cross-tenant into one
+// ErrMediaAssetNotFound signal. Cloudinary Destroy still requires the
+// public_id, so we re-fetch the (still-soft-deleted-looking) row to learn it.
+func (s *cloudinaryStorage) DeleteByTenant(ctx context.Context, id string, tenantID int64) error {
+	var idInt int64
+	if _, err := fmt.Sscanf(id, "%d", &idInt); err != nil {
+		return errors.New("invalid id")
+	}
+	if err := s.repo.DeleteByTenant(ctx, idInt, tenantID); err != nil {
+		return err
+	}
+	// DB row is now soft-deleted but the column data is still readable;
+	// we need public_id to call Cloudinary's Destroy.
+	asset, lookupErr := s.repo.FindByID(ctx, idInt)
+	if lookupErr == nil {
+		if _, derr := s.cloud.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: asset.PublicID}); derr != nil {
+			logx.WithContext(ctx).Errorf("cloudinary DestroyByTenant failed: public_id=%s err=%v", asset.PublicID, derr)
+		}
+	}
+	return nil
+}
+
 func (s *cloudinaryStorage) Get(ctx context.Context, id string) (*Asset, error) {
 	a, err := s.lookupByID(ctx, id)
 	if err != nil {

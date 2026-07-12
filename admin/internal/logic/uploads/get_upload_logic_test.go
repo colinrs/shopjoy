@@ -29,7 +29,10 @@ func (g *getUploadStorage) Save(_ context.Context, _ storage.AssetDraft) (*stora
 func (g *getUploadStorage) RegisterAsset(_ context.Context, _ storage.RemoteAsset) (*storage.Asset, error) {
 	return nil, nil
 }
-func (g *getUploadStorage) Delete(_ context.Context, _ string) error { return nil }
+func (g *getUploadStorage) Delete(_ context.Context, _ string) error       { return nil }
+func (g *getUploadStorage) DeleteByTenant(_ context.Context, _ string, _ int64) error {
+	return nil
+}
 func (g *getUploadStorage) Get(_ context.Context, id string) (*storage.Asset, error) {
 	g.gotID = id
 	return g.ret, g.retErr

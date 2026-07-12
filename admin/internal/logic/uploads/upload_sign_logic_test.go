@@ -38,6 +38,9 @@ func (f *fakeSigner) RegisterAsset(_ context.Context, _ storage.RemoteAsset) (*s
 }
 
 func (f *fakeSigner) Delete(_ context.Context, _ string) error                { return nil }
+func (f *fakeSigner) DeleteByTenant(_ context.Context, _ string, _ int64) error {
+	return nil
+}
 func (f *fakeSigner) Get(_ context.Context, _ string) (*storage.Asset, error) { return nil, nil }
 func (f *fakeSigner) GetURL(_ context.Context, _ string) (string, error)      { return "", nil }
 
@@ -58,6 +61,9 @@ func (nonSignerStorage) RegisterAsset(_ context.Context, _ storage.RemoteAsset) 
 	return nil, nil
 }
 func (nonSignerStorage) Delete(_ context.Context, _ string) error                { return nil }
+func (nonSignerStorage) DeleteByTenant(_ context.Context, _ string, _ int64) error {
+	return nil
+}
 func (nonSignerStorage) Get(_ context.Context, _ string) (*storage.Asset, error) { return nil, nil }
 func (nonSignerStorage) GetURL(_ context.Context, _ string) (string, error)      { return "", nil }
 
