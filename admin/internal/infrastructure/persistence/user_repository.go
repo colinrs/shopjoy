@@ -24,7 +24,7 @@ func (r *UserRepository) Update(ctx context.Context, db *gorm.DB, u *user.User) 
 	return db.WithContext(ctx).Where("deleted_at IS NULL").Save(u).Error
 }
 
-func (r *UserRepository) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *UserRepository) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	now := time.Now().UTC()
 	dbQuery := db.WithContext(ctx).Model(&user.User{}).
 		Where("id = ? AND deleted_at IS NULL", id)
@@ -39,7 +39,7 @@ func (r *UserRepository) Delete(ctx context.Context, db *gorm.DB,  id int64) err
 	return nil
 }
 
-func (r *UserRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*user.User, error) {
+func (r *UserRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*user.User, error) {
 	var u user.User
 	dbQuery := db.WithContext(ctx).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can access users across all tenants
@@ -50,7 +50,7 @@ func (r *UserRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (
 	return &u, err
 }
 
-func (r *UserRepository) FindByEmail(ctx context.Context, db *gorm.DB,  email string) (*user.User, error) {
+func (r *UserRepository) FindByEmail(ctx context.Context, db *gorm.DB, email string) (*user.User, error) {
 	var u user.User
 	dbQuery := db.WithContext(ctx).Where("email = ? AND deleted_at IS NULL", email)
 	// Platform admin (tenantID == 0) can lookup by email across all tenants
@@ -61,7 +61,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, db *gorm.DB,  email st
 	return &u, err
 }
 
-func (r *UserRepository) FindByPhone(ctx context.Context, db *gorm.DB,  phone string) (*user.User, error) {
+func (r *UserRepository) FindByPhone(ctx context.Context, db *gorm.DB, phone string) (*user.User, error) {
 	var u user.User
 	dbQuery := db.WithContext(ctx).Where("phone = ? AND deleted_at IS NULL", phone)
 	// Platform admin (tenantID == 0) can lookup by phone across all tenants
@@ -72,7 +72,7 @@ func (r *UserRepository) FindByPhone(ctx context.Context, db *gorm.DB,  phone st
 	return &u, err
 }
 
-func (r *UserRepository) FindList(ctx context.Context, db *gorm.DB,  query user.Query) ([]*user.User, int64, error) {
+func (r *UserRepository) FindList(ctx context.Context, db *gorm.DB, query user.Query) ([]*user.User, int64, error) {
 	var users []*user.User
 	var total int64
 
@@ -101,7 +101,7 @@ func (r *UserRepository) FindList(ctx context.Context, db *gorm.DB,  query user.
 	return users, total, err
 }
 
-func (r *UserRepository) Exists(ctx context.Context, db *gorm.DB,  email, phone string) (bool, error) {
+func (r *UserRepository) Exists(ctx context.Context, db *gorm.DB, email, phone string) (bool, error) {
 	var count int64
 	dbQuery := db.WithContext(ctx).Model(&user.User{}).
 		Where("deleted_at IS NULL AND (email = ? OR phone = ?)", email, phone)

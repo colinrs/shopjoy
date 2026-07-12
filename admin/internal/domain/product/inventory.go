@@ -95,9 +95,9 @@ const (
 type WarehouseRepository interface {
 	Create(ctx context.Context, db *gorm.DB, warehouse *Warehouse) error
 	Update(ctx context.Context, db *gorm.DB, warehouse *Warehouse) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Warehouse, error)
-	FindByCode(ctx context.Context, db *gorm.DB,  code string) (*Warehouse, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Warehouse, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Warehouse, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Warehouse, error)
 	FindDefault(ctx context.Context, db *gorm.DB) (*Warehouse, error)
 }
@@ -106,14 +106,14 @@ type WarehouseRepository interface {
 type WarehouseInventoryRepository interface {
 	Create(ctx context.Context, db *gorm.DB, wi *WarehouseInventory) error
 	Update(ctx context.Context, db *gorm.DB, wi *WarehouseInventory) error
-	FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB,  skuCode string, warehouseID int64) (*WarehouseInventory, error)
-	FindBySKU(ctx context.Context, db *gorm.DB,  skuCode string) ([]*WarehouseInventory, error)
+	FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB, skuCode string, warehouseID int64) (*WarehouseInventory, error)
+	FindBySKU(ctx context.Context, db *gorm.DB, skuCode string) ([]*WarehouseInventory, error)
 }
 
 // InventoryLogRepository interface
 type InventoryLogRepository interface {
 	Create(ctx context.Context, db *gorm.DB, log *InventoryLog) error
-	Find(ctx context.Context, db *gorm.DB,  query InventoryLogQuery) ([]*InventoryLog, int64, error)
+	Find(ctx context.Context, db *gorm.DB, query InventoryLogQuery) ([]*InventoryLog, int64, error)
 }
 
 // InventoryLogQuery for querying inventory logs.
@@ -131,19 +131,19 @@ type InventoryLogQuery struct {
 // InventoryRepository interface for SKU-level inventory operations
 type InventoryRepository interface {
 	// SKU inventory
-	GetSKUInventory(ctx context.Context, db *gorm.DB,  skuCode string) (*SKU, error)
-	UpdateSKUStock(ctx context.Context, db *gorm.DB,  skuCode string, availableStock, lockedStock int) error
-	LockStock(ctx context.Context, db *gorm.DB,  skuCode string, quantity int) error
-	DeductStock(ctx context.Context, db *gorm.DB,  skuCode string, quantity int) error
-	RestoreStock(ctx context.Context, db *gorm.DB,  skuCode string, quantity int) error
+	GetSKUInventory(ctx context.Context, db *gorm.DB, skuCode string) (*SKU, error)
+	UpdateSKUStock(ctx context.Context, db *gorm.DB, skuCode string, availableStock, lockedStock int) error
+	LockStock(ctx context.Context, db *gorm.DB, skuCode string, quantity int) error
+	DeductStock(ctx context.Context, db *gorm.DB, skuCode string, quantity int) error
+	RestoreStock(ctx context.Context, db *gorm.DB, skuCode string, quantity int) error
 
 	// Warehouse inventory
-	GetWarehouseInventory(ctx context.Context, db *gorm.DB,  skuCode string, warehouseID int64) (*WarehouseInventory, error)
-	SetWarehouseStock(ctx context.Context, db *gorm.DB,  skuCode string, warehouseID int64, stock int) error
+	GetWarehouseInventory(ctx context.Context, db *gorm.DB, skuCode string, warehouseID int64) (*WarehouseInventory, error)
+	SetWarehouseStock(ctx context.Context, db *gorm.DB, skuCode string, warehouseID int64, stock int) error
 
 	// Logs
 	CreateLog(ctx context.Context, db *gorm.DB, log *InventoryLog) error
-	GetLogs(ctx context.Context, db *gorm.DB,  query InventoryLogQuery) ([]*InventoryLog, int64, error)
+	GetLogs(ctx context.Context, db *gorm.DB, query InventoryLogQuery) ([]*InventoryLog, int64, error)
 
 	// Low stock
 	GetLowStockSKUs(ctx context.Context, db *gorm.DB) ([]*SKU, error)

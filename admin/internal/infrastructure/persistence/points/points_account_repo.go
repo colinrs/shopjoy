@@ -29,7 +29,7 @@ func (r *pointsAccountRepo) Update(ctx context.Context, db *gorm.DB, account *po
 }
 
 // FindByID finds a points account by ID
-func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*points.PointsAccount, error) {
 	var account points.PointsAccount
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -44,7 +44,7 @@ func (r *pointsAccountRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64
 }
 
 // FindByUserID finds a points account by user ID
-func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) (*points.PointsAccount, error) {
+func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB, userID int64) (*points.PointsAccount, error) {
 	var account points.PointsAccount
 	err := db.WithContext(ctx).
 		Where("user_id = ?", userID).
@@ -59,7 +59,7 @@ func (r *pointsAccountRepo) FindByUserID(ctx context.Context, db *gorm.DB,  user
 }
 
 // FindList finds points accounts with pagination and filters
-func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
+func (r *pointsAccountRepo) FindList(ctx context.Context, db *gorm.DB, query points.PointsAccountQuery) ([]*points.PointsAccount, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.PointsAccount{})

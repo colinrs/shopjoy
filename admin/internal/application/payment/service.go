@@ -20,15 +20,15 @@ import (
 // Service is the payment application service interface
 type Service interface {
 	// GetPaymentStats returns payment statistics
-	GetPaymentStats(ctx context.Context,  period string) (*PaymentStatsDTO, error)
+	GetPaymentStats(ctx context.Context, period string) (*PaymentStatsDTO, error)
 	// ListTransactions returns a list of payment transactions
-	ListTransactions(ctx context.Context,  req ListTransactionsRequest) (*ListTransactionsResponse, error)
+	ListTransactions(ctx context.Context, req ListTransactionsRequest) (*ListTransactionsResponse, error)
 	// GetTransaction returns a single transaction by ID
-	GetTransaction(ctx context.Context,  id int64) (*TransactionDTO, error)
+	GetTransaction(ctx context.Context, id int64) (*TransactionDTO, error)
 	// GetOrderPayment returns payment details for an order
-	GetOrderPayment(ctx context.Context,  orderID int64) (*OrderPaymentDTO, error)
+	GetOrderPayment(ctx context.Context, orderID int64) (*OrderPaymentDTO, error)
 	// InitiateRefund initiates a refund for an order
-	InitiateRefund(ctx context.Context,  adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error)
+	InitiateRefund(ctx context.Context, adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error)
 	// HandleWebhook handles Stripe webhook events
 	HandleWebhook(ctx context.Context, event *WebhookEvent) error
 }
@@ -68,7 +68,7 @@ func NewService(
 }
 
 // GetPaymentStats returns payment statistics
-func (s *service) GetPaymentStats(ctx context.Context,  period string) (*PaymentStatsDTO, error) {
+func (s *service) GetPaymentStats(ctx context.Context, period string) (*PaymentStatsDTO, error) {
 	// Parse period to get time range
 	now := time.Now().UTC()
 	var startTime time.Time
@@ -98,7 +98,7 @@ func (s *service) GetPaymentStats(ctx context.Context,  period string) (*Payment
 		StartTime: todayStart,
 		EndTime:   now,
 	}
-	todayTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  todayQuery)
+	todayTxns, _, err := s.transactionRepo.FindList(ctx, s.db, todayQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (s *service) GetPaymentStats(ctx context.Context,  period string) (*Payment
 		StartTime: yesterdayStart,
 		EndTime:   todayStart,
 	}
-	yesterdayTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  yesterdayQuery)
+	yesterdayTxns, _, err := s.transactionRepo.FindList(ctx, s.db, yesterdayQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (s *service) GetPaymentStats(ctx context.Context,  period string) (*Payment
 		StartTime: startTime,
 		EndTime:   now,
 	}
-	periodTxns, _, err := s.transactionRepo.FindList(ctx, s.db,  periodQuery)
+	periodTxns, _, err := s.transactionRepo.FindList(ctx, s.db, periodQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func (s *service) GetPaymentStats(ctx context.Context,  period string) (*Payment
 }
 
 // ListTransactions returns a list of payment transactions
-func (s *service) ListTransactions(ctx context.Context,  req ListTransactionsRequest) (*ListTransactionsResponse, error) {
+func (s *service) ListTransactions(ctx context.Context, req ListTransactionsRequest) (*ListTransactionsResponse, error) {
 	query := payment.TransactionQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -223,7 +223,7 @@ func (s *service) ListTransactions(ctx context.Context,  req ListTransactionsReq
 
 	query.PageQuery.Validate()
 
-	transactions, total, err := s.transactionRepo.FindList(ctx, s.db,  query)
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -253,8 +253,8 @@ func (s *service) ListTransactions(ctx context.Context,  req ListTransactionsReq
 }
 
 // GetTransaction returns a single transaction by ID
-func (s *service) GetTransaction(ctx context.Context,  id int64) (*TransactionDTO, error) {
-	txn, err := s.transactionRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetTransaction(ctx context.Context, id int64) (*TransactionDTO, error) {
+	txn, err := s.transactionRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -262,20 +262,20 @@ func (s *service) GetTransaction(ctx context.Context,  id int64) (*TransactionDT
 }
 
 // GetOrderPayment returns payment details for an order
-func (s *service) GetOrderPayment(ctx context.Context,  orderID int64) (*OrderPaymentDTO, error) {
-	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db,  orderID)
+func (s *service) GetOrderPayment(ctx context.Context, orderID int64) (*OrderPaymentDTO, error) {
+	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db, orderID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get refunds for this payment
-	refunds, err := s.refundRepo.FindByPaymentID(ctx, s.db,  paymentEntity.ID)
+	refunds, err := s.refundRepo.FindByPaymentID(ctx, s.db, paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Calculate total refunded amount
-	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db,  paymentEntity.ID)
+	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db, paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func (s *service) GetOrderPayment(ctx context.Context,  orderID int64) (*OrderPa
 }
 
 // InitiateRefund initiates a refund for an order
-func (s *service) InitiateRefund(ctx context.Context,  adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error) {
+func (s *service) InitiateRefund(ctx context.Context, adminID int64, req InitiateRefundRequest) (*InitiateRefundResponse, error) {
 	// Parse amount from string to int64 (cents)
 	// The amount string can be "99.99 USD" or just "99.99"
 	amount, err := parseMoneyString(req.Amount)
@@ -337,7 +337,7 @@ func (s *service) InitiateRefund(ctx context.Context,  adminID int64, req Initia
 	}
 
 	// Get payment for the order
-	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db,  req.OrderID)
+	paymentEntity, err := s.paymentRepo.FindByOrderID(ctx, s.db, req.OrderID)
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +353,7 @@ func (s *service) InitiateRefund(ctx context.Context,  adminID int64, req Initia
 	}
 
 	// Calculate refundable amount
-	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db,  paymentEntity.ID)
+	totalRefunded, err := s.refundRepo.GetTotalRefundedAmount(ctx, s.db, paymentEntity.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +375,7 @@ func (s *service) InitiateRefund(ctx context.Context,  adminID int64, req Initia
 	}
 
 	refund := payment.NewPaymentRefund(
-		
+
 		req.OrderID,
 		paymentEntity.ID,
 		req.IdempotencyKey,

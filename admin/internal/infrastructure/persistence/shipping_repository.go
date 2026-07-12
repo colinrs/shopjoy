@@ -17,8 +17,8 @@ type ShippingTemplateRepository interface {
 	Delete(ctx context.Context, db *gorm.DB, id int64) error
 	FindByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, error)
 	FindByIDWithDetails(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingTemplate, []*shipping.ShippingZone, []*shipping.ShippingTemplateMapping, error)
-	FindList(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
-	FindListWithStats(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
+	FindListWithStats(ctx context.Context, db *gorm.DB, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error)
 	FindDefault(ctx context.Context, db *gorm.DB) (*shipping.ShippingTemplate, error)
 	SetDefault(ctx context.Context, db *gorm.DB, id int64) error
 	UnsetAllDefault(ctx context.Context, db *gorm.DB) error
@@ -30,7 +30,7 @@ type ShippingTemplateRepository interface {
 	FindZoneByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingZone, error)
 	FindZonesByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) ([]*shipping.ShippingZone, error)
 	ReorderZones(ctx context.Context, db *gorm.DB, templateID int64, zoneIDs []int64) error
-	FindZoneByCityCode(ctx context.Context, db *gorm.DB,  cityCode string) ([]*shipping.ShippingZone, error)
+	FindZoneByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]*shipping.ShippingZone, error)
 
 	// Zone region operations (for indexed lookup)
 	CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error
@@ -119,7 +119,7 @@ func (r *shippingTemplateRepo) FindByIDWithDetails(ctx context.Context, db *gorm
 }
 
 // FindList 查找运费模板列表
-func (r *shippingTemplateRepo) FindList(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
+func (r *shippingTemplateRepo) FindList(ctx context.Context, db *gorm.DB, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
 	query := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
 
 	if name != "" {
@@ -156,7 +156,7 @@ type TemplateWithStats struct {
 }
 
 // FindListWithStats 查找运费模板列表（带统计信息，单次查询）
-func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.DB,  name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error) {
+func (r *shippingTemplateRepo) FindListWithStats(ctx context.Context, db *gorm.DB, name string, isActive *bool, page, pageSize int) ([]*TemplateWithStats, int64, error) {
 	// Build base query for count
 	baseQuery := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
 
@@ -322,7 +322,7 @@ func (r *shippingTemplateRepo) ReorderZones(ctx context.Context, db *gorm.DB, te
 
 // FindZoneByCityCode 根据城市代码查找匹配的配送区域
 // Uses the junction table for efficient indexed lookup
-func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB,  cityCode string) ([]*shipping.ShippingZone, error) {
+func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]*shipping.ShippingZone, error) {
 	// First find zone IDs via junction table (indexed)
 	zoneIDs, err := r.FindZoneIDsByCityCode(ctx, db, cityCode)
 	if err != nil {

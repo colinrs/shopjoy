@@ -56,7 +56,7 @@ func (l *GetProductStatsLogic) GetProductStats(req *types.ProductStatsReq) (resp
 	}, nil
 }
 
-func (l *GetProductStatsLogic) calculateReplyStats( productID int64, totalReviews int) (replyCount int, replyRate float64) {
+func (l *GetProductStatsLogic) calculateReplyStats(productID int64, totalReviews int) (replyCount int, replyRate float64) {
 	if totalReviews == 0 {
 		return 0, 0
 	}

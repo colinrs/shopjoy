@@ -21,7 +21,7 @@ func (r *pointsTransactionRepo) Create(ctx context.Context, db *gorm.DB, transac
 }
 
 // FindByID finds a points transaction by ID
-func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsTransaction, error) {
+func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*points.PointsTransaction, error) {
 	query := db.WithContext(ctx)
 	var transaction points.PointsTransaction
 	err := query.First(&transaction, id).Error
@@ -35,7 +35,7 @@ func (r *pointsTransactionRepo) FindByID(ctx context.Context, db *gorm.DB,  id i
 }
 
 // FindList finds points transactions with pagination and filters
-func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
+func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB, query points.PointsTransactionQuery) ([]*points.PointsTransaction, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.PointsTransaction{})
@@ -74,7 +74,7 @@ func (r *pointsTransactionRepo) FindList(ctx context.Context, db *gorm.DB,  quer
 }
 
 // GetStats gets statistics for points transactions
-func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB,  query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
+func (r *pointsTransactionRepo) GetStats(ctx context.Context, db *gorm.DB, query points.PointsTransactionQuery) (*points.PointsTransactionStats, error) {
 	stats := &points.PointsTransactionStats{}
 
 	// Base query with tenant filter

@@ -258,38 +258,38 @@ type OrderQuery struct {
 // OrderRepository 订单仓储接口
 type OrderRepository interface {
 	// FindByID 根据ID查询订单
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Order, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Order, error)
 	// FindByOrderNo 根据订单号查询订单
-	FindByOrderNo(ctx context.Context, db *gorm.DB,  orderNo string) (*Order, error)
+	FindByOrderNo(ctx context.Context, db *gorm.DB, orderNo string) (*Order, error)
 	// FindList 分页查询订单列表
-	FindList(ctx context.Context, db *gorm.DB,  query OrderQuery) ([]*Order, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, query OrderQuery) ([]*Order, int64, error)
 	// UpdateWithVersion 带乐观锁的更新
 	// 返回 ErrOrderVersionConflict 如果版本冲突
 	UpdateWithVersion(ctx context.Context, db *gorm.DB, order *Order) error
 	// UpdateRemark 更新商家备注
-	UpdateRemark(ctx context.Context, db *gorm.DB,  orderID int64, remark string) error
+	UpdateRemark(ctx context.Context, db *gorm.DB, orderID int64, remark string) error
 	// CountTodayOrders 统计今日订单数
 	CountTodayOrders(ctx context.Context, db *gorm.DB) (int64, error)
 	// SumTodayGMV 统计今日GMV（已支付订单的总金额）
 	SumTodayGMV(ctx context.Context, db *gorm.DB) (decimal.Decimal, error)
 	// FindForExport 导出订单（最多10000条）
-	FindForExport(ctx context.Context, db *gorm.DB,  query OrderQuery) ([]*Order, error)
+	FindForExport(ctx context.Context, db *gorm.DB, query OrderQuery) ([]*Order, error)
 	// CountByStatus 按状态统计订单数量
 	CountByStatus(ctx context.Context, db *gorm.DB) ([]OrderStatusCount, error)
 	// FindPendingOrders 查询待付款订单
-	FindPendingOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*Order, error)
+	FindPendingOrders(ctx context.Context, db *gorm.DB, limit int) ([]*Order, error)
 	// CountPendingOrders 统计待付款订单数量
 	CountPendingOrders(ctx context.Context, db *gorm.DB) (int64, error)
 	// FindRecentOrders 查询最近创建的订单
-	FindRecentOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*Order, error)
+	FindRecentOrders(ctx context.Context, db *gorm.DB, limit int) ([]*Order, error)
 	// FindRecentPaidOrders 查询最近已支付的订单
-	FindRecentPaidOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*Order, error)
+	FindRecentPaidOrders(ctx context.Context, db *gorm.DB, limit int) ([]*Order, error)
 	// SumGMVByDateRange 按日期范围统计GMV
-	SumGMVByDateRange(ctx context.Context, db *gorm.DB,  start, end time.Time, statuses []OrderStatus) (decimal.Decimal, error)
+	SumGMVByDateRange(ctx context.Context, db *gorm.DB, start, end time.Time, statuses []OrderStatus) (decimal.Decimal, error)
 	// FindTopProducts 查询热销商品
-	FindTopProducts(ctx context.Context, db *gorm.DB,  startTime time.Time, limit int) ([]*TopProduct, error)
+	FindTopProducts(ctx context.Context, db *gorm.DB, startTime time.Time, limit int) ([]*TopProduct, error)
 	// FindSalesTrend 查询销售趋势
-	FindSalesTrend(ctx context.Context, db *gorm.DB,  startDate, endDate time.Time) ([]*DailySalesTrend, error)
+	FindSalesTrend(ctx context.Context, db *gorm.DB, startDate, endDate time.Time) ([]*DailySalesTrend, error)
 }
 
 // OrderItemRepository 订单明细仓储接口

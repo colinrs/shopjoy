@@ -23,11 +23,11 @@ func (r *RoleRepository) Update(ctx context.Context, db *gorm.DB, role *role.Rol
 	return db.WithContext(ctx).Save(role).Error
 }
 
-func (r *RoleRepository) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *RoleRepository) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	return db.WithContext(ctx).Where("id = ?", id).Delete(&role.Role{}).Error
 }
 
-func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*role.Role, error) {
+func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*role.Role, error) {
 	var rl role.Role
 	err := db.WithContext(ctx).Where("id = ?", id).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,7 +36,7 @@ func (r *RoleRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (
 	return &rl, err
 }
 
-func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB,  codeStr string) (*role.Role, error) {
+func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB, codeStr string) (*role.Role, error) {
 	var rl role.Role
 	err := db.WithContext(ctx).Where("code = ?", codeStr).First(&rl).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -45,7 +45,7 @@ func (r *RoleRepository) FindByCode(ctx context.Context, db *gorm.DB,  codeStr s
 	return &rl, err
 }
 
-func (r *RoleRepository) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]*role.Role, error) {
+func (r *RoleRepository) FindByUserID(ctx context.Context, db *gorm.DB, userID int64) ([]*role.Role, error) {
 	var roles []*role.Role
 	err := db.WithContext(ctx).
 		Joins("JOIN user_roles ON user_roles.role_id = roles.id").
@@ -54,7 +54,7 @@ func (r *RoleRepository) FindByUserID(ctx context.Context, db *gorm.DB,  userID 
 	return roles, err
 }
 
-func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB,  query role.Query) ([]*role.Role, int64, error) {
+func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB, query role.Query) ([]*role.Role, int64, error) {
 	var roles []*role.Role
 	var total int64
 
@@ -75,7 +75,7 @@ func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB,  query role.
 	return roles, total, err
 }
 
-func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB,  userID int64, roleIDs []int64) error {
+func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB, userID int64, roleIDs []int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("user_id = ?", userID).Delete(&role.UserRole{}).Error; err != nil {
 			return err
@@ -93,7 +93,7 @@ func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB,  userID 
 	})
 }
 
-func (r *RoleRepository) GetUserRoles(ctx context.Context, db *gorm.DB,  userID int64) ([]*role.Role, error) {
+func (r *RoleRepository) GetUserRoles(ctx context.Context, db *gorm.DB, userID int64) ([]*role.Role, error) {
 	return r.FindByUserID(ctx, db, userID)
 }
 

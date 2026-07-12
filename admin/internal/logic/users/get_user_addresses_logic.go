@@ -24,7 +24,7 @@ func NewGetUserAddressesLogic(ctx context.Context, svcCtx *svc.ServiceContext) G
 }
 
 func (l *GetUserAddressesLogic) GetUserAddresses(req *types.GetUserRequest) (resp *types.UserAddressListResponse, err error) {
-	addressList, err := l.svcCtx.UserService.GetAddresses(l.ctx,  req.ID)
+	addressList, err := l.svcCtx.UserService.GetAddresses(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -38,9 +38,9 @@ func (l *UpdateShopSettingsLogic) UpdateShopSettings(req *types.UpdateShopSettin
 	if settings == nil {
 		// Create new settings if not exists
 		settings = &shop.ShopSettings{
-			Code:     generateShopCode(),
-			Status:   1,
-			Plan:     0,
+			Code:   generateShopCode(),
+			Status: 1,
+			Plan:   0,
 		}
 	}
 

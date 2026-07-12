@@ -79,7 +79,7 @@ func (r *promotionUsageRepo) Create(ctx context.Context, db *gorm.DB, usage *pro
 }
 
 // FindByOrderID finds a promotion usage record by order ID
-func (r *promotionUsageRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) (*promotion.PromotionUsage, error) {
+func (r *promotionUsageRepo) FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) (*promotion.PromotionUsage, error) {
 	var model promotionUsageModel
 	err := db.WithContext(ctx).
 		Where("order_id = ?", orderID).
@@ -94,7 +94,7 @@ func (r *promotionUsageRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  or
 }
 
 // FindList finds promotion usage records with pagination and filters
-func (r *promotionUsageRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion.PromotionUsageQuery) ([]*promotion.PromotionUsage, int64, error) {
+func (r *promotionUsageRepo) FindList(ctx context.Context, db *gorm.DB, query promotion.PromotionUsageQuery) ([]*promotion.PromotionUsage, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&promotionUsageModel{})

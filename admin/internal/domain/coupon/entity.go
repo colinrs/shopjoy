@@ -149,17 +149,17 @@ func (uc *UserCoupon) CanUse() bool {
 type CouponRepository interface {
 	Create(ctx context.Context, db *gorm.DB, coupon *Coupon) error
 	Update(ctx context.Context, db *gorm.DB, coupon *Coupon) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Coupon, error)
-	FindByCode(ctx context.Context, db *gorm.DB,  code string) (*Coupon, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Coupon, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Coupon, error)
 	FindActive(ctx context.Context, db *gorm.DB) ([]*Coupon, error)
-	FindList(ctx context.Context, db *gorm.DB,  query Query) ([]*Coupon, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Coupon, int64, error)
 }
 
 type UserCouponRepository interface {
 	Create(ctx context.Context, db *gorm.DB, userCoupon *UserCoupon) error
-	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, status UserCouponStatus) ([]*UserCoupon, error)
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*UserCoupon, error)
-	Use(ctx context.Context, db *gorm.DB,  id int64, orderID string) error
+	FindByUserID(ctx context.Context, db *gorm.DB, userID int64, status UserCouponStatus) ([]*UserCoupon, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*UserCoupon, error)
+	Use(ctx context.Context, db *gorm.DB, id int64, orderID string) error
 }
 
 type Query struct {

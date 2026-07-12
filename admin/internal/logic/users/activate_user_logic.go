@@ -25,13 +25,13 @@ func NewActivateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) Activ
 }
 
 func (l *ActivateUserLogic) ActivateUser(req *types.ActivateUserRequest) (resp *types.GetUserResponse, err error) {
-	if err := l.svcCtx.UserService.Activate(l.ctx,  req.ID); err != nil {
+	if err := l.svcCtx.UserService.Activate(l.ctx, req.ID); err != nil {
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionActivateUser, "")
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionActivateUser, "")
 
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -76,13 +76,13 @@ type UserRole struct {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, role *Role) error
 	Update(ctx context.Context, db *gorm.DB, role *Role) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Role, error)
-	FindByCode(ctx context.Context, db *gorm.DB,  code string) (*Role, error)
-	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]*Role, error)
-	FindList(ctx context.Context, db *gorm.DB,  query Query) ([]*Role, int64, error)
-	AssignToUser(ctx context.Context, db *gorm.DB,  userID int64, roleIDs []int64) error
-	GetUserRoles(ctx context.Context, db *gorm.DB,  userID int64) ([]*Role, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Role, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Role, error)
+	FindByUserID(ctx context.Context, db *gorm.DB, userID int64) ([]*Role, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Role, int64, error)
+	AssignToUser(ctx context.Context, db *gorm.DB, userID int64, roleIDs []int64) error
+	GetUserRoles(ctx context.Context, db *gorm.DB, userID int64) ([]*Role, error)
 }
 
 type PermissionRepository interface {

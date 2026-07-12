@@ -24,7 +24,7 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetUserLog
 }
 
 func (l *GetUserLogic) GetUser(req *types.GetUserRequest) (resp *types.GetUserResponse, err error) {
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

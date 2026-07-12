@@ -36,7 +36,7 @@ func (l *ListUserOperationLogsLogic) ListUserOperationLogs(req *types.ListUserOp
 		Keyword:  req.Keyword,
 	}
 
-	out, err := l.svcCtx.OperationLogService.List(l.ctx, l.svcCtx.DB,  req.ID, query)
+	out, err := l.svcCtx.OperationLogService.List(l.ctx, l.svcCtx.DB, req.ID, query)
 	if err != nil {
 		return nil, err
 	}

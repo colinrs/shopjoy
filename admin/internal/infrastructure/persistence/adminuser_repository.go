@@ -112,7 +112,7 @@ func (r *AdminUserRepository) UpdatePassword(ctx context.Context, db *gorm.DB, i
 		Update("password", hashedPassword).Error
 }
 
-func (r *AdminUserRepository) ExistsByUsername(ctx context.Context, db *gorm.DB,  username string) (bool, error) {
+func (r *AdminUserRepository) ExistsByUsername(ctx context.Context, db *gorm.DB, username string) (bool, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
 		Where("username = ?", username).
@@ -120,7 +120,7 @@ func (r *AdminUserRepository) ExistsByUsername(ctx context.Context, db *gorm.DB,
 	return count > 0, err
 }
 
-func (r *AdminUserRepository) ExistsByEmail(ctx context.Context, db *gorm.DB,  email string) (bool, error) {
+func (r *AdminUserRepository) ExistsByEmail(ctx context.Context, db *gorm.DB, email string) (bool, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&adminuser.AdminUser{}).
 		Where("email = ?", email).

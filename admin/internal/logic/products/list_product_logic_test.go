@@ -14,21 +14,21 @@ import (
 // ProductResponse had images, because it only set basic fields + markets.
 func TestConvertToProductDetailRespWithMarkets_PopulatesImages(t *testing.T) {
 	p := &appProduct.ProductResponse{
-		ID:        42,
-		Name:      "Test Product",
-		Price:     decimal.NewFromInt(99),
-		Currency:  "USD",
-		SKU:       "SKU-1",
-		Brand:     "Acme",
-		Tags:      []string{"hot"},
-		Images:    []string{"https://cdn.example.com/a.jpg", "https://cdn.example.com/b.jpg"},
-		HSCode:    "HS-1",
-		COO:       "CN",
-		Weight:    decimal.NewFromInt(100),
+		ID:         42,
+		Name:       "Test Product",
+		Price:      decimal.NewFromInt(99),
+		Currency:   "USD",
+		SKU:        "SKU-1",
+		Brand:      "Acme",
+		Tags:       []string{"hot"},
+		Images:     []string{"https://cdn.example.com/a.jpg", "https://cdn.example.com/b.jpg"},
+		HSCode:     "HS-1",
+		COO:        "CN",
+		Weight:     decimal.NewFromInt(100),
 		WeightUnit: "g",
-		Length:    decimal.NewFromInt(10),
-		Width:     decimal.NewFromInt(20),
-		Height:    decimal.NewFromInt(30),
+		Length:     decimal.NewFromInt(10),
+		Width:      decimal.NewFromInt(20),
+		Height:     decimal.NewFromInt(30),
 	}
 
 	resp := convertToProductDetailRespWithMarkets(p, nil, nil)

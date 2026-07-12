@@ -25,10 +25,10 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) DeleteU
 }
 
 func (l *DeleteUserLogic) DeleteUser(req *types.DeleteUserRequest) error {
-	if err := l.svcCtx.UserService.Delete(l.ctx,  req.ID); err != nil {
+	if err := l.svcCtx.UserService.Delete(l.ctx, req.ID); err != nil {
 		return err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionDeleteUser, "")
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionDeleteUser, "")
 	return nil
 }

@@ -83,14 +83,14 @@ func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Ware
 		}).Error
 }
 
-func (r *warehouseRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *warehouseRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&warehouseModel{}).
 		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).
@@ -104,7 +104,7 @@ func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*
 	return model.toEntity(), nil
 }
 
-func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB,  code string) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, code string) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
 		Where("code = ? AND deleted_at IS NULL", code).

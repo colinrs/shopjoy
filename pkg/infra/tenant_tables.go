@@ -12,18 +12,18 @@ var tenantScopedTables = map[string]bool{
 	"user_operation_logs": true,
 
 	// Product Domain
-	"categories":              true,
-	"brands":                  true,
-	"products":                true,
-	"skus":                    true,
-	"product_markets":         true,
-	"product_localizations":   true,
-	"category_markets":        true,
-	"brand_markets":           true,
-	"warehouses":              true,
-	"warehouse_inventories":   true,
-	"inventory_logs":          true,
-	"markets":                 true,
+	"categories":            true,
+	"brands":                true,
+	"products":              true,
+	"skus":                  true,
+	"product_markets":       true,
+	"product_localizations": true,
+	"category_markets":      true,
+	"brand_markets":         true,
+	"warehouses":            true,
+	"warehouse_inventories": true,
+	"inventory_logs":        true,
+	"markets":               true,
 
 	// Order Domain
 	"orders":     true,
@@ -31,11 +31,11 @@ var tenantScopedTables = map[string]bool{
 	"cart_items": true,
 
 	// Payment Domain
-	"payments":            true,
-	"order_payments":      true,
+	"payments":             true,
+	"order_payments":       true,
 	"payment_transactions": true,
-	"payment_refunds":     true,
-	"webhook_events":      true,
+	"payment_refunds":      true,
+	"webhook_events":       true,
 
 	// Fulfillment Domain
 	"shipments":                  true,
@@ -46,11 +46,11 @@ var tenantScopedTables = map[string]bool{
 	"shipping_template_mappings": true,
 
 	// Promotion Domain
-	"promotions":       true,
-	"promotion_rules":  true,
-	"promotion_usage":  true,
-	"coupons":          true,
-	"user_coupons":     true,
+	"promotions":      true,
+	"promotion_rules": true,
+	"promotion_usage": true,
+	"coupons":         true,
+	"user_coupons":    true,
 
 	// Points Domain
 	"earn_rules":          true,
@@ -60,9 +60,9 @@ var tenantScopedTables = map[string]bool{
 	"points_redemptions":  true,
 
 	// Review Domain
-	"reviews":       true,
+	"reviews":        true,
 	"review_replies": true,
-	"review_stats":  true,
+	"review_stats":   true,
 
 	// Storefront Domain
 	"shops":            true,

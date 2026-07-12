@@ -40,21 +40,21 @@ func (l *GetDashboardLogic) GetDashboard(req *types.GetDashboardRequest) (resp *
 	}
 
 	// Get pending orders
-	pendingOrdersResp, err := helper.GetPendingOrders( 5)
+	pendingOrdersResp, err := helper.GetPendingOrders(5)
 	if err != nil {
 		l.Logger.Errorf("failed to get pending orders: %v", err)
 		pendingOrdersResp = &types.PendingOrdersResponse{}
 	}
 
 	// Get top products
-	topProductsResp, err := helper.GetTopProducts( 5, "week")
+	topProductsResp, err := helper.GetTopProducts(5, "week")
 	if err != nil {
 		l.Logger.Errorf("failed to get top products: %v", err)
 		topProductsResp = &types.TopProductsResponse{}
 	}
 
 	// Get recent activities
-	activitiesResp, err := helper.GetRecentActivities( 10)
+	activitiesResp, err := helper.GetRecentActivities(10)
 	if err != nil {
 		l.Logger.Errorf("failed to get recent activities: %v", err)
 		activitiesResp = &types.RecentActivitiesResponse{}

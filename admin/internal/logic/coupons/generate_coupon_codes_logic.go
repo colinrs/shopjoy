@@ -34,7 +34,6 @@ func (l *GenerateCouponCodesLogic) GenerateCouponCodes(req *types.GenerateCoupon
 		codes = append(codes, code)
 	}
 
-
 	return &types.GenerateCouponCodesResp{
 		Codes: codes,
 		Count: len(codes),

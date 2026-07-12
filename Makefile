@@ -23,7 +23,7 @@ SHOP_BINARY := bin/shop
 .PHONY: all build clean api lint fmt vet test security deps help
 
 # Default target
-all: deps build
+all: deps build fmt
 
 ## build: Build all services
 build:
@@ -31,6 +31,7 @@ build:
 	cd $(ADMIN_DIR) && $(GOBUILD) -o $(ADMIN_BINARY) .
 	@echo "Building shop service..."
 	cd $(SHOP_DIR) && $(GOBUILD) -o $(SHOP_BINARY) .
+	make fmt
 
 ## clean: Clean build artifacts
 clean:
@@ -41,11 +42,13 @@ clean:
 api:
 	cd $(ADMIN_DIR) && make api
 	cd $(SHOP_DIR) && make api
+	make fmt
 
 ## lint: Run golangci-lint
 lint:
 	@which golangci-lint > /dev/null || (echo "Installing golangci-lint..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest)
 	golangci-lint run --timeout=10m ./...
+	make fmt
 
 ## fmt: Format Go code
 fmt:

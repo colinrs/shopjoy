@@ -129,41 +129,41 @@ type PaginatedResult[T any] struct {
 type ThemeService interface {
 	ListThemes(ctx context.Context) ([]*ThemeDTO, error)
 	GetCurrentTheme(ctx context.Context) (*CurrentThemeDTO, error)
-	SwitchTheme(ctx context.Context,  themeID int64, userID int64, userName string) error
-	UpdateThemeConfig(ctx context.Context,  config ThemeConfigDTO, userID int64, userName string) error
-	ListAuditLogs(ctx context.Context,  page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error)
+	SwitchTheme(ctx context.Context, themeID int64, userID int64, userName string) error
+	UpdateThemeConfig(ctx context.Context, config ThemeConfigDTO, userID int64, userName string) error
+	ListAuditLogs(ctx context.Context, page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error)
 }
 
 type PageService interface {
-	CreatePage(ctx context.Context,  name, slug, pageType string) (*PageDTO, error)
-	ListPages(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageDTO], error)
-	GetPage(ctx context.Context,  pageID int64) (*PageDetailDTO, error)
-	GetPageBySlug(ctx context.Context,  slug string) (*PageDetailDTO, error)
-	SaveDraft(ctx context.Context,  pageID int64, blocks []*DecorationDTO, userID int64) error
-	PublishPage(ctx context.Context,  pageID int64, userID int64) error
-	UnpublishPage(ctx context.Context,  pageID int64) error
+	CreatePage(ctx context.Context, name, slug, pageType string) (*PageDTO, error)
+	ListPages(ctx context.Context, page, pageSize int) (*PaginatedResult[*PageDTO], error)
+	GetPage(ctx context.Context, pageID int64) (*PageDetailDTO, error)
+	GetPageBySlug(ctx context.Context, slug string) (*PageDetailDTO, error)
+	SaveDraft(ctx context.Context, pageID int64, blocks []*DecorationDTO, userID int64) error
+	PublishPage(ctx context.Context, pageID int64, userID int64) error
+	UnpublishPage(ctx context.Context, pageID int64) error
 }
 
 type DecorationService interface {
-	GetDecorations(ctx context.Context,  pageID int64) ([]*DecorationDTO, error)
-	AddDecoration(ctx context.Context,  pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error)
-	UpdateDecoration(ctx context.Context,  decorationID int64, blockConfig map[string]any) error
-	DeleteDecoration(ctx context.Context,  decorationID int64) error
-	ReorderBlocks(ctx context.Context,  pageID int64, orders []BlockOrderDTO) error
+	GetDecorations(ctx context.Context, pageID int64) ([]*DecorationDTO, error)
+	AddDecoration(ctx context.Context, pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error)
+	UpdateDecoration(ctx context.Context, decorationID int64, blockConfig map[string]any) error
+	DeleteDecoration(ctx context.Context, decorationID int64) error
+	ReorderBlocks(ctx context.Context, pageID int64, orders []BlockOrderDTO) error
 }
 
 type VersionService interface {
-	ListVersions(ctx context.Context,  pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error)
-	GetVersion(ctx context.Context,  pageID int64, version int) (*VersionDetailDTO, error)
-	RestoreVersion(ctx context.Context,  pageID int64, version int, userID int64) error
+	ListVersions(ctx context.Context, pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error)
+	GetVersion(ctx context.Context, pageID int64, version int) (*VersionDetailDTO, error)
+	RestoreVersion(ctx context.Context, pageID int64, version int, userID int64) error
 }
 
 type SEOService interface {
 	GetGlobalSEO(ctx context.Context) (*SEOConfigDTO, error)
-	UpdateGlobalSEO(ctx context.Context,  config SEOConfigDTO) error
-	GetPageSEO(ctx context.Context,  pageType string, pageID *int64) (*PageSEOConfigDTO, error)
-	UpdatePageSEO(ctx context.Context,  pageType string, pageID *int64, config SEOConfigDTO) error
-	ListPageSEO(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error)
+	UpdateGlobalSEO(ctx context.Context, config SEOConfigDTO) error
+	GetPageSEO(ctx context.Context, pageType string, pageID *int64) (*PageSEOConfigDTO, error)
+	UpdatePageSEO(ctx context.Context, pageType string, pageID *int64, config SEOConfigDTO) error
+	ListPageSEO(ctx context.Context, page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error)
 }
 
 // Service implementation
@@ -223,7 +223,7 @@ func (s *themeService) GetCurrentTheme(ctx context.Context) (*CurrentThemeDTO, e
 
 	var theme *storefront.Theme
 	if shop.CurrentThemeID != nil {
-		theme, err = s.themeRepo.FindByID(ctx, s.db,  *shop.CurrentThemeID)
+		theme, err = s.themeRepo.FindByID(ctx, s.db, *shop.CurrentThemeID)
 		if err != nil {
 			return nil, err
 		}
@@ -274,8 +274,8 @@ func (s *themeService) GetCurrentTheme(ctx context.Context) (*CurrentThemeDTO, e
 	}, nil
 }
 
-func (s *themeService) SwitchTheme(ctx context.Context,  themeID int64, userID int64, userName string) error {
-	theme, err := s.themeRepo.FindByID(ctx, s.db,  themeID)
+func (s *themeService) SwitchTheme(ctx context.Context, themeID int64, userID int64, userName string) error {
+	theme, err := s.themeRepo.FindByID(ctx, s.db, themeID)
 	if err != nil {
 		return err
 	}
@@ -295,7 +295,7 @@ func (s *themeService) SwitchTheme(ctx context.Context,  themeID int64, userID i
 	var oldThemeName string
 	var oldThemeCode string
 	if shop.CurrentThemeID != nil {
-		oldTheme, _ := s.themeRepo.FindByID(ctx, s.db,  *shop.CurrentThemeID)
+		oldTheme, _ := s.themeRepo.FindByID(ctx, s.db, *shop.CurrentThemeID)
 		if oldTheme != nil {
 			oldThemeName = oldTheme.Name
 			oldThemeCode = oldTheme.Code
@@ -323,7 +323,7 @@ func (s *themeService) SwitchTheme(ctx context.Context,  themeID int64, userID i
 	})
 }
 
-func (s *themeService) UpdateThemeConfig(ctx context.Context,  config ThemeConfigDTO, userID int64, userName string) error {
+func (s *themeService) UpdateThemeConfig(ctx context.Context, config ThemeConfigDTO, userID int64, userName string) error {
 	shop, err := s.shopRepo.FindByTenantID(ctx, s.db)
 	if err != nil {
 		return err
@@ -335,7 +335,7 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context,  config ThemeConfi
 	// Get theme info for audit log
 	var theme *storefront.Theme
 	if shop.CurrentThemeID != nil {
-		theme, _ = s.themeRepo.FindByID(ctx, s.db,  *shop.CurrentThemeID)
+		theme, _ = s.themeRepo.FindByID(ctx, s.db, *shop.CurrentThemeID)
 	}
 	// Fall back to default theme if no current theme is set
 	if theme == nil {
@@ -387,8 +387,8 @@ func (s *themeService) UpdateThemeConfig(ctx context.Context,  config ThemeConfi
 	})
 }
 
-func (s *themeService) ListAuditLogs(ctx context.Context,  page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error) {
-	logs, total, err := s.auditLogRepo.FindByTenantID(ctx, s.db,  page, pageSize)
+func (s *themeService) ListAuditLogs(ctx context.Context, page, pageSize int) (*PaginatedResult[*ThemeAuditLogDTO], error) {
+	logs, total, err := s.auditLogRepo.FindByTenantID(ctx, s.db, page, pageSize)
 	if err != nil {
 		return nil, err
 	}

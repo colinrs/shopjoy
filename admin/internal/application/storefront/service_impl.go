@@ -36,9 +36,9 @@ func NewPageService(
 	}
 }
 
-func (s *pageService) CreatePage(ctx context.Context,  name, slug, pageType string) (*PageDTO, error) {
+func (s *pageService) CreatePage(ctx context.Context, name, slug, pageType string) (*PageDTO, error) {
 	// Validate slug uniqueness
-	existingPage, err := s.pageRepo.FindBySlug(ctx, s.db,  slug)
+	existingPage, err := s.pageRepo.FindBySlug(ctx, s.db, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,8 @@ func (s *pageService) CreatePage(ctx context.Context,  name, slug, pageType stri
 	}, nil
 }
 
-func (s *pageService) ListPages(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageDTO], error) {
-	pages, total, err := s.pageRepo.FindAll(ctx, s.db,  page, pageSize)
+func (s *pageService) ListPages(ctx context.Context, page, pageSize int) (*PaginatedResult[*PageDTO], error) {
+	pages, total, err := s.pageRepo.FindAll(ctx, s.db, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (s *pageService) ListPages(ctx context.Context,  page, pageSize int) (*Pagi
 }
 
 func (s *pageService) GetPage(ctx context.Context, pageID int64) (*PageDetailDTO, error) {
-	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
+	page, err := s.pageRepo.FindByID(ctx, s.db, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (s *pageService) GetPage(ctx context.Context, pageID int64) (*PageDetailDTO
 		return nil, code.ErrPageNotFound
 	}
 
-	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db,  pageID)
+	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (s *pageService) GetPage(ctx context.Context, pageID int64) (*PageDetailDTO
 }
 
 func (s *pageService) GetPageBySlug(ctx context.Context, slug string) (*PageDetailDTO, error) {
-	page, err := s.pageRepo.FindBySlug(ctx, s.db,  slug)
+	page, err := s.pageRepo.FindBySlug(ctx, s.db, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -145,11 +145,11 @@ func (s *pageService) GetPageBySlug(ctx context.Context, slug string) (*PageDeta
 		return nil, code.ErrPageNotFound
 	}
 
-	return s.GetPage(ctx,  page.Model.ID)
+	return s.GetPage(ctx, page.Model.ID)
 }
 
-func (s *pageService) SaveDraft(ctx context.Context,  pageID int64, blocks []*DecorationDTO, userID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
+func (s *pageService) SaveDraft(ctx context.Context, pageID int64, blocks []*DecorationDTO, userID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db, pageID)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (s *pageService) SaveDraft(ctx context.Context,  pageID int64, blocks []*De
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Delete existing decorations
-		if err := s.decorationRepo.DeleteByPageID(ctx, tx,  pageID); err != nil {
+		if err := s.decorationRepo.DeleteByPageID(ctx, tx, pageID); err != nil {
 			return err
 		}
 
@@ -199,8 +199,8 @@ func (s *pageService) SaveDraft(ctx context.Context,  pageID int64, blocks []*De
 	})
 }
 
-func (s *pageService) PublishPage(ctx context.Context,  pageID int64, userID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
+func (s *pageService) PublishPage(ctx context.Context, pageID int64, userID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db, pageID)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (s *pageService) PublishPage(ctx context.Context,  pageID int64, userID int
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Get current decorations for version snapshot
-		decorations, err := s.decorationRepo.FindByPageID(ctx, tx,  pageID)
+		decorations, err := s.decorationRepo.FindByPageID(ctx, tx, pageID)
 		if err != nil {
 			return err
 		}
@@ -247,7 +247,7 @@ func (s *pageService) PublishPage(ctx context.Context,  pageID int64, userID int
 		}
 
 		// Clean up old versions (keep last 20)
-		if err := s.versionRepo.DeleteOldest(ctx, tx,  pageID, 20); err != nil {
+		if err := s.versionRepo.DeleteOldest(ctx, tx, pageID, 20); err != nil {
 			return err
 		}
 
@@ -263,8 +263,8 @@ func (s *pageService) PublishPage(ctx context.Context,  pageID int64, userID int
 	})
 }
 
-func (s *pageService) UnpublishPage(ctx context.Context,  pageID int64) error {
-	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
+func (s *pageService) UnpublishPage(ctx context.Context, pageID int64) error {
+	page, err := s.pageRepo.FindByID(ctx, s.db, pageID)
 	if err != nil {
 		return err
 	}
@@ -340,15 +340,15 @@ func NewDecorationService(
 	}
 }
 
-func (s *decorationService) GetDecorations(ctx context.Context,  pageID int64) ([]*DecorationDTO, error) {
-	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db,  pageID)
+func (s *decorationService) GetDecorations(ctx context.Context, pageID int64) ([]*DecorationDTO, error) {
+	decorations, err := s.decorationRepo.FindByPageID(ctx, s.db, pageID)
 	if err != nil {
 		return nil, err
 	}
 	return decorationsToDTOs(decorations), nil
 }
 
-func (s *decorationService) AddDecoration(ctx context.Context,  pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error) {
+func (s *decorationService) AddDecoration(ctx context.Context, pageID int64, blockType string, blockConfig map[string]any, sortOrder int) (*DecorationDTO, error) {
 	// Validate block type
 	if !isValidBlockType(blockType) {
 		return nil, code.ErrInvalidBlockType
@@ -380,8 +380,8 @@ func (s *decorationService) AddDecoration(ctx context.Context,  pageID int64, bl
 	}, nil
 }
 
-func (s *decorationService) UpdateDecoration(ctx context.Context,  decorationID int64, blockConfig map[string]any) error {
-	decoration, err := s.decorationRepo.FindByID(ctx, s.db,  decorationID)
+func (s *decorationService) UpdateDecoration(ctx context.Context, decorationID int64, blockConfig map[string]any) error {
+	decoration, err := s.decorationRepo.FindByID(ctx, s.db, decorationID)
 	if err != nil {
 		return err
 	}
@@ -394,10 +394,10 @@ func (s *decorationService) UpdateDecoration(ctx context.Context,  decorationID 
 }
 
 func (s *decorationService) DeleteDecoration(ctx context.Context, decorationID int64) error {
-	return s.decorationRepo.Delete(ctx, s.db,  decorationID)
+	return s.decorationRepo.Delete(ctx, s.db, decorationID)
 }
 
-func (s *decorationService) ReorderBlocks(ctx context.Context,  pageID int64, orders []BlockOrderDTO) error {
+func (s *decorationService) ReorderBlocks(ctx context.Context, pageID int64, orders []BlockOrderDTO) error {
 	blockOrders := make([]storefront.BlockOrder, len(orders))
 	for i, o := range orders {
 		blockOrders[i] = storefront.BlockOrder{
@@ -405,7 +405,7 @@ func (s *decorationService) ReorderBlocks(ctx context.Context,  pageID int64, or
 			SortOrder: o.SortOrder,
 		}
 	}
-	return s.decorationRepo.Reorder(ctx, s.db,  blockOrders)
+	return s.decorationRepo.Reorder(ctx, s.db, blockOrders)
 }
 
 // isValidBlockType validates that the block type is one of the allowed types
@@ -449,8 +449,8 @@ func NewVersionService(
 	}
 }
 
-func (s *versionService) ListVersions(ctx context.Context,  pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error) {
-	versions, total, err := s.versionRepo.FindByPageID(ctx, s.db,  pageID, page, pageSize)
+func (s *versionService) ListVersions(ctx context.Context, pageID int64, page, pageSize int) (*PaginatedResult[*VersionDTO], error) {
+	versions, total, err := s.versionRepo.FindByPageID(ctx, s.db, pageID, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -472,8 +472,8 @@ func (s *versionService) ListVersions(ctx context.Context,  pageID int64, page, 
 	}, nil
 }
 
-func (s *versionService) GetVersion(ctx context.Context,  pageID int64, version int) (*VersionDetailDTO, error) {
-	v, err := s.versionRepo.FindByVersion(ctx, s.db,  pageID, version)
+func (s *versionService) GetVersion(ctx context.Context, pageID int64, version int) (*VersionDetailDTO, error) {
+	v, err := s.versionRepo.FindByVersion(ctx, s.db, pageID, version)
 	if err != nil {
 		return nil, err
 	}
@@ -501,8 +501,8 @@ func (s *versionService) GetVersion(ctx context.Context,  pageID int64, version 
 	}, nil
 }
 
-func (s *versionService) RestoreVersion(ctx context.Context,  pageID int64, version int, userID int64) error {
-	v, err := s.versionRepo.FindByVersion(ctx, s.db,  pageID, version)
+func (s *versionService) RestoreVersion(ctx context.Context, pageID int64, version int, userID int64) error {
+	v, err := s.versionRepo.FindByVersion(ctx, s.db, pageID, version)
 	if err != nil {
 		return err
 	}
@@ -511,7 +511,7 @@ func (s *versionService) RestoreVersion(ctx context.Context,  pageID int64, vers
 	}
 
 	// Get current page to increment version
-	page, err := s.pageRepo.FindByID(ctx, s.db,  pageID)
+	page, err := s.pageRepo.FindByID(ctx, s.db, pageID)
 	if err != nil {
 		return err
 	}
@@ -521,7 +521,7 @@ func (s *versionService) RestoreVersion(ctx context.Context,  pageID int64, vers
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// Delete existing decorations
-		if err := s.decorationRepo.DeleteByPageID(ctx, tx,  pageID); err != nil {
+		if err := s.decorationRepo.DeleteByPageID(ctx, tx, pageID); err != nil {
 			return err
 		}
 
@@ -589,7 +589,7 @@ func NewSEOService(
 }
 
 func (s *seoService) GetGlobalSEO(ctx context.Context) (*SEOConfigDTO, error) {
-	config, err := s.seoRepo.FindByPageType(ctx, s.db,  "global", nil)
+	config, err := s.seoRepo.FindByPageType(ctx, s.db, "global", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -604,7 +604,7 @@ func (s *seoService) GetGlobalSEO(ctx context.Context) (*SEOConfigDTO, error) {
 	}, nil
 }
 
-func (s *seoService) UpdateGlobalSEO(ctx context.Context,  config SEOConfigDTO) error {
+func (s *seoService) UpdateGlobalSEO(ctx context.Context, config SEOConfigDTO) error {
 	// Validate SEO fields
 	if len(config.Title) > 70 {
 		return code.ErrSEOTitleTooLong
@@ -624,7 +624,7 @@ func (s *seoService) UpdateGlobalSEO(ctx context.Context,  config SEOConfigDTO) 
 }
 
 func (s *seoService) GetPageSEO(ctx context.Context, pageType string, pageID *int64) (*PageSEOConfigDTO, error) {
-	config, err := s.seoRepo.FindByPageType(ctx, s.db,  pageType, pageID)
+	config, err := s.seoRepo.FindByPageType(ctx, s.db, pageType, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -647,7 +647,7 @@ func (s *seoService) GetPageSEO(ctx context.Context, pageType string, pageID *in
 	}, nil
 }
 
-func (s *seoService) UpdatePageSEO(ctx context.Context,  pageType string, pageID *int64, config SEOConfigDTO) error {
+func (s *seoService) UpdatePageSEO(ctx context.Context, pageType string, pageID *int64, config SEOConfigDTO) error {
 	// Validate SEO fields
 	if len(config.Title) > 70 {
 		return code.ErrSEOTitleTooLong
@@ -666,8 +666,8 @@ func (s *seoService) UpdatePageSEO(ctx context.Context,  pageType string, pageID
 	return s.seoRepo.Save(ctx, s.db, seoConfig)
 }
 
-func (s *seoService) ListPageSEO(ctx context.Context,  page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error) {
-	configs, total, err := s.seoRepo.FindAll(ctx, s.db,  page, pageSize)
+func (s *seoService) ListPageSEO(ctx context.Context, page, pageSize int) (*PaginatedResult[*PageSEOConfigDTO], error) {
+	configs, total, err := s.seoRepo.FindAll(ctx, s.db, page, pageSize)
 	if err != nil {
 		return nil, err
 	}

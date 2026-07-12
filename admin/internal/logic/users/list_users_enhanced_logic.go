@@ -38,7 +38,7 @@ func (l *ListUsersEnhancedLogic) ListUsersEnhanced(req *types.ListUsersEnhancedR
 		RegisterEnd:   req.RegisterEnd,
 	}
 
-	listResp, err := l.svcCtx.UserService.ExtendedList(l.ctx,  queryReq)
+	listResp, err := l.svcCtx.UserService.ExtendedList(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

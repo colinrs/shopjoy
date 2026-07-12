@@ -30,5 +30,5 @@ func (l *GetPendingOrdersLogic) GetPendingOrders(req *types.PendingOrdersRequest
 		limit = 5
 	}
 
-	return helper.GetPendingOrders( limit)
+	return helper.GetPendingOrders(limit)
 }

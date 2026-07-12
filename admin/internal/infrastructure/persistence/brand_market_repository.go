@@ -66,7 +66,7 @@ func (r *brandMarketRepo) Update(ctx context.Context, db *gorm.DB, bm *product.B
 		}).Error
 }
 
-func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB,  brandID int64) ([]*product.BrandMarket, error) {
+func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB, brandID int64) ([]*product.BrandMarket, error) {
 	var models []brandMarketModel
 	err := db.WithContext(ctx).
 		Where("brand_id = ?", brandID).
@@ -81,7 +81,7 @@ func (r *brandMarketRepo) FindByBrand(ctx context.Context, db *gorm.DB,  brandID
 	return result, nil
 }
 
-func (r *brandMarketRepo) DeleteByBrand(ctx context.Context, db *gorm.DB,  brandID int64) error {
+func (r *brandMarketRepo) DeleteByBrand(ctx context.Context, db *gorm.DB, brandID int64) error {
 	return db.WithContext(ctx).
 		Where("brand_id = ?", brandID).
 		Delete(&brandMarketModel{}).Error

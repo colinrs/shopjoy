@@ -424,7 +424,7 @@ func (s *Shipment) SetWeight(weight decimal.Decimal) {
 const ShipmentSequenceMod = 1000000
 
 // GenerateShipmentNo 生成发货单号
-func GenerateShipmentNo(  sequence int) string {
+func GenerateShipmentNo(sequence int) string {
 	// Format: SHP{YYYYMMDD}{sequence:06d}
 	dateStr := time.Now().UTC().Format("20060102")
 	// Ensure sequence fits in 6 digits
@@ -678,36 +678,36 @@ type ProductRefundCount struct {
 type ShipmentRepository interface {
 	Create(ctx context.Context, db *gorm.DB, shipment *Shipment) error
 	Update(ctx context.Context, db *gorm.DB, shipment *Shipment) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Shipment, error)
-	FindByShipmentNo(ctx context.Context, db *gorm.DB,  shipmentNo string) (*Shipment, error)
-	FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) ([]*Shipment, error)
-	FindByTrackingNo(ctx context.Context, db *gorm.DB,  trackingNo string) (*Shipment, error)
-	FindList(ctx context.Context, db *gorm.DB,  query ShipmentQuery) ([]*Shipment, int64, error)
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	CountByStatus(ctx context.Context, db *gorm.DB,  status ShipmentStatus) (int64, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Shipment, error)
+	FindByShipmentNo(ctx context.Context, db *gorm.DB, shipmentNo string) (*Shipment, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) ([]*Shipment, error)
+	FindByTrackingNo(ctx context.Context, db *gorm.DB, trackingNo string) (*Shipment, error)
+	FindList(ctx context.Context, db *gorm.DB, query ShipmentQuery) ([]*Shipment, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	CountByStatus(ctx context.Context, db *gorm.DB, status ShipmentStatus) (int64, error)
 }
 
 // ShipmentItemRepository 发货单明细仓储接口
 type ShipmentItemRepository interface {
 	BatchCreate(ctx context.Context, db *gorm.DB, items []ShipmentItem) error
-	FindByShipmentID(ctx context.Context, db *gorm.DB,  shipmentID int64) ([]ShipmentItem, error)
-	FindByShipmentIDs(ctx context.Context, db *gorm.DB,  shipmentIDs []int64) (map[int64][]ShipmentItem, error)
-	FindByOrderItemID(ctx context.Context, db *gorm.DB,  orderItemID int64) ([]ShipmentItem, error)
-	DeleteByShipmentID(ctx context.Context, db *gorm.DB,  shipmentID int64) error
+	FindByShipmentID(ctx context.Context, db *gorm.DB, shipmentID int64) ([]ShipmentItem, error)
+	FindByShipmentIDs(ctx context.Context, db *gorm.DB, shipmentIDs []int64) (map[int64][]ShipmentItem, error)
+	FindByOrderItemID(ctx context.Context, db *gorm.DB, orderItemID int64) ([]ShipmentItem, error)
+	DeleteByShipmentID(ctx context.Context, db *gorm.DB, shipmentID int64) error
 }
 
 // RefundRepository 退款单仓储接口
 type RefundRepository interface {
 	Create(ctx context.Context, db *gorm.DB, refund *Refund) error
 	Update(ctx context.Context, db *gorm.DB, refund *Refund) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Refund, error)
-	FindByRefundNo(ctx context.Context, db *gorm.DB,  refundNo string) (*Refund, error)
-	FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) ([]*Refund, error)
-	FindPendingByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) (*Refund, error)
-	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, query RefundQuery) ([]*Refund, int64, error)
-	FindList(ctx context.Context, db *gorm.DB,  query RefundQuery) ([]*Refund, int64, error)
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	CountByStatus(ctx context.Context, db *gorm.DB,  status RefundStatus) (int64, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Refund, error)
+	FindByRefundNo(ctx context.Context, db *gorm.DB, refundNo string) (*Refund, error)
+	FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) ([]*Refund, error)
+	FindPendingByOrderID(ctx context.Context, db *gorm.DB, orderID int64) (*Refund, error)
+	FindByUserID(ctx context.Context, db *gorm.DB, userID int64, query RefundQuery) ([]*Refund, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, query RefundQuery) ([]*Refund, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	CountByStatus(ctx context.Context, db *gorm.DB, status RefundStatus) (int64, error)
 }
 
 // CarrierRepository 物流公司仓储接口

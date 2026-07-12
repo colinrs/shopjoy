@@ -23,7 +23,7 @@ func (r *paymentRepository) Update(ctx context.Context, db *gorm.DB, p *payment.
 	return db.WithContext(ctx).Save(p).Error
 }
 
-func (r *paymentRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.Payment, error) {
+func (r *paymentRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*payment.Payment, error) {
 	var p payment.Payment
 	query := db.WithContext(ctx).Where("id = ?", id)
 	err := query.First(&p).Error
@@ -36,7 +36,7 @@ func (r *paymentRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64
 	return &p, nil
 }
 
-func (r *paymentRepository) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) (*payment.Payment, error) {
+func (r *paymentRepository) FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) (*payment.Payment, error) {
 	var p payment.Payment
 	query := db.WithContext(ctx).Where("order_id = ?", orderID)
 	err := query.First(&p).Error
@@ -49,7 +49,7 @@ func (r *paymentRepository) FindByOrderID(ctx context.Context, db *gorm.DB,  ord
 	return &p, nil
 }
 
-func (r *paymentRepository) FindByPaymentNo(ctx context.Context, db *gorm.DB,  paymentNo string) (*payment.Payment, error) {
+func (r *paymentRepository) FindByPaymentNo(ctx context.Context, db *gorm.DB, paymentNo string) (*payment.Payment, error) {
 	var p payment.Payment
 	query := db.WithContext(ctx).Where("payment_no = ?", paymentNo)
 	err := query.First(&p).Error
@@ -76,11 +76,10 @@ func (r *paymentRepository) FindByChannelPaymentID(ctx context.Context, db *gorm
 	return &p, nil
 }
 
-func (r *paymentRepository) FindList(ctx context.Context, db *gorm.DB,  query payment.PaymentQuery) ([]*payment.Payment, int64, error) {
+func (r *paymentRepository) FindList(ctx context.Context, db *gorm.DB, query payment.PaymentQuery) ([]*payment.Payment, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&payment.Payment{})
-
 
 	if query.OrderID > 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)

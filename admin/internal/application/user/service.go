@@ -169,21 +169,21 @@ type Service interface {
 	Register(ctx context.Context, req CreateUserRequest) (*UserResponse, error)
 	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
 	ChangePassword(ctx context.Context, req ChangePasswordRequest) error
-	GetByID(ctx context.Context,  id int64) (*UserResponse, error)
-	GetByEmail(ctx context.Context,  email string) (*UserResponse, error)
-	List(ctx context.Context,  req QueryRequest) (*UserListResponse, error)
-	Suspend(ctx context.Context,  id int64) error
-	Activate(ctx context.Context,  id int64) error
-	Delete(ctx context.Context,  id int64) error
-	ResetPassword(ctx context.Context,  id int64) (string, error)
+	GetByID(ctx context.Context, id int64) (*UserResponse, error)
+	GetByEmail(ctx context.Context, email string) (*UserResponse, error)
+	List(ctx context.Context, req QueryRequest) (*UserListResponse, error)
+	Suspend(ctx context.Context, id int64) error
+	Activate(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id int64) error
+	ResetPassword(ctx context.Context, id int64) (string, error)
 	GetStats(ctx context.Context) (*UserStatsResponse, error)
 	// Extended methods
-	GetDetail(ctx context.Context,  id int64) (*UserDetailResponse, error)
-	ExtendedList(ctx context.Context,  req EnhancedQueryRequest) (*ExtendedListResponse, error)
-	GetAddresses(ctx context.Context,  userID int64) (*AddressListResponse, error)
+	GetDetail(ctx context.Context, id int64) (*UserDetailResponse, error)
+	ExtendedList(ctx context.Context, req EnhancedQueryRequest) (*ExtendedListResponse, error)
+	GetAddresses(ctx context.Context, userID int64) (*AddressListResponse, error)
 	SuspendWithReason(ctx context.Context, req SuspendUserRequest) error
-	ActivateUser(ctx context.Context,  userID int64) error
-	DeleteUser(ctx context.Context,  userID int64) error
+	ActivateUser(ctx context.Context, userID int64) error
+	DeleteUser(ctx context.Context, userID int64) error
 	GetUserStats(ctx context.Context) (*UserStats, error)
-	ExportUsers(ctx context.Context,  req EnhancedQueryRequest) ([]byte, error)
+	ExportUsers(ctx context.Context, req EnhancedQueryRequest) ([]byte, error)
 }

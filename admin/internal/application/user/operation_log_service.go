@@ -101,7 +101,7 @@ func (s *operationLogServiceImpl) List(
 	if db == nil {
 		db = s.db
 	}
-	logs, total, err := s.repo.FindByUserID(ctx, db,  userID, query)
+	logs, total, err := s.repo.FindByUserID(ctx, db, userID, query)
 	if err != nil {
 		return nil, err
 	}

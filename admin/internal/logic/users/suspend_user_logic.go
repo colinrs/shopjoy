@@ -26,13 +26,13 @@ func NewSuspendUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) Suspen
 }
 
 func (l *SuspendUserLogic) SuspendUser(req *types.SuspendUserRequest) (resp *types.GetUserResponse, err error) {
-	if err := l.svcCtx.UserService.Suspend(l.ctx,  req.ID); err != nil {
+	if err := l.svcCtx.UserService.Suspend(l.ctx, req.ID); err != nil {
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionSuspendUser, "")
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionSuspendUser, "")
 
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

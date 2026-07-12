@@ -25,12 +25,12 @@ func NewResetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) Rese
 }
 
 func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordRequest) (resp *types.ResetPasswordResponse, err error) {
-	tempPassword, err := l.svcCtx.UserService.ResetPassword(l.ctx,  req.ID)
+	tempPassword, err := l.svcCtx.UserService.ResetPassword(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionResetPassword, "")
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionResetPassword, "")
 
 	return &types.ResetPasswordResponse{
 		TemporaryPassword: tempPassword,

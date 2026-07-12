@@ -144,9 +144,9 @@ func (r *PromotionRule) CalculateDiscount(cartAmount decimal.Decimal) (decimal.D
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, promotion *Promotion) error
 	Update(ctx context.Context, db *gorm.DB, promotion *Promotion) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Promotion, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Promotion, error)
 	FindActive(ctx context.Context, db *gorm.DB) ([]*Promotion, error)
-	FindList(ctx context.Context, db *gorm.DB,  query Query) ([]*Promotion, int64, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Promotion, int64, error)
 }
 
 type Query struct {

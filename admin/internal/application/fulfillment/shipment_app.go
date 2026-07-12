@@ -124,14 +124,14 @@ type CarrierResponse struct {
 
 // ShipmentApp 发货单应用服务接口
 type ShipmentApp interface {
-	CreateShipment(ctx context.Context,  userID int64, req CreateShipmentRequest) (*ShipmentResponse, error)
-	BatchCreateShipments(ctx context.Context,  userID int64, carrierCode, carrierName string, shipments []BatchShipmentItem) (*BatchShipmentResult, error)
-	GetShipment(ctx context.Context,  id int64) (*ShipmentResponse, error)
-	ListShipments(ctx context.Context,  req QueryShipmentRequest) (*ShipmentListResponse, error)
-	UpdateShipment(ctx context.Context,  userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error)
-	UpdateShipmentStatus(ctx context.Context,  userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error)
-	GetOrderShipments(ctx context.Context,  orderID int64) ([]*ShipmentResponse, error)
-	CancelShipment(ctx context.Context,  userID int64, id int64, reason string) (*ShipmentResponse, error)
+	CreateShipment(ctx context.Context, userID int64, req CreateShipmentRequest) (*ShipmentResponse, error)
+	BatchCreateShipments(ctx context.Context, userID int64, carrierCode, carrierName string, shipments []BatchShipmentItem) (*BatchShipmentResult, error)
+	GetShipment(ctx context.Context, id int64) (*ShipmentResponse, error)
+	ListShipments(ctx context.Context, req QueryShipmentRequest) (*ShipmentListResponse, error)
+	UpdateShipment(ctx context.Context, userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error)
+	UpdateShipmentStatus(ctx context.Context, userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error)
+	GetOrderShipments(ctx context.Context, orderID int64) ([]*ShipmentResponse, error)
+	CancelShipment(ctx context.Context, userID int64, id int64, reason string) (*ShipmentResponse, error)
 }
 
 // BatchShipmentItem 批量发货单项
@@ -217,7 +217,7 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, userID int64, req Crea
 			return err
 		}
 
-		shipmentNo := fulfillment.GenerateShipmentNo( int(shipmentID%1000000))
+		shipmentNo := fulfillment.GenerateShipmentNo(int(shipmentID % 1000000))
 
 		// Create shipment entity
 		shipment := &fulfillment.Shipment{
@@ -279,7 +279,7 @@ func (a *shipmentApp) CreateShipment(ctx context.Context, userID int64, req Crea
 		return nil, err
 	}
 
-	orderNo := a.lookupOrderNo(ctx,  result.OrderID)
+	orderNo := a.lookupOrderNo(ctx, result.OrderID)
 	return toShipmentResponse(result, carrier, orderNo), nil
 }
 
@@ -302,7 +302,7 @@ func (a *shipmentApp) BatchCreateShipments(ctx context.Context, userID int64, ca
 	}
 
 	for i, item := range shipments {
-		shipmentResp, err := a.CreateShipment(ctx,  userID, CreateShipmentRequest{
+		shipmentResp, err := a.CreateShipment(ctx, userID, CreateShipmentRequest{
 			OrderID:     item.OrderID,
 			CarrierCode: carrierCode,
 			CarrierName: carrierName,
@@ -328,14 +328,14 @@ func (a *shipmentApp) BatchCreateShipments(ctx context.Context, userID int64, ca
 	return result, nil
 }
 
-func (a *shipmentApp) GetShipment(ctx context.Context,  id int64) (*ShipmentResponse, error) {
-	shipment, err := a.shipmentRepo.FindByID(ctx, a.db,  id)
+func (a *shipmentApp) GetShipment(ctx context.Context, id int64) (*ShipmentResponse, error) {
+	shipment, err := a.shipmentRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Load items
-	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db,  shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, shipment.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -347,11 +347,11 @@ func (a *shipmentApp) GetShipment(ctx context.Context,  id int64) (*ShipmentResp
 		log.Printf("GetShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
 
-	orderNo := a.lookupOrderNo(ctx,  shipment.OrderID)
+	orderNo := a.lookupOrderNo(ctx, shipment.OrderID)
 	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
-func (a *shipmentApp) ListShipments(ctx context.Context,  req QueryShipmentRequest) (*ShipmentListResponse, error) {
+func (a *shipmentApp) ListShipments(ctx context.Context, req QueryShipmentRequest) (*ShipmentListResponse, error) {
 	query := fulfillment.ShipmentQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -365,7 +365,7 @@ func (a *shipmentApp) ListShipments(ctx context.Context,  req QueryShipmentReque
 		EndTime:     req.EndTime,
 	}
 
-	shipments, total, err := a.shipmentRepo.FindList(ctx, a.db,  query)
+	shipments, total, err := a.shipmentRepo.FindList(ctx, a.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +384,7 @@ func (a *shipmentApp) ListShipments(ctx context.Context,  req QueryShipmentReque
 	for i, s := range shipments {
 		shipmentIDs[i] = s.ID
 	}
-	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db,  shipmentIDs)
+	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, shipmentIDs)
 	if err != nil {
 		log.Printf("ListShipments: batch find items error: %v", err)
 		itemsMap = make(map[int64][]fulfillment.ShipmentItem)
@@ -416,7 +416,7 @@ func (a *shipmentApp) ListShipments(ctx context.Context,  req QueryShipmentReque
 			seenOrderIDs[s.OrderID] = true
 		}
 	}
-	orderNoMap := a.lookupOrderNos(ctx,  orderIDs)
+	orderNoMap := a.lookupOrderNos(ctx, orderIDs)
 
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
@@ -433,8 +433,8 @@ func (a *shipmentApp) ListShipments(ctx context.Context,  req QueryShipmentReque
 	}, nil
 }
 
-func (a *shipmentApp) UpdateShipment(ctx context.Context,  userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error) {
-	shipment, err := a.shipmentRepo.FindByID(ctx, a.db,  req.ID)
+func (a *shipmentApp) UpdateShipment(ctx context.Context, userID int64, req UpdateShipmentRequest) (*ShipmentResponse, error) {
+	shipment, err := a.shipmentRepo.FindByID(ctx, a.db, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ func (a *shipmentApp) UpdateShipment(ctx context.Context,  userID int64, req Upd
 	}
 
 	// Load items
-	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db,  shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, shipment.ID)
 	if err != nil {
 		log.Printf("UpdateShipment: find items by shipment ID %d error: %v", shipment.ID, err)
 	}
@@ -482,12 +482,12 @@ func (a *shipmentApp) UpdateShipment(ctx context.Context,  userID int64, req Upd
 	if err != nil {
 		log.Printf("UpdateShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
-	orderNo := a.lookupOrderNo(ctx,  shipment.OrderID)
+	orderNo := a.lookupOrderNo(ctx, shipment.OrderID)
 	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
-func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context,  userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error) {
-	shipment, err := a.shipmentRepo.FindByID(ctx, a.db,  id)
+func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context, userID int64, id int64, status fulfillment.ShipmentStatus) (*ShipmentResponse, error) {
+	shipment, err := a.shipmentRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -523,7 +523,7 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context,  userID int64, i
 	}
 
 	// Load items
-	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db,  shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, shipment.ID)
 	if err != nil {
 		log.Printf("UpdateShipmentStatus: find items by shipment ID %d error: %v", shipment.ID, err)
 	}
@@ -533,12 +533,12 @@ func (a *shipmentApp) UpdateShipmentStatus(ctx context.Context,  userID int64, i
 	if err != nil {
 		log.Printf("UpdateShipmentStatus: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
-	orderNo := a.lookupOrderNo(ctx,  shipment.OrderID)
+	orderNo := a.lookupOrderNo(ctx, shipment.OrderID)
 	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
-func (a *shipmentApp) GetOrderShipments(ctx context.Context,  orderID int64) ([]*ShipmentResponse, error) {
-	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db,  orderID)
+func (a *shipmentApp) GetOrderShipments(ctx context.Context, orderID int64) ([]*ShipmentResponse, error) {
+	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context,  orderID int64) ([]
 	for i, s := range shipments {
 		shipmentIDs[i] = s.ID
 	}
-	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db,  shipmentIDs)
+	itemsMap, err := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, shipmentIDs)
 	if err != nil {
 		log.Printf("GetOrderShipments: batch find items error: %v", err)
 		itemsMap = make(map[int64][]fulfillment.ShipmentItem)
@@ -576,7 +576,7 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context,  orderID int64) ([]
 	}
 
 	// All shipments share the same orderID — one lookup is enough.
-	orderNo := a.lookupOrderNo(ctx,  orderID)
+	orderNo := a.lookupOrderNo(ctx, orderID)
 
 	list := make([]*ShipmentResponse, len(shipments))
 	for i, s := range shipments {
@@ -588,9 +588,9 @@ func (a *shipmentApp) GetOrderShipments(ctx context.Context,  orderID int64) ([]
 	return list, nil
 }
 
-func (a *shipmentApp) CancelShipment(ctx context.Context,  userID int64, id int64, reason string) (*ShipmentResponse, error) {
+func (a *shipmentApp) CancelShipment(ctx context.Context, userID int64, id int64, reason string) (*ShipmentResponse, error) {
 	// Get the shipment
-	shipment, err := a.shipmentRepo.FindByID(ctx, a.db,  id)
+	shipment, err := a.shipmentRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -606,7 +606,7 @@ func (a *shipmentApp) CancelShipment(ctx context.Context,  userID int64, id int6
 	}
 
 	// Load items
-	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db,  shipment.ID)
+	items, err := a.shipmentItemRepo.FindByShipmentID(ctx, a.db, shipment.ID)
 	if err != nil {
 		log.Printf("CancelShipment: find items by shipment ID %d error: %v", shipment.ID, err)
 	}
@@ -618,7 +618,7 @@ func (a *shipmentApp) CancelShipment(ctx context.Context,  userID int64, id int6
 		log.Printf("CancelShipment: find carrier by code %s error: %v", shipment.CarrierCode, err)
 	}
 
-	orderNo := a.lookupOrderNo(ctx,  shipment.OrderID)
+	orderNo := a.lookupOrderNo(ctx, shipment.OrderID)
 	return toShipmentResponse(shipment, carrier, orderNo), nil
 }
 
@@ -675,7 +675,7 @@ func (a *shipmentApp) lookupOrderNo(ctx context.Context, orderID int64) string {
 	if orderID == 0 {
 		return ""
 	}
-	order, err := a.orderRepo.FindByID(ctx, a.db,  orderID)
+	order, err := a.orderRepo.FindByID(ctx, a.db, orderID)
 	if err != nil || order == nil {
 		return ""
 	}
@@ -693,7 +693,7 @@ func (a *shipmentApp) lookupOrderNos(ctx context.Context, orderIDs []int64) map[
 		if id == 0 {
 			continue
 		}
-		order, err := a.orderRepo.FindByID(ctx, a.db,  id)
+		order, err := a.orderRepo.FindByID(ctx, a.db, id)
 		if err != nil || order == nil {
 			continue
 		}

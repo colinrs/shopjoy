@@ -27,9 +27,9 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) UpdateU
 
 func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.GetUserResponse, err error) {
 	updateReq := appUser.UpdateUserRequest{
-		ID:       req.ID,
-		Name:     req.Name,
-		Avatar:   req.Avatar,
+		ID:     req.ID,
+		Name:   req.Name,
+		Avatar: req.Avatar,
 	}
 
 	userResp, err := l.svcCtx.UserService.Update(l.ctx, updateReq)
@@ -37,7 +37,7 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionUpdateUser, "")
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionUpdateUser, "")
 
 	return &types.GetUserResponse{
 		ID:        userResp.ID,

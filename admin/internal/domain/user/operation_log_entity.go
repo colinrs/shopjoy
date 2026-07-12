@@ -68,7 +68,7 @@ func (q OperationLogQuery) Limit() int {
 // "no tenant filter".
 type OperationLogRepository interface {
 	Create(ctx context.Context, db *gorm.DB, log *OperationLog) error
-	FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, query OperationLogQuery) ([]*OperationLog, int64, error)
+	FindByUserID(ctx context.Context, db *gorm.DB, userID int64, query OperationLogQuery) ([]*OperationLog, int64, error)
 }
 
 // ActionText returns the Chinese display label for a known action.

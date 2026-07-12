@@ -15,7 +15,7 @@ func NewUserAddressRepository() user.AddressRepository {
 	return &UserAddressRepository{}
 }
 
-func (r *UserAddressRepository) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64) ([]*user.UserAddress, error) {
+func (r *UserAddressRepository) FindByUserID(ctx context.Context, db *gorm.DB, userID int64) ([]*user.UserAddress, error) {
 	var addresses []*user.UserAddress
 	err := db.WithContext(ctx).
 		Where("user_id = ? AND deleted_at IS NULL", userID).
@@ -27,7 +27,7 @@ func (r *UserAddressRepository) FindByUserID(ctx context.Context, db *gorm.DB,  
 	return addresses, nil
 }
 
-func (r *UserAddressRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*user.UserAddress, error) {
+func (r *UserAddressRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*user.UserAddress, error) {
 	var address user.UserAddress
 	err := db.WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).

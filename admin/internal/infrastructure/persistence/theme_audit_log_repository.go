@@ -72,7 +72,7 @@ func (r *themeAuditLogRepo) Create(ctx context.Context, db *gorm.DB, log *storef
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *themeAuditLogRepo) FindByTenantID(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*storefront.ThemeAuditLog, int64, error) {
+func (r *themeAuditLogRepo) FindByTenantID(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*storefront.ThemeAuditLog, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&themeAuditLogModel{}).
 		Count(&total).Error; err != nil {

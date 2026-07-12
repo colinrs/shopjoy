@@ -193,24 +193,24 @@ func (s *SKU) IsLowStock() bool {
 type CategoryRepository interface {
 	Create(ctx context.Context, db *gorm.DB, category *Category) error
 	Update(ctx context.Context, db *gorm.DB, category *Category) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Category, error)
-	FindByParentID(ctx context.Context, db *gorm.DB,  parentID int64) ([]*Category, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Category, error)
+	FindByParentID(ctx context.Context, db *gorm.DB, parentID int64) ([]*Category, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Category, error)
 	FindTree(ctx context.Context, db *gorm.DB) ([]*Category, error)
-	FindByCode(ctx context.Context, db *gorm.DB,  code string) (*Category, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Category, error)
 	GetProductCount(ctx context.Context, db *gorm.DB, categoryID int64) (int64, error)
-	UpdateSort(ctx context.Context, db *gorm.DB,  sorts []CategorySort) error
-	Move(ctx context.Context, db *gorm.DB,  id int64, newParentID int64) error
+	UpdateSort(ctx context.Context, db *gorm.DB, sorts []CategorySort) error
+	Move(ctx context.Context, db *gorm.DB, id int64, newParentID int64) error
 }
 
 type BrandRepository interface {
 	Create(ctx context.Context, db *gorm.DB, brand *Brand) error
 	Update(ctx context.Context, db *gorm.DB, brand *Brand) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Brand, error)
-	FindByName(ctx context.Context, db *gorm.DB,  name string) (*Brand, error)
-	FindList(ctx context.Context, db *gorm.DB,  query BrandQuery) ([]*Brand, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Brand, error)
+	FindByName(ctx context.Context, db *gorm.DB, name string) (*Brand, error)
+	FindList(ctx context.Context, db *gorm.DB, query BrandQuery) ([]*Brand, int64, error)
 	GetProductCount(ctx context.Context, db *gorm.DB, brandID int64) (int64, error)
 }
 
@@ -258,8 +258,8 @@ type CategorySort struct {
 type CategoryMarketRepository interface {
 	Create(ctx context.Context, db *gorm.DB, cm *CategoryMarket) error
 	Update(ctx context.Context, db *gorm.DB, cm *CategoryMarket) error
-	FindByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) ([]*CategoryMarket, error)
-	DeleteByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) error
+	FindByCategory(ctx context.Context, db *gorm.DB, categoryID int64) ([]*CategoryMarket, error)
+	DeleteByCategory(ctx context.Context, db *gorm.DB, categoryID int64) error
 	BatchCreate(ctx context.Context, db *gorm.DB, items []*CategoryMarket) error
 }
 
@@ -267,8 +267,8 @@ type CategoryMarketRepository interface {
 type BrandMarketRepository interface {
 	Create(ctx context.Context, db *gorm.DB, bm *BrandMarket) error
 	Update(ctx context.Context, db *gorm.DB, bm *BrandMarket) error
-	FindByBrand(ctx context.Context, db *gorm.DB,  brandID int64) ([]*BrandMarket, error)
-	DeleteByBrand(ctx context.Context, db *gorm.DB,  brandID int64) error
+	FindByBrand(ctx context.Context, db *gorm.DB, brandID int64) ([]*BrandMarket, error)
+	DeleteByBrand(ctx context.Context, db *gorm.DB, brandID int64) error
 	BatchCreate(ctx context.Context, db *gorm.DB, items []*BrandMarket) error
 }
 
@@ -276,13 +276,13 @@ type BrandMarketRepository interface {
 type SKURepository interface {
 	Create(ctx context.Context, db *gorm.DB, sku *SKU) error
 	Update(ctx context.Context, db *gorm.DB, sku *SKU) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*SKU, error)
-	FindByCode(ctx context.Context, db *gorm.DB,  code string) (*SKU, error)
-	FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*SKU, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*SKU, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*SKU, error)
+	FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*SKU, error)
 	FindList(ctx context.Context, db *gorm.DB, query SKUQuery) ([]*SKU, int64, error)
-	FindLowStock(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*SKU, int64, error)
-	Search(ctx context.Context, db *gorm.DB,  keyword string, page, pageSize int) ([]*SKUItem, int64, error)
+	FindLowStock(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*SKU, int64, error)
+	Search(ctx context.Context, db *gorm.DB, keyword string, page, pageSize int) ([]*SKUItem, int64, error)
 }
 
 // SKUQuery for SKU search

@@ -39,10 +39,10 @@ type Repository interface {
 	UpdatePassword(ctx context.Context, db *gorm.DB, id int64, hashedPassword string) error
 
 	// ExistsByUsername 检查用户名是否已存在
-	ExistsByUsername(ctx context.Context, db *gorm.DB,  username string) (bool, error)
+	ExistsByUsername(ctx context.Context, db *gorm.DB, username string) (bool, error)
 
 	// ExistsByEmail 检查邮箱是否已存在（在租户范围内）
-	ExistsByEmail(ctx context.Context, db *gorm.DB,  email string) (bool, error)
+	ExistsByEmail(ctx context.Context, db *gorm.DB, email string) (bool, error)
 
 	// CountMainAccount 统计租户主账号数量
 	CountMainAccount(ctx context.Context, db *gorm.DB) (int64, error)

@@ -27,17 +27,17 @@ func NewSuspendUserWithReasonLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *SuspendUserWithReasonLogic) SuspendUserWithReason(req *types.SuspendUserWithReasonRequest) (resp *types.GetUserResponse, err error) {
 	suspendReq := appUser.SuspendUserRequest{
-		UserID:   req.ID,
-		Reason:   req.Reason,
+		UserID: req.ID,
+		Reason: req.Reason,
 	}
 
 	if err := l.svcCtx.UserService.SuspendWithReason(l.ctx, suspendReq); err != nil {
 		return nil, err
 	}
 
-	recordOperationLog(l.ctx, l.svcCtx,  req.ID, user.ActionSuspendWithReason, req.Reason)
+	recordOperationLog(l.ctx, l.svcCtx, req.ID, user.ActionSuspendWithReason, req.Reason)
 
-	userResp, err := l.svcCtx.UserService.GetByID(l.ctx,  req.ID)
+	userResp, err := l.svcCtx.UserService.GetByID(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -30,5 +30,5 @@ func (l *GetRecentActivitiesLogic) GetRecentActivities(req *types.RecentActiviti
 		limit = 10
 	}
 
-	return helper.GetRecentActivities( limit)
+	return helper.GetRecentActivities(limit)
 }

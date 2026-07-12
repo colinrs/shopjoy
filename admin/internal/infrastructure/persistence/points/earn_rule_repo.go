@@ -30,7 +30,7 @@ func (r *earnRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.Ear
 }
 
 // Delete soft deletes an earn rule
-func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&points.EarnRule{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
 	result := query.Delete(&points.EarnRule{})
@@ -44,7 +44,7 @@ func (r *earnRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error
 }
 
 // FindByID finds an earn rule by ID
-func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*points.EarnRule, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	var rule points.EarnRule
@@ -59,7 +59,7 @@ func (r *earnRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*p
 }
 
 // FindList finds earn rules with pagination and filters
-func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
+func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB, query points.EarnRuleQuery) ([]*points.EarnRule, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.EarnRule{}).Where("deleted_at IS NULL")
@@ -97,7 +97,7 @@ func (r *earnRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.
 }
 
 // FindByScenario finds earn rules by scenario
-func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB,  scenario points.EarnScenario) ([]*points.EarnRule, error) {
+func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB, scenario points.EarnScenario) ([]*points.EarnRule, error) {
 	query := db.WithContext(ctx).Model(&points.EarnRule{}).
 		Where("scenario = ? AND deleted_at IS NULL", scenario)
 
@@ -113,7 +113,7 @@ func (r *earnRuleRepo) FindByScenario(ctx context.Context, db *gorm.DB,  scenari
 }
 
 // UpdateStatus updates the status of an earn rule
-func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status points.EarnRuleStatus) error {
+func (r *earnRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, id int64, status points.EarnRuleStatus) error {
 	query := db.WithContext(ctx).
 		Model(&points.EarnRule{}).
 		Where("id = ? AND deleted_at IS NULL", id)

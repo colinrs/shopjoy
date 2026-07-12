@@ -37,7 +37,7 @@ func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.Lis
 		Status: domainUser.Status(req.Status),
 	}
 
-	listResp, err := l.svcCtx.UserService.List(l.ctx,  queryReq)
+	listResp, err := l.svcCtx.UserService.List(l.ctx, queryReq)
 	if err != nil {
 		return nil, err
 	}

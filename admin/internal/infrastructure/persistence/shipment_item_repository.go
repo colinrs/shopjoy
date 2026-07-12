@@ -85,7 +85,7 @@ func (r *shipmentItemRepo) BatchCreate(ctx context.Context, db *gorm.DB, items [
 // Joins order_items so product_name / sku_name / image are populated. The
 // shipment_items table does not store these columns — order_items is the
 // single source of truth (NULLIF keeps blank order values from leaking out).
-func (r *shipmentItemRepo) FindByShipmentID(ctx context.Context, db *gorm.DB,  shipmentID int64) ([]fulfillment.ShipmentItem, error) {
+func (r *shipmentItemRepo) FindByShipmentID(ctx context.Context, db *gorm.DB, shipmentID int64) ([]fulfillment.ShipmentItem, error) {
 	query := db.WithContext(ctx).
 		Table("shipment_items si").
 		Select(`si.id              AS id,
@@ -117,7 +117,7 @@ func (r *shipmentItemRepo) FindByShipmentID(ctx context.Context, db *gorm.DB,  s
 }
 
 // FindByOrderItemID finds all shipment items for an order item with tenant isolation
-func (r *shipmentItemRepo) FindByOrderItemID(ctx context.Context, db *gorm.DB,  orderItemID int64) ([]fulfillment.ShipmentItem, error) {
+func (r *shipmentItemRepo) FindByOrderItemID(ctx context.Context, db *gorm.DB, orderItemID int64) ([]fulfillment.ShipmentItem, error) {
 	query := db.WithContext(ctx).Where("order_item_id = ?", orderItemID)
 	// Platform admin (tenantID == 0) can access all tenant data
 	var models []shipmentItemModel
@@ -134,7 +134,7 @@ func (r *shipmentItemRepo) FindByOrderItemID(ctx context.Context, db *gorm.DB,  
 }
 
 // DeleteByShipmentID deletes all items for a shipment with tenant isolation
-func (r *shipmentItemRepo) DeleteByShipmentID(ctx context.Context, db *gorm.DB,  shipmentID int64) error {
+func (r *shipmentItemRepo) DeleteByShipmentID(ctx context.Context, db *gorm.DB, shipmentID int64) error {
 	query := db.WithContext(ctx).Where("shipment_id = ?", shipmentID)
 	// Platform admin (tenantID == 0) can access all tenant data
 	return query.Delete(&shipmentItemModel{}).Error
@@ -145,7 +145,7 @@ func (r *shipmentItemRepo) DeleteByShipmentID(ctx context.Context, db *gorm.DB, 
 // Joins order_items so product_name / sku_name / image are populated. The
 // shipment_items table does not store these columns — order_items is the
 // single source of truth (NULLIF keeps blank order values from leaking out).
-func (r *shipmentItemRepo) FindByShipmentIDs(ctx context.Context, db *gorm.DB,  shipmentIDs []int64) (map[int64][]fulfillment.ShipmentItem, error) {
+func (r *shipmentItemRepo) FindByShipmentIDs(ctx context.Context, db *gorm.DB, shipmentIDs []int64) (map[int64][]fulfillment.ShipmentItem, error) {
 	if len(shipmentIDs) == 0 {
 		return make(map[int64][]fulfillment.ShipmentItem), nil
 	}

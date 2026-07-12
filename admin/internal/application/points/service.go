@@ -169,44 +169,44 @@ type AdjustPointsRequest struct {
 // Service points application service interface
 type Service interface {
 	// Earn Rules
-	CreateEarnRule(ctx context.Context,  req CreateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error)
-	UpdateEarnRule(ctx context.Context,  req UpdateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error)
-	DeleteEarnRule(ctx context.Context,  id int64) error
-	GetEarnRule(ctx context.Context,  id int64) (*EarnRuleDTO, error)
-	ListEarnRules(ctx context.Context,  query points.EarnRuleQuery) ([]*EarnRuleDTO, int64, *points.EarnRuleStats, error)
-	ActivateEarnRule(ctx context.Context,  id int64, operatorID int64) error
-	DeactivateEarnRule(ctx context.Context,  id int64, operatorID int64) error
+	CreateEarnRule(ctx context.Context, req CreateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error)
+	UpdateEarnRule(ctx context.Context, req UpdateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error)
+	DeleteEarnRule(ctx context.Context, id int64) error
+	GetEarnRule(ctx context.Context, id int64) (*EarnRuleDTO, error)
+	ListEarnRules(ctx context.Context, query points.EarnRuleQuery) ([]*EarnRuleDTO, int64, *points.EarnRuleStats, error)
+	ActivateEarnRule(ctx context.Context, id int64, operatorID int64) error
+	DeactivateEarnRule(ctx context.Context, id int64, operatorID int64) error
 
 	// Redeem Rules
-	CreateRedeemRule(ctx context.Context,  req CreateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error)
-	UpdateRedeemRule(ctx context.Context,  req UpdateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error)
-	DeleteRedeemRule(ctx context.Context,  id int64) error
-	GetRedeemRule(ctx context.Context,  id int64) (*RedeemRuleDTO, error)
-	ListRedeemRules(ctx context.Context,  query points.RedeemRuleQuery) ([]*RedeemRuleDTO, int64, *points.RedeemRuleStats, error)
-	ActivateRedeemRule(ctx context.Context,  id int64, operatorID int64) error
-	DeactivateRedeemRule(ctx context.Context,  id int64, operatorID int64) error
+	CreateRedeemRule(ctx context.Context, req CreateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error)
+	UpdateRedeemRule(ctx context.Context, req UpdateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error)
+	DeleteRedeemRule(ctx context.Context, id int64) error
+	GetRedeemRule(ctx context.Context, id int64) (*RedeemRuleDTO, error)
+	ListRedeemRules(ctx context.Context, query points.RedeemRuleQuery) ([]*RedeemRuleDTO, int64, *points.RedeemRuleStats, error)
+	ActivateRedeemRule(ctx context.Context, id int64, operatorID int64) error
+	DeactivateRedeemRule(ctx context.Context, id int64, operatorID int64) error
 
 	// Accounts
-	GetAccount(ctx context.Context,  id int64) (*PointsAccountDTO, error)
-	GetAccountByUser(ctx context.Context,  userID int64) (*PointsAccountDTO, error)
-	ListAccounts(ctx context.Context,  query points.PointsAccountQuery) ([]*PointsAccountDTO, int64, *points.PointsAccountStats, error)
-	AdjustPoints(ctx context.Context,  req AdjustPointsRequest) (*PointsTransactionDTO, error)
-	GetAccountTransactions(ctx context.Context,  accountID int64, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error)
+	GetAccount(ctx context.Context, id int64) (*PointsAccountDTO, error)
+	GetAccountByUser(ctx context.Context, userID int64) (*PointsAccountDTO, error)
+	ListAccounts(ctx context.Context, query points.PointsAccountQuery) ([]*PointsAccountDTO, int64, *points.PointsAccountStats, error)
+	AdjustPoints(ctx context.Context, req AdjustPointsRequest) (*PointsTransactionDTO, error)
+	GetAccountTransactions(ctx context.Context, accountID int64, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error)
 
 	// Transactions
-	GetTransaction(ctx context.Context,  id int64) (*PointsTransactionDTO, error)
-	ListTransactions(ctx context.Context,  query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, *points.PointsTransactionStats, error)
-	ExportTransactions(ctx context.Context,  query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error)
+	GetTransaction(ctx context.Context, id int64) (*PointsTransactionDTO, error)
+	ListTransactions(ctx context.Context, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, *points.PointsTransactionStats, error)
+	ExportTransactions(ctx context.Context, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error)
 
 	// Redemptions
-	GetRedemption(ctx context.Context,  id int64) (*PointsRedemptionDTO, error)
-	ListRedemptions(ctx context.Context,  query points.PointsRedemptionQuery) ([]*PointsRedemptionDTO, int64, error)
+	GetRedemption(ctx context.Context, id int64) (*PointsRedemptionDTO, error)
+	ListRedemptions(ctx context.Context, query points.PointsRedemptionQuery) ([]*PointsRedemptionDTO, int64, error)
 
 	// Statistics
-	GetStats(ctx context.Context,  startTime, endTime *time.Time) (*PointsStatsDTO, error)
-	GetTrend(ctx context.Context,  startTime, endTime time.Time, granularity string) ([]TrendDataPoint, error)
-	GetTopUsers(ctx context.Context,  startTime, endTime time.Time, limit int) ([]TopUserDTO, error)
-	GetExpiringPoints(ctx context.Context,  days int) ([]ExpiringPointsDTO, int64, error)
+	GetStats(ctx context.Context, startTime, endTime *time.Time) (*PointsStatsDTO, error)
+	GetTrend(ctx context.Context, startTime, endTime time.Time, granularity string) ([]TrendDataPoint, error)
+	GetTopUsers(ctx context.Context, startTime, endTime time.Time, limit int) ([]TopUserDTO, error)
+	GetExpiringPoints(ctx context.Context, days int) ([]ExpiringPointsDTO, int64, error)
 }
 
 // PointsStatsDTO represents points statistics
@@ -277,7 +277,7 @@ func NewService(
 
 // ==================== Earn Rules ====================
 
-func (s *service) CreateEarnRule(ctx context.Context,  req CreateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error) {
+func (s *service) CreateEarnRule(ctx context.Context, req CreateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error) {
 	if req.Name == "" {
 		return nil, code.ErrParam
 	}
@@ -318,8 +318,8 @@ func (s *service) CreateEarnRule(ctx context.Context,  req CreateEarnRuleRequest
 	return toEarnRuleDTO(rule), nil
 }
 
-func (s *service) UpdateEarnRule(ctx context.Context,  req UpdateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error) {
-	rule, err := s.earnRuleRepo.FindByID(ctx, s.db,  req.ID)
+func (s *service) UpdateEarnRule(ctx context.Context, req UpdateEarnRuleRequest, operatorID int64) (*EarnRuleDTO, error) {
+	rule, err := s.earnRuleRepo.FindByID(ctx, s.db, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -350,8 +350,8 @@ func (s *service) UpdateEarnRule(ctx context.Context,  req UpdateEarnRuleRequest
 	return toEarnRuleDTO(rule), nil
 }
 
-func (s *service) DeleteEarnRule(ctx context.Context,  id int64) error {
-	rule, err := s.earnRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) DeleteEarnRule(ctx context.Context, id int64) error {
+	rule, err := s.earnRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -360,19 +360,19 @@ func (s *service) DeleteEarnRule(ctx context.Context,  id int64) error {
 		return nil // Cannot delete active rule
 	}
 
-	return s.earnRuleRepo.Delete(ctx, s.db,  id)
+	return s.earnRuleRepo.Delete(ctx, s.db, id)
 }
 
-func (s *service) GetEarnRule(ctx context.Context,  id int64) (*EarnRuleDTO, error) {
-	rule, err := s.earnRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetEarnRule(ctx context.Context, id int64) (*EarnRuleDTO, error) {
+	rule, err := s.earnRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toEarnRuleDTO(rule), nil
 }
 
-func (s *service) ListEarnRules(ctx context.Context,  query points.EarnRuleQuery) ([]*EarnRuleDTO, int64, *points.EarnRuleStats, error) {
-	rules, total, err := s.earnRuleRepo.FindList(ctx, s.db,  query)
+func (s *service) ListEarnRules(ctx context.Context, query points.EarnRuleQuery) ([]*EarnRuleDTO, int64, *points.EarnRuleStats, error) {
+	rules, total, err := s.earnRuleRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, nil, err
 	}
@@ -390,8 +390,8 @@ func (s *service) ListEarnRules(ctx context.Context,  query points.EarnRuleQuery
 	return dtos, total, stats, nil
 }
 
-func (s *service) ActivateEarnRule(ctx context.Context,  id int64, operatorID int64) error {
-	rule, err := s.earnRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) ActivateEarnRule(ctx context.Context, id int64, operatorID int64) error {
+	rule, err := s.earnRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -403,8 +403,8 @@ func (s *service) ActivateEarnRule(ctx context.Context,  id int64, operatorID in
 	return s.earnRuleRepo.Update(ctx, s.db, rule)
 }
 
-func (s *service) DeactivateEarnRule(ctx context.Context,  id int64, operatorID int64) error {
-	rule, err := s.earnRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) DeactivateEarnRule(ctx context.Context, id int64, operatorID int64) error {
+	rule, err := s.earnRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -418,7 +418,7 @@ func (s *service) DeactivateEarnRule(ctx context.Context,  id int64, operatorID 
 
 // ==================== Redeem Rules ====================
 
-func (s *service) CreateRedeemRule(ctx context.Context,  req CreateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error) {
+func (s *service) CreateRedeemRule(ctx context.Context, req CreateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error) {
 	if req.Name == "" {
 		return nil, code.ErrParam
 	}
@@ -455,8 +455,8 @@ func (s *service) CreateRedeemRule(ctx context.Context,  req CreateRedeemRuleReq
 	return toRedeemRuleDTO(rule), nil
 }
 
-func (s *service) UpdateRedeemRule(ctx context.Context,  req UpdateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error) {
-	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db,  req.ID)
+func (s *service) UpdateRedeemRule(ctx context.Context, req UpdateRedeemRuleRequest, operatorID int64) (*RedeemRuleDTO, error) {
+	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db, req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -482,8 +482,8 @@ func (s *service) UpdateRedeemRule(ctx context.Context,  req UpdateRedeemRuleReq
 	return toRedeemRuleDTO(rule), nil
 }
 
-func (s *service) DeleteRedeemRule(ctx context.Context,  id int64) error {
-	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) DeleteRedeemRule(ctx context.Context, id int64) error {
+	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -492,19 +492,19 @@ func (s *service) DeleteRedeemRule(ctx context.Context,  id int64) error {
 		return nil // Cannot delete active rule
 	}
 
-	return s.redeemRuleRepo.Delete(ctx, s.db,  id)
+	return s.redeemRuleRepo.Delete(ctx, s.db, id)
 }
 
-func (s *service) GetRedeemRule(ctx context.Context,  id int64) (*RedeemRuleDTO, error) {
-	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetRedeemRule(ctx context.Context, id int64) (*RedeemRuleDTO, error) {
+	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toRedeemRuleDTO(rule), nil
 }
 
-func (s *service) ListRedeemRules(ctx context.Context,  query points.RedeemRuleQuery) ([]*RedeemRuleDTO, int64, *points.RedeemRuleStats, error) {
-	rules, total, err := s.redeemRuleRepo.FindList(ctx, s.db,  query)
+func (s *service) ListRedeemRules(ctx context.Context, query points.RedeemRuleQuery) ([]*RedeemRuleDTO, int64, *points.RedeemRuleStats, error) {
+	rules, total, err := s.redeemRuleRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, nil, err
 	}
@@ -522,8 +522,8 @@ func (s *service) ListRedeemRules(ctx context.Context,  query points.RedeemRuleQ
 	return dtos, total, stats, nil
 }
 
-func (s *service) ActivateRedeemRule(ctx context.Context,  id int64, operatorID int64) error {
-	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) ActivateRedeemRule(ctx context.Context, id int64, operatorID int64) error {
+	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -535,8 +535,8 @@ func (s *service) ActivateRedeemRule(ctx context.Context,  id int64, operatorID 
 	return s.redeemRuleRepo.Update(ctx, s.db, rule)
 }
 
-func (s *service) DeactivateRedeemRule(ctx context.Context,  id int64, operatorID int64) error {
-	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db,  id)
+func (s *service) DeactivateRedeemRule(ctx context.Context, id int64, operatorID int64) error {
+	rule, err := s.redeemRuleRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -550,24 +550,24 @@ func (s *service) DeactivateRedeemRule(ctx context.Context,  id int64, operatorI
 
 // ==================== Accounts ====================
 
-func (s *service) GetAccount(ctx context.Context,  id int64) (*PointsAccountDTO, error) {
-	account, err := s.accountRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetAccount(ctx context.Context, id int64) (*PointsAccountDTO, error) {
+	account, err := s.accountRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toPointsAccountDTO(account), nil
 }
 
-func (s *service) GetAccountByUser(ctx context.Context,  userID int64) (*PointsAccountDTO, error) {
-	account, err := s.accountRepo.FindByUserID(ctx, s.db,  userID)
+func (s *service) GetAccountByUser(ctx context.Context, userID int64) (*PointsAccountDTO, error) {
+	account, err := s.accountRepo.FindByUserID(ctx, s.db, userID)
 	if err != nil {
 		return nil, err
 	}
 	return toPointsAccountDTO(account), nil
 }
 
-func (s *service) ListAccounts(ctx context.Context,  query points.PointsAccountQuery) ([]*PointsAccountDTO, int64, *points.PointsAccountStats, error) {
-	accounts, total, err := s.accountRepo.FindList(ctx, s.db,  query)
+func (s *service) ListAccounts(ctx context.Context, query points.PointsAccountQuery) ([]*PointsAccountDTO, int64, *points.PointsAccountStats, error) {
+	accounts, total, err := s.accountRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, nil, err
 	}
@@ -585,7 +585,7 @@ func (s *service) ListAccounts(ctx context.Context,  query points.PointsAccountQ
 	return dtos, total, stats, nil
 }
 
-func (s *service) AdjustPoints(ctx context.Context,  req AdjustPointsRequest) (*PointsTransactionDTO, error) {
+func (s *service) AdjustPoints(ctx context.Context, req AdjustPointsRequest) (*PointsTransactionDTO, error) {
 	if req.Points <= 0 {
 		return nil, code.ErrParam
 	}
@@ -596,7 +596,7 @@ func (s *service) AdjustPoints(ctx context.Context,  req AdjustPointsRequest) (*
 	var transaction *points.PointsTransaction
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-		account, err := s.accountRepo.FindByID(ctx, tx,  req.AccountID)
+		account, err := s.accountRepo.FindByID(ctx, tx, req.AccountID)
 		if err != nil {
 			return err
 		}
@@ -645,9 +645,9 @@ func (s *service) AdjustPoints(ctx context.Context,  req AdjustPointsRequest) (*
 	return toPointsTransactionDTO(transaction), nil
 }
 
-func (s *service) GetAccountTransactions(ctx context.Context,  accountID int64, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error) {
+func (s *service) GetAccountTransactions(ctx context.Context, accountID int64, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error) {
 	query.AccountID = accountID
-	transactions, total, err := s.transactionRepo.FindList(ctx, s.db,  query)
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -662,21 +662,21 @@ func (s *service) GetAccountTransactions(ctx context.Context,  accountID int64, 
 
 // ==================== Transactions ====================
 
-func (s *service) GetTransaction(ctx context.Context,  id int64) (*PointsTransactionDTO, error) {
-	transaction, err := s.transactionRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetTransaction(ctx context.Context, id int64) (*PointsTransactionDTO, error) {
+	transaction, err := s.transactionRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toPointsTransactionDTO(transaction), nil
 }
 
-func (s *service) ListTransactions(ctx context.Context,  query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, *points.PointsTransactionStats, error) {
-	transactions, total, err := s.transactionRepo.FindList(ctx, s.db,  query)
+func (s *service) ListTransactions(ctx context.Context, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, *points.PointsTransactionStats, error) {
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, nil, err
 	}
 
-	stats, err := s.transactionRepo.GetStats(ctx, s.db,  query)
+	stats, err := s.transactionRepo.GetStats(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, nil, err
 	}
@@ -689,11 +689,11 @@ func (s *service) ListTransactions(ctx context.Context,  query points.PointsTran
 	return dtos, total, stats, nil
 }
 
-func (s *service) ExportTransactions(ctx context.Context,  query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error) {
+func (s *service) ExportTransactions(ctx context.Context, query points.PointsTransactionQuery) ([]*PointsTransactionDTO, int64, error) {
 	query.Page = 1
 	query.PageSize = 10001 // Max export limit
 
-	transactions, total, err := s.transactionRepo.FindList(ctx, s.db,  query)
+	transactions, total, err := s.transactionRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -708,16 +708,16 @@ func (s *service) ExportTransactions(ctx context.Context,  query points.PointsTr
 
 // ==================== Redemptions ====================
 
-func (s *service) GetRedemption(ctx context.Context,  id int64) (*PointsRedemptionDTO, error) {
-	redemption, err := s.redemptionRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetRedemption(ctx context.Context, id int64) (*PointsRedemptionDTO, error) {
+	redemption, err := s.redemptionRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toPointsRedemptionDTO(redemption), nil
 }
 
-func (s *service) ListRedemptions(ctx context.Context,  query points.PointsRedemptionQuery) ([]*PointsRedemptionDTO, int64, error) {
-	redemptions, total, err := s.redemptionRepo.FindList(ctx, s.db,  query)
+func (s *service) ListRedemptions(ctx context.Context, query points.PointsRedemptionQuery) ([]*PointsRedemptionDTO, int64, error) {
+	redemptions, total, err := s.redemptionRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -732,7 +732,7 @@ func (s *service) ListRedemptions(ctx context.Context,  query points.PointsRedem
 
 // ==================== Statistics ====================
 
-func (s *service) GetStats(ctx context.Context,  startTime, endTime *time.Time) (*PointsStatsDTO, error) {
+func (s *service) GetStats(ctx context.Context, startTime, endTime *time.Time) (*PointsStatsDTO, error) {
 	// Get account stats
 	accountStats, err := s.accountRepo.GetStats(ctx, s.db)
 	if err != nil {
@@ -744,7 +744,7 @@ func (s *service) GetStats(ctx context.Context,  startTime, endTime *time.Time) 
 		StartTime: startTime,
 		EndTime:   endTime,
 	}
-	txStats, err := s.transactionRepo.GetStats(ctx, s.db,  txQuery)
+	txStats, err := s.transactionRepo.GetStats(ctx, s.db, txQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -772,7 +772,7 @@ func (s *service) GetStats(ctx context.Context,  startTime, endTime *time.Time) 
 	}, nil
 }
 
-func (s *service) GetTrend(ctx context.Context,  startTime, endTime time.Time, granularity string) ([]TrendDataPoint, error) {
+func (s *service) GetTrend(ctx context.Context, startTime, endTime time.Time, granularity string) ([]TrendDataPoint, error) {
 	// Simplified implementation - in production, this would query aggregated data
 	var result []TrendDataPoint
 
@@ -802,12 +802,12 @@ func (s *service) GetTrend(ctx context.Context,  startTime, endTime time.Time, g
 	return result, nil
 }
 
-func (s *service) GetTopUsers(ctx context.Context,  startTime, endTime time.Time, limit int) ([]TopUserDTO, error) {
+func (s *service) GetTopUsers(ctx context.Context, startTime, endTime time.Time, limit int) ([]TopUserDTO, error) {
 	// Simplified implementation - would query aggregated data with ranking
 	return []TopUserDTO{}, nil
 }
 
-func (s *service) GetExpiringPoints(ctx context.Context,  days int) ([]ExpiringPointsDTO, int64, error) {
+func (s *service) GetExpiringPoints(ctx context.Context, days int) ([]ExpiringPointsDTO, int64, error) {
 	// Simplified implementation - would query transactions with expiration dates
 	return []ExpiringPointsDTO{}, 0, nil
 }

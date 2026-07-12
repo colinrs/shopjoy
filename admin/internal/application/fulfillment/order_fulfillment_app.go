@@ -36,7 +36,7 @@ type OrderItemInfo struct {
 // This interface should be implemented by the Order service client
 type OrderValidator interface {
 	// GetOrderForShipment retrieves order info for shipment validation
-	GetOrderForShipment(ctx context.Context,  orderID int64) (*OrderValidationInfo, error)
+	GetOrderForShipment(ctx context.Context, orderID int64) (*OrderValidationInfo, error)
 	// ValidateShipmentItems validates that shipment items match order items and quantities
 	ValidateShipmentItems(order *OrderValidationInfo, items []CreateShipmentItemRequest) error
 }
@@ -172,14 +172,14 @@ type FulfillmentSummary struct {
 
 // OrderFulfillmentApp 订单履约应用服务接口
 type OrderFulfillmentApp interface {
-	ListOrders(ctx context.Context,  req QueryOrderRequest) (*OrderListResponse, error)
-	GetOrderFulfillment(ctx context.Context,  orderID int64) (*OrderFulfillmentDetail, error)
-	ShipOrder(ctx context.Context,  userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error)
+	ListOrders(ctx context.Context, req QueryOrderRequest) (*OrderListResponse, error)
+	GetOrderFulfillment(ctx context.Context, orderID int64) (*OrderFulfillmentDetail, error)
+	ShipOrder(ctx context.Context, userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error)
 	GetFulfillmentSummary(ctx context.Context) (*FulfillmentSummary, error)
 	// New methods
-	UpdateOrderRemark(ctx context.Context,  orderID int64, remark string) error
-	AdjustOrderPrice(ctx context.Context,  userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error)
-	ExportOrders(ctx context.Context,  req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error)
+	UpdateOrderRemark(ctx context.Context, orderID int64, remark string) error
+	AdjustOrderPrice(ctx context.Context, userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error)
+	ExportOrders(ctx context.Context, req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error)
 }
 
 // ShipOrderRequest 发货请求
@@ -231,8 +231,8 @@ func NewOrderFulfillmentApp(
 	}
 }
 
-func (a *orderFulfillmentApp) ListOrders(ctx context.Context,  req QueryOrderRequest) (*OrderListResponse, error) {
-	orders, total, err := a.orderRepo.FindList(ctx, a.db,  buildOrderQuery(req))
+func (a *orderFulfillmentApp) ListOrders(ctx context.Context, req QueryOrderRequest) (*OrderListResponse, error) {
+	orders, total, err := a.orderRepo.FindList(ctx, a.db, buildOrderQuery(req))
 	if err != nil {
 		return nil, err
 	}
@@ -251,9 +251,9 @@ func (a *orderFulfillmentApp) ListOrders(ctx context.Context,  req QueryOrderReq
 		return nil, err
 	}
 
-	shipmentMap := a.loadShipmentsByOrder(ctx,  orderIDs)
-	shipmentItemsMap, carrierMap := a.preloadShipmentContexts(ctx,  shipmentMap)
-	refundMap := a.loadRefundsByOrder(ctx,  orderIDs)
+	shipmentMap := a.loadShipmentsByOrder(ctx, orderIDs)
+	shipmentItemsMap, carrierMap := a.preloadShipmentContexts(ctx, shipmentMap)
+	refundMap := a.loadRefundsByOrder(ctx, orderIDs)
 
 	list := make([]*OrderFulfillmentDetail, len(orders))
 	for i, o := range orders {
@@ -279,7 +279,7 @@ func (a *orderFulfillmentApp) ListOrders(ctx context.Context,  req QueryOrderReq
 func (a *orderFulfillmentApp) loadShipmentsByOrder(ctx context.Context, orderIDs []int64) map[int64][]*fulfillment.Shipment {
 	shipmentMap := make(map[int64][]*fulfillment.Shipment, len(orderIDs))
 	for _, orderID := range orderIDs {
-		shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db,  orderID)
+		shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, orderID)
 		if err != nil {
 			continue
 		}
@@ -312,7 +312,7 @@ func (a *orderFulfillmentApp) preloadShipmentContexts(
 			carrierCodes = append(carrierCodes, s.CarrierCode)
 		}
 	}
-	shipmentItemsMap, _ = a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db,  shipmentIDs)
+	shipmentItemsMap, _ = a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, shipmentIDs)
 	carrierMap, _ = a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
 	return shipmentItemsMap, carrierMap
 }
@@ -322,7 +322,7 @@ func (a *orderFulfillmentApp) preloadShipmentContexts(
 func (a *orderFulfillmentApp) loadRefundsByOrder(ctx context.Context, orderIDs []int64) map[int64][]*fulfillment.Refund {
 	refundMap := make(map[int64][]*fulfillment.Refund, len(orderIDs))
 	for _, orderID := range orderIDs {
-		refunds, err := a.refundRepo.FindByOrderID(ctx, a.db,  orderID)
+		refunds, err := a.refundRepo.FindByOrderID(ctx, a.db, orderID)
 		if err != nil {
 			continue
 		}
@@ -333,8 +333,8 @@ func (a *orderFulfillmentApp) loadRefundsByOrder(ctx context.Context, orderIDs [
 	return refundMap
 }
 
-func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context,  orderID int64) (*OrderFulfillmentDetail, error) {
-	order, err := a.orderRepo.FindByID(ctx, a.db,  orderID)
+func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context, orderID int64) (*OrderFulfillmentDetail, error) {
+	order, err := a.orderRepo.FindByID(ctx, a.db, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -347,10 +347,10 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context,  orderID 
 	detail := toOrderFulfillmentDetail(order)
 	detail.Items = toOrderFulfillmentItems(itemsMap[order.ID])
 
-	if err := a.loadAndAttachShipments(ctx,  detail); err != nil {
+	if err := a.loadAndAttachShipments(ctx, detail); err != nil {
 		return nil, err
 	}
-	if err := a.loadAndAttachRefund(ctx,  detail); err != nil {
+	if err := a.loadAndAttachRefund(ctx, detail); err != nil {
 		return nil, err
 	}
 	return detail, nil
@@ -358,7 +358,7 @@ func (a *orderFulfillmentApp) GetOrderFulfillment(ctx context.Context,  orderID 
 
 // loadAndAttachShipments loads shipments + their items + carriers, attaching them to detail.Shipments.
 func (a *orderFulfillmentApp) loadAndAttachShipments(ctx context.Context, detail *OrderFulfillmentDetail) error {
-	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db,  detail.OrderID)
+	shipments, err := a.shipmentRepo.FindByOrderID(ctx, a.db, detail.OrderID)
 	if err != nil {
 		return err
 	}
@@ -373,7 +373,7 @@ func (a *orderFulfillmentApp) loadAndAttachShipments(ctx context.Context, detail
 		shipmentIDs[i] = s.Model.ID
 		carrierCodes[i] = s.CarrierCode
 	}
-	shipmentItemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db,  shipmentIDs)
+	shipmentItemsMap, _ := a.shipmentItemRepo.FindByShipmentIDs(ctx, a.db, shipmentIDs)
 	carrierMap, _ := a.carrierRepo.FindByCodes(ctx, a.db, carrierCodes)
 
 	detail.Shipments = buildShipmentResponses(shipments, shipmentItemsMap, carrierMap, detail.OrderNo)
@@ -382,7 +382,7 @@ func (a *orderFulfillmentApp) loadAndAttachShipments(ctx context.Context, detail
 
 // loadAndAttachRefund loads refunds for the order and attaches the latest one to detail.Refund.
 func (a *orderFulfillmentApp) loadAndAttachRefund(ctx context.Context, detail *OrderFulfillmentDetail) error {
-	refunds, err := a.refundRepo.FindByOrderID(ctx, a.db,  detail.OrderID)
+	refunds, err := a.refundRepo.FindByOrderID(ctx, a.db, detail.OrderID)
 	if err != nil {
 		return err
 	}
@@ -390,10 +390,10 @@ func (a *orderFulfillmentApp) loadAndAttachRefund(ctx context.Context, detail *O
 	return nil
 }
 
-func (a *orderFulfillmentApp) ShipOrder(ctx context.Context,  userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error) {
+func (a *orderFulfillmentApp) ShipOrder(ctx context.Context, userID int64, orderID int64, req ShipOrderRequest) (*ShipmentResponse, error) {
 	// Validate order exists and can be shipped
 	if a.orderValidator != nil {
-		orderInfo, err := a.orderValidator.GetOrderForShipment(ctx,  orderID)
+		orderInfo, err := a.orderValidator.GetOrderForShipment(ctx, orderID)
 		if err != nil {
 			return nil, err
 		}
@@ -451,7 +451,7 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context,  userID int64, orde
 			return err
 		}
 
-		shipmentNo := fulfillment.GenerateShipmentNo( int(shipmentID))
+		shipmentNo := fulfillment.GenerateShipmentNo(int(shipmentID))
 
 		// Create shipment entity
 		shipment := &fulfillment.Shipment{
@@ -512,7 +512,7 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context,  userID int64, orde
 
 	// Look up order_no so the response includes it (used by frontend detail page)
 	var orderNo string
-	if order, err := a.orderRepo.FindByID(ctx, a.db,  result.OrderID); err == nil && order != nil {
+	if order, err := a.orderRepo.FindByID(ctx, a.db, result.OrderID); err == nil && order != nil {
 		orderNo = order.OrderNo
 	}
 	return toShipmentResponse(result, carrier, orderNo), nil
@@ -520,14 +520,14 @@ func (a *orderFulfillmentApp) ShipOrder(ctx context.Context,  userID int64, orde
 
 func (a *orderFulfillmentApp) GetFulfillmentSummary(ctx context.Context) (*FulfillmentSummary, error) {
 	// Count shipments by status
-	pendingCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db,  fulfillment.ShipmentStatusPending)
-	shippedCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db,  fulfillment.ShipmentStatusShipped)
-	inTransitCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db,  fulfillment.ShipmentStatusInTransit)
-	deliveredCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db,  fulfillment.ShipmentStatusDelivered)
+	pendingCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db, fulfillment.ShipmentStatusPending)
+	shippedCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db, fulfillment.ShipmentStatusShipped)
+	inTransitCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db, fulfillment.ShipmentStatusInTransit)
+	deliveredCount, _ := a.shipmentRepo.CountByStatus(ctx, a.db, fulfillment.ShipmentStatusDelivered)
 
 	// Count refunds by status
-	pendingRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusPending)
-	approvedRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusApproved)
+	pendingRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusPending)
+	approvedRefundCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusApproved)
 
 	// Get today's stats
 	todayOrders, _ := a.orderRepo.CountTodayOrders(ctx, a.db)
@@ -547,14 +547,14 @@ func (a *orderFulfillmentApp) GetFulfillmentSummary(ctx context.Context) (*Fulfi
 }
 
 // UpdateOrderRemark updates the merchant remark for an order
-func (a *orderFulfillmentApp) UpdateOrderRemark(ctx context.Context,  orderID int64, remark string) error {
-	return a.orderRepo.UpdateRemark(ctx, a.db,  orderID, remark)
+func (a *orderFulfillmentApp) UpdateOrderRemark(ctx context.Context, orderID int64, remark string) error {
+	return a.orderRepo.UpdateRemark(ctx, a.db, orderID, remark)
 }
 
 // AdjustOrderPrice adjusts the price of an order
-func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context,  userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error) {
+func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context, userID int64, orderID int64, adjustAmount decimal.Decimal, reason string) (*fulfillment.AdjustPriceResponse, error) {
 	// Get order
-	order, err := a.orderRepo.FindByID(ctx, a.db,  orderID)
+	order, err := a.orderRepo.FindByID(ctx, a.db, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -582,7 +582,7 @@ func (a *orderFulfillmentApp) AdjustOrderPrice(ctx context.Context,  userID int6
 }
 
 // ExportOrders exports orders to CSV
-func (a *orderFulfillmentApp) ExportOrders(ctx context.Context,  req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error) {
+func (a *orderFulfillmentApp) ExportOrders(ctx context.Context, req QueryOrderRequest) ([]*fulfillment.OrderExportRow, int64, error) {
 	// Build query
 	query := fulfillment.OrderQuery{
 		PageQuery: shared.PageQuery{
@@ -599,7 +599,7 @@ func (a *orderFulfillmentApp) ExportOrders(ctx context.Context,  req QueryOrderR
 	}
 
 	// Get orders for export
-	orders, err := a.orderRepo.FindForExport(ctx, a.db,  query)
+	orders, err := a.orderRepo.FindForExport(ctx, a.db, query)
 	if err != nil {
 		return nil, 0, err
 	}

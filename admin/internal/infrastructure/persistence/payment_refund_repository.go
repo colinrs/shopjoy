@@ -24,7 +24,7 @@ func (r *paymentRefundRepository) Update(ctx context.Context, db *gorm.DB, refun
 	return db.WithContext(ctx).Save(refund).Error
 }
 
-func (r *paymentRefundRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.PaymentRefund, error) {
+func (r *paymentRefundRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*payment.PaymentRefund, error) {
 	var refund payment.PaymentRefund
 	query := db.WithContext(ctx).Where("id = ?", id)
 	err := query.First(&refund).Error
@@ -37,7 +37,7 @@ func (r *paymentRefundRepository) FindByID(ctx context.Context, db *gorm.DB,  id
 	return &refund, nil
 }
 
-func (r *paymentRefundRepository) FindByRefundNo(ctx context.Context, db *gorm.DB,  refundNo string) (*payment.PaymentRefund, error) {
+func (r *paymentRefundRepository) FindByRefundNo(ctx context.Context, db *gorm.DB, refundNo string) (*payment.PaymentRefund, error) {
 	var refund payment.PaymentRefund
 	query := db.WithContext(ctx).Where("refund_no = ?", refundNo)
 	err := query.First(&refund).Error
@@ -64,18 +64,17 @@ func (r *paymentRefundRepository) FindByIdempotencyKey(ctx context.Context, db *
 	return &refund, nil
 }
 
-func (r *paymentRefundRepository) FindByPaymentID(ctx context.Context, db *gorm.DB,  paymentID int64) ([]*payment.PaymentRefund, error) {
+func (r *paymentRefundRepository) FindByPaymentID(ctx context.Context, db *gorm.DB, paymentID int64) ([]*payment.PaymentRefund, error) {
 	query := db.WithContext(ctx).Model(&payment.PaymentRefund{}).Where("payment_id = ?", paymentID)
 	var refunds []*payment.PaymentRefund
 	err := query.Order("id DESC").Find(&refunds).Error
 	return refunds, err
 }
 
-func (r *paymentRefundRepository) FindList(ctx context.Context, db *gorm.DB,  query payment.RefundQuery) ([]*payment.PaymentRefund, int64, error) {
+func (r *paymentRefundRepository) FindList(ctx context.Context, db *gorm.DB, query payment.RefundQuery) ([]*payment.PaymentRefund, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&payment.PaymentRefund{})
-
 
 	if query.OrderID > 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -107,7 +106,7 @@ func (r *paymentRefundRepository) FindList(ctx context.Context, db *gorm.DB,  qu
 	return list, total, nil
 }
 
-func (r *paymentRefundRepository) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB,  paymentID int64) (decimal.Decimal, error) {
+func (r *paymentRefundRepository) GetTotalRefundedAmount(ctx context.Context, db *gorm.DB, paymentID int64) (decimal.Decimal, error) {
 	query := db.WithContext(ctx).
 		Model(&payment.PaymentRefund{}).
 		Where("payment_id = ? AND status = ?", paymentID, payment.PaymentRefundStatusSucceeded)

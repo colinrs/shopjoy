@@ -40,7 +40,7 @@ func (l *ExportProductsLogic) ExportProducts(req *types.ExportProductsReq) error
 
 	// Build query request - use large page size for export
 	query := product.Query{
-	Name:       req.Name,
+		Name:       req.Name,
 		CategoryID: req.CategoryID,
 		Status:     parseProductStatus(req.Status),
 		MarketID:   req.MarketID,

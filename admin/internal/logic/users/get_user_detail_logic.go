@@ -24,7 +24,7 @@ func NewGetUserDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetU
 }
 
 func (l *GetUserDetailLogic) GetUserDetail(req *types.GetUserRequest) (resp *types.UserDetailResponse, err error) {
-	detail, err := l.svcCtx.UserService.GetDetail(l.ctx,  req.ID)
+	detail, err := l.svcCtx.UserService.GetDetail(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}

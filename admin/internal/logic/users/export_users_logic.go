@@ -45,7 +45,7 @@ func (l *ExportUsersLogic) ExportUsers(req *types.ExportUsersRequest) error {
 	}
 
 	// Get users for export
-	data, err := l.svcCtx.UserService.ExportUsers(l.ctx,  queryReq)
+	data, err := l.svcCtx.UserService.ExportUsers(l.ctx, queryReq)
 	if err != nil {
 		return err
 	}

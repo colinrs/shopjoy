@@ -250,7 +250,7 @@ func (r *PaymentRefund) TableName() string {
 }
 
 // NewPaymentRefund 创建退款记录
-func NewPaymentRefund( orderID, paymentID int64, idempotencyKey string, amount decimal.Decimal, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
+func NewPaymentRefund(orderID, paymentID int64, idempotencyKey string, amount decimal.Decimal, currency, reasonType, reason string, createdBy int64) *PaymentRefund {
 	return &PaymentRefund{
 		OrderID:        orderID,
 		PaymentID:      paymentID,

@@ -43,9 +43,9 @@ func (l *BatchUpdateUserStatusLogic) BatchUpdateUserStatus(req *types.BatchUpdat
 		var updateErr error
 		switch req.Status {
 		case 1: // activate
-			updateErr = l.svcCtx.UserService.Activate(l.ctx,  userID)
+			updateErr = l.svcCtx.UserService.Activate(l.ctx, userID)
 		case 2: // suspend
-			updateErr = l.svcCtx.UserService.Suspend(l.ctx,  userID)
+			updateErr = l.svcCtx.UserService.Suspend(l.ctx, userID)
 		default:
 			resp.Failed = append(resp.Failed, types.BatchStatusFail{
 				UserID:  userID,

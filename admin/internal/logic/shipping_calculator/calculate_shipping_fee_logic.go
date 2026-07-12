@@ -99,7 +99,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 }
 
 // findTemplateForItems finds the appropriate template and zone using priority: Product > Category > Default
-func (l *CalculateShippingFeeLogic) findTemplateForItems( cityCode string, reqItems []types.CalculatorItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
+func (l *CalculateShippingFeeLogic) findTemplateForItems(cityCode string, reqItems []types.CalculatorItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
 	// Priority 1: Check for product-specific template
 	for _, item := range reqItems {
 		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.ProductID)

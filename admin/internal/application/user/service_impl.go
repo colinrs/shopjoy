@@ -122,23 +122,23 @@ func (s *ServiceImpl) ChangePassword(ctx context.Context, req ChangePasswordRequ
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) GetByID(ctx context.Context,  id int64) (*UserResponse, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+func (s *ServiceImpl) GetByID(ctx context.Context, id int64) (*UserResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toUserResponse(u), nil
 }
 
-func (s *ServiceImpl) GetByEmail(ctx context.Context,  email string) (*UserResponse, error) {
-	u, err := s.userRepo.FindByEmail(ctx, s.db,  email)
+func (s *ServiceImpl) GetByEmail(ctx context.Context, email string) (*UserResponse, error) {
+	u, err := s.userRepo.FindByEmail(ctx, s.db, email)
 	if err != nil {
 		return nil, err
 	}
 	return toUserResponse(u), nil
 }
 
-func (s *ServiceImpl) List(ctx context.Context,  req QueryRequest) (*UserListResponse, error) {
+func (s *ServiceImpl) List(ctx context.Context, req QueryRequest) (*UserListResponse, error) {
 	query := domain.Query{
 		PageQuery: req.PageQuery,
 		Name:      req.Name,
@@ -148,7 +148,7 @@ func (s *ServiceImpl) List(ctx context.Context,  req QueryRequest) (*UserListRes
 	}
 	query.PageQuery.Validate()
 
-	users, total, err := s.userRepo.FindList(ctx, s.db,  query)
+	users, total, err := s.userRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -167,8 +167,8 @@ func (s *ServiceImpl) List(ctx context.Context,  req QueryRequest) (*UserListRes
 	return resp, nil
 }
 
-func (s *ServiceImpl) Suspend(ctx context.Context,  id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+func (s *ServiceImpl) Suspend(ctx context.Context, id int64) error {
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func (s *ServiceImpl) Suspend(ctx context.Context,  id int64) error {
 }
 
 func (s *ServiceImpl) Activate(ctx context.Context, id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (s *ServiceImpl) Activate(ctx context.Context, id int64) error {
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, id int64) error {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -208,8 +208,8 @@ func (s *ServiceImpl) Delete(ctx context.Context, id int64) error {
 	return s.userRepo.Update(ctx, s.db, u)
 }
 
-func (s *ServiceImpl) ResetPassword(ctx context.Context,  id int64) (string, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+func (s *ServiceImpl) ResetPassword(ctx context.Context, id int64) (string, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return "", err
 	}
@@ -286,8 +286,8 @@ func toUserResponse(u *domain.User) *UserResponse {
 }
 
 // GetDetail returns detailed user information with points and order statistics
-func (s *ServiceImpl) GetDetail(ctx context.Context,  id int64) (*UserDetailResponse, error) {
-	u, err := s.userRepo.FindByID(ctx, s.db,  id)
+func (s *ServiceImpl) GetDetail(ctx context.Context, id int64) (*UserDetailResponse, error) {
+	u, err := s.userRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +340,7 @@ func (s *ServiceImpl) GetDetail(ctx context.Context,  id int64) (*UserDetailResp
 	resp.ReviewCount = reviewCount
 
 	// Query default address
-	addresses, err := s.addressRepo.FindByUserID(ctx, s.db,  id)
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, id)
 	if err == nil && len(addresses) > 0 {
 		for _, addr := range addresses {
 			if addr.IsDefault {
@@ -358,7 +358,7 @@ func (s *ServiceImpl) GetDetail(ctx context.Context,  id int64) (*UserDetailResp
 }
 
 // ExtendedList returns a list of users with extended information
-func (s *ServiceImpl) ExtendedList(ctx context.Context,  req EnhancedQueryRequest) (*ExtendedListResponse, error) {
+func (s *ServiceImpl) ExtendedList(ctx context.Context, req EnhancedQueryRequest) (*ExtendedListResponse, error) {
 	query := domain.Query{
 		PageQuery: req.PageQuery,
 		Name:      req.Keyword,
@@ -368,7 +368,7 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context,  req EnhancedQueryReques
 	}
 	query.PageQuery.Validate()
 
-	users, total, err := s.userRepo.FindList(ctx, s.db,  query)
+	users, total, err := s.userRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -449,8 +449,8 @@ func (s *ServiceImpl) ExtendedList(ctx context.Context,  req EnhancedQueryReques
 }
 
 // GetAddresses returns all addresses for a user
-func (s *ServiceImpl) GetAddresses(ctx context.Context,  userID int64) (*AddressListResponse, error) {
-	addresses, err := s.addressRepo.FindByUserID(ctx, s.db,  userID)
+func (s *ServiceImpl) GetAddresses(ctx context.Context, userID int64) (*AddressListResponse, error) {
+	addresses, err := s.addressRepo.FindByUserID(ctx, s.db, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -474,12 +474,12 @@ func (s *ServiceImpl) SuspendWithReason(ctx context.Context, req SuspendUserRequ
 
 // ActivateUser activates a user
 func (s *ServiceImpl) ActivateUser(ctx context.Context, userID int64) error {
-	return s.Activate(ctx,  userID)
+	return s.Activate(ctx, userID)
 }
 
 // DeleteUser deletes a user
 func (s *ServiceImpl) DeleteUser(ctx context.Context, userID int64) error {
-	return s.Delete(ctx,  userID)
+	return s.Delete(ctx, userID)
 }
 
 // GetUserStats returns user statistics
@@ -498,7 +498,7 @@ func (s *ServiceImpl) GetUserStats(ctx context.Context) (*UserStats, error) {
 }
 
 // ExportUsers exports users to a file (placeholder implementation)
-func (s *ServiceImpl) ExportUsers(ctx context.Context,  req EnhancedQueryRequest) ([]byte, error) {
+func (s *ServiceImpl) ExportUsers(ctx context.Context, req EnhancedQueryRequest) ([]byte, error) {
 	// Get all users matching the criteria
 	query := domain.Query{
 		PageQuery: shared.PageQuery{Page: 1, PageSize: 10000}, // Large page size for export
@@ -508,7 +508,7 @@ func (s *ServiceImpl) ExportUsers(ctx context.Context,  req EnhancedQueryRequest
 		Status:    req.Status,
 	}
 
-	users, _, err := s.userRepo.FindList(ctx, s.db,  query)
+	users, _, err := s.userRepo.FindList(ctx, s.db, query)
 	if err != nil {
 		return nil, err
 	}

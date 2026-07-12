@@ -19,7 +19,7 @@ func (r *paymentTransactionRepository) Create(ctx context.Context, db *gorm.DB, 
 	return db.WithContext(ctx).Create(txn).Error
 }
 
-func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*payment.PaymentTransaction, error) {
+func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
 	query := db.WithContext(ctx).Where("id = ?", id)
 	err := query.First(&txn).Error
@@ -32,7 +32,7 @@ func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB
 	return &txn, nil
 }
 
-func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, db *gorm.DB,  txnID string) (*payment.PaymentTransaction, error) {
+func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, db *gorm.DB, txnID string) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
 	query := db.WithContext(ctx).Where("transaction_id = ?", txnID)
 	err := query.First(&txn).Error
@@ -45,11 +45,10 @@ func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, 
 	return &txn, nil
 }
 
-func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB,  query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
+func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB, query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&payment.PaymentTransaction{})
-
 
 	if query.OrderID > 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -98,7 +97,6 @@ func (r *paymentTransactionRepository) GetStats(ctx context.Context, db *gorm.DB
 		Model(&payment.PaymentTransaction{}).
 		Select("status, COUNT(*) as count").
 		Group("status")
-
 
 	err = query.Scan(&results).Error
 	if err != nil {

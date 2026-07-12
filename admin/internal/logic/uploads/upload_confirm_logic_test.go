@@ -31,7 +31,7 @@ func (f *fakeStorage) RegisterAsset(ctx context.Context, remote storage.RemoteAs
 	f.gotRemote = remote
 	return f.ret, f.retErr
 }
-func (f *fakeStorage) Delete(_ context.Context, _ string) error                { return nil }
+func (f *fakeStorage) Delete(_ context.Context, _ string) error                  { return nil }
 func (f *fakeStorage) DeleteByTenant(_ context.Context, _ string, _ int64) error { return nil }
 func (f *fakeStorage) Get(_ context.Context, _ string) (*storage.Asset, error) {
 	return nil, nil

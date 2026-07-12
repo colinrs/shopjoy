@@ -75,13 +75,13 @@ func (r *productLocalizationRepo) Update(ctx context.Context, db *gorm.DB, local
 		}).Error
 }
 
-func (r *productLocalizationRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *productLocalizationRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	return db.WithContext(ctx).
 		Where("id = ?", id).
 		Delete(&productLocalizationModel{}).Error
 }
 
-func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.ProductLocalization, error) {
 	var model productLocalizationModel
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -92,7 +92,7 @@ func (r *productLocalizationRepo) FindByID(ctx context.Context, db *gorm.DB,  id
 	return model.toEntity(), nil
 }
 
-func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*product.ProductLocalization, error) {
 	var models []productLocalizationModel
 	err := db.WithContext(ctx).
 		Where("product_id = ?", productID).
@@ -107,7 +107,7 @@ func (r *productLocalizationRepo) FindByProductID(ctx context.Context, db *gorm.
 	return result, nil
 }
 
-func (r *productLocalizationRepo) FindByProductAndLanguage(ctx context.Context, db *gorm.DB,  productID int64, languageCode string) (*product.ProductLocalization, error) {
+func (r *productLocalizationRepo) FindByProductAndLanguage(ctx context.Context, db *gorm.DB, productID int64, languageCode string) (*product.ProductLocalization, error) {
 	var model productLocalizationModel
 	err := db.WithContext(ctx).
 		Where("product_id = ? AND language_code = ?", productID, languageCode).

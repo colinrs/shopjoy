@@ -74,7 +74,7 @@ func ctxPlatformAdmin() context.Context {
 // captureSQL 捕获 GORM 生成的 SQL
 func captureSQL(db *gorm.DB) *gorm.DB {
 	return db.Session(&gorm.Session{
-	 DryRun: true,
+		DryRun: true,
 	})
 }
 

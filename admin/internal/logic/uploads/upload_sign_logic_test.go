@@ -37,7 +37,7 @@ func (f *fakeSigner) RegisterAsset(_ context.Context, _ storage.RemoteAsset) (*s
 	return nil, nil
 }
 
-func (f *fakeSigner) Delete(_ context.Context, _ string) error                { return nil }
+func (f *fakeSigner) Delete(_ context.Context, _ string) error { return nil }
 func (f *fakeSigner) DeleteByTenant(_ context.Context, _ string, _ int64) error {
 	return nil
 }
@@ -60,7 +60,7 @@ func (nonSignerStorage) Save(_ context.Context, _ storage.AssetDraft) (*storage.
 func (nonSignerStorage) RegisterAsset(_ context.Context, _ storage.RemoteAsset) (*storage.Asset, error) {
 	return nil, nil
 }
-func (nonSignerStorage) Delete(_ context.Context, _ string) error                { return nil }
+func (nonSignerStorage) Delete(_ context.Context, _ string) error { return nil }
 func (nonSignerStorage) DeleteByTenant(_ context.Context, _ string, _ int64) error {
 	return nil
 }

@@ -30,5 +30,5 @@ func (l *GetTopProductsLogic) GetTopProducts(req *types.TopProductsRequest) (res
 		limit = 5
 	}
 
-	return helper.GetTopProducts( limit, req.Period)
+	return helper.GetTopProducts(limit, req.Period)
 }

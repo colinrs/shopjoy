@@ -115,11 +115,11 @@ type RefundReasonItemResponse struct {
 
 // RefundApp is the refund application service interface
 type RefundApp interface {
-	GetRefund(ctx context.Context,  id int64) (*RefundDetailResponse, error)
-	ListRefunds(ctx context.Context,  req QueryRefundRequest) (*RefundListResponse, error)
-	ApproveRefund(ctx context.Context,  id int64, approvedBy int64) (*RefundDetailResponse, error)
-	RejectRefund(ctx context.Context,  id int64, rejectReason string, updatedBy int64) (*RefundDetailResponse, error)
-	GetRefundStatistics(ctx context.Context,  startTime, endTime time.Time) (*RefundStatisticsResponse, error)
+	GetRefund(ctx context.Context, id int64) (*RefundDetailResponse, error)
+	ListRefunds(ctx context.Context, req QueryRefundRequest) (*RefundListResponse, error)
+	ApproveRefund(ctx context.Context, id int64, approvedBy int64) (*RefundDetailResponse, error)
+	RejectRefund(ctx context.Context, id int64, rejectReason string, updatedBy int64) (*RefundDetailResponse, error)
+	GetRefundStatistics(ctx context.Context, startTime, endTime time.Time) (*RefundStatisticsResponse, error)
 }
 
 type refundApp struct {
@@ -144,15 +144,15 @@ func NewRefundApp(
 	}
 }
 
-func (a *refundApp) GetRefund(ctx context.Context,  id int64) (*RefundDetailResponse, error) {
-	refund, err := a.refundRepo.FindByID(ctx, a.db,  id)
+func (a *refundApp) GetRefund(ctx context.Context, id int64) (*RefundDetailResponse, error) {
+	refund, err := a.refundRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
 	return toRefundDetailResponse(refund), nil
 }
 
-func (a *refundApp) ListRefunds(ctx context.Context,  req QueryRefundRequest) (*RefundListResponse, error) {
+func (a *refundApp) ListRefunds(ctx context.Context, req QueryRefundRequest) (*RefundListResponse, error) {
 	query := fulfillment.RefundQuery{
 		PageQuery: shared.PageQuery{
 			Page:     req.Page,
@@ -168,7 +168,7 @@ func (a *refundApp) ListRefunds(ctx context.Context,  req QueryRefundRequest) (*
 	}
 	query.PageQuery.Validate()
 
-	refunds, total, err := a.refundRepo.FindList(ctx, a.db,  query)
+	refunds, total, err := a.refundRepo.FindList(ctx, a.db, query)
 	if err != nil {
 		return nil, err
 	}
@@ -187,8 +187,8 @@ func (a *refundApp) ListRefunds(ctx context.Context,  req QueryRefundRequest) (*
 	return resp, nil
 }
 
-func (a *refundApp) ApproveRefund(ctx context.Context,  id int64, approvedBy int64) (*RefundDetailResponse, error) {
-	refund, err := a.refundRepo.FindByID(ctx, a.db,  id)
+func (a *refundApp) ApproveRefund(ctx context.Context, id int64, approvedBy int64) (*RefundDetailResponse, error) {
+	refund, err := a.refundRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -211,13 +211,13 @@ func (a *refundApp) ApproveRefund(ctx context.Context,  id int64, approvedBy int
 	return toRefundDetailResponse(refund), nil
 }
 
-func (a *refundApp) RejectRefund(ctx context.Context,  id int64, rejectReason string, updatedBy int64) (*RefundDetailResponse, error) {
+func (a *refundApp) RejectRefund(ctx context.Context, id int64, rejectReason string, updatedBy int64) (*RefundDetailResponse, error) {
 	// Validate reject reason is provided
 	if rejectReason == "" {
 		return nil, code.ErrRefundRejectReasonRequired
 	}
 
-	refund, err := a.refundRepo.FindByID(ctx, a.db,  id)
+	refund, err := a.refundRepo.FindByID(ctx, a.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -240,12 +240,12 @@ func (a *refundApp) RejectRefund(ctx context.Context,  id int64, rejectReason st
 	return toRefundDetailResponse(refund), nil
 }
 
-func (a *refundApp) GetRefundStatistics(ctx context.Context,  startTime, endTime time.Time) (*RefundStatisticsResponse, error) {
+func (a *refundApp) GetRefundStatistics(ctx context.Context, startTime, endTime time.Time) (*RefundStatisticsResponse, error) {
 	// Get counts by status
-	pendingCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusPending)
-	approvedCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusApproved)
-	rejectedCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusRejected)
-	completedCount, _ := a.refundRepo.CountByStatus(ctx, a.db,  fulfillment.RefundStatusCompleted)
+	pendingCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusPending)
+	approvedCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusApproved)
+	rejectedCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusRejected)
+	completedCount, _ := a.refundRepo.CountByStatus(ctx, a.db, fulfillment.RefundStatusCompleted)
 
 	totalRefunds := pendingCount + approvedCount + rejectedCount + completedCount
 
@@ -256,7 +256,7 @@ func (a *refundApp) GetRefundStatistics(ctx context.Context,  startTime, endTime
 	}
 	query.Validate()
 
-	refunds, _, err := a.refundRepo.FindList(ctx, a.db,  query)
+	refunds, _, err := a.refundRepo.FindList(ctx, a.db, query)
 	if err != nil {
 		return nil, err
 	}

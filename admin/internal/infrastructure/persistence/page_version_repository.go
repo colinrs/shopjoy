@@ -65,7 +65,7 @@ func (r *pageVersionRepo) Create(ctx context.Context, db *gorm.DB, v *storefront
 	return db.WithContext(ctx).Create(model).Error
 }
 
-func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64, page, pageSize int) ([]*storefront.PageVersion, int64, error) {
+func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB, pageID int64, page, pageSize int) ([]*storefront.PageVersion, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageVersionModel{}).
 		Where("page_id = ?", pageID).
@@ -92,7 +92,7 @@ func (r *pageVersionRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID
 	return versions, total, nil
 }
 
-func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB,  pageID int64) (int64, error) {
+func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB, pageID int64) (int64, error) {
 	var total int64
 	err := db.WithContext(ctx).Model(&pageVersionModel{}).
 		Where("page_id = ?", pageID).
@@ -100,7 +100,7 @@ func (r *pageVersionRepo) CountByPageID(ctx context.Context, db *gorm.DB,  pageI
 	return total, err
 }
 
-func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB,  pageID int64, version int) (*storefront.PageVersion, error) {
+func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB, pageID int64, version int) (*storefront.PageVersion, error) {
 	var model pageVersionModel
 	err := db.WithContext(ctx).
 		Where("page_id = ? AND version = ?", pageID, version).
@@ -114,7 +114,7 @@ func (r *pageVersionRepo) FindByVersion(ctx context.Context, db *gorm.DB,  pageI
 	return model.toEntity(), nil
 }
 
-func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB,  pageID int64, keepCount int) error {
+func (r *pageVersionRepo) DeleteOldest(ctx context.Context, db *gorm.DB, pageID int64, keepCount int) error {
 	// Get total count
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageVersionModel{}).

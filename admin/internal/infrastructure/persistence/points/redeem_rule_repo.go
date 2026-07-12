@@ -30,7 +30,7 @@ func (r *redeemRuleRepo) Update(ctx context.Context, db *gorm.DB, rule *points.R
 }
 
 // Delete soft deletes a redeem rule
-func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&points.RedeemRule{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
 	result := query.Delete(&points.RedeemRule{})
@@ -44,7 +44,7 @@ func (r *redeemRuleRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) err
 }
 
 // FindByID finds a redeem rule by ID
-func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.RedeemRule, error) {
+func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*points.RedeemRule, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	var rule points.RedeemRule
@@ -59,7 +59,7 @@ func (r *redeemRuleRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (
 }
 
 // FindList finds redeem rules with pagination and filters
-func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query points.RedeemRuleQuery) ([]*points.RedeemRule, int64, error) {
+func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB, query points.RedeemRuleQuery) ([]*points.RedeemRule, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.RedeemRule{}).Where("deleted_at IS NULL")
@@ -91,7 +91,7 @@ func (r *redeemRuleRepo) FindList(ctx context.Context, db *gorm.DB,  query point
 }
 
 // UpdateStatus updates the status of a redeem rule
-func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int64, status points.RedeemRuleStatus) error {
+func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB, id int64, status points.RedeemRuleStatus) error {
 	query := db.WithContext(ctx).
 		Model(&points.RedeemRule{}).
 		Where("id = ? AND deleted_at IS NULL", id)
@@ -109,7 +109,7 @@ func (r *redeemRuleRepo) UpdateStatus(ctx context.Context, db *gorm.DB,  id int6
 }
 
 // IncrementUsedStock atomically increments the used_stock of a redeem rule
-func (r *redeemRuleRepo) IncrementUsedStock(ctx context.Context, db *gorm.DB,  id int64, quantity int64) error {
+func (r *redeemRuleRepo) IncrementUsedStock(ctx context.Context, db *gorm.DB, id int64, quantity int64) error {
 	query := db.WithContext(ctx).
 		Model(&points.RedeemRule{}).
 		Where("id = ? AND deleted_at IS NULL", id)

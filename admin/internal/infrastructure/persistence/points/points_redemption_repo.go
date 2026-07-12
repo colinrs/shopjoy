@@ -29,7 +29,7 @@ func (r *pointsRedemptionRepo) Update(ctx context.Context, db *gorm.DB, redempti
 }
 
 // FindByID finds a points redemption by ID
-func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*points.PointsRedemption, error) {
+func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*points.PointsRedemption, error) {
 	var redemption points.PointsRedemption
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -44,7 +44,7 @@ func (r *pointsRedemptionRepo) FindByID(ctx context.Context, db *gorm.DB,  id in
 }
 
 // FindList finds points redemptions with pagination and filters
-func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB,  query points.PointsRedemptionQuery) ([]*points.PointsRedemption, int64, error) {
+func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB, query points.PointsRedemptionQuery) ([]*points.PointsRedemption, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&points.PointsRedemption{})
@@ -80,7 +80,7 @@ func (r *pointsRedemptionRepo) FindList(ctx context.Context, db *gorm.DB,  query
 }
 
 // CountByUserAndRule counts the number of redemptions by a user for a specific rule
-func (r *pointsRedemptionRepo) CountByUserAndRule(ctx context.Context, db *gorm.DB,  userID, ruleID int64) (int64, error) {
+func (r *pointsRedemptionRepo) CountByUserAndRule(ctx context.Context, db *gorm.DB, userID, ruleID int64) (int64, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&points.PointsRedemption{}).
 		Where("user_id = ? AND redeem_rule_id = ? AND status != ?",

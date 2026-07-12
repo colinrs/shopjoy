@@ -105,12 +105,12 @@ func (u *User) IsDeleted() bool {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, user *User) error
 	Update(ctx context.Context, db *gorm.DB, user *User) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*User, error)
-	FindByEmail(ctx context.Context, db *gorm.DB,  email string) (*User, error)
-	FindByPhone(ctx context.Context, db *gorm.DB,  phone string) (*User, error)
-	FindList(ctx context.Context, db *gorm.DB,  query Query) ([]*User, int64, error)
-	Exists(ctx context.Context, db *gorm.DB,  email, phone string) (bool, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*User, error)
+	FindByEmail(ctx context.Context, db *gorm.DB, email string) (*User, error)
+	FindByPhone(ctx context.Context, db *gorm.DB, phone string) (*User, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*User, int64, error)
+	Exists(ctx context.Context, db *gorm.DB, email, phone string) (bool, error)
 	GetStats(ctx context.Context, db *gorm.DB) (*Stats, error)
 }
 

@@ -73,7 +73,7 @@ func (r *warehouseInventoryRepo) Update(ctx context.Context, db *gorm.DB, wi *pr
 		}).Error
 }
 
-func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB,  skuCode string, warehouseID int64) (*product.WarehouseInventory, error) {
+func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *gorm.DB, skuCode string, warehouseID int64) (*product.WarehouseInventory, error) {
 	var model warehouseInventoryModel
 	err := db.WithContext(ctx).
 		Where("sku_code = ? AND warehouse_id = ?", skuCode, warehouseID).
@@ -87,7 +87,7 @@ func (r *warehouseInventoryRepo) FindBySKUAndWarehouse(ctx context.Context, db *
 	return model.toEntity(), nil
 }
 
-func (r *warehouseInventoryRepo) FindBySKU(ctx context.Context, db *gorm.DB,  skuCode string) ([]*product.WarehouseInventory, error) {
+func (r *warehouseInventoryRepo) FindBySKU(ctx context.Context, db *gorm.DB, skuCode string) ([]*product.WarehouseInventory, error) {
 	var models []warehouseInventoryModel
 	err := db.WithContext(ctx).
 		Where("sku_code = ?", skuCode).
