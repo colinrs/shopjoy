@@ -102,22 +102,29 @@ type AdminLoginResponse struct {
 	User         AdminUserInfo `json:"user"`
 }
 
+type AdminRoleInfo struct {
+	ID   int64  `json:"id,string"`
+	Name string `json:"name"`
+	Code string `json:"code"`
+}
+
 type AdminUserIDRequest struct {
 	ID int64 `path:"id"`
 }
 
 type AdminUserInfo struct {
-	ID        int64  `json:"id,string"`
-	TenantID  int64  `json:"tenant_id,string"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Mobile    string `json:"mobile"`
-	RealName  string `json:"real_name"`
-	Avatar    string `json:"avatar"`
-	Type      int    `json:"type"`
-	TypeText  string `json:"type_text"`
-	Status    int    `json:"status"`
-	CreatedAt string `json:"created_at"`
+	ID        int64            `json:"id,string"`
+	TenantID  int64            `json:"tenant_id,string"`
+	Username  string           `json:"username"`
+	Email     string           `json:"email"`
+	Mobile    string           `json:"mobile"`
+	RealName  string           `json:"real_name"`
+	Avatar    string           `json:"avatar"`
+	Type      int              `json:"type"`
+	TypeText  string           `json:"type_text"`
+	Status    int              `json:"status"`
+	CreatedAt string           `json:"created_at"`
+	Roles     []*AdminRoleInfo `json:"roles"` // 已分配角色（详情/单用户加载时填充）
 }
 
 type ApproveRefundReq struct {

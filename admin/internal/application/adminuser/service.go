@@ -41,18 +41,26 @@ type ChangePasswordRequest struct {
 
 // AdminUserResponse 管理员响应
 type AdminUserResponse struct {
-	ID          int64  `json:"id"`
-	TenantID    int64  `json:"tenant_id"`
-	Username    string `json:"username"`
-	Email       string `json:"email"`
-	Mobile      string `json:"mobile"`
-	RealName    string `json:"real_name"`
-	Avatar      string `json:"avatar"`
-	Type        int    `json:"type"`
-	TypeText    string `json:"type_text"`
-	Status      int    `json:"status"`
-	LastLoginAt string `json:"last_login_at"`
-	CreatedAt   string `json:"created_at"`
+	ID          int64        `json:"id"`
+	TenantID    int64        `json:"tenant_id"`
+	Username    string       `json:"username"`
+	Email       string       `json:"email"`
+	Mobile      string       `json:"mobile"`
+	RealName    string       `json:"real_name"`
+	Avatar      string       `json:"avatar"`
+	Type        int          `json:"type"`
+	TypeText    string       `json:"type_text"`
+	Status      int          `json:"status"`
+	LastLoginAt string       `json:"last_login_at"`
+	CreatedAt   string       `json:"created_at"`
+	Roles       []*AdminRole `json:"roles"` // 已分配角色（详情/单用户加载时填充）
+}
+
+// AdminRole 精简角色信息，与 .api 中 AdminRoleInfo 对齐
+type AdminRole struct {
+	ID   int64  `json:"id,string"`
+	Name string `json:"name"`
+	Code string `json:"code"`
 }
 
 // LoginResponse 登录响应

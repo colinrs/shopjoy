@@ -115,7 +115,11 @@ func (s *service) GetByID(ctx context.Context, id int64) (*AdminUserResponse, er
 	if err != nil {
 		return nil, err
 	}
-	return s.toResponse(user), nil
+	roles, err := s.roleRepo.FindByUserID(ctx, s.db, id)
+	if err != nil {
+		return nil, err
+	}
+	return s.toResponseWithRoles(user, roles), nil
 }
 
 func (s *service) GetByEmail(ctx context.Context, email string) (*AdminUserResponse, error) {
@@ -542,5 +546,20 @@ func (s *service) toResponse(user *adminuser.AdminUser) *AdminUserResponse {
 		resp.LastLoginAt = user.LastLoginAt.UTC().Format(time.RFC3339)
 	}
 
+	return resp
+}
+
+// toResponseWithRoles 在 toResponse 基础上填充已分配角色。
+// 用于 GetByID 等需要返回角色信息的场景；列表/登录等不需要角色的路径仍使用 toResponse 避免 N+1 查询。
+func (s *service) toResponseWithRoles(user *adminuser.AdminUser, roles []*role.Role) *AdminUserResponse {
+	resp := s.toResponse(user)
+	resp.Roles = make([]*AdminRole, 0, len(roles))
+	for _, r := range roles {
+		resp.Roles = append(resp.Roles, &AdminRole{
+			ID:   r.ID,
+			Name: r.Name,
+			Code: r.Code,
+		})
+	}
 	return resp
 }

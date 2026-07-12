@@ -200,7 +200,8 @@
         <el-table-column
           v-if="activeTab === 'admin'"
           :label="$t('adminUsers.actions')"
-          width="180"
+          width="220"
+          align="center"
           fixed="right"
         >
           <template #default="{ row }">
@@ -253,6 +254,7 @@
           v-if="activeTab === 'customer'"
           :label="$t('adminUsers.actions')"
           width="120"
+          align="center"
           fixed="right"
         >
           <template #default="{ row }">
@@ -465,6 +467,7 @@ import RoleAssignDialog from './components/RoleAssignDialog.vue'
 import ImageUploader from '@/components/ImageUploader.vue'
 import {
   getAdminUsers,
+  getAdminUserDetail,
   disableAdminUser,
   enableAdminUser,
   createAdminUser,
@@ -587,11 +590,16 @@ const handleEditCustomer = (row: Customer) => {
   router.push(`/users/${row.id}`)
 }
 
-const handleAssignRoles = (row: AdminUser) => {
-  currentAdminUser.value = {
-    ...row,
-    roles: []
-  } as AdminUserDetail
+const handleAssignRoles = async (row: AdminUser) => {
+  // 从列表点击时，列表响应不含 roles；这里走详情接口拿到已分配角色用于回显，
+  // 避免给列表接口加 roles 字段引入 N+1 查询。
+  try {
+    const detail = await getAdminUserDetail(row.id)
+    currentAdminUser.value = detail
+  } catch (error) {
+    handleError(error, t('adminUsers.loadDataFailed'))
+    return
+  }
   roleDialogVisible.value = true
 }
 

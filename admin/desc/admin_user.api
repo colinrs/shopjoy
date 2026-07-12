@@ -1,5 +1,7 @@
 syntax = "v1"
 
+import "role.api"
+
 info (
 	title:   "Admin User API"
 	desc:    "管理员用户管理接口"
@@ -7,18 +9,25 @@ info (
 )
 
 type (
+	// AdminRoleInfo 分配给管理员的精简角色信息（仅包含详情展示与回显所需字段）
+	AdminRoleInfo {
+		ID   int64  `json:"id,string"`
+		Name string `json:"name"`
+		Code string `json:"code"`
+	}
 	AdminUserInfo {
-		ID        int64  `json:"id,string"`
-		TenantID  int64  `json:"tenant_id,string"`
-		Username  string `json:"username"`
-		Email     string `json:"email"`
-		Mobile    string `json:"mobile"`
-		RealName  string `json:"real_name"`
-		Avatar    string `json:"avatar"`
-		Type      int    `json:"type"`
-		TypeText  string `json:"type_text"`
-		Status    int    `json:"status"`
-		CreatedAt string `json:"created_at"`
+		ID        int64            `json:"id,string"`
+		TenantID  int64            `json:"tenant_id,string"`
+		Username  string           `json:"username"`
+		Email     string           `json:"email"`
+		Mobile    string           `json:"mobile"`
+		RealName  string           `json:"real_name"`
+		Avatar    string           `json:"avatar"`
+		Type      int              `json:"type"`
+		TypeText  string           `json:"type_text"`
+		Status    int              `json:"status"`
+		CreatedAt string           `json:"created_at"`
+		Roles     []*AdminRoleInfo `json:"roles"` // 已分配角色（详情/单用户加载时填充）
 	}
 	ListAdminUsersRequest {
 		Page     int    `form:"page,default=1"`

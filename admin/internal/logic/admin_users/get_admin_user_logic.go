@@ -29,7 +29,7 @@ func (l *GetAdminUserLogic) GetAdminUser(req *types.AdminUserIDRequest) (resp *t
 		return nil, err
 	}
 
-	return &types.AdminUserInfo{
+	resp = &types.AdminUserInfo{
 		ID:        user.ID,
 		TenantID:  user.TenantID,
 		Username:  user.Username,
@@ -41,5 +41,15 @@ func (l *GetAdminUserLogic) GetAdminUser(req *types.AdminUserIDRequest) (resp *t
 		TypeText:  user.TypeText,
 		Status:    user.Status,
 		CreatedAt: user.CreatedAt,
-	}, nil
+		Roles:     make([]*types.AdminRoleInfo, 0, len(user.Roles)),
+	}
+	for _, r := range user.Roles {
+		resp.Roles = append(resp.Roles, &types.AdminRoleInfo{
+			ID:   r.ID,
+			Name: r.Name,
+			Code: r.Code,
+		})
+	}
+
+	return resp, nil
 }
