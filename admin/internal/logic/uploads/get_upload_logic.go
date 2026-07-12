@@ -31,6 +31,10 @@ func NewGetUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUplo
 }
 
 func (l *GetUploadLogic) GetUpload(req *types.GetUploadReq) (resp *types.UploadResponse, err error) {
+	// Note: req.ID is the internal snowflake primary key (string-encoded),
+	// not the Cloudinary public_id. Storage.Get uses this as the lookup key.
+	// We then check that the returned asset's tenant_id matches the auth
+	// context to prevent IDOR across tenants.
 	asset, err := l.svcCtx.Storage.Get(l.ctx, req.ID)
 	if err != nil {
 		l.Logger.Errorf("get upload: storage.Get failed: id=%s err=%v", req.ID, err)
