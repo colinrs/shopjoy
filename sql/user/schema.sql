@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_username` (`username`),
     UNIQUE KEY `uk_email` (`email`),
-    UNIQUE KEY `uk_mobile` (`mobile`),
+    KEY `idx_mobile` (`mobile`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_type` (`type`),
     KEY `idx_status` (`status`)

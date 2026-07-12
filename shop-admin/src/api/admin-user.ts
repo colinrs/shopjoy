@@ -78,6 +78,7 @@ export function getAdminUserDetail(id: string) {
 }
 
 export interface CreateAdminUserParams {
+  username: string
   email: string
   mobile?: string
   real_name: string

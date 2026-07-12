@@ -9,10 +9,6 @@
         :label="$t('adminUsers.admin')"
         name="admin"
       />
-      <el-tab-pane
-        :label="$t('adminUsers.customer')"
-        name="customer"
-      />
     </el-tabs>
 
     <el-card
@@ -140,41 +136,6 @@
           </template>
         </el-table-column>
         <el-table-column
-          v-if="activeTab === 'customer'"
-          :label="$t('adminUsers.role')"
-          width="100"
-          align="center"
-        >
-          <template #default>
-            <el-tag
-              type="info"
-              size="small"
-            >
-              {{ $t('adminUsers.ordinary') }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-if="activeTab === 'customer'"
-          :label="$t('adminUsers.orderCount')"
-          width="100"
-          align="center"
-        >
-          <template #default="{ row }">
-            <span class="order-count">{{ row.order_count || 0 }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-if="activeTab === 'customer'"
-          :label="$t('adminUsers.totalSpent')"
-          width="120"
-          align="right"
-        >
-          <template #default="{ row }">
-            <span class="total-spent">¥{{ formatPrice(row.total_spent) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
           :label="$t('adminUsers.status')"
           width="100"
           align="center"
@@ -205,75 +166,51 @@
           fixed="right"
         >
           <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleView(row)"
-            >
-              {{ $t('adminUsers.viewDetail') }}
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleAssignRoles(row)"
-            >
-              {{ $t('adminUsers.assignRoles') }}
-            </el-button>
-            <el-dropdown
-              trigger="click"
-              @command="(cmd: string) => handleCommand(cmd, row)"
-            >
+            <div class="action-buttons">
               <el-button
                 type="primary"
                 link
                 size="small"
+                @click.stop="handleView(row)"
               >
-                {{ $t('adminUsers.more') }}<el-icon class="el-icon--right">
-                  <ArrowDown />
-                </el-icon>
+                {{ $t('adminUsers.viewDetail') }}
               </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="resetPassword">
-                    {{ $t('adminUsers.resetPassword') }}
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    command="delete"
-                    style="color: #EF4444;"
-                  >
-                    {{ $t('adminUsers.delete') }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-if="activeTab === 'customer'"
-          :label="$t('adminUsers.actions')"
-          width="120"
-          align="center"
-          fixed="right"
-        >
-          <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleViewCustomer(row)"
-            >
-              {{ $t('adminUsers.viewDetail') }}
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click.stop="handleEditCustomer(row)"
-            >
-              {{ $t('adminUsers.edit') }}
-            </el-button>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click.stop="handleAssignRoles(row)"
+              >
+                {{ $t('adminUsers.assignRoles') }}
+              </el-button>
+              <el-dropdown
+                trigger="click"
+                @command="(cmd: string) => handleCommand(cmd, row)"
+              >
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                >
+                  {{ $t('adminUsers.more') }}<el-icon class="el-icon--right">
+                    <ArrowDown />
+                  </el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="resetPassword">
+                      {{ $t('adminUsers.resetPassword') }}
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      command="delete"
+                      style="color: #EF4444;"
+                    >
+                      {{ $t('adminUsers.delete') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -304,6 +241,15 @@
         label-width="100px"
       >
         <el-form-item
+          :label="$t('adminUsers.usernameLabel')"
+          prop="username"
+        >
+          <el-input
+            v-model="formData.username"
+            :placeholder="$t('adminUsers.pleaseEnterUsername')"
+          />
+        </el-form-item>
+        <el-form-item
           :label="$t('adminUsers.emailLabel')"
           prop="email"
         >
@@ -318,7 +264,7 @@
         >
           <el-input
             v-model="formData.mobile"
-            :placeholder="$t('adminUsers.pleaseEnterEmail')"
+            :placeholder="$t('adminUsers.pleaseEnterMobile')"
           />
         </el-form-item>
         <el-form-item
@@ -409,7 +355,7 @@
           {{ currentRow.id }}
         </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.username')">
-          {{ ('real_name' in currentRow ? currentRow.real_name : currentRow.name) || '-' }}
+          {{ currentRow.real_name || '-' }}
         </el-descriptions-item>
         <el-descriptions-item :label="$t('adminUsers.email')">
           {{ currentRow.email || '-' }}
@@ -473,11 +419,9 @@ import {
   createAdminUser,
   deleteAdminUser,
   resetAdminPassword,
-  getCustomerList,
   type AdminUser,
   type AdminUserDetail,
   type CreateAdminUserParams,
-  type Customer,
   type GetAdminUsersParams
 } from '@/api/admin-user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -498,17 +442,18 @@ const filterStatus = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
-const tableData = ref<(AdminUser | Customer)[]>([])
+const tableData = ref<AdminUser[]>([])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const roleDialogVisible = ref(false)
 const submitLoading = ref(false)
-const currentRow = ref<AdminUser | Customer | null>(null)
+const currentRow = ref<AdminUser | null>(null)
 const currentAdminUser = ref<AdminUserDetail | null>(null)
 const formRef = ref()
 
 const formData = reactive<CreateAdminUserParams>({
+  username: '',
   email: '',
   mobile: '',
   real_name: '',
@@ -519,6 +464,10 @@ const formData = reactive<CreateAdminUserParams>({
 })
 
 const formRules = computed(() => ({
+  username: [
+    { required: true, message: t('adminUsers.pleaseEnterUsername'), trigger: 'blur' },
+    { min: 3, max: 32, message: t('adminUsers.usernameLength'), trigger: 'blur' }
+  ],
   email: [
     { required: true, message: t('adminUsers.pleaseEnterEmail'), trigger: 'blur' },
     { type: 'email', message: t('adminUsers.pleaseEnterValidEmail'), trigger: 'blur' }
@@ -533,8 +482,8 @@ const formRules = computed(() => ({
 
 const dialogTitle = computed(() => t('adminUsers.addAdmin'))
 
-const getAvatarText = (row: AdminUser | Customer) => {
-  const name = ('real_name' in row ? row.real_name : row.name) || ''
+const getAvatarText = (row: AdminUser) => {
+  const name = row.real_name || ''
   return name.charAt(0).toUpperCase()
 }
 
@@ -547,11 +496,6 @@ const getTypeTagType = (type: number) => {
   return types[type] || 'info'
 }
 
-const formatPrice = (price: number | undefined) => {
-  if (!price) return '0.00'
-  return (price / 100).toFixed(2)
-}
-
 const handleSearch = () => {
   currentPage.value = 1
   loadData()
@@ -559,6 +503,7 @@ const handleSearch = () => {
 
 const handleAdd = () => {
   Object.assign(formData, {
+    username: '',
     email: '',
     mobile: '',
     real_name: '',
@@ -574,20 +519,8 @@ const handleView = (row: AdminUser) => {
   router.push(`/admin-users/${row.id}`)
 }
 
-const handleViewCustomer = (row: Customer) => {
-  router.push(`/users/${row.id}`)
-}
-
-const handleRowClick = (row: AdminUser | Customer) => {
-  if (activeTab.value === 'admin') {
-    router.push(`/admin-users/${row.id}`)
-  } else {
-    router.push(`/users/${row.id}`)
-  }
-}
-
-const handleEditCustomer = (row: Customer) => {
-  router.push(`/users/${row.id}`)
+const handleRowClick = (row: AdminUser) => {
+  router.push(`/admin-users/${row.id}`)
 }
 
 const handleAssignRoles = async (row: AdminUser) => {
@@ -711,37 +644,17 @@ const handleCurrentChange = (val: number) => {
 const loadData = async () => {
   loading.value = true
   try {
-    if (activeTab.value === 'admin') {
-      const params: GetAdminUsersParams = {
-        page: currentPage.value,
-        page_size: pageSize.value
-      }
-      if (searchQuery.value) params.keyword = searchQuery.value
-      if (filterType.value) params.type = filterType.value
-      if (filterStatus.value) params.status = filterStatus.value
-
-      const res = await getAdminUsers(params)
-      tableData.value = res.list || []
-      total.value = res.total || 0
-    } else {
-      const params: {
-        page: number
-        page_size: number
-        name?: string
-        email?: string
-      } = {
-        page: currentPage.value,
-        page_size: pageSize.value
-      }
-      if (searchQuery.value) {
-        params.name = searchQuery.value
-        params.email = searchQuery.value
-      }
-
-      const res = await getCustomerList(params)
-      tableData.value = res.list || []
-      total.value = res.total || 0
+    const params: GetAdminUsersParams = {
+      page: currentPage.value,
+      page_size: pageSize.value
     }
+    if (searchQuery.value) params.keyword = searchQuery.value
+    if (filterType.value) params.type = filterType.value
+    if (filterStatus.value) params.status = filterStatus.value
+
+    const res = await getAdminUsers(params)
+    tableData.value = res.list || []
+    total.value = res.total || 0
   } catch (error) {
     handleError(error, t('adminUsers.loadDataFailed'))
   } finally {
@@ -758,16 +671,6 @@ watch(activeTab, () => {
   total.value = 0
   loadData()
 })
-
-watch(
-  () => userStore.userInfo,
-  (info) => {
-    if (info && 'type' in info && info.type !== 1) {
-      activeTab.value = 'customer'
-    }
-  },
-  { immediate: true }
-)
 
 onMounted(() => {
   loadData()
@@ -846,6 +749,13 @@ onMounted(() => {
 /* Table row hover */
 :deep(.el-table__row) {
   cursor: pointer;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 :deep(.el-table__row:hover > td) {

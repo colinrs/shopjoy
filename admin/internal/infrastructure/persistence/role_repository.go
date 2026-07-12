@@ -77,7 +77,12 @@ func (r *RoleRepository) FindList(ctx context.Context, db *gorm.DB, query role.Q
 
 func (r *RoleRepository) AssignToUser(ctx context.Context, db *gorm.DB, userID int64, roleIDs []int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id = ?", userID).Delete(&role.UserRole{}).Error; err != nil {
+		// Junction table user_roles has PRIMARY KEY (user_id, role_id) which
+		// excludes deleted_at. A soft delete (default for application.Model)
+		// would only set deleted_at, leaving the physical row in place and
+		// causing the next INSERT to collide on the PK (Error 1062). Use
+		// Unscoped() to physically remove prior rows before re-inserting.
+		if err := tx.Where("user_id = ?", userID).Unscoped().Delete(&role.UserRole{}).Error; err != nil {
 			return err
 		}
 		for _, roleID := range roleIDs {
@@ -129,11 +134,12 @@ func (r *PermissionRepository) FindByRoleIDs(ctx context.Context, db *gorm.DB, r
 
 func (r *PermissionRepository) AssignToRole(ctx context.Context, db *gorm.DB, roleID int64, permissionIDs []int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// Delete existing permissions
-		if err := tx.Where("role_id = ?", roleID).Delete(&role.RolePermission{}).Error; err != nil {
+		// Junction table role_permissions has PRIMARY KEY (role_id, permission_id)
+		// which excludes deleted_at; soft-delete would leave the row in place and
+		// collide on the PK on the next INSERT. See AssignToUser for full rationale.
+		if err := tx.Where("role_id = ?", roleID).Unscoped().Delete(&role.RolePermission{}).Error; err != nil {
 			return err
 		}
-		// Add new permissions
 		for _, permID := range permissionIDs {
 			rp := &role.RolePermission{
 				RoleID:       roleID,
