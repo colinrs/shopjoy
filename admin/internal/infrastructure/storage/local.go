@@ -79,7 +79,8 @@ func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, erro
 			width, height = cfg.Width, cfg.Height
 		}
 	}
-	if _, err := dst.Write(buf); err != nil {
+	written, err := dst.Write(buf)
+	if err != nil {
 		return nil, fmt.Errorf("write file: %w", err)
 	}
 
@@ -90,7 +91,7 @@ func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, erro
 		PublicID:  relPath,
 		URL:       relPath,
 		Filename:  draft.Filename,
-		SizeBytes: 0, // caller can fill from draft.Size in v2
+		SizeBytes: int64(written), // populate from actual writer result
 		MimeType:  draft.MimeType,
 		Width:     width,
 		Height:    height,
@@ -109,7 +110,7 @@ func (s *localStorage) Save(ctx context.Context, draft AssetDraft) (*Asset, erro
 		PublicID:  relPath,
 		URL:       relPath,
 		Filename:  draft.Filename,
-		Size:      0,
+		Size:      int64(written),
 		MimeType:  draft.MimeType,
 		Width:     width,
 		Height:    height,
