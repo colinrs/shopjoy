@@ -14,19 +14,19 @@ import (
 func TestCreateRoleHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid request with name and code",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Admin Role",
 				"code": "ADMIN",
 			},
 		},
 		{
 			name: "valid request with description",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":        "Admin Role",
 				"code":        "ADMIN",
 				"description": "Administrator role with full access",
@@ -34,7 +34,7 @@ func TestCreateRoleHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name: "valid request with permissions",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":           "Admin Role",
 				"code":           "ADMIN",
 				"permission_ids": []int64{1, 2, 3},
@@ -42,22 +42,22 @@ func TestCreateRoleHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name:           "missing name",
-			requestBody:    map[string]interface{}{"code": "ADMIN"},
+			requestBody:    map[string]any{"code": "ADMIN"},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "missing code",
-			requestBody:    map[string]interface{}{"name": "Admin Role"},
+			requestBody:    map[string]any{"name": "Admin Role"},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "empty name",
-			requestBody:    map[string]interface{}{"name": "", "code": "ADMIN"},
+			requestBody:    map[string]any{"name": "", "code": "ADMIN"},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "empty code",
-			requestBody:    map[string]interface{}{"name": "Admin Role", "code": ""},
+			requestBody:    map[string]any{"name": "Admin Role", "code": ""},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -78,27 +78,27 @@ func TestUpdateRoleHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
 		path           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid update with name",
 			path: "/api/v1/roles/123",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Updated Admin Role",
 			},
 		},
 		{
 			name: "valid update with description",
 			path: "/api/v1/roles/123",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"description": "Updated description",
 			},
 		},
 		{
 			name:           "invalid role ID",
 			path:           "/api/v1/roles/0",
-			requestBody:    map[string]interface{}{"name": "Test"},
+			requestBody:    map[string]any{"name": "Test"},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -187,24 +187,24 @@ func TestListRolesHandler_QueryParams(t *testing.T) {
 func TestUpdateRoleStatusHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "enable role",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 1,
 			},
 		},
 		{
 			name: "disable role",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 0,
 			},
 		},
 		{
 			name:           "invalid status",
-			requestBody:    map[string]interface{}{"status": 2},
+			requestBody:    map[string]any{"status": 2},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -224,18 +224,18 @@ func TestUpdateRoleStatusHandler_RequestValidation(t *testing.T) {
 func TestUpdateRolePermissionsHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid permissions update",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"permission_ids": []int64{1, 2, 3, 4, 5},
 			},
 		},
 		{
 			name: "empty permissions",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"permission_ids": []int64{},
 			},
 		},

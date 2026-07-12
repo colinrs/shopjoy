@@ -75,7 +75,7 @@ func (r *userCouponRepo) Create(ctx context.Context, db *gorm.DB, userCoupon *pr
 }
 
 // FindByID finds a user coupon by ID
-func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.UserCoupon, error) {
+func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*promotion.UserCoupon, error) {
 	query := db.WithContext(ctx)
 	var model userCouponModel
 	err := query.First(&model, id).Error
@@ -89,7 +89,7 @@ func (r *userCouponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (
 }
 
 // FindByUserID finds user coupons by user ID, optionally filtered by status
-func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID int64, status *promotion.UserCouponStatus) ([]*promotion.UserCoupon, error) {
+func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB, userID int64, status *promotion.UserCouponStatus) ([]*promotion.UserCoupon, error) {
 	query := db.WithContext(ctx).Model(&userCouponModel{}).
 		Where("user_id = ?", userID)
 
@@ -111,7 +111,7 @@ func (r *userCouponRepo) FindByUserID(ctx context.Context, db *gorm.DB,  userID 
 }
 
 // FindByUserAndCoupon finds user coupons by user ID and coupon ID
-func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB,  userID int64, couponID int64) ([]*promotion.UserCoupon, error) {
+func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB, userID int64, couponID int64) ([]*promotion.UserCoupon, error) {
 	var models []userCouponModel
 	err := db.WithContext(ctx).Model(&userCouponModel{}).
 		Where("user_id = ?", userID).
@@ -130,12 +130,12 @@ func (r *userCouponRepo) FindByUserAndCoupon(ctx context.Context, db *gorm.DB,  
 }
 
 // MarkUsed marks a user coupon as used
-func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB,  id int64, orderID int64) error {
+func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB, id int64, orderID int64) error {
 	now := time.Now().UTC()
 	result := db.WithContext(ctx).
 		Model(&userCouponModel{}).
 		Where("id = ? AND status = ?", id, promotion.UserCouponStatusUnused).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"status":     promotion.UserCouponStatusUsed,
 			"used_at":    now,
 			"order_id":   orderID,
@@ -152,7 +152,7 @@ func (r *userCouponRepo) MarkUsed(ctx context.Context, db *gorm.DB,  id int64, o
 }
 
 // CountUsageByUser counts how many times a user has used a specific coupon
-func (r *userCouponRepo) CountUsageByUser(ctx context.Context, db *gorm.DB,  userID int64, couponID int64) (int, error) {
+func (r *userCouponRepo) CountUsageByUser(ctx context.Context, db *gorm.DB, userID int64, couponID int64) (int, error) {
 	var count int64
 	err := db.WithContext(ctx).Model(&userCouponModel{}).
 		Where("user_id = ?", userID).

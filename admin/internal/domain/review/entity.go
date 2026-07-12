@@ -276,7 +276,7 @@ func (s StringArray) Value() (driver.Value, error) {
 	return json.Marshal(s)
 }
 
-func (s *StringArray) Scan(value interface{}) error {
+func (s *StringArray) Scan(value any) error {
 	if value == nil {
 		*s = []string{}
 		return nil
@@ -328,12 +328,12 @@ func (q Query) Limit() int {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, review *Review) error
 	Update(ctx context.Context, db *gorm.DB, review *Review) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Review, error)
-	FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*Review, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Review, error)
+	FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*Review, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Review, int64, error)
-	FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*Review, error)
-	BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []int64, status Status, reason string) (int64, error)
+	FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*Review, error)
+	BatchUpdateStatus(ctx context.Context, db *gorm.DB, ids []int64, status Status, reason string) (int64, error)
 }
 
 // ReplyRepository 回复仓储接口

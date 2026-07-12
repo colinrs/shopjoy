@@ -120,11 +120,12 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 	config, _ := json.Marshal(theme.Config)
 	configSchema, _ := json.Marshal(theme.ConfigSchema)
 	defaultConfig, _ := json.Marshal(theme.DefaultConfig)
+	now := time.Now().UTC()
 
 	// Only allow updating custom themes (not preset themes)
 	return db.WithContext(ctx).Model(&themeModel{}).
 		Where("id = ? AND is_preset = 0", theme.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":           model.Name,
 			"description":    model.Description,
 			"thumbnail":      model.Thumbnail,
@@ -134,11 +135,11 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 			"default_config": string(defaultConfig),
 			"is_active":      model.IsActive,
 			"is_custom":      model.IsCustom,
-			"updated_at":     model.UpdatedAt,
+			"updated_at":     now,
 		}).Error
 }
 
-func (r *themeRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Theme, error) {
+func (r *themeRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*storefront.Theme, error) {
 	var model themeModel
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -214,7 +215,7 @@ func (r *themeRepo) FindPresets(ctx context.Context, db *gorm.DB) ([]*storefront
 	return themes, nil
 }
 
-func (r *themeRepo) SetActive(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *themeRepo) SetActive(ctx context.Context, db *gorm.DB, id int64) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Deactivate all themes for this tenant
 		if err := tx.Model(&themeModel{}).

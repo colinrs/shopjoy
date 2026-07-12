@@ -70,6 +70,7 @@ func (r *warehouseRepo) Create(ctx context.Context, db *gorm.DB, w *product.Ware
 
 func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Warehouse) error {
 	model := fromWarehouseEntity(w)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&warehouseModel{}).
 		Where("id = ?", w.Model.ID).
 		Updates(map[string]any{
@@ -78,7 +79,7 @@ func (r *warehouseRepo) Update(ctx context.Context, db *gorm.DB, w *product.Ware
 			"address":    model.Address,
 			"is_default": model.IsDefault,
 			"status":     model.Status,
-			"updated_at": model.UpdatedAt,
+			"updated_at": now,
 		}).Error
 }
 

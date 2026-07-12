@@ -11,7 +11,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/config"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/pkg/code"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
 // mockPaymentService is a mock implementation of appPayment.Service
@@ -19,23 +18,23 @@ type mockPaymentService struct {
 	handleWebhookFunc func(ctx context.Context, event *appPayment.WebhookEvent) error
 }
 
-func (m *mockPaymentService) GetPaymentStats(ctx context.Context, tenantID shared.TenantID, period string) (*appPayment.PaymentStatsDTO, error) {
+func (m *mockPaymentService) GetPaymentStats(ctx context.Context, period string) (*appPayment.PaymentStatsDTO, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentService) ListTransactions(ctx context.Context, tenantID shared.TenantID, req appPayment.ListTransactionsRequest) (*appPayment.ListTransactionsResponse, error) {
+func (m *mockPaymentService) ListTransactions(ctx context.Context, req appPayment.ListTransactionsRequest) (*appPayment.ListTransactionsResponse, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentService) GetTransaction(ctx context.Context, tenantID shared.TenantID, id int64) (*appPayment.TransactionDTO, error) {
+func (m *mockPaymentService) GetTransaction(ctx context.Context, id int64) (*appPayment.TransactionDTO, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentService) GetOrderPayment(ctx context.Context, tenantID shared.TenantID, orderID int64) (*appPayment.OrderPaymentDTO, error) {
+func (m *mockPaymentService) GetOrderPayment(ctx context.Context, orderID int64) (*appPayment.OrderPaymentDTO, error) {
 	return nil, nil
 }
 
-func (m *mockPaymentService) InitiateRefund(ctx context.Context, tenantID shared.TenantID, adminID int64, req appPayment.InitiateRefundRequest) (*appPayment.InitiateRefundResponse, error) {
+func (m *mockPaymentService) InitiateRefund(ctx context.Context, adminID int64, req appPayment.InitiateRefundRequest) (*appPayment.InitiateRefundResponse, error) {
 	return nil, nil
 }
 

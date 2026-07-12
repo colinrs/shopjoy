@@ -58,11 +58,11 @@ func (t *Theme) TableName() string {
 }
 
 type ThemeConfig struct {
-	Colors     map[string]string      `json:"colors"`
-	Fonts      map[string]string      `json:"fonts"`
-	Layout     string                 `json:"layout"`
-	CustomCSS  string                 `json:"custom_css"`
-	Components map[string]interface{} `json:"components"`
+	Colors     map[string]string `json:"colors"`
+	Fonts      map[string]string `json:"fonts"`
+	Layout     string            `json:"layout"`
+	CustomCSS  string            `json:"custom_css"`
+	Components map[string]any    `json:"components"`
 }
 
 type ThemeConfigSchema struct {
@@ -127,7 +127,7 @@ func (d *Decoration) TableName() string {
 }
 
 // BlockConfig represents the configuration of a decoration block
-type BlockConfig map[string]interface{}
+type BlockConfig map[string]any
 
 // PageVersion represents a snapshot of page decoration at a point in time
 type PageVersion struct {
@@ -145,9 +145,9 @@ func (v *PageVersion) TableName() string {
 
 // BlockSnapshot represents a snapshot of a decoration block for versioning
 type BlockSnapshot struct {
-	BlockType   string                 `json:"block_type"`
-	BlockConfig map[string]interface{} `json:"block_config"`
-	SortOrder   int                    `json:"sort_order"`
+	BlockType   string         `json:"block_type"`
+	BlockConfig map[string]any `json:"block_config"`
+	SortOrder   int            `json:"sort_order"`
 }
 
 // SEOConfigEntity represents SEO configuration for a page type
@@ -235,57 +235,57 @@ type ShopRepository interface {
 type ThemeRepository interface {
 	Create(ctx context.Context, db *gorm.DB, theme *Theme) error
 	Update(ctx context.Context, db *gorm.DB, theme *Theme) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Theme, error)
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Theme, error)
 	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Theme, error)
 	FindActive(ctx context.Context, db *gorm.DB) (*Theme, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Theme, error)
 	FindPresets(ctx context.Context, db *gorm.DB) ([]*Theme, error)
-	SetActive(ctx context.Context, db *gorm.DB,  id int64) error
+	SetActive(ctx context.Context, db *gorm.DB, id int64) error
 }
 
 type PageRepository interface {
 	Create(ctx context.Context, db *gorm.DB, page *Page) error
 	Update(ctx context.Context, db *gorm.DB, page *Page) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Page, error)
-	FindBySlug(ctx context.Context, db *gorm.DB,  slug string) (*Page, error)
-	FindByType(ctx context.Context, db *gorm.DB,  pageType PageType) (*Page, error)
-	FindAll(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*Page, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Page, error)
+	FindBySlug(ctx context.Context, db *gorm.DB, slug string) (*Page, error)
+	FindByType(ctx context.Context, db *gorm.DB, pageType PageType) (*Page, error)
+	FindAll(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*Page, int64, error)
 	CountAll(ctx context.Context, db *gorm.DB) (int64, error)
 }
 
 type DecorationRepository interface {
 	Create(ctx context.Context, db *gorm.DB, d *Decoration) error
 	Update(ctx context.Context, db *gorm.DB, d *Decoration) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Decoration, error)
-	FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64) ([]*Decoration, error)
-	Reorder(ctx context.Context, db *gorm.DB,  orders []BlockOrder) error
-	DeleteByPageID(ctx context.Context, db *gorm.DB,  pageID int64) error
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Decoration, error)
+	FindByPageID(ctx context.Context, db *gorm.DB, pageID int64) ([]*Decoration, error)
+	Reorder(ctx context.Context, db *gorm.DB, orders []BlockOrder) error
+	DeleteByPageID(ctx context.Context, db *gorm.DB, pageID int64) error
 }
 
 type PageVersionRepository interface {
 	Create(ctx context.Context, db *gorm.DB, v *PageVersion) error
-	FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64, page, pageSize int) ([]*PageVersion, int64, error)
-	FindByVersion(ctx context.Context, db *gorm.DB,  pageID int64, version int) (*PageVersion, error)
-	DeleteOldest(ctx context.Context, db *gorm.DB,  pageID int64, keepCount int) error
-	CountByPageID(ctx context.Context, db *gorm.DB,  pageID int64) (int64, error)
+	FindByPageID(ctx context.Context, db *gorm.DB, pageID int64, page, pageSize int) ([]*PageVersion, int64, error)
+	FindByVersion(ctx context.Context, db *gorm.DB, pageID int64, version int) (*PageVersion, error)
+	DeleteOldest(ctx context.Context, db *gorm.DB, pageID int64, keepCount int) error
+	CountByPageID(ctx context.Context, db *gorm.DB, pageID int64) (int64, error)
 }
 
 type SEOConfigRepository interface {
 	Save(ctx context.Context, db *gorm.DB, config *SEOConfigEntity) error
-	FindByPageType(ctx context.Context, db *gorm.DB,  pageType string, pageID *int64) (*SEOConfigEntity, error)
-	FindAll(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*SEOConfigEntity, int64, error)
-	Delete(ctx context.Context, db *gorm.DB,  pageType string, pageID *int64) error
+	FindByPageType(ctx context.Context, db *gorm.DB, pageType string, pageID *int64) (*SEOConfigEntity, error)
+	FindAll(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*SEOConfigEntity, int64, error)
+	Delete(ctx context.Context, db *gorm.DB, pageType string, pageID *int64) error
 	CountAll(ctx context.Context, db *gorm.DB) (int64, error)
 }
 
 type ThemeAuditLogRepository interface {
 	Create(ctx context.Context, db *gorm.DB, log *ThemeAuditLog) error
-	FindByTenantID(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*ThemeAuditLog, int64, error)
+	FindByTenantID(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*ThemeAuditLog, int64, error)
 }
 
 type NavigationRepository interface {
 	Save(ctx context.Context, db *gorm.DB, nav *Navigation) error
-	FindByPosition(ctx context.Context, db *gorm.DB,  position string) (*Navigation, error)
+	FindByPosition(ctx context.Context, db *gorm.DB, position string) (*Navigation, error)
 }

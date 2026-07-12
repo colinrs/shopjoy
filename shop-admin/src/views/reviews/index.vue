@@ -182,7 +182,7 @@
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            :range-separator="$t('reviews.startDate')"
+            :range-separator="$t('common.to')"
             :start-placeholder="$t('reviews.startDate')"
             :end-placeholder="$t('reviews.endDate')"
             class="date-picker"
@@ -250,7 +250,7 @@
         </el-table-column>
         <el-table-column
           :label="$t('reviews.reviewer')"
-          min-width="120"
+          min-width="180"
         >
           <template #default="{ row }">
             <div class="reviewer-cell">
@@ -427,62 +427,64 @@
         </el-table-column>
         <el-table-column
           :label="$t('common.actions')"
-          width="200"
+          width="280"
           fixed="right"
         >
           <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click="handleViewDetail(row)"
-            >
-              {{ $t('reviews.detail') }}
-            </el-button>
-            <el-button
-              v-if="row.status === 'pending'"
-              type="success"
-              link
-              size="small"
-              @click="handleApprove(row)"
-            >
-              {{ $t('reviews.approve') }}
-            </el-button>
-            <el-button
-              v-if="row.status === 'approved'"
-              type="warning"
-              link
-              size="small"
-              @click="handleHide(row)"
-            >
-              {{ $t('reviews.hide') }}
-            </el-button>
-            <el-button
-              v-if="row.status === 'hidden'"
-              type="success"
-              link
-              size="small"
-              @click="handleShow(row)"
-            >
-              {{ $t('reviews.show') }}
-            </el-button>
-            <el-button
-              v-if="row.status === 'approved'"
-              :type="row.is_featured ? 'warning' : 'primary'"
-              link
-              size="small"
-              @click="handleToggleFeatured(row)"
-            >
-              {{ row.is_featured ? $t('reviews.unfeature') : $t('reviews.feature') }}
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click="handleReply(row)"
-            >
-              {{ $t('reviews.reply') }}
-            </el-button>
+            <div class="action-buttons">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click="handleViewDetail(row)"
+              >
+                {{ $t('reviews.detail') }}
+              </el-button>
+              <el-button
+                v-if="row.status === 'pending'"
+                type="success"
+                link
+                size="small"
+                @click="handleApprove(row)"
+              >
+                {{ $t('reviews.approve') }}
+              </el-button>
+              <el-button
+                v-if="row.status === 'approved'"
+                type="warning"
+                link
+                size="small"
+                @click="handleHide(row)"
+              >
+                {{ $t('reviews.hide') }}
+              </el-button>
+              <el-button
+                v-if="row.status === 'hidden'"
+                type="success"
+                link
+                size="small"
+                @click="handleShow(row)"
+              >
+                {{ $t('reviews.show') }}
+              </el-button>
+              <el-button
+                v-if="row.status === 'approved'"
+                :type="row.is_featured ? 'warning' : 'primary'"
+                link
+                size="small"
+                @click="handleToggleFeatured(row)"
+              >
+                {{ row.is_featured ? $t('reviews.unfeature') : $t('reviews.feature') }}
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click="handleReply(row)"
+              >
+                {{ $t('reviews.reply') }}
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -1561,6 +1563,17 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.action-buttons .el-button {
+  padding: 2px 4px;
 }
 
 /* Rating Cell */

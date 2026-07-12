@@ -14,18 +14,18 @@ import (
 func TestCreateBrandHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid request with name only",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Apple",
 			},
 		},
 		{
 			name: "valid request with all fields",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":              "Apple",
 				"logo":              "https://example.com/apple-logo.png",
 				"description":       "Apple Inc.",
@@ -38,12 +38,12 @@ func TestCreateBrandHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name:           "missing name",
-			requestBody:    map[string]interface{}{},
+			requestBody:    map[string]any{},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name: "empty name",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -66,13 +66,13 @@ func TestUpdateBrandHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
 		path           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid update request",
 			path: "/api/v1/brands/123",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":        "Updated Apple",
 				"description": "Updated description",
 			},
@@ -80,7 +80,7 @@ func TestUpdateBrandHandler_RequestValidation(t *testing.T) {
 		{
 			name:           "invalid brand ID",
 			path:           "/api/v1/brands/0",
-			requestBody:    map[string]interface{}{"name": "Test"},
+			requestBody:    map[string]any{"name": "Test"},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -165,24 +165,24 @@ func TestListBrandsHandler_QueryParams(t *testing.T) {
 func TestUpdateBrandStatusHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "enable brand",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 1,
 			},
 		},
 		{
 			name: "disable brand",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 0,
 			},
 		},
 		{
 			name:           "invalid status",
-			requestBody:    map[string]interface{}{"status": 2},
+			requestBody:    map[string]any{"status": 2},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -202,18 +202,18 @@ func TestUpdateBrandStatusHandler_RequestValidation(t *testing.T) {
 func TestToggleBrandPageHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "enable page",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"enabled": true,
 			},
 		},
 		{
 			name: "disable page",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"enabled": false,
 			},
 		},
@@ -261,26 +261,26 @@ func TestDeleteBrandHandler(t *testing.T) {
 func TestSetBrandMarketVisibilityHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "set visible",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"market_ids": []int64{1, 2, 3},
 				"visible":    true,
 			},
 		},
 		{
 			name: "set invisible",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"market_ids": []int64{1, 2, 3},
 				"visible":    false,
 			},
 		},
 		{
 			name:           "empty market_ids",
-			requestBody:    map[string]interface{}{"market_ids": []int64{}, "visible": true},
+			requestBody:    map[string]any{"market_ids": []int64{}, "visible": true},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}

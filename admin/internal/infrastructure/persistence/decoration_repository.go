@@ -80,25 +80,26 @@ func (r *decorationRepo) Create(ctx context.Context, db *gorm.DB, d *storefront.
 func (r *decorationRepo) Update(ctx context.Context, db *gorm.DB, d *storefront.Decoration) error {
 	model := fromDecorationEntity(d)
 	config, _ := json.Marshal(d.BlockConfig)
+	now := time.Now().UTC()
 
 	return db.WithContext(ctx).Model(&decorationModel{}).
 		Where("id = ?", d.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"block_type":   model.BlockType,
 			"block_config": string(config),
 			"sort_order":   model.SortOrder,
 			"is_active":    model.IsActive,
-			"updated_at":   model.UpdatedAt,
+			"updated_at":   now,
 		}).Error
 }
 
-func (r *decorationRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *decorationRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	return db.WithContext(ctx).
 		Where("id = ?", id).
 		Delete(&decorationModel{}).Error
 }
 
-func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Decoration, error) {
+func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*storefront.Decoration, error) {
 	var model decorationModel
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -112,7 +113,7 @@ func (r *decorationRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (
 	return model.toEntity(), nil
 }
 
-func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID int64) ([]*storefront.Decoration, error) {
+func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB, pageID int64) ([]*storefront.Decoration, error) {
 	var models []decorationModel
 	err := db.WithContext(ctx).
 		Where("page_id = ? AND is_active = 1", pageID).
@@ -129,7 +130,7 @@ func (r *decorationRepo) FindByPageID(ctx context.Context, db *gorm.DB,  pageID 
 	return decorations, nil
 }
 
-func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB,  orders []storefront.BlockOrder) error {
+func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB, orders []storefront.BlockOrder) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, order := range orders {
 			if err := tx.Model(&decorationModel{}).
@@ -142,7 +143,7 @@ func (r *decorationRepo) Reorder(ctx context.Context, db *gorm.DB,  orders []sto
 	})
 }
 
-func (r *decorationRepo) DeleteByPageID(ctx context.Context, db *gorm.DB,  pageID int64) error {
+func (r *decorationRepo) DeleteByPageID(ctx context.Context, db *gorm.DB, pageID int64) error {
 	return db.WithContext(ctx).
 		Where("page_id = ?", pageID).
 		Delete(&decorationModel{}).Error

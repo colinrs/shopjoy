@@ -46,19 +46,19 @@ func GenerateTestToken(cfg TestJWTConfig) string {
 func TestAdminLoginHandler_Validation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 		expectedMsg    string
 	}{
 		{
 			name:           "missing account and password",
-			requestBody:    map[string]interface{}{},
+			requestBody:    map[string]any{},
 			expectedStatus: http.StatusBadRequest,
 			expectedMsg:    "",
 		},
 		{
 			name: "missing password",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"account": "admin@test.com",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -66,7 +66,7 @@ func TestAdminLoginHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "missing account",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"password": "password123",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -74,7 +74,7 @@ func TestAdminLoginHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "empty account",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"account":  "",
 				"password": "password123",
 			},
@@ -83,7 +83,7 @@ func TestAdminLoginHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "empty password",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"account":  "admin@test.com",
 				"password": "",
 			},
@@ -154,17 +154,17 @@ func TestAdminLoginHandler_ResponseFormat(t *testing.T) {
 func TestRegisterTenantAdminHandler_Validation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name:           "missing email and password",
-			requestBody:    map[string]interface{}{},
+			requestBody:    map[string]any{},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name: "missing password",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"email":    "admin@test.com",
 				"realName": "Test Admin",
 			},
@@ -172,7 +172,7 @@ func TestRegisterTenantAdminHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "invalid email format",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"email":    "invalid-email",
 				"password": "password123",
 				"realName": "Test Admin",
@@ -181,7 +181,7 @@ func TestRegisterTenantAdminHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "password too short",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"email":    "admin@test.com",
 				"password": "12345", // min 6 chars
 				"realName": "Test Admin",
@@ -190,7 +190,7 @@ func TestRegisterTenantAdminHandler_Validation(t *testing.T) {
 		},
 		{
 			name: "missing realName",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"email":    "admin@test.com",
 				"password": "password123",
 			},
@@ -298,7 +298,7 @@ func TestAuthIntegration_LoginRequestParsing(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Parse the request JSON
-			var req map[string]interface{}
+			var req map[string]any
 			err := json.Unmarshal([]byte(tt.body), &req)
 
 			if tt.wantErr {
@@ -370,7 +370,7 @@ func TestAuthIntegration_RegisterRequestParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var req map[string]interface{}
+			var req map[string]any
 			err := json.Unmarshal([]byte(tt.body), &req)
 			assert.NoError(t, err)
 
@@ -409,7 +409,7 @@ func TestAuthResponseTypes(t *testing.T) {
 	})
 
 	t.Run("user info structure", func(t *testing.T) {
-		userInfo := map[string]interface{}{
+		userInfo := map[string]any{
 			"id":          float64(1),
 			"tenant_id":   float64(1),
 			"username":    "admin",
@@ -449,7 +449,7 @@ func BenchmarkLoginRequestParsing(b *testing.B) {
 	body := `{"account":"admin@test.com","password":"password123"}`
 
 	for i := 0; i < b.N; i++ {
-		var req map[string]interface{}
+		var req map[string]any
 		json.Unmarshal([]byte(body), &req)
 	}
 }
@@ -458,7 +458,7 @@ func BenchmarkRegisterRequestParsing(b *testing.B) {
 	body := `{"email":"admin@test.com","password":"password123","realName":"Test Admin"}`
 
 	for i := 0; i < b.N; i++ {
-		var req map[string]interface{}
+		var req map[string]any
 		json.Unmarshal([]byte(body), &req)
 	}
 }

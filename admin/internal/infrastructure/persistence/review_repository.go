@@ -103,18 +103,19 @@ func (r *reviewRepo) Create(ctx context.Context, db *gorm.DB, rev *review.Review
 
 func (r *reviewRepo) Update(ctx context.Context, db *gorm.DB, rev *review.Review) error {
 	model := fromReviewEntity(rev)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&reviewModel{}).
 		Where("id = ? AND deleted_at IS NULL", rev.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"status":        model.Status,
 			"is_featured":   model.IsFeatured,
 			"helpful_count": model.HelpfulCount,
-			"updated_at":    model.UpdatedAt,
+			"updated_at":    now,
 		}).Error
 }
 
-func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&reviewModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
@@ -128,7 +129,7 @@ func (r *reviewRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	return nil
 }
 
-func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*review.Review, error) {
+func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*review.Review, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	var model reviewModel
 	err := query.First(&model, id).Error
@@ -141,7 +142,7 @@ func (r *reviewRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*rev
 	return model.toEntity(), nil
 }
 
-func (r *reviewRepo) FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*review.Review, error) {
+func (r *reviewRepo) FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*review.Review, error) {
 	if len(ids) == 0 {
 		return []*review.Review{}, nil
 	}
@@ -215,7 +216,7 @@ func (r *reviewRepo) FindList(ctx context.Context, db *gorm.DB, query review.Que
 	return reviews, total, nil
 }
 
-func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []int64, status review.Status, reason string) (int64, error) {
+func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB, ids []int64, status review.Status, reason string) (int64, error) {
 	if len(ids) == 0 {
 		return 0, nil
 	}
@@ -223,7 +224,6 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []
 	query := db.WithContext(ctx).Model(&reviewModel{}).
 		Where("id IN ?", ids).
 		Where("deleted_at IS NULL")
-
 
 	// Filter by valid status transitions
 	switch status {
@@ -234,14 +234,14 @@ func (r *reviewRepo) BatchUpdateStatus(ctx context.Context, db *gorm.DB,  ids []
 	}
 
 	now := time.Now().UTC()
-	result := query.Updates(map[string]interface{}{
+	result := query.Updates(map[string]any{
 		"status":     int(status),
 		"updated_at": now,
 	})
 	return result.RowsAffected, result.Error
 }
 
-func (r *reviewRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*review.Review, error) {
+func (r *reviewRepo) FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*review.Review, error) {
 	dbQuery := db.WithContext(ctx).Model(&reviewModel{}).Where("deleted_at IS NULL")
 
 	dbQuery = dbQuery.Where("product_id = ?", productID)

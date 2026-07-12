@@ -14,18 +14,18 @@ import (
 func TestCreateCategoryHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid request with name only",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Electronics",
 			},
 		},
 		{
 			name: "valid request with all fields",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":            "Electronics",
 				"parent_id":       0,
 				"code":            "ELEC",
@@ -38,19 +38,19 @@ func TestCreateCategoryHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name: "valid request with parent",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":      "Smartphones",
 				"parent_id": 1,
 			},
 		},
 		{
 			name:           "missing name",
-			requestBody:    map[string]interface{}{},
+			requestBody:    map[string]any{},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name: "empty name",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -73,13 +73,13 @@ func TestUpdateCategoryHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
 		path           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid update request",
 			path: "/api/v1/categories/123",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Updated Electronics",
 				"code": "ELEC-UPD",
 				"sort": 2,
@@ -88,7 +88,7 @@ func TestUpdateCategoryHandler_RequestValidation(t *testing.T) {
 		{
 			name:           "invalid ID",
 			path:           "/api/v1/categories/0",
-			requestBody:    map[string]interface{}{"name": "Test"},
+			requestBody:    map[string]any{"name": "Test"},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -173,24 +173,24 @@ func TestCategoryTreeHandler(t *testing.T) {
 func TestUpdateCategoryStatusHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "enable category",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 1,
 			},
 		},
 		{
 			name: "disable category",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 0,
 			},
 		},
 		{
 			name:           "invalid status",
-			requestBody:    map[string]interface{}{"status": 2},
+			requestBody:    map[string]any{"status": 2},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -210,13 +210,13 @@ func TestUpdateCategoryStatusHandler_RequestValidation(t *testing.T) {
 func TestUpdateCategorySortHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid sort update",
-			requestBody: map[string]interface{}{
-				"sorts": []map[string]interface{}{
+			requestBody: map[string]any{
+				"sorts": []map[string]any{
 					{"id": 1, "sort": 1},
 					{"id": 2, "sort": 2},
 					{"id": 3, "sort": 3},
@@ -225,7 +225,7 @@ func TestUpdateCategorySortHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name:           "empty sorts",
-			requestBody:    map[string]interface{}{"sorts": []map[string]interface{}{}},
+			requestBody:    map[string]any{"sorts": []map[string]any{}},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -245,18 +245,18 @@ func TestUpdateCategorySortHandler_RequestValidation(t *testing.T) {
 func TestMoveCategoryHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "move to root",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"new_parent_id": 0,
 			},
 		},
 		{
 			name: "move to subcategory",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"new_parent_id": 5,
 			},
 		},
@@ -277,26 +277,26 @@ func TestMoveCategoryHandler_RequestValidation(t *testing.T) {
 func TestSetCategoryMarketVisibilityHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "set visible",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"market_ids": []int64{1, 2, 3},
 				"visible":    true,
 			},
 		},
 		{
 			name: "set invisible",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"market_ids": []int64{1, 2, 3},
 				"visible":    false,
 			},
 		},
 		{
 			name:           "empty market_ids",
-			requestBody:    map[string]interface{}{"market_ids": []int64{}, "visible": true},
+			requestBody:    map[string]any{"market_ids": []int64{}, "visible": true},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}

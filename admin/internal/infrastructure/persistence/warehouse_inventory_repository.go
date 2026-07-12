@@ -63,12 +63,13 @@ func (r *warehouseInventoryRepo) Create(ctx context.Context, db *gorm.DB, wi *pr
 
 func (r *warehouseInventoryRepo) Update(ctx context.Context, db *gorm.DB, wi *product.WarehouseInventory) error {
 	model := fromWarehouseInventoryEntity(wi)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&warehouseInventoryModel{}).
 		Where("id = ?", wi.Model.ID).
 		Updates(map[string]any{
 			"available_stock": model.AvailableStock,
 			"locked_stock":    model.LockedStock,
-			"updated_at":      model.UpdatedAt,
+			"updated_at":      now,
 		}).Error
 }
 

@@ -63,7 +63,7 @@ func (h *DashboardHelper) GetOverview() (*types.DashboardOverviewResponse, error
 	}
 
 	// Get yesterday's GMV for comparison
-	yesterdayGMV, err := h.getYesterdayGMV( yesterdayStart, yesterdayEnd)
+	yesterdayGMV, err := h.getYesterdayGMV(yesterdayStart, yesterdayEnd)
 	if err != nil {
 		h.Logger.Errorf("failed to get yesterday GMV: %v", err)
 		yesterdayGMV = decimal.Zero
@@ -93,7 +93,7 @@ func (h *DashboardHelper) GetOverview() (*types.DashboardOverviewResponse, error
 	}
 
 	// Get new users today
-	newUsersToday, err := h.getNewUsersToday( todayStart)
+	newUsersToday, err := h.getNewUsersToday(todayStart)
 	if err != nil {
 		h.Logger.Errorf("failed to get new users today: %v", err)
 		newUsersToday = 0
@@ -112,7 +112,7 @@ func (h *DashboardHelper) GetOverview() (*types.DashboardOverviewResponse, error
 }
 
 // GetSalesTrend retrieves sales trend data
-func (h *DashboardHelper) GetSalesTrend( period string) (*types.SalesTrendResponse, error) {
+func (h *DashboardHelper) GetSalesTrend(period string) (*types.SalesTrendResponse, error) {
 	var days int
 	switch period {
 	case "week":
@@ -125,7 +125,7 @@ func (h *DashboardHelper) GetSalesTrend( period string) (*types.SalesTrendRespon
 		days = 7
 	}
 
-	data, err := h.getSalesTrendData( days)
+	data, err := h.getSalesTrendData(days)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +182,7 @@ func (h *DashboardHelper) GetOrderStatusDistribution() (*types.OrderStatusDistri
 }
 
 // GetTopProducts returns top selling products
-func (h *DashboardHelper) GetTopProducts( limit int, period string) (*types.TopProductsResponse, error) {
+func (h *DashboardHelper) GetTopProducts(limit int, period string) (*types.TopProductsResponse, error) {
 	var daysAgo time.Time
 	switch period {
 	case "week":
@@ -218,7 +218,7 @@ func (h *DashboardHelper) GetTopProducts( limit int, period string) (*types.TopP
 }
 
 // GetPendingOrders returns recent pending payment orders
-func (h *DashboardHelper) GetPendingOrders( limit int) (*types.PendingOrdersResponse, error) {
+func (h *DashboardHelper) GetPendingOrders(limit int) (*types.PendingOrdersResponse, error) {
 	orders, err := h.svcCtx.OrderRepo.FindPendingOrders(h.ctx, h.svcCtx.DB, limit)
 	if err != nil {
 		return nil, err
@@ -248,7 +248,7 @@ func (h *DashboardHelper) GetPendingOrders( limit int) (*types.PendingOrdersResp
 }
 
 // GetRecentActivities returns recent system activities
-func (h *DashboardHelper) GetRecentActivities( limit int) (*types.RecentActivitiesResponse, error) {
+func (h *DashboardHelper) GetRecentActivities(limit int) (*types.RecentActivitiesResponse, error) {
 	activities := make([]*types.ActivityItem, 0, limit)
 
 	// Get recent orders
@@ -293,7 +293,7 @@ func (h *DashboardHelper) GetRecentActivities( limit int) (*types.RecentActiviti
 
 // Helper methods
 
-func (h *DashboardHelper) getYesterdayGMV( start, end time.Time) (decimal.Decimal, error) {
+func (h *DashboardHelper) getYesterdayGMV(start, end time.Time) (decimal.Decimal, error) {
 	statuses := []fulfillment.OrderStatus{
 		fulfillment.OrderStatusPaid,
 		fulfillment.OrderStatusShipped,
@@ -314,7 +314,7 @@ func (h *DashboardHelper) getTotalUsers() (int64, error) {
 	return stats.Total, nil
 }
 
-func (h *DashboardHelper) getNewUsersToday( todayStart time.Time) (int64, error) {
+func (h *DashboardHelper) getNewUsersToday(todayStart time.Time) (int64, error) {
 	stats, err := h.svcCtx.UserService.GetStats(h.ctx)
 	if err != nil {
 		return 0, err
@@ -322,14 +322,14 @@ func (h *DashboardHelper) getNewUsersToday( todayStart time.Time) (int64, error)
 	return stats.NewToday, nil
 }
 
-func (h *DashboardHelper) getSalesTrendData( days int) ([]*types.SalesTrendData, error) {
+func (h *DashboardHelper) getSalesTrendData(days int) ([]*types.SalesTrendData, error) {
 	now := time.Now().UTC()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := todayStart.Add(24 * time.Hour)
 
 	// Generate date range
 	dates := make([]time.Time, days)
-	for i := 0; i < days; i++ {
+	for i := range days {
 		dates[days-1-i] = todayStart.AddDate(0, 0, -i)
 	}
 

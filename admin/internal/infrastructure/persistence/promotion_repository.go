@@ -169,10 +169,11 @@ func (r *promotionRepo) Create(ctx context.Context, db *gorm.DB, p *promotion.Pr
 // Update updates an existing promotion
 func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Promotion) error {
 	model := fromPromotionEntity(p)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&promotionModel{}).
 		Where("id = ? AND deleted_at IS NULL", p.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":        model.Name,
 			"description": model.Description,
 			"type":        model.Type,
@@ -185,12 +186,12 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 			"exclude_ids": model.ExcludeIDs,
 			"currency":    model.Currency,
 			"updated_by":  model.UpdatedBy,
-			"updated_at":  model.UpdatedAt,
+			"updated_at":  now,
 		}).Error
 }
 
 // Delete soft deletes a promotion
-func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&promotionModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
 	now := time.Now().UTC()
@@ -206,7 +207,7 @@ func (r *promotionRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) erro
 }
 
 // FindByID finds a promotion by ID
-func (r *promotionRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.Promotion, error) {
+func (r *promotionRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*promotion.Promotion, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	var model promotionModel
@@ -244,7 +245,7 @@ func (r *promotionRepo) FindActive(ctx context.Context, db *gorm.DB) ([]*promoti
 }
 
 // FindActiveByCurrency finds all active promotions for a tenant filtered by currency
-func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB,  currency string) ([]*promotion.Promotion, error) {
+func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB, currency string) ([]*promotion.Promotion, error) {
 	query := db.WithContext(ctx).Model(&promotionModel{}).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 
@@ -268,7 +269,7 @@ func (r *promotionRepo) FindActiveByCurrency(ctx context.Context, db *gorm.DB,  
 }
 
 // FindList finds promotions with pagination and filters
-func (r *promotionRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion.Query) ([]*promotion.Promotion, int64, error) {
+func (r *promotionRepo) FindList(ctx context.Context, db *gorm.DB, query promotion.Query) ([]*promotion.Promotion, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&promotionModel{}).Where("deleted_at IS NULL")
@@ -362,10 +363,11 @@ func (r *promotionRepo) FindRulesByPromotionIDs(ctx context.Context, db *gorm.DB
 // UpdateRule updates a promotion rule
 func (r *promotionRepo) UpdateRule(ctx context.Context, db *gorm.DB, rule *promotion.PromotionRule) error {
 	model := fromPromotionRuleEntity(rule)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&promotionRuleModel{}).
 		Where("id = ?", rule.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"condition_type":  model.ConditionType,
 			"condition_value": model.ConditionValue,
 			"action_type":     model.ActionType,
@@ -373,7 +375,7 @@ func (r *promotionRepo) UpdateRule(ctx context.Context, db *gorm.DB, rule *promo
 			"max_discount":    model.MaxDiscount,
 			"currency":        model.Currency,
 			"sort_order":      model.SortOrder,
-			"updated_at":      model.UpdatedAt,
+			"updated_at":      now,
 		}).Error
 }
 

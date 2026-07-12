@@ -116,6 +116,7 @@ func (r *refundRepo) Create(ctx context.Context, db *gorm.DB, refund *fulfillmen
 // Update updates an existing refund
 func (r *refundRepo) Update(ctx context.Context, db *gorm.DB, refund *fulfillment.Refund) error {
 	model := fromRefundEntity(refund)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&refundModel{}).
 		Where("id = ? AND deleted_at IS NULL", refund.ID).
@@ -125,7 +126,7 @@ func (r *refundRepo) Update(ctx context.Context, db *gorm.DB, refund *fulfillmen
 			"approved_at":   model.ApprovedAt,
 			"approved_by":   model.ApprovedBy,
 			"completed_at":  model.CompletedAt,
-			"updated_at":    model.UpdatedAt,
+			"updated_at":    now,
 		}).Error
 }
 

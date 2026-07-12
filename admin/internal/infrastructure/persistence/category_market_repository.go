@@ -60,13 +60,13 @@ func (r *categoryMarketRepo) Create(ctx context.Context, db *gorm.DB, cm *produc
 func (r *categoryMarketRepo) Update(ctx context.Context, db *gorm.DB, cm *product.CategoryMarket) error {
 	return db.WithContext(ctx).Model(&categoryMarketModel{}).
 		Where("id = ?", cm.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"is_visible": cm.IsVisible,
 			"updated_at": time.Now().UTC(),
 		}).Error
 }
 
-func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) ([]*product.CategoryMarket, error) {
+func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB, categoryID int64) ([]*product.CategoryMarket, error) {
 	var models []categoryMarketModel
 	err := db.WithContext(ctx).
 		Where("category_id = ?", categoryID).
@@ -81,7 +81,7 @@ func (r *categoryMarketRepo) FindByCategory(ctx context.Context, db *gorm.DB,  c
 	return result, nil
 }
 
-func (r *categoryMarketRepo) DeleteByCategory(ctx context.Context, db *gorm.DB,  categoryID int64) error {
+func (r *categoryMarketRepo) DeleteByCategory(ctx context.Context, db *gorm.DB, categoryID int64) error {
 	return db.WithContext(ctx).
 		Where("category_id = ?", categoryID).
 		Delete(&categoryMarketModel{}).Error

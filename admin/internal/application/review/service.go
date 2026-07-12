@@ -13,20 +13,20 @@ import (
 )
 
 type Service interface {
-	ListReviews(ctx context.Context,  req ListReviewsRequest) (*ListReviewsResponse, error)
-	GetReview(ctx context.Context,  id int64) (*ReviewDetailDTO, error)
-	ApproveReview(ctx context.Context,  id int64) error
-	HideReview(ctx context.Context,  id int64, reason string) error
-	ShowReview(ctx context.Context,  id int64) error
-	DeleteReview(ctx context.Context,  id int64) error
-	ToggleFeatured(ctx context.Context,  id int64, featured bool) error
-	CreateReply(ctx context.Context,  adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error)
-	UpdateReply(ctx context.Context,  reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error)
-	DeleteReply(ctx context.Context,  reviewID int64) error
-	BatchApprove(ctx context.Context,  ids []int64) (*BatchOperationResult, error)
-	BatchHide(ctx context.Context,  ids []int64, reason string) (*BatchOperationResult, error)
+	ListReviews(ctx context.Context, req ListReviewsRequest) (*ListReviewsResponse, error)
+	GetReview(ctx context.Context, id int64) (*ReviewDetailDTO, error)
+	ApproveReview(ctx context.Context, id int64) error
+	HideReview(ctx context.Context, id int64, reason string) error
+	ShowReview(ctx context.Context, id int64) error
+	DeleteReview(ctx context.Context, id int64) error
+	ToggleFeatured(ctx context.Context, id int64, featured bool) error
+	CreateReply(ctx context.Context, adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error)
+	UpdateReply(ctx context.Context, reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error)
+	DeleteReply(ctx context.Context, reviewID int64) error
+	BatchApprove(ctx context.Context, ids []int64) (*BatchOperationResult, error)
+	BatchHide(ctx context.Context, ids []int64, reason string) (*BatchOperationResult, error)
 	GetStats(ctx context.Context) (*domainReview.OverallStats, error)
-	GetProductStats(ctx context.Context,  productID int64) (*domainReview.ReviewStats, error)
+	GetProductStats(ctx context.Context, productID int64) (*domainReview.ReviewStats, error)
 }
 
 type service struct {
@@ -45,7 +45,7 @@ func NewService(db *gorm.DB, reviewRepo domainReview.Repository, replyRepo domai
 	}
 }
 
-func (s *service) ListReviews(ctx context.Context,  req ListReviewsRequest) (*ListReviewsResponse, error) {
+func (s *service) ListReviews(ctx context.Context, req ListReviewsRequest) (*ListReviewsResponse, error) {
 	query := domainReview.Query{
 		ProductID: req.ProductID,
 		UserID:    req.UserID,
@@ -124,8 +124,8 @@ func (s *service) ListReviews(ctx context.Context,  req ListReviewsRequest) (*Li
 	}, nil
 }
 
-func (s *service) GetReview(ctx context.Context,  id int64) (*ReviewDetailDTO, error) {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) GetReview(ctx context.Context, id int64) (*ReviewDetailDTO, error) {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -140,8 +140,8 @@ func (s *service) GetReview(ctx context.Context,  id int64) (*ReviewDetailDTO, e
 	return FromDomainReview(rev), nil
 }
 
-func (s *service) ApproveReview(ctx context.Context,  id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) ApproveReview(ctx context.Context, id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -153,8 +153,8 @@ func (s *service) ApproveReview(ctx context.Context,  id int64) error {
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) HideReview(ctx context.Context,  id int64, reason string) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) HideReview(ctx context.Context, id int64, reason string) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -166,8 +166,8 @@ func (s *service) HideReview(ctx context.Context,  id int64, reason string) erro
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) ShowReview(ctx context.Context,  id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) ShowReview(ctx context.Context, id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -179,8 +179,8 @@ func (s *service) ShowReview(ctx context.Context,  id int64) error {
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) DeleteReview(ctx context.Context,  id int64) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) DeleteReview(ctx context.Context, id int64) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -189,11 +189,11 @@ func (s *service) DeleteReview(ctx context.Context,  id int64) error {
 		return err
 	}
 
-	return s.reviewRepo.Delete(ctx, s.db,  int64(rev.ID))
+	return s.reviewRepo.Delete(ctx, s.db, int64(rev.ID))
 }
 
-func (s *service) ToggleFeatured(ctx context.Context,  id int64, featured bool) error {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  id)
+func (s *service) ToggleFeatured(ctx context.Context, id int64, featured bool) error {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, id)
 	if err != nil {
 		return err
 	}
@@ -205,8 +205,8 @@ func (s *service) ToggleFeatured(ctx context.Context,  id int64, featured bool) 
 	return s.reviewRepo.Update(ctx, s.db, rev)
 }
 
-func (s *service) CreateReply(ctx context.Context,  adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error) {
-	rev, err := s.reviewRepo.FindByID(ctx, s.db,  reviewID)
+func (s *service) CreateReply(ctx context.Context, adminID int64, adminName string, reviewID int64, req CreateReplyRequest) (*ReplyDTO, error) {
+	rev, err := s.reviewRepo.FindByID(ctx, s.db, reviewID)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (s *service) CreateReply(ctx context.Context,  adminID int64, adminName str
 	}, nil
 }
 
-func (s *service) UpdateReply(ctx context.Context,  reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error) {
+func (s *service) UpdateReply(ctx context.Context, reviewID int64, req UpdateReplyRequest) (*ReplyDTO, error) {
 	reply, err := s.replyRepo.FindByReviewID(ctx, s.db, reviewID)
 	if err != nil {
 		return nil, err
@@ -265,11 +265,11 @@ func (s *service) UpdateReply(ctx context.Context,  reviewID int64, req UpdateRe
 	}, nil
 }
 
-func (s *service) DeleteReply(ctx context.Context,  reviewID int64) error {
+func (s *service) DeleteReply(ctx context.Context, reviewID int64) error {
 	return s.replyRepo.Delete(ctx, s.db, reviewID)
 }
 
-func (s *service) BatchApprove(ctx context.Context,  ids []int64) (*BatchOperationResult, error) {
+func (s *service) BatchApprove(ctx context.Context, ids []int64) (*BatchOperationResult, error) {
 	if len(ids) == 0 {
 		return nil, code.ErrReviewBatchEmpty
 	}
@@ -277,7 +277,7 @@ func (s *service) BatchApprove(ctx context.Context,  ids []int64) (*BatchOperati
 		return nil, code.ErrReviewBatchLimitExceeded
 	}
 
-	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db,  ids, domainReview.StatusApproved, "")
+	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db, ids, domainReview.StatusApproved, "")
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (s *service) BatchApprove(ctx context.Context,  ids []int64) (*BatchOperati
 	}, nil
 }
 
-func (s *service) BatchHide(ctx context.Context,  ids []int64, reason string) (*BatchOperationResult, error) {
+func (s *service) BatchHide(ctx context.Context, ids []int64, reason string) (*BatchOperationResult, error) {
 	if len(ids) == 0 {
 		return nil, code.ErrReviewBatchEmpty
 	}
@@ -297,7 +297,7 @@ func (s *service) BatchHide(ctx context.Context,  ids []int64, reason string) (*
 		return nil, code.ErrReviewBatchLimitExceeded
 	}
 
-	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db,  ids, domainReview.StatusHidden, reason)
+	count, err := s.reviewRepo.BatchUpdateStatus(ctx, s.db, ids, domainReview.StatusHidden, reason)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +332,7 @@ func (s *service) GetStats(ctx context.Context) (*domainReview.OverallStats, err
 
 	mainWhere := "deleted_at IS NULL"
 	subWhere := "r2.deleted_at IS NULL"
-	var args []interface{}
+	var args []any
 
 	query := fmt.Sprintf(`
 		SELECT
@@ -386,7 +386,7 @@ func (s *service) GetStats(ctx context.Context) (*domainReview.OverallStats, err
 	}, nil
 }
 
-func (s *service) GetProductStats(ctx context.Context,  productID int64) (*domainReview.ReviewStats, error) {
+func (s *service) GetProductStats(ctx context.Context, productID int64) (*domainReview.ReviewStats, error) {
 	// Implement product stats calculation
 	return &domainReview.ReviewStats{}, nil
 }

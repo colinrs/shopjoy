@@ -141,7 +141,7 @@ func fromOrderEntity(o *fulfillment.Order) *orderModel {
 }
 
 // FindByID 根据ID查询订单
-func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulfillment.Order, error) {
+func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*fulfillment.Order, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	var model orderModel
 	err := query.First(&model, id).Error
@@ -155,7 +155,7 @@ func (r *orderRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulf
 }
 
 // FindByOrderNo 根据订单号查询订单
-func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB,  orderNo string) (*fulfillment.Order, error) {
+func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB, orderNo string) (*fulfillment.Order, error) {
 	query := db.WithContext(ctx).Model(&orderModel{}).Where("order_no = ? AND deleted_at IS NULL", orderNo)
 	var model orderModel
 	err := query.First(&model).Error
@@ -169,11 +169,10 @@ func (r *orderRepo) FindByOrderNo(ctx context.Context, db *gorm.DB,  orderNo str
 }
 
 // FindList 分页查询订单列表
-func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillment.OrderQuery) ([]*fulfillment.Order, int64, error) {
+func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB, query fulfillment.OrderQuery) ([]*fulfillment.Order, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&orderModel{}).Where("deleted_at IS NULL")
-
 
 	if query.OrderNo != "" {
 		dbQuery = dbQuery.Where("order_no LIKE ?", escapeLikePattern(query.OrderNo))
@@ -221,12 +220,13 @@ func (r *orderRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillmen
 // UpdateWithVersion 带乐观锁的更新
 func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *fulfillment.Order) error {
 	model := fromOrderEntity(order)
+	now := time.Now().UTC()
 
 	// Use optimistic lock: update only if version matches
 	result := db.WithContext(ctx).Model(&orderModel{}).
 		Where("id = ? AND version = ? AND deleted_at IS NULL",
 			order.ID, order.Version).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"pay_amount":      model.PayAmount,
 			"adjust_amount":   model.AdjustAmount,
 			"adjust_reason":   model.AdjustReason,
@@ -235,7 +235,7 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 			"merchant_remark": model.MerchantRemark,
 			"version":         gorm.Expr("version + 1"),
 			"updated_by":      model.UpdatedBy,
-			"updated_at":      model.UpdatedAt,
+			"updated_at":      now,
 		})
 
 	if result.Error != nil {
@@ -253,7 +253,7 @@ func (r *orderRepo) UpdateWithVersion(ctx context.Context, db *gorm.DB, order *f
 }
 
 // UpdateRemark 更新商家备注
-func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB,  orderID int64, remark string) error {
+func (r *orderRepo) UpdateRemark(ctx context.Context, db *gorm.DB, orderID int64, remark string) error {
 	query := db.WithContext(ctx).Model(&orderModel{}).Where("id = ? AND deleted_at IS NULL", orderID)
 
 	result := query.Update("merchant_remark", remark)
@@ -304,11 +304,10 @@ func (r *orderRepo) SumTodayGMV(ctx context.Context, db *gorm.DB) (decimal.Decim
 }
 
 // FindForExport 导出订单（最多10000条）
-func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB,  query fulfillment.OrderQuery) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindForExport(ctx context.Context, db *gorm.DB, query fulfillment.OrderQuery) ([]*fulfillment.Order, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&orderModel{}).Where("deleted_at IS NULL")
-
 
 	if query.OrderNo != "" {
 		dbQuery = dbQuery.Where("order_no LIKE ?", escapeLikePattern(query.OrderNo))
@@ -401,7 +400,7 @@ func (r *orderRepo) CountByStatus(ctx context.Context, db *gorm.DB) ([]fulfillme
 }
 
 // FindPendingOrders 查询待付款订单
-func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindPendingOrders(ctx context.Context, db *gorm.DB, limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
 		Where("status = ? AND deleted_at IS NULL", string(fulfillment.OrderStatusPendingPayment)).
@@ -429,7 +428,7 @@ func (r *orderRepo) CountPendingOrders(ctx context.Context, db *gorm.DB) (int64,
 }
 
 // FindRecentOrders 查询最近创建的订单
-func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB, limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
 		Where("deleted_at IS NULL").
@@ -448,7 +447,7 @@ func (r *orderRepo) FindRecentOrders(ctx context.Context, db *gorm.DB,  limit in
 }
 
 // FindRecentPaidOrders 查询最近已支付的订单
-func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB,  limit int) ([]*fulfillment.Order, error) {
+func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB, limit int) ([]*fulfillment.Order, error) {
 	var models []orderModel
 	err := db.WithContext(ctx).Model(&orderModel{}).
 		Where("paid_at IS NOT NULL AND deleted_at IS NULL").
@@ -467,7 +466,7 @@ func (r *orderRepo) FindRecentPaidOrders(ctx context.Context, db *gorm.DB,  limi
 }
 
 // SumGMVByDateRange 按日期范围统计GMV
-func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB,  start, end time.Time, statuses []fulfillment.OrderStatus) (decimal.Decimal, error) {
+func (r *orderRepo) SumGMVByDateRange(ctx context.Context, db *gorm.DB, start, end time.Time, statuses []fulfillment.OrderStatus) (decimal.Decimal, error) {
 	statusStrings := make([]string, len(statuses))
 	for i, s := range statuses {
 		statusStrings[i] = string(s)
@@ -514,7 +513,7 @@ func (r *orderRepo) FindTopProducts(ctx context.Context, db *gorm.DB, startTime 
 }
 
 // FindSalesTrend 查询销售趋势
-func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB,  startDate, endDate time.Time) ([]*fulfillment.DailySalesTrend, error) {
+func (r *orderRepo) FindSalesTrend(ctx context.Context, db *gorm.DB, startDate, endDate time.Time) ([]*fulfillment.DailySalesTrend, error) {
 	statusStrings := []string{string(fulfillment.OrderStatusPaid), string(fulfillment.OrderStatusShipped), string(fulfillment.OrderStatusDelivered)}
 
 	var results []*fulfillment.DailySalesTrend

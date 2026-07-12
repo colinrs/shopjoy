@@ -92,9 +92,10 @@ func (r *categoryRepo) Create(ctx context.Context, db *gorm.DB, c *product.Categ
 
 func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Category) error {
 	model := fromCategoryEntity(c)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&categoryModel{}).
 		Where("id = ? AND deleted_at IS NULL", c.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":            model.Name,
 			"code":            model.Code,
 			"parent_id":       model.ParentID,
@@ -105,19 +106,19 @@ func (r *categoryRepo) Update(ctx context.Context, db *gorm.DB, c *product.Categ
 			"seo_title":       model.SeoTitle,
 			"seo_description": model.SeoDescription,
 			"status":          model.Status,
-			"updated_at":      model.UpdatedAt,
+			"updated_at":      now,
 			"updated_by":      model.UpdatedBy,
 		}).Error
 }
 
-func (r *categoryRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *categoryRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&categoryModel{}).
 		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Category, error) {
+func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.Category, error) {
 	var model categoryModel
 	err := db.WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).
@@ -131,7 +132,7 @@ func (r *categoryRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*p
 	return model.toEntity(), nil
 }
 
-func (r *categoryRepo) FindByParentID(ctx context.Context, db *gorm.DB,  parentID int64) ([]*product.Category, error) {
+func (r *categoryRepo) FindByParentID(ctx context.Context, db *gorm.DB, parentID int64) ([]*product.Category, error) {
 	var models []categoryModel
 	err := db.WithContext(ctx).
 		Where("parent_id = ? AND deleted_at IS NULL", parentID).
@@ -167,7 +168,7 @@ func (r *categoryRepo) FindTree(ctx context.Context, db *gorm.DB) ([]*product.Ca
 	return r.FindAll(ctx, db)
 }
 
-func (r *categoryRepo) FindByCode(ctx context.Context, db *gorm.DB,  code string) (*product.Category, error) {
+func (r *categoryRepo) FindByCode(ctx context.Context, db *gorm.DB, code string) (*product.Category, error) {
 	var model categoryModel
 	err := db.WithContext(ctx).
 		Where("code = ? AND deleted_at IS NULL", code).
@@ -189,7 +190,7 @@ func (r *categoryRepo) GetProductCount(ctx context.Context, db *gorm.DB, categor
 	return count, err
 }
 
-func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB,  sorts []product.CategorySort) error {
+func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB, sorts []product.CategorySort) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, s := range sorts {
 			if err := tx.Model(&categoryModel{}).
@@ -202,7 +203,7 @@ func (r *categoryRepo) UpdateSort(ctx context.Context, db *gorm.DB,  sorts []pro
 	})
 }
 
-func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB,  id int64, newParentID int64) error {
+func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB, id int64, newParentID int64) error {
 	// Get current category to calculate level delta
 	var current categoryModel
 	if err := db.WithContext(ctx).
@@ -231,7 +232,7 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB,  id int64, newPare
 		// Update the category itself
 		if err := tx.Model(&categoryModel{}).
 			Where("id = ?", id).
-			Updates(map[string]interface{}{
+			Updates(map[string]any{
 				"parent_id": newParentID,
 				"level":     newLevel,
 			}).Error; err != nil {
@@ -250,7 +251,7 @@ func (r *categoryRepo) Move(ctx context.Context, db *gorm.DB,  id int64, newPare
 }
 
 // updateDescendantLevels recursively updates levels of all descendants
-func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB,  parentID int64, levelDelta int) error {
+func (r *categoryRepo) updateDescendantLevels(tx *gorm.DB, parentID int64, levelDelta int) error {
 	// Get direct children
 	var children []categoryModel
 	if err := tx.Where("parent_id = ? AND deleted_at IS NULL", parentID).

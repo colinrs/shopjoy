@@ -149,10 +149,11 @@ func (r *productRepo) Create(ctx context.Context, db *gorm.DB, p *product.Produc
 
 func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Product) error {
 	model := fromEntity(p)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&productModel{}).
 		Where("id = ? AND deleted_at IS NULL", p.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"sku":               model.SKU,
 			"name":              model.Name,
 			"description":       model.Description,
@@ -174,11 +175,11 @@ func (r *productRepo) Update(ctx context.Context, db *gorm.DB, p *product.Produc
 			"width":             model.Width,
 			"height":            model.Height,
 			"dangerous_goods":   model.DangerousGoods,
-			"updated_at":        model.UpdatedAt,
+			"updated_at":        now,
 		}).Error
 }
 
-func (r *productRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *productRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&productModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// 平台管理员 (tenantID == 0) 可删除所有租户数据
 	now := time.Now().UTC()
@@ -193,7 +194,7 @@ func (r *productRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error 
 	return nil
 }
 
-func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Product, error) {
+func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.Product, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// 平台管理员 (tenantID == 0) 可访问所有租户数据
 	var model productModel
@@ -207,7 +208,7 @@ func (r *productRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*pr
 	return model.toEntity(), nil
 }
 
-func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*product.Product, error) {
+func (r *productRepo) FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*product.Product, error) {
 	if len(ids) == 0 {
 		return []*product.Product{}, nil
 	}
@@ -279,7 +280,7 @@ func (r *productRepo) FindList(ctx context.Context, db *gorm.DB, query product.Q
 	return products, total, nil
 }
 
-func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB,  id int64, delta int) error {
+func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB, id int64, delta int) error {
 	query := db.WithContext(ctx).Model(&productModel{}).
 		Where("id = ? AND status = ? AND deleted_at IS NULL", id, product.StatusOnSale)
 	// 租户过滤：平台管理员 (tenantID == 0) 可操作所有租户数据
@@ -295,7 +296,7 @@ func (r *productRepo) UpdateStock(ctx context.Context, db *gorm.DB,  id int64, d
 	return nil
 }
 
-func (r *productRepo) Exists(ctx context.Context, db *gorm.DB,  id int64) (bool, error) {
+func (r *productRepo) Exists(ctx context.Context, db *gorm.DB, id int64) (bool, error) {
 	query := db.WithContext(ctx).Model(&productModel{}).
 		Where("id = ? AND deleted_at IS NULL", id)
 	// 租户过滤：平台管理员 (tenantID == 0) 可访问所有租户数据

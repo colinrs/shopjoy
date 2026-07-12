@@ -126,7 +126,7 @@ func dropAll(db *gorm.DB) error {
 }
 
 func migrate(ctx context.Context, db *gorm.DB) error {
-	models := []interface{}{
+	models := []any{
 		// Base tables - no foreign key dependencies
 		&tenant.Tenant{},
 		&user.User{},

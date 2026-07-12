@@ -61,12 +61,13 @@ func (r *replyRepo) Create(ctx context.Context, db *gorm.DB, reply *review.Revie
 
 func (r *replyRepo) Update(ctx context.Context, db *gorm.DB, reply *review.ReviewReply) error {
 	model := fromReplyEntity(reply)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&replyModel{}).
 		Where("review_id = ?", reply.ReviewID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"content":    model.Content,
-			"updated_at": model.UpdatedAt,
+			"updated_at": now,
 		}).Error
 }
 

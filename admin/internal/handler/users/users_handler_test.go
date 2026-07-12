@@ -247,25 +247,25 @@ func TestListUsersHandler_ResponseFormat(t *testing.T) {
 func TestUpdateUserHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid update with name",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "Updated Name",
 			},
 		},
 		{
 			name: "valid update with avatar",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name":   "Updated Name",
 				"avatar": "https://example.com/avatar.jpg",
 			},
 		},
 		{
 			name: "empty name",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"name": "",
 			},
 		},
@@ -313,23 +313,23 @@ func TestSuspendUserHandler_RequestValidation(t *testing.T) {
 func TestSuspendUserWithReasonHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid request with reason",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"reason": "User violated terms of service",
 			},
 		},
 		{
 			name:           "missing reason",
-			requestBody:    map[string]interface{}{},
+			requestBody:    map[string]any{},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "empty reason",
-			requestBody:    map[string]interface{}{"reason": ""},
+			requestBody:    map[string]any{"reason": ""},
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -390,33 +390,33 @@ func TestGetUserAddressesHandler(t *testing.T) {
 func TestBatchUpdateUserStatusHandler_RequestValidation(t *testing.T) {
 	tests := []struct {
 		name           string
-		requestBody    map[string]interface{}
+		requestBody    map[string]any
 		expectedStatus int
 	}{
 		{
 			name: "valid batch enable request",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"user_ids": []int64{1, 2, 3},
 				"status":   1,
 			},
 		},
 		{
 			name: "valid batch disable request",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"user_ids": []int64{1, 2, 3},
 				"status":   2,
 			},
 		},
 		{
 			name: "missing user_ids",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"status": 1,
 			},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name: "empty user_ids",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"user_ids": []int64{},
 				"status":   1,
 			},
@@ -424,7 +424,7 @@ func TestBatchUpdateUserStatusHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name: "too many user_ids",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"user_ids": make([]int64, 101),
 				"status":   1,
 			},
@@ -432,7 +432,7 @@ func TestBatchUpdateUserStatusHandler_RequestValidation(t *testing.T) {
 		},
 		{
 			name: "invalid status",
-			requestBody: map[string]interface{}{
+			requestBody: map[string]any{
 				"user_ids": []int64{1, 2, 3},
 				"status":   3, // Only 1 or 2 allowed
 			},
@@ -595,7 +595,7 @@ func BenchmarkBatchStatusRequestParsing(b *testing.B) {
 	body := `{"user_ids":[1,2,3,4,5],"status":1}`
 
 	for i := 0; i < b.N; i++ {
-		var req map[string]interface{}
+		var req map[string]any
 		json.Unmarshal([]byte(body), &req)
 	}
 }

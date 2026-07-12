@@ -102,10 +102,11 @@ func (r *skuRepo) Create(ctx context.Context, db *gorm.DB, sku *product.SKU) err
 
 func (r *skuRepo) Update(ctx context.Context, db *gorm.DB, sku *product.SKU) error {
 	model := fromSKUEntity(sku)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&skuModel{}).
 		Where("id = ?", sku.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"code":             model.Code,
 			"price_amount":     model.PriceAmount,
 			"price_currency":   model.PriceCurrency,
@@ -116,11 +117,11 @@ func (r *skuRepo) Update(ctx context.Context, db *gorm.DB, sku *product.SKU) err
 			"pre_sale_enabled": model.PreSaleEnabled,
 			"attributes":       model.Attributes,
 			"status":           model.Status,
-			"updated_at":       model.UpdatedAt,
+			"updated_at":       now,
 		}).Error
 }
 
-func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	result := db.WithContext(ctx).
 		Where("id = ?", id).
 		Delete(&skuModel{})
@@ -134,7 +135,7 @@ func (r *skuRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 	return nil
 }
 
-func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.SKU, error) {
+func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.SKU, error) {
 	var model skuModel
 	err := db.WithContext(ctx).
 		Where("id = ?", id).
@@ -148,7 +149,7 @@ func (r *skuRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*produc
 	return model.toEntity(), nil
 }
 
-func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB,  skuCode string) (*product.SKU, error) {
+func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB, skuCode string) (*product.SKU, error) {
 	var model skuModel
 	err := db.WithContext(ctx).
 		Where("code = ?", skuCode).
@@ -162,7 +163,7 @@ func (r *skuRepo) FindByCode(ctx context.Context, db *gorm.DB,  skuCode string) 
 	return model.toEntity(), nil
 }
 
-func (r *skuRepo) FindByProductID(ctx context.Context, db *gorm.DB,  productID int64) ([]*product.SKU, error) {
+func (r *skuRepo) FindByProductID(ctx context.Context, db *gorm.DB, productID int64) ([]*product.SKU, error) {
 	var models []skuModel
 	query := db.WithContext(ctx).Where("product_id = ?", productID)
 
@@ -199,10 +200,7 @@ func (r *skuRepo) FindList(ctx context.Context, db *gorm.DB, query product.SKUQu
 	}
 
 	var models []skuModel
-	offset := (query.Page - 1) * query.PageSize
-	if offset < 0 {
-		offset = 0
-	}
+	offset := max((query.Page-1)*query.PageSize, 0)
 	if query.PageSize <= 0 {
 		query.PageSize = 20
 	}
@@ -223,7 +221,7 @@ func (r *skuRepo) FindList(ctx context.Context, db *gorm.DB, query product.SKUQu
 }
 
 // FindLowStock finds SKUs where available_stock < safety_stock AND safety_stock > 0
-func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*product.SKU, int64, error) {
+func (r *skuRepo) FindLowStock(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*product.SKU, int64, error) {
 	dbQuery := db.WithContext(ctx).Model(&skuModel{}).
 		Where("safety_stock > 0 AND available_stock < safety_stock").
 		Where("status = ?", shared.StatusEnabled)

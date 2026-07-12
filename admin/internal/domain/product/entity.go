@@ -4,6 +4,7 @@ package product
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/application"
@@ -56,12 +57,7 @@ func (s Status) CanTransitionTo(target Status) bool {
 		return false
 	}
 
-	for _, status := range allowed {
-		if status == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(allowed, target)
 }
 
 // Money 金额（值对象）
@@ -307,12 +303,12 @@ type DBProvider interface {
 type Repository interface {
 	Create(ctx context.Context, db *gorm.DB, product *Product) error
 	Update(ctx context.Context, db *gorm.DB, product *Product) error
-	Delete(ctx context.Context, db *gorm.DB,  id int64) error
-	FindByID(ctx context.Context, db *gorm.DB,  id int64) (*Product, error)
-	FindByIDs(ctx context.Context, db *gorm.DB,  ids []int64) ([]*Product, error)
+	Delete(ctx context.Context, db *gorm.DB, id int64) error
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Product, error)
+	FindByIDs(ctx context.Context, db *gorm.DB, ids []int64) ([]*Product, error)
 	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Product, int64, error)
-	UpdateStock(ctx context.Context, db *gorm.DB,  id int64, delta int) error
-	Exists(ctx context.Context, db *gorm.DB,  id int64) (bool, error)
+	UpdateStock(ctx context.Context, db *gorm.DB, id int64, delta int) error
+	Exists(ctx context.Context, db *gorm.DB, id int64) (bool, error)
 	CountTotal(ctx context.Context, db *gorm.DB) (int64, error)
 }
 

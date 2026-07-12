@@ -81,17 +81,18 @@ func (r *seoConfigRepo) Save(ctx context.Context, db *gorm.DB, config *storefron
 	// Update existing
 	config.ID = existing.ID
 	model.ID = existing.ID
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&seoConfigModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"title":       model.Title,
 			"description": model.Description,
 			"keywords":    model.Keywords,
-			"updated_at":  model.UpdatedAt,
+			"updated_at":  now,
 		}).Error
 }
 
-func (r *seoConfigRepo) FindByPageType(ctx context.Context, db *gorm.DB,  pageType string, pageID *int64) (*storefront.SEOConfigEntity, error) {
+func (r *seoConfigRepo) FindByPageType(ctx context.Context, db *gorm.DB, pageType string, pageID *int64) (*storefront.SEOConfigEntity, error) {
 	var model seoConfigModel
 	query := db.WithContext(ctx).
 		Where("page_type = ?", pageType)
@@ -112,7 +113,7 @@ func (r *seoConfigRepo) FindByPageType(ctx context.Context, db *gorm.DB,  pageTy
 	return model.toEntity(), nil
 }
 
-func (r *seoConfigRepo) FindAll(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*storefront.SEOConfigEntity, int64, error) {
+func (r *seoConfigRepo) FindAll(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*storefront.SEOConfigEntity, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&seoConfigModel{}).
 		Count(&total).Error; err != nil {
@@ -144,7 +145,7 @@ func (r *seoConfigRepo) CountAll(ctx context.Context, db *gorm.DB) (int64, error
 	return total, err
 }
 
-func (r *seoConfigRepo) Delete(ctx context.Context, db *gorm.DB,  pageType string, pageID *int64) error {
+func (r *seoConfigRepo) Delete(ctx context.Context, db *gorm.DB, pageType string, pageID *int64) error {
 	query := db.WithContext(ctx).
 		Where("page_type = ?", pageType)
 

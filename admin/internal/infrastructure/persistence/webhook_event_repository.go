@@ -37,7 +37,7 @@ func (r *webhookEventRepository) MarkProcessed(ctx context.Context, db *gorm.DB,
 	return db.WithContext(ctx).
 		Model(&payment.WebhookEvent{}).
 		Where("id = ?", id).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"processed":     processed,
 			"error_message": errorMsg,
 			"processed_at":  now,

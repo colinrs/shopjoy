@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"slices"
 
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -47,7 +48,7 @@ func (r Regions) Value() (driver.Value, error) {
 }
 
 // Scan 实现 sql.Scanner 接口
-func (r *Regions) Scan(value interface{}) error {
+func (r *Regions) Scan(value any) error {
 	if value == nil {
 		*r = nil
 		return nil
@@ -154,12 +155,7 @@ func (z *ShippingZone) Validate() error {
 
 // MatchesRegion 检查是否匹配指定区域
 func (z *ShippingZone) MatchesRegion(cityCode string) bool {
-	for _, region := range z.Regions {
-		if region == cityCode {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(z.Regions, cityCode)
 }
 
 // TargetType 关联目标类型

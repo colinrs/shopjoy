@@ -155,7 +155,7 @@ func AssertJSONField(t *testing.T, body []byte, field string, expectedValue any)
 	err := json.Unmarshal(body, &resp)
 	assert.NoError(t, err)
 
-	data, ok := resp["data"].(map[string]interface{})
+	data, ok := resp["data"].(map[string]any)
 	if !ok {
 		// Try to get directly from response
 		val, exists := resp[field]
@@ -267,7 +267,7 @@ func ValidCategoryRequest() map[string]any {
 }
 
 // ValidProductRequest creates a valid product create request
-func ValidProductRequest() map[string]interface{} {
+func ValidProductRequest() map[string]any {
 	return map[string]any{
 		"name":        "Test Product",
 		"description": "A test product description",
@@ -279,7 +279,7 @@ func ValidProductRequest() map[string]interface{} {
 }
 
 // ValidBrandRequest creates a valid brand create request
-func ValidBrandRequest() map[string]interface{} {
+func ValidBrandRequest() map[string]any {
 	return map[string]any{
 		"name":        "Test Brand",
 		"description": "A test brand",
@@ -288,7 +288,7 @@ func ValidBrandRequest() map[string]interface{} {
 }
 
 // ValidRoleRequest creates a valid role create request
-func ValidRoleRequest() map[string]interface{} {
+func ValidRoleRequest() map[string]any {
 	return map[string]any{
 		"name":        "Test Role",
 		"code":        "TEST-ROLE-001",

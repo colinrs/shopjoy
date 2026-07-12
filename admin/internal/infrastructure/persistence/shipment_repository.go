@@ -109,10 +109,11 @@ func (r *shipmentRepo) Create(ctx context.Context, db *gorm.DB, s *fulfillment.S
 // Update updates an existing shipment
 func (r *shipmentRepo) Update(ctx context.Context, db *gorm.DB, s *fulfillment.Shipment) error {
 	model := fromShipmentEntity(s)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&shipmentModel{}).
 		Where("id = ? AND deleted_at IS NULL", s.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"status":            model.Status,
 			"carrier":           model.Carrier,
 			"carrier_code":      model.CarrierCode,
@@ -123,12 +124,12 @@ func (r *shipmentRepo) Update(ctx context.Context, db *gorm.DB, s *fulfillment.S
 			"shipped_at":        model.ShippedAt,
 			"delivered_at":      model.DeliveredAt,
 			"remark":            model.Remark,
-			"updated_at":        model.UpdatedAt,
+			"updated_at":        now,
 		}).Error
 }
 
 // FindByID finds a shipment by ID
-func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	var model shipmentModel
 	err := query.First(&model, id).Error
@@ -142,7 +143,7 @@ func (r *shipmentRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*f
 }
 
 // FindByShipmentNo finds a shipment by shipment number
-func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB,  shipmentNo string) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB, shipmentNo string) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("shipment_no = ? AND deleted_at IS NULL", shipmentNo)
 	var model shipmentModel
 	err := query.First(&model).Error
@@ -156,7 +157,7 @@ func (r *shipmentRepo) FindByShipmentNo(ctx context.Context, db *gorm.DB,  shipm
 }
 
 // FindByOrderID finds all shipments for an order
-func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID int64) ([]*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) ([]*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("order_id = ? AND deleted_at IS NULL", orderID)
 	var models []shipmentModel
 	err := query.Order("created_at DESC").Find(&models).Error
@@ -172,7 +173,7 @@ func (r *shipmentRepo) FindByOrderID(ctx context.Context, db *gorm.DB,  orderID 
 }
 
 // FindByTrackingNo finds a shipment by tracking number
-func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB,  trackingNo string) (*fulfillment.Shipment, error) {
+func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB, trackingNo string) (*fulfillment.Shipment, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("tracking_no = ? AND deleted_at IS NULL", trackingNo)
 	var model shipmentModel
 	err := query.First(&model).Error
@@ -186,11 +187,10 @@ func (r *shipmentRepo) FindByTrackingNo(ctx context.Context, db *gorm.DB,  track
 }
 
 // FindList finds shipments with pagination and filters
-func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfillment.ShipmentQuery) ([]*fulfillment.Shipment, int64, error) {
+func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB, query fulfillment.ShipmentQuery) ([]*fulfillment.Shipment, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&shipmentModel{}).Where("deleted_at IS NULL")
-
 
 	if query.OrderID != 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -233,7 +233,7 @@ func (r *shipmentRepo) FindList(ctx context.Context, db *gorm.DB,  query fulfill
 }
 
 // Delete soft deletes a shipment
-func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	now := time.Now().UTC()
 	result := query.Update("deleted_at", now)
@@ -248,7 +248,7 @@ func (r *shipmentRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error
 }
 
 // CountByStatus counts shipments by status
-func (r *shipmentRepo) CountByStatus(ctx context.Context, db *gorm.DB,  status fulfillment.ShipmentStatus) (int64, error) {
+func (r *shipmentRepo) CountByStatus(ctx context.Context, db *gorm.DB, status fulfillment.ShipmentStatus) (int64, error) {
 	query := db.WithContext(ctx).Model(&shipmentModel{}).Where("status = ? AND deleted_at IS NULL", status)
 	var count int64
 	err := query.Count(&count).Error

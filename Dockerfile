@@ -1,5 +1,5 @@
 # ShopJoy 多阶段构建
-FROM golang:1.25.0-alpine AS builder
+FROM golang:1.26.0-alpine AS builder
 
 WORKDIR /app
 

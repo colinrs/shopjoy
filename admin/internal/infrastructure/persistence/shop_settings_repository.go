@@ -52,11 +52,12 @@ func (r *shopSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *shop
 	// Update existing
 	settings.ID = existing.ID
 	settings.CreatedAt = existing.CreatedAt
-	settings.UpdatedAt = time.Now().UTC()
+	now := time.Now().UTC()
+	settings.UpdatedAt = now
 	model := fromShopSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&shopSettingsModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":             model.Name,
 			"code":             model.Code,
 			"logo":             model.Logo,
@@ -76,7 +77,7 @@ func (r *shopSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *shop
 			"status":           model.Status,
 			"plan":             model.Plan,
 			"expire_at":        model.ExpireAt,
-			"updated_at":       model.UpdatedAt,
+			"updated_at":       now,
 		}).Error
 }
 
@@ -294,11 +295,12 @@ func (r *notificationSettingsRepo) Save(ctx context.Context, db *gorm.DB, settin
 	// Update existing
 	settings.ID = existing.ID
 	settings.CreatedAt = existing.CreatedAt
-	settings.UpdatedAt = time.Now().UTC()
+	now := time.Now().UTC()
+	settings.UpdatedAt = now
 	model := fromNotificationSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&notificationSettingsModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"order_created":       model.OrderCreated,
 			"order_paid":          model.OrderPaid,
 			"order_shipped":       model.OrderShipped,
@@ -307,7 +309,7 @@ func (r *notificationSettingsRepo) Save(ctx context.Context, db *gorm.DB, settin
 			"low_stock_threshold": model.LowStockThreshold,
 			"refund_requested":    model.RefundRequested,
 			"new_review":          model.NewReview,
-			"updated_at":          model.UpdatedAt,
+			"updated_at":          now,
 		}).Error
 }
 
@@ -406,15 +408,16 @@ func (r *paymentSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *s
 	// Update existing
 	settings.ID = existing.ID
 	settings.CreatedAt = existing.CreatedAt
-	settings.UpdatedAt = time.Now().UTC()
+	now := time.Now().UTC()
+	settings.UpdatedAt = now
 	model := fromPaymentSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&paymentSettingsModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"stripe_enabled":    model.StripeEnabled,
 			"stripe_public_key": model.StripePublicKey,
 			"stripe_secret_key": model.StripeSecretKey,
-			"updated_at":        model.UpdatedAt,
+			"updated_at":        now,
 		}).Error
 }
 
@@ -498,15 +501,16 @@ func (r *shippingSettingsRepo) Save(ctx context.Context, db *gorm.DB, settings *
 	// Update existing
 	settings.ID = existing.ID
 	settings.CreatedAt = existing.CreatedAt
-	settings.UpdatedAt = time.Now().UTC()
+	now := time.Now().UTC()
+	settings.UpdatedAt = now
 	model := fromShippingSettingsEntity(settings)
 	return db.WithContext(ctx).Model(&shippingSettingsModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"free_shipping_threshold": model.FreeShippingThreshold,
 			"default_shipping_fee":    model.DefaultShippingFee,
 			"currency":                model.Currency,
-			"updated_at":              model.UpdatedAt,
+			"updated_at":              now,
 		}).Error
 }
 

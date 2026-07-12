@@ -136,10 +136,11 @@ func (r *couponRepo) Create(ctx context.Context, db *gorm.DB, c *promotion.Coupo
 // Update updates an existing coupon
 func (r *couponRepo) Update(ctx context.Context, db *gorm.DB, c *promotion.Coupon) error {
 	model := fromCouponEntity(c)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).
 		Model(&couponModel{}).
 		Where("id = ? AND deleted_at IS NULL", c.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":           model.Name,
 			"code":           model.Code,
 			"description":    model.Description,
@@ -158,12 +159,12 @@ func (r *couponRepo) Update(ctx context.Context, db *gorm.DB, c *promotion.Coupo
 			"scope_ids":      model.ScopeIDs,
 			"exclude_ids":    model.ExcludeIDs,
 			"updated_by":     model.UpdatedBy,
-			"updated_at":     model.UpdatedAt,
+			"updated_at":     now,
 		}).Error
 }
 
 // Delete soft deletes a coupon
-func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).Model(&couponModel{}).Where("id = ? AND deleted_at IS NULL", id)
 	// Platform admin (tenantID == 0) can delete all tenant data
 	now := time.Now().UTC()
@@ -179,7 +180,7 @@ func (r *couponRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
 }
 
 // FindByID finds a coupon by ID
-func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*promotion.Coupon, error) {
+func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*promotion.Coupon, error) {
 	query := db.WithContext(ctx).Where("deleted_at IS NULL")
 	// Platform admin (tenantID == 0) can access all tenant data
 	var model couponModel
@@ -194,7 +195,7 @@ func (r *couponRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*pro
 }
 
 // FindByCode finds a coupon by code
-func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB,  codeStr string) (*promotion.Coupon, error) {
+func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB, codeStr string) (*promotion.Coupon, error) {
 	query := db.WithContext(ctx).Model(&couponModel{}).Where("code = ? AND deleted_at IS NULL", codeStr)
 	// Platform admin (tenantID == 0) can access all tenant data
 	var model couponModel
@@ -209,7 +210,7 @@ func (r *couponRepo) FindByCode(ctx context.Context, db *gorm.DB,  codeStr strin
 }
 
 // FindList finds coupons with pagination and filters
-func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion.CouponQuery) ([]*promotion.Coupon, int64, error) {
+func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB, query promotion.CouponQuery) ([]*promotion.Coupon, int64, error) {
 	query.Validate()
 
 	dbQuery := db.WithContext(ctx).Model(&couponModel{}).Where("deleted_at IS NULL")
@@ -251,7 +252,7 @@ func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB,  query promotion
 }
 
 // IncrementUsage atomically increments the used_count of a coupon
-func (r *couponRepo) IncrementUsage(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *couponRepo) IncrementUsage(ctx context.Context, db *gorm.DB, id int64) error {
 	query := db.WithContext(ctx).
 		Model(&couponModel{}).
 		Where("id = ? AND deleted_at IS NULL", id)

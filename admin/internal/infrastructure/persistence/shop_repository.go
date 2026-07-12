@@ -150,9 +150,10 @@ func (r *shopRepo) Save(ctx context.Context, db *gorm.DB, shop *storefront.Shop)
 	// Update existing
 	shop.Model.ID = existing.ID
 	model.ID = existing.ID
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&shopModel{}).
 		Where("id = ?", existing.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":             model.Name,
 			"description":      model.Description,
 			"logo":             model.Logo,
@@ -167,6 +168,6 @@ func (r *shopRepo) Save(ctx context.Context, db *gorm.DB, shop *storefront.Shop)
 			"status":           model.Status,
 			"current_theme_id": model.CurrentThemeID,
 			"theme_config":     model.ThemeConfig,
-			"updated_at":       model.UpdatedAt,
+			"updated_at":       now,
 		}).Error
 }

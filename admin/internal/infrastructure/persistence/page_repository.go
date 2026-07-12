@@ -114,9 +114,10 @@ func (r *pageRepo) Create(ctx context.Context, db *gorm.DB, page *storefront.Pag
 
 func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Page) error {
 	model := fromPageEntity(page)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&pageModel{}).
 		Where("id = ? AND deleted_at IS NULL", page.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":            model.Name,
 			"slug":            model.Slug,
 			"type":            model.Type,
@@ -129,19 +130,19 @@ func (r *pageRepo) Update(ctx context.Context, db *gorm.DB, page *storefront.Pag
 			"is_published":    model.IsPublished,
 			"published_at":    model.PublishedAt,
 			"version":         model.Version,
-			"updated_at":      model.UpdatedAt,
+			"updated_at":      now,
 			"updated_by":      model.UpdatedBy,
 		}).Error
 }
 
-func (r *pageRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *pageRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&pageModel{}).
 		Where("id = ? AND deleted_at IS NULL", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*storefront.Page, error) {
+func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).
@@ -155,7 +156,7 @@ func (r *pageRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*store
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB,  slug string) (*storefront.Page, error) {
+func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB, slug string) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
 		Where("slug = ? AND deleted_at IS NULL", slug).
@@ -169,7 +170,7 @@ func (r *pageRepo) FindBySlug(ctx context.Context, db *gorm.DB,  slug string) (*
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB,  pageType storefront.PageType) (*storefront.Page, error) {
+func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB, pageType storefront.PageType) (*storefront.Page, error) {
 	var model pageModel
 	err := db.WithContext(ctx).
 		Where("type = ? AND deleted_at IS NULL", int(pageType)).
@@ -183,7 +184,7 @@ func (r *pageRepo) FindByType(ctx context.Context, db *gorm.DB,  pageType storef
 	return model.toEntity(), nil
 }
 
-func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB,  page, pageSize int) ([]*storefront.Page, int64, error) {
+func (r *pageRepo) FindAll(ctx context.Context, db *gorm.DB, page, pageSize int) ([]*storefront.Page, int64, error) {
 	var total int64
 	if err := db.WithContext(ctx).Model(&pageModel{}).
 		Where("deleted_at IS NULL").

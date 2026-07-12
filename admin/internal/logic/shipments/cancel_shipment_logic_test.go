@@ -12,49 +12,48 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 )
 
 // mockShipmentApp is a mock implementation of fulfillment.ShipmentApp
 type mockShipmentApp struct {
-	getShipmentFunc    func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error)
-	cancelShipmentFunc func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error)
+	getShipmentFunc    func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error)
+	cancelShipmentFunc func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error)
 }
 
-func (m *mockShipmentApp) CreateShipment(ctx context.Context, tenantID shared.TenantID, userID int64, req fulfillment.CreateShipmentRequest) (*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) CreateShipment(ctx context.Context, userID int64, req fulfillment.CreateShipmentRequest) (*fulfillment.ShipmentResponse, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) BatchCreateShipments(ctx context.Context, tenantID shared.TenantID, userID int64, carrierCode, carrierName string, shipments []fulfillment.BatchShipmentItem) (*fulfillment.BatchShipmentResult, error) {
+func (m *mockShipmentApp) BatchCreateShipments(ctx context.Context, userID int64, carrierCode, carrierName string, shipments []fulfillment.BatchShipmentItem) (*fulfillment.BatchShipmentResult, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) GetShipment(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) GetShipment(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 	if m.getShipmentFunc != nil {
-		return m.getShipmentFunc(ctx, tenantID, id)
+		return m.getShipmentFunc(ctx, id)
 	}
 	return nil, nil
 }
 
-func (m *mockShipmentApp) ListShipments(ctx context.Context, tenantID shared.TenantID, req fulfillment.QueryShipmentRequest) (*fulfillment.ShipmentListResponse, error) {
+func (m *mockShipmentApp) ListShipments(ctx context.Context, req fulfillment.QueryShipmentRequest) (*fulfillment.ShipmentListResponse, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) UpdateShipment(ctx context.Context, tenantID shared.TenantID, userID int64, req fulfillment.UpdateShipmentRequest) (*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) UpdateShipment(ctx context.Context, userID int64, req fulfillment.UpdateShipmentRequest) (*fulfillment.ShipmentResponse, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) UpdateShipmentStatus(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, status domain.ShipmentStatus) (*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) UpdateShipmentStatus(ctx context.Context, userID int64, id int64, status domain.ShipmentStatus) (*fulfillment.ShipmentResponse, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) GetOrderShipments(ctx context.Context, tenantID shared.TenantID, orderID int64) ([]*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) GetOrderShipments(ctx context.Context, orderID int64) ([]*fulfillment.ShipmentResponse, error) {
 	return nil, nil
 }
 
-func (m *mockShipmentApp) CancelShipment(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+func (m *mockShipmentApp) CancelShipment(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 	if m.cancelShipmentFunc != nil {
-		return m.cancelShipmentFunc(ctx, tenantID, userID, id, reason)
+		return m.cancelShipmentFunc(ctx, userID, id, reason)
 	}
 	return nil, nil
 }
@@ -85,14 +84,14 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
 						Status:     int(domain.ShipmentStatusPending),
 					}, nil
 				},
-				cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+				cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
@@ -136,7 +135,7 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return nil, code.ErrShipmentNotFound
 				},
 			},
@@ -156,14 +155,14 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
 						Status:     int(domain.ShipmentStatusCancelled),
 					}, nil
 				},
-				cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+				cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 					return nil, code.ErrShipmentAlreadyCancelled
 				},
 			},
@@ -183,14 +182,14 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
 						Status:     int(domain.ShipmentStatusDelivered),
 					}, nil
 				},
-				cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+				cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 					return nil, code.ErrShipmentCannotCancelDelivered
 				},
 			},
@@ -210,18 +209,14 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
-					// Platform admin passes tenantID=0 to app layer
-					if tenantID != 0 {
-						t.Errorf("tenantID = %v, want 0 for platform admin", tenantID)
-					}
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
 						Status:     int(domain.ShipmentStatusPending),
 					}, nil
 				},
-				cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+				cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
@@ -245,14 +240,14 @@ func TestCancelShipmentLogic_CancelShipment(t *testing.T) {
 				return ctx
 			},
 			mockApp: &mockShipmentApp{
-				getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+				getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 					return &fulfillment.ShipmentResponse{
 						ID:         1,
 						ShipmentNo: "SHP001",
 						Status:     int(domain.ShipmentStatusPending),
 					}, nil
 				},
-				cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+				cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 					return nil, errors.New("database error")
 				},
 			},
@@ -313,14 +308,14 @@ func TestCancelShipmentLogic_CancelShipment_CancelledAtIsRFC3339Format(t *testin
 	ctx = contextx.SetUserType(ctx, 0)
 
 	mockApp := &mockShipmentApp{
-		getShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, id int64) (*fulfillment.ShipmentResponse, error) {
+		getShipmentFunc: func(ctx context.Context, id int64) (*fulfillment.ShipmentResponse, error) {
 			return &fulfillment.ShipmentResponse{
 				ID:         1,
 				ShipmentNo: "SHP001",
 				Status:     int(domain.ShipmentStatusPending),
 			}, nil
 		},
-		cancelShipmentFunc: func(ctx context.Context, tenantID shared.TenantID, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
+		cancelShipmentFunc: func(ctx context.Context, userID int64, id int64, reason string) (*fulfillment.ShipmentResponse, error) {
 			return &fulfillment.ShipmentResponse{
 				ID:         1,
 				ShipmentNo: "SHP001",

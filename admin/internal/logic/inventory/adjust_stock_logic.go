@@ -6,10 +6,10 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
-	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/application"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -54,10 +54,7 @@ func (l *AdjustStockLogic) AdjustStock(req *types.AdjustStockReq) (resp *types.C
 		if err != nil {
 			return nil, err
 		}
-		newStock := req.Quantity
-		if newStock < 0 {
-			newStock = 0
-		}
+		newStock := max(req.Quantity, 0)
 		inventory = &product.WarehouseInventory{
 			Model:          application.Model{ID: id, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()},
 			SKUCode:        req.SKUCode,

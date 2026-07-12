@@ -93,9 +93,10 @@ func (r *brandRepo) Create(ctx context.Context, db *gorm.DB, b *product.Brand) e
 
 func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) error {
 	model := fromBrandEntity(b)
+	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&brandModel{}).
 		Where("id = ?", b.Model.ID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"name":              model.Name,
 			"logo":              model.Logo,
 			"description":       model.Description,
@@ -105,19 +106,19 @@ func (r *brandRepo) Update(ctx context.Context, db *gorm.DB, b *product.Brand) e
 			"trademark_number":  model.TrademarkNumber,
 			"trademark_country": model.TrademarkCountry,
 			"status":            model.Status,
-			"updated_at":        model.UpdatedAt,
+			"updated_at":        now,
 			"updated_by":        model.UpdatedBy,
 		}).Error
 }
 
-func (r *brandRepo) Delete(ctx context.Context, db *gorm.DB,  id int64) error {
+func (r *brandRepo) Delete(ctx context.Context, db *gorm.DB, id int64) error {
 	now := time.Now().UTC()
 	return db.WithContext(ctx).Model(&brandModel{}).
 		Where("id = ?", id).
 		Update("deleted_at", now).Error
 }
 
-func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*product.Brand, error) {
+func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*product.Brand, error) {
 	var model brandModel
 	err := db.WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).
@@ -131,7 +132,7 @@ func (r *brandRepo) FindByID(ctx context.Context, db *gorm.DB,  id int64) (*prod
 	return model.toEntity(), nil
 }
 
-func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB,  name string) (*product.Brand, error) {
+func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB, name string) (*product.Brand, error) {
 	var model brandModel
 	err := db.WithContext(ctx).
 		Where("name = ? AND deleted_at IS NULL", name).
@@ -145,7 +146,7 @@ func (r *brandRepo) FindByName(ctx context.Context, db *gorm.DB,  name string) (
 	return model.toEntity(), nil
 }
 
-func (r *brandRepo) FindList(ctx context.Context, db *gorm.DB,  query product.BrandQuery) ([]*product.Brand, int64, error) {
+func (r *brandRepo) FindList(ctx context.Context, db *gorm.DB, query product.BrandQuery) ([]*product.Brand, int64, error) {
 	var models []brandModel
 	var total int64
 
