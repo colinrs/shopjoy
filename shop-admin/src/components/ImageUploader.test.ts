@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 // Stub the composable so the component never makes a real API call.
 // We expose the reactive items ref so the test can mutate it to
@@ -185,6 +185,152 @@ describe('ImageUploader', () => {
     // Add card is rendered as a child upload stub.
     const uploads = wrapper.findAll('.el-upload-stub')
     expect(uploads.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('rebuilds items from external value in single mode (brand logo / avatar case)', async () => {
+    // Bug: ImageUploader in single mode (no `multiple` prop) used to ignore
+    // props.value entirely on mount, so a brand with an existing logo would
+    // show the empty dropzone in the edit dialog instead of the current logo.
+    itemsRef.value = []
+
+    mount(ImageUploader, {
+      props: {
+        value: 'https://example.com/brand-logo.png',
+        category: 'brand'
+      } as any,
+      global: { stubs, mocks: { $t: (k: string) => k } }
+    })
+
+    await nextTick()
+
+    // After mount, items should be populated with a synthetic done entry
+    // for the external URL so the preview renders.
+    expect(itemsRef.value.length).toBe(1)
+    expect((itemsRef.value[0] as any).url).toBe('https://example.com/brand-logo.png')
+    expect((itemsRef.value[0] as any).status).toBe('done')
+  })
+
+  it('emits the latest uploaded URL in single mode (replacing prior external value)', async () => {
+    // In single mode the most recently completed upload should win over
+    // any pre-existing item seeded from props.value, so the parent form
+    // receives the new URL the user just chose.
+    itemsRef.value = [
+      { uid: 'existing', status: 'done', progress: 100, url: 'https://example.com/old.png' }
+    ]
+
+    const wrapper = mount(ImageUploader, {
+      props: {
+        value: 'https://example.com/old.png',
+        category: 'brand'
+      } as any,
+      global: { stubs, mocks: { $t: (k: string) => k } }
+    })
+
+    await nextTick()
+
+    // Simulate a fresh upload completing — items grows with the new entry.
+    itemsRef.value = [
+      ...itemsRef.value,
+      { uid: 'new', status: 'done', progress: 100, url: 'https://example.com/new.png' }
+    ]
+
+    await nextTick()
+
+    const events = wrapper.emitted('update:value') as unknown[][] | undefined
+    expect(events).toBeTruthy()
+    expect(events!.length).toBeGreaterThan(0)
+    const lastEmit = events![events!.length - 1][0] as string
+    expect(lastEmit).toBe('https://example.com/new.png')
+  })
+
+  it('rebuilds items from external value when initial items are empty (multi mode)', async () => {
+    // Bug A: page loads with images from backend but the uploader's internal
+    // items is empty. The watcher must rebuild items so the previews display
+    // and the URLs are visible in the gallery.
+    itemsRef.value = []
+
+    mount(ImageUploader, {
+      props: {
+        value: ['https://example.com/saved1.jpg', 'https://example.com/saved2.jpg'],
+        category: 'product',
+        multiple: true
+      } as any,
+      global: {
+        stubs: {
+          ...stubs,
+          draggable: {
+            name: 'Draggable',
+            template:
+              '<div class="draggable-stub"><slot v-for="el in modelValue" :element="el" /><slot name="footer" /></div>',
+            props: ['modelValue']
+          }
+        },
+        mocks: { $t: (k: string) => k }
+      }
+    })
+
+    await nextTick()
+
+    // After mount, items should be populated with synthetic done entries
+    // for each URL in props.value. Currently the watcher just clears items,
+    // so this assertion fails.
+    expect(itemsRef.value.length).toBe(2)
+    expect((itemsRef.value[0] as any).url).toBe('https://example.com/saved1.jpg')
+    expect((itemsRef.value[0] as any).status).toBe('done')
+    expect((itemsRef.value[1] as any).url).toBe('https://example.com/saved2.jpg')
+  })
+
+  it('preserves existing URLs in emitted value when a new upload completes in multi mode', async () => {
+    // Bug B: when syncMulti emits update:value, it should include URLs that
+    // were already in props.value, not just the newly uploaded item. Otherwise
+    // uploading one new image overwrites all existing images in the parent
+    // form, and Save sends only [newUrl] to the backend.
+    itemsRef.value = [
+      { uid: 'e1', status: 'done', progress: 100, url: 'https://example.com/e1.jpg' },
+      { uid: 'e2', status: 'done', progress: 100, url: 'https://example.com/e2.jpg' }
+    ]
+
+    const wrapper = mount(ImageUploader, {
+      props: {
+        value: ['https://example.com/e1.jpg', 'https://example.com/e2.jpg'],
+        category: 'product',
+        multiple: true
+      } as any,
+      global: {
+        stubs: {
+          ...stubs,
+          draggable: {
+            name: 'Draggable',
+            template:
+              '<div class="draggable-stub"><slot v-for="el in modelValue" :element="el" /><slot name="footer" /></div>',
+            props: ['modelValue']
+          }
+        },
+        mocks: { $t: (k: string) => k }
+      }
+    })
+
+    await nextTick()
+
+    // Simulate a new upload completing — items grows with the new entry.
+    itemsRef.value = [
+      ...itemsRef.value,
+      { uid: 'new1', status: 'done', progress: 100, url: 'https://example.com/new1.jpg' }
+    ]
+
+    await nextTick()
+
+    const events = wrapper.emitted('update:value') as unknown[][] | undefined
+    expect(events).toBeTruthy()
+    expect(events!.length).toBeGreaterThan(0)
+    const lastEmit = events![events!.length - 1][0] as string[]
+    expect(lastEmit).toEqual(
+      expect.arrayContaining([
+        'https://example.com/e1.jpg',
+        'https://example.com/e2.jpg',
+        'https://example.com/new1.jpg'
+      ])
+    )
   })
 
   it('emits update:value when remove is called on a single item', async () => {

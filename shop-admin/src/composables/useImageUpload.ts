@@ -120,9 +120,15 @@ export function useImageUpload(opts: UseImageUploadOptions) {
 
     // --- 3. Direct XHR PUT/POST to Cloudinary ---
     item.status = 'uploading'
-    const { url, width, height } = await uploadToCloudinary(sign.upload_url, item.raw, sign, signal, (p) => {
-      item.progress = p
-    })
+    const { url, width, height, publicId, format } = await uploadToCloudinary(
+      sign.upload_url,
+      item.raw,
+      sign,
+      signal,
+      (p) => {
+        item.progress = p
+      }
+    )
     if (width && height) {
       item.width = width
       item.height = height
@@ -132,14 +138,20 @@ export function useImageUpload(opts: UseImageUploadOptions) {
     item.status = 'confirming'
     const confirmed: UploadResponse = await confirmImage({
       asset_id: sign.asset_id,
-      public_id: sign.public_id,
+      // Use the full public_id (folder + uuid) from Cloudinary's
+      // response — the backend's RegisterAsset requires the folder
+      // prefix. The bare sign.public_id would fail the prefix check.
+      public_id: publicId,
       url,
       filename: item.raw.name,
       size: item.raw.size,
       mime_type: item.raw.type,
       width: item.width ?? 0,
       height: item.height ?? 0,
-      format: (sign.public_id.split('.').pop() || '').toLowerCase() || extFromMime(item.raw.type),
+      // Prefer Cloudinary's detected format; fall back to the
+      // extension parsed from the MIME type if Cloudinary didn't
+      // report one (e.g. older responses).
+      format: format || extFromMime(item.raw.type),
       category
     })
 
@@ -147,7 +159,7 @@ export function useImageUpload(opts: UseImageUploadOptions) {
     item.progress = 100
     item.url = confirmed.url
     item.assetId = confirmed.id
-    item.publicId = sign.public_id
+    item.publicId = publicId
   }
 
   function throwObject(): never {
@@ -312,7 +324,7 @@ function uploadToCloudinary(
   },
   signal: AbortSignal | undefined,
   onProgress: (pct: number) => void
-): Promise<{ url: string; width: number; height: number }> {
+): Promise<{ url: string; width: number; height: number; publicId: string; format: string }> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
 
@@ -340,8 +352,16 @@ function uploadToCloudinary(
           const url: string = resp.secure_url || resp.url
           const width: number = resp.width || 0
           const height: number = resp.height || 0
+          // Cloudinary returns the FULL public_id including the folder
+          // prefix (e.g. "dev/0/product/<uuid>"). The sign endpoint only
+          // hands out the bare UUID, but the backend's RegisterAsset
+          // requires the folder-prefixed form for its tenant/category
+          // guard. Falling back to `${sign.folder}/${sign.public_id}` is
+          // safe because we signed that exact path.
+          const publicId: string = resp.public_id || `${sign.folder}/${sign.public_id}`
+          const format: string = resp.format || ''
           onProgress(100)
-          resolve({ url, width, height })
+          resolve({ url, width, height, publicId, format })
         } catch (err: any) {
           reject(new Error(`Invalid Cloudinary response: ${err?.message || err}`))
         }

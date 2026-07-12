@@ -260,6 +260,86 @@ describe('useImageUpload', () => {
     expect(signImage).toHaveBeenCalled()
   })
 
+  it('sends the full Cloudinary public_id (folder + uuid) and format to confirmImage', async () => {
+    // The backend's RegisterAsset requires public_id to start with the
+    // tenant/category folder (e.g. "dev/0/product/"). The sign endpoint
+    // returns the bare UUID; the full path lives in Cloudinary's upload
+    // response. The composable must forward the full path, not the bare
+    // UUID — otherwise confirm fails with ErrUploadConfirmFailed (240007).
+    const folder = 'dev/0/product'
+    const bareUUID = 'b9630656-fbfc-4ca0-b196-782f1b403bf3'
+    const fullPublicID = `${folder}/${bareUUID}`
+
+    // Sign response mirrors production: bare UUID, no extension.
+    signImage.mockResolvedValueOnce({
+      cloud_name: 'demo',
+      api_key: 'key',
+      timestamp: '1700000000',
+      signature: 'sig',
+      folder,
+      public_id: bareUUID,
+      asset_id: 'asset-456',
+      upload_url: 'https://api.cloudinary.com/v1_1/demo/image/upload'
+    })
+
+    // Cloudinary returns the FULL public_id (folder/uuid) and the
+    // detected format.
+    class CloudinaryXHR {
+      upload: { onprogress: ((e: ProgressEvent) => void) | null } = { onprogress: null }
+      onload: (() => void) | null = null
+      onerror: (() => void) | null = null
+      onabort: (() => void) | null = null
+      status = 200
+      statusText = 'OK'
+      responseText = JSON.stringify({
+        public_id: fullPublicID,
+        secure_url: `https://res.cloudinary.com/demo/image/upload/v1/${fullPublicID}.png`,
+        url: `https://res.cloudinary.com/demo/image/upload/v1/${fullPublicID}.png`,
+        width: 2720,
+        height: 1280,
+        format: 'png'
+      })
+      open() {}
+      send(_form: FormData) {
+        queueMicrotask(() => {
+          if (this.upload.onprogress) {
+            const event = {
+              lengthComputable: true,
+              loaded: 1,
+              total: 1
+            } as unknown as ProgressEvent
+            this.upload.onprogress(event)
+          }
+          if (this.onload) this.onload()
+        })
+      }
+      abort() {
+        if (this.onabort) this.onabort()
+      }
+    }
+    // @ts-expect-error - inject response-including XHR
+    globalThis.XMLHttpRequest = CloudinaryXHR
+
+    const { uploadOne } = useImageUpload({ category: 'product', compress: false })
+    const file = makeFile('scarce_resources_shift.png', 179534, 'image/png')
+    await uploadOne(file)
+
+    // confirmImage must receive the FULL public_id (folder + uuid) and
+    // the format from Cloudinary's response — not the bare UUID and not
+    // a derived-extension guess.
+    expect(confirmImage).toHaveBeenCalledTimes(1)
+    const sent = confirmImage.mock.calls[0][0] as Record<string, unknown>
+    expect(sent.public_id).toBe(fullPublicID)
+    expect(sent.format).toBe('png')
+    expect(sent.url).toBe(
+      `https://res.cloudinary.com/demo/image/upload/v1/${fullPublicID}.png`
+    )
+
+    // Restore default XHR for subsequent tests.
+    // @ts-expect-error - restore default XHR
+    globalThis.XMLHttpRequest = FakeXHR
+  })
+
   it('caller-side size guard rejects oversized files before upload starts', async () => {
     // Simulate what the ImageUploader / caller is supposed to do:
     //   if (file.size > opts.maxSize) reject early

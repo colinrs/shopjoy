@@ -126,39 +126,39 @@ func (l *ListProductLogic) ListProduct(req *types.ListProductReq) (resp *types.L
 }
 
 func convertToProductDetailRespWithMarkets(p *appProduct.ProductResponse, pms []*product.ProductMarket, marketsMap map[int64]*types.MarketResponse) *types.ProductDetailResp {
-	resp := &types.ProductDetailResp{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price.String(),
-		Currency:    p.Currency,
-		CostPrice:   p.CostPrice.String(),
-		Stock:       p.Stock,
-		Status:      p.Status,
-		CategoryID:  p.CategoryID,
-		CreatedAt:   p.CreatedAt,
-		UpdatedAt:   p.UpdatedAt,
-	}
+	// Reuse the full detail converter so every common field (Images, SKU,
+	// Brand, Tags, IsMatrixProduct, HSCode, COO, Weight, WeightUnit,
+	// Length, Width, Height, DangerousGoods) populates the list response
+	// the same way the detail endpoint does. Without this, the list
+	// response silently dropped those fields — most visibly, product
+	// thumbnails disappeared on the list page because Images was empty.
+	resp := convertToProductDetailResp(p)
 
-	// Add market info
-	if len(pms) > 0 {
-		markets := make([]types.ProductMarketInfo, 0, len(pms))
-		for _, pm := range pms {
-			marketInfo, ok := marketsMap[pm.MarketID]
-			if !ok {
-				continue
-			}
-			markets = append(markets, types.ProductMarketInfo{
-				MarketID:   pm.MarketID,
-				MarketCode: marketInfo.Code,
-				MarketName: marketInfo.Name,
-				IsEnabled:  pm.IsEnabled,
-				Price:      pm.Price.String(),
-				Currency:   marketInfo.Currency,
-			})
+	// Override Markets with the per-product-market info built from raw
+	// entities. The detail converter seeded Markets from p.Markets, but
+	// the list endpoint loads ProductMarket rows directly to also surface
+	// the per-market price (pm.Price) and currency. If there are no rows,
+	// clear the field so callers can distinguish "no markets" from
+	// "service-level market info".
+	if len(pms) == 0 {
+		resp.Markets = nil
+		return resp
+	}
+	markets := make([]types.ProductMarketInfo, 0, len(pms))
+	for _, pm := range pms {
+		marketInfo, ok := marketsMap[pm.MarketID]
+		if !ok {
+			continue
 		}
-		resp.Markets = markets
+		markets = append(markets, types.ProductMarketInfo{
+			MarketID:   pm.MarketID,
+			MarketCode: marketInfo.Code,
+			MarketName: marketInfo.Name,
+			IsEnabled:  pm.IsEnabled,
+			Price:      pm.Price.String(),
+			Currency:   marketInfo.Currency,
+		})
 	}
-
+	resp.Markets = markets
 	return resp
 }

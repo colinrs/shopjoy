@@ -232,11 +232,13 @@ const multiItems = computed({
 
 function syncSingle() {
   if (props.multiple) return
-  const done = currentSingle.value?.status === 'done' ? currentSingle.value?.url ?? '' : ''
-  // Allow empty string when no item
-  if (currentSingle.value === undefined) {
-    emit('update:value', '')
-  } else if (done !== props.value) {
+  // In single mode the most recently completed upload should win over
+  // any stale "existing" item seeded by the external-value watcher.
+  // Otherwise a user picking a new file in the brand/avatar edit dialog
+  // would never have their selection reach the parent form.
+  const latestDone = [...items.value].reverse().find((it) => it.status === 'done')
+  const done = latestDone?.url ?? ''
+  if (done !== props.value) {
     emit('update:value', done)
   }
 }
@@ -254,17 +256,49 @@ watch(() => items.value.map((it) => `${it.uid}:${it.status}:${it.url ?? ''}`).jo
   else syncSingle()
 })
 
-// External value → items (e.g. when form loads).
+// External value → items (e.g. when form loads or after save re-fetch).
+// Rebuilds items from props.value so pre-existing images render in the
+// gallery (multi mode) or preview (single mode). Preserves any items that
+// are still uploading so a concurrent upload is not lost when the parent
+// re-pushes the value (e.g. after Save → loadProduct).
 watch(
   () => props.value,
   (val) => {
+    const stamp = Date.now()
     if (props.multiple) {
       const arr = Array.isArray(val) ? val : []
-      const existing = items.value.filter((it) => it.status === 'done').map((it) => it.url)
+      const existing = items.value
+        .filter((it) => it.status === 'done')
+        .map((it) => it.url)
       if (JSON.stringify(existing) !== JSON.stringify(arr)) {
-        // External change: rebuild items.
-        // eslint-disable-next-line no-restricted-syntax
-        items.value = []
+        const externalItems: UploadItem[] = arr.map((url, idx) => ({
+          uid: `existing-${idx}-${stamp}`,
+          status: 'done',
+          progress: 100,
+          url,
+          preview: url
+        }))
+        const inFlight = items.value.filter((it) => it.status !== 'done')
+        items.value = [...inFlight, ...externalItems]
+      }
+    } else {
+      // Single mode: val is a single URL. Seed one synthetic done item
+      // from it so the existing logo / avatar renders. We do nothing
+      // when val is empty — clearing items on empty input would erase
+      // an item the user has already uploaded and is just about to save.
+      const url = typeof val === 'string' ? val : ''
+      if (url === '') return
+      const currentDoneUrl = items.value.find((it) => it.status === 'done')?.url
+      if (currentDoneUrl !== url) {
+        const externalItem: UploadItem = {
+          uid: `existing-0-${stamp}`,
+          status: 'done',
+          progress: 100,
+          url,
+          preview: url
+        }
+        const inFlight = items.value.filter((it) => it.status !== 'done')
+        items.value = [externalItem, ...inFlight]
       }
     }
   },

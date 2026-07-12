@@ -957,7 +957,21 @@ const selectedProducts = ref<Product[]>([])
 const tableRef = ref()
 const formRef = ref()
 const pushToMarketFormRef = ref()
-const defaultImage = 'https://via.placeholder.com/80'
+// Inline SVG placeholder — keeps the list page working without an external
+// dependency (the previous via.placeholder.com URL was unreliable in
+// dev environments). The SVG renders a soft gray box with a "no image"
+// hint so empty product rows are visually distinguishable from products
+// whose image failed to load (those hit the el-image #error slot).
+const defaultImage =
+  'data:image/svg+xml;utf8,' +
+  '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">' +
+  '<rect width="80" height="80" fill="%23f3f4f6"/>' +
+  '<g fill="%23d1d5db">' +
+  '<rect x="20" y="32" width="40" height="28" rx="2"/>' +
+  '<circle cx="30" cy="42" r="3"/>' +
+  '<path d="M20 56 L34 44 L46 54 L60 42 L60 60 L20 60 Z"/>' +
+  '</g>' +
+  '</svg>'
 
 // Market data
 const markets = ref<Market[]>([])
