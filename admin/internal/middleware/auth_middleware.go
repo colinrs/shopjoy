@@ -11,7 +11,9 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/colinrs/shopjoy/pkg/httpy"
+	"github.com/colinrs/shopjoy/pkg/tenant"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/zeromicro/go-zero/rest"
 	"gorm.io/gorm"
@@ -70,6 +72,7 @@ func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Re
 				}
 			}
 			ctx = contextx.SetTenantID(ctx, tenantID)
+			ctx = tenant.WithContext(ctx, shared.TenantID(tenantID))
 
 			// Fetch username from database for audit logging
 			if adminUserRepo != nil && db != nil {

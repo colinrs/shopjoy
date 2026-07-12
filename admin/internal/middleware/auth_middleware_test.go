@@ -69,15 +69,15 @@ func (m *mockAdminUserRepo) UpdatePassword(ctx context.Context, db *gorm.DB, id 
 	return nil
 }
 
-func (m *mockAdminUserRepo) ExistsByUsername(ctx context.Context, db *gorm.DB, tenantID int64, username string) (bool, error) {
+func (m *mockAdminUserRepo) ExistsByUsername(ctx context.Context, db *gorm.DB, username string) (bool, error) {
 	return false, nil
 }
 
-func (m *mockAdminUserRepo) ExistsByEmail(ctx context.Context, db *gorm.DB, tenantID int64, email string) (bool, error) {
+func (m *mockAdminUserRepo) ExistsByEmail(ctx context.Context, db *gorm.DB, email string) (bool, error) {
 	return false, nil
 }
 
-func (m *mockAdminUserRepo) CountMainAccount(ctx context.Context, db *gorm.DB, tenantID int64) (int64, error) {
+func (m *mockAdminUserRepo) CountMainAccount(ctx context.Context, db *gorm.DB) (int64, error) {
 	return 0, nil
 }
 

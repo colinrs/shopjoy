@@ -8,7 +8,6 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
 	"github.com/colinrs/shopjoy/pkg/application"
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )

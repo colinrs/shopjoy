@@ -44,7 +44,7 @@ const stubs: Record<string, any> = {
     props: ['onChange'],
     template: '<div class="el-upload-stub" @click="trigger"><slot /></div>',
     methods: {
-      trigger() {
+      trigger(this: any) {
         // emit a synthetic on-change with a fake raw file
         if (typeof this.onChange === 'function') {
           this.onChange({ raw: new File([new Uint8Array(8)], 'fake.png', { type: 'image/png' }) })

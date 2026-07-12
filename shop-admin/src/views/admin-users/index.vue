@@ -649,7 +649,7 @@ const handleSubmit = async () => {
       try {
         const payload: CreateAdminUserParams = {
           ...formData,
-          avatar: formData.avatar || undefined
+          avatar: formData.avatar
         }
         await createAdminUser(payload)
         ElMessage.success(t('adminUsers.createSuccess'))
