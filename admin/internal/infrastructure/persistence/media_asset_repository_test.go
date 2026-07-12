@@ -13,6 +13,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/media"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
+	"github.com/colinrs/shopjoy/pkg/code"
 )
 
 func newMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
@@ -88,9 +89,8 @@ func TestMediaAssetRepository_SoftDelete_OK(t *testing.T) {
 	}
 }
 
-// SoftDelete: rows-affected = 0 → "asset not found" (GORM silently succeeds on
-// missing rows; we distinguish via res.RowsAffected instead of the unreachable
-// substring check the original brief prescribed).
+// SoftDelete: rows-affected = 0 → ErrMediaAssetNotFound (GORM silently succeeds
+// on missing rows; we distinguish via res.RowsAffected).
 func TestMediaAssetRepository_SoftDelete_NotFound(t *testing.T) {
 	gdb, mock := newMockDB(t)
 	repo := persistence.NewMediaAssetRepository(gdb)
@@ -100,7 +100,46 @@ func TestMediaAssetRepository_SoftDelete_NotFound(t *testing.T) {
 	mock.ExpectCommit()
 
 	err := repo.SoftDelete(context.Background(), 999)
-	if err == nil || !strings.Contains(err.Error(), "asset not found") {
-		t.Fatalf("expected asset-not-found error, got %v", err)
+	if !errors.Is(err, code.ErrMediaAssetNotFound) {
+		t.Fatalf("expected ErrMediaAssetNotFound, got %v", err)
+	}
+}
+
+// DeleteByTenant: rows-affected = 1 → success (matched tenant).
+func TestMediaAssetRepository_DeleteByTenant_OK(t *testing.T) {
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewMediaAssetRepository(gdb)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE `media_assets` SET `deleted_at`=").
+		WithArgs(sqlmock.AnyArg(), int64(7), int64(42)).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	if err := repo.DeleteByTenant(context.Background(), 7, 42); err != nil {
+		t.Fatalf("DeleteByTenant: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// DeleteByTenant: rows-affected = 0 → ErrMediaAssetNotFound (covers both
+// missing rows and cross-tenant attempts; we collapse both into one signal
+// to prevent IDOR-style existence leaks).
+func TestMediaAssetRepository_DeleteByTenant_NotFound(t *testing.T) {
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewMediaAssetRepository(gdb)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE `media_assets` SET `deleted_at`=").
+		WithArgs(sqlmock.AnyArg(), int64(7), int64(999)).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectCommit()
+
+	err := repo.DeleteByTenant(context.Background(), 7, 999)
+	if !errors.Is(err, code.ErrMediaAssetNotFound) {
+		t.Fatalf("expected ErrMediaAssetNotFound, got %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
 	}
 }

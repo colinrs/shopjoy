@@ -191,6 +191,9 @@ var (
 	ErrTenantNameRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 90007, Msg: "tenant name is required"}
 	ErrTenantCodeRequired         = &Err{HTTPCode: http.StatusBadRequest, Code: 90008, Msg: "tenant code is required"}
 
+	// MediaAsset errors (tenant-scoped, co-located in 90xxx range)
+	ErrMediaAssetNotFound = &Err{HTTPCode: http.StatusNotFound, Code: 90501, Msg: "media asset not found"}
+
 	// ErrRoleNotFound ==================== Role Module (100xxx) ====================
 	ErrRoleNotFound           = &Err{HTTPCode: http.StatusNotFound, Code: 100001, Msg: "role not found"}
 	ErrRoleDuplicate          = &Err{HTTPCode: http.StatusConflict, Code: 100002, Msg: "duplicate role"}

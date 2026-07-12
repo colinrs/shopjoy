@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/media"
+	"github.com/colinrs/shopjoy/pkg/code"
 )
 
 type mediaAssetRepo struct {
@@ -40,7 +41,7 @@ func (r *mediaAssetRepo) FindByID(ctx context.Context, id int64) (*media.Asset, 
 	var a media.Asset
 	if err := r.db.WithContext(ctx).First(&a, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("asset not found")
+			return nil, code.ErrMediaAssetNotFound
 		}
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func (r *mediaAssetRepo) FindByPublicID(ctx context.Context, provider, publicID 
 		Where("provider = ? AND public_id = ? AND deleted_at IS NULL", provider, publicID).
 		First(&a).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("asset not found")
+			return nil, code.ErrMediaAssetNotFound
 		}
 		return nil, err
 	}
@@ -69,7 +70,24 @@ func (r *mediaAssetRepo) SoftDelete(ctx context.Context, id int64) error {
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return errors.New("asset not found")
+		return code.ErrMediaAssetNotFound
+	}
+	return nil
+}
+
+// DeleteByTenant atomically filters by both primary key and tenant id so a
+// cross-tenant delete attempt cannot leak the existence of a row. Returns
+// code.ErrMediaAssetNotFound when the row is missing or owned by a different
+// tenant (we deliberately collapse both signals into one to prevent IDOR).
+func (r *mediaAssetRepo) DeleteByTenant(ctx context.Context, id int64, tenantID int64) error {
+	res := r.db.WithContext(ctx).
+		Where("id = ? AND tenant_id = ?", id, tenantID).
+		Delete(&media.Asset{})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return code.ErrMediaAssetNotFound
 	}
 	return nil
 }
