@@ -145,6 +145,7 @@ func (s *ServiceImpl) List(ctx context.Context, req QueryRequest) (*UserListResp
 		Email:     req.Email,
 		Phone:     req.Phone,
 		Status:    req.Status,
+		Keyword:   req.Keyword,
 	}
 	query.PageQuery.Validate()
 

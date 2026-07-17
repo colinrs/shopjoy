@@ -31,8 +31,10 @@ type CreateCouponRequest struct {
 // UpdateCouponRequest 更新优惠券请求
 type UpdateCouponRequest struct {
 	ID           int64
+	Code         string
 	Name         string
 	Description  string
+	Value        decimal.Decimal
 	MinAmount    decimal.Decimal
 	MaxDiscount  decimal.Decimal
 	TotalCount   int
@@ -105,6 +107,17 @@ type IssueCouponToUserResponse struct {
 	ExpireAt     string `json:"expire_at"`
 }
 
+// BatchIssueCouponToUserRequest 批量向用户发放优惠券请求
+type BatchIssueCouponToUserRequest struct {
+	CouponID int64
+	UserIDs  []int64
+}
+
+// BatchIssueCouponToUserResponse 批量向用户发放优惠券响应
+type BatchIssueCouponToUserResponse struct {
+	UserCouponIDs []int64 `json:"user_coupon_ids"`
+}
+
 // UserCouponResponse 用户优惠券响应
 type UserCouponResponse struct {
 	ID         int64  `json:"id"`
@@ -133,8 +146,11 @@ type CouponApp interface {
 	GetCoupon(ctx context.Context, id int64) (*CouponResponse, error)
 	ListCoupons(ctx context.Context, req QueryCouponRequest) (*CouponListResponse, error)
 	DeleteCoupon(ctx context.Context, id int64) error
+	ActivateCoupon(ctx context.Context, id int64) error
+	DeactivateCoupon(ctx context.Context, id int64) error
 	GenerateCouponCodes(ctx context.Context, req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error)
 	IssueCouponToUser(ctx context.Context, req IssueCouponToUserRequest) (*IssueCouponToUserResponse, error)
+	BatchIssueCouponToUser(ctx context.Context, req BatchIssueCouponToUserRequest) (*BatchIssueCouponToUserResponse, error)
 	ListUserCoupons(ctx context.Context, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error)
 }
 
@@ -221,11 +237,30 @@ func (a *couponApp) UpdateCoupon(ctx context.Context, req UpdateCouponRequest) (
 
 	// Only allow update if coupon is not active
 	if c.Status == pkgcoupon.CouponStatusActive {
-		return nil, code.ErrCouponCannotDelete
+		return nil, code.ErrCouponCannotUpdate
 	}
 
+	// Mirror the validation from CreateCoupon so partial / invalid updates
+	// can't sneak past the API.
+	if req.Name == "" {
+		return nil, code.ErrCouponNameRequired
+	}
+	if req.Value.IsZero() || req.Value.IsNegative() {
+		return nil, code.ErrCouponValueRequired
+	}
+	if req.StartAt.IsZero() || req.EndAt.IsZero() {
+		return nil, code.ErrCouponTimeRequired
+	}
+	if req.StartAt.After(req.EndAt) {
+		return nil, code.ErrCouponInvalidTimeRange
+	}
+
+	// Type is intentionally NOT updated — changing the discount calculation
+	// model mid-flight would silently break coupons already issued to users.
+	c.Code = req.Code
 	c.Name = req.Name
 	c.Description = req.Description
+	c.Value = req.Value
 	c.MinAmount = req.MinAmount
 	c.MaxDiscount = req.MaxDiscount
 	c.TotalCount = req.TotalCount
@@ -298,6 +333,32 @@ func (a *couponApp) DeleteCoupon(ctx context.Context, id int64) error {
 		}
 		return nil
 	})
+}
+
+func (a *couponApp) ActivateCoupon(ctx context.Context, id int64) error {
+	c, err := a.couponRepo.FindByID(ctx, a.db, id)
+	if err != nil {
+		return err
+	}
+
+	// Idempotent: activating an already-active coupon is a no-op.
+	c.Status = pkgcoupon.CouponStatusActive
+	c.Audit.Update(0)
+
+	return a.couponRepo.Update(ctx, a.db, c)
+}
+
+func (a *couponApp) DeactivateCoupon(ctx context.Context, id int64) error {
+	c, err := a.couponRepo.FindByID(ctx, a.db, id)
+	if err != nil {
+		return err
+	}
+
+	// Idempotent: deactivating an already-inactive coupon is a no-op.
+	c.Status = pkgcoupon.CouponStatusInactive
+	c.Audit.Update(0)
+
+	return a.couponRepo.Update(ctx, a.db, c)
 }
 
 func (a *couponApp) GenerateCouponCodes(ctx context.Context, req GenerateCouponCodesRequest) (*GenerateCouponCodesResponse, error) {
@@ -375,6 +436,71 @@ func (a *couponApp) IssueCouponToUser(ctx context.Context, req IssueCouponToUser
 		CouponCode:   c.Code,
 		ExpireAt:     c.EndAt.Format(time.RFC3339),
 	}, nil
+}
+
+func (a *couponApp) BatchIssueCouponToUser(ctx context.Context, req BatchIssueCouponToUserRequest) (*BatchIssueCouponToUserResponse, error) {
+	if len(req.UserIDs) == 0 {
+		return nil, code.ErrCouponUserIDRequired
+	}
+
+	// Validate the coupon once before touching the DB transaction. Cheap, and
+	// avoids opening a transaction just to bail.
+	c, err := a.couponRepo.FindByID(ctx, a.db, req.CouponID)
+	if err != nil {
+		return nil, err
+	}
+	if !c.IsActive() {
+		return nil, code.ErrCouponNotActive
+	}
+	if c.TotalCount > 0 && int64(c.UsedCount)+int64(len(req.UserIDs)) > int64(c.TotalCount) {
+		return nil, code.ErrCouponUserLimitReached
+	}
+
+	// Deduplicate user IDs up front so the same person doesn't get two rows
+	// if the caller slips a duplicate in.
+	seen := make(map[int64]struct{}, len(req.UserIDs))
+	unique := make([]int64, 0, len(req.UserIDs))
+	for _, uid := range req.UserIDs {
+		if _, ok := seen[uid]; ok {
+			continue
+		}
+		seen[uid] = struct{}{}
+		unique = append(unique, uid)
+	}
+
+	ids := make([]int64, 0, len(unique))
+	err = a.db.Transaction(func(tx *gorm.DB) error {
+		for _, uid := range unique {
+			id, err := a.idGen.NextID(ctx)
+			if err != nil {
+				return err
+			}
+			userCoupon := &pkgcoupon.UserCoupon{
+				ID:         id,
+				UserID:     uid,
+				CouponID:   c.ID,
+				Status:     pkgcoupon.UserCouponStatusUnused,
+				ReceivedAt: time.Now().UTC(),
+				ExpireAt:   c.EndAt,
+			}
+			if err := a.userCouponRepo.Create(ctx, tx, userCoupon); err != nil {
+				return err
+			}
+			// Increment one-by-one so the row count tracks correctly. If any
+			// step fails, the surrounding transaction rolls everything back.
+			if err := a.couponRepo.IncrementUsage(ctx, tx, c.ID); err != nil {
+				return err
+			}
+			ids = append(ids, id)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &BatchIssueCouponToUserResponse{UserCouponIDs: ids}, nil
 }
 
 func (a *couponApp) ListUserCoupons(ctx context.Context, userID int64, status pkgcoupon.UserCouponStatus, page, pageSize int) (*UserCouponListResponse, error) {

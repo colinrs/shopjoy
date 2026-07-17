@@ -242,11 +242,21 @@
             </el-table-column>
             <el-table-column
               :label="$t('promotions.statusColumn')"
-              width="100"
+              width="120"
               align="center"
             >
               <template #default="{ row }">
+                <el-switch
+                  v-if="row.status === 'active' || row.status === 'inactive'"
+                  :model-value="row.status === 'active'"
+                  :loading="couponToggleLoading[row.id] === true"
+                  :active-text="$t('promotions.activatedStatus')"
+                  :inactive-text="$t('promotions.unactivated')"
+                  inline-prompt
+                  @change="(val: boolean) => handleToggleCouponStatus(row, val)"
+                />
                 <el-tag
+                  v-else
                   :type="getCouponStatusType(row.status)"
                   effect="light"
                   size="small"
@@ -598,7 +608,7 @@
         </el-form-item>
         <el-form-item
           :label="couponForm.type === 'fixed_amount' ? $t('promotions.discountAmount') : $t('promotions.discountRatio')"
-          prop="discount_value"
+          prop="discount_value_num"
         >
           <el-input-number
             v-model="couponForm.discount_value_num"
@@ -740,7 +750,7 @@
         </el-form-item>
         <el-form-item
           :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')"
-          prop="discount_value"
+          prop="discount_value_num"
         >
           <el-input-number
             v-model="promotionForm.discount_value_num"
@@ -1001,11 +1011,38 @@
           :label="$t('promotions.userId')"
           required
         >
-          <el-input
-            v-model="issueForm.user_id"
-            :placeholder="$t('promotions.enterUserId')"
+          <el-select
+            v-model="issueForm.selectedUsers"
+            multiple
+            filterable
+            remote
+            :remote-method="searchIssueUsers"
+            :loading="issueSearchLoading"
+            :placeholder="$t('promotions.searchUserPlaceholder')"
             style="width: 100%"
-          />
+            value-key="id"
+            @change="onIssueUserSelectionChange"
+          >
+            <el-option
+              v-for="u in issueUserOptions"
+              :key="u.id"
+              :label="formatUserOptionLabel(u)"
+              :value="u"
+            >
+              <div class="user-option">
+                <div class="user-option-main">
+                  <span class="user-email">{{ u.email }}</span>
+                  <span class="user-name">{{ u.name }}</span>
+                </div>
+                <div
+                  v-if="u.phone"
+                  class="user-phone"
+                >
+                  {{ u.phone }}
+                </div>
+              </div>
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1031,13 +1068,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Ticket, CircleCheck, User, Search, Plus, Present, DocumentCopy } from '@element-plus/icons-vue'
 import {
   getCouponList, createCoupon, updateCoupon, deleteCoupon,
+  activateCoupon, deactivateCoupon,
   getPromotionList, createPromotion, updatePromotion, deletePromotion,
   activatePromotion, deactivatePromotion, getCouponUsage,
-  generateCouponCodes, issueUserCoupon,
+  generateCouponCodes, issueUserCoupon, batchIssueUserCoupon,
   type Coupon, type Promotion, type CouponUsage,
   type CouponStatus, type CouponType, type PromotionStatus, type PromotionType,
   type GenerateCouponCodesRequest
 } from '@/api/promotion'
+import { getUserList, type User as UserAccount } from '@/api/user'
 import TablePagination from '@/components/common/TablePagination.vue'
 import StatsCard from '@/components/common/StatsCard.vue'
 import { t } from '@/plugins/i18n'
@@ -1115,7 +1154,7 @@ const generatedCodes = ref<string[]>([])
 const issueDialogVisible = ref(false)
 const issueLoading = ref(false)
 const issueForm = reactive({
-  user_id: '' as string,
+  selectedUsers: [] as UserAccount[],
   coupon_id: '' as string,
   coupon_name: ''
 })
@@ -1139,11 +1178,16 @@ const couponForm = reactive({
   dateRange: [] as string[]
 })
 
+// Issue-coupon dialog state
+const issueUserOptions = ref<UserAccount[]>([])
+const issueSearchLoading = ref(false)
+let issueSearchSeq = 0
+
 const couponRules = {
   name: [{ required: true, message: t('promotions.enterCouponName'), trigger: 'blur' }],
   code: [{ required: true, message: t('promotions.enterCouponCode'), trigger: 'blur' }],
   type: [{ required: true, message: t('promotions.selectCouponType'), trigger: 'change' }],
-  discount_value: [{ required: true, message: t('promotions.enterDiscountValue'), trigger: 'blur' }],
+  discount_value_num: [{ required: true, message: t('promotions.enterDiscountValue'), trigger: 'blur' }],
   dateRange: [{ required: true, message: t('promotions.selectValidityPeriod'), trigger: 'change' }]
 }
 
@@ -1167,6 +1211,7 @@ const promotionRules = {
   name: [{ required: true, message: t('promotions.enterPromotionName'), trigger: 'blur' }],
   type: [{ required: true, message: t('promotions.selectPromotionType'), trigger: 'change' }],
   discount_type: [{ required: true, message: t('promotions.selectDiscountType'), trigger: 'change' }],
+  discount_value_num: [{ required: true, message: t('promotions.enterDiscountValue'), trigger: 'blur' }],
   dateRange: [{ required: true, message: t('promotions.selectValidityPeriod'), trigger: 'change' }]
 }
 
@@ -1382,25 +1427,73 @@ const handleDeleteCoupon = async (row: Coupon) => {
 }
 
 const handleIssueToUser = (row: Coupon) => {
-  issueForm.user_id = ''
+  issueForm.selectedUsers = []
   issueForm.coupon_id = row.id
   issueForm.coupon_name = row.name
+  issueUserOptions.value = []
   issueDialogVisible.value = true
 }
 
+const searchIssueUsers = async (query: string) => {
+  const mySeq = ++issueSearchSeq
+  issueSearchLoading.value = true
+  try {
+    const res = await getUserList({
+      page: 1,
+      page_size: 20,
+      keyword: query || undefined,
+      // Pass phone too so a bare phone search (no keyword) still works.
+      phone: /^\d+$/.test(query) ? query : undefined
+    })
+    // Discard stale responses if the user kept typing.
+    if (mySeq !== issueSearchSeq) return
+    issueUserOptions.value = res.list || []
+  } catch (error) {
+    handleError(error, t('promotions.searchUserFailed'))
+  } finally {
+    if (mySeq === issueSearchSeq) issueSearchLoading.value = false
+  }
+}
+
+const onIssueUserSelectionChange = (selected: UserAccount[]) => {
+  // Keep the option list populated with currently-selected users so they
+  // remain visible as "selected chips" even after a fresh search runs.
+  const known = new Map(issueUserOptions.value.map(u => [u.id, u]))
+  for (const u of selected) {
+    if (!known.has(u.id)) known.set(u.id, u)
+  }
+  issueUserOptions.value = Array.from(known.values())
+}
+
+const formatUserOptionLabel = (u: UserAccount) => {
+  // Shown inside the collapsed selection chips.
+  return u.name ? `${u.email} (${u.name})` : u.email
+}
+
 const handleConfirmIssue = async () => {
-  if (!issueForm.user_id) {
-    ElMessage.warning(t('promotions.enterUserId'))
+  if (issueForm.selectedUsers.length === 0) {
+    ElMessage.warning(t('promotions.selectAtLeastOneUser'))
     return
   }
 
   issueLoading.value = true
   try {
-    await issueUserCoupon({
-      user_id: issueForm.user_id,
-      coupon_id: issueForm.coupon_id
-    })
-    ElMessage.success(t('promotions.issueSuccess'))
+    const userIds = issueForm.selectedUsers.map(u => u.id)
+    if (userIds.length === 1) {
+      // Keep the single-user path on the legacy endpoint to avoid churn for
+      // the bulk path when only one row is selected.
+      await issueUserCoupon({
+        user_id: userIds[0],
+        coupon_id: issueForm.coupon_id
+      })
+      ElMessage.success(t('promotions.issueSuccess'))
+    } else {
+      const res = await batchIssueUserCoupon({
+        coupon_id: issueForm.coupon_id,
+        user_ids: userIds
+      })
+      ElMessage.success(t('promotions.batchIssueSuccess', { count: res.issued }))
+    }
     issueDialogVisible.value = false
   } catch (error) {
     handleError(error, t('promotions.issueFailed'))
@@ -1532,6 +1625,34 @@ const handleAddPromotion = () => {
 
 const handleEditPromotion = (row: Promotion) => {
   router.push(`/promotions/${row.id}`)
+}
+
+const couponToggleLoading = reactive<Record<string, boolean>>({})
+
+const handleToggleCouponStatus = async (row: Coupon, nextActive: boolean) => {
+  const wasActive = row.status === 'active'
+  // Optimistic flip so the switch doesn't visually snap back on slow networks.
+  row.status = nextActive ? 'active' : 'inactive'
+  couponToggleLoading[row.id] = true
+  try {
+    if (nextActive) {
+      await activateCoupon(row.id)
+      ElMessage.success(t('promotions.activateSuccess'))
+    } else {
+      await deactivateCoupon(row.id)
+      ElMessage.success(t('promotions.deactivateSuccess'))
+    }
+    loadCoupons()
+  } catch (error) {
+    // Revert on failure so the UI matches server state.
+    row.status = wasActive ? 'active' : 'inactive'
+    handleError(
+      error,
+      nextActive ? t('promotions.activateCouponFailed') : t('promotions.deactivateCouponFailed')
+    )
+  } finally {
+    couponToggleLoading[row.id] = false
+  }
 }
 
 const handleActivatePromotion = async (row: Promotion) => {

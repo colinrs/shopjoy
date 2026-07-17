@@ -325,6 +325,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: coupons.DeleteCouponHandler(serverCtx),
 				},
 				{
+					// 激活优惠券
+					Method:  http.MethodPost,
+					Path:    "/api/v1/coupons/:id/activate",
+					Handler: coupons.ActivateCouponHandler(serverCtx),
+				},
+				{
+					// 停用优惠券
+					Method:  http.MethodPost,
+					Path:    "/api/v1/coupons/:id/deactivate",
+					Handler: coupons.DeactivateCouponHandler(serverCtx),
+				},
+				{
 					// 获取优惠券使用记录
 					Method:  http.MethodGet,
 					Path:    "/api/v1/coupons/:id/usage",
@@ -1739,6 +1751,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/api/v1/user-coupons",
 					Handler: user_coupons.ListUserCouponsHandler(serverCtx),
+				},
+				{
+					// 批量发放优惠券
+					Method:  http.MethodPost,
+					Path:    "/api/v1/user-coupons/batch",
+					Handler: user_coupons.BatchIssueUserCouponHandler(serverCtx),
 				},
 			}...,
 		),

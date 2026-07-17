@@ -25,6 +25,7 @@ type (
 		PageSize int    `form:"page_size,default=20"`
 		Name     string `form:"name,optional"`
 		Email    string `form:"email,optional"`
+		Phone    string `form:"phone,optional"`
 		Status   int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 		Keyword  string `form:"keyword,optional"`
 	}

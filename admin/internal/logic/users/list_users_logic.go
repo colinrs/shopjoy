@@ -32,9 +32,11 @@ func (l *ListUsersLogic) ListUsers(req *types.ListUsersRequest) (resp *types.Lis
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name:   req.Name,
-		Email:  req.Email,
-		Status: domainUser.Status(req.Status),
+		Name:    req.Name,
+		Email:   req.Email,
+		Phone:   req.Phone,
+		Status:  domainUser.Status(req.Status),
+		Keyword: req.Keyword,
 	}
 
 	listResp, err := l.svcCtx.UserService.List(l.ctx, queryReq)

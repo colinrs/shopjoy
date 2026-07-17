@@ -92,6 +92,11 @@ func (r *UserRepository) FindList(ctx context.Context, db *gorm.DB, query user.Q
 	if query.Status != 0 {
 		dbQuery = dbQuery.Where("status = ?", query.Status)
 	}
+	if query.Keyword != "" {
+		// Fuzzy match across name, email, phone — used by search-as-you-type.
+		kw := "%" + query.Keyword + "%"
+		dbQuery = dbQuery.Where("name LIKE ? OR email LIKE ? OR phone LIKE ?", kw, kw, kw)
+	}
 
 	if err := dbQuery.Count(&total).Error; err != nil {
 		return nil, 0, err

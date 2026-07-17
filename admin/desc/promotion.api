@@ -219,6 +219,12 @@ type (
 	DeleteCouponReq {
 		ID int64 `path:"id"`
 	}
+	ActivateCouponReq {
+		ID int64 `path:"id"`
+	}
+	DeactivateCouponReq {
+		ID int64 `path:"id"`
+	}
 	GenerateCouponCodesReq {
 		Prefix       string `json:"prefix,optional"`
 		Quantity     int    `json:"quantity"`
@@ -255,6 +261,14 @@ type (
 	}
 	IssueUserCouponResp {
 		ID int64 `json:"id,string"`
+	}
+	BatchIssueUserCouponReq {
+		CouponID int64   `json:"coupon_id,string"`
+		UserIDs  []int64 `json:"user_ids"`
+	}
+	BatchIssueUserCouponResp {
+		Issued        int64   `json:"issued"`
+		UserCouponIDs []int64 `json:"user_coupon_ids"`
 	}
 	ListUserCouponsReq {
 		UserID   int64  `form:"user_id,optional"`
@@ -364,6 +378,14 @@ service admin-api {
 	@handler DeleteCouponHandler
 	delete /api/v1/coupons/:id (DeleteCouponReq) returns (CreateCouponResp)
 
+	@doc "激活优惠券"
+	@handler ActivateCouponHandler
+	post /api/v1/coupons/:id/activate (ActivateCouponReq) returns (CouponDetailResp)
+
+	@doc "停用优惠券"
+	@handler DeactivateCouponHandler
+	post /api/v1/coupons/:id/deactivate (DeactivateCouponReq) returns (CouponDetailResp)
+
 	@doc "批量生成优惠券码"
 	@handler GenerateCouponCodesHandler
 	post /api/v1/coupons/generate (GenerateCouponCodesReq) returns (GenerateCouponCodesResp)
@@ -381,6 +403,10 @@ service admin-api {
 	@doc "发放优惠券给用户"
 	@handler IssueUserCouponHandler
 	post /api/v1/user-coupons (IssueUserCouponReq) returns (IssueUserCouponResp)
+
+	@doc "批量发放优惠券"
+	@handler BatchIssueUserCouponHandler
+	post /api/v1/user-coupons/batch (BatchIssueUserCouponReq) returns (BatchIssueUserCouponResp)
 
 	@doc "获取用户优惠券列表"
 	@handler ListUserCouponsHandler

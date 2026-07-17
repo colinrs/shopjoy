@@ -39,8 +39,10 @@ func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *type
 
 	updateReq := apppromotion.UpdateCouponRequest{
 		ID:           req.ID,
+		Code:         req.Code,
 		Name:         req.Name,
 		Description:  req.Description,
+		Value:        parseMoneyToDecimal(req.DiscountValue),
 		MinAmount:    parseMoneyToDecimal(req.MinOrderAmount),
 		MaxDiscount:  parseMoneyToDecimal(req.MaxDiscount),
 		TotalCount:   req.UsageLimit,

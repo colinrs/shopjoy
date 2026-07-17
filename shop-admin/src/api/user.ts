@@ -67,6 +67,7 @@ export interface ListUsersParams {
   page_size: number
   name?: string
   email?: string
+  phone?: string
   status?: UserStatus
   keyword?: string
   // Enhanced filters

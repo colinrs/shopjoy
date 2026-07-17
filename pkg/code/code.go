@@ -156,6 +156,8 @@ var (
 	ErrCouponTimeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 70015, Msg: "coupon start time and end time are required"}
 	ErrCouponInvalidTimeRange = &Err{HTTPCode: http.StatusBadRequest, Code: 70016, Msg: "coupon start time must be before end time"}
 	ErrCouponNotActive        = &Err{HTTPCode: http.StatusBadRequest, Code: 70017, Msg: "coupon is not active"}
+	ErrCouponCannotUpdate     = &Err{HTTPCode: http.StatusBadRequest, Code: 70018, Msg: "cannot update active coupon"}
+	ErrCouponUserIDRequired   = &Err{HTTPCode: http.StatusBadRequest, Code: 70019, Msg: "at least one user id is required"}
 
 	// UserCoupon errors (70xxx - 701xx)
 	ErrUserCouponNotFound    = &Err{HTTPCode: http.StatusNotFound, Code: 70101, Msg: "user coupon not found"}

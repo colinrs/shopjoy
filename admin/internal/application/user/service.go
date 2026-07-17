@@ -59,10 +59,11 @@ type UserListResponse struct {
 
 type QueryRequest struct {
 	shared.PageQuery
-	Name   string
-	Email  string
-	Phone  string
-	Status domain.Status
+	Name    string
+	Email   string
+	Phone   string
+	Status  domain.Status
+	Keyword string // Fuzzy match across Name, Email, Phone
 }
 
 type UserStatsResponse struct {

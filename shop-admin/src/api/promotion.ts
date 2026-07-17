@@ -301,6 +301,16 @@ export interface IssueUserCouponResponse {
   id: string
 }
 
+export interface BatchIssueUserCouponRequest {
+  coupon_id: string
+  user_ids: string[]
+}
+
+export interface BatchIssueUserCouponResponse {
+  issued: number
+  user_coupon_ids: string[]
+}
+
 // ==================== Promotion API Functions ====================
 
 export function getPromotionList(params: ListPromotionsParams) {
@@ -427,6 +437,20 @@ export function deleteCoupon(id: string) {
   })
 }
 
+export function activateCoupon(id: string) {
+  return request<Coupon>({
+    url: `/api/v1/coupons/${id}/activate`,
+    method: 'post'
+  })
+}
+
+export function deactivateCoupon(id: string) {
+  return request<Coupon>({
+    url: `/api/v1/coupons/${id}/deactivate`,
+    method: 'post'
+  })
+}
+
 export function generateCouponCodes(data: GenerateCouponCodesRequest) {
   return request<GenerateCouponCodesResponse>({
     url: '/api/v1/coupons/generate',
@@ -456,6 +480,14 @@ export function getUserCouponList(params: ListUserCouponsParams) {
 export function issueUserCoupon(data: IssueUserCouponRequest) {
   return request<IssueUserCouponResponse>({
     url: '/api/v1/user-coupons',
+    method: 'post',
+    data
+  })
+}
+
+export function batchIssueUserCoupon(data: BatchIssueUserCouponRequest) {
+  return request<BatchIssueUserCouponResponse>({
+    url: '/api/v1/user-coupons/batch',
     method: 'post',
     data
   })

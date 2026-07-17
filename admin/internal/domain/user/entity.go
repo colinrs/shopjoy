@@ -116,10 +116,11 @@ type Repository interface {
 
 type Query struct {
 	shared.PageQuery
-	Name   string
-	Email  string
-	Phone  string
-	Status Status
+	Name    string
+	Email   string
+	Phone   string
+	Status  Status
+	Keyword string // Fuzzy match across Name, Email, Phone (LIKE %kw%)
 }
 
 type Stats struct {

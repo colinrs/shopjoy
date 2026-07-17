@@ -9,6 +9,10 @@ type AccountsStats struct {
 	Active       int64 `json:"active"`
 }
 
+type ActivateCouponReq struct {
+	ID int64 `path:"id"`
+}
+
 type ActivateEarnRuleReq struct {
 	ID int64 `path:"id"`
 }
@@ -194,6 +198,16 @@ type BatchHideResp struct {
 	SuccessCount int      `json:"success_count"`
 	FailedCount  int      `json:"failed_count"`
 	Errors       []string `json:"errors"`
+}
+
+type BatchIssueUserCouponReq struct {
+	CouponID int64   `json:"coupon_id,string"`
+	UserIDs  []int64 `json:"user_ids"`
+}
+
+type BatchIssueUserCouponResp struct {
+	Issued        int64   `json:"issued"`
+	UserCouponIDs []int64 `json:"user_coupon_ids"`
 }
 
 type BatchProductFail struct {
@@ -769,6 +783,10 @@ type DashboardOverviewResponse struct {
 	TotalUsers     int64  `json:"total_users"`
 	NewUsersToday  int64  `json:"new_users_today"`
 	Currency       string `json:"currency"`
+}
+
+type DeactivateCouponReq struct {
+	ID int64 `path:"id"`
 }
 
 type DeactivateEarnRuleReq struct {
@@ -1794,6 +1812,7 @@ type ListUsersRequest struct {
 	PageSize int    `form:"page_size,default=20"`
 	Name     string `form:"name,optional"`
 	Email    string `form:"email,optional"`
+	Phone    string `form:"phone,optional"`
 	Status   int    `form:"status,optional"` // 0=inactive, 1=active, 2=suspended, 3=deleted
 	Keyword  string `form:"keyword,optional"`
 }
