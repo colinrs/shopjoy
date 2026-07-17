@@ -70,10 +70,13 @@ type CouponListResponse struct {
 }
 
 // QueryCouponRequest 查询优惠券请求
+// Status and Type are pointers: nil means "no filter". Using pointers because
+// CouponStatusInactive (0) and CouponTypeFixedAmount (0) are both valid enum
+// values — a value-type zero sentinel would silently drop those filters.
 type QueryCouponRequest struct {
 	Name     string
-	Status   pkgcoupon.CouponStatus
-	Type     pkgcoupon.CouponType
+	Status   *pkgcoupon.CouponStatus
+	Type     *pkgcoupon.CouponType
 	Page     int
 	PageSize int
 }
@@ -252,13 +255,9 @@ func (a *couponApp) ListCoupons(ctx context.Context, req QueryCouponRequest) (*C
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name: req.Name,
-	}
-	if req.Status != 0 {
-		query.Status = &req.Status
-	}
-	if req.Type != 0 {
-		query.Type = &req.Type
+		Name:   req.Name,
+		Status: req.Status,
+		Type:   req.Type,
 	}
 	query.PageQuery.Validate()
 

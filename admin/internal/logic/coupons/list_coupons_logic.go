@@ -28,10 +28,20 @@ func (l *ListCouponsLogic) ListCoupons(req *types.ListCouponsReq) (resp *types.L
 
 	queryReq := apppromotion.QueryCouponRequest{
 		Name:     req.Name,
-		Type:     mapCouponType(req.Type),
-		Status:   mapCouponStatusToInt(req.Status),
 		Page:     req.Page,
 		PageSize: req.PageSize,
+	}
+	// Only set the typed filters when the caller actually supplied a value.
+	// mapCouponType("") and mapCouponStatusToInt("") both return zero-valued
+	// enums (CouponTypeFixedAmount / CouponStatusInactive) which are valid
+	// filter values, so we cannot rely on zero-detection downstream.
+	if req.Type != "" {
+		t := mapCouponType(req.Type)
+		queryReq.Type = &t
+	}
+	if req.Status != "" {
+		s := mapCouponStatusToInt(req.Status)
+		queryReq.Status = &s
 	}
 
 	listResp, err := l.svcCtx.CouponApp.ListCoupons(l.ctx, queryReq)
