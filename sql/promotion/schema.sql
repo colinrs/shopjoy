@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     `scope_type` VARCHAR(32) NOT NULL DEFAULT 'STOREWIDE' COMMENT '范围类型',
     `scope_ids` JSON DEFAULT NULL COMMENT '范围ID列表',
     `exclude_ids` JSON DEFAULT NULL COMMENT '排除ID列表',
+    `usage_limit` INT NOT NULL DEFAULT 0 COMMENT '0 = unlimited',
+    `per_user_limit` INT NOT NULL DEFAULT 1 COMMENT 'per-user cap; 0 = unlimited',
+    `tags` JSON DEFAULT NULL COMMENT 'free-form labels, stored as JSON array of strings',
     `start_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '开始时间',
     `end_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '结束时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
@@ -30,17 +33,10 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     KEY `idx_active` (`status`, `currency`, `start_at`, `end_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='促销活动表';
 
--- 2026-07-18: add usage_limit / per_user_limit / tags (commit 16488ce)
+-- usage_limit / per_user_limit / tags added 2026-07-18.
 -- These columns back the wire-level fields that were previously
 -- dropped between the API edge and the DB layer. Defaults chosen so
 -- existing rows behave as "unlimited" without backfill.
-ALTER TABLE promotions
-    ADD COLUMN usage_limit    INT     NOT NULL DEFAULT 0
-        COMMENT '0 = unlimited',
-    ADD COLUMN per_user_limit INT     NOT NULL DEFAULT 1
-        COMMENT 'per-user cap; 0 = unlimited',
-    ADD COLUMN tags           JSON    NULL
-        COMMENT 'free-form labels, stored as JSON array of strings';
 
 -- ============================================
 -- 促销规则表 (promotion_rules)
