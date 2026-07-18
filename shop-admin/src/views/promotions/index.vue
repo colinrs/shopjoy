@@ -483,7 +483,7 @@
             >
               <template #default="{ row }">
                 <el-switch
-                  v-if="row.status === 'active' || row.status === 'pending' || row.status === 'paused'"
+                  v-if="['active', 'pending', 'paused', 'inactive'].includes(row.status)"
                   :model-value="row.status === 'active'"
                   :loading="promotionToggleLoading[row.id] === true"
                   :active-text="$t('promotions.activatedStatus')"
