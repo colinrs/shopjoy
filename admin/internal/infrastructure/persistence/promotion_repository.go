@@ -384,6 +384,20 @@ func (r *promotionRepo) FindRulesByPromotionID(ctx context.Context, db *gorm.DB,
 	return rules, nil
 }
 
+// FindRuleByID finds a single promotion rule by its ID
+func (r *promotionRepo) FindRuleByID(ctx context.Context, db *gorm.DB, id int64) (*promotion.PromotionRule, error) {
+	var model promotionRuleModel
+	err := db.WithContext(ctx).First(&model, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, code.ErrPromotionRuleNotFound
+		}
+		return nil, err
+	}
+	entity := model.toEntity()
+	return &entity, nil
+}
+
 // FindRulesByPromotionIDs finds all rules for multiple promotions in a single query
 func (r *promotionRepo) FindRulesByPromotionIDs(ctx context.Context, db *gorm.DB, promotionIDs []int64) (map[int64][]promotion.PromotionRule, error) {
 	if len(promotionIDs) == 0 {

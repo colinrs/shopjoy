@@ -3,6 +3,7 @@ package promotions
 import (
 	"context"
 
+	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 
@@ -24,18 +25,28 @@ func NewUpdatePromotionRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *UpdatePromotionRuleLogic) UpdatePromotionRule(req *types.UpdatePromotionRuleReq) (resp *types.PromotionRuleResp, err error) {
-	// Get tenantID from context
+	updateReq := apppromotion.UpdatePromotionRuleRequest{
+		ConditionType:  mapConditionType(req.RuleType),
+		ConditionValue: parseMoneyToDecimal(req.Value),
+		ActionType:     mapDiscountActionType(req.DiscountType),
+		ActionValue:    parseMoneyToDecimal(req.DiscountValue),
+	}
 
-	// Note: This would require additional implementation in the app service
-	// For now, return the updated rule
+	ruleResp, err := l.svcCtx.PromotionApp.UpdatePromotionRule(l.ctx, req.ID, updateReq)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.PromotionRuleResp{
-		ID:            req.ID,
-		RuleType:      req.RuleType,
-		Operator:      req.Operator,
-		Value:         req.Value,
-		DiscountType:  req.DiscountType,
-		DiscountValue: req.DiscountValue,
-		Priority:      req.Priority,
+		ID:            ruleResp.ID,
+		PromotionID:   ruleResp.PromotionID,
+		RuleType:      mapConditionTypeToString(ruleResp.ConditionType),
+		Operator:      "gte",
+		Value:         ruleResp.ConditionValue.StringFixed(2),
+		DiscountType:  mapActionTypeIntToString(ruleResp.ActionType),
+		DiscountValue: ruleResp.ActionValue.StringFixed(2),
+		Priority:      0,
+		CreatedAt:     "",
+		UpdatedAt:     "",
 	}, nil
 }

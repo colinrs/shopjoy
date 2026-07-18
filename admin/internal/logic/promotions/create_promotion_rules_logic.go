@@ -3,9 +3,9 @@ package promotions
 import (
 	"context"
 
+	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -26,44 +26,21 @@ func NewCreatePromotionRulesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromotionRulesReq) (resp *types.CreatePromotionRulesResp, err error) {
-	// Get tenantID from context
+	ruleReqs := make([]apppromotion.CreatePromotionRuleRequest, 0, len(req.Rules))
 
-	// Get existing promotion
-	p, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, req.PromotionID)
+	for _, ruleReq := range req.Rules {
+		ruleReqs = append(ruleReqs, apppromotion.CreatePromotionRuleRequest{
+			ConditionType:  mapConditionType(ruleReq.RuleType),
+			ConditionValue: parseMoneyToDecimal(ruleReq.Value),
+			ActionType:     mapDiscountActionType(ruleReq.DiscountType),
+			ActionValue:    parseMoneyToDecimal(ruleReq.DiscountValue),
+		})
+	}
+
+	ids, err := l.svcCtx.PromotionApp.CreatePromotionRules(l.ctx, req.PromotionID, ruleReqs)
 	if err != nil {
 		return nil, err
 	}
-
-	// Convert rules
-	rules := make([]pkgpromotion.PromotionRule, 0, len(req.Rules))
-	ids := make([]int64, 0, len(req.Rules))
-
-	for _, ruleReq := range req.Rules {
-		id, err := l.svcCtx.IDGen.NextID(l.ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		rule := pkgpromotion.PromotionRule{
-			ID:            id,
-			PromotionID:   req.PromotionID,
-			ConditionType: mapConditionType(ruleReq.RuleType),
-			ActionType:    mapDiscountActionType(ruleReq.DiscountType),
-		}
-
-		// Parse condition value
-		rule.ConditionValue = parseMoneyToDecimal(ruleReq.Value)
-
-		// Parse action value
-		rule.ActionValue = parseMoneyToDecimal(ruleReq.DiscountValue)
-
-		rules = append(rules, rule)
-		ids = append(ids, id)
-	}
-
-	// Update promotion with new rules (this would require adding a method to the app service)
-	// For now, we return the IDs
-	_ = p // promotion retrieved for validation
 
 	return &types.CreatePromotionRulesResp{
 		IDs: utils.FormatInt64Slice(ids),

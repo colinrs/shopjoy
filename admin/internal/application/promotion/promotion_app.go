@@ -73,6 +73,15 @@ type CreatePromotionRuleRequest struct {
 	MaxDiscount    decimal.Decimal
 }
 
+// UpdatePromotionRuleRequest 更新促销规则请求
+type UpdatePromotionRuleRequest struct {
+	ConditionType  pkgpromotion.ConditionType
+	ConditionValue decimal.Decimal
+	ActionType     pkgpromotion.ActionType
+	ActionValue    decimal.Decimal
+	MaxDiscount    decimal.Decimal
+}
+
 // UpdatePromotionRequest 更新促销请求
 //
 // The previous version of this struct only carried Name / Description /
@@ -167,6 +176,8 @@ type PromotionApp interface {
 	DeletePromotion(ctx context.Context, id int64) error
 	ActivatePromotion(ctx context.Context, id int64) error
 	DeactivatePromotion(ctx context.Context, id int64) error
+	UpdatePromotionRule(ctx context.Context, ruleID int64, req UpdatePromotionRuleRequest) (*PromotionRuleResponse, error)
+	CreatePromotionRules(ctx context.Context, promotionID int64, reqs []CreatePromotionRuleRequest) ([]int64, error)
 }
 
 type promotionApp struct {
@@ -497,4 +508,67 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		CreatedAt:    p.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:    p.Audit.UpdatedAt.Format(time.RFC3339),
 	}
+}
+
+func (a *promotionApp) UpdatePromotionRule(ctx context.Context, ruleID int64, req UpdatePromotionRuleRequest) (*PromotionRuleResponse, error) {
+	rule, err := a.promotionRepo.FindRuleByID(ctx, a.db, ruleID)
+	if err != nil {
+		return nil, err
+	}
+
+	rule.ConditionType = req.ConditionType
+	rule.ConditionValue = req.ConditionValue
+	rule.ActionType = req.ActionType
+	rule.ActionValue = req.ActionValue
+	rule.MaxDiscount = req.MaxDiscount
+	rule.UpdatedAt = time.Now().UTC()
+
+	if err := a.promotionRepo.UpdateRule(ctx, a.db, rule); err != nil {
+		return nil, err
+	}
+
+	return &PromotionRuleResponse{
+		ID:             rule.ID,
+		PromotionID:    rule.PromotionID,
+		ConditionType:  int(rule.ConditionType),
+		ConditionValue: rule.ConditionValue,
+		ActionType:     int(rule.ActionType),
+		ActionValue:    rule.ActionValue,
+		MaxDiscount:    rule.MaxDiscount,
+	}, nil
+}
+
+func (a *promotionApp) CreatePromotionRules(ctx context.Context, promotionID int64, reqs []CreatePromotionRuleRequest) ([]int64, error) {
+	// Verify promotion exists
+	if _, err := a.promotionRepo.FindByID(ctx, a.db, promotionID); err != nil {
+		return nil, err
+	}
+
+	rules := make([]pkgpromotion.PromotionRule, 0, len(reqs))
+	ids := make([]int64, 0, len(reqs))
+
+	for _, req := range reqs {
+		id, err := a.idGen.NextID(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		rule := pkgpromotion.PromotionRule{
+			ID:             id,
+			PromotionID:    promotionID,
+			ConditionType:  req.ConditionType,
+			ConditionValue: req.ConditionValue,
+			ActionType:     req.ActionType,
+			ActionValue:    req.ActionValue,
+			MaxDiscount:    req.MaxDiscount,
+		}
+		rules = append(rules, rule)
+		ids = append(ids, id)
+	}
+
+	if err := a.promotionRepo.CreateRules(ctx, a.db, rules); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }
