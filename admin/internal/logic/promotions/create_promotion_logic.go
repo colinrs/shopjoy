@@ -46,7 +46,7 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 		Name:         req.Name,
 		Description:  req.Description,
 		Type:         promotionType,
-		Currency:     "CNY", // Default currency; wire type doesn't expose this field
+		Currency:     currencyWithDefault(req.Currency),
 		Scope:        buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs),
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
@@ -82,4 +82,15 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 	return &types.CreatePromotionResp{
 		ID: promotionResp.ID,
 	}, nil
+}
+
+// currencyWithDefault returns the wire-supplied currency or "CNY" if
+// the frontend omitted it. The DB column has DEFAULT 'CNY' and the
+// app layer rejects empty currency, so this default keeps the API
+// forgiving for older clients.
+func currencyWithDefault(c string) string {
+	if c == "" {
+		return "CNY"
+	}
+	return c
 }

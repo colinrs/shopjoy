@@ -98,6 +98,7 @@ type UpdatePromotionRequest struct {
 	Name         string
 	Description  string
 	Type         pkgpromotion.Type
+	Currency     string
 	Scope        pkgpromotion.PromotionScope
 	StartAt      time.Time
 	EndAt        time.Time

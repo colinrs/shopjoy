@@ -628,6 +628,7 @@ type CreatePromotionReq struct {
 	Name           string   `json:"name"`
 	Description    string   `json:"description,optional"`
 	Type           string   `json:"type"`                      // discount, coupon, flash_sale, bundle
+	Currency       string   `json:"currency,optional"`         // ISO 4217, defaults to CNY
 	StartTime      string   `json:"start_time"`                // RFC3339
 	EndTime        string   `json:"end_time"`                  // RFC3339
 	DiscountType   string   `json:"discount_type,optional"`    // percentage, fixed_amount, buy_x_get_y
@@ -3134,6 +3135,7 @@ type UpdatePromotionReq struct {
 	Name           string   `json:"name"`
 	Description    string   `json:"description,optional"`
 	Type           string   `json:"type"`
+	Currency       string   `json:"currency,optional"`
 	StartTime      string   `json:"start_time"`
 	EndTime        string   `json:"end_time"`
 	DiscountType   string   `json:"discount_type,optional"`

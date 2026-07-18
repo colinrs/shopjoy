@@ -78,6 +78,24 @@
                   </el-select>
                 </el-form-item>
               </el-col>
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item :label="$t('promotions.currency')">
+                  <el-select
+                    v-model="promotionForm.currency"
+                    style="width: 100%"
+                  >
+                    <el-option label="CNY" value="CNY" />
+                    <el-option label="USD" value="USD" />
+                    <el-option label="EUR" value="EUR" />
+                    <el-option label="JPY" value="JPY" />
+                    <el-option label="GBP" value="GBP" />
+                    <el-option label="SGD" value="SGD" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
             </el-row>
 
             <el-form-item :label="$t('promotions.promotionDescription')">
@@ -583,6 +601,7 @@ const promotionForm = reactive({
   name: '',
   description: '',
   type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
+  currency: 'CNY',
   dateRange: [] as string[],
   scope_type: 'storewide' as 'storewide' | 'products' | 'categories' | 'brands',
   product_ids: [] as string[],
@@ -610,6 +629,7 @@ const loadPromotion = async () => {
     promotionForm.name = res.name
     promotionForm.description = res.description || ''
     promotionForm.type = res.type as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
+    promotionForm.currency = res.currency || 'CNY'
     promotionForm.dateRange = [res.start_time, res.end_time]
     promotionForm.product_ids = res.product_ids || []
     promotionForm.category_ids = res.category_ids || []
@@ -658,6 +678,7 @@ const handleSave = async () => {
         name: promotionForm.name,
         description: promotionForm.description,
         type: promotionForm.type,
+        currency: promotionForm.currency,
         start_time: promotionForm.dateRange[0],
         end_time: promotionForm.dateRange[1],
         usage_limit: promotionForm.usage_limit,

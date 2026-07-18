@@ -53,6 +53,7 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 		Name:         req.Name,
 		Description:  req.Description,
 		Type:         mapPromotionType(req.Type),
+		Currency:     currencyWithDefault(req.Currency),
 		Scope:        scope,
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
