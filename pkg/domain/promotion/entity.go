@@ -241,10 +241,13 @@ type Promotion struct {
 	Priority    int              `json:"priority"`
 	StartAt     time.Time        `json:"start_at"`
 	EndAt       time.Time        `json:"end_at"`
-	Scope       PromotionScope   `json:"scope"`
-	Currency    string           `json:"currency"`
-	Rules       []PromotionRule  `json:"rules,omitempty"`
-	Audit       shared.AuditInfo `json:"audit"`
+	Scope        PromotionScope   `json:"scope"`
+	UsageLimit   int              `json:"usage_limit"`
+	PerUserLimit int              `json:"per_user_limit"`
+	Tags         []string         `json:"tags,omitempty" gorm:"type:json"`
+	Currency     string           `json:"currency"`
+	Rules        []PromotionRule  `json:"rules,omitempty"`
+	Audit        shared.AuditInfo `json:"audit"`
 	DeletedAt   *time.Time       `json:"deleted_at,omitempty"`
 }
 
