@@ -1,6 +1,7 @@
 package coupons
 
 import (
+	"strings"
 	"time"
 
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
@@ -80,6 +81,27 @@ func formatDecimalToString(v decimal.Decimal) string {
 	return v.StringFixed(2)
 }
 
+// buildCouponScope maps the wire-level scope hint onto the domain's
+// PromotionScope. product_ids / category_ids / market_ids on the
+// wire are JSON-stringified arrays; we don't currently decode them
+// because no coupon edit form binds them — a future form that does
+// can replace the Scope assignment here with the full mapping.
+//
+// Wire values are lowercase ("products", "categories", …); the
+// domain constants are uppercase ("PRODUCTS", …). Normalize via
+// strings.ToUpper before comparing to the enum.
+func buildCouponScope(scopeType string) pkgcoupon.PromotionScope {
+	switch strings.ToUpper(scopeType) {
+	case string(pkgcoupon.ScopeTypeProducts):
+		return pkgcoupon.PromotionScope{Type: pkgcoupon.ScopeTypeProducts}
+	case string(pkgcoupon.ScopeTypeCategories):
+		return pkgcoupon.PromotionScope{Type: pkgcoupon.ScopeTypeCategories}
+	case string(pkgcoupon.ScopeTypeBrands):
+		return pkgcoupon.PromotionScope{Type: pkgcoupon.ScopeTypeBrands}
+	}
+	return pkgcoupon.PromotionScope{Type: pkgcoupon.ScopeTypeStorewide}
+}
+
 // convertCouponToDetailResp converts the application-layer response to
 // the wire-format response. The status is computed: if the coupon is
 // past its EndAt, "expired" is returned regardless of the stored
@@ -104,6 +126,7 @@ func convertCouponToDetailResp(c *apppromotion.CouponResponse) *types.CouponDeta
 		UsedCount:      c.UsedCount,
 		PerUserLimit:   c.PerUserLimit,
 		Status:         status,
+		ScopeType:      c.ScopeType,
 		CreatedAt:      c.CreatedAt,
 		UpdatedAt:      c.UpdatedAt,
 	}

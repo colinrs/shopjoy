@@ -229,6 +229,13 @@ func (r *couponRepo) FindList(ctx context.Context, db *gorm.DB, query promotion.
 	if query.Type != nil && query.Type.IsValid() {
 		dbQuery = dbQuery.Where("type = ?", *query.Type)
 	}
+	if query.ExpiredOnly {
+		// "expired" is a derived wire status, not a stored enum value;
+		// filter on end_at <= NOW() so we don't rely on a column that
+		// never gets written to (CouponStatusExpired exists in the enum
+		// but isn't set by any background job today).
+		dbQuery = dbQuery.Where("end_at <= ?", time.Now().UTC())
+	}
 
 	var total int64
 	if err := dbQuery.Count(&total).Error; err != nil {

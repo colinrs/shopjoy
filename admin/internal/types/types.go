@@ -476,6 +476,7 @@ type CouponDetailResp struct {
 	CategoryIDs    string `json:"category_ids"`
 	MarketIDs      string `json:"market_ids"`
 	Status         string `json:"status"` // inactive, active, expired, depleted
+	ScopeType      string `json:"scope_type"`
 	CreatedAt      string `json:"created_at"`
 	UpdatedAt      string `json:"updated_at"`
 }
@@ -546,6 +547,7 @@ type CreateCouponReq struct {
 	ProductIDs     string `json:"product_ids,optional"`  // JSON array as string
 	CategoryIDs    string `json:"category_ids,optional"` // JSON array as string
 	MarketIDs      string `json:"market_ids,optional"`   // JSON array as string
+	ScopeType      string `json:"scope_type,optional"`   // storewide | products | categories | brands
 }
 
 type CreateCouponResp struct {
@@ -638,6 +640,7 @@ type CreatePromotionReq struct {
 	CategoryIDs    []string `json:"category_ids,optional"`
 	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
+	ScopeType      string   `json:"scope_type,optional"` // storewide | products | categories | brands
 }
 
 type CreatePromotionResp struct {
@@ -2198,7 +2201,7 @@ type PromotionDetailResp struct {
 	Name           string   `json:"name"`
 	Description    string   `json:"description"`
 	Type           string   `json:"type"`   // discount, coupon, flash_sale, bundle, buy_x_get_y
-	Status         string   `json:"status"` // pending, active, paused, ended
+	Status         string   `json:"status"` // pending, active, paused, ended, expired
 	StartTime      string   `json:"start_time"`
 	EndTime        string   `json:"end_time"`
 	DiscountType   string   `json:"discount_type"` // percentage, fixed_amount, buy_x_get_y
@@ -2212,8 +2215,11 @@ type PromotionDetailResp struct {
 	CategoryIDs    []string `json:"category_ids"`
 	MarketIDs      []string `json:"market_ids"`
 	Tags           []string `json:"tags"`
-	CreatedAt      string   `json:"created_at"`
-	UpdatedAt      string   `json:"updated_at"`
+	// ScopeType reflects the stored Scope.Type for the promotion and
+	// tells the frontend which ID array is authoritative.
+	ScopeType string `json:"scope_type"` // storewide | products | categories | brands
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type PromotionRuleReq struct {
@@ -3020,6 +3026,7 @@ type UpdateCouponReq struct {
 	ProductIDs     string `json:"product_ids,optional"`
 	CategoryIDs    string `json:"category_ids,optional"`
 	MarketIDs      string `json:"market_ids,optional"`
+	ScopeType      string `json:"scope_type,optional"`
 }
 
 type UpdateDecorationRequest struct {
@@ -3139,6 +3146,11 @@ type UpdatePromotionReq struct {
 	CategoryIDs    []string `json:"category_ids,optional"`
 	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
+	// ScopeType selects how ProductIDs/CategoryIDs map onto the
+	// promotion's stored Scope. Valid values: "storewide",
+	// "products", "categories", "brands". When empty, the logic
+	// layer derives it from the populated ID arrays.
+	ScopeType string `json:"scope_type,optional"`
 }
 
 type UpdatePromotionRuleReq struct {

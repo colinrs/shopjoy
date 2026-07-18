@@ -39,7 +39,11 @@ func (l *ListCouponsLogic) ListCoupons(req *types.ListCouponsReq) (resp *types.L
 		t := mapCouponType(req.Type)
 		queryReq.Type = &t
 	}
-	if req.Status != "" {
+	if req.Status == "expired" {
+		// "expired" is a derived wire status; translate it into an
+		// end_at-based filter rather than a status-column match.
+		queryReq.ExpiredOnly = true
+	} else if req.Status != "" {
 		s := mapCouponStatusToInt(req.Status)
 		queryReq.Status = &s
 	}

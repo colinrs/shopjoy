@@ -47,6 +47,7 @@ func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *type
 		MaxDiscount:  parseMoneyToDecimal(req.MaxDiscount),
 		TotalCount:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
+		Scope:        buildCouponScope(req.ScopeType),
 		StartAt:      startAt,
 		EndAt:        endAt,
 	}

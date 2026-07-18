@@ -1040,6 +1040,7 @@
     "buyXGetY": "买X送Y",
     "createPromotion": "创建促销活动",
     "editPromotion": "编辑促销活动",
+    "promotionDetail": "促销详情",
     "promotionName": "活动名称",
     "promotionDescription": "活动描述",
     "enterPromotionName": "请输入活动名称",

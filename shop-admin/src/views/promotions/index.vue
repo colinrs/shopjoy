@@ -119,6 +119,14 @@
                   :label="$t('promotions.activatedStatus')"
                   value="active"
                 />
+                <el-option
+                  :label="$t('promotions.depletedStatus')"
+                  value="depleted"
+                />
+                <el-option
+                  :label="$t('promotions.expiredStatus')"
+                  value="expired"
+                />
               </el-select>
               <el-select
                 v-model="couponParams.type"
@@ -360,6 +368,10 @@
                 <el-option
                   :label="$t('promotions.ended')"
                   value="ended"
+                />
+                <el-option
+                  :label="$t('promotions.expiredStatus')"
+                  value="expired"
                 />
               </el-select>
               <el-select

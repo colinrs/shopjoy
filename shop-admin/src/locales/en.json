@@ -1040,6 +1040,7 @@
     "buyXGetY": "Buy X Get Y",
     "createPromotion": "Create Promotion",
     "editPromotion": "Edit Promotion",
+    "promotionDetail": "Promotion Detail",
     "promotionName": "Promotion Name",
     "promotionDescription": "Promotion Description",
     "enterPromotionName": "Enter promotion name",

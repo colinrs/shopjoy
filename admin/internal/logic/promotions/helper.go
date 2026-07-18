@@ -85,17 +85,6 @@ func mapDiscountActionType(discountType string) pkgpromotion.ActionType {
 	return pkgpromotion.ActionFixedAmount
 }
 
-func mapActionTypeToString(actionType pkgpromotion.ActionType) string {
-	switch actionType {
-	case pkgpromotion.ActionPercentage:
-		return "percentage"
-	case pkgpromotion.ActionFixedAmount:
-		return "fixed_amount"
-	default:
-		return "fixed_amount"
-	}
-}
-
 func mapConditionType(ruleType string) pkgpromotion.ConditionType {
 	switch ruleType {
 	case "amount":
@@ -157,16 +146,43 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 	if isPromotionExpired(p.EndAt) {
 		status = "expired"
 	}
+
+	// DiscountType/DiscountValue/MinOrderAmount/MaxDiscount aren't
+	// stored on the Promotion row; they're stored as PromotionRules.
+	// Surface the first rule's values when present so the form
+	// re-renders correctly after the user refreshes.
+	var (
+		discountType, discountValue, minOrderAmount, maxDiscount string
+	)
+	if len(p.Rules) > 0 {
+		first := p.Rules[0]
+		discountType = mapActionTypeIntToString(first.ActionType)
+		if !first.ActionValue.IsZero() {
+			discountValue = first.ActionValue.StringFixed(2)
+		}
+		if pkgpromotion.ConditionType(first.ConditionType) == pkgpromotion.ConditionMinAmount && !first.ConditionValue.IsZero() {
+			minOrderAmount = first.ConditionValue.StringFixed(2)
+		}
+		if !first.MaxDiscount.IsZero() {
+			maxDiscount = first.MaxDiscount.StringFixed(2)
+		}
+	}
+
 	return &types.PromotionDetailResp{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Type:        mapPromotionTypeToString(pkgpromotion.Type(p.Type)),
-		Status:      status,
-		StartTime:   p.StartAt,
-		EndTime:     p.EndAt,
-		CreatedAt:   p.CreatedAt,
-		UpdatedAt:   p.UpdatedAt,
+		ID:             p.ID,
+		Name:           p.Name,
+		Description:    p.Description,
+		Type:           mapPromotionTypeToString(pkgpromotion.Type(p.Type)),
+		Status:         status,
+		StartTime:      p.StartAt,
+		EndTime:        p.EndAt,
+		DiscountType:   discountType,
+		DiscountValue:  discountValue,
+		MinOrderAmount: minOrderAmount,
+		MaxDiscount:    maxDiscount,
+		ScopeType:      p.ScopeType,
+		CreatedAt:      p.CreatedAt,
+		UpdatedAt:      p.UpdatedAt,
 	}
 }
 

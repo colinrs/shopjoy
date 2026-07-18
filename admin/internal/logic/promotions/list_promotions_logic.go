@@ -27,12 +27,27 @@ func NewListPromotionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 func (l *ListPromotionsLogic) ListPromotions(req *types.ListPromotionsReq) (resp *types.ListPromotionsResp, err error) {
 	// Get tenantID from context
 
+	// Only attach status / type filters when the frontend actually
+	// provided a value. Using the mapped int as a sentinel — as the
+	// old code did — silently dropped filters whose mapped value
+	// equals the iota-zero (StatusPending / TypeDiscount).
 	queryReq := apppromotion.QueryPromotionRequest{
 		Name:     req.Name,
-		Type:     mapPromotionType(req.Type),
-		Status:   mapPromotionStatusToInt(req.Status),
 		Page:     req.Page,
 		PageSize: req.PageSize,
+	}
+	if req.Status == "expired" {
+		// "expired" is a derived wire status, not a stored value;
+		// translate it into an end_at-based filter rather than a
+		// status column match (StatusExpired doesn't exist in the enum).
+		queryReq.ExpiredOnly = true
+	} else if req.Status != "" {
+		s := mapPromotionStatusToInt(req.Status)
+		queryReq.Status = &s
+	}
+	if req.Type != "" {
+		t := mapPromotionType(req.Type)
+		queryReq.Type = &t
 	}
 
 	listResp, err := l.svcCtx.PromotionApp.ListPromotions(l.ctx, queryReq)

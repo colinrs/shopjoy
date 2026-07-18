@@ -47,6 +47,7 @@ func (l *CreateCouponLogic) CreateCoupon(req *types.CreateCouponReq) (resp *type
 		MaxDiscount:  parseMoneyToDecimal(req.MaxDiscount),
 		TotalCount:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
+		Scope:        buildCouponScope(req.ScopeType),
 		StartAt:      startAt,
 		EndAt:        endAt,
 	}

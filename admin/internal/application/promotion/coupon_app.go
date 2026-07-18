@@ -24,6 +24,7 @@ type CreateCouponRequest struct {
 	MaxDiscount  decimal.Decimal
 	TotalCount   int
 	PerUserLimit int
+	Scope        pkgcoupon.PromotionScope
 	StartAt      time.Time
 	EndAt        time.Time
 }
@@ -39,6 +40,7 @@ type UpdateCouponRequest struct {
 	MaxDiscount  decimal.Decimal
 	TotalCount   int
 	PerUserLimit int
+	Scope        pkgcoupon.PromotionScope
 	StartAt      time.Time
 	EndAt        time.Time
 }
@@ -57,6 +59,7 @@ type CouponResponse struct {
 	UsedCount    int             `json:"used_count"`
 	PerUserLimit int             `json:"per_user_limit"`
 	Status       int             `json:"status"`
+	ScopeType    string          `json:"scope_type"`
 	StartAt      string          `json:"start_at"`
 	EndAt        string          `json:"end_at"`
 	CreatedAt    string          `json:"created_at"`
@@ -76,11 +79,12 @@ type CouponListResponse struct {
 // CouponStatusInactive (0) and CouponTypeFixedAmount (0) are both valid enum
 // values — a value-type zero sentinel would silently drop those filters.
 type QueryCouponRequest struct {
-	Name     string
-	Status   *pkgcoupon.CouponStatus
-	Type     *pkgcoupon.CouponType
-	Page     int
-	PageSize int
+	Name        string
+	Status      *pkgcoupon.CouponStatus
+	Type        *pkgcoupon.CouponType
+	ExpiredOnly bool
+	Page        int
+	PageSize    int
 }
 
 // GenerateCouponCodesRequest 生成优惠券码请求
@@ -212,6 +216,7 @@ func (a *couponApp) CreateCoupon(ctx context.Context, req CreateCouponRequest) (
 		UsedCount:    0,
 		PerUserLimit: req.PerUserLimit,
 		Status:       pkgcoupon.CouponStatusInactive,
+		Scope:        req.Scope,
 		StartAt:      req.StartAt.UTC(),
 		EndAt:        req.EndAt.UTC(),
 		Audit:        shared.NewAuditInfo(0),
@@ -265,6 +270,7 @@ func (a *couponApp) UpdateCoupon(ctx context.Context, req UpdateCouponRequest) (
 	c.MaxDiscount = req.MaxDiscount
 	c.TotalCount = req.TotalCount
 	c.PerUserLimit = req.PerUserLimit
+	c.Scope = req.Scope
 	c.StartAt = req.StartAt.UTC()
 	c.EndAt = req.EndAt.UTC()
 	c.Audit.Update(0)
@@ -290,9 +296,10 @@ func (a *couponApp) ListCoupons(ctx context.Context, req QueryCouponRequest) (*C
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name:   req.Name,
-		Status: req.Status,
-		Type:   req.Type,
+		Name:        req.Name,
+		Status:      req.Status,
+		Type:        req.Type,
+		ExpiredOnly: req.ExpiredOnly,
 	}
 	query.PageQuery.Validate()
 
@@ -573,6 +580,7 @@ func toCouponResponse(c *pkgcoupon.Coupon) *CouponResponse {
 		UsedCount:    c.UsedCount,
 		PerUserLimit: c.PerUserLimit,
 		Status:       int(c.Status),
+		ScopeType:    string(c.Scope.Type),
 		StartAt:      c.StartAt.Format(time.RFC3339),
 		EndAt:        c.EndAt.Format(time.RFC3339),
 		CreatedAt:    c.Audit.CreatedAt.Format(time.RFC3339),

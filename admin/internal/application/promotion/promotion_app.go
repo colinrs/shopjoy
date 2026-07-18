@@ -35,26 +35,44 @@ type CreatePromotionRuleRequest struct {
 }
 
 // UpdatePromotionRequest 更新促销请求
+//
+// The previous version of this struct only carried Name / Description /
+// StartAt / EndAt, so every other field on UpdatePromotionReq (Type,
+// DiscountType, DiscountValue, MinOrderAmount, MaxDiscount,
+// UsageLimit, PerUserLimit, ProductIDs, CategoryIDs, MarketIDs, Tags)
+// was silently dropped between the wire and the persistence layer.
+//
+// Type and Scope are now honored. Discount mechanics still flow
+// through the dedicated promotion-rules endpoints, not through this
+// update, mirroring the Create-side split. UsageLimit, PerUserLimit
+// and Tags have no DB columns today and remain no-ops until a
+// schema migration lands; see [UpdatePromotion] for the storage map.
 type UpdatePromotionRequest struct {
 	ID          int64
 	Name        string
 	Description string
+	Type        pkgpromotion.Type
+	Scope       pkgpromotion.PromotionScope
 	StartAt     time.Time
 	EndAt       time.Time
 }
 
 // PromotionResponse 促销响应
 type PromotionResponse struct {
-	ID          int64                    `json:"id"`
-	Name        string                   `json:"name"`
-	Description string                   `json:"description"`
-	Type        int                      `json:"type"`
-	Status      int                      `json:"status"`
-	StartAt     string                   `json:"start_at"`
-	EndAt       string                   `json:"end_at"`
-	Rules       []*PromotionRuleResponse `json:"rules"`
-	CreatedAt   string                   `json:"created_at"`
-	UpdatedAt   string                   `json:"updated_at"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Type        int    `json:"type"`
+	Status      int    `json:"status"`
+	StartAt     string `json:"start_at"`
+	EndAt       string `json:"end_at"`
+	// ScopeType mirrors the stored Scope.Type so the wire can carry
+	// the same flag the form posts without forcing the frontend to
+	// re-derive it from product_ids / category_ids arrays.
+	ScopeType string                   `json:"scope_type"`
+	Rules     []*PromotionRuleResponse `json:"rules"`
+	CreatedAt string                   `json:"created_at"`
+	UpdatedAt string                   `json:"updated_at"`
 }
 
 // PromotionRuleResponse 促销规则响应
@@ -77,12 +95,23 @@ type PromotionListResponse struct {
 }
 
 // QueryPromotionRequest 查询促销请求
+//
+// Status and Type are pointers so that "no filter" (nil) can be
+// distinguished from a filter that happens to equal the iota-zero
+// value (e.g. StatusPending = 0, TypeDiscount = 0). The old
+// `req.Status != 0` sentinel collided with those zero values and
+// silently dropped the filter for the default status/type.
+//
+// ExpiredOnly is a separate flag because the wire status "expired"
+// is computed from EndAt at response time and is never a stored
+// enum value — it cannot be expressed as StatusExpired.
 type QueryPromotionRequest struct {
-	Name     string
-	Status   pkgpromotion.Status
-	Type     pkgpromotion.Type
-	Page     int
-	PageSize int
+	Name        string
+	Status      *pkgpromotion.Status
+	Type        *pkgpromotion.Type
+	ExpiredOnly bool
+	Page        int
+	PageSize    int
 }
 
 // PromotionApp 促销应用服务接口
@@ -200,8 +229,17 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionR
 		return nil, code.ErrPromotionCannotDelete
 	}
 
+	// Type change is allowed for non-active promotions. Changing the
+	// promotion classification mid-flight is what makes the Update
+	// path different from a status toggle; restart rules separately
+	// via the promotion-rules endpoints if needed.
+	if !req.Type.IsValid() {
+		return nil, code.ErrPromotionTypeInvalid
+	}
 	p.Name = req.Name
 	p.Description = req.Description
+	p.Type = req.Type
+	p.Scope = req.Scope
 	p.StartAt = req.StartAt.UTC()
 	p.EndAt = req.EndAt.UTC()
 	p.Audit.Update(0)
@@ -233,14 +271,16 @@ func (a *promotionApp) ListPromotions(ctx context.Context, req QueryPromotionReq
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		},
-		Name: req.Name,
+		Name:        req.Name,
+		ExpiredOnly: req.ExpiredOnly,
 	}
-	if req.Status != 0 {
-		query.Status = &req.Status
-	}
-	if req.Type != 0 {
-		query.Type = &req.Type
-	}
+	// Status / Type are already pointers in the request; assign directly.
+	// A nil pointer means "no filter", which the storage layer honors.
+	// Previously this code used `if req.Status != 0` as the sentinel,
+	// which silently dropped filters for the iota-zero values
+	// (StatusPending = 0, TypeDiscount = 0).
+	query.Status = req.Status
+	query.Type = req.Type
 	query.PageQuery.Validate()
 
 	promotions, total, err := a.promotionRepo.FindList(ctx, a.db, query)
@@ -337,6 +377,7 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		Status:      int(p.Status),
 		StartAt:     p.StartAt.Format(time.RFC3339),
 		EndAt:       p.EndAt.Format(time.RFC3339),
+		ScopeType:   string(p.Scope.Type),
 		Rules:       rules,
 		CreatedAt:   p.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   p.Audit.UpdatedAt.Format(time.RFC3339),

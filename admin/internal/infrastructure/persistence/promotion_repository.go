@@ -285,6 +285,11 @@ func (r *promotionRepo) FindList(ctx context.Context, db *gorm.DB, query promoti
 	if query.Type != nil && query.Type.IsValid() {
 		dbQuery = dbQuery.Where("type = ?", *query.Type)
 	}
+	if query.ExpiredOnly {
+		// "Expired" is a derived wire status, not a stored enum value.
+		// The presence of records past their EndAt is what we filter on.
+		dbQuery = dbQuery.Where("end_at <= ?", time.Now().UTC())
+	}
 
 	var total int64
 	if err := dbQuery.Count(&total).Error; err != nil {

@@ -758,7 +758,8 @@ const handleSave = async () => {
         usage_limit: promotionForm.usage_limit,
         per_user_limit: promotionForm.per_user_limit,
         product_ids: promotionForm.product_ids,
-        category_ids: promotionForm.category_ids
+        category_ids: promotionForm.category_ids,
+        scope_type: promotionForm.scope_type
       }
 
       if (isEdit.value) {

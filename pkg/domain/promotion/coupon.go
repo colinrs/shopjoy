@@ -190,4 +190,8 @@ type CouponQuery struct {
 	Code     string
 	Status   *CouponStatus
 	Type     *CouponType
+	// ExpiredOnly filters to coupons whose EndAt is in the past.
+	// Mirrors the same flag on promotion.Query — see that comment
+	// for why this lives as a separate flag instead of a status value.
+	ExpiredOnly bool
 }

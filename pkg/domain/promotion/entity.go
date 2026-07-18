@@ -294,6 +294,13 @@ type Query struct {
 	Name     string
 	Status   *Status
 	Type     *Type
+
+	// ExpiredOnly restricts the result set to promotions whose EndAt
+	// is in the past, regardless of the stored status column. This is
+	// a filter flag rather than a status value because "expired" is
+	// derived from EndAt at response time and is never written back
+	// to the promotions table.
+	ExpiredOnly bool
 }
 
 // ==================== Repository Interface ====================
