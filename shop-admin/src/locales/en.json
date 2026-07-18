@@ -1109,6 +1109,7 @@
     "unlimitedText": "Unlimited",
     "basicInfo": "Basic Info",
     "discountSettings": "Discount Settings",
+    "currency": "Currency",
     "selectDiscountType": "Select discount type",
     "selectTimePeriod": "Select time period",
     "configurePromotionInfo": "Configure promotion info",
