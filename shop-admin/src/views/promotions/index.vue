@@ -503,7 +503,7 @@
             </el-table-column>
             <el-table-column
               :label="$t('promotions.actionsColumn')"
-              width="200"
+              width="180"
               fixed="right"
             >
               <template #default="{ row }">
@@ -514,24 +514,6 @@
                   @click="handleEditPromotion(row)"
                 >
                   {{ $t('promotions.edit') }}
-                </el-button>
-                <el-button
-                  v-if="row.status === 'pending' || row.status === 'paused'"
-                  type="success"
-                  link
-                  size="small"
-                  @click="handleActivatePromotion(row)"
-                >
-                  {{ $t('promotions.activate') }}
-                </el-button>
-                <el-button
-                  v-if="row.status === 'active'"
-                  type="warning"
-                  link
-                  size="small"
-                  @click="handleDeactivatePromotion(row)"
-                >
-                  {{ $t('promotions.deactivate') }}
                 </el-button>
                 <el-button
                   v-if="row.status !== 'active'"
@@ -1690,26 +1672,6 @@ const handleTogglePromotionStatus = async (row: Promotion, nextActive: boolean) 
     )
   } finally {
     promotionToggleLoading[row.id] = false
-  }
-}
-
-const handleActivatePromotion = async (row: Promotion) => {
-  try {
-    await activatePromotion(row.id)
-    ElMessage.success(t('promotions.activateSuccess'))
-    loadPromotions()
-  } catch (error) {
-    handleError(error, t('promotions.activatePromotionFailed'))
-  }
-}
-
-const handleDeactivatePromotion = async (row: Promotion) => {
-  try {
-    await deactivatePromotion(row.id)
-    ElMessage.success(t('promotions.deactivateSuccess'))
-    loadPromotions()
-  } catch (error) {
-    handleError(error, t('promotions.deactivatePromotionFailed'))
   }
 }
 
