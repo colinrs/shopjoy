@@ -91,85 +91,104 @@
               />
             </el-form-item>
 
-            <!-- Discount Settings -->
+            <!-- Promotion Rules -->
             <div class="section-title">
-              {{ $t('promotions.discountSettings') }}
+              <div class="rules-header">
+                <span>{{ $t('promotions.promotionRules') }}</span>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="showAddRuleDialog"
+                >
+                  <el-icon><Plus /></el-icon>
+                  {{ $t('promotions.addRule') }}
+                </el-button>
+              </div>
             </div>
-            <el-row :gutter="20">
-              <el-col
-                :xs="24"
-                :sm="8"
-              >
-                <el-form-item
-                  :label="$t('promotions.discountType')"
-                  prop="discount_type"
-                >
-                  <el-select
-                    v-model="promotionForm.discount_type"
-                    :placeholder="$t('promotions.selectDiscountType')"
-                    style="width: 100%"
-                  >
-                    <el-option
-                      :label="$t('promotions.fixedAmount')"
-                      value="fixed_amount"
-                    />
-                    <el-option
-                      :label="$t('promotions.percentage')"
-                      value="percentage"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col
-                :xs="24"
-                :sm="8"
-              >
-                <el-form-item
-                  :label="promotionForm.discount_type === 'fixed_amount' ? $t('promotions.discountAmountLabel') : $t('promotions.discountRatioLabel')"
-                  prop="discount_value"
-                >
-                  <el-input-number
-                    v-model="promotionForm.discount_value_num"
-                    :min="0"
-                    :max="promotionForm.discount_type === 'percentage' ? 100 : 99999"
-                    :precision="2"
-                    style="width: 100%"
-                  />
-                </el-form-item>
-              </el-col>
-              <el-col
-                :xs="24"
-                :sm="8"
-              >
-                <el-form-item :label="$t('promotions.lowestConsume')">
-                  <el-input-number
-                    v-model="promotionForm.min_order_amount_num"
-                    :min="0"
-                    :precision="2"
-                    style="width: 100%"
-                  />
-                </el-form-item>
-              </el-col>
-            </el-row>
-
-            <el-row
-              v-if="promotionForm.discount_type === 'percentage'"
-              :gutter="20"
+            <el-table
+              v-loading="rulesLoading"
+              :data="rulesList"
+              stripe
+              style="margin-bottom: 20px;"
             >
-              <el-col
-                :xs="24"
-                :sm="12"
+              <el-table-column
+                :label="$t('promotions.ruleType')"
+                width="150"
               >
-                <el-form-item :label="$t('promotions.maxDiscountAmount')">
-                  <el-input-number
-                    v-model="promotionForm.max_discount_num"
-                    :min="0"
-                    :precision="2"
-                    style="width: 100%"
-                  />
-                </el-form-item>
-              </el-col>
-            </el-row>
+                <template #default="{ row }">
+                  {{ getRuleTypeText(row.rule_type) }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.operator')"
+                width="120"
+              >
+                <template #default="{ row }">
+                  {{ getOperatorText(row.operator) }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.ruleValue')"
+                width="150"
+              >
+                <template #default="{ row }">
+                  {{ row.value }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.ruleDiscountType')"
+                width="150"
+              >
+                <template #default="{ row }">
+                  {{ row.discount_type ? (row.discount_type === 'percentage' ? $t('promotions.percentage') : $t('promotions.fixedAmount')) : '-' }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.ruleDiscountValue')"
+                width="120"
+              >
+                <template #default="{ row }">
+                  {{ row.discount_value || '-' }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.rulePriority')"
+                width="100"
+                align="center"
+              >
+                <template #default="{ row }">
+                  {{ row.priority }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('common.actions')"
+                width="150"
+                fixed="right"
+              >
+                <template #default="{ row }">
+                  <el-button
+                    type="primary"
+                    link
+                    size="small"
+                    @click="handleEditRule(row)"
+                  >
+                    {{ $t('common.edit') }}
+                  </el-button>
+                  <el-button
+                    type="danger"
+                    link
+                    size="small"
+                    @click="handleDeleteRule(row)"
+                  >
+                    {{ $t('common.delete') }}
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-empty
+              v-if="!rulesLoading && rulesList.length === 0"
+              :description="$t('promotions.noRules')"
+            />
 
             <!-- Time Range -->
             <div class="section-title">
@@ -349,14 +368,17 @@
             <p class="preview-desc">
               {{ promotionForm.description || $t('promotions.activityDesc') }}
             </p>
-            <div class="preview-discount">
+            <div
+              v-if="rulesList.length > 0"
+              class="preview-discount"
+            >
               <span class="discount-label">{{ $t('promotions.previewDiscount') }}</span>
               <span class="discount-value">
-                <template v-if="promotionForm.discount_type === 'fixed_amount'">
-                  ¥{{ promotionForm.discount_value_num || 0 }}
+                <template v-if="rulesList[0].discount_type === 'fixed_amount'">
+                  ¥{{ rulesList[0].discount_value || 0 }}
                 </template>
                 <template v-else>
-                  {{ promotionForm.discount_value_num || 0 }}%
+                  {{ rulesList[0].discount_value || 0 }}%
                 </template>
               </span>
             </div>
@@ -377,110 +399,6 @@
         </el-card>
       </el-col>
     </el-row>
-
-    <!-- Rules Section -->
-    <el-card
-      v-if="isEdit"
-      class="rules-card"
-      shadow="never"
-    >
-      <template #header>
-        <div class="rules-header">
-          <span class="card-title">{{ $t('promotions.promotionRules') }}</span>
-          <el-button
-            type="primary"
-            size="small"
-            @click="showAddRuleDialog"
-          >
-            <el-icon><Plus /></el-icon>
-            {{ $t('promotions.addRule') }}
-          </el-button>
-        </div>
-      </template>
-      <el-table
-        v-loading="rulesLoading"
-        :data="rulesList"
-        stripe
-      >
-        <el-table-column
-          :label="$t('promotions.ruleType')"
-          width="150"
-        >
-          <template #default="{ row }">
-            {{ getRuleTypeText(row.rule_type) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('promotions.operator')"
-          width="120"
-        >
-          <template #default="{ row }">
-            {{ getOperatorText(row.operator) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('promotions.ruleValue')"
-          width="150"
-        >
-          <template #default="{ row }">
-            {{ row.value }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('promotions.ruleDiscountType')"
-          width="150"
-        >
-          <template #default="{ row }">
-            {{ row.discount_type ? (row.discount_type === 'percentage' ? $t('promotions.percentage') : $t('promotions.fixedAmount')) : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('promotions.ruleDiscountValue')"
-          width="120"
-        >
-          <template #default="{ row }">
-            {{ row.discount_value || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('promotions.rulePriority')"
-          width="100"
-          align="center"
-        >
-          <template #default="{ row }">
-            {{ row.priority }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('common.actions')"
-          width="150"
-          fixed="right"
-        >
-          <template #default="{ row }">
-            <el-button
-              type="primary"
-              link
-              size="small"
-              @click="handleEditRule(row)"
-            >
-              {{ $t('common.edit') }}
-            </el-button>
-            <el-button
-              type="danger"
-              link
-              size="small"
-              @click="handleDeleteRule(row)"
-            >
-              {{ $t('common.delete') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-empty
-        v-if="!rulesLoading && rulesList.length === 0"
-        :description="$t('promotions.noRules')"
-      />
-    </el-card>
 
     <!-- Add/Edit Rule Dialog -->
     <el-dialog
@@ -665,10 +583,6 @@ const promotionForm = reactive({
   name: '',
   description: '',
   type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
-  discount_type: 'fixed_amount' as 'fixed_amount' | 'percentage' | 'buy_x_get_y',
-  discount_value_num: 0,
-  min_order_amount_num: 0,
-  max_discount_num: 0,
   dateRange: [] as string[],
   scope_type: 'storewide' as 'storewide' | 'products' | 'categories' | 'brands',
   product_ids: [] as string[],
@@ -681,7 +595,6 @@ const promotionForm = reactive({
 const rules = {
   name: [{ required: true, message: t('promotions.enterPromotionName'), trigger: 'blur' }],
   type: [{ required: true, message: t('promotions.selectPromotionType'), trigger: 'change' }],
-  discount_type: [{ required: true, message: t('promotions.selectDiscountType'), trigger: 'change' }],
   dateRange: [{ required: true, message: t('promotions.selectTimePeriod'), trigger: 'change' }]
 }
 
@@ -697,10 +610,6 @@ const loadPromotion = async () => {
     promotionForm.name = res.name
     promotionForm.description = res.description || ''
     promotionForm.type = res.type as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
-    promotionForm.discount_type = (res.discount_type || 'fixed_amount') as 'fixed_amount' | 'percentage'
-    promotionForm.discount_value_num = parseFloat(res.discount_value) || 0
-    promotionForm.min_order_amount_num = parseFloat(res.min_order_amount) || 0
-    promotionForm.max_discount_num = parseFloat(res.max_discount) || 0
     promotionForm.dateRange = [res.start_time, res.end_time]
     promotionForm.product_ids = res.product_ids || []
     promotionForm.category_ids = res.category_ids || []
@@ -749,10 +658,6 @@ const handleSave = async () => {
         name: promotionForm.name,
         description: promotionForm.description,
         type: promotionForm.type,
-        discount_type: promotionForm.discount_type,
-        discount_value: String(promotionForm.discount_value_num),
-        min_order_amount: String(promotionForm.min_order_amount_num),
-        max_discount: String(promotionForm.max_discount_num),
         start_time: promotionForm.dateRange[0],
         end_time: promotionForm.dateRange[1],
         usage_limit: promotionForm.usage_limit,
