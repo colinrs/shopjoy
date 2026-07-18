@@ -13,6 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// findMatchingRule returns the first rule in the slice whose
+// ConditionType and ActionType match, or nil if none matches.
+func findMatchingRule(rules []pkgpromotion.PromotionRule, cond pkgpromotion.ConditionType, action pkgpromotion.ActionType) *pkgpromotion.PromotionRule {
+	for i := range rules {
+		if rules[i].ConditionType == cond && rules[i].ActionType == action {
+			return &rules[i]
+		}
+	}
+	return nil
+}
+
 // sanitizeTags enforces a max length of 64 chars per entry and
 // drops empty entries. Returns nil for empty result so persistence
 // can write SQL NULL consistently.
@@ -70,11 +81,9 @@ type CreatePromotionRuleRequest struct {
 // UsageLimit, PerUserLimit, ProductIDs, CategoryIDs, MarketIDs, Tags)
 // was silently dropped between the wire and the persistence layer.
 //
-// Type and Scope are now honored. Discount mechanics still flow
-// through the dedicated promotion-rules endpoints, not through this
-// update, mirroring the Create-side split. UsageLimit, PerUserLimit
-// and Tags are persisted alongside the other promotion fields; see
-// [UpdatePromotion] for the storage map.
+// All fields are now persisted. When Rules is non-empty the first rule
+// is upserted (matched by ConditionType + ActionType) so discount
+// fields survive a save→re-fetch cycle.
 type UpdatePromotionRequest struct {
 	ID           int64
 	Name         string
@@ -86,6 +95,7 @@ type UpdatePromotionRequest struct {
 	UsageLimit   int
 	PerUserLimit int
 	Tags         []string
+	Rules        []CreatePromotionRuleRequest
 }
 
 // PromotionResponse 促销响应
@@ -305,6 +315,51 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionR
 		return nil, err
 	}
 
+	// Upsert discount rules. Match by ConditionType + ActionType so
+	// re-saving the same form doesn't create duplicate rules.
+	if len(req.Rules) > 0 {
+		existing, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
+		if err != nil {
+			return nil, err
+		}
+		for _, ruleReq := range req.Rules {
+			r := findMatchingRule(existing, ruleReq.ConditionType, ruleReq.ActionType)
+			if r != nil {
+				r.ActionValue = ruleReq.ActionValue
+				r.ConditionValue = ruleReq.ConditionValue
+				r.MaxDiscount = ruleReq.MaxDiscount
+				r.Currency = p.Currency
+				if err := a.promotionRepo.UpdateRule(ctx, a.db, r); err != nil {
+					return nil, err
+				}
+			} else {
+				ruleID, err := a.idGen.NextID(ctx)
+				if err != nil {
+					return nil, err
+				}
+				rule := pkgpromotion.PromotionRule{
+					ID:             ruleID,
+					PromotionID:    p.ID,
+					ConditionType:  ruleReq.ConditionType,
+					ConditionValue: ruleReq.ConditionValue,
+					ActionType:     ruleReq.ActionType,
+					ActionValue:    ruleReq.ActionValue,
+					MaxDiscount:    ruleReq.MaxDiscount,
+					Currency:       p.Currency,
+				}
+				if err := a.promotionRepo.CreateRules(ctx, a.db, []pkgpromotion.PromotionRule{rule}); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	// Reload with rules so the response includes discount fields.
+	rules, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	p.Rules = rules
 	return toPromotionResponse(p), nil
 }
 

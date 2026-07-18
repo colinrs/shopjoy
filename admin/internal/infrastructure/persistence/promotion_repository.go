@@ -51,27 +51,27 @@ func encodeJSONStringSlice(in []string) string {
 
 // promotionModel represents the database model for Promotion
 type promotionModel struct {
-	ID          int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
-	TenantID    int64      `gorm:"column:tenant_id;not null;index"`
-	Name        string     `gorm:"column:name;size:200;not null;index"`
-	Description string     `gorm:"column:description;type:text"`
-	Type        int        `gorm:"column:type;not null;index"`
-	Status      int        `gorm:"column:status;not null;index"`
-	Priority    int        `gorm:"column:priority;not null;default:0"`
-	StartAt     time.Time  `gorm:"column:start_at;not null;index"`
-	EndAt       time.Time  `gorm:"column:end_at;not null;index"`
-	ScopeType   string     `gorm:"column:scope_type;size:32;not null"`
-	ScopeIDs    string     `gorm:"column:scope_ids;type:json"`       // JSON array of int64
-	ExcludeIDs  string     `gorm:"column:exclude_ids;type:json"`     // JSON array of int64
-	Currency    string     `gorm:"column:currency;size:10;not null"` // ISO 4217
-	CreatedBy   int64      `gorm:"column:created_by;not null"`
-	UpdatedBy   int64      `gorm:"column:updated_by;not null"`
-	UsageLimit    int    `gorm:"column:usage_limit;not null;default:0"`
-	PerUserLimit  int    `gorm:"column:per_user_limit;not null;default:1"`
-	Tags          string `gorm:"column:tags;type:json"` // JSON-encoded []string, empty/nullsafe
-	DeletedAt   *time.Time `gorm:"column:deleted_at;index"`
-	CreatedAt   time.Time  `gorm:"column:created_at"`
-	UpdatedAt   time.Time  `gorm:"column:updated_at"`
+	ID           int64      `gorm:"column:id;primaryKey;autoIncrement:false"`
+	TenantID     int64      `gorm:"column:tenant_id;not null;index"`
+	Name         string     `gorm:"column:name;size:200;not null;index"`
+	Description  string     `gorm:"column:description;type:text"`
+	Type         int        `gorm:"column:type;not null;index"`
+	Status       int        `gorm:"column:status;not null;index"`
+	Priority     int        `gorm:"column:priority;not null;default:0"`
+	StartAt      time.Time  `gorm:"column:start_at;not null;index"`
+	EndAt        time.Time  `gorm:"column:end_at;not null;index"`
+	ScopeType    string     `gorm:"column:scope_type;size:32;not null"`
+	ScopeIDs     string     `gorm:"column:scope_ids;type:json"`       // JSON array of int64
+	ExcludeIDs   string     `gorm:"column:exclude_ids;type:json"`     // JSON array of int64
+	Currency     string     `gorm:"column:currency;size:10;not null"` // ISO 4217
+	CreatedBy    int64      `gorm:"column:created_by;not null"`
+	UpdatedBy    int64      `gorm:"column:updated_by;not null"`
+	UsageLimit   int        `gorm:"column:usage_limit;not null;default:0"`
+	PerUserLimit int        `gorm:"column:per_user_limit;not null;default:1"`
+	Tags         string     `gorm:"column:tags;type:json"` // JSON-encoded []string, empty/nullsafe
+	DeletedAt    *time.Time `gorm:"column:deleted_at;index"`
+	CreatedAt    time.Time  `gorm:"column:created_at"`
+	UpdatedAt    time.Time  `gorm:"column:updated_at"`
 }
 
 func (promotionModel) TableName() string {
@@ -106,7 +106,7 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 		UsageLimit:   int(m.UsageLimit),
 		PerUserLimit: int(m.PerUserLimit),
 		Tags:         decodeJSONStringSlice(m.Tags),
-		Currency: m.Currency,
+		Currency:     m.Currency,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt.UTC(),
 			UpdatedAt: m.UpdatedAt.UTC(),
@@ -123,27 +123,27 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 	excludeIDsJSON, _ := json.Marshal(p.Scope.ExcludeIDs)
 
 	return &promotionModel{
-		ID:          p.ID,
-		TenantID:    p.TenantID.Int64(),
-		Name:        p.Name,
-		Description: p.Description,
-		Type:        int(p.Type),
-		Status:      int(p.Status),
-		Priority:    p.Priority,
-		StartAt:     p.StartAt,
-		EndAt:       p.EndAt,
-		ScopeType:   string(p.Scope.Type),
-		ScopeIDs:    string(scopeIDsJSON),
-		ExcludeIDs:  string(excludeIDsJSON),
+		ID:           p.ID,
+		TenantID:     p.TenantID.Int64(),
+		Name:         p.Name,
+		Description:  p.Description,
+		Type:         int(p.Type),
+		Status:       int(p.Status),
+		Priority:     p.Priority,
+		StartAt:      p.StartAt,
+		EndAt:        p.EndAt,
+		ScopeType:    string(p.Scope.Type),
+		ScopeIDs:     string(scopeIDsJSON),
+		ExcludeIDs:   string(excludeIDsJSON),
 		UsageLimit:   int(p.UsageLimit),
 		PerUserLimit: int(p.PerUserLimit),
 		Tags:         encodeJSONStringSlice(p.Tags),
-		Currency:    p.Currency,
-		CreatedBy:   p.Audit.CreatedBy,
-		UpdatedBy:   p.Audit.UpdatedBy,
-		DeletedAt:   p.DeletedAt,
-		CreatedAt:   p.Audit.CreatedAt,
-		UpdatedAt:   p.Audit.UpdatedAt,
+		Currency:     p.Currency,
+		CreatedBy:    p.Audit.CreatedBy,
+		UpdatedBy:    p.Audit.UpdatedBy,
+		DeletedAt:    p.DeletedAt,
+		CreatedAt:    p.Audit.CreatedAt,
+		UpdatedAt:    p.Audit.UpdatedAt,
 	}
 }
 
@@ -155,7 +155,7 @@ type promotionRuleModel struct {
 	ConditionValue decimal.Decimal `gorm:"column:condition_value;type:decimal(19,4);not null"`
 	ActionType     int             `gorm:"column:action_type;not null"`
 	ActionValue    decimal.Decimal `gorm:"column:action_value;type:decimal(19,4);not null"`
-	MaxDiscount    decimal.Decimal `gorm:"column:max_discount;type:decimal(19,4);not null;default:0"`
+	MaxDiscount    decimal.Decimal `gorm:"column:max_discount_amount;type:decimal(19,4);not null;default:0"`
 	Currency       string          `gorm:"column:currency;size:10;not null"`
 	SortOrder      int             `gorm:"column:sort_order;not null;default:0"`
 	CreatedAt      time.Time       `gorm:"column:created_at"`
@@ -212,22 +212,22 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 		Model(&promotionModel{}).
 		Where("id = ? AND deleted_at IS NULL", p.ID).
 		Updates(map[string]any{
-			"name":        model.Name,
-			"description": model.Description,
-			"type":        model.Type,
-			"status":      model.Status,
-			"priority":    model.Priority,
-			"start_at":    model.StartAt,
-			"end_at":      model.EndAt,
-			"scope_type":  model.ScopeType,
-			"scope_ids":   model.ScopeIDs,
-			"exclude_ids": model.ExcludeIDs,
+			"name":           model.Name,
+			"description":    model.Description,
+			"type":           model.Type,
+			"status":         model.Status,
+			"priority":       model.Priority,
+			"start_at":       model.StartAt,
+			"end_at":         model.EndAt,
+			"scope_type":     model.ScopeType,
+			"scope_ids":      model.ScopeIDs,
+			"exclude_ids":    model.ExcludeIDs,
 			"usage_limit":    model.UsageLimit,
 			"per_user_limit": model.PerUserLimit,
 			"tags":           model.Tags,
-			"currency":    model.Currency,
-			"updated_by":  model.UpdatedBy,
-			"updated_at":  now,
+			"currency":       model.Currency,
+			"updated_by":     model.UpdatedBy,
+			"updated_at":     now,
 		}).Error
 }
 
@@ -414,14 +414,14 @@ func (r *promotionRepo) UpdateRule(ctx context.Context, db *gorm.DB, rule *promo
 		Model(&promotionRuleModel{}).
 		Where("id = ?", rule.ID).
 		Updates(map[string]any{
-			"condition_type":  model.ConditionType,
-			"condition_value": model.ConditionValue,
-			"action_type":     model.ActionType,
-			"action_value":    model.ActionValue,
-			"max_discount":    model.MaxDiscount,
-			"currency":        model.Currency,
-			"sort_order":      model.SortOrder,
-			"updated_at":      now,
+			"condition_type":      model.ConditionType,
+			"condition_value":     model.ConditionValue,
+			"action_type":         model.ActionType,
+			"action_value":        model.ActionValue,
+			"max_discount_amount": model.MaxDiscount,
+			"currency":            model.Currency,
+			"sort_order":          model.SortOrder,
+			"updated_at":          now,
 		}).Error
 }
 

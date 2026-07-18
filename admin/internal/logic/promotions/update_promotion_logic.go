@@ -49,16 +49,35 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 	scope := buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs)
 
 	updateReq := apppromotion.UpdatePromotionRequest{
-		ID:          req.ID,
-		Name:        req.Name,
-		Description: req.Description,
-		Type:        mapPromotionType(req.Type),
-		Scope:       scope,
+		ID:           req.ID,
+		Name:         req.Name,
+		Description:  req.Description,
+		Type:         mapPromotionType(req.Type),
+		Scope:        scope,
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
 		Tags:         req.Tags,
-		StartAt:     startAt,
-		EndAt:       endAt,
+		StartAt:      startAt,
+		EndAt:        endAt,
+		Rules:        make([]apppromotion.CreatePromotionRuleRequest, 0),
+	}
+
+	// Build rules from discount fields (same logic as create path).
+	if req.DiscountType != "" && req.DiscountValue != "" {
+		rule := apppromotion.CreatePromotionRuleRequest{
+			ConditionType: pkgpromotion.ConditionMinAmount,
+			ActionType:    mapDiscountActionType(req.DiscountType),
+		}
+		if req.MinOrderAmount != "" {
+			rule.ConditionValue = parseMoneyToDecimal(req.MinOrderAmount)
+		}
+		if req.DiscountValue != "" {
+			rule.ActionValue = parseMoneyToDecimal(req.DiscountValue)
+		}
+		if req.MaxDiscount != "" {
+			rule.MaxDiscount = parseMoneyToDecimal(req.MaxDiscount)
+		}
+		updateReq.Rules = append(updateReq.Rules, rule)
 	}
 
 	promotionResp, err := l.svcCtx.PromotionApp.UpdatePromotion(l.ctx, updateReq)
