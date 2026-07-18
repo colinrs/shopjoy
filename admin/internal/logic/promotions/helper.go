@@ -1,6 +1,8 @@
 package promotions
 
 import (
+	"time"
+
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
@@ -24,30 +26,35 @@ func mapPromotionType(typeStr string) pkgpromotion.Type {
 	}
 }
 
+// mapPromotionStatus converts a stored promotion status (int) to its
+// wire-format string. Values match the .api file comment and the
+// frontend's PromotionStatus type verbatim.
 func mapPromotionStatus(status int) string {
 	switch pkgpromotion.Status(status) {
 	case pkgpromotion.StatusPending:
-		return "draft"
+		return "pending"
 	case pkgpromotion.StatusActive:
 		return "active"
 	case pkgpromotion.StatusPaused:
-		return "inactive"
+		return "paused"
 	case pkgpromotion.StatusEnded:
-		return "expired"
+		return "ended"
 	default:
-		return "draft"
+		return "pending"
 	}
 }
 
+// mapPromotionStatusToInt is the inverse of mapPromotionStatus; used to
+// translate the status query parameter on the list endpoint.
 func mapPromotionStatusToInt(statusStr string) pkgpromotion.Status {
 	switch statusStr {
-	case "draft":
+	case "pending":
 		return pkgpromotion.StatusPending
 	case "active":
 		return pkgpromotion.StatusActive
-	case "inactive":
+	case "paused":
 		return pkgpromotion.StatusPaused
-	case "expired":
+	case "ended":
 		return pkgpromotion.StatusEnded
 	default:
 		return pkgpromotion.StatusPending
@@ -141,16 +148,39 @@ func formatDecimalToString(v decimal.Decimal) string {
 	return v.StringFixed(2)
 }
 
+// convertPromotionToDetailResp converts the application-layer response to
+// the wire-format response. The status is computed: if the promotion is
+// past its EndAt, "expired" is returned regardless of the stored status
+// (the frontend renders this as a non-toggleable tag).
 func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.PromotionDetailResp {
+	status := mapPromotionStatus(p.Status)
+	if isPromotionExpired(p.EndAt) {
+		status = "expired"
+	}
 	return &types.PromotionDetailResp{
 		ID:          p.ID,
 		Name:        p.Name,
 		Description: p.Description,
 		Type:        mapPromotionTypeToString(pkgpromotion.Type(p.Type)),
-		Status:      mapPromotionStatus(p.Status),
+		Status:      status,
 		StartTime:   p.StartAt,
 		EndTime:     p.EndAt,
 		CreatedAt:   p.CreatedAt,
 		UpdatedAt:   p.UpdatedAt,
 	}
+}
+
+// isPromotionExpired returns true if the promotion's EndAt is in the
+// past. EndAt is an RFC3339 string (as emitted by the application
+// layer). A malformed or zero value is treated as not expired so that
+// the stored status is preserved.
+func isPromotionExpired(endAt string) bool {
+	if endAt == "" {
+		return false
+	}
+	t, err := time.Parse(time.RFC3339, endAt)
+	if err != nil {
+		return false
+	}
+	return time.Now().UTC().After(t)
 }
