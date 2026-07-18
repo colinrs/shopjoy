@@ -46,6 +46,7 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 		Name:         req.Name,
 		Description:  req.Description,
 		Type:         promotionType,
+		Currency:     "CNY", // Default currency; wire type doesn't expose this field
 		Scope:        buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs),
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
