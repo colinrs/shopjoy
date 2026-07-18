@@ -39,12 +39,12 @@ func sanitizeTags(in []string) []string {
 
 // CreatePromotionRequest 创建促销请求
 type CreatePromotionRequest struct {
-	Name        string
-	Description string
-	Type        pkgpromotion.Type
-	Priority    int
-	Currency    string
-	Scope       pkgpromotion.PromotionScope
+	Name         string
+	Description  string
+	Type         pkgpromotion.Type
+	Priority     int
+	Currency     string
+	Scope        pkgpromotion.PromotionScope
 	StartAt      time.Time
 	EndAt        time.Time
 	Rules        []CreatePromotionRuleRequest
@@ -73,14 +73,14 @@ type CreatePromotionRuleRequest struct {
 // Type and Scope are now honored. Discount mechanics still flow
 // through the dedicated promotion-rules endpoints, not through this
 // update, mirroring the Create-side split. UsageLimit, PerUserLimit
-// and Tags have no DB columns today and remain no-ops until a
-// schema migration lands; see [UpdatePromotion] for the storage map.
+// and Tags are persisted alongside the other promotion fields; see
+// [UpdatePromotion] for the storage map.
 type UpdatePromotionRequest struct {
-	ID          int64
-	Name        string
-	Description string
-	Type        pkgpromotion.Type
-	Scope       pkgpromotion.PromotionScope
+	ID           int64
+	Name         string
+	Description  string
+	Type         pkgpromotion.Type
+	Scope        pkgpromotion.PromotionScope
 	StartAt      time.Time
 	EndAt        time.Time
 	UsageLimit   int
@@ -100,7 +100,7 @@ type PromotionResponse struct {
 	// ScopeType mirrors the stored Scope.Type so the wire can carry
 	// the same flag the form posts without forcing the frontend to
 	// re-derive it from product_ids / category_ids arrays.
-	ScopeType string                   `json:"scope_type"`
+	ScopeType    string                   `json:"scope_type"`
 	Rules        []*PromotionRuleResponse `json:"rules"`
 	UsageLimit   int                      `json:"usage_limit"`
 	PerUserLimit int                      `json:"per_user_limit"`
@@ -212,21 +212,21 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionR
 		}
 
 		p := &pkgpromotion.Promotion{
-			ID:          id,
-			Name:        req.Name,
-			Description: req.Description,
-			Type:        req.Type,
-			Status:      pkgpromotion.StatusPending,
-			Priority:    req.Priority,
-			StartAt:     req.StartAt.UTC(),
-			EndAt:       req.EndAt.UTC(),
-			Scope:       req.Scope,
+			ID:           id,
+			Name:         req.Name,
+			Description:  req.Description,
+			Type:         req.Type,
+			Status:       pkgpromotion.StatusPending,
+			Priority:     req.Priority,
+			StartAt:      req.StartAt.UTC(),
+			EndAt:        req.EndAt.UTC(),
+			Scope:        req.Scope,
 			UsageLimit:   req.UsageLimit,
 			PerUserLimit: req.PerUserLimit,
 			Tags:         req.Tags,
-			Currency:    req.Currency,
-			Audit:       shared.NewAuditInfo(0),
-			Rules:       make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
+			Currency:     req.Currency,
+			Audit:        shared.NewAuditInfo(0),
+			Rules:        make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
 		}
 
 		// Create rules
@@ -427,19 +427,19 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 	}
 
 	return &PromotionResponse{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Type:        int(p.Type),
-		Status:      int(p.Status),
-		StartAt:     p.StartAt.Format(time.RFC3339),
-		EndAt:       p.EndAt.Format(time.RFC3339),
+		ID:           p.ID,
+		Name:         p.Name,
+		Description:  p.Description,
+		Type:         int(p.Type),
+		Status:       int(p.Status),
+		StartAt:      p.StartAt.Format(time.RFC3339),
+		EndAt:        p.EndAt.Format(time.RFC3339),
 		ScopeType:    string(p.Scope.Type),
 		Rules:        rules,
 		UsageLimit:   p.UsageLimit,
 		PerUserLimit: p.PerUserLimit,
 		Tags:         p.Tags,
 		CreatedAt:    p.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   p.Audit.UpdatedAt.Format(time.RFC3339),
+		UpdatedAt:    p.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }
