@@ -54,6 +54,9 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 		Description: req.Description,
 		Type:        mapPromotionType(req.Type),
 		Scope:       scope,
+		UsageLimit:   req.UsageLimit,
+		PerUserLimit: req.PerUserLimit,
+		Tags:         req.Tags,
 		StartAt:     startAt,
 		EndAt:       endAt,
 	}
