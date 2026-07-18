@@ -1655,6 +1655,35 @@ const handleToggleCouponStatus = async (row: Coupon, nextActive: boolean) => {
   }
 }
 
+const promotionToggleLoading = reactive<Record<string, boolean>>({})
+
+// @ts-expect-error - Wired to template in subsequent commit; intentionally unused here.
+const handleTogglePromotionStatus = async (row: Promotion, nextActive: boolean) => {
+  const wasActive = row.status === 'active'
+  // 乐观翻转，避免网络慢时开关回弹
+  row.status = nextActive ? 'active' : 'paused'
+  promotionToggleLoading[row.id] = true
+  try {
+    if (nextActive) {
+      await activatePromotion(row.id)
+      ElMessage.success(t('promotions.activateSuccess'))
+    } else {
+      await deactivatePromotion(row.id)
+      ElMessage.success(t('promotions.deactivateSuccess'))
+    }
+    loadPromotions()
+  } catch (error) {
+    // 失败回滚，保证 UI 与服务端状态一致
+    row.status = wasActive ? 'active' : 'paused'
+    handleError(
+      error,
+      nextActive ? t('promotions.activatePromotionFailed') : t('promotions.deactivatePromotionFailed')
+    )
+  } finally {
+    promotionToggleLoading[row.id] = false
+  }
+}
+
 const handleActivatePromotion = async (row: Promotion) => {
   try {
     await activatePromotion(row.id)
