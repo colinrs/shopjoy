@@ -232,15 +232,15 @@ func (r *PromotionRule) MeetsCondition(amount decimal.Decimal, quantity int) boo
 // ==================== Promotion (Aggregate Root) ====================
 
 type Promotion struct {
-	ID          int64            `json:"id"`
-	TenantID    shared.TenantID  `json:"tenant_id"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Type        Type             `json:"type"`
-	Status      Status           `json:"status"`
-	Priority    int              `json:"priority"`
-	StartAt     time.Time        `json:"start_at"`
-	EndAt       time.Time        `json:"end_at"`
+	ID           int64            `json:"id"`
+	TenantID     shared.TenantID  `json:"tenant_id"`
+	Name         string           `json:"name"`
+	Description  string           `json:"description"`
+	Type         Type             `json:"type"`
+	Status       Status           `json:"status"`
+	Priority     int              `json:"priority"`
+	StartAt      time.Time        `json:"start_at"`
+	EndAt        time.Time        `json:"end_at"`
 	Scope        PromotionScope   `json:"scope"`
 	UsageLimit   int              `json:"usage_limit"`
 	PerUserLimit int              `json:"per_user_limit"`
@@ -248,7 +248,7 @@ type Promotion struct {
 	Currency     string           `json:"currency"`
 	Rules        []PromotionRule  `json:"rules,omitempty"`
 	Audit        shared.AuditInfo `json:"audit"`
-	DeletedAt   *time.Time       `json:"deleted_at,omitempty"`
+	DeletedAt    *time.Time       `json:"deleted_at,omitempty"`
 }
 
 func (p *Promotion) TableName() string {
