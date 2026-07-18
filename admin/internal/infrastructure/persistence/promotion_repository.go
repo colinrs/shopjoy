@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -18,6 +19,34 @@ type promotionRepo struct{}
 
 func NewPromotionRepository() promotion.Repository {
 	return &promotionRepo{}
+}
+
+// decodeJSONStringSlice parses a MySQL JSON column value into a
+// string slice, returning nil on missing / malformed / empty
+// payloads. The wire/UI layer treats nil and [] as equivalent.
+func decodeJSONStringSlice(s string) []string {
+	if strings.TrimSpace(s) == "" {
+		return nil
+	}
+	var out []string
+	if err := json.Unmarshal([]byte(s), &out); err != nil {
+		return nil
+	}
+	return out
+}
+
+// encodeJSONStringSlice renders a string slice as a MySQL JSON
+// column value. nil slices become NULL ("null") so the row
+// distinguishes "no tags" from "empty array" by absence.
+func encodeJSONStringSlice(in []string) string {
+	if len(in) == 0 {
+		return "null"
+	}
+	b, err := json.Marshal(in)
+	if err != nil {
+		return "null"
+	}
+	return string(b)
 }
 
 // promotionModel represents the database model for Promotion
@@ -37,6 +66,9 @@ type promotionModel struct {
 	Currency    string     `gorm:"column:currency;size:10;not null"` // ISO 4217
 	CreatedBy   int64      `gorm:"column:created_by;not null"`
 	UpdatedBy   int64      `gorm:"column:updated_by;not null"`
+	UsageLimit    int    `gorm:"column:usage_limit;not null;default:0"`
+	PerUserLimit  int    `gorm:"column:per_user_limit;not null;default:1"`
+	Tags          string `gorm:"column:tags;type:json"` // JSON-encoded []string, empty/nullsafe
 	DeletedAt   *time.Time `gorm:"column:deleted_at;index"`
 	CreatedAt   time.Time  `gorm:"column:created_at"`
 	UpdatedAt   time.Time  `gorm:"column:updated_at"`
@@ -71,6 +103,9 @@ func (m *promotionModel) toEntity() *promotion.Promotion {
 			IDs:        scopeIDs,
 			ExcludeIDs: excludeIDs,
 		},
+		UsageLimit:   int(m.UsageLimit),
+		PerUserLimit: int(m.PerUserLimit),
+		Tags:         decodeJSONStringSlice(m.Tags),
 		Currency: m.Currency,
 		Audit: shared.AuditInfo{
 			CreatedAt: m.CreatedAt.UTC(),
@@ -100,6 +135,9 @@ func fromPromotionEntity(p *promotion.Promotion) *promotionModel {
 		ScopeType:   string(p.Scope.Type),
 		ScopeIDs:    string(scopeIDsJSON),
 		ExcludeIDs:  string(excludeIDsJSON),
+		UsageLimit:   int(p.UsageLimit),
+		PerUserLimit: int(p.PerUserLimit),
+		Tags:         encodeJSONStringSlice(p.Tags),
 		Currency:    p.Currency,
 		CreatedBy:   p.Audit.CreatedBy,
 		UpdatedBy:   p.Audit.UpdatedBy,
@@ -184,6 +222,9 @@ func (r *promotionRepo) Update(ctx context.Context, db *gorm.DB, p *promotion.Pr
 			"scope_type":  model.ScopeType,
 			"scope_ids":   model.ScopeIDs,
 			"exclude_ids": model.ExcludeIDs,
+			"usage_limit":    model.UsageLimit,
+			"per_user_limit": model.PerUserLimit,
+			"tags":           model.Tags,
 			"currency":    model.Currency,
 			"updated_by":  model.UpdatedBy,
 			"updated_at":  now,
