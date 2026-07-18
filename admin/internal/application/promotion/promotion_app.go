@@ -2,6 +2,7 @@ package promotion
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -12,6 +13,30 @@ import (
 	"gorm.io/gorm"
 )
 
+// sanitizeTags enforces a max length of 64 chars per entry and
+// drops empty entries. Returns nil for empty result so persistence
+// can write SQL NULL consistently.
+func sanitizeTags(in []string) []string {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(in))
+	for _, t := range in {
+		t = strings.TrimSpace(t)
+		if t == "" {
+			continue
+		}
+		if len(t) > 64 {
+			t = t[:64]
+		}
+		out = append(out, t)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
 // CreatePromotionRequest 创建促销请求
 type CreatePromotionRequest struct {
 	Name        string
@@ -20,9 +45,12 @@ type CreatePromotionRequest struct {
 	Priority    int
 	Currency    string
 	Scope       pkgpromotion.PromotionScope
-	StartAt     time.Time
-	EndAt       time.Time
-	Rules       []CreatePromotionRuleRequest
+	StartAt      time.Time
+	EndAt        time.Time
+	Rules        []CreatePromotionRuleRequest
+	UsageLimit   int
+	PerUserLimit int
+	Tags         []string
 }
 
 // CreatePromotionRuleRequest 创建促销规则请求
@@ -53,8 +81,11 @@ type UpdatePromotionRequest struct {
 	Description string
 	Type        pkgpromotion.Type
 	Scope       pkgpromotion.PromotionScope
-	StartAt     time.Time
-	EndAt       time.Time
+	StartAt      time.Time
+	EndAt        time.Time
+	UsageLimit   int
+	PerUserLimit int
+	Tags         []string
 }
 
 // PromotionResponse 促销响应
@@ -70,9 +101,12 @@ type PromotionResponse struct {
 	// the same flag the form posts without forcing the frontend to
 	// re-derive it from product_ids / category_ids arrays.
 	ScopeType string                   `json:"scope_type"`
-	Rules     []*PromotionRuleResponse `json:"rules"`
-	CreatedAt string                   `json:"created_at"`
-	UpdatedAt string                   `json:"updated_at"`
+	Rules        []*PromotionRuleResponse `json:"rules"`
+	UsageLimit   int                      `json:"usage_limit"`
+	PerUserLimit int                      `json:"per_user_limit"`
+	Tags         []string                 `json:"tags"`
+	CreatedAt    string                   `json:"created_at"`
+	UpdatedAt    string                   `json:"updated_at"`
 }
 
 // PromotionRuleResponse 促销规则响应
@@ -141,6 +175,8 @@ func NewPromotionApp(db *gorm.DB, promotionRepo pkgpromotion.Repository, idGen s
 }
 
 func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionRequest) (*PromotionResponse, error) {
+	req.Tags = sanitizeTags(req.Tags)
+
 	// Input validation
 	if req.Name == "" {
 		return nil, code.ErrPromotionNameRequired
@@ -156,6 +192,13 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionR
 	}
 	if !req.Type.IsValid() {
 		return nil, code.ErrPromotionTypeInvalid
+	}
+	// TODO(Task 5): replace code.ErrPromotionInvalid with code.ErrPromotionUsageLimitInvalid / code.ErrPromotionPerUserLimitInvalid
+	if req.UsageLimit < 0 {
+		return nil, code.ErrPromotionInvalid
+	}
+	if req.PerUserLimit < 0 {
+		return nil, code.ErrPromotionInvalid
 	}
 	if !req.Scope.Type.IsValid() {
 		return nil, code.ErrPromotionScopeInvalid
@@ -179,6 +222,9 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionR
 			StartAt:     req.StartAt.UTC(),
 			EndAt:       req.EndAt.UTC(),
 			Scope:       req.Scope,
+			UsageLimit:   req.UsageLimit,
+			PerUserLimit: req.PerUserLimit,
+			Tags:         req.Tags,
 			Currency:    req.Currency,
 			Audit:       shared.NewAuditInfo(0),
 			Rules:       make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
@@ -219,6 +265,8 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionR
 }
 
 func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionRequest) (*PromotionResponse, error) {
+	req.Tags = sanitizeTags(req.Tags)
+
 	p, err := a.promotionRepo.FindByID(ctx, a.db, req.ID)
 	if err != nil {
 		return nil, err
@@ -227,6 +275,14 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionR
 	// Only allow update if promotion is not active
 	if p.Status == pkgpromotion.StatusActive {
 		return nil, code.ErrPromotionCannotDelete
+	}
+
+	// TODO(Task 5): replace code.ErrPromotionInvalid with code.ErrPromotionUsageLimitInvalid / code.ErrPromotionPerUserLimitInvalid
+	if req.UsageLimit < 0 {
+		return nil, code.ErrPromotionInvalid
+	}
+	if req.PerUserLimit < 0 {
+		return nil, code.ErrPromotionInvalid
 	}
 
 	// Type change is allowed for non-active promotions. Changing the
@@ -240,6 +296,9 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionR
 	p.Description = req.Description
 	p.Type = req.Type
 	p.Scope = req.Scope
+	p.UsageLimit = req.UsageLimit
+	p.PerUserLimit = req.PerUserLimit
+	p.Tags = req.Tags
 	p.StartAt = req.StartAt.UTC()
 	p.EndAt = req.EndAt.UTC()
 	p.Audit.Update(0)
@@ -377,9 +436,12 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		Status:      int(p.Status),
 		StartAt:     p.StartAt.Format(time.RFC3339),
 		EndAt:       p.EndAt.Format(time.RFC3339),
-		ScopeType:   string(p.Scope.Type),
-		Rules:       rules,
-		CreatedAt:   p.Audit.CreatedAt.Format(time.RFC3339),
+		ScopeType:    string(p.Scope.Type),
+		Rules:        rules,
+		UsageLimit:   p.UsageLimit,
+		PerUserLimit: p.PerUserLimit,
+		Tags:         p.Tags,
+		CreatedAt:    p.Audit.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   p.Audit.UpdatedAt.Format(time.RFC3339),
 	}
 }
