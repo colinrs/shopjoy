@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `promotions` (
     `exclude_ids` JSON DEFAULT NULL COMMENT '排除ID列表',
     `usage_limit` INT NOT NULL DEFAULT 0 COMMENT '0 = unlimited',
     `per_user_limit` INT NOT NULL DEFAULT 1 COMMENT 'per-user cap; 0 = unlimited',
-    `tags` JSON DEFAULT NULL COMMENT 'free-form labels, stored as JSON array of strings',
+    `tags` JSON DEFAULT NULL COMMENT 'tags',
     `start_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '开始时间',
     `end_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '结束时间',
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
