@@ -478,11 +478,21 @@
             </el-table-column>
             <el-table-column
               :label="$t('promotions.statusColumn')"
-              width="100"
+              width="120"
               align="center"
             >
               <template #default="{ row }">
+                <el-switch
+                  v-if="row.status === 'active' || row.status === 'pending' || row.status === 'paused'"
+                  :model-value="row.status === 'active'"
+                  :loading="promotionToggleLoading[row.id] === true"
+                  :active-text="$t('promotions.activatedStatus')"
+                  :inactive-text="$t('promotions.unactivated')"
+                  inline-prompt
+                  @change="(val: boolean) => handleTogglePromotionStatus(row, val)"
+                />
                 <el-tag
+                  v-else
                   :type="getPromoStatusType(row.status)"
                   effect="light"
                   size="small"
@@ -1657,7 +1667,6 @@ const handleToggleCouponStatus = async (row: Coupon, nextActive: boolean) => {
 
 const promotionToggleLoading = reactive<Record<string, boolean>>({})
 
-// @ts-expect-error - Wired to template in subsequent commit; intentionally unused here.
 const handleTogglePromotionStatus = async (row: Promotion, nextActive: boolean) => {
   const wasActive = row.status === 'active'
   // 乐观翻转，避免网络慢时开关回弹
