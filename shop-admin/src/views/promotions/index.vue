@@ -483,7 +483,7 @@
             >
               <template #default="{ row }">
                 <el-switch
-                  v-if="['active', 'pending', 'paused', 'inactive'].includes(row.status)"
+                  v-if="row.status === 'active' || row.status === 'pending' || row.status === 'paused'"
                   :model-value="row.status === 'active'"
                   :loading="promotionToggleLoading[row.id] === true"
                   :active-text="$t('promotions.activatedStatus')"
@@ -1302,7 +1302,8 @@ const getPromoStatusType = (status: string) => {
     'active': 'success',
     'paused': 'warning',
     'pending': 'info',
-    'ended': 'info'
+    'ended': 'info',
+    'expired': 'danger'
   }
   return types[status] || 'info'
 }
@@ -1312,7 +1313,8 @@ const getPromoStatusText = (status: string) => {
     'active': t('promotions.activeStatus'),
     'paused': t('promotions.paused'),
     'pending': t('promotions.pending'),
-    'ended': t('promotions.ended')
+    'ended': t('promotions.ended'),
+    'expired': t('promotions.expiredStatus')
   }
   return texts[status] || status
 }

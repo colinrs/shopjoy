@@ -4,7 +4,7 @@ import request from '@/utils/request'
 
 // Promotion Types
 export type PromotionType = 'discount' | 'coupon' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
-export type PromotionStatus = 'pending' | 'active' | 'paused' | 'ended'
+export type PromotionStatus = 'pending' | 'active' | 'paused' | 'ended' | 'expired'
 export type DiscountType = 'percentage' | 'fixed_amount' | 'buy_x_get_y'
 export type ConditionType = 'min_amount' | 'min_quantity'
 export type ScopeType = 'storewide' | 'products' | 'categories' | 'brands'
