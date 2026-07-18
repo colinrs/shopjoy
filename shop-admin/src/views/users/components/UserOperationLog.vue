@@ -8,7 +8,10 @@
         class="action-filter"
         @change="reload"
       >
-        <el-option :label="$t('users.logFilterAll')" value="" />
+        <el-option
+          :label="$t('users.logFilterAll')"
+          value=""
+        />
         <el-option
           v-for="opt in actionOptions"
           :key="opt.value"
@@ -18,45 +21,85 @@
       </el-select>
     </div>
 
-    <el-table v-loading="loading" :data="logs" stripe>
-      <el-table-column :label="$t('users.logColumns.time')" width="170">
+    <el-table
+      v-loading="loading"
+      :data="logs"
+      stripe
+    >
+      <el-table-column
+        :label="$t('users.logColumns.time')"
+        width="170"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.logColumns.action')" width="160" align="center">
+      <el-table-column
+        :label="$t('users.logColumns.action')"
+        width="160"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getActionType(row.action)" size="small">
+          <el-tag
+            :type="getActionType(row.action)"
+            size="small"
+          >
             {{ row.action_text }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.operator')" width="120">
+      <el-table-column
+        :label="$t('users.operator')"
+        width="120"
+      >
         <template #default="{ row }">
           <span>{{ row.operator_name || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.logColumns.ip')" width="140">
+      <el-table-column
+        :label="$t('users.logColumns.ip')"
+        width="140"
+      >
         <template #default="{ row }">
           <span class="mono">{{ row.ip_address || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.logColumns.reason')" min-width="180">
+      <el-table-column
+        :label="$t('users.logColumns.reason')"
+        min-width="180"
+      >
         <template #default="{ row }">
           <span>{{ row.reason || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.logColumns.userAgent')" width="80" align="center">
+      <el-table-column
+        :label="$t('users.logColumns.userAgent')"
+        width="80"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tooltip v-if="row.user_agent" :content="row.user_agent" placement="top">
-            <el-button link type="primary" size="small">{{ $t('common.view') }}</el-button>
+          <el-tooltip
+            v-if="row.user_agent"
+            :content="row.user_agent"
+            placement="top"
+          >
+            <el-button
+              link
+              type="primary"
+              size="small"
+            >
+              {{ $t('common.view') }}
+            </el-button>
           </el-tooltip>
           <span v-else>-</span>
         </template>
       </el-table-column>
     </el-table>
 
-    <div v-if="total > pageSize" class="pagination-wrapper">
+    <div
+      v-if="total > pageSize"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -68,8 +111,15 @@
       />
     </div>
 
-    <el-empty v-if="!loading && logs.length === 0 && !error" :description="$t('users.noLogs')" />
-    <el-empty v-if="!loading && error" :description="error" image-error />
+    <el-empty
+      v-if="!loading && logs.length === 0 && !error"
+      :description="$t('users.noLogs')"
+    />
+    <el-empty
+      v-if="!loading && error"
+      :description="error"
+      image-error
+    />
   </div>
 </template>
 

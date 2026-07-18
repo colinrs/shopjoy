@@ -1,53 +1,107 @@
 <template>
   <div class="user-review-list">
-    <el-table v-loading="loading" :data="reviews" stripe>
-      <el-table-column :label="$t('users.reviewsColumns.product')" min-width="180">
+    <el-table
+      v-loading="loading"
+      :data="reviews"
+      stripe
+    >
+      <el-table-column
+        :label="$t('users.reviewsColumns.product')"
+        min-width="180"
+      >
         <template #default="{ row }">
           <span class="product-name">{{ row.product_name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.reviewsColumns.user')" width="100" align="center">
+      <el-table-column
+        :label="$t('users.reviewsColumns.user')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
-          <span v-if="row.is_anonymous" class="anonymous">{{ $t('users.reviewsColumns.anonymous') }}</span>
+          <span
+            v-if="row.is_anonymous"
+            class="anonymous"
+          >{{ $t('users.reviewsColumns.anonymous') }}</span>
           <span v-else>{{ row.user_name || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.reviewsColumns.rating')" width="110" align="center">
+      <el-table-column
+        :label="$t('users.reviewsColumns.rating')"
+        width="110"
+        align="center"
+      >
         <template #default="{ row }">
           <span class="rating">
-            <el-icon v-for="i in 5" :key="i" :class="i <= Number(row.overall_rating) ? 'star-filled' : 'star-empty'">
+            <el-icon
+              v-for="i in 5"
+              :key="i"
+              :class="i <= Number(row.overall_rating) ? 'star-filled' : 'star-empty'"
+            >
               <Star />
             </el-icon>
           </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.reviewsColumns.content')" min-width="220">
+      <el-table-column
+        :label="$t('users.reviewsColumns.content')"
+        min-width="220"
+      >
         <template #default="{ row }">
-          <el-tooltip :content="row.content" placement="top" :disabled="!row.content || row.content.length <= 80">
+          <el-tooltip
+            :content="row.content"
+            placement="top"
+            :disabled="!row.content || row.content.length <= 80"
+          >
             <span class="content-text">{{ truncate(row.content, 80) }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.reviewsColumns.status')" width="100" align="center">
+      <el-table-column
+        :label="$t('users.reviewsColumns.status')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)" size="small">{{ row.status }}</el-tag>
+          <el-tag
+            :type="getStatusType(row.status)"
+            size="small"
+          >
+            {{ row.status }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.reviewsColumns.createdAt')" width="170">
+      <el-table-column
+        :label="$t('users.reviewsColumns.createdAt')"
+        width="170"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.actions')" width="80" align="center" fixed="right">
+      <el-table-column
+        :label="$t('common.actions')"
+        width="80"
+        align="center"
+        fixed="right"
+      >
         <template #default="{ row }">
-          <el-button link type="primary" size="small" @click="goReviews(row)">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="goReviews(row)"
+          >
             {{ $t('common.view') }}
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <div v-if="total > pageSize" class="pagination-wrapper">
+    <div
+      v-if="total > pageSize"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -59,8 +113,15 @@
       />
     </div>
 
-    <el-empty v-if="!loading && reviews.length === 0 && !error" :description="$t('users.noReviews')" />
-    <el-empty v-if="!loading && error" :description="error" image-error />
+    <el-empty
+      v-if="!loading && reviews.length === 0 && !error"
+      :description="$t('users.noReviews')"
+    />
+    <el-empty
+      v-if="!loading && error"
+      :description="error"
+      image-error
+    />
   </div>
 </template>
 

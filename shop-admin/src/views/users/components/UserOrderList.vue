@@ -1,43 +1,81 @@
 <template>
   <div class="user-order-list">
-    <el-table v-loading="loading" :data="orders" stripe>
-      <el-table-column :label="$t('users.orderNo')" min-width="180">
+    <el-table
+      v-loading="loading"
+      :data="orders"
+      stripe
+    >
+      <el-table-column
+        :label="$t('users.orderNo')"
+        min-width="180"
+      >
         <template #default="{ row }">
           <span class="order-no">{{ row.order_no }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orderStatus')" width="120" align="center">
+      <el-table-column
+        :label="$t('users.orderStatus')"
+        width="120"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)" size="small">
+          <el-tag
+            :type="getStatusType(row.status)"
+            size="small"
+          >
             {{ row.status }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orderItemCount')" width="100" align="center">
+      <el-table-column
+        :label="$t('users.orderItemCount')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
           <span>{{ row.item_count ?? '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orderTotalAmount')" width="140" align="right">
+      <el-table-column
+        :label="$t('users.orderTotalAmount')"
+        width="140"
+        align="right"
+      >
         <template #default="{ row }">
           <span class="amount">{{ row.currency }} {{ row.total_amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.orderCreatedAt')" width="180">
+      <el-table-column
+        :label="$t('users.orderCreatedAt')"
+        width="180"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('common.actions')" width="120" align="center" fixed="right">
+      <el-table-column
+        :label="$t('common.actions')"
+        width="120"
+        align="center"
+        fixed="right"
+      >
         <template #default="{ row }">
-          <el-button link type="primary" size="small" @click="goDetail(row)">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="goDetail(row)"
+          >
             {{ $t('users.viewDetail') }}
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <div v-if="total > pageSize" class="pagination-wrapper">
+    <div
+      v-if="total > pageSize"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -49,8 +87,15 @@
       />
     </div>
 
-    <el-empty v-if="!loading && orders.length === 0 && !error" :description="$t('users.noOrders')" />
-    <el-empty v-if="!loading && error" :description="error" image-error />
+    <el-empty
+      v-if="!loading && orders.length === 0 && !error"
+      :description="$t('users.noOrders')"
+    />
+    <el-empty
+      v-if="!loading && error"
+      :description="error"
+      image-error
+    />
   </div>
 </template>
 

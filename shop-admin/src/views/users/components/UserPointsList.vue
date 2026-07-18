@@ -1,36 +1,72 @@
 <template>
   <div class="user-points-list">
-    <el-table v-loading="loading" :data="txns" stripe>
-      <el-table-column :label="$t('users.pointsColumns.time')" width="170">
+    <el-table
+      v-loading="loading"
+      :data="txns"
+      stripe
+    >
+      <el-table-column
+        :label="$t('users.pointsColumns.time')"
+        width="170"
+      >
         <template #default="{ row }">
           <span class="time-text">{{ formatDateTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.pointsColumns.type')" width="100" align="center">
+      <el-table-column
+        :label="$t('users.pointsColumns.type')"
+        width="100"
+        align="center"
+      >
         <template #default="{ row }">
-          <el-tag :type="getTypeTag(row.type)" size="small">{{ row.type }}</el-tag>
+          <el-tag
+            :type="getTypeTag(row.type)"
+            size="small"
+          >
+            {{ row.type }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.pointsColumns.change')" width="120" align="right">
+      <el-table-column
+        :label="$t('users.pointsColumns.change')"
+        width="120"
+        align="right"
+      >
         <template #default="{ row }">
           <span :class="row.points >= 0 ? 'positive' : 'negative'">
             {{ row.points >= 0 ? '+' : '' }}{{ row.points }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.pointsColumns.balance')" width="100" align="right">
+      <el-table-column
+        :label="$t('users.pointsColumns.balance')"
+        width="100"
+        align="right"
+      >
         <template #default="{ row }">
           <span class="balance">{{ row.balance_after }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.pointsColumns.description')" min-width="180">
+      <el-table-column
+        :label="$t('users.pointsColumns.description')"
+        min-width="180"
+      >
         <template #default="{ row }">
           <span>{{ row.description || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('users.pointsColumns.reference')" width="180">
+      <el-table-column
+        :label="$t('users.pointsColumns.reference')"
+        width="180"
+      >
         <template #default="{ row }">
-          <el-button v-if="row.reference_type === 'ORDER' && row.reference_id" link type="primary" size="small" @click="goOrder(row.reference_id)">
+          <el-button
+            v-if="row.reference_type === 'ORDER' && row.reference_id"
+            link
+            type="primary"
+            size="small"
+            @click="goOrder(row.reference_id)"
+          >
             {{ $t('users.pointsColumns.reference') }}: {{ row.reference_id }}
           </el-button>
           <span v-else-if="row.reference_id">{{ row.reference_type }}:{{ row.reference_id }}</span>
@@ -39,7 +75,10 @@
       </el-table-column>
     </el-table>
 
-    <div v-if="total > pageSize" class="pagination-wrapper">
+    <div
+      v-if="total > pageSize"
+      class="pagination-wrapper"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -51,8 +90,15 @@
       />
     </div>
 
-    <el-empty v-if="!loading && txns.length === 0 && !error" :description="$t('users.noPoints')" />
-    <el-empty v-if="!loading && error" :description="error" image-error />
+    <el-empty
+      v-if="!loading && txns.length === 0 && !error"
+      :description="$t('users.noPoints')"
+    />
+    <el-empty
+      v-if="!loading && error"
+      :description="error"
+      image-error
+    />
   </div>
 </template>
 
