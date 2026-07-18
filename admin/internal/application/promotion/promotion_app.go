@@ -193,12 +193,11 @@ func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionR
 	if !req.Type.IsValid() {
 		return nil, code.ErrPromotionTypeInvalid
 	}
-	// TODO(Task 5): replace code.ErrPromotionInvalid with code.ErrPromotionUsageLimitInvalid / code.ErrPromotionPerUserLimitInvalid
 	if req.UsageLimit < 0 {
-		return nil, code.ErrPromotionInvalid
+		return nil, code.ErrPromotionUsageLimitInvalid
 	}
 	if req.PerUserLimit < 0 {
-		return nil, code.ErrPromotionInvalid
+		return nil, code.ErrPromotionPerUserLimitInvalid
 	}
 	if !req.Scope.Type.IsValid() {
 		return nil, code.ErrPromotionScopeInvalid
@@ -277,12 +276,11 @@ func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionR
 		return nil, code.ErrPromotionCannotDelete
 	}
 
-	// TODO(Task 5): replace code.ErrPromotionInvalid with code.ErrPromotionUsageLimitInvalid / code.ErrPromotionPerUserLimitInvalid
 	if req.UsageLimit < 0 {
-		return nil, code.ErrPromotionInvalid
+		return nil, code.ErrPromotionUsageLimitInvalid
 	}
 	if req.PerUserLimit < 0 {
-		return nil, code.ErrPromotionInvalid
+		return nil, code.ErrPromotionPerUserLimitInvalid
 	}
 
 	// Type change is allowed for non-active promotions. Changing the

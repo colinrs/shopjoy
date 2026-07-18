@@ -181,7 +181,9 @@ var (
 	ErrPromotionNameRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 80012, Msg: "promotion name is required"}
 	ErrPromotionCurrencyRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 80013, Msg: "promotion currency is required"}
 	ErrPromotionTimeRequired     = &Err{HTTPCode: http.StatusBadRequest, Code: 80014, Msg: "promotion start time and end time are required"}
-	ErrPromotionInvalidTimeRange = &Err{HTTPCode: http.StatusBadRequest, Code: 80015, Msg: "promotion start time must be before end time"}
+	ErrPromotionInvalidTimeRange     = &Err{HTTPCode: http.StatusBadRequest, Code: 80015, Msg: "promotion start time must be before end time"}
+	ErrPromotionUsageLimitInvalid    = &Err{HTTPCode: http.StatusBadRequest, Code: 80016, Msg: "promotion usage_limit must be >= 0"}
+	ErrPromotionPerUserLimitInvalid  = &Err{HTTPCode: http.StatusBadRequest, Code: 80017, Msg: "promotion per_user_limit must be >= 0"}
 
 	// ErrTenantNotFound ==================== Tenant Module (90xxx) ====================
 	ErrTenantNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 90001, Msg: "tenant not found"}
