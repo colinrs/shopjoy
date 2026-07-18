@@ -54,7 +54,7 @@ type (
 		Name           string   `json:"name"`
 		Description    string   `json:"description"`
 		Type           string   `json:"type"` // discount, coupon, flash_sale, bundle, buy_x_get_y
-		Status         string   `json:"status"` // pending, active, paused, ended
+		Status         string   `json:"status"` // pending, active, paused, ended, expired (expired is computed: now > EndAt)
 		StartTime      string   `json:"start_time"`
 		EndTime        string   `json:"end_time"`
 		DiscountType   string   `json:"discount_type"` // percentage, fixed_amount, buy_x_get_y
@@ -198,7 +198,7 @@ type (
 		ProductIDs     string `json:"product_ids"`
 		CategoryIDs    string `json:"category_ids"`
 		MarketIDs      string `json:"market_ids"`
-		Status         string `json:"status"` // inactive, active, expired, depleted
+		Status         string `json:"status"` // inactive, active, expired, depleted (expired is computed: now > EndAt)
 		CreatedAt      string `json:"created_at"`
 		UpdatedAt      string `json:"updated_at"`
 	}
