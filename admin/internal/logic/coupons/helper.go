@@ -1,6 +1,8 @@
 package coupons
 
 import (
+	"time"
+
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	pkgcoupon "github.com/colinrs/shopjoy/pkg/domain/promotion"
@@ -78,7 +80,15 @@ func formatDecimalToString(v decimal.Decimal) string {
 	return v.StringFixed(2)
 }
 
+// convertCouponToDetailResp converts the application-layer response to
+// the wire-format response. The status is computed: if the coupon is
+// past its EndAt, "expired" is returned regardless of the stored
+// status (the frontend renders this as a non-toggleable tag).
 func convertCouponToDetailResp(c *apppromotion.CouponResponse) *types.CouponDetailResp {
+	status := mapCouponStatus(c.Status)
+	if isCouponExpired(c.EndAt) {
+		status = "expired"
+	}
 	return &types.CouponDetailResp{
 		ID:             c.ID,
 		Code:           c.Code,
@@ -93,8 +103,23 @@ func convertCouponToDetailResp(c *apppromotion.CouponResponse) *types.CouponDeta
 		UsageLimit:     c.TotalCount,
 		UsedCount:      c.UsedCount,
 		PerUserLimit:   c.PerUserLimit,
-		Status:         mapCouponStatus(c.Status),
+		Status:         status,
 		CreatedAt:      c.CreatedAt,
 		UpdatedAt:      c.UpdatedAt,
 	}
+}
+
+// isCouponExpired returns true if the coupon's EndAt is in the past.
+// EndAt is an RFC3339 string (as emitted by the application layer). A
+// malformed or zero value is treated as not expired so that the stored
+// status is preserved.
+func isCouponExpired(endAt string) bool {
+	if endAt == "" {
+		return false
+	}
+	t, err := time.Parse(time.RFC3339, endAt)
+	if err != nil {
+		return false
+	}
+	return time.Now().UTC().After(t)
 }
