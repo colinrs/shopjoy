@@ -43,16 +43,16 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 	promotionType := mapPromotionType(req.Type)
 
 	createReq := apppromotion.CreatePromotionRequest{
-		Name:        req.Name,
-		Description: req.Description,
-		Type:        promotionType,
-		Scope:       buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs),
+		Name:         req.Name,
+		Description:  req.Description,
+		Type:         promotionType,
+		Scope:        buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs),
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
 		Tags:         req.Tags,
-		StartAt:     startAt,
-		EndAt:       endAt,
-		Rules:       make([]apppromotion.CreatePromotionRuleRequest, 0),
+		StartAt:      startAt,
+		EndAt:        endAt,
+		Rules:        make([]apppromotion.CreatePromotionRuleRequest, 0),
 	}
 
 	// Build rules from request if applicable
