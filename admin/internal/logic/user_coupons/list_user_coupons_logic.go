@@ -55,9 +55,9 @@ func (l *ListUserCouponsLogic) ListUserCoupons(req *types.ListUserCouponsReq) (r
 	}
 
 	return &types.ListUserCouponsResp{
-		List:  list,
-		Total: listResp.Total,
-		Page:  req.Page,
+		List:     list,
+		Total:    listResp.Total,
+		Page:     req.Page,
 		PageSize: req.PageSize,
 	}, nil
 }

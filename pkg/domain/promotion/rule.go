@@ -10,8 +10,8 @@ import (
 type ConditionType int
 
 const (
-	ConditionMinAmount ConditionType = iota // 0 - minimum cart amount
-	ConditionMinQuantity                     // 1 - minimum item quantity
+	ConditionMinAmount   ConditionType = iota // 0 - minimum cart amount
+	ConditionMinQuantity                      // 1 - minimum item quantity
 )
 
 func (t ConditionType) IsValid() bool {
@@ -22,8 +22,8 @@ func (t ConditionType) IsValid() bool {
 type ActionType int
 
 const (
-	ActionFixedAmount ActionType = iota // 0 - subtract ActionValue as money
-	ActionPercentage                    // 1 - multiply by ActionValue/10000 (basis points)
+	ActionFixedAmount  ActionType = iota // 0 - subtract ActionValue as money
+	ActionPercentage                     // 1 - multiply by ActionValue/10000 (basis points)
 	ActionFreeShipping                   // 2 - waive shipping (ActionValue unused)
 )
 

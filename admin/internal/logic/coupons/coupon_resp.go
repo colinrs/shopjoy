@@ -173,10 +173,10 @@ func convertPromotionToCouponResp(p *apppromotion.PromotionResponse) *types.Coup
 	}
 
 	var (
-		couponType      = "fixed_amount"
-		discountValue   = "0"
-		minOrderAmount  = "0"
-		maxDiscount     = "0"
+		couponType     = "fixed_amount"
+		discountValue  = "0"
+		minOrderAmount = "0"
+		maxDiscount    = "0"
 	)
 	if len(p.Rules) > 0 {
 		first := p.Rules[0]

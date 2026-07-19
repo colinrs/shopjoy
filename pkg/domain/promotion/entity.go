@@ -38,10 +38,10 @@ func (s Status) IsValid() bool {
 type Type int
 
 const (
-	TypeDiscount Type = iota // 0
-	TypeFlashSale            // 1
-	TypeBundle               // 2
-	TypeBuyXGetY             // 3
+	TypeDiscount  Type = iota // 0
+	TypeFlashSale             // 1
+	TypeBundle                // 2
+	TypeBuyXGetY              // 3
 )
 
 func (t Type) IsValid() bool {
@@ -215,9 +215,9 @@ func (p *Promotion) Issue(userID int64, now time.Time) (*UserCoupon, error) {
 // happens via repo.IncrementUsedCount which uses an atomic SQL check to
 // prevent overselling:
 //
-//   UPDATE promotions
-//   SET used_count = used_count + 1
-//   WHERE id = ? AND kind = 'COUPON' AND (total_count IS NULL OR used_count < total_count)
+//	UPDATE promotions
+//	SET used_count = used_count + 1
+//	WHERE id = ? AND kind = 'COUPON' AND (total_count IS NULL OR used_count < total_count)
 //
 // Caller must roll back the in-memory value if the SQL fails.
 func (p *Promotion) ConsumeInventory() error {

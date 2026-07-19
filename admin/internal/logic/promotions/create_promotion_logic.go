@@ -132,9 +132,9 @@ func optionalInt(v int) *int {
 // scope_ids, exclude_ids) into the domain's PromotionScope.
 func buildPromotionScopeFromWire(scopeType string, scopeIDs, excludeIDs []string) pkgpromotion.PromotionScope {
 	return pkgpromotion.PromotionScope{
-		Type:        normalizeScopeType(scopeType),
-		IDs:         parseInt64Slice(scopeIDs),
-		ExcludeIDs:  parseInt64Slice(excludeIDs),
+		Type:       normalizeScopeType(scopeType),
+		IDs:        parseInt64Slice(scopeIDs),
+		ExcludeIDs: parseInt64Slice(excludeIDs),
 	}
 }
 
