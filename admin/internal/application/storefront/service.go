@@ -199,14 +199,15 @@ func (s *themeService) ListThemes(ctx context.Context) ([]*ThemeDTO, error) {
 	dtos := make([]*ThemeDTO, len(themes))
 	for i, t := range themes {
 		dtos[i] = &ThemeDTO{
-			ID:           t.ID,
-			Code:         t.Code,
-			Name:         t.Name,
-			Description:  t.Description,
-			PreviewImage: t.PreviewImage,
-			Thumbnail:    t.Thumbnail,
-			IsPreset:     t.IsPreset,
-			IsCurrent:    t.ID == currentThemeID,
+			ID:            t.ID,
+			Code:          t.Code,
+			Name:          t.Name,
+			Description:   t.Description,
+			PreviewImage:  t.PreviewImage,
+			Thumbnail:     t.Thumbnail,
+			IsPreset:      t.IsPreset,
+			IsCurrent:     t.ID == currentThemeID,
+			DefaultConfig: defaultConfigToDTO(t.DefaultConfig),
 		}
 	}
 	return dtos, nil
@@ -254,7 +255,7 @@ func (s *themeService) GetCurrentTheme(ctx context.Context) (*CurrentThemeDTO, e
 
 	config := themeConfigToDTO(shop.ThemeConfig)
 	if config == nil {
-		config = themeConfigToDTO(&theme.DefaultConfig)
+		config = defaultConfigToDTO(theme.DefaultConfig)
 	}
 
 	return &CurrentThemeDTO{
@@ -452,6 +453,37 @@ func themeConfigToDTO(config *storefront.ThemeConfig) *ThemeConfigDTO {
 		FontFamily:     fontFamily,
 		ButtonStyle:    buttonStyle,
 	}
+}
+
+// defaultConfigToDTO parses theme.DefaultConfig JSON which may be in either
+// nested entity format ({"colors":{"primary":"#xxx"},"fonts":{"heading":"..."},"components":{"button_style":"..."}})
+// or flat DTO format ({"primary_color":"#xxx","font_family":"...","button_style":"..."}).
+// The latter is what the seed SQL inserts. Returns nil if neither format yields data.
+func defaultConfigToDTO(raw json.RawMessage) *ThemeConfigDTO {
+	if len(raw) == 0 {
+		return nil
+	}
+
+	// Try nested form first
+	var nested storefront.ThemeConfig
+	if err := json.Unmarshal(raw, &nested); err == nil {
+		if dto := themeConfigToDTO(&nested); dto != nil &&
+			(dto.PrimaryColor != "" || dto.SecondaryColor != "" ||
+				dto.FontFamily != "" || dto.ButtonStyle != "") {
+			return dto
+		}
+	}
+
+	// Fall back to flat form
+	var flat ThemeConfigDTO
+	if err := json.Unmarshal(raw, &flat); err != nil {
+		return nil
+	}
+	if flat.PrimaryColor == "" && flat.SecondaryColor == "" &&
+		flat.FontFamily == "" && flat.ButtonStyle == "" {
+		return nil
+	}
+	return &flat
 }
 
 func dtoToThemeConfig(dto ThemeConfigDTO) storefront.ThemeConfig {

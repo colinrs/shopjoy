@@ -51,9 +51,9 @@ func (m *themeModel) toEntity() *storefront.Theme {
 		_ = json.Unmarshal([]byte(m.ConfigSchema), &configSchema)
 	}
 
-	var defaultConfig storefront.ThemeConfig
+	var defaultConfig json.RawMessage
 	if m.DefaultConfig != "" {
-		_ = json.Unmarshal([]byte(m.DefaultConfig), &defaultConfig)
+		defaultConfig = json.RawMessage(m.DefaultConfig)
 	}
 
 	return &storefront.Theme{
@@ -76,7 +76,7 @@ func (m *themeModel) toEntity() *storefront.Theme {
 func fromThemeEntity(t *storefront.Theme) *themeModel {
 	config, _ := json.Marshal(t.Config)
 	configSchema, _ := json.Marshal(t.ConfigSchema)
-	defaultConfig, _ := json.Marshal(t.DefaultConfig)
+	defaultConfig := []byte(t.DefaultConfig)
 
 	isActive := 0
 	if t.IsActive {

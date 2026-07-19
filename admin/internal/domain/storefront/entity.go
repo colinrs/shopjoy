@@ -2,6 +2,7 @@ package storefront
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/application"
@@ -47,7 +48,7 @@ type Theme struct {
 	PreviewImage  string
 	Config        ThemeConfig
 	ConfigSchema  ThemeConfigSchema
-	DefaultConfig ThemeConfig
+	DefaultConfig json.RawMessage `gorm:"column:default_config;type:text"`
 	IsActive      bool
 	IsCustom      bool
 	IsPreset      bool
