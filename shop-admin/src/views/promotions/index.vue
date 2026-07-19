@@ -823,6 +823,67 @@
           </el-radio-group>
         </el-form-item>
 
+        <el-form-item
+          v-if="form.scope_type === 'products'"
+          :label="$t('promotions.selectProducts')"
+        >
+          <el-select
+            v-model="form.scope_ids"
+            multiple
+            filterable
+            remote
+            reserve-keyword
+            :placeholder="$t('promotions.searchProducts')"
+            :remote-method="searchProducts"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in productOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
+          v-if="form.scope_type === 'categories'"
+          :label="$t('promotions.selectCategories')"
+        >
+          <el-select
+            v-model="form.scope_ids"
+            multiple
+            :placeholder="$t('promotions.selectCategoryPlaceholder')"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in categoryOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
+          v-if="form.scope_type === 'brands'"
+          :label="$t('promotions.selectBrand')"
+        >
+          <el-select
+            v-model="form.scope_ids"
+            multiple
+            :placeholder="$t('promotions.selectBrand')"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in brandOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+
         <el-form-item :label="$t('promotions.tags')">
           <el-input
             v-model="form.tagsText"
@@ -1225,6 +1286,9 @@ import {
   type GenerateCouponCodesRequest
 } from '@/api/promotion'
 import { getMarkets, type Market } from '@/api/market'
+import { getProductList } from '@/api/product'
+import { getCategories } from '@/api/category'
+import { getBrands } from '@/api/brand'
 import { currencySymbol } from '@/utils/currency'
 import { getUserList, type User as UserAccount } from '@/api/user'
 import TablePagination from '@/components/common/TablePagination.vue'
@@ -1248,6 +1312,9 @@ const stats = ref({
 
 // Markets (shared by both tabs and form)
 const marketOptions = ref<Market[]>([])
+const productOptions = ref<{ id: string; name: string }[]>([])
+const categoryOptions = ref<{ id: string; name: string }[]>([])
+const brandOptions = ref<{ id: string; name: string }[]>([])
 
 // Coupon list state
 const couponList = ref<Promotion[]>([])
@@ -1401,6 +1468,34 @@ const loadMarkets = async () => {
     marketOptions.value = res.list || []
   } catch (error) {
     handleError(error, t('promotions.loadMarketsFailed'))
+  }
+}
+
+const loadCategories = async () => {
+  try {
+    const res = await getCategories()
+    categoryOptions.value = (res.list || []).map(c => ({ id: c.id, name: c.name }))
+  } catch (error) {
+    handleError(error, t('promotions.loadCategoriesFailed'))
+  }
+}
+
+const loadBrands = async () => {
+  try {
+    const res = await getBrands({ page: 1, page_size: 200 })
+    brandOptions.value = (res.list || []).map(b => ({ id: b.id, name: b.name }))
+  } catch (error) {
+    handleError(error, t('promotions.loadBrandsFailed'))
+  }
+}
+
+const searchProducts = async (query: string) => {
+  if (!query) return
+  try {
+    const res = await getProductList({ page: 1, page_size: 20, name: query })
+    productOptions.value = (res.list || []).map(p => ({ id: p.id, name: p.name }))
+  } catch (error) {
+    handleError(error, t('promotions.searchProductsFailed'))
   }
 }
 
@@ -1966,6 +2061,8 @@ const handleCopyAllCodes = async () => {
 
 onMounted(() => {
   loadMarkets()
+  loadCategories()
+  loadBrands()
   loadCoupons()
   loadPromotions()
 })

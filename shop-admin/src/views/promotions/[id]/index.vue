@@ -121,17 +121,12 @@
                 :sm="12"
               >
                 <el-form-item :label="$t('promotions.currency')">
-                  <el-select
-                    v-model="promotionForm.currency"
-                    style="width: 100%"
-                  >
-                    <el-option label="CNY" value="CNY" />
-                    <el-option label="USD" value="USD" />
-                    <el-option label="EUR" value="EUR" />
-                    <el-option label="JPY" value="JPY" />
-                    <el-option label="GBP" value="GBP" />
-                    <el-option label="SGD" value="SGD" />
-                  </el-select>
+                  <el-input
+                    :model-value="promotionForm.currency || (selectedMarketCurrency || '—')"
+                    readonly
+                    disabled
+                    :placeholder="$t('promotions.currencyAutoBound')"
+                  />
                 </el-form-item>
               </el-col>
               <el-col
@@ -638,7 +633,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -697,6 +692,22 @@ const productOptions = ref<{ id: string; name: string }[]>([])
 const categoryOptions = ref<{ id: string; name: string }[]>([])
 const brandOptions = ref<{ id: string; name: string }[]>([])
 const marketOptions = ref<Market[]>([])
+
+// Currency is auto-bound from the selected market — never user-editable.
+const selectedMarketCurrency = computed(() => {
+  if (!promotionForm.market_id) return ''
+  const m = marketOptions.value.find(x => String(x.id) === String(promotionForm.market_id))
+  return m?.currency || ''
+})
+
+watch(() => promotionForm.market_id, (newId) => {
+  if (!newId) {
+    promotionForm.currency = ''
+    return
+  }
+  const m = marketOptions.value.find(x => String(x.id) === String(newId))
+  if (m?.currency) promotionForm.currency = m.currency
+})
 
 const loadPromotion = async () => {
   if (!promotionId.value) return
