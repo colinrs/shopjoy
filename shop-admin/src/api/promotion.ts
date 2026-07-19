@@ -2,57 +2,64 @@ import request from '@/utils/request'
 
 // ==================== Types ====================
 
-// Promotion Types
-export type PromotionType = 'discount' | 'coupon' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
+// Unified Promotion/Coupon discriminator
+export type PromotionKind = 'promotion' | 'coupon'
+
+// Generic field enums (matching backend wire values)
+export type PromotionType = 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
 export type PromotionStatus = 'pending' | 'active' | 'paused' | 'ended' | 'expired'
-export type DiscountType = 'percentage' | 'fixed_amount' | 'buy_x_get_y'
-export type ConditionType = 'min_amount' | 'min_quantity'
+export type PromotionActionType = 'fixed_amount' | 'percentage' | 'free_shipping'
+export type PromotionConditionType = 'min_amount' | 'min_quantity'
 export type ScopeType = 'storewide' | 'products' | 'categories' | 'brands'
 
-// Coupon Types
-export type CouponType = 'fixed_amount' | 'percentage' | 'free_shipping'
-export type CouponStatus = 'inactive' | 'active' | 'expired' | 'depleted'
-
-// User Coupon Types
+// User Coupon Types (still served by /user-coupons endpoints)
 export type UserCouponStatus = 'unused' | 'used' | 'expired'
 
 // ==================== Promotion Interfaces ====================
 
+/**
+ * PromotionRule — wire shape of promotion_rules rows.
+ * Discount fields moved off of `promotions` onto the first matching rule.
+ */
 export interface PromotionRule {
   id: string
-  promotion_id: string
-  rule_type: string
-  operator: string
-  value: string
-  discount_type: string
-  discount_value: string
-  priority: number
-  created_at: string
-  updated_at: string
+  condition_type: PromotionConditionType
+  condition_value: string
+  action_type: PromotionActionType
+  action_value: string
+  max_discount?: string
+  sort_order?: number
 }
 
+/**
+ * Unified Promotion entity. Discriminated by `kind`:
+ * - `kind === 'promotion'` — activity/promotion (no code, no total_count)
+ * - `kind === 'coupon'`    — coupon (code, total_count populated)
+ *
+ * Matches the backend `PromotionDetailResp` after the
+ * promotion×coupon merge refactor (Tasks 1-8).
+ */
 export interface Promotion {
   id: string
+  kind: PromotionKind
   name: string
   description: string
-  type: PromotionType
+  code?: string                          // coupon only
+  type: string
   status: PromotionStatus
-  start_time: string
-  end_time: string
-  discount_type: DiscountType
-  discount_value: string
-  min_order_amount: string
-  max_discount: string
+  market_id?: string                     // optional
   currency: string
   usage_limit: number
   used_count: number
   per_user_limit: number
-  product_ids: string[]
-  category_ids: string[]
-  brand_ids: string[]
-  market_ids: string[]
-  tags: string[]
+  total_count?: number                   // coupon only
   scope_type: ScopeType
+  scope_ids: string[]
+  exclude_ids: string[]
+  tags: string[]
+  rules?: PromotionRule[]                // nested rules
+  start_time: string
+  end_time: string
   created_at: string
   updated_at: string
 }
@@ -61,8 +68,9 @@ export interface ListPromotionsParams {
   page: number
   page_size: number
   name?: string
-  type?: PromotionType
-  status?: PromotionStatus
+  kind?: PromotionKind
+  type?: string
+  status?: PromotionStatus | string
   market_id?: string
 }
 
@@ -74,22 +82,23 @@ export interface ListPromotionsResponse {
 }
 
 export interface CreatePromotionRequest {
+  kind: PromotionKind
   name: string
   description?: string
-  type: PromotionType
-  start_time: string
-  end_time: string
-  discount_type?: DiscountType
-  discount_value?: string
-  min_order_amount?: string
-  max_discount?: string
+  code?: string
+  type?: string
+  market_id?: string
+  currency?: string
   usage_limit?: number
   per_user_limit?: number
-  product_ids?: string[]
-  category_ids?: string[]
-  brand_ids?: string[]
-  market_ids?: string[]
+  total_count?: number
+  scope_type?: ScopeType
+  scope_ids?: string[]
+  exclude_ids?: string[]
   tags?: string[]
+  rules?: PromotionRuleRequest[]
+  start_time: string
+  end_time: string
 }
 
 export interface CreatePromotionResponse {
@@ -98,135 +107,69 @@ export interface CreatePromotionResponse {
 
 export interface UpdatePromotionRequest {
   id: string
+  kind: PromotionKind
   name: string
   description?: string
-  type: PromotionType
-  start_time: string
-  end_time: string
-  discount_type?: DiscountType
-  discount_value?: string
-  min_order_amount?: string
-  max_discount?: string
+  code?: string
+  type?: string
+  market_id?: string
+  currency?: string
   usage_limit?: number
   per_user_limit?: number
-  product_ids?: string[]
-  category_ids?: string[]
-  brand_ids?: string[]
-  market_ids?: string[]
+  total_count?: number
+  scope_type?: ScopeType
+  scope_ids?: string[]
+  exclude_ids?: string[]
   tags?: string[]
-}
-
-export interface CreatePromotionRulesRequest {
-  promotion_id: string
-  rules: PromotionRuleRequest[]
+  rules?: PromotionRuleRequest[]
+  start_time: string
+  end_time: string
 }
 
 export interface PromotionRuleRequest {
-  rule_type: string
-  operator: string
-  value: string
-  discount_type?: string
-  discount_value?: string
-  priority?: number
+  condition_type: PromotionConditionType
+  condition_value: string
+  action_type: PromotionActionType
+  action_value: string
+  max_discount?: string
+  sort_order?: number
 }
 
-export interface CreatePromotionRulesResponse {
-  ids: number[]
-}
-
+// Rule CRUD — owner_kind tells the backend whether the parent is a
+// promotion or a coupon (same table layout).
 export interface ListPromotionRulesResponse {
   list: PromotionRule[]
   total: number
 }
 
+export interface CreatePromotionRulesRequest {
+  owner_kind: PromotionKind
+  rules: PromotionRuleRequest[]
+}
+
+export interface CreatePromotionRulesResponse {
+  ids: string[]
+}
+
 export interface UpdatePromotionRuleRequest {
   id: string
-  rule_type: string
-  operator: string
-  value: string
-  discount_type?: string
-  discount_value?: string
-  priority?: number
-}
-
-// ==================== Coupon Interfaces ====================
-
-export interface Coupon {
-  id: string
-  code: string
-  name: string
-  description: string
-  type: CouponType
-  discount_value: string
-  min_order_amount: string
-  max_discount: string
-  start_time: string
-  end_time: string
-  usage_limit: number
-  used_count: number
-  per_user_limit: number
-  product_ids: string
-  category_ids: string
-  market_ids: string
-  status: CouponStatus
-  created_at: string
-  updated_at: string
-}
-
-export interface ListCouponsParams {
-  page: number
-  page_size: number
-  code?: string
-  name?: string
-  type?: CouponType
-  status?: CouponStatus
-}
-
-export interface ListCouponsResponse {
-  list: Coupon[]
-  total: number
-  page: number
-  page_size: number
-}
-
-export interface CreateCouponRequest {
-  code: string
-  name: string
-  description?: string
-  type: CouponType
-  discount_value: string
-  min_order_amount?: string
+  condition_type: PromotionConditionType
+  condition_value: string
+  action_type: PromotionActionType
+  action_value: string
   max_discount?: string
-  start_time: string
-  end_time: string
-  usage_limit?: number
-  per_user_limit?: number
-  product_ids?: string
-  category_ids?: string
-  market_ids?: string
+  sort_order?: number
 }
 
-export interface CreateCouponResponse {
-  id: string
-}
+// ==================== Coupon Legacy Interfaces ====================
+// NOTE: `CouponDetailResp` was merged into `Promotion` after the
+// promotion×coupon merge refactor. The legacy `/api/v1/coupons`
+// endpoints still exist for backwards compatibility and continue
+// to return the unified `PromotionDetailResp` shape (with kind="coupon").
+// Callers should use the unified `Promotion` type instead.
+export type Coupon = Promotion
 
-export interface UpdateCouponRequest {
-  id: string
-  code: string
-  name: string
-  description?: string
-  type: CouponType
-  discount_value: string
-  min_order_amount?: string
-  max_discount?: string
-  start_time: string
-  end_time: string
-  usage_limit?: number
-  per_user_limit?: number
-  product_ids?: string
-  category_ids?: string
-  market_ids?: string
-}
+// ==================== Coupon Usage Interfaces ====================
 
 export interface GenerateCouponCodesRequest {
   prefix?: string
@@ -379,11 +322,15 @@ export function getPromotionRules(promotionId: string) {
   })
 }
 
-export function createPromotionRules(promotionId: string, data: PromotionRuleRequest[]) {
+export function createPromotionRules(
+  promotionId: string,
+  ownerKind: PromotionKind,
+  rules: PromotionRuleRequest[]
+) {
   return request<CreatePromotionRulesResponse>({
     url: `/api/v1/promotions/${promotionId}/rules`,
     method: 'post',
-    data: { rules: data }
+    data: { owner_kind: ownerKind, rules }
   })
 }
 
@@ -402,18 +349,18 @@ export function deletePromotionRule(id: string) {
   })
 }
 
-// ==================== Coupon API Functions ====================
+// ==================== Coupon API Functions (legacy endpoints) ====================
 
-export function getCouponList(params: ListCouponsParams) {
-  return request<ListCouponsResponse>({
+export function getCouponList(params: { page: number; page_size: number; name?: string; type?: string; status?: string }) {
+  return request<ListPromotionsResponse>({
     url: '/api/v1/coupons',
     method: 'get',
     params
   })
 }
 
-export function createCoupon(data: CreateCouponRequest) {
-  return request<CreateCouponResponse>({
+export function createCoupon(data: CreatePromotionRequest) {
+  return request<CreatePromotionResponse>({
     url: '/api/v1/coupons',
     method: 'post',
     data
@@ -421,14 +368,14 @@ export function createCoupon(data: CreateCouponRequest) {
 }
 
 export function getCoupon(id: string) {
-  return request<Coupon>({
+  return request<Promotion>({
     url: `/api/v1/coupons/${id}`,
     method: 'get'
   })
 }
 
-export function updateCoupon(data: UpdateCouponRequest) {
-  return request<Coupon>({
+export function updateCoupon(data: UpdatePromotionRequest) {
+  return request<Promotion>({
     url: `/api/v1/coupons/${data.id}`,
     method: 'put',
     data
@@ -443,14 +390,14 @@ export function deleteCoupon(id: string) {
 }
 
 export function activateCoupon(id: string) {
-  return request<Coupon>({
+  return request<Promotion>({
     url: `/api/v1/coupons/${id}/activate`,
     method: 'post'
   })
 }
 
 export function deactivateCoupon(id: string) {
-  return request<Coupon>({
+  return request<Promotion>({
     url: `/api/v1/coupons/${id}/deactivate`,
     method: 'post'
   })

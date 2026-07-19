@@ -4,8 +4,8 @@
     class="promotion-detail-page"
   >
     <PageHeader
-      :title="isEdit ? $t('promotions.editPromotion') : $t('promotions.createPromotion')"
-      :subtitle="promotionForm.name || $t('promotions.configurePromotionInfo')"
+      :title="isEdit ? (kind === 'coupon' ? $t('promotions.editCoupon') : $t('promotions.editPromotion')) : (kind === 'coupon' ? $t('promotions.createCoupon') : $t('promotions.createPromotion'))"
+      :subtitle="promotionForm.name || (kind === 'coupon' ? $t('promotions.configureCouponInfo') : $t('promotions.configurePromotionInfo'))"
       @back="handleBack"
     />
 
@@ -40,10 +40,32 @@
                 >
                   <el-input
                     v-model="promotionForm.name"
-                    :placeholder="$t('promotions.enterPromotionName')"
+                    :placeholder="kind === 'coupon' ? $t('promotions.enterCouponName') : $t('promotions.enterPromotionName')"
                     maxlength="100"
                     show-word-limit
                   />
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="kind === 'coupon'"
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item
+                  :label="$t('promotions.couponCode')"
+                  prop="code"
+                >
+                  <el-input
+                    v-model="promotionForm.code"
+                    :placeholder="$t('promotions.enterCouponCode')"
+                    maxlength="50"
+                  >
+                    <template #append>
+                      <el-button @click="generateCouponCode">
+                        {{ $t('promotions.generate') }}
+                      </el-button>
+                    </template>
+                  </el-input>
                 </el-form-item>
               </el-col>
               <el-col
@@ -59,22 +81,38 @@
                     :placeholder="$t('promotions.selectPromotionType')"
                     style="width: 100%"
                   >
-                    <el-option
-                      :label="$t('promotions.discount')"
-                      value="discount"
-                    />
-                    <el-option
-                      :label="$t('promotions.flashSale')"
-                      value="flash_sale"
-                    />
-                    <el-option
-                      :label="$t('promotions.bundle')"
-                      value="bundle"
-                    />
-                    <el-option
-                      :label="$t('promotions.buyXGetY')"
-                      value="buy_x_get_y"
-                    />
+                    <template v-if="kind === 'coupon'">
+                      <el-option
+                        :label="$t('promotions.fixedAmount')"
+                        value="fixed_amount"
+                      />
+                      <el-option
+                        :label="$t('promotions.percentage')"
+                        value="percentage"
+                      />
+                      <el-option
+                        :label="$t('promotions.freeShipping')"
+                        value="free_shipping"
+                      />
+                    </template>
+                    <template v-else>
+                      <el-option
+                        :label="$t('promotions.discount')"
+                        value="discount"
+                      />
+                      <el-option
+                        :label="$t('promotions.flashSale')"
+                        value="flash_sale"
+                      />
+                      <el-option
+                        :label="$t('promotions.bundle')"
+                        value="bundle"
+                      />
+                      <el-option
+                        :label="$t('promotions.buyXGetY')"
+                        value="buy_x_get_y"
+                      />
+                    </template>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -96,6 +134,26 @@
                   </el-select>
                 </el-form-item>
               </el-col>
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item :label="$t('promotions.market')">
+                  <el-select
+                    v-model="promotionForm.market_id"
+                    :placeholder="$t('promotions.selectMarket')"
+                    clearable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="m in marketOptions"
+                      :key="m.id"
+                      :label="m.name"
+                      :value="m.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
             </el-row>
 
             <el-form-item :label="$t('promotions.promotionDescription')">
@@ -109,10 +167,10 @@
               />
             </el-form-item>
 
-            <!-- Promotion Rules -->
+            <!-- Rules -->
             <div class="section-title">
               <div class="rules-header">
-                <span>{{ $t('promotions.promotionRules') }}</span>
+                <span>{{ kind === 'coupon' ? $t('promotions.couponRules') : $t('promotions.promotionRules') }}</span>
                 <el-button
                   type="primary"
                   size="small"
@@ -130,52 +188,60 @@
               style="margin-bottom: 20px;"
             >
               <el-table-column
-                :label="$t('promotions.ruleType')"
+                :label="$t('promotions.conditionType')"
                 width="150"
               >
                 <template #default="{ row }">
-                  {{ getRuleTypeText(row.rule_type) }}
+                  {{ formatConditionType(row.condition_type) }}
                 </template>
               </el-table-column>
               <el-table-column
-                :label="$t('promotions.operator')"
+                :label="$t('promotions.conditionValue')"
                 width="120"
               >
                 <template #default="{ row }">
-                  {{ getOperatorText(row.operator) }}
+                  {{ row.condition_value }}
                 </template>
               </el-table-column>
               <el-table-column
-                :label="$t('promotions.ruleValue')"
+                :label="$t('promotions.actionType')"
                 width="150"
               >
                 <template #default="{ row }">
-                  {{ row.value }}
+                  {{ formatActionType(row.action_type) }}
                 </template>
               </el-table-column>
               <el-table-column
-                :label="$t('promotions.ruleDiscountType')"
-                width="150"
-              >
-                <template #default="{ row }">
-                  {{ row.discount_type ? (row.discount_type === 'percentage' ? $t('promotions.percentage') : $t('promotions.fixedAmount')) : '-' }}
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="$t('promotions.ruleDiscountValue')"
+                :label="$t('promotions.actionValue')"
                 width="120"
               >
                 <template #default="{ row }">
-                  {{ row.discount_value || '-' }}
+                  <template v-if="row.action_type === 'fixed_amount'">
+                    ¥{{ row.action_value }}
+                  </template>
+                  <template v-else-if="row.action_type === 'percentage'">
+                    {{ row.action_value }}%
+                  </template>
+                  <template v-else>
+                    -
+                  </template>
                 </template>
               </el-table-column>
               <el-table-column
-                :label="$t('promotions.rulePriority')"
-                width="100"
+                :label="$t('promotions.maxDiscount')"
+                width="120"
+              >
+                <template #default="{ row }">
+                  {{ row.max_discount && parseFloat(row.max_discount) > 0 ? `¥${row.max_discount}` : '-' }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                :label="$t('promotions.sortOrder')"
+                width="80"
                 align="center"
               >
                 <template #default="{ row }">
-                  {{ row.priority }}
+                  {{ row.sort_order ?? '-' }}
                 </template>
               </el-table-column>
               <el-table-column
@@ -253,7 +319,7 @@
               :label="$t('promotions.selectProducts')"
             >
               <el-select
-                v-model="promotionForm.product_ids"
+                v-model="promotionForm.scope_ids"
                 multiple
                 filterable
                 remote
@@ -276,7 +342,7 @@
               :label="$t('promotions.selectCategories')"
             >
               <el-select
-                v-model="promotionForm.category_ids"
+                v-model="promotionForm.scope_ids"
                 multiple
                 :placeholder="$t('promotions.selectCategoryPlaceholder')"
                 style="width: 100%"
@@ -295,7 +361,7 @@
               :label="$t('promotions.selectBrand')"
             >
               <el-select
-                v-model="promotionForm.brand_ids"
+                v-model="promotionForm.scope_ids"
                 multiple
                 :placeholder="$t('promotions.selectBrand')"
                 style="width: 100%"
@@ -314,6 +380,22 @@
               {{ $t('promotions.usageLimits') }}
             </div>
             <el-row :gutter="20">
+              <el-col
+                v-if="kind === 'coupon'"
+                :xs="24"
+                :sm="12"
+              >
+                <el-form-item :label="$t('promotions.totalCount')">
+                  <el-input-number
+                    v-model="promotionForm.total_count"
+                    :min="0"
+                    style="width: 100%"
+                  />
+                  <div class="form-tip">
+                    {{ $t('promotions.totalCountTip') }}
+                  </div>
+                </el-form-item>
+              </el-col>
               <el-col
                 :xs="24"
                 :sm="12"
@@ -411,11 +493,14 @@
             >
               <span class="discount-label">{{ $t('promotions.previewDiscount') }}</span>
               <span class="discount-value">
-                <template v-if="rulesList[0].discount_type === 'fixed_amount'">
-                  ¥{{ rulesList[0].discount_value || 0 }}
+                <template v-if="rulesList[0].action_type === 'fixed_amount'">
+                  ¥{{ rulesList[0].action_value || 0 }}
+                </template>
+                <template v-else-if="rulesList[0].action_type === 'percentage'">
+                  {{ rulesList[0].action_value || 0 }}%
                 </template>
                 <template v-else>
-                  {{ rulesList[0].discount_value || 0 }}%
+                  {{ $t('promotions.freeShipping') }}
                 </template>
               </span>
             </div>
@@ -448,109 +533,74 @@
         :model="ruleForm"
         label-width="120px"
       >
-        <el-form-item :label="$t('promotions.ruleType')">
+        <el-form-item :label="$t('promotions.conditionType')">
           <el-select
-            v-model="ruleForm.rule_type"
+            v-model="ruleForm.condition_type"
             style="width: 100%"
           >
             <el-option
-              :label="$t('promotions.ruleTypeProduct')"
-              value="product"
+              :label="$t('promotions.minAmount')"
+              value="min_amount"
             />
             <el-option
-              :label="$t('promotions.ruleTypeCategory')"
-              value="category"
-            />
-            <el-option
-              :label="$t('promotions.ruleTypeAmount')"
-              value="amount"
-            />
-            <el-option
-              :label="$t('promotions.ruleTypeQuantity')"
-              value="quantity"
-            />
-            <el-option
-              :label="$t('promotions.ruleTypeUserGroup')"
-              value="user_group"
-            />
-            <el-option
-              :label="$t('promotions.ruleTypeMarket')"
-              value="market"
+              :label="$t('promotions.minQuantity')"
+              value="min_quantity"
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('promotions.operator')">
-          <el-select
-            v-model="ruleForm.operator"
-            style="width: 100%"
-          >
-            <el-option
-              :label="$t('promotions.operatorEq')"
-              value="eq"
-            />
-            <el-option
-              :label="$t('promotions.operatorNe')"
-              value="ne"
-            />
-            <el-option
-              :label="$t('promotions.operatorGt')"
-              value="gt"
-            />
-            <el-option
-              :label="$t('promotions.operatorGte')"
-              value="gte"
-            />
-            <el-option
-              :label="$t('promotions.operatorLt')"
-              value="lt"
-            />
-            <el-option
-              :label="$t('promotions.operatorLte')"
-              value="lte"
-            />
-            <el-option
-              :label="$t('promotions.operatorIn')"
-              value="in"
-            />
-            <el-option
-              :label="$t('promotions.operatorNotIn')"
-              value="not_in"
-            />
-            <el-option
-              :label="$t('promotions.operatorContains')"
-              value="contains"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('promotions.ruleValue')">
-          <el-input v-model="ruleForm.value" />
-        </el-form-item>
-        <el-form-item :label="$t('promotions.ruleDiscountType')">
-          <el-select
-            v-model="ruleForm.discount_type"
-            style="width: 100%"
-          >
-            <el-option
-              :label="$t('promotions.fixedAmount')"
-              value="fixed_amount"
-            />
-            <el-option
-              :label="$t('promotions.percentage')"
-              value="percentage"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('promotions.ruleDiscountValue')">
+        <el-form-item :label="$t('promotions.conditionValue')">
           <el-input-number
-            v-model="ruleForm.discount_value_num"
+            v-model="ruleForm.condition_value_num"
             :min="0"
             :precision="2"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item :label="$t('promotions.rulePriority')">
+        <el-form-item :label="$t('promotions.actionType')">
+          <el-select
+            v-model="ruleForm.action_type"
+            style="width: 100%"
+          >
+            <el-option
+              :label="$t('promotions.fixedAmountType')"
+              value="fixed_amount"
+            />
+            <el-option
+              :label="$t('promotions.percentageType')"
+              value="percentage"
+            />
+            <el-option
+              :label="$t('promotions.freeShipping')"
+              value="free_shipping"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          v-if="ruleForm.action_type !== 'free_shipping'"
+          :label="$t('promotions.actionValue')"
+        >
           <el-input-number
-            v-model="ruleForm.priority"
+            v-model="ruleForm.action_value_num"
+            :min="0"
+            :max="ruleForm.action_type === 'percentage' ? 100 : 99999"
+            :precision="2"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item
+          v-if="ruleForm.action_type === 'percentage'"
+          :label="$t('promotions.maxDiscount')"
+        >
+          <el-input-number
+            v-model="ruleForm.max_discount_num"
+            :min="0"
+            :precision="2"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item :label="$t('promotions.sortOrder')">
+          <el-input-number
+            v-model="ruleForm.sort_order"
             :min="0"
             :max="100"
             style="width: 100%"
@@ -596,11 +646,12 @@ import { getPromotionStatusType } from '@/utils/status'
 import {
   getPromotion, createPromotion, updatePromotion, activatePromotion, deactivatePromotion,
   getPromotionRules, createPromotionRules, updatePromotionRule, deletePromotionRule,
-  type PromotionRule
+  type PromotionKind, type PromotionRule, type PromotionRuleRequest
 } from '@/api/promotion'
 import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'
 import { getBrands } from '@/api/brand'
+import { getMarkets, type Market } from '@/api/market'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { t } from '@/plugins/i18n'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -616,19 +667,22 @@ const activating = ref(false)
 
 const promotionId = computed(() => route.params.id as string)
 const isEdit = computed(() => !!promotionId.value)
+const kind = ref<PromotionKind>('promotion')
 
 const promotionForm = reactive({
   name: '',
   description: '',
-  type: 'discount' as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y',
+  code: '',
+  type: 'discount' as string,
   currency: 'CNY',
+  market_id: '',
   dateRange: [] as string[],
   scope_type: 'storewide' as 'storewide' | 'products' | 'categories' | 'brands',
-  product_ids: [] as string[],
-  category_ids: [] as string[],
-  brand_ids: [] as string[],
+  scope_ids: [] as string[],
+  exclude_ids: [] as string[],
   usage_limit: 0,
   per_user_limit: 0,
+  total_count: 0,
   status: 'pending' as string
 })
 
@@ -641,6 +695,7 @@ const rules = {
 const productOptions = ref<{ id: string; name: string }[]>([])
 const categoryOptions = ref<{ id: string; name: string }[]>([])
 const brandOptions = ref<{ id: string; name: string }[]>([])
+const marketOptions = ref<Market[]>([])
 
 const loadPromotion = async () => {
   if (!promotionId.value) return
@@ -648,19 +703,22 @@ const loadPromotion = async () => {
   loading.value = true
   try {
     const res = await getPromotion(promotionId.value)
+    kind.value = res.kind
     promotionForm.name = res.name
     promotionForm.description = res.description || ''
-    promotionForm.type = res.type as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
+    promotionForm.code = res.code || ''
+    promotionForm.type = res.type || (res.kind === 'coupon' ? 'fixed_amount' : 'discount')
     promotionForm.currency = res.currency || 'CNY'
+    promotionForm.market_id = res.market_id || ''
     promotionForm.dateRange = [res.start_time, res.end_time]
     if (res.scope_type) {
       promotionForm.scope_type = res.scope_type
     }
-    promotionForm.product_ids = res.product_ids || []
-    promotionForm.category_ids = res.category_ids || []
-    promotionForm.brand_ids = res.brand_ids || []
+    promotionForm.scope_ids = res.scope_ids || []
+    promotionForm.exclude_ids = res.exclude_ids || []
     promotionForm.usage_limit = res.usage_limit || 0
     promotionForm.per_user_limit = res.per_user_limit || 0
+    promotionForm.total_count = res.total_count || 0
     promotionForm.status = res.status
   } catch (error) {
     handleError(error, t('promotions.loadPromotionFailed'))
@@ -687,6 +745,15 @@ const loadBrands = async () => {
   }
 }
 
+const loadMarkets = async () => {
+  try {
+    const res = await getMarkets()
+    marketOptions.value = res.list || []
+  } catch (error) {
+    handleError(error, t('promotions.loadMarketsFailed'))
+  }
+}
+
 const searchProducts = async (query: string) => {
   if (!query) return
   try {
@@ -709,26 +776,33 @@ const handleSave = async () => {
 
     saving.value = true
     try {
-      const data = {
+      const baseData = {
+        kind: kind.value,
         name: promotionForm.name,
         description: promotionForm.description,
         type: promotionForm.type,
         currency: promotionForm.currency,
+        market_id: promotionForm.market_id || undefined,
         start_time: promotionForm.dateRange[0],
         end_time: promotionForm.dateRange[1],
         usage_limit: promotionForm.usage_limit,
         per_user_limit: promotionForm.per_user_limit,
-        product_ids: promotionForm.product_ids,
-        category_ids: promotionForm.category_ids,
-        brand_ids: promotionForm.brand_ids,
-        scope_type: promotionForm.scope_type
+        scope_type: promotionForm.scope_type,
+        scope_ids: promotionForm.scope_ids,
+        exclude_ids: promotionForm.exclude_ids
       }
+
+      const couponExtra = kind.value === 'coupon'
+        ? { code: promotionForm.code, total_count: promotionForm.total_count }
+        : {}
+
+      const data = { ...baseData, ...couponExtra }
 
       if (isEdit.value) {
         await updatePromotion({ id: promotionId.value, ...data })
         ElMessage.success(t('promotions.updateSuccess'))
       } else {
-        await createPromotion(data)
+        await createPromotion(data as Parameters<typeof createPromotion>[0])
         ElMessage.success(t('promotions.createSuccess'))
         router.push('/promotions')
       }
@@ -778,6 +852,15 @@ const formatDateTime = (dateStr: string) => {
   })
 }
 
+const generateCouponCode = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < 10; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  promotionForm.code = code
+}
+
 const getStatusType = getPromotionStatusType
 
 const getStatusText = (status: string) => {
@@ -785,7 +868,9 @@ const getStatusText = (status: string) => {
     'active': t('promotions.activeStatus'),
     'paused': t('promotions.paused'),
     'pending': t('promotions.pending'),
-    'ended': t('promotions.ended')
+    'ended': t('promotions.ended'),
+    'expired': t('promotions.expiredStatus'),
+    'depleted': t('promotions.depletedStatus')
   }
   return texts[status] || status
 }
@@ -800,6 +885,19 @@ const getScopeText = (scope: string) => {
   return texts[scope] || scope
 }
 
+const formatConditionType = (val: string) => {
+  return val === 'min_amount' ? t('promotions.minAmount') : t('promotions.minQuantity')
+}
+
+const formatActionType = (val: string) => {
+  const map: Record<string, string> = {
+    'fixed_amount': t('promotions.fixedAmountType'),
+    'percentage': t('promotions.percentageType'),
+    'free_shipping': t('promotions.freeShipping')
+  }
+  return map[val] || val
+}
+
 // Rules section
 const rulesList = ref<PromotionRule[]>([])
 const rulesLoading = ref(false)
@@ -807,12 +905,12 @@ const ruleDialogVisible = ref(false)
 const editingRule = ref<PromotionRule | null>(null)
 const ruleSaving = ref(false)
 const ruleForm = reactive({
-  rule_type: 'product',
-  operator: 'eq',
-  value: '',
-  discount_type: 'fixed_amount',
-  discount_value_num: 0,
-  priority: 0
+  condition_type: 'min_amount' as 'min_amount' | 'min_quantity',
+  condition_value_num: 0,
+  action_type: 'fixed_amount' as 'fixed_amount' | 'percentage' | 'free_shipping',
+  action_value_num: 0,
+  max_discount_num: 0,
+  sort_order: 0
 })
 
 const loadRules = async () => {
@@ -830,23 +928,23 @@ const loadRules = async () => {
 
 const showAddRuleDialog = () => {
   editingRule.value = null
-  ruleForm.rule_type = 'product'
-  ruleForm.operator = 'eq'
-  ruleForm.value = ''
-  ruleForm.discount_type = 'fixed_amount'
-  ruleForm.discount_value_num = 0
-  ruleForm.priority = 0
+  ruleForm.condition_type = 'min_amount'
+  ruleForm.condition_value_num = 0
+  ruleForm.action_type = 'fixed_amount'
+  ruleForm.action_value_num = 0
+  ruleForm.max_discount_num = 0
+  ruleForm.sort_order = 0
   ruleDialogVisible.value = true
 }
 
 const handleEditRule = (rule: PromotionRule) => {
   editingRule.value = rule
-  ruleForm.rule_type = rule.rule_type
-  ruleForm.operator = rule.operator
-  ruleForm.value = rule.value
-  ruleForm.discount_type = rule.discount_type || 'fixed_amount'
-  ruleForm.discount_value_num = parseFloat(rule.discount_value) || 0
-  ruleForm.priority = rule.priority
+  ruleForm.condition_type = rule.condition_type
+  ruleForm.condition_value_num = parseFloat(rule.condition_value) || 0
+  ruleForm.action_type = rule.action_type
+  ruleForm.action_value_num = parseFloat(rule.action_value) || 0
+  ruleForm.max_discount_num = parseFloat(rule.max_discount || '0') || 0
+  ruleForm.sort_order = rule.sort_order || 0
   ruleDialogVisible.value = true
 }
 
@@ -870,61 +968,40 @@ const handleDeleteRule = async (rule: PromotionRule) => {
 const handleSaveRule = async () => {
   ruleSaving.value = true
   try {
-    const data = {
-      rule_type: ruleForm.rule_type,
-      operator: ruleForm.operator,
-      value: ruleForm.value,
-      discount_type: ruleForm.discount_type,
-      discount_value: String(ruleForm.discount_value_num),
-      priority: ruleForm.priority
+    const data: PromotionRuleRequest = {
+      condition_type: ruleForm.condition_type,
+      condition_value: String(ruleForm.condition_value_num),
+      action_type: ruleForm.action_type,
+      action_value: ruleForm.action_type === 'free_shipping' ? '0' : String(ruleForm.action_value_num),
+      max_discount: ruleForm.action_type === 'percentage' ? String(ruleForm.max_discount_num) : undefined,
+      sort_order: ruleForm.sort_order
     }
 
     if (editingRule.value) {
-      await updatePromotionRule({ id: editingRule.value.id, ...data })
+      await updatePromotionRule({ ...data, id: editingRule.value.id })
       ElMessage.success(t('promotions.ruleUpdatedSuccess'))
     } else {
-      await createPromotionRules(promotionId.value, [data])
+      await createPromotionRules(promotionId.value, kind.value, [data])
       ElMessage.success(t('promotions.ruleCreatedSuccess'))
     }
     ruleDialogVisible.value = false
     loadRules()
   } catch (error) {
-    handleError(error, editingRule.value ? t('promotions.updateRuleFailed') : t('promotions.createRuleFailed'))
+    handleError(
+      error,
+      editingRule.value
+        ? t('promotions.updateRuleFailed')
+        : t('promotions.createRuleFailed')
+    )
   } finally {
     ruleSaving.value = false
   }
 }
 
-const getRuleTypeText = (type: string) => {
-  const texts: Record<string, string> = {
-    'product': t('promotions.ruleTypeProduct'),
-    'category': t('promotions.ruleTypeCategory'),
-    'amount': t('promotions.ruleTypeAmount'),
-    'quantity': t('promotions.ruleTypeQuantity'),
-    'user_group': t('promotions.ruleTypeUserGroup'),
-    'market': t('promotions.ruleTypeMarket')
-  }
-  return texts[type] || type
-}
-
-const getOperatorText = (operator: string) => {
-  const texts: Record<string, string> = {
-    'eq': t('promotions.operatorEq'),
-    'ne': t('promotions.operatorNe'),
-    'gt': t('promotions.operatorGt'),
-    'gte': t('promotions.operatorGte'),
-    'lt': t('promotions.operatorLt'),
-    'lte': t('promotions.operatorLte'),
-    'in': t('promotions.operatorIn'),
-    'not_in': t('promotions.operatorNotIn'),
-    'contains': t('promotions.operatorContains')
-  }
-  return texts[operator] || operator
-}
-
 onMounted(() => {
   loadCategories()
   loadBrands()
+  loadMarkets()
   if (isEdit.value) {
     loadPromotion()
     loadRules()
