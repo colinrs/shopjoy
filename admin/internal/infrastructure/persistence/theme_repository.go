@@ -117,9 +117,6 @@ func (r *themeRepo) Create(ctx context.Context, db *gorm.DB, theme *storefront.T
 
 func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.Theme) error {
 	model := fromThemeEntity(theme)
-	config, _ := json.Marshal(theme.Config)
-	configSchema, _ := json.Marshal(theme.ConfigSchema)
-	defaultConfig, _ := json.Marshal(theme.DefaultConfig)
 	now := time.Now().UTC()
 
 	// Only allow updating custom themes (not preset themes)
@@ -130,9 +127,9 @@ func (r *themeRepo) Update(ctx context.Context, db *gorm.DB, theme *storefront.T
 			"description":    model.Description,
 			"thumbnail":      model.Thumbnail,
 			"preview_image":  model.PreviewImage,
-			"config":         string(config),
-			"config_schema":  string(configSchema),
-			"default_config": string(defaultConfig),
+			"config":         model.Config,
+			"config_schema":  model.ConfigSchema,
+			"default_config": model.DefaultConfig,
 			"is_active":      model.IsActive,
 			"is_custom":      model.IsCustom,
 			"updated_at":     now,
