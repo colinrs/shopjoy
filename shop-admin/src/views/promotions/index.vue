@@ -701,19 +701,14 @@
           </el-radio-group>
         </el-form-item>
 
-        <!-- Currency -->
+        <!-- Currency (auto-bound from selected market) -->
         <el-form-item :label="$t('promotions.currency')">
-          <el-select
-            v-model="form.currency"
-            style="width: 100%"
-          >
-            <el-option label="CNY" value="CNY" />
-            <el-option label="USD" value="USD" />
-            <el-option label="EUR" value="EUR" />
-            <el-option label="JPY" value="JPY" />
-            <el-option label="GBP" value="GBP" />
-            <el-option label="SGD" value="SGD" />
-          </el-select>
+          <el-input
+            :model-value="form.currency || (selectedMarketCurrency || '—')"
+            readonly
+            disabled
+            :placeholder="$t('promotions.currencyAutoBound')"
+          />
         </el-form-item>
 
         <!-- Market -->
@@ -737,6 +732,7 @@
         <el-form-item :label="$t('promotions.rules')">
           <div class="rules-editor">
             <el-button
+              v-if="!(form.kind === 'coupon' && (form.rules || []).length >= 1)"
               size="small"
               type="primary"
               @click="showAddRuleDialogInForm"
@@ -1217,7 +1213,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Ticket, CircleCheck, User, Search, Plus, Present, DocumentCopy } from '@element-plus/icons-vue'
@@ -1366,6 +1362,23 @@ const formDialogTitle = computed(() => {
     return form.kind === 'coupon' ? t('promotions.editCoupon') : t('promotions.editPromotion')
   }
   return form.kind === 'coupon' ? t('promotions.createCoupon') : t('promotions.createPromotion')
+})
+
+// Currency is auto-bound from the selected market — never user-editable.
+// Looked up via marketOptions so changing the market updates form.currency.
+const selectedMarketCurrency = computed(() => {
+  if (!form.market_id) return ''
+  const m = marketOptions.value.find(x => String(x.id) === String(form.market_id))
+  return m?.currency || ''
+})
+
+watch(() => form.market_id, (newId) => {
+  if (!newId) {
+    form.currency = ''
+    return
+  }
+  const m = marketOptions.value.find(x => String(x.id) === String(newId))
+  if (m?.currency) form.currency = m.currency
 })
 
 // Rule editor (inline in form)
@@ -1608,6 +1621,9 @@ const handleEditCoupon = async (row: Promotion) => {
   } catch {
     fillFormFromRow(row)
   }
+  // Defensive: handlers know which kind they're editing. Don't rely on the
+  // row's kind field being populated if the API omitted it.
+  form.kind = 'coupon'
   isFormEdit.value = true
   formDialogVisible.value = true
 }

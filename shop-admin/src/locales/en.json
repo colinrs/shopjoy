@@ -1216,7 +1216,8 @@
     "tags": "Tags",
     "tagsPlaceholder": "Comma-separated tags",
     "totalCount": "Total Count",
-    "totalCountTip": "Total coupons to issue; 0 = unlimited"
+    "totalCountTip": "Total coupons to issue; 0 = unlimited",
+    "currencyAutoBound": "Auto-bound from market"
   },
   "dashboard": {
     "title": "Dashboard",
