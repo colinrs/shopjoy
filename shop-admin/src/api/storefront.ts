@@ -11,6 +11,7 @@ export interface ThemeItem {
   thumbnail: string
   is_preset: boolean
   is_current: boolean
+  default_config?: ThemeConfigDTO
 }
 
 export interface ListThemesResponse {
