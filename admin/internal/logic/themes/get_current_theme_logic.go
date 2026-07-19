@@ -35,14 +35,15 @@ func (l *GetCurrentThemeLogic) GetCurrentTheme() (resp *types.CurrentThemeRespon
 
 	return &types.CurrentThemeResponse{
 		Theme: &types.ThemeItem{
-			ID:           result.Theme.ID,
-			Code:         result.Theme.Code,
-			Name:         result.Theme.Name,
-			Description:  result.Theme.Description,
-			PreviewImage: result.Theme.PreviewImage,
-			Thumbnail:    result.Theme.Thumbnail,
-			IsPreset:     result.Theme.IsPreset,
-			IsCurrent:    result.Theme.IsCurrent,
+			ID:            result.Theme.ID,
+			Code:          result.Theme.Code,
+			Name:          result.Theme.Name,
+			Description:   result.Theme.Description,
+			PreviewImage:  result.Theme.PreviewImage,
+			Thumbnail:     result.Theme.Thumbnail,
+			IsPreset:      result.Theme.IsPreset,
+			IsCurrent:     result.Theme.IsCurrent,
+			DefaultConfig: defaultConfigToWire(result.Theme.DefaultConfig),
 		},
 		Config: types.ThemeConfigDTO{
 			PrimaryColor:   result.Config.PrimaryColor,
