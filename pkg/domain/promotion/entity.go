@@ -1,81 +1,55 @@
 package promotion
 
 import (
-	"context"
 	"time"
 
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
-// ==================== Promotion Status ====================
-// Aligned with existing admin/internal/domain/promotion/entity.go
+// Kind discriminates between system-driven promotions and claim-based coupons.
+type Kind string
 
+const (
+	KindPromotion Kind = "PROMOTION"
+	KindCoupon    Kind = "COUPON"
+)
+
+func (k Kind) IsValid() bool {
+	return k == KindPromotion || k == KindCoupon
+}
+
+// Status (unified for both kinds)
 type Status int
 
 const (
-	StatusPending Status = iota // 0 - Draft/Pending state
-	StatusActive                // 1 - Active and running
-	StatusPaused                // 2 - Manually paused/inactive
-	StatusEnded                 // 3 - Ended (time passed)
+	StatusPending Status = iota // 0
+	StatusActive                // 1
+	StatusPaused                // 2
+	StatusEnded                 // 3 - depleted coupons also surface as ended (see IsActive)
 )
 
 func (s Status) IsValid() bool {
 	return s >= StatusPending && s <= StatusEnded
 }
 
-func (s Status) String() string {
-	switch s {
-	case StatusPending:
-		return "pending"
-	case StatusActive:
-		return "active"
-	case StatusPaused:
-		return "paused"
-	case StatusEnded:
-		return "ended"
-	default:
-		return "unknown"
-	}
-}
-
-// ==================== Promotion Type ====================
-// Extended from existing with new MVP types
-
+// Type (marketing play). COUPONs always use TypeDiscount (=0).
 type Type int
 
 const (
-	TypeDiscount   Type = iota // 0 - Generic discount (FIXED_DISCOUNT)
-	TypeFlashSale              // 1 - Flash sale (Phase 2)
-	TypeBundle                 // 2 - Bundle promotion (Phase 2)
-	TypeBuyXGetY               // 3 - Buy X Get Y (Phase 2)
-	TypeFullReduce             // 4 - Tiered full reduction (NEW for MVP)
+	TypeDiscount Type = iota // 0
+	TypeFlashSale            // 1
+	TypeBundle               // 2
+	TypeBuyXGetY             // 3
 )
 
 func (t Type) IsValid() bool {
-	return t >= TypeDiscount && t <= TypeFullReduce
+	return t >= TypeDiscount && t <= TypeBuyXGetY
 }
 
-func (t Type) String() string {
-	switch t {
-	case TypeDiscount:
-		return "discount"
-	case TypeFlashSale:
-		return "flash_sale"
-	case TypeBundle:
-		return "bundle"
-	case TypeBuyXGetY:
-		return "buy_x_get_y"
-	case TypeFullReduce:
-		return "full_reduce"
-	default:
-		return "unknown"
-	}
-}
-
-// ==================== Scope Type ====================
-
+// ScopeType enumerates the kinds of product scope a promotion can target.
+// (MARKET scope was removed — promotions now use the top-level market_id column.)
 type ScopeType string
 
 const (
@@ -94,44 +68,7 @@ func (t ScopeType) IsValid() bool {
 	}
 }
 
-// ==================== Rule Types ====================
-// Aligned with existing admin/internal/domain/promotion/entity.go
-
-type ConditionType int
-
-const (
-	ConditionMinAmount ConditionType = iota
-	ConditionMinQuantity
-)
-
-func (t ConditionType) IsValid() bool {
-	return t >= ConditionMinAmount && t <= ConditionMinQuantity
-}
-
-type ActionType int
-
-const (
-	ActionFixedAmount ActionType = iota
-	ActionPercentage
-)
-
-func (t ActionType) IsValid() bool {
-	return t >= ActionFixedAmount && t <= ActionPercentage
-}
-
-func (t ActionType) String() string {
-	switch t {
-	case ActionFixedAmount:
-		return "FIXED_AMOUNT"
-	case ActionPercentage:
-		return "PERCENTAGE"
-	default:
-		return "UNKNOWN"
-	}
-}
-
-// ==================== PromotionScope (Value Object) ====================
-
+// PromotionScope (Value Object)
 type PromotionScope struct {
 	Type       ScopeType `json:"type"`
 	IDs        []int64   `json:"ids,omitempty"`
@@ -175,154 +112,121 @@ func (s *PromotionScope) MatchesProduct(productID, categoryID, brandID int64) bo
 	}
 }
 
-// ==================== PromotionRule (Entity) ====================
-
-type PromotionRule struct {
-	ID             int64           `json:"id"`
-	PromotionID    int64           `json:"promotion_id"`
-	ConditionType  ConditionType   `json:"condition_type"`
-	ConditionValue decimal.Decimal `json:"condition_value"` // Threshold: amount for MIN_AMOUNT, count for MIN_QUANTITY
-	ActionType     ActionType      `json:"action_type"`
-	ActionValue    decimal.Decimal `json:"action_value"` // Discount: amount for FIXED_AMOUNT, basis points for PERCENTAGE (100 = 1%)
-	MaxDiscount    decimal.Decimal `json:"max_discount"` // Maximum discount cap for percentage
-	Currency       string          `json:"currency"`
-	SortOrder      int             `json:"sort_order"`
-	CreatedAt      time.Time       `json:"created_at"`
-	UpdatedAt      time.Time       `json:"updated_at"`
-}
-
-// CalculateDiscount calculates the discount for a given amount
-// ActionValue interpretation:
-// - ActionFixedAmount: amount (e.g., 100 = 100.00)
-// - ActionPercentage: basis points (100 = 1%, 500 = 5%, 1000 = 10%)
-func (r *PromotionRule) CalculateDiscount(matchedAmount decimal.Decimal) decimal.Decimal {
-	var discount decimal.Decimal
-
-	switch r.ActionType {
-	case ActionFixedAmount:
-		discount = r.ActionValue
-	case ActionPercentage:
-		// Basis points: 100 = 1%, so divide by 10000
-		discount = matchedAmount.Mul(r.ActionValue).Div(decimal.NewFromInt(10000))
-	}
-
-	if r.MaxDiscount.IsPositive() && discount.GreaterThan(r.MaxDiscount) {
-		discount = r.MaxDiscount
-	}
-
-	if discount.GreaterThan(matchedAmount) {
-		discount = matchedAmount
-	}
-
-	return discount
-}
-
-// MeetsCondition checks if the amount/quantity meets the condition
-func (r *PromotionRule) MeetsCondition(amount decimal.Decimal, quantity int) bool {
-	switch r.ConditionType {
-	case ConditionMinAmount:
-		return amount.GreaterThanOrEqual(r.ConditionValue)
-	case ConditionMinQuantity:
-		return decimal.NewFromInt(int64(quantity)).GreaterThanOrEqual(r.ConditionValue)
-	default:
-		return false
-	}
-}
-
-// ==================== Promotion (Aggregate Root) ====================
-
+// Promotion is the aggregate root for both system promotions and user-claimable
+// coupons. Coupon-specific fields are nullable; semantics activate when Kind == KindCoupon.
 type Promotion struct {
 	ID           int64            `json:"id"`
 	TenantID     shared.TenantID  `json:"tenant_id"`
+	Kind         Kind             `json:"kind"`
 	Name         string           `json:"name"`
 	Description  string           `json:"description"`
+	Code         *string          `json:"code,omitempty"`
 	Type         Type             `json:"type"`
 	Status       Status           `json:"status"`
 	Priority     int              `json:"priority"`
-	StartAt      time.Time        `json:"start_at"`
-	EndAt        time.Time        `json:"end_at"`
-	Scope        PromotionScope   `json:"scope"`
+	MarketID     *int64           `json:"market_id,omitempty"`
+	Currency     string           `json:"currency"`
+	TotalCount   *int             `json:"total_count,omitempty"`
+	UsedCount    *int             `json:"used_count,omitempty"`
 	UsageLimit   int              `json:"usage_limit"`
 	PerUserLimit int              `json:"per_user_limit"`
 	Tags         []string         `json:"tags,omitempty" gorm:"type:json"`
-	Currency     string           `json:"currency"`
+	Scope        PromotionScope   `json:"scope"`
+	StartAt      time.Time        `json:"start_at"`
+	EndAt        time.Time        `json:"end_at"`
 	Rules        []PromotionRule  `json:"rules,omitempty"`
 	Audit        shared.AuditInfo `json:"audit"`
 	DeletedAt    *time.Time       `json:"deleted_at,omitempty"`
 }
 
-func (p *Promotion) TableName() string {
-	return "promotions"
-}
+func (p *Promotion) TableName() string { return "promotions" }
 
-// IsActive checks if promotion is currently active
+// IsActive returns true if the promotion is currently usable. For COUPONs,
+// this also checks inventory (used_count < total_count).
 func (p *Promotion) IsActive() bool {
-	if p.Status != StatusActive {
+	if p.Status != StatusActive || p.DeletedAt != nil {
 		return false
 	}
-	if p.DeletedAt != nil {
-		return false
+	if p.Kind == KindCoupon && p.TotalCount != nil && p.UsedCount != nil {
+		if *p.UsedCount >= *p.TotalCount {
+			return false // depleted
+		}
 	}
 	now := time.Now().UTC()
 	return !now.Before(p.StartAt) && !now.After(p.EndAt)
 }
 
-// MatchesProduct checks if product is in promotion scope
-func (p *Promotion) MatchesProduct(productID, categoryID, brandID int64) bool {
+// MatchesMarket returns true if the promotion applies to the given market.
+// A NULL market_id means "applies to all markets".
+func (p *Promotion) MatchesMarket(marketID int64) bool {
+	return p.MarketID == nil || *p.MarketID == marketID
+}
+
+// MatchesScope delegates to Scope (kind-agnostic).
+func (p *Promotion) MatchesScope(productID, categoryID, brandID int64) bool {
 	return p.Scope.MatchesProduct(productID, categoryID, brandID)
 }
 
-// FindBestRule finds the best applicable rule for given amount
+// FindBestRule returns the rule with the highest ConditionValue that still
+// meets the condition. Multi-tier support for COUPONs lives here.
 func (p *Promotion) FindBestRule(matchedAmount decimal.Decimal, quantity int) *PromotionRule {
-	var bestRule *PromotionRule
-
+	var best *PromotionRule
 	for i := range p.Rules {
 		rule := &p.Rules[i]
 		if !rule.MeetsCondition(matchedAmount, quantity) {
 			continue
 		}
-		if bestRule == nil || rule.ConditionValue.GreaterThan(bestRule.ConditionValue) {
-			bestRule = rule
+		if best == nil || rule.ConditionValue.GreaterThan(best.ConditionValue) {
+			best = rule
 		}
 	}
-
-	return bestRule
+	return best
 }
 
-// ==================== Query Types ====================
-
-type Query struct {
-	shared.PageQuery
-	TenantID shared.TenantID
-	Name     string
-	Status   *Status
-	Type     *Type
-
-	// ExpiredOnly restricts the result set to promotions whose EndAt
-	// is in the past, regardless of the stored status column. This is
-	// a filter flag rather than a status value because "expired" is
-	// derived from EndAt at response time and is never written back
-	// to the promotions table.
-	ExpiredOnly bool
+// CalculateDiscount is a convenience wrapper around FindBestRule.
+func (p *Promotion) CalculateDiscount(matchedAmount decimal.Decimal, quantity int) decimal.Decimal {
+	rule := p.FindBestRule(matchedAmount, quantity)
+	if rule == nil {
+		return decimal.Zero
+	}
+	return rule.CalculateDiscount(matchedAmount)
 }
 
-// ==================== Repository Interface ====================
-// Extended from existing Repository with new methods
+// Issue creates a UserCoupon from this promotion. Returns ErrPromotionInvalidKind
+// if invoked on a non-COUPON.
+func (p *Promotion) Issue(userID int64, now time.Time) (*UserCoupon, error) {
+	if p.Kind != KindCoupon {
+		return nil, code.ErrPromotionInvalidKind
+	}
+	if !p.IsActive() {
+		return nil, code.ErrCouponExpired
+	}
+	return &UserCoupon{
+		TenantID:   p.TenantID,
+		UserID:     userID,
+		CouponID:   p.ID,
+		Status:     UserCouponStatusUnused,
+		ReceivedAt: now,
+		ExpireAt:   p.EndAt,
+	}, nil
+}
 
-type Repository interface {
-	Create(ctx context.Context, db *gorm.DB, promotion *Promotion) error
-	Update(ctx context.Context, db *gorm.DB, promotion *Promotion) error
-	Delete(ctx context.Context, db *gorm.DB, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Promotion, error)
-	FindActive(ctx context.Context, db *gorm.DB) ([]*Promotion, error)
-	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Promotion, int64, error)
-
-	// Extended methods for MVP
-	FindActiveByCurrency(ctx context.Context, db *gorm.DB, currency string) ([]*Promotion, error)
-	CreateRules(ctx context.Context, db *gorm.DB, rules []PromotionRule) error
-	FindRuleByID(ctx context.Context, db *gorm.DB, id int64) (*PromotionRule, error)
-	FindRulesByPromotionID(ctx context.Context, db *gorm.DB, promotionID int64) ([]PromotionRule, error)
-	FindRulesByPromotionIDs(ctx context.Context, db *gorm.DB, promotionIDs []int64) (map[int64][]PromotionRule, error)
-	UpdateRule(ctx context.Context, db *gorm.DB, rule *PromotionRule) error
-	DeleteRule(ctx context.Context, db *gorm.DB, id int64) error
+// ConsumeInventory increments used_count in memory (pre-check). Persistence
+// happens via repo.IncrementUsedCount which uses an atomic SQL check to
+// prevent overselling:
+//
+//   UPDATE promotions
+//   SET used_count = used_count + 1
+//   WHERE id = ? AND kind = 'COUPON' AND (total_count IS NULL OR used_count < total_count)
+//
+// Caller must roll back the in-memory value if the SQL fails.
+func (p *Promotion) ConsumeInventory() error {
+	if p.Kind != KindCoupon || p.UsedCount == nil || p.TotalCount == nil {
+		return code.ErrPromotionInvalidKind
+	}
+	if *p.UsedCount >= *p.TotalCount {
+		return code.ErrCouponUsedUp
+	}
+	*p.UsedCount++
+	return nil
 }

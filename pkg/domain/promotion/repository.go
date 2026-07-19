@@ -3,44 +3,34 @@ package promotion
 import (
 	"context"
 
-	"github.com/colinrs/shopjoy/pkg/domain/shared"
 	"gorm.io/gorm"
 )
 
-// CouponRepository defines the interface for coupon persistence
-type CouponRepository interface {
-	Create(ctx context.Context, db *gorm.DB, coupon *Coupon) error
-	Update(ctx context.Context, db *gorm.DB, coupon *Coupon) error
+// Repository is the persistence boundary for promotions and their rules.
+// All methods are kind-agnostic unless suffixed (e.g., Issue* methods are
+// only valid when OwnerKind == KindCoupon).
+type Repository interface {
+	// Generic CRUD
+	Create(ctx context.Context, db *gorm.DB, p *Promotion) error
+	Update(ctx context.Context, db *gorm.DB, p *Promotion) error
 	Delete(ctx context.Context, db *gorm.DB, id int64) error
-	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Coupon, error)
-	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Coupon, error)
-	FindList(ctx context.Context, db *gorm.DB, query CouponQuery) ([]*Coupon, int64, error)
-	IncrementUsage(ctx context.Context, db *gorm.DB, id int64) error
-}
+	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Promotion, error)
+	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Promotion, error)
+	FindList(ctx context.Context, db *gorm.DB, query Query) ([]*Promotion, int64, error)
 
-// UserCouponRepository defines the interface for user coupon persistence
-type UserCouponRepository interface {
-	Create(ctx context.Context, db *gorm.DB, userCoupon *UserCoupon) error
-	FindByID(ctx context.Context, db *gorm.DB, id int64) (*UserCoupon, error)
-	FindByUserID(ctx context.Context, db *gorm.DB, userID int64, status *UserCouponStatus) ([]*UserCoupon, error)
-	FindByUserAndCoupon(ctx context.Context, db *gorm.DB, userID int64, couponID int64) ([]*UserCoupon, error)
-	MarkUsed(ctx context.Context, db *gorm.DB, id int64, orderID int64) error
-	CountUsageByUser(ctx context.Context, db *gorm.DB, userID int64, couponID int64) (int, error)
-}
+	// Rules
+	CreateRules(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64, rules []PromotionRule) error
+	FindRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) ([]PromotionRule, error)
+	UpdateRule(ctx context.Context, db *gorm.DB, rule *PromotionRule) error
+	DeleteRule(ctx context.Context, db *gorm.DB, id int64) error
+	DeleteRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) error
 
-// PromotionUsageRepository defines the interface for promotion usage persistence
-type PromotionUsageRepository interface {
-	Create(ctx context.Context, db *gorm.DB, usage *PromotionUsage) error
-	FindByOrderID(ctx context.Context, db *gorm.DB, orderID int64) (*PromotionUsage, error)
-	FindList(ctx context.Context, db *gorm.DB, query PromotionUsageQuery) ([]*PromotionUsage, int64, error)
-}
+	// Coupon-specific
+	FindActiveCoupons(ctx context.Context, db *gorm.DB, marketID *int64) ([]*Promotion, error)
+	IncrementUsedCount(ctx context.Context, db *gorm.DB, couponID int64) error
+	IssueUserCoupon(ctx context.Context, db *gorm.DB, uc *UserCoupon) error
+	FindUserCoupons(ctx context.Context, db *gorm.DB, query UserCouponQuery) ([]*UserCoupon, int64, error)
 
-// PromotionUsageQuery for querying promotion usage
-type PromotionUsageQuery struct {
-	shared.PageQuery
-	TenantID    shared.TenantID
-	PromotionID *int64
-	CouponID    *int64
-	UserID      *int64
-	OrderID     int64
+	// Usage (existing)
+	FindPromotionUsage(ctx context.Context, db *gorm.DB, query UsageQuery) ([]*PromotionUsage, int64, error)
 }
