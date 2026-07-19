@@ -213,8 +213,10 @@ SELECT code, COUNT(*) c FROM coupons WHERE deleted_at IS NULL GROUP BY code HAVI
 SELECT r.* FROM promotion_rules r LEFT JOIN promotions p ON p.id = r.promotion_id WHERE p.id IS NULL;
 -- 预期：0 行
 
--- 3. 旧 coupons.scope_ids / market_ids 数据形态检查（如需回填到 market_id）
-SELECT id, scope_type, scope_ids, market_ids FROM coupons WHERE JSON_LENGTH(market_ids) > 0;
+-- 3. 旧 coupons.market_ids 数据形态检查 —— **NO-OP**: 实际 schema 中 `coupons` 表
+--    没有 `market_ids` 列（仅 `scope_ids` + `exclude_ids`），故此检查无法执行。
+--    按设计 §2.7，promotion.market_id 是新列，不从旧数据回填。
+--    原 SQL 留作参考：SELECT id, scope_type, scope_ids FROM coupons;
 ```
 
 ### 2.6 字段映射表
