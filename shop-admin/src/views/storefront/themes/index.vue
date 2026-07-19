@@ -255,20 +255,11 @@
         v-if="previewThemeData"
         class="preview-dialog-content"
       >
-        <el-image
-          :src="previewThemeData.preview_image || previewThemeData.thumbnail"
-          fit="contain"
-          class="preview-large-image"
-        >
-          <template #error>
-            <div class="image-placeholder large">
-              <el-icon size="64">
-                <Picture />
-              </el-icon>
-              <span>{{ $t('storefront.noPreviewImage') }}</span>
-            </div>
-          </template>
-        </el-image>
+        <ThemePreviewCard
+          :theme="previewThemeData"
+          large
+          class="preview-large-card"
+        />
         <div class="preview-info">
           <h3>{{ previewThemeData.name }}</h3>
           <p>{{ previewThemeData.description }}</p>
@@ -706,11 +697,9 @@ onUnmounted(() => {
   gap: 24px;
 }
 
-.preview-large-image {
+.preview-large-card {
   width: 100%;
-  max-height: 400px;
-  border-radius: 12px;
-  overflow: hidden;
+  max-height: 420px;
 }
 
 .image-placeholder.large {

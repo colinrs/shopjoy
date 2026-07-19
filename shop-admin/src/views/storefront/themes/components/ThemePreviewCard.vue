@@ -1,6 +1,7 @@
 <template>
   <div
     class="theme-preview-card"
+    :class="{ 'theme-preview-card--large': large }"
     :style="rootStyle"
   >
     <!-- Header bar -->
@@ -52,9 +53,12 @@
 import { computed } from 'vue'
 import type { ThemeItem } from '@/api/storefront'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   theme: ThemeItem
-}>()
+  large?: boolean
+}>(), {
+  large: false
+})
 
 const FONT_MAP: Record<string, string> = {
   inter:        'Inter, system-ui, sans-serif',
@@ -204,5 +208,73 @@ const buttonStyle = computed(() => cfg.value?.button_style || 'rounded')
   color: var(--theme-primary);
   text-decoration: underline;
   padding: 4px 6px;
+}
+
+/* Large variant — used by the preview dialog */
+.theme-preview-card--large {
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.theme-preview-card--large .tpc-header {
+  padding: 14px 22px;
+  gap: 12px;
+}
+
+.theme-preview-card--large .tpc-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.theme-preview-card--large .tpc-shop-name {
+  font-size: 16px;
+}
+
+.theme-preview-card--large .tpc-icons {
+  font-size: 14px;
+  letter-spacing: 4px;
+}
+
+.theme-preview-card--large .tpc-body {
+  padding: 24px 28px;
+  gap: 14px;
+}
+
+.theme-preview-card--large .tpc-section-title {
+  font-size: 22px;
+}
+
+.theme-preview-card--large .tpc-section-rule {
+  width: 56px;
+  height: 3px;
+}
+
+.theme-preview-card--large .tpc-grid {
+  gap: 14px;
+}
+
+.theme-preview-card--large .tpc-tile-img {
+  border-radius: 6px;
+}
+
+.theme-preview-card--large .tpc-tile-price {
+  font-size: 14px;
+  padding-top: 6px;
+}
+
+.theme-preview-card--large .tpc-cta-wrap {
+  padding-top: 14px;
+}
+
+.theme-preview-card--large .tpc-cta {
+  padding: 10px 32px;
+  font-size: 14px;
+}
+
+.theme-preview-card--large .tpc-cta-link {
+  padding: 10px 8px;
+  font-size: 14px;
 }
 </style>
