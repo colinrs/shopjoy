@@ -242,7 +242,11 @@ func (a *PromotionApp) Update(ctx context.Context, req *UpdatePromotionRequest) 
 		return nil, err
 	}
 	if req.Rules != nil {
-		if err := a.repo.DeleteRulesByOwner(ctx, a.db, p.Kind, p.ID); err != nil {
+		// Hard-delete old rules so the promotion_rules table doesn't
+		// accumulate tombstones across replace cycles. DeleteRulesByOwner
+		// (soft-delete) is reserved for full promotion delete so that
+		// undeleting a promotion recovers its rules.
+		if err := a.repo.HardDeleteRulesByOwner(ctx, a.db, p.Kind, p.ID); err != nil {
 			return nil, err
 		}
 		if len(*req.Rules) > 0 {

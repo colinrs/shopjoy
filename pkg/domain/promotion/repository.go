@@ -27,6 +27,12 @@ type Repository interface {
 	UpdateRule(ctx context.Context, db *gorm.DB, rule *PromotionRule) error
 	DeleteRule(ctx context.Context, db *gorm.DB, id int64) error
 	DeleteRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) error
+	// HardDeleteRulesByOwner removes rules for an owner WITHOUT going through
+	// GORM soft-delete. Used by Update to prevent the promotion_rules table
+	// from accumulating tombstoned rows across replace cycles. Delete (full
+	// promotion delete) keeps the soft-delete semantics so undeleting a
+	// promotion recovers its rules.
+	HardDeleteRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) error
 
 	// Coupon-specific
 	FindActiveCoupons(ctx context.Context, db *gorm.DB, marketID *int64) ([]*Promotion, error)

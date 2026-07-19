@@ -571,6 +571,18 @@ func (r *promotionRepo) DeleteRulesByOwner(ctx context.Context, db *gorm.DB, own
 		Delete(&promotionRuleModel{}).Error
 }
 
+// HardDeleteRulesByOwner permanently removes rules for an owner, bypassing
+// GORM's soft-delete (deleted_at). Used by PromotionApp.Update when replacing
+// the ruleset so old rows don't accumulate as tombstones across replace
+// cycles. Compare with DeleteRulesByOwner (soft-delete) which is kept for
+// full promotion delete so an undeleted promotion recovers its rules.
+func (r *promotionRepo) HardDeleteRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind promotion.Kind, ownerID int64) error {
+	return db.WithContext(ctx).
+		Unscoped().
+		Where("owner_kind = ? AND owner_id = ?", ownerKind, ownerID).
+		Delete(&promotionRuleModel{}).Error
+}
+
 // FindActiveCoupons returns claim-eligible coupons for a market (or any market
 // when marketID is nil). Eligibility = status active, time window open, and
 // inventory not depleted (total_count IS NULL OR used_count < total_count).
