@@ -24,13 +24,9 @@ func NewDeletePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) De
 }
 
 func (l *DeletePromotionLogic) DeletePromotion(req *types.DeletePromotionReq) (resp *types.CreatePromotionResp, err error) {
-	// Get tenantID from context
-
-	err = l.svcCtx.PromotionApp.DeletePromotion(l.ctx, req.ID)
-	if err != nil {
+	if err := l.svcCtx.PromotionApp.Delete(l.ctx, req.ID); err != nil {
 		return nil, err
 	}
-
 	return &types.CreatePromotionResp{
 		ID: req.ID,
 	}, nil

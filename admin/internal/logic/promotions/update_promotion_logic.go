@@ -2,9 +2,6 @@ package promotions
 
 import (
 	"context"
-	"strconv"
-	"strings"
-	"time"
 
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -28,44 +25,25 @@ func NewUpdatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Up
 	}
 }
 
+// UpdatePromotion mirrors CreatePromotion: parse times, build a
+// PromotionRule from the wire discount fields, then call the unified
+// PromotionApp.Update with Rules wrapped in a pointer (so the app
+// layer knows to replace — not preserve — the rules).
 func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (resp *types.PromotionDetailResp, err error) {
-	// Get tenantID from context
-
-	// Parse time
-	startAt, err := time.Parse(time.RFC3339, req.StartTime)
+	startAt, err := parseTime(req.StartTime)
 	if err != nil {
 		return nil, err
 	}
-	endAt, err := time.Parse(time.RFC3339, req.EndTime)
+	endAt, err := parseTime(req.EndTime)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map type + scope. Type comes straight from the wire; scope
-	// needs synthesizing because the form posts ID arrays but not
-	// scope_type (see wire UpdatePromotionReq). If the form supplies
-	// scope_type we trust it, otherwise we derive from whichever ID
-	// array is non-empty (PRODUCTS wins when multiple are populated).
 	scope := buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs, req.BrandIDs)
 
-	updateReq := apppromotion.UpdatePromotionRequest{
-		ID:           req.ID,
-		Name:         req.Name,
-		Description:  req.Description,
-		Type:         mapPromotionType(req.Type),
-		Currency:     currencyWithDefault(req.Currency),
-		Scope:        scope,
-		UsageLimit:   req.UsageLimit,
-		PerUserLimit: req.PerUserLimit,
-		Tags:         req.Tags,
-		StartAt:      startAt,
-		EndAt:        endAt,
-		Rules:        make([]apppromotion.CreatePromotionRuleRequest, 0),
-	}
-
-	// Build rules from discount fields (same logic as create path).
+	var rulesPtr *[]pkgpromotion.PromotionRule
 	if req.DiscountType != "" && req.DiscountValue != "" {
-		rule := apppromotion.CreatePromotionRuleRequest{
+		rule := pkgpromotion.PromotionRule{
 			ConditionType: pkgpromotion.ConditionMinAmount,
 			ActionType:    mapDiscountActionType(req.DiscountType),
 		}
@@ -78,10 +56,27 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 		if req.MaxDiscount != "" {
 			rule.MaxDiscount = parseMoneyToDecimal(req.MaxDiscount)
 		}
-		updateReq.Rules = append(updateReq.Rules, rule)
+		rules := []pkgpromotion.PromotionRule{rule}
+		rulesPtr = &rules
 	}
 
-	promotionResp, err := l.svcCtx.PromotionApp.UpdatePromotion(l.ctx, updateReq)
+	updateReq := &apppromotion.UpdatePromotionRequest{
+		ID:           req.ID,
+		Name:         req.Name,
+		Description:  req.Description,
+		Type:         parsePromotionType(req.Type),
+		Currency:     currencyWithDefault(req.Currency),
+		Scope:        scope,
+		UsageLimit:   req.UsageLimit,
+		PerUserLimit: req.PerUserLimit,
+		Tags:         req.Tags,
+		StartAt:      startAt,
+		EndAt:        endAt,
+		Rules:        rulesPtr,
+		ActorID:      actorID(l.ctx),
+	}
+
+	promotionResp, err := l.svcCtx.PromotionApp.Update(l.ctx, updateReq)
 	if err != nil {
 		return nil, err
 	}
@@ -89,73 +84,12 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 	return convertPromotionToDetailResp(promotionResp), nil
 }
 
-// buildPromotionScope maps the wire-level (scope_type, product_ids,
-// category_ids, brand_ids) tuple onto the domain's PromotionScope.
-// Empty IDs for the chosen scope are normalized to nil so the
-// storage layer doesn't carry stale empty arrays.
-//
-// Wire values are lowercase ("products", "categories", "brands", …)
-// but the domain constants are uppercase ("PRODUCTS", …). We
-// uppercase before comparing so the form's emitted value matches
-// the enum.
-func buildPromotionScope(scopeType string, productIDs, categoryIDs, brandIDs []string) pkgpromotion.PromotionScope {
-	normalize := func(s string) pkgpromotion.ScopeType {
-		switch strings.ToUpper(s) {
-		case string(pkgpromotion.ScopeTypeProducts):
-			return pkgpromotion.ScopeTypeProducts
-		case string(pkgpromotion.ScopeTypeCategories):
-			return pkgpromotion.ScopeTypeCategories
-		case string(pkgpromotion.ScopeTypeBrands):
-			return pkgpromotion.ScopeTypeBrands
-		case string(pkgpromotion.ScopeTypeStorewide):
-			return pkgpromotion.ScopeTypeStorewide
-		}
-		return ""
-	}
-
-	st := normalize(scopeType)
-	if st == "" {
-		switch {
-		case len(productIDs) > 0:
-			st = pkgpromotion.ScopeTypeProducts
-		case len(categoryIDs) > 0:
-			st = pkgpromotion.ScopeTypeCategories
-		case len(brandIDs) > 0:
-			st = pkgpromotion.ScopeTypeBrands
-		default:
-			st = pkgpromotion.ScopeTypeStorewide
+// actorID extracts the audit user ID from context with a 0 fallback.
+func actorID(ctx context.Context) int64 {
+	if v := ctx.Value("user_id"); v != nil {
+		if id, ok := v.(int64); ok {
+			return id
 		}
 	}
-
-	var ids []int64
-	switch st {
-	case pkgpromotion.ScopeTypeProducts:
-		ids = parseInt64Slice(productIDs)
-	case pkgpromotion.ScopeTypeCategories:
-		ids = parseInt64Slice(categoryIDs)
-	case pkgpromotion.ScopeTypeBrands:
-		ids = parseInt64Slice(brandIDs)
-	default:
-		ids = nil
-	}
-	return pkgpromotion.PromotionScope{Type: st, IDs: ids}
-}
-
-// parseInt64Slice converts []string of decimal numeric IDs into
-// []int64, ignoring entries that fail to parse. The wire model uses
-// string IDs to match the rest of the API; the domain uses int64.
-func parseInt64Slice(ss []string) []int64 {
-	if len(ss) == 0 {
-		return nil
-	}
-	out := make([]int64, 0, len(ss))
-	for _, s := range ss {
-		if n, err := strconv.ParseInt(s, 10, 64); err == nil {
-			out = append(out, n)
-		}
-	}
-	if len(out) == 0 {
-		return nil
-	}
-	return out
+	return 0
 }

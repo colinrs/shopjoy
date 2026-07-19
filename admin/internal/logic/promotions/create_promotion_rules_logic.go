@@ -2,11 +2,10 @@ package promotions
 
 import (
 	"context"
+	"strconv"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/utils"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,24 +24,23 @@ func NewCreatePromotionRulesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	}
 }
 
+// CreatePromotionRules looks up the owner Promotion to determine
+// Kind, then calls PromotionApp.CreateRules. The app layer expects a
+// typed Kind (PROMOTION / COUPON) so it can route the row to the
+// correct rules table slice / owner_kind column.
 func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromotionRulesReq) (resp *types.CreatePromotionRulesResp, err error) {
-	ruleReqs := make([]apppromotion.CreatePromotionRuleRequest, 0, len(req.Rules))
-
-	for _, ruleReq := range req.Rules {
-		ruleReqs = append(ruleReqs, apppromotion.CreatePromotionRuleRequest{
-			ConditionType:  mapConditionType(ruleReq.RuleType),
-			ConditionValue: parseMoneyToDecimal(ruleReq.Value),
-			ActionType:     mapDiscountActionType(ruleReq.DiscountType),
-			ActionValue:    parseMoneyToDecimal(ruleReq.DiscountValue),
-		})
-	}
-
-	ids, err := l.svcCtx.PromotionApp.CreatePromotionRules(l.ctx, req.PromotionID, ruleReqs)
+	owner, err := l.svcCtx.PromotionApp.Get(l.ctx, req.PromotionID)
 	if err != nil {
 		return nil, err
 	}
-
-	return &types.CreatePromotionRulesResp{
-		IDs: utils.FormatInt64Slice(ids),
-	}, nil
+	rules := convertRuleReqsToDomain(req.Rules)
+	out, err := l.svcCtx.PromotionApp.CreateRules(l.ctx, owner.Kind, req.PromotionID, rules)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, len(out))
+	for i, r := range out {
+		ids[i] = strconv.FormatInt(r.ID, 10)
+	}
+	return &types.CreatePromotionRulesResp{IDs: ids}, nil
 }

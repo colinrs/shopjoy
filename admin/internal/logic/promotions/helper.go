@@ -1,6 +1,8 @@
 package promotions
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
@@ -8,6 +10,10 @@ import (
 	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/shopspring/decimal"
 )
+
+// =============================================================================
+// Type / status / kind mappings (wire <-> domain)
+// =============================================================================
 
 func mapPromotionType(typeStr string) pkgpromotion.Type {
 	switch typeStr {
@@ -19,18 +25,34 @@ func mapPromotionType(typeStr string) pkgpromotion.Type {
 		return pkgpromotion.TypeBundle
 	case "buy_x_get_y":
 		return pkgpromotion.TypeBuyXGetY
-	case "full_reduce":
-		return pkgpromotion.TypeFullReduce
 	default:
 		return pkgpromotion.TypeDiscount
+	}
+}
+
+// parsePromotionType is the new wire-side entry point. The wire sends
+// lowercase ("discount", "flash_sale", …); normalize to the domain
+// constant and validate.
+func parsePromotionType(typeStr string) pkgpromotion.Type {
+	return mapPromotionType(strings.ToLower(typeStr))
+}
+
+func mapPromotionKindToString(k pkgpromotion.Kind) string {
+	switch k {
+	case pkgpromotion.KindPromotion:
+		return "promotion"
+	case pkgpromotion.KindCoupon:
+		return "coupon"
+	default:
+		return "promotion"
 	}
 }
 
 // mapPromotionStatus converts a stored promotion status (int) to its
 // wire-format string. Values match the .api file comment and the
 // frontend's PromotionStatus type verbatim.
-func mapPromotionStatus(status int) string {
-	switch pkgpromotion.Status(status) {
+func mapPromotionStatus(status pkgpromotion.Status) string {
+	switch status {
 	case pkgpromotion.StatusPending:
 		return "pending"
 	case pkgpromotion.StatusActive:
@@ -71,22 +93,35 @@ func mapPromotionTypeToString(t pkgpromotion.Type) string {
 		return "bundle"
 	case pkgpromotion.TypeBuyXGetY:
 		return "buy_x_get_y"
-	case pkgpromotion.TypeFullReduce:
-		return "full_reduce"
 	default:
 		return "discount"
 	}
 }
 
 func mapDiscountActionType(discountType string) pkgpromotion.ActionType {
-	if discountType == "percentage" {
+	if strings.EqualFold(discountType, "percentage") {
 		return pkgpromotion.ActionPercentage
 	}
 	return pkgpromotion.ActionFixedAmount
 }
 
+// mapCouponActionType maps the coupon's wire Type ("fixed_amount",
+// "percentage", "free_shipping") onto the domain ActionType. The wire
+// is largely unchanged from the pre-merge coupon form so the
+// translation stays simple.
+func mapCouponActionType(couponType string) pkgpromotion.ActionType {
+	switch strings.ToLower(couponType) {
+	case "percentage":
+		return pkgpromotion.ActionPercentage
+	case "free_shipping":
+		return pkgpromotion.ActionFreeShipping
+	default:
+		return pkgpromotion.ActionFixedAmount
+	}
+}
+
 func mapConditionType(ruleType string) pkgpromotion.ConditionType {
-	switch ruleType {
+	switch strings.ToLower(ruleType) {
 	case "amount":
 		return pkgpromotion.ConditionMinAmount
 	case "quantity":
@@ -96,8 +131,8 @@ func mapConditionType(ruleType string) pkgpromotion.ConditionType {
 	}
 }
 
-func mapConditionTypeToString(conditionType int) string {
-	switch pkgpromotion.ConditionType(conditionType) {
+func mapConditionTypeToString(conditionType pkgpromotion.ConditionType) string {
+	switch conditionType {
 	case pkgpromotion.ConditionMinAmount:
 		return "amount"
 	case pkgpromotion.ConditionMinQuantity:
@@ -107,22 +142,27 @@ func mapConditionTypeToString(conditionType int) string {
 	}
 }
 
-func mapActionTypeIntToString(actionType int) string {
-	switch pkgpromotion.ActionType(actionType) {
+func mapActionTypeIntToString(actionType pkgpromotion.ActionType) string {
+	switch actionType {
 	case pkgpromotion.ActionFixedAmount:
 		return "fixed_amount"
 	case pkgpromotion.ActionPercentage:
 		return "percentage"
+	case pkgpromotion.ActionFreeShipping:
+		return "free_shipping"
 	default:
 		return "fixed_amount"
 	}
 }
 
+// =============================================================================
+// Money / decimal helpers
+// =============================================================================
+
 func parseMoneyToDecimal(s string) decimal.Decimal {
 	if s == "" {
 		return decimal.Zero
 	}
-	// Try parsing as decimal
 	v, err := decimal.NewFromString(s)
 	if err != nil {
 		return decimal.Zero
@@ -137,10 +177,197 @@ func formatDecimalToString(v decimal.Decimal) string {
 	return v.StringFixed(2)
 }
 
-// convertPromotionToDetailResp converts the application-layer response to
-// the wire-format response. The status is computed: if the promotion is
-// past its EndAt, "expired" is returned regardless of the stored status
-// (the frontend renders this as a non-toggleable tag).
+// currencyWithDefault returns the wire-supplied currency or "CNY" if
+// the frontend omitted it.
+func currencyWithDefault(c string) string {
+	if c == "" {
+		return "CNY"
+	}
+	return c
+}
+
+// optionalInt64 returns a pointer to v, or nil if v is zero. Used to
+// translate the wire "0 = unset" convention onto the domain's nullable
+// MarketID pointer.
+func optionalInt64(v int64) *int64 {
+	if v == 0 {
+		return nil
+	}
+	return &v
+}
+
+// parseTime parses an RFC3339 string into a UTC time.Time. Returns the
+// zero value (and the parse error) when the input is empty or
+// malformed; callers should propagate the error.
+func parseTime(s string) (time.Time, error) {
+	if s == "" {
+		return time.Time{}, nil
+	}
+	return time.Parse(time.RFC3339, s)
+}
+
+// =============================================================================
+// Scope helpers (shared by PROMOTION and COUPON create/update)
+// =============================================================================
+
+// buildPromotionScope maps the wire-level (scope_type, product_ids,
+// category_ids, brand_ids) tuple onto the domain's PromotionScope.
+// Empty IDs for the chosen scope are normalized to nil so the storage
+// layer doesn't carry stale empty arrays.
+//
+// Wire values are lowercase ("products", "categories", "brands", …)
+// but the domain constants are uppercase ("PRODUCTS", …). We uppercase
+// before comparing so the form's emitted value matches the enum.
+func buildPromotionScope(scopeType string, productIDs, categoryIDs, brandIDs []string) pkgpromotion.PromotionScope {
+	normalize := func(s string) pkgpromotion.ScopeType {
+		switch strings.ToUpper(s) {
+		case string(pkgpromotion.ScopeTypeProducts):
+			return pkgpromotion.ScopeTypeProducts
+		case string(pkgpromotion.ScopeTypeCategories):
+			return pkgpromotion.ScopeTypeCategories
+		case string(pkgpromotion.ScopeTypeBrands):
+			return pkgpromotion.ScopeTypeBrands
+		case string(pkgpromotion.ScopeTypeStorewide):
+			return pkgpromotion.ScopeTypeStorewide
+		}
+		return ""
+	}
+
+	st := normalize(scopeType)
+	if st == "" {
+		switch {
+		case len(productIDs) > 0:
+			st = pkgpromotion.ScopeTypeProducts
+		case len(categoryIDs) > 0:
+			st = pkgpromotion.ScopeTypeCategories
+		case len(brandIDs) > 0:
+			st = pkgpromotion.ScopeTypeBrands
+		default:
+			st = pkgpromotion.ScopeTypeStorewide
+		}
+	}
+
+	var ids []int64
+	switch st {
+	case pkgpromotion.ScopeTypeProducts:
+		ids = parseInt64Slice(productIDs)
+	case pkgpromotion.ScopeTypeCategories:
+		ids = parseInt64Slice(categoryIDs)
+	case pkgpromotion.ScopeTypeBrands:
+		ids = parseInt64Slice(brandIDs)
+	default:
+		ids = nil
+	}
+	return pkgpromotion.PromotionScope{Type: st, IDs: ids}
+}
+
+// buildCouponScope is a thin wrapper used by the coupon create/update
+// logic. The wire shape currently does not bind scope IDs for coupons
+// (product_ids / category_ids are JSON strings the form never
+// re-populates), so the resulting PromotionScope carries the chosen
+// scope_type with a nil ID slice.
+func buildCouponScope(scopeType string) pkgpromotion.PromotionScope {
+	switch strings.ToUpper(scopeType) {
+	case string(pkgpromotion.ScopeTypeProducts):
+		return pkgpromotion.PromotionScope{Type: pkgpromotion.ScopeTypeProducts}
+	case string(pkgpromotion.ScopeTypeCategories):
+		return pkgpromotion.PromotionScope{Type: pkgpromotion.ScopeTypeCategories}
+	case string(pkgpromotion.ScopeTypeBrands):
+		return pkgpromotion.PromotionScope{Type: pkgpromotion.ScopeTypeBrands}
+	}
+	return pkgpromotion.PromotionScope{Type: pkgpromotion.ScopeTypeStorewide}
+}
+
+// parseInt64Slice converts []string of decimal numeric IDs into
+// []int64, ignoring entries that fail to parse.
+func parseInt64Slice(ss []string) []int64 {
+	if len(ss) == 0 {
+		return nil
+	}
+	out := make([]int64, 0, len(ss))
+	for _, s := range ss {
+		if n, err := strconv.ParseInt(s, 10, 64); err == nil {
+			out = append(out, n)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// idsToStrings converts []int64 IDs to []string (decimal form). Used
+// when surfacing the domain Scope back into the wire response. Returns
+// nil for an empty slice so the JSON tag can emit "omitted".
+func idsToStrings(ids []int64) []string {
+	if len(ids) == 0 {
+		return nil
+	}
+	out := make([]string, len(ids))
+	for i, n := range ids {
+		out[i] = strconv.FormatInt(n, 10)
+	}
+	return out
+}
+
+// =============================================================================
+// Rule conversion (domain <-> wire)
+// =============================================================================
+
+// convertRuleReqsToDomain maps the wire-shaped rule request (rule_type,
+// value, discount_type, discount_value) onto the domain
+// PromotionRule. OwnerKind / OwnerID are set by the caller (they
+// aren't known until the promotion row exists).
+func convertRuleReqsToDomain(reqs []types.PromotionRuleReq) []pkgpromotion.PromotionRule {
+	if len(reqs) == 0 {
+		return nil
+	}
+	out := make([]pkgpromotion.PromotionRule, 0, len(reqs))
+	for _, r := range reqs {
+		out = append(out, pkgpromotion.PromotionRule{
+			ConditionType:  mapConditionType(r.RuleType),
+			ConditionValue: parseMoneyToDecimal(r.Value),
+			ActionType:     mapDiscountActionType(r.DiscountType),
+			ActionValue:    parseMoneyToDecimal(r.DiscountValue),
+		})
+	}
+	return out
+}
+
+// convertRulesToResp maps app → wire types for rules. The wire
+// PromotionRuleResp keeps the old flat shape (rule_type /
+// discount_type / discount_value / value / priority) so the form can
+// re-hydrate unchanged.
+func convertRulesToResp(rules []*apppromotion.PromotionRuleResponse) []*types.PromotionRuleResp {
+	if len(rules) == 0 {
+		return nil
+	}
+	out := make([]*types.PromotionRuleResp, 0, len(rules))
+	for _, r := range rules {
+		out = append(out, &types.PromotionRuleResp{
+			ID:            r.ID,
+			RuleType:      mapConditionTypeToString(r.ConditionType),
+			Operator:      "gte",
+			Value:         formatDecimalToString(r.ConditionValue),
+			DiscountType:  mapActionTypeIntToString(r.ActionType),
+			DiscountValue: formatDecimalToString(r.ActionValue),
+			Priority:      0,
+			CreatedAt:     "",
+			UpdatedAt:     "",
+		})
+	}
+	return out
+}
+
+// =============================================================================
+// PromotionResponse → PromotionDetailResp
+// =============================================================================
+
+// convertPromotionToDetailResp maps a unified PromotionResponse to the
+// wire PromotionDetailResp. The wire type still has the OLD shape
+// (no Kind / MarketID / Code / TotalCount / Rules fields); Task 8
+// will regenerate them. Until then, those fields stay zero/empty so
+// existing forms continue to render.
 func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.PromotionDetailResp {
 	status := mapPromotionStatus(p.Status)
 	if isPromotionExpired(p.EndAt) {
@@ -160,7 +387,7 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 		if !first.ActionValue.IsZero() {
 			discountValue = first.ActionValue.StringFixed(2)
 		}
-		if pkgpromotion.ConditionType(first.ConditionType) == pkgpromotion.ConditionMinAmount && !first.ConditionValue.IsZero() {
+		if first.ConditionType == pkgpromotion.ConditionMinAmount && !first.ConditionValue.IsZero() {
 			minOrderAmount = first.ConditionValue.StringFixed(2)
 		}
 		if !first.MaxDiscount.IsZero() {
@@ -173,26 +400,25 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 	// array matching ScopeType is populated — the others stay nil
 	// to mirror how the form sends a single non-empty ID array.
 	var productIDs, categoryIDs, brandIDs []string
-	scopeIDs := pkgpromotion.ScopeType(p.ScopeType)
-	if len(p.ScopeIDs) > 0 {
-		switch scopeIDs {
+	if len(p.Scope.IDs) > 0 {
+		switch p.Scope.Type {
 		case pkgpromotion.ScopeTypeProducts:
-			productIDs = p.ScopeIDs
+			productIDs = idsToStrings(p.Scope.IDs)
 		case pkgpromotion.ScopeTypeCategories:
-			categoryIDs = p.ScopeIDs
+			categoryIDs = idsToStrings(p.Scope.IDs)
 		case pkgpromotion.ScopeTypeBrands:
-			brandIDs = p.ScopeIDs
+			brandIDs = idsToStrings(p.Scope.IDs)
 		}
 	}
 
-	return &types.PromotionDetailResp{
+	resp := &types.PromotionDetailResp{
 		ID:             p.ID,
 		Name:           p.Name,
 		Description:    p.Description,
-		Type:           mapPromotionTypeToString(pkgpromotion.Type(p.Type)),
+		Type:           mapPromotionTypeToString(p.Type),
 		Status:         status,
-		StartTime:      p.StartAt,
-		EndTime:        p.EndAt,
+		StartTime:      p.StartAt.Format(time.RFC3339),
+		EndTime:        p.EndAt.Format(time.RFC3339),
 		DiscountType:   discountType,
 		DiscountValue:  discountValue,
 		MinOrderAmount: minOrderAmount,
@@ -204,23 +430,18 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 		CategoryIDs:    categoryIDs,
 		BrandIDs:       brandIDs,
 		Tags:           p.Tags,
-		ScopeType:      p.ScopeType,
-		CreatedAt:      p.CreatedAt,
-		UpdatedAt:      p.UpdatedAt,
+		ScopeType:      string(p.Scope.Type),
+		CreatedAt:      p.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      p.UpdatedAt.Format(time.RFC3339),
 	}
+	return resp
 }
 
 // isPromotionExpired returns true if the promotion's EndAt is in the
-// past. EndAt is an RFC3339 string (as emitted by the application
-// layer). A malformed or zero value is treated as not expired so that
-// the stored status is preserved.
-func isPromotionExpired(endAt string) bool {
-	if endAt == "" {
+// past.
+func isPromotionExpired(endAt time.Time) bool {
+	if endAt.IsZero() {
 		return false
 	}
-	t, err := time.Parse(time.RFC3339, endAt)
-	if err != nil {
-		return false
-	}
-	return time.Now().UTC().After(t)
+	return time.Now().UTC().After(endAt)
 }

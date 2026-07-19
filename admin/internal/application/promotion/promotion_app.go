@@ -2,7 +2,10 @@ package promotion
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
@@ -579,10 +582,202 @@ func randomCode(n int) string {
 }
 
 // couponFromConfig builds a CreatePromotionRequest from a code + cfg map.
-// This is a stub in this task — the JSON parsing will be implemented in the
-// logic layer (Task 7), which is where wire-shaped cfg comes from.
+// The cfg shape comes from the wire GenerateCouponCodesReq.CouponConfig
+// (a JSON object) parsed by the logic layer. Supported keys:
+//
+//	name (string, required)            — coupon display name
+//	description (string, optional)
+//	type (string)                      — "fixed_amount" | "percentage" | "free_shipping"
+//	discount_value (string|number)     — required for fixed/percentage
+//	min_order_amount (string|number)
+//	max_discount (string|number)
+//	currency (string)                  — defaults to "CNY"
+//	start_time (string, RFC3339)       — required
+//	end_time (string, RFC3339)         — required
+//	usage_limit (int)                  — total_count; 0 = unlimited
+//	per_user_limit (int)               — defaults to 1
+//	scope_type (string)                — storewide | products | categories | brands
+//	_actor_id (int64)                  — audit (injected by logic layer)
+//	_tenant_id (int64)                 — tenant scope (injected by logic layer)
+//
+// Per handoff I2, usage_limit=0 leaves TotalCount unset so the repo
+//'s consume-inventory SQL guard treats the coupon as unlimited.
 func couponFromConfig(code string, cfg map[string]any) *CreatePromotionRequest {
-	_ = code
-	_ = cfg
-	return nil
+	if cfg == nil {
+		return nil
+	}
+	name := stringFromCfg(cfg, "name")
+	if name == "" {
+		return nil
+	}
+
+	startStr := stringFromCfg(cfg, "start_time")
+	endStr := stringFromCfg(cfg, "end_time")
+	startAt, err1 := time.Parse(time.RFC3339, startStr)
+	endAt, err2 := time.Parse(time.RFC3339, endStr)
+	if err1 != nil || err2 != nil {
+		return nil
+	}
+
+	discountType := stringFromCfg(cfg, "type")
+	rule := promotion.PromotionRule{
+		ConditionType: promotion.ConditionMinAmount,
+		ActionType:    actionTypeFromCouponType(discountType),
+	}
+	if v := stringFromCfg(cfg, "min_order_amount"); v != "" {
+		if d, err := decimal.NewFromString(v); err == nil {
+			rule.ConditionValue = d
+		}
+	}
+	if v := stringFromCfg(cfg, "discount_value"); v != "" {
+		if d, err := decimal.NewFromString(v); err == nil {
+			rule.ActionValue = d
+		}
+	}
+	if v := stringFromCfg(cfg, "max_discount"); v != "" {
+		if d, err := decimal.NewFromString(v); err == nil {
+			rule.MaxDiscount = d
+		}
+	}
+
+	usageLimit := intFromCfg(cfg, "usage_limit")
+	perUserLimit := intFromCfg(cfg, "per_user_limit")
+	if perUserLimit == 0 {
+		perUserLimit = 1
+	}
+
+	codeCopy := code
+	var total *int
+	if usageLimit > 0 {
+		v := usageLimit
+		total = &v
+	}
+
+	actorID := int64FromCfg(cfg, "_actor_id")
+	tenantID := int64FromCfg(cfg, "_tenant_id")
+
+	return &CreatePromotionRequest{
+		TenantID:     shared.TenantID(tenantID),
+		Kind:         promotion.KindCoupon,
+		Name:         name,
+		Description:  stringFromCfg(cfg, "description"),
+		Code:         &codeCopy,
+		Type:         promotion.TypeDiscount,
+		Currency:     defaultCurrencyFromCfg(cfg, "currency"),
+		TotalCount:   total,
+		UsageLimit:   usageLimit,
+		PerUserLimit: perUserLimit,
+		Scope:        scopeFromCfg(cfg),
+		StartAt:      startAt,
+		EndAt:        endAt,
+		Rules:        []promotion.PromotionRule{rule},
+		ActorID:      actorID,
+	}
+}
+
+// stringFromCfg looks up a string key in cfg, accepting either a
+// string value or a fmt.Stringer / numeric value that converts via
+// fmt.Sprint.
+func stringFromCfg(cfg map[string]any, key string) string {
+	v, ok := cfg[key]
+	if !ok || v == nil {
+		return ""
+	}
+	switch s := v.(type) {
+	case string:
+		return s
+	case float64:
+		return fmt.Sprintf("%g", s)
+	case float32:
+		return fmt.Sprintf("%g", s)
+	case int:
+		return fmt.Sprintf("%d", s)
+	case int64:
+		return fmt.Sprintf("%d", s)
+	case json.Number:
+		return s.String()
+	}
+	return fmt.Sprintf("%v", v)
+}
+
+// intFromCfg reads an integer-typed key from cfg, tolerating JSON
+// numeric values which arrive as float64.
+func intFromCfg(cfg map[string]any, key string) int {
+	v, ok := cfg[key]
+	if !ok || v == nil {
+		return 0
+	}
+	switch n := v.(type) {
+	case int:
+		return n
+	case int32:
+		return int(n)
+	case int64:
+		return int(n)
+	case float64:
+		return int(n)
+	case float32:
+		return int(n)
+	case json.Number:
+		i, _ := n.Int64()
+		return int(i)
+	case string:
+		i, _ := strconv.Atoi(n)
+		return i
+	}
+	return 0
+}
+
+func int64FromCfg(cfg map[string]any, key string) int64 {
+	v, ok := cfg[key]
+	if !ok || v == nil {
+		return 0
+	}
+	switch n := v.(type) {
+	case int64:
+		return n
+	case int:
+		return int64(n)
+	case float64:
+		return int64(n)
+	case json.Number:
+		i, _ := n.Int64()
+		return i
+	}
+	return 0
+}
+
+func defaultCurrencyFromCfg(cfg map[string]any, key string) string {
+	if s := stringFromCfg(cfg, key); s != "" {
+		return s
+	}
+	return "CNY"
+}
+
+// actionTypeFromCouponType maps the wire coupon Type string onto the
+// domain ActionType.
+func actionTypeFromCouponType(t string) promotion.ActionType {
+	switch strings.ToLower(t) {
+	case "percentage":
+		return promotion.ActionPercentage
+	case "free_shipping":
+		return promotion.ActionFreeShipping
+	default:
+		return promotion.ActionFixedAmount
+	}
+}
+
+// scopeFromCfg translates the wire "scope_type" hint onto a
+// PromotionScope. The form doesn't yet bind IDs for batch
+// generation, so IDs stay nil.
+func scopeFromCfg(cfg map[string]any) promotion.PromotionScope {
+	switch strings.ToUpper(stringFromCfg(cfg, "scope_type")) {
+	case string(promotion.ScopeTypeProducts):
+		return promotion.PromotionScope{Type: promotion.ScopeTypeProducts}
+	case string(promotion.ScopeTypeCategories):
+		return promotion.PromotionScope{Type: promotion.ScopeTypeCategories}
+	case string(promotion.ScopeTypeBrands):
+		return promotion.PromotionScope{Type: promotion.ScopeTypeBrands}
+	}
+	return promotion.PromotionScope{Type: promotion.ScopeTypeStorewide}
 }

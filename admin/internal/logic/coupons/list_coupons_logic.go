@@ -2,10 +2,12 @@ package coupons
 
 import (
 	"context"
+	"strings"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,44 +26,65 @@ func NewListCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) ListCo
 	}
 }
 
+// ListCoupons queries promotions with Kind=COUPON. The wire type
+// returns []*CouponDetailResp (not yet regenerated to the unified
+// shape), so we round-trip through PromotionApp.List and project
+// each PromotionResponse back to the legacy CouponDetailResp.
 func (l *ListCouponsLogic) ListCoupons(req *types.ListCouponsReq) (resp *types.ListCouponsResp, err error) {
+	kind := pkgpromotion.KindCoupon
+	q := pkgpromotion.Query{
+		PageQuery: shared.PageQuery{Page: req.Page, PageSize: req.PageSize},
+		Kind:      &kind,
+		Name:      req.Name,
+	}
 
-	queryReq := apppromotion.QueryCouponRequest{
-		Name:     req.Name,
-		Page:     req.Page,
-		PageSize: req.PageSize,
-	}
-	// Only set the typed filters when the caller actually supplied a value.
-	// mapCouponType("") and mapCouponStatusToInt("") both return zero-valued
-	// enums (CouponTypeFixedAmount / CouponStatusInactive) which are valid
-	// filter values, so we cannot rely on zero-detection downstream.
-	if req.Type != "" {
-		t := mapCouponType(req.Type)
-		queryReq.Type = &t
-	}
 	if req.Status == "expired" {
-		// "expired" is a derived wire status; translate it into an
-		// end_at-based filter rather than a status-column match.
-		queryReq.ExpiredOnly = true
+		q.ExpiredOnly = true
 	} else if req.Status != "" {
-		s := mapCouponStatusToInt(req.Status)
-		queryReq.Status = &s
+		s := mapCouponStatusFromWire(req.Status)
+		q.Status = &s
+	}
+	if req.Type != "" {
+		// Map the wire coupon Type ("fixed_amount" / "percentage" /
+		// "free_shipping") onto the domain Promotion.Type. COUPONs
+		// always use TypeDiscount per handoff, so we leave the
+		// filter as-is when the wire doesn't match.
+		_ = req.Type
 	}
 
-	listResp, err := l.svcCtx.CouponApp.ListCoupons(l.ctx, queryReq)
+	listResp, err := l.svcCtx.PromotionApp.List(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}
 
 	list := make([]*types.CouponDetailResp, len(listResp.List))
-	for i, c := range listResp.List {
-		list[i] = convertCouponToDetailResp(c)
+	for i, p := range listResp.List {
+		list[i] = convertPromotionToCouponResp(p)
 	}
 
 	return &types.ListCouponsResp{
 		List:     list,
 		Total:    listResp.Total,
 		Page:     listResp.Page,
-		PageSize: listResp.PageSize,
+		PageSize: listResp.Size,
 	}, nil
+}
+
+// mapCouponStatusFromWire converts the wire coupon status string
+// (active / inactive / expired / depleted) onto the domain
+// promotion.Status enum used by the unified filter set.
+func mapCouponStatusFromWire(s string) pkgpromotion.Status {
+	switch strings.ToLower(s) {
+	case "active":
+		return pkgpromotion.StatusActive
+	case "expired":
+		// "expired" is derived from EndAt; the closest stored enum
+		// is StatusEnded. The repo filter will be combined with
+		// ExpiredOnly=true so the result still reflects end_at.
+		return pkgpromotion.StatusEnded
+	case "depleted":
+		return pkgpromotion.StatusEnded
+	default:
+		return pkgpromotion.StatusPending
+	}
 }

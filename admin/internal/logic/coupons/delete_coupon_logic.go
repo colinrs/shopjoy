@@ -23,14 +23,11 @@ func NewDeleteCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Delet
 	}
 }
 
+// DeleteCoupon removes the unified Promotion row (kind=COUPON). The
+// app layer also deletes the associated rules in the same call.
 func (l *DeleteCouponLogic) DeleteCoupon(req *types.DeleteCouponReq) (resp *types.CreateCouponResp, err error) {
-
-	err = l.svcCtx.CouponApp.DeleteCoupon(l.ctx, req.ID)
-	if err != nil {
+	if err := l.svcCtx.PromotionApp.Delete(l.ctx, req.ID); err != nil {
 		return nil, err
 	}
-
-	return &types.CreateCouponResp{
-		ID: req.ID,
-	}, nil
+	return &types.CreateCouponResp{ID: req.ID}, nil
 }

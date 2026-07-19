@@ -23,13 +23,12 @@ func NewDeletePromotionRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
+// DeletePromotionRule removes a single rule by ID via the unified
+// app service. No need to look up the parent promotion — DeleteRule
+// is owner-kind-agnostic.
 func (l *DeletePromotionRuleLogic) DeletePromotionRule(req *types.DeletePromotionRuleReq) (resp *types.CreatePromotionResp, err error) {
-	// Get tenantID from context
-
-	// Note: This would require additional implementation in the app service
-	// For now, return success
-
-	return &types.CreatePromotionResp{
-		ID: req.ID,
-	}, nil
+	if err := l.svcCtx.PromotionApp.DeleteRule(l.ctx, req.ID); err != nil {
+		return nil, err
+	}
+	return &types.CreatePromotionResp{ID: req.ID}, nil
 }

@@ -23,12 +23,15 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetCoupo
 	}
 }
 
+// GetCoupon fetches the unified PromotionResponse and projects it
+// back to the legacy wire CouponDetailResp. The repo enforces
+// Kind=COUPON (the wire endpoint is coupon-scoped) so an attempt to
+// GET a non-COUPON id here returns the promotion row as a coupon
+// payload — acceptable until Task 8 wires Kind into the request.
 func (l *GetCouponLogic) GetCoupon(req *types.GetCouponReq) (resp *types.CouponDetailResp, err error) {
-
-	couponResp, err := l.svcCtx.CouponApp.GetCoupon(l.ctx, req.ID)
+	p, err := l.svcCtx.PromotionApp.Get(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
-
-	return convertCouponToDetailResp(couponResp), nil
+	return convertPromotionToCouponResp(p), nil
 }

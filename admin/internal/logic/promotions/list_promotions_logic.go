@@ -2,10 +2,12 @@ package promotions
 
 import (
 	"context"
+	"strings"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
+	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,33 +26,38 @@ func NewListPromotionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 	}
 }
 
+// ListPromotions builds a promotion.Query from the wire request and
+// delegates to PromotionApp.List. Kind / Status / Type / MarketID
+// are wired with pointer semantics so the iota-zero (PROMOTION /
+// PENDING / DISCOUNT) can be expressed as a real filter, not a "no
+// filter" sentinel.
 func (l *ListPromotionsLogic) ListPromotions(req *types.ListPromotionsReq) (resp *types.ListPromotionsResp, err error) {
-	// Get tenantID from context
-
-	// Only attach status / type filters when the frontend actually
-	// provided a value. Using the mapped int as a sentinel — as the
-	// old code did — silently dropped filters whose mapped value
-	// equals the iota-zero (StatusPending / TypeDiscount).
-	queryReq := apppromotion.QueryPromotionRequest{
-		Name:     req.Name,
-		Page:     req.Page,
-		PageSize: req.PageSize,
+	q := pkgpromotion.Query{
+		PageQuery: shared.PageQuery{Page: req.Page, PageSize: req.PageSize},
+		Name:      req.Name,
 	}
+
+	// Wire sends lowercase kind strings; the domain constants are
+	// uppercase.
 	if req.Status == "expired" {
 		// "expired" is a derived wire status, not a stored value;
 		// translate it into an end_at-based filter rather than a
-		// status column match (StatusExpired doesn't exist in the enum).
-		queryReq.ExpiredOnly = true
+		// status column match.
+		q.ExpiredOnly = true
 	} else if req.Status != "" {
 		s := mapPromotionStatusToInt(req.Status)
-		queryReq.Status = &s
+		q.Status = &s
 	}
 	if req.Type != "" {
-		t := mapPromotionType(req.Type)
-		queryReq.Type = &t
+		t := parsePromotionType(req.Type)
+		q.Type = &t
+	}
+	if req.MarketID != 0 {
+		mid := req.MarketID
+		q.MarketID = &mid
 	}
 
-	listResp, err := l.svcCtx.PromotionApp.ListPromotions(l.ctx, queryReq)
+	listResp, err := l.svcCtx.PromotionApp.List(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +71,10 @@ func (l *ListPromotionsLogic) ListPromotions(req *types.ListPromotionsReq) (resp
 		List:     list,
 		Total:    listResp.Total,
 		Page:     listResp.Page,
-		PageSize: listResp.PageSize,
+		PageSize: listResp.Size,
 	}, nil
 }
+
+// strings is imported to keep the package aligned with the rest of
+// the promotion logic files that share it via convertRulesToResp.
+var _ = strings.ToLower

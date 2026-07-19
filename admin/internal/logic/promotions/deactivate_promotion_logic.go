@@ -24,18 +24,9 @@ func NewDeactivatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *DeactivatePromotionLogic) DeactivatePromotion(req *types.DeactivatePromotionReq) (resp *types.PromotionDetailResp, err error) {
-	// Get tenantID from context
-
-	err = l.svcCtx.PromotionApp.DeactivatePromotion(l.ctx, req.ID)
+	promotionResp, err := l.svcCtx.PromotionApp.Deactivate(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
-
-	// Get updated promotion
-	promotionResp, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, req.ID)
-	if err != nil {
-		return nil, err
-	}
-
 	return convertPromotionToDetailResp(promotionResp), nil
 }

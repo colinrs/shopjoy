@@ -3,9 +3,9 @@ package promotions
 import (
 	"context"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,28 +24,30 @@ func NewUpdatePromotionRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
+// UpdatePromotionRule mutates a single rule by ID. The app layer's
+// UpdateRule preserves OwnerKind / OwnerID — we don't need to fetch
+// the parent promotion here.
 func (l *UpdatePromotionRuleLogic) UpdatePromotionRule(req *types.UpdatePromotionRuleReq) (resp *types.PromotionRuleResp, err error) {
-	updateReq := apppromotion.UpdatePromotionRuleRequest{
-		ConditionType:  mapConditionType(req.RuleType),
+	rule := &pkgpromotion.PromotionRule{
+		ID:            req.ID,
+		ConditionType: mapConditionType(req.RuleType),
 		ConditionValue: parseMoneyToDecimal(req.Value),
 		ActionType:     mapDiscountActionType(req.DiscountType),
 		ActionValue:    parseMoneyToDecimal(req.DiscountValue),
 	}
-
-	ruleResp, err := l.svcCtx.PromotionApp.UpdatePromotionRule(l.ctx, req.ID, updateReq)
+	ruleResp, err := l.svcCtx.PromotionApp.UpdateRule(l.ctx, rule)
 	if err != nil {
 		return nil, err
 	}
 
 	return &types.PromotionRuleResp{
 		ID:            ruleResp.ID,
-		PromotionID:   ruleResp.PromotionID,
 		RuleType:      mapConditionTypeToString(ruleResp.ConditionType),
 		Operator:      "gte",
-		Value:         ruleResp.ConditionValue.StringFixed(2),
+		Value:         formatDecimalToString(ruleResp.ConditionValue),
 		DiscountType:  mapActionTypeIntToString(ruleResp.ActionType),
-		DiscountValue: ruleResp.ActionValue.StringFixed(2),
-		Priority:      0,
+		DiscountValue: formatDecimalToString(ruleResp.ActionValue),
+		Priority:      ruleResp.SortOrder,
 		CreatedAt:     "",
 		UpdatedAt:     "",
 	}, nil

@@ -2,6 +2,7 @@ package coupons
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -23,38 +24,35 @@ func NewGenerateCouponCodesLogic(ctx context.Context, svcCtx *svc.ServiceContext
 	}
 }
 
+// GenerateCouponCodes parses the wire CouponConfig JSON, hands the
+// resulting map to PromotionApp.GenerateCodes, and reports the codes
+// it produced. GenerateCodes internally builds a COUPON-kind
+// Promotion per code via couponFromConfig (see promotion_app.go).
+//
+// Per handoff I2, COUPON rows may carry usage_limit=0 ("unlimited")
+// after the data migration; the JSON parsing below preserves that —
+// a zero usage_limit leaves TotalCount unset (nil) on the resulting
+// Promotion so the consume-inventory SQL guard short-circuits.
 func (l *GenerateCouponCodesLogic) GenerateCouponCodes(req *types.GenerateCouponCodesReq) (resp *types.GenerateCouponCodesResp, err error) {
-
-	// Generate codes using the coupon app
-	// Note: This requires a coupon ID, but the API doesn't provide one
-	// For now, generate codes based on the prefix
-	codes := make([]string, 0, req.Quantity)
-	for i := 0; i < req.Quantity; i++ {
-		code := generateCode(req.Prefix, req.Length, i)
-		codes = append(codes, code)
+	cfg := map[string]any{}
+	if req.CouponConfig != "" {
+		if err := json.Unmarshal([]byte(req.CouponConfig), &cfg); err != nil {
+			return nil, err
+		}
 	}
+	// Inject context-derived defaults so couponFromConfig in the
+	// app layer can attach them to the COUPON-kind Promotion it
+	// builds. The actor id is needed for audit, the tenant for
+	// scoping.
+	cfg["_actor_id"] = actorID(l.ctx)
+	cfg["_tenant_id"] = tenantID(l.ctx)
 
+	codes, err := l.svcCtx.PromotionApp.GenerateCodes(l.ctx, req.Prefix, req.Quantity, cfg)
+	if err != nil {
+		return nil, err
+	}
 	return &types.GenerateCouponCodesResp{
 		Codes: codes,
 		Count: len(codes),
 	}, nil
-}
-
-func generateCode(prefix string, length int, index int) string {
-	// Simple code generation
-	// In production, use a more sophisticated method
-	if prefix == "" {
-		prefix = "CPN"
-	}
-	return prefix + randomString(length)
-}
-
-func randomString(length int) string {
-	// Simple implementation - in production use crypto/rand
-	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[i%len(charset)]
-	}
-	return string(b)
 }

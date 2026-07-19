@@ -7,6 +7,7 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,8 +27,6 @@ func NewUpdateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Updat
 }
 
 func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *types.CouponDetailResp, err error) {
-
-	// Parse time
 	startAt, err := time.Parse(time.RFC3339, req.StartTime)
 	if err != nil {
 		return nil, err
@@ -37,25 +36,45 @@ func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *type
 		return nil, err
 	}
 
-	updateReq := apppromotion.UpdateCouponRequest{
+	code := req.Code
+	total := req.UsageLimit
+
+	rule := pkgpromotion.PromotionRule{
+		ConditionType: pkgpromotion.ConditionMinAmount,
+		ActionType:    mapCouponActionType(req.Type),
+	}
+	if req.MinOrderAmount != "" {
+		rule.ConditionValue = parseMoney(req.MinOrderAmount)
+	}
+	if req.DiscountValue != "" {
+		rule.ActionValue = parseMoney(req.DiscountValue)
+	}
+	if req.MaxDiscount != "" {
+		rule.MaxDiscount = parseMoney(req.MaxDiscount)
+	}
+	rules := []pkgpromotion.PromotionRule{rule}
+
+	updateReq := &apppromotion.UpdatePromotionRequest{
 		ID:           req.ID,
-		Code:         req.Code,
 		Name:         req.Name,
 		Description:  req.Description,
-		Value:        parseMoneyToDecimal(req.DiscountValue),
-		MinAmount:    parseMoneyToDecimal(req.MinOrderAmount),
-		MaxDiscount:  parseMoneyToDecimal(req.MaxDiscount),
-		TotalCount:   req.UsageLimit,
+		Code:         &code,
+		Type:         pkgpromotion.TypeDiscount,
+		Currency:     defaultCurrency(""),
+		TotalCount:   &total,
+		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
 		Scope:        buildCouponScope(req.ScopeType),
 		StartAt:      startAt,
 		EndAt:        endAt,
+		Rules:        &rules,
+		ActorID:      actorID(l.ctx),
 	}
 
-	couponResp, err := l.svcCtx.CouponApp.UpdateCoupon(l.ctx, updateReq)
+	p, err := l.svcCtx.PromotionApp.Update(l.ctx, updateReq)
 	if err != nil {
 		return nil, err
 	}
 
-	return convertCouponToDetailResp(couponResp), nil
+	return convertPromotionToCouponResp(p), nil
 }

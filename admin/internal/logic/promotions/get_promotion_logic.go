@@ -24,11 +24,9 @@ func NewGetPromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) GetPr
 }
 
 func (l *GetPromotionLogic) GetPromotion(req *types.GetPromotionReq) (resp *types.PromotionDetailResp, err error) {
-
-	promotionResp, err := l.svcCtx.PromotionApp.GetPromotion(l.ctx, req.ID)
+	promotionResp, err := l.svcCtx.PromotionApp.Get(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
-
 	return convertPromotionToDetailResp(promotionResp), nil
 }
