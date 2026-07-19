@@ -647,9 +647,8 @@ type CreatePromotionResp struct {
 }
 
 type CreatePromotionRulesReq struct {
-	OwnerKind string             `path:"owner_kind"` // "promotion" | "coupon"
-	OwnerID   int64              `path:"owner_id"`
-	Rules     []PromotionRuleReq `json:"rules"`
+	ID    int64              `path:"id"` // promotion or coupon id; kind is derived by the logic layer
+	Rules []PromotionRuleReq `json:"rules"`
 }
 
 type CreatePromotionRulesResp struct {
@@ -1196,8 +1195,7 @@ type GetPromotionReq struct {
 }
 
 type GetPromotionRulesReq struct {
-	OwnerKind string `path:"owner_kind"`
-	OwnerID   int64  `path:"owner_id"`
+	ID int64 `path:"id"` // promotion or coupon id; kind is derived by the logic layer
 }
 
 type GetRedeemRuleReq struct {

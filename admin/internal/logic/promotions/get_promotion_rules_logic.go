@@ -2,11 +2,9 @@ package promotions
 
 import (
 	"context"
-	"strings"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,17 +23,19 @@ func NewGetPromotionRulesLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-// GetPromotionRules takes the owner kind + owner id from the path
-// (no Promotion lookup required) and asks the unified PromotionApp
-// for its rules. The wire response uses the unified rule shape
-// (condition_type / condition_value / action_type / action_value).
+// GetPromotionRules resolves the owner's kind (PROMOTION or COUPON) by
+// reading the unified Promotion record, then asks PromotionApp.GetRules.
+// Wire response uses the unified rule shape (condition_type / condition_value
+// / action_type / action_value).
 func (l *GetPromotionRulesLogic) GetPromotionRules(req *types.GetPromotionRulesReq) (resp *types.ListPromotionRulesResp, err error) {
-	ownerKind := pkgpromotion.Kind(strings.ToUpper(req.OwnerKind))
-	rules, err := l.svcCtx.PromotionApp.GetRules(l.ctx, ownerKind, req.OwnerID)
+	owner, err := l.svcCtx.PromotionApp.Get(l.ctx, req.ID)
 	if err != nil {
 		return nil, err
 	}
-
+	rules, err := l.svcCtx.PromotionApp.GetRules(l.ctx, owner.Kind, req.ID)
+	if err != nil {
+		return nil, err
+	}
 	return &types.ListPromotionRulesResp{
 		List:  convertRulesPtrToResp(rules),
 		Total: int64(len(rules)),

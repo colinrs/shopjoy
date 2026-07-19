@@ -3,11 +3,9 @@ package promotions
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,15 +24,16 @@ func NewCreatePromotionRulesLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	}
 }
 
-// CreatePromotionRules takes the owner kind + owner id from the path
-// (no Promotion lookup required) and forwards the rule set to
-// PromotionApp.CreateRules. The app layer expects a typed Kind
-// (PROMOTION / COUPON) so it can route the row to the correct rules
-// table slice / owner_kind column.
+// CreatePromotionRules resolves the owner's kind (PROMOTION or COUPON) by
+// reading the unified Promotion record, then forwards the rule set to
+// PromotionApp.CreateRules.
 func (l *CreatePromotionRulesLogic) CreatePromotionRules(req *types.CreatePromotionRulesReq) (resp *types.CreatePromotionRulesResp, err error) {
-	ownerKind := pkgpromotion.Kind(strings.ToUpper(req.OwnerKind))
+	owner, err := l.svcCtx.PromotionApp.Get(l.ctx, req.ID)
+	if err != nil {
+		return nil, err
+	}
 	rules := convertRuleReqsToDomain(req.Rules)
-	out, err := l.svcCtx.PromotionApp.CreateRules(l.ctx, ownerKind, req.OwnerID, rules)
+	out, err := l.svcCtx.PromotionApp.CreateRules(l.ctx, owner.Kind, req.ID, rules)
 	if err != nil {
 		return nil, err
 	}
