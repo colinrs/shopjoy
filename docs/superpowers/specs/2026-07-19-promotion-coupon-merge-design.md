@@ -767,7 +767,7 @@ export interface PromotionRule {
 `pkg/code/code.go`：
 
 ```go
-ErrPromotionInvalidKind = &Err{HTTPCode: 400, Code: 80010, Msg: "invalid promotion kind"}
+ErrPromotionInvalidKind = &Err{HTTPCode: 400, Code: 80018, Msg: "invalid promotion kind"}
 ErrCouponDepleted       = &Err{HTTPCode: 400, Code: 70004, Msg: "coupon depleted"}  // 复用已有
 ```
 
