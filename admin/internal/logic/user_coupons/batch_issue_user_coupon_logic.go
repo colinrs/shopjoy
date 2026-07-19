@@ -6,7 +6,6 @@ package user_coupons
 import (
 	"context"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 
@@ -29,18 +28,12 @@ func NewBatchIssueUserCouponLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *BatchIssueUserCouponLogic) BatchIssueUserCoupon(req *types.BatchIssueUserCouponReq) (resp *types.BatchIssueUserCouponResp, err error) {
-	issueReq := apppromotion.BatchIssueCouponToUserRequest{
-		CouponID: req.CouponID,
-		UserIDs:  req.UserIDs,
-	}
-
-	issueResp, err := l.svcCtx.CouponApp.BatchIssueCouponToUser(l.ctx, issueReq)
+	issued, ids, err := l.svcCtx.PromotionApp.BatchIssue(l.ctx, req.CouponID, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
-
 	return &types.BatchIssueUserCouponResp{
-		Issued:        int64(len(issueResp.UserCouponIDs)),
-		UserCouponIDs: issueResp.UserCouponIDs,
+		Issued:        issued,
+		UserCouponIDs: ids,
 	}, nil
 }

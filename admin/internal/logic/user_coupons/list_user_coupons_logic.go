@@ -5,6 +5,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,17 +25,26 @@ func NewListUserCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) Li
 }
 
 func (l *ListUserCouponsLogic) ListUserCoupons(req *types.ListUserCouponsReq) (resp *types.ListUserCouponsResp, err error) {
-
-	// Map status string to domain type
 	status := mapUserCouponStatus(req.Status)
 
-	listResp, err := l.svcCtx.CouponApp.ListUserCoupons(
-		l.ctx,
-		req.UserID,
-		status,
-		req.Page,
-		req.PageSize,
-	)
+	var statusPtr *pkgpromotion.UserCouponStatus
+	if req.Status != "" {
+		s := status
+		statusPtr = &s
+	}
+
+	var userIDPtr *int64
+	if req.UserID != 0 {
+		uid := req.UserID
+		userIDPtr = &uid
+	}
+
+	q := pkgpromotion.UserCouponQuery{
+		UserID: userIDPtr,
+		Status: statusPtr,
+	}
+
+	listResp, err := l.svcCtx.PromotionApp.ListUserCoupons(l.ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -45,9 +55,9 @@ func (l *ListUserCouponsLogic) ListUserCoupons(req *types.ListUserCouponsReq) (r
 	}
 
 	return &types.ListUserCouponsResp{
-		List:     list,
-		Total:    listResp.Total,
-		Page:     listResp.Page,
-		PageSize: listResp.PageSize,
+		List:  list,
+		Total: listResp.Total,
+		Page:  req.Page,
+		PageSize: req.PageSize,
 	}, nil
 }

@@ -3,7 +3,6 @@ package user_coupons
 import (
 	"context"
 
-	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 
@@ -25,18 +24,11 @@ func NewIssueUserCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) Is
 }
 
 func (l *IssueUserCouponLogic) IssueUserCoupon(req *types.IssueUserCouponReq) (resp *types.IssueUserCouponResp, err error) {
-
-	issueReq := apppromotion.IssueCouponToUserRequest{
-		CouponID: req.CouponID,
-		UserID:   req.UserID,
-	}
-
-	issueResp, err := l.svcCtx.CouponApp.IssueCouponToUser(l.ctx, issueReq)
+	uc, err := l.svcCtx.PromotionApp.IssueToUser(l.ctx, req.CouponID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-
 	return &types.IssueUserCouponResp{
-		ID: issueResp.UserCouponID,
+		ID: uc.ID,
 	}, nil
 }
