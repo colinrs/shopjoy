@@ -11,14 +11,12 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/adminuser"
 	"github.com/colinrs/shopjoy/admin/internal/domain/cart"
-	"github.com/colinrs/shopjoy/admin/internal/domain/coupon"
 	"github.com/colinrs/shopjoy/admin/internal/domain/fulfillment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/market"
 	"github.com/colinrs/shopjoy/admin/internal/domain/order"
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
-	"github.com/colinrs/shopjoy/admin/internal/domain/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
@@ -27,6 +25,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/tenant"
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/pkg/application"
+	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
 
 	"github.com/shopspring/decimal"
@@ -150,11 +149,11 @@ func migrate(ctx context.Context, db *gorm.DB) error {
 		&cart.Cart{},
 		&cart.CartItem{},
 
-		// Promotion tables
-		&promotion.Promotion{},
-		&promotion.PromotionRule{},
-		&coupon.Coupon{},
-		&coupon.UserCoupon{},
+		// Promotion tables (unified in pkg/domain/promotion after 2026-07-19 merge)
+		&pkgpromotion.Promotion{},
+		&pkgpromotion.PromotionRule{},
+		&pkgpromotion.UserCoupon{},
+		&pkgpromotion.PromotionUsage{},
 
 		// Order tables
 		&order.Order{},
