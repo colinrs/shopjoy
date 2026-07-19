@@ -184,6 +184,9 @@ var (
 	ErrPromotionInvalidTimeRange    = &Err{HTTPCode: http.StatusBadRequest, Code: 80015, Msg: "promotion start time must be before end time"}
 	ErrPromotionUsageLimitInvalid   = &Err{HTTPCode: http.StatusBadRequest, Code: 80016, Msg: "promotion usage_limit must be >= 0"}
 	ErrPromotionPerUserLimitInvalid = &Err{HTTPCode: http.StatusBadRequest, Code: 80017, Msg: "promotion per_user_limit must be >= 0"}
+	// ErrPromotionInvalidKind is returned when an operation is invoked on a
+	// Promotion whose Kind does not support it (e.g., Issue on a PROMOTION).
+	ErrPromotionInvalidKind = &Err{HTTPCode: http.StatusBadRequest, Code: 80018, Msg: "invalid promotion kind"}
 
 	// ErrTenantNotFound ==================== Tenant Module (90xxx) ====================
 	ErrTenantNotFound             = &Err{HTTPCode: http.StatusNotFound, Code: 90001, Msg: "tenant not found"}
