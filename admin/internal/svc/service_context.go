@@ -46,8 +46,7 @@ type ServiceContext struct {
 	UserService             appUser.Service
 	AdminUserService        appAdminUser.Service
 	PaymentService          appPayment.Service
-	PromotionApp            apppromotion.PromotionApp
-	CouponApp               apppromotion.CouponApp
+	PromotionApp            *apppromotion.PromotionApp
 	ShipmentApp             appfulfillment.ShipmentApp
 	CarrierApp              appfulfillment.CarrierApp
 	OrderFulfillmentApp     appfulfillment.OrderFulfillmentApp
@@ -70,8 +69,6 @@ type ServiceContext struct {
 	SKUGenerator            sku.Generator
 	IDGen                   snowflake.Snowflake
 	PromotionRepo           pkgpromotion.Repository
-	CouponRepo              pkgpromotion.CouponRepository
-	UserCouponRepo          pkgpromotion.UserCouponRepository
 	OrderRepo               fulfillment.OrderRepository
 	OrderItemRepo           fulfillment.OrderItemRepository
 	ReviewService           appReview.Service
@@ -149,14 +146,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	productLocalizationRepo := persistence.NewProductLocalizationRepository()
 	skuGenerator := sku.NewGenerator(sku.DefaultConfig())
 
-	// Promotion and Coupon repositories
+	// Promotion repository (unified — covers both PROMOTION and COUPON kinds)
 	promotionRepo := persistence.NewPromotionRepository()
-	couponRepo := persistence.NewCouponRepository()
-	userCouponRepo := persistence.NewUserCouponRepository()
 
-	// Promotion and Coupon application services
-	promotionApp := apppromotion.NewPromotionApp(db, promotionRepo, idGen)
-	couponApp := apppromotion.NewCouponApp(db, couponRepo, userCouponRepo, idGen)
+	// Promotion application service (unified — covers both PROMOTION and COUPON kinds)
+	promotionApp := apppromotion.NewPromotionApp(promotionRepo, db)
 
 	// Fulfillment repositories
 	shipmentRepo := persistence.NewShipmentRepository()
@@ -246,7 +240,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminUserService:        adminUserService,
 		PaymentService:          paymentService,
 		PromotionApp:            promotionApp,
-		CouponApp:               couponApp,
 		ShipmentApp:             shipmentApp,
 		CarrierApp:              carrierApp,
 		OrderFulfillmentApp:     orderFulfillmentApp,
@@ -269,8 +262,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SKUGenerator:            skuGenerator,
 		IDGen:                   idGen,
 		PromotionRepo:           promotionRepo,
-		CouponRepo:              couponRepo,
-		UserCouponRepo:          userCouponRepo,
 		OrderRepo:               orderRepo,
 		OrderItemRepo:           orderItemRepo,
 		ReviewService:           reviewService,

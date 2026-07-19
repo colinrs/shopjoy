@@ -2,591 +2,587 @@ package promotion
 
 import (
 	"context"
-	"strconv"
-	"strings"
+	"fmt"
 	"time"
 
 	"github.com/colinrs/shopjoy/pkg/code"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
+	"github.com/colinrs/shopjoy/pkg/domain/promotion"
 	"github.com/colinrs/shopjoy/pkg/domain/shared"
-	"github.com/colinrs/shopjoy/pkg/snowflake"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-// findMatchingRule returns the first rule in the slice whose
-// ConditionType and ActionType match, or nil if none matches.
-func findMatchingRule(rules []pkgpromotion.PromotionRule, cond pkgpromotion.ConditionType, action pkgpromotion.ActionType) *pkgpromotion.PromotionRule {
-	for i := range rules {
-		if rules[i].ConditionType == cond && rules[i].ActionType == action {
-			return &rules[i]
-		}
-	}
-	return nil
-}
+// =============================================================================
+// Request types
+// =============================================================================
 
-// sanitizeTags enforces a max length of 64 chars per entry and
-// drops empty entries. Returns nil for empty result so persistence
-// can write SQL NULL consistently.
-func sanitizeTags(in []string) []string {
-	if len(in) == 0 {
-		return nil
-	}
-	out := make([]string, 0, len(in))
-	for _, t := range in {
-		t = strings.TrimSpace(t)
-		if t == "" {
-			continue
-		}
-		if len(t) > 64 {
-			t = t[:64]
-		}
-		out = append(out, t)
-	}
-	if len(out) == 0 {
-		return nil
-	}
-	return out
-}
-
-// CreatePromotionRequest 创建促销请求
+// CreatePromotionRequest is the unified input for both PROMOTION and COUPON
+// kinds. Coupon-specific fields (Code, TotalCount, MarketID) are nullable.
 type CreatePromotionRequest struct {
+	TenantID     shared.TenantID
+	Kind         promotion.Kind
 	Name         string
 	Description  string
-	Type         pkgpromotion.Type
-	Priority     int
+	Code         *string
+	Type         promotion.Type
+	MarketID     *int64
 	Currency     string
-	Scope        pkgpromotion.PromotionScope
-	StartAt      time.Time
-	EndAt        time.Time
-	Rules        []CreatePromotionRuleRequest
+	TotalCount   *int
 	UsageLimit   int
 	PerUserLimit int
 	Tags         []string
+	Scope        promotion.PromotionScope
+	StartAt      time.Time
+	EndAt        time.Time
+	Rules        []promotion.PromotionRule
+	ActorID      int64
 }
 
-// CreatePromotionRuleRequest 创建促销规则请求
-type CreatePromotionRuleRequest struct {
-	ConditionType  pkgpromotion.ConditionType
-	ConditionValue decimal.Decimal
-	ActionType     pkgpromotion.ActionType
-	ActionValue    decimal.Decimal
-	MaxDiscount    decimal.Decimal
-}
-
-// UpdatePromotionRuleRequest 更新促销规则请求
-type UpdatePromotionRuleRequest struct {
-	ConditionType  pkgpromotion.ConditionType
-	ConditionValue decimal.Decimal
-	ActionType     pkgpromotion.ActionType
-	ActionValue    decimal.Decimal
-	MaxDiscount    decimal.Decimal
-}
-
-// UpdatePromotionRequest 更新促销请求
-//
-// The previous version of this struct only carried Name / Description /
-// StartAt / EndAt, so every other field on UpdatePromotionReq (Type,
-// DiscountType, DiscountValue, MinOrderAmount, MaxDiscount,
-// UsageLimit, PerUserLimit, ProductIDs, CategoryIDs, MarketIDs, Tags)
-// was silently dropped between the wire and the persistence layer.
-//
-// All fields are now persisted. When Rules is non-empty the first rule
-// is upserted (matched by ConditionType + ActionType) so discount
-// fields survive a save→re-fetch cycle.
+// UpdatePromotionRequest mirrors CreatePromotionRequest plus ID and Status.
+// Rules is a pointer: nil means "do not touch", non-nil means "replace".
 type UpdatePromotionRequest struct {
 	ID           int64
 	Name         string
 	Description  string
-	Type         pkgpromotion.Type
+	Code         *string
+	Type         promotion.Type
+	MarketID     *int64
 	Currency     string
-	Scope        pkgpromotion.PromotionScope
-	StartAt      time.Time
-	EndAt        time.Time
+	TotalCount   *int
 	UsageLimit   int
 	PerUserLimit int
 	Tags         []string
-	Rules        []CreatePromotionRuleRequest
+	Scope        promotion.PromotionScope
+	StartAt      time.Time
+	EndAt        time.Time
+	Rules        *[]promotion.PromotionRule // nil = no change; non-nil = replace
+	Status       *promotion.Status
+	ActorID      int64
 }
 
-// PromotionResponse 促销响应
+// =============================================================================
+// Response types (local; Task 8 will regenerate wire types and merge in)
+// =============================================================================
+
+// PromotionResponse is the unified output of GET / LIST endpoints.
 type PromotionResponse struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Type        int    `json:"type"`
-	Status      int    `json:"status"`
-	StartAt     string `json:"start_at"`
-	EndAt       string `json:"end_at"`
-	// ScopeType mirrors the stored Scope.Type so the wire can carry
-	// the same flag the form posts without forcing the frontend to
-	// re-derive it from product_ids / category_ids arrays.
-	ScopeType string `json:"scope_type"`
-	// ScopeIDs carries the raw IDs from Scope.IDs as strings so the
-	// helper layer can route them to product_ids / category_ids /
-	// brand_ids based on ScopeType. Without this, the form loses
-	// scope IDs on a re-fetch (e.g. when the user refreshes the
-	// edit page).
-	ScopeIDs     []string                 `json:"scope_ids,omitempty"`
-	Rules        []*PromotionRuleResponse `json:"rules"`
-	Currency     string                   `json:"currency"`
-	UsageLimit   int                      `json:"usage_limit"`
-	PerUserLimit int                      `json:"per_user_limit"`
-	Tags         []string                 `json:"tags"`
-	CreatedAt    string                   `json:"created_at"`
-	UpdatedAt    string                   `json:"updated_at"`
+	ID           int64
+	TenantID     shared.TenantID
+	Kind         promotion.Kind
+	Name         string
+	Description  string
+	Code         *string
+	Type         promotion.Type
+	Status       promotion.Status
+	MarketID     *int64
+	Currency     string
+	TotalCount   *int
+	UsedCount    *int
+	UsageLimit   int
+	PerUserLimit int
+	Tags         []string
+	Scope        promotion.PromotionScope
+	StartAt      time.Time
+	EndAt        time.Time
+	Rules        []PromotionRuleResponse
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
-// PromotionRuleResponse 促销规则响应
+// PromotionRuleResponse mirrors the domain rule for wire serialization.
 type PromotionRuleResponse struct {
-	ID             int64           `json:"id"`
-	PromotionID    int64           `json:"promotion_id"`
-	ConditionType  int             `json:"condition_type"`
-	ConditionValue decimal.Decimal `json:"condition_value"`
-	ActionType     int             `json:"action_type"`
-	ActionValue    decimal.Decimal `json:"action_value"`
-	MaxDiscount    decimal.Decimal `json:"max_discount"`
+	ID             int64
+	ConditionType  promotion.ConditionType
+	ConditionValue decimal.Decimal
+	ActionType     promotion.ActionType
+	ActionValue    decimal.Decimal
+	MaxDiscount    decimal.Decimal
+	SortOrder      int
 }
 
-// PromotionListResponse 促销列表响应
-type PromotionListResponse struct {
-	List     []*PromotionResponse `json:"list"`
-	Total    int64                `json:"total"`
-	Page     int                  `json:"page"`
-	PageSize int                  `json:"page_size"`
+// ListPromotionResponse carries a paginated slice of PromotionResponse.
+type ListPromotionResponse struct {
+	List  []*PromotionResponse
+	Total int64
+	Page  int
+	Size  int
 }
 
-// QueryPromotionRequest 查询促销请求
-//
-// Status and Type are pointers so that "no filter" (nil) can be
-// distinguished from a filter that happens to equal the iota-zero
-// value (e.g. StatusPending = 0, TypeDiscount = 0). The old
-// `req.Status != 0` sentinel collided with those zero values and
-// silently dropped the filter for the default status/type.
-//
-// ExpiredOnly is a separate flag because the wire status "expired"
-// is computed from EndAt at response time and is never a stored
-// enum value — it cannot be expressed as StatusExpired.
-type QueryPromotionRequest struct {
-	Name        string
-	Status      *pkgpromotion.Status
-	Type        *pkgpromotion.Type
-	ExpiredOnly bool
-	Page        int
-	PageSize    int
+// UserCouponResponse mirrors a per-user coupon claim.
+type UserCouponResponse struct {
+	ID         int64
+	UserID     int64
+	CouponID   int64
+	Status     promotion.UserCouponStatus
+	UsedAt     *time.Time
+	OrderID    int64
+	ReceivedAt time.Time
+	ExpireAt   time.Time
 }
 
-// PromotionApp 促销应用服务接口
-type PromotionApp interface {
-	CreatePromotion(ctx context.Context, req CreatePromotionRequest) (*PromotionResponse, error)
-	UpdatePromotion(ctx context.Context, req UpdatePromotionRequest) (*PromotionResponse, error)
-	GetPromotion(ctx context.Context, id int64) (*PromotionResponse, error)
-	ListPromotions(ctx context.Context, req QueryPromotionRequest) (*PromotionListResponse, error)
-	DeletePromotion(ctx context.Context, id int64) error
-	ActivatePromotion(ctx context.Context, id int64) error
-	DeactivatePromotion(ctx context.Context, id int64) error
-	UpdatePromotionRule(ctx context.Context, ruleID int64, req UpdatePromotionRuleRequest) (*PromotionRuleResponse, error)
-	CreatePromotionRules(ctx context.Context, promotionID int64, reqs []CreatePromotionRuleRequest) ([]int64, error)
+// ListUserCouponResponse is the paginated envelope for user coupon listings.
+type ListUserCouponResponse struct {
+	List  []*UserCouponResponse
+	Total int64
 }
 
-type promotionApp struct {
-	db            *gorm.DB
-	promotionRepo pkgpromotion.Repository
-	idGen         snowflake.Snowflake
+// PromotionUsageResponse carries one (coupon, order, user) hit.
+type PromotionUsageResponse struct {
+	ID             int64
+	CouponID       *int64
+	UserID         int64
+	OrderID        int64
+	DiscountAmount decimal.Decimal
+	CreatedAt      time.Time
 }
 
-// NewPromotionApp 创建促销应用服务
-func NewPromotionApp(db *gorm.DB, promotionRepo pkgpromotion.Repository, idGen snowflake.Snowflake) PromotionApp {
-	return &promotionApp{
-		db:            db,
-		promotionRepo: promotionRepo,
-		idGen:         idGen,
-	}
+// ListPromotionUsageResponse is the paginated envelope for usage listings.
+type ListPromotionUsageResponse struct {
+	List  []*PromotionUsageResponse
+	Total int64
 }
 
-func (a *promotionApp) CreatePromotion(ctx context.Context, req CreatePromotionRequest) (*PromotionResponse, error) {
-	req.Tags = sanitizeTags(req.Tags)
+// =============================================================================
+// PromotionApp
+// =============================================================================
 
-	// Input validation
-	if req.Name == "" {
-		return nil, code.ErrPromotionNameRequired
+// PromotionApp is the unified application service for both PROMOTION and
+// COUPON kinds. Coupon-specific methods (IssueToUser, BatchIssue,
+// GenerateCodes, ListUserCoupons, FindPromotionUsage) live alongside the
+// kind-agnostic CRUD methods.
+type PromotionApp struct {
+	repo promotion.Repository
+	db   *gorm.DB
+}
+
+// NewPromotionApp wires the unified repository + DB.
+func NewPromotionApp(repo promotion.Repository, db *gorm.DB) *PromotionApp {
+	return &PromotionApp{repo: repo, db: db}
+}
+
+// Create persists a Promotion and (optionally) its rules. The new promotion
+// starts with StatusPending; UseCount is initialized to 0 if TotalCount is set.
+func (a *PromotionApp) Create(ctx context.Context, req *CreatePromotionRequest) (*PromotionResponse, error) {
+	now := time.Now().UTC()
+	p := &promotion.Promotion{
+		TenantID:     req.TenantID,
+		Kind:         req.Kind,
+		Name:         req.Name,
+		Description:  req.Description,
+		Code:         req.Code,
+		Type:         req.Type,
+		Status:       promotion.StatusPending,
+		MarketID:     req.MarketID,
+		Currency:     req.Currency,
+		TotalCount:   req.TotalCount,
+		UsedCount:    nilOrZero(req.TotalCount),
+		UsageLimit:   req.UsageLimit,
+		PerUserLimit: req.PerUserLimit,
+		Tags:         req.Tags,
+		Scope:        req.Scope,
+		StartAt:      req.StartAt,
+		EndAt:        req.EndAt,
+		Rules:        req.Rules,
+		Audit: shared.AuditInfo{
+			CreatedAt: now,
+			UpdatedAt: now,
+			CreatedBy: req.ActorID,
+			UpdatedBy: req.ActorID,
+		},
 	}
-	if req.Currency == "" {
-		return nil, code.ErrPromotionCurrencyRequired
-	}
-	if req.StartAt.IsZero() || req.EndAt.IsZero() {
-		return nil, code.ErrPromotionTimeRequired
-	}
-	if req.StartAt.After(req.EndAt) {
-		return nil, code.ErrPromotionInvalidTimeRange
-	}
-	if !req.Type.IsValid() {
-		return nil, code.ErrPromotionTypeInvalid
-	}
-	if req.UsageLimit < 0 {
-		return nil, code.ErrPromotionUsageLimitInvalid
-	}
-	if req.PerUserLimit < 0 {
-		return nil, code.ErrPromotionPerUserLimitInvalid
-	}
-	if !req.Scope.Type.IsValid() {
-		return nil, code.ErrPromotionScopeInvalid
-	}
-
-	var result *pkgpromotion.Promotion
-
-	err := a.db.Transaction(func(tx *gorm.DB) error {
-		id, err := a.idGen.NextID(ctx)
-		if err != nil {
-			return err
-		}
-
-		p := &pkgpromotion.Promotion{
-			ID:           id,
-			Name:         req.Name,
-			Description:  req.Description,
-			Type:         req.Type,
-			Status:       pkgpromotion.StatusPending,
-			Priority:     req.Priority,
-			StartAt:      req.StartAt.UTC(),
-			EndAt:        req.EndAt.UTC(),
-			Scope:        req.Scope,
-			UsageLimit:   req.UsageLimit,
-			PerUserLimit: req.PerUserLimit,
-			Tags:         req.Tags,
-			Currency:     req.Currency,
-			Audit:        shared.NewAuditInfo(0),
-			Rules:        make([]pkgpromotion.PromotionRule, 0, len(req.Rules)),
-		}
-
-		// Create rules
-		for _, ruleReq := range req.Rules {
-			ruleID, err := a.idGen.NextID(ctx)
-			if err != nil {
-				return err
-			}
-
-			rule := pkgpromotion.PromotionRule{
-				ID:             ruleID,
-				PromotionID:    id,
-				ConditionType:  ruleReq.ConditionType,
-				ConditionValue: ruleReq.ConditionValue,
-				ActionType:     ruleReq.ActionType,
-				ActionValue:    ruleReq.ActionValue,
-				MaxDiscount:    ruleReq.MaxDiscount,
-			}
-			p.Rules = append(p.Rules, rule)
-		}
-
-		if err := a.promotionRepo.Create(ctx, tx, p); err != nil {
-			return err
-		}
-
-		result = p
-		return nil
-	})
-
-	if err != nil {
+	if err := a.repo.Create(ctx, a.db, p); err != nil {
 		return nil, err
 	}
-
-	return toPromotionResponse(result), nil
+	if len(p.Rules) > 0 {
+		for i := range p.Rules {
+			p.Rules[i].OwnerKind = p.Kind
+			p.Rules[i].OwnerID = p.ID
+		}
+		if err := a.repo.CreateRules(ctx, a.db, p.Kind, p.ID, p.Rules); err != nil {
+			return nil, err
+		}
+	}
+	return a.toResponse(p), nil
 }
 
-func (a *promotionApp) UpdatePromotion(ctx context.Context, req UpdatePromotionRequest) (*PromotionResponse, error) {
-	req.Tags = sanitizeTags(req.Tags)
-
-	p, err := a.promotionRepo.FindByID(ctx, a.db, req.ID)
+// Update modifies an existing Promotion and (optionally) its rules.
+//
+// Rules semantics:
+//   - req.Rules == nil  → leave existing rules untouched
+//   - req.Rules != nil  → delete all existing rules, then insert the new ones
+//     (an empty slice removes all rules)
+func (a *PromotionApp) Update(ctx context.Context, req *UpdatePromotionRequest) (*PromotionResponse, error) {
+	p, err := a.repo.FindByID(ctx, a.db, req.ID)
 	if err != nil {
 		return nil, err
-	}
-
-	// Only allow update if promotion is not active
-	if p.Status == pkgpromotion.StatusActive {
-		return nil, code.ErrPromotionCannotDelete
-	}
-
-	if req.UsageLimit < 0 {
-		return nil, code.ErrPromotionUsageLimitInvalid
-	}
-	if req.PerUserLimit < 0 {
-		return nil, code.ErrPromotionPerUserLimitInvalid
-	}
-
-	// Type change is allowed for non-active promotions. Changing the
-	// promotion classification mid-flight is what makes the Update
-	// path different from a status toggle; restart rules separately
-	// via the promotion-rules endpoints if needed.
-	if !req.Type.IsValid() {
-		return nil, code.ErrPromotionTypeInvalid
 	}
 	p.Name = req.Name
 	p.Description = req.Description
+	p.Code = req.Code
 	p.Type = req.Type
-	p.Scope = req.Scope
+	p.MarketID = req.MarketID
+	p.Currency = req.Currency
+	p.TotalCount = req.TotalCount
 	p.UsageLimit = req.UsageLimit
 	p.PerUserLimit = req.PerUserLimit
 	p.Tags = req.Tags
-	p.StartAt = req.StartAt.UTC()
-	p.EndAt = req.EndAt.UTC()
-	p.Audit.Update(0)
+	p.Scope = req.Scope
+	p.StartAt = req.StartAt
+	p.EndAt = req.EndAt
+	if req.Status != nil {
+		p.Status = *req.Status
+	}
+	p.Audit.UpdatedAt = time.Now().UTC()
+	p.Audit.UpdatedBy = req.ActorID
 
-	if err := a.promotionRepo.Update(ctx, a.db, p); err != nil {
+	if err := a.repo.Update(ctx, a.db, p); err != nil {
 		return nil, err
 	}
-
-	// Upsert discount rules. Match by ConditionType + ActionType so
-	// re-saving the same form doesn't create duplicate rules.
-	if len(req.Rules) > 0 {
-		existing, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
-		if err != nil {
+	if req.Rules != nil {
+		if err := a.repo.DeleteRulesByOwner(ctx, a.db, p.Kind, p.ID); err != nil {
 			return nil, err
 		}
-		for _, ruleReq := range req.Rules {
-			r := findMatchingRule(existing, ruleReq.ConditionType, ruleReq.ActionType)
-			if r != nil {
-				r.ActionValue = ruleReq.ActionValue
-				r.ConditionValue = ruleReq.ConditionValue
-				r.MaxDiscount = ruleReq.MaxDiscount
-				r.Currency = p.Currency
-				if err := a.promotionRepo.UpdateRule(ctx, a.db, r); err != nil {
-					return nil, err
-				}
-			} else {
-				ruleID, err := a.idGen.NextID(ctx)
-				if err != nil {
-					return nil, err
-				}
-				rule := pkgpromotion.PromotionRule{
-					ID:             ruleID,
-					PromotionID:    p.ID,
-					ConditionType:  ruleReq.ConditionType,
-					ConditionValue: ruleReq.ConditionValue,
-					ActionType:     ruleReq.ActionType,
-					ActionValue:    ruleReq.ActionValue,
-					MaxDiscount:    ruleReq.MaxDiscount,
-					Currency:       p.Currency,
-				}
-				if err := a.promotionRepo.CreateRules(ctx, a.db, []pkgpromotion.PromotionRule{rule}); err != nil {
-					return nil, err
-				}
+		if len(*req.Rules) > 0 {
+			for i := range *req.Rules {
+				(*req.Rules)[i].OwnerKind = p.Kind
+				(*req.Rules)[i].OwnerID = p.ID
 			}
+			if err := a.repo.CreateRules(ctx, a.db, p.Kind, p.ID, *req.Rules); err != nil {
+				return nil, err
+			}
+			p.Rules = *req.Rules
+		} else {
+			p.Rules = nil
 		}
 	}
+	return a.toResponse(p), nil
+}
 
-	// Reload with rules so the response includes discount fields.
-	rules, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
+// Get returns the promotion with its rules loaded.
+func (a *PromotionApp) Get(ctx context.Context, id int64) (*PromotionResponse, error) {
+	p, err := a.repo.FindByID(ctx, a.db, id)
+	if err != nil {
+		return nil, err
+	}
+	rules, err := a.repo.FindRulesByOwner(ctx, a.db, p.Kind, p.ID)
 	if err != nil {
 		return nil, err
 	}
 	p.Rules = rules
-	return toPromotionResponse(p), nil
+	return a.toResponse(p), nil
 }
 
-func (a *promotionApp) GetPromotion(ctx context.Context, id int64) (*PromotionResponse, error) {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, id)
+// List paginates with optional filters (Name, Kind, Status, Type, MarketID,
+// ExpiredOnly). Status / Type / Kind / MarketID must be pointers in the query
+// so the iota-zero value can be expressed as a real filter, not "unset".
+func (a *PromotionApp) List(ctx context.Context, q promotion.Query) (*ListPromotionResponse, error) {
+	list, total, err := a.repo.FindList(ctx, a.db, q)
 	if err != nil {
 		return nil, err
 	}
-	// Load promotion rules
-	rules, err := a.promotionRepo.FindRulesByPromotionID(ctx, a.db, p.ID)
-	if err != nil {
-		return nil, err
+	out := make([]*PromotionResponse, len(list))
+	for i, p := range list {
+		out[i] = a.toResponse(p)
 	}
-	p.Rules = rules
-	return toPromotionResponse(p), nil
-}
-
-func (a *promotionApp) ListPromotions(ctx context.Context, req QueryPromotionRequest) (*PromotionListResponse, error) {
-	query := pkgpromotion.Query{
-		PageQuery: shared.PageQuery{
-			Page:     req.Page,
-			PageSize: req.PageSize,
-		},
-		Name:        req.Name,
-		ExpiredOnly: req.ExpiredOnly,
-	}
-	// Status / Type are already pointers in the request; assign directly.
-	// A nil pointer means "no filter", which the storage layer honors.
-	// Previously this code used `if req.Status != 0` as the sentinel,
-	// which silently dropped filters for the iota-zero values
-	// (StatusPending = 0, TypeDiscount = 0).
-	query.Status = req.Status
-	query.Type = req.Type
-	query.PageQuery.Validate()
-
-	promotions, total, err := a.promotionRepo.FindList(ctx, a.db, query)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := &PromotionListResponse{
-		List:     make([]*PromotionResponse, len(promotions)),
-		Total:    total,
-		Page:     req.Page,
-		PageSize: req.PageSize,
-	}
-
-	for i, p := range promotions {
-		resp.List[i] = toPromotionResponse(p)
-	}
-
-	return resp, nil
-}
-
-func (a *promotionApp) DeletePromotion(ctx context.Context, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, id)
-	if err != nil {
-		return err
-	}
-
-	// Only allow delete if promotion is not active
-	if p.Status == pkgpromotion.StatusActive {
-		return code.ErrPromotionCannotDelete
-	}
-
-	return a.db.Transaction(func(tx *gorm.DB) error {
-		// Delete promotion (soft delete)
-		if err := a.promotionRepo.Delete(ctx, tx, id); err != nil {
-			return err
-		}
-		return nil
-	})
-}
-
-func (a *promotionApp) ActivatePromotion(ctx context.Context, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, id)
-	if err != nil {
-		return err
-	}
-
-	// Validate time range
-	now := time.Now().UTC()
-	if now.After(p.EndAt) {
-		return code.ErrPromotionExpired
-	}
-
-	// Update status
-	p.Status = pkgpromotion.StatusActive
-	p.Audit.Update(0)
-
-	return a.promotionRepo.Update(ctx, a.db, p)
-}
-
-func (a *promotionApp) DeactivatePromotion(ctx context.Context, id int64) error {
-	p, err := a.promotionRepo.FindByID(ctx, a.db, id)
-	if err != nil {
-		return err
-	}
-
-	// Update status
-	p.Status = pkgpromotion.StatusPaused
-	p.Audit.Update(0)
-
-	return a.promotionRepo.Update(ctx, a.db, p)
-}
-
-// toPromotionResponse 转换为响应DTO
-func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
-	rules := make([]*PromotionRuleResponse, 0, len(p.Rules))
-	for _, r := range p.Rules {
-		rules = append(rules, &PromotionRuleResponse{
-			ID:             r.ID,
-			PromotionID:    r.PromotionID,
-			ConditionType:  int(r.ConditionType),
-			ConditionValue: r.ConditionValue,
-			ActionType:     int(r.ActionType),
-			ActionValue:    r.ActionValue,
-			MaxDiscount:    r.MaxDiscount,
-		})
-	}
-
-	// Convert scope IDs from int64 to string so the wire keeps its
-	// declared []string type without leaking int64 semantics.
-	scopeIDs := make([]string, 0, len(p.Scope.IDs))
-	for _, id := range p.Scope.IDs {
-		scopeIDs = append(scopeIDs, strconv.FormatInt(id, 10))
-	}
-
-	return &PromotionResponse{
-		ID:           p.ID,
-		Name:         p.Name,
-		Description:  p.Description,
-		Type:         int(p.Type),
-		Status:       int(p.Status),
-		StartAt:      p.StartAt.Format(time.RFC3339),
-		EndAt:        p.EndAt.Format(time.RFC3339),
-		ScopeType:    string(p.Scope.Type),
-		ScopeIDs:     scopeIDs,
-		Rules:        rules,
-		Currency:     p.Currency,
-		UsageLimit:   p.UsageLimit,
-		PerUserLimit: p.PerUserLimit,
-		Tags:         p.Tags,
-		CreatedAt:    p.Audit.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    p.Audit.UpdatedAt.Format(time.RFC3339),
-	}
-}
-
-func (a *promotionApp) UpdatePromotionRule(ctx context.Context, ruleID int64, req UpdatePromotionRuleRequest) (*PromotionRuleResponse, error) {
-	rule, err := a.promotionRepo.FindRuleByID(ctx, a.db, ruleID)
-	if err != nil {
-		return nil, err
-	}
-
-	rule.ConditionType = req.ConditionType
-	rule.ConditionValue = req.ConditionValue
-	rule.ActionType = req.ActionType
-	rule.ActionValue = req.ActionValue
-	rule.MaxDiscount = req.MaxDiscount
-	rule.UpdatedAt = time.Now().UTC()
-
-	if err := a.promotionRepo.UpdateRule(ctx, a.db, rule); err != nil {
-		return nil, err
-	}
-
-	return &PromotionRuleResponse{
-		ID:             rule.ID,
-		PromotionID:    rule.PromotionID,
-		ConditionType:  int(rule.ConditionType),
-		ConditionValue: rule.ConditionValue,
-		ActionType:     int(rule.ActionType),
-		ActionValue:    rule.ActionValue,
-		MaxDiscount:    rule.MaxDiscount,
+	return &ListPromotionResponse{
+		List:  out,
+		Total: total,
+		Page:  q.Page,
+		Size:  q.PageSize,
 	}, nil
 }
 
-func (a *promotionApp) CreatePromotionRules(ctx context.Context, promotionID int64, reqs []CreatePromotionRuleRequest) ([]int64, error) {
-	// Verify promotion exists
-	if _, err := a.promotionRepo.FindByID(ctx, a.db, promotionID); err != nil {
+// Delete removes a promotion and all its rules.
+func (a *PromotionApp) Delete(ctx context.Context, id int64) error {
+	p, err := a.repo.FindByID(ctx, a.db, id)
+	if err != nil {
+		return err
+	}
+	if err := a.repo.DeleteRulesByOwner(ctx, a.db, p.Kind, p.ID); err != nil {
+		return err
+	}
+	return a.repo.Delete(ctx, a.db, id)
+}
+
+// Activate flips Status → StatusActive. Refuses if EndAt is already past.
+func (a *PromotionApp) Activate(ctx context.Context, id int64) (*PromotionResponse, error) {
+	p, err := a.repo.FindByID(ctx, a.db, id)
+	if err != nil {
 		return nil, err
 	}
+	if time.Now().UTC().After(p.EndAt) {
+		return nil, code.ErrPromotionExpired
+	}
+	p.Status = promotion.StatusActive
+	p.Audit.UpdatedAt = time.Now().UTC()
+	if err := a.repo.Update(ctx, a.db, p); err != nil {
+		return nil, err
+	}
+	return a.toResponse(p), nil
+}
 
-	rules := make([]pkgpromotion.PromotionRule, 0, len(reqs))
-	ids := make([]int64, 0, len(reqs))
+// Deactivate flips Status → StatusPaused.
+func (a *PromotionApp) Deactivate(ctx context.Context, id int64) (*PromotionResponse, error) {
+	p, err := a.repo.FindByID(ctx, a.db, id)
+	if err != nil {
+		return nil, err
+	}
+	p.Status = promotion.StatusPaused
+	p.Audit.UpdatedAt = time.Now().UTC()
+	if err := a.repo.Update(ctx, a.db, p); err != nil {
+		return nil, err
+	}
+	return a.toResponse(p), nil
+}
 
-	for _, req := range reqs {
-		id, err := a.idGen.NextID(ctx)
-		if err != nil {
+// =============================================================================
+// Rules (kind-agnostic)
+// =============================================================================
+
+// GetRules returns the rules attached to a Promotion of any kind.
+func (a *PromotionApp) GetRules(ctx context.Context, ownerKind promotion.Kind, ownerID int64) ([]*PromotionRuleResponse, error) {
+	rules, err := a.repo.FindRulesByOwner(ctx, a.db, ownerKind, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*PromotionRuleResponse, len(rules))
+	for i := range rules {
+		out[i] = ruleToResponse(&rules[i])
+	}
+	return out, nil
+}
+
+// CreateRules inserts a batch of rules under an existing owner.
+func (a *PromotionApp) CreateRules(ctx context.Context, ownerKind promotion.Kind, ownerID int64, rules []promotion.PromotionRule) ([]*PromotionRuleResponse, error) {
+	for i := range rules {
+		rules[i].OwnerKind = ownerKind
+		rules[i].OwnerID = ownerID
+	}
+	if err := a.repo.CreateRules(ctx, a.db, ownerKind, ownerID, rules); err != nil {
+		return nil, err
+	}
+	return a.GetRules(ctx, ownerKind, ownerID)
+}
+
+// UpdateRule mutates a single rule by ID. OwnerKind / OwnerID are preserved.
+func (a *PromotionApp) UpdateRule(ctx context.Context, rule *promotion.PromotionRule) (*PromotionRuleResponse, error) {
+	if err := a.repo.UpdateRule(ctx, a.db, rule); err != nil {
+		return nil, err
+	}
+	return ruleToResponse(rule), nil
+}
+
+// DeleteRule removes a single rule by ID.
+func (a *PromotionApp) DeleteRule(ctx context.Context, id int64) error {
+	return a.repo.DeleteRule(ctx, a.db, id)
+}
+
+// =============================================================================
+// COUPON-specific
+// =============================================================================
+
+// IssueToUser atomically:
+//  1. Calls Promotion.Issue (validates Kind=COUPON + active + not depleted)
+//  2. Inserts a UserCoupon row
+//  3. Calls IncrementUsedCount, which uses an atomic SQL guard against
+//     overselling. If the inventory check fails, the in-memory increment is
+//     rolled back by leaving it as-is — the repo refused to write.
+//
+// For COUPONs that were migrated with usage_limit=0 ("unlimited", per
+// handoff I2), ConsumeInventory short-circuits (TotalCount nil) and
+// IncrementUsedCount is skipped — there is no inventory to track.
+func (a *PromotionApp) IssueToUser(ctx context.Context, couponID, userID int64) (*UserCouponResponse, error) {
+	p, err := a.repo.FindByID(ctx, a.db, couponID)
+	if err != nil {
+		return nil, err
+	}
+	uc, err := p.Issue(userID, time.Now().UTC())
+	if err != nil {
+		return nil, err
+	}
+	if err := a.repo.IssueUserCoupon(ctx, a.db, uc); err != nil {
+		return nil, err
+	}
+	// Atomically consume inventory if the coupon has TotalCount tracking.
+	if p.TotalCount != nil {
+		if err := a.repo.IncrementUsedCount(ctx, a.db, couponID); err != nil {
 			return nil, err
 		}
-
-		rule := pkgpromotion.PromotionRule{
-			ID:             id,
-			PromotionID:    promotionID,
-			ConditionType:  req.ConditionType,
-			ConditionValue: req.ConditionValue,
-			ActionType:     req.ActionType,
-			ActionValue:    req.ActionValue,
-			MaxDiscount:    req.MaxDiscount,
-		}
-		rules = append(rules, rule)
-		ids = append(ids, id)
 	}
+	return userCouponToResponse(uc), nil
+}
 
-	if err := a.promotionRepo.CreateRules(ctx, a.db, rules); err != nil {
+// BatchIssue issues a coupon to a list of users. Failures on individual
+// users are silently skipped — partial success is the norm for batch ops.
+func (a *PromotionApp) BatchIssue(ctx context.Context, couponID int64, userIDs []int64) (int64, []int64, error) {
+	var issued int64
+	ids := make([]int64, 0, len(userIDs))
+	for _, uid := range userIDs {
+		resp, err := a.IssueToUser(ctx, couponID, uid)
+		if err != nil {
+			continue
+		}
+		issued++
+		ids = append(ids, resp.ID)
+	}
+	return issued, ids, nil
+}
+
+// GenerateCodes produces `quantity` deterministic-ish codes and inserts a
+// COUPON promotion for each. The cfg map carries the per-coupon parameters
+// (name, value, currency, etc.) — see couponFromConfig for the shape.
+//
+// Per the brief this is a stub: the JSON parsing will be implemented in
+// the logic layer (Task 7). The current loop generates codes and creates
+// coupon promotions using whatever couponFromConfig returns.
+func (a *PromotionApp) GenerateCodes(ctx context.Context, prefix string, quantity int, cfg map[string]any) ([]string, error) {
+	if quantity <= 0 {
+		return nil, fmt.Errorf("quantity must be positive")
+	}
+	out := make([]string, 0, quantity)
+	for i := 0; i < quantity; i++ {
+		code := prefix + randomCode(8)
+		req := couponFromConfig(code, cfg)
+		if req == nil {
+			// couponFromConfig is a stub in this task; logic layer (Task 7)
+			// will replace it. Return the codes we have so callers can
+			// observe progress.
+			out = append(out, code)
+			continue
+		}
+		if _, err := a.Create(ctx, req); err != nil {
+			return out, err
+		}
+		out = append(out, code)
+	}
+	return out, nil
+}
+
+// ListUserCoupons paginates user-claimed coupons.
+func (a *PromotionApp) ListUserCoupons(ctx context.Context, q promotion.UserCouponQuery) (*ListUserCouponResponse, error) {
+	list, total, err := a.repo.FindUserCoupons(ctx, a.db, q)
+	if err != nil {
 		return nil, err
 	}
+	out := make([]*UserCouponResponse, len(list))
+	for i := range list {
+		out[i] = userCouponToResponse(list[i])
+	}
+	return &ListUserCouponResponse{List: out, Total: total}, nil
+}
 
-	return ids, nil
+// FindPromotionUsage paginates historical promotion usage rows.
+func (a *PromotionApp) FindPromotionUsage(ctx context.Context, q promotion.UsageQuery) (*ListPromotionUsageResponse, error) {
+	list, total, err := a.repo.FindPromotionUsage(ctx, a.db, q)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*PromotionUsageResponse, len(list))
+	for i := range list {
+		out[i] = usageToResponse(list[i])
+	}
+	return &ListPromotionUsageResponse{List: out, Total: total}, nil
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+// nilOrZero returns a pointer to 0 if total is non-nil, otherwise nil.
+// Used to initialize UsedCount alongside TotalCount on Create.
+func nilOrZero(total *int) *int {
+	if total == nil {
+		return nil
+	}
+	z := 0
+	return &z
+}
+
+// toResponse converts a domain Promotion (with optional loaded rules) to the
+// wire-shaped PromotionResponse.
+func (a *PromotionApp) toResponse(p *promotion.Promotion) *PromotionResponse {
+	resp := &PromotionResponse{
+		ID:           p.ID,
+		TenantID:     p.TenantID,
+		Kind:         p.Kind,
+		Name:         p.Name,
+		Description:  p.Description,
+		Code:         p.Code,
+		Type:         p.Type,
+		Status:       p.Status,
+		MarketID:     p.MarketID,
+		Currency:     p.Currency,
+		TotalCount:   p.TotalCount,
+		UsedCount:    p.UsedCount,
+		UsageLimit:   p.UsageLimit,
+		PerUserLimit: p.PerUserLimit,
+		Tags:         p.Tags,
+		Scope:        p.Scope,
+		StartAt:      p.StartAt,
+		EndAt:        p.EndAt,
+		CreatedAt:    p.Audit.CreatedAt,
+		UpdatedAt:    p.Audit.UpdatedAt,
+	}
+	for _, r := range p.Rules {
+		resp.Rules = append(resp.Rules, *ruleToResponse(&r))
+	}
+	return resp
+}
+
+func ruleToResponse(r *promotion.PromotionRule) *PromotionRuleResponse {
+	return &PromotionRuleResponse{
+		ID:             r.ID,
+		ConditionType:  r.ConditionType,
+		ConditionValue: r.ConditionValue,
+		ActionType:     r.ActionType,
+		ActionValue:    r.ActionValue,
+		MaxDiscount:    r.MaxDiscount,
+		SortOrder:      r.SortOrder,
+	}
+}
+
+func userCouponToResponse(uc *promotion.UserCoupon) *UserCouponResponse {
+	return &UserCouponResponse{
+		ID:         uc.ID,
+		UserID:     uc.UserID,
+		CouponID:   uc.CouponID,
+		Status:     uc.Status,
+		UsedAt:     uc.UsedAt,
+		OrderID:    uc.OrderID,
+		ReceivedAt: uc.ReceivedAt,
+		ExpireAt:   uc.ExpireAt,
+	}
+}
+
+func usageToResponse(u *promotion.PromotionUsage) *PromotionUsageResponse {
+	return &PromotionUsageResponse{
+		ID:             u.ID,
+		CouponID:       u.CouponID,
+		UserID:         u.UserID,
+		OrderID:        u.OrderID,
+		DiscountAmount: u.DiscountAmount,
+		CreatedAt:      u.CreatedAt,
+	}
+}
+
+// randomCode produces a pseudo-random alphanumeric string of length n using
+// nanosecond time as the entropy source. Used by GenerateCodes — not
+// cryptographically secure.
+func randomCode(n int) string {
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
+		time.Sleep(time.Microsecond)
+	}
+	return string(b)
+}
+
+// couponFromConfig builds a CreatePromotionRequest from a code + cfg map.
+// This is a stub in this task — the JSON parsing will be implemented in the
+// logic layer (Task 7), which is where wire-shaped cfg comes from.
+func couponFromConfig(code string, cfg map[string]any) *CreatePromotionRequest {
+	_ = code
+	_ = cfg
+	return nil
 }
