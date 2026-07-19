@@ -64,7 +64,7 @@ func (l *UpdateCouponLogic) UpdateCoupon(req *types.UpdateCouponReq) (resp *type
 		TotalCount:   &total,
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
-		Scope:        buildCouponScope(req.ScopeType),
+		Scope:        buildCouponScope(""),
 		StartAt:      startAt,
 		EndAt:        endAt,
 		Rules:        &rules,

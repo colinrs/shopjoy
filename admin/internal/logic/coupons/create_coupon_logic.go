@@ -72,7 +72,7 @@ func (l *CreateCouponLogic) CreateCoupon(req *types.CreateCouponReq) (resp *type
 		TotalCount:   &total,
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
-		Scope:        buildCouponScope(req.ScopeType),
+		Scope:        buildCouponScope(""),
 		StartAt:      startAt,
 		EndAt:        endAt,
 		Rules:        []pkgpromotion.PromotionRule{rule},

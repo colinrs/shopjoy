@@ -217,7 +217,6 @@ func convertPromotionToCouponResp(p *apppromotion.PromotionResponse) *types.Coup
 		UsedCount:      usedCount,
 		PerUserLimit:   perUserLimit,
 		Status:         status,
-		ScopeType:      strings.ToLower(string(p.Scope.Type)),
 		CreatedAt:      p.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:      p.UpdatedAt.Format(time.RFC3339),
 	}

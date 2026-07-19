@@ -29,11 +29,13 @@ func NewUpdatePromotionRuleLogic(ctx context.Context, svcCtx *svc.ServiceContext
 // the parent promotion here.
 func (l *UpdatePromotionRuleLogic) UpdatePromotionRule(req *types.UpdatePromotionRuleReq) (resp *types.PromotionRuleResp, err error) {
 	rule := &pkgpromotion.PromotionRule{
-		ID:            req.ID,
-		ConditionType: mapConditionType(req.RuleType),
-		ConditionValue: parseMoneyToDecimal(req.Value),
-		ActionType:     mapDiscountActionType(req.DiscountType),
-		ActionValue:    parseMoneyToDecimal(req.DiscountValue),
+		ID:             req.ID,
+		ConditionType:  mapWireConditionType(req.ConditionType),
+		ConditionValue: parseMoneyToDecimal(req.ConditionValue),
+		ActionType:     mapWireActionType(req.ActionType),
+		ActionValue:    parseMoneyToDecimal(req.ActionValue),
+		MaxDiscount:    parseMoneyToDecimal(req.MaxDiscount),
+		SortOrder:      req.SortOrder,
 	}
 	ruleResp, err := l.svcCtx.PromotionApp.UpdateRule(l.ctx, rule)
 	if err != nil {
@@ -41,14 +43,12 @@ func (l *UpdatePromotionRuleLogic) UpdatePromotionRule(req *types.UpdatePromotio
 	}
 
 	return &types.PromotionRuleResp{
-		ID:            ruleResp.ID,
-		RuleType:      mapConditionTypeToString(ruleResp.ConditionType),
-		Operator:      "gte",
-		Value:         formatDecimalToString(ruleResp.ConditionValue),
-		DiscountType:  mapActionTypeIntToString(ruleResp.ActionType),
-		DiscountValue: formatDecimalToString(ruleResp.ActionValue),
-		Priority:      ruleResp.SortOrder,
-		CreatedAt:     "",
-		UpdatedAt:     "",
+		ID:             ruleResp.ID,
+		ConditionType:  mapWireConditionTypeToString(ruleResp.ConditionType),
+		ConditionValue: formatDecimalToString(ruleResp.ConditionValue),
+		ActionType:     mapWireActionTypeToString(ruleResp.ActionType),
+		ActionValue:    formatDecimalToString(ruleResp.ActionValue),
+		MaxDiscount:    formatDecimalToString(ruleResp.MaxDiscount),
+		SortOrder:      ruleResp.SortOrder,
 	}, nil
 }

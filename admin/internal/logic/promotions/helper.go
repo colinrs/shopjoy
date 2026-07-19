@@ -155,6 +155,28 @@ func mapActionTypeIntToString(actionType pkgpromotion.ActionType) string {
 	}
 }
 
+// mapWireConditionTypeToString is the inverse of mapWireConditionType.
+// The wire shape uses "min_amount" / "min_quantity" so the form
+// re-hydrates with the same enum strings the create endpoint accepts.
+func mapWireConditionTypeToString(conditionType pkgpromotion.ConditionType) string {
+	switch conditionType {
+	case pkgpromotion.ConditionMinQuantity:
+		return "min_quantity"
+	case pkgpromotion.ConditionMinAmount:
+		return "min_amount"
+	default:
+		return "min_amount"
+	}
+}
+
+// mapWireActionTypeToString is the inverse of mapWireActionType. The
+// wire shape uses "fixed_amount" / "percentage" / "free_shipping" so
+// the form re-hydrates with the same enum strings the create endpoint
+// accepts.
+func mapWireActionTypeToString(actionType pkgpromotion.ActionType) string {
+	return mapActionTypeIntToString(actionType)
+}
+
 // =============================================================================
 // Money / decimal helpers
 // =============================================================================
@@ -314,10 +336,10 @@ func idsToStrings(ids []int64) []string {
 // Rule conversion (domain <-> wire)
 // =============================================================================
 
-// convertRuleReqsToDomain maps the wire-shaped rule request (rule_type,
-// value, discount_type, discount_value) onto the domain
-// PromotionRule. OwnerKind / OwnerID are set by the caller (they
-// aren't known until the promotion row exists).
+// convertRuleReqsToDomain maps the wire-shaped rule request
+// (condition_type / condition_value / action_type / action_value)
+// onto the domain PromotionRule. OwnerKind / OwnerID are set by the
+// caller (they aren't known until the promotion row exists).
 func convertRuleReqsToDomain(reqs []types.PromotionRuleReq) []pkgpromotion.PromotionRule {
 	if len(reqs) == 0 {
 		return nil
@@ -325,35 +347,59 @@ func convertRuleReqsToDomain(reqs []types.PromotionRuleReq) []pkgpromotion.Promo
 	out := make([]pkgpromotion.PromotionRule, 0, len(reqs))
 	for _, r := range reqs {
 		out = append(out, pkgpromotion.PromotionRule{
-			ConditionType:  mapConditionType(r.RuleType),
-			ConditionValue: parseMoneyToDecimal(r.Value),
-			ActionType:     mapDiscountActionType(r.DiscountType),
-			ActionValue:    parseMoneyToDecimal(r.DiscountValue),
+			ConditionType:  mapWireConditionType(r.ConditionType),
+			ConditionValue: parseMoneyToDecimal(r.ConditionValue),
+			ActionType:     mapWireActionType(r.ActionType),
+			ActionValue:    parseMoneyToDecimal(r.ActionValue),
+			MaxDiscount:    parseMoneyToDecimal(r.MaxDiscount),
+			SortOrder:      r.SortOrder,
 		})
 	}
 	return out
 }
 
 // convertRulesToResp maps app → wire types for rules. The wire
-// PromotionRuleResp keeps the old flat shape (rule_type /
-// discount_type / discount_value / value / priority) so the form can
-// re-hydrate unchanged.
-func convertRulesToResp(rules []*apppromotion.PromotionRuleResponse) []*types.PromotionRuleResp {
+// PromotionRuleResp uses the unified shape
+// (condition_type / condition_value / action_type / action_value /
+// max_discount / sort_order).
+func convertRulesToResp(rules []apppromotion.PromotionRuleResponse) []*types.PromotionRuleResp {
 	if len(rules) == 0 {
 		return nil
 	}
 	out := make([]*types.PromotionRuleResp, 0, len(rules))
 	for _, r := range rules {
 		out = append(out, &types.PromotionRuleResp{
-			ID:            r.ID,
-			RuleType:      mapConditionTypeToString(r.ConditionType),
-			Operator:      "gte",
-			Value:         formatDecimalToString(r.ConditionValue),
-			DiscountType:  mapActionTypeIntToString(r.ActionType),
-			DiscountValue: formatDecimalToString(r.ActionValue),
-			Priority:      0,
-			CreatedAt:     "",
-			UpdatedAt:     "",
+			ID:             r.ID,
+			ConditionType:  mapWireConditionTypeToString(r.ConditionType),
+			ConditionValue: formatDecimalToString(r.ConditionValue),
+			ActionType:     mapWireActionTypeToString(r.ActionType),
+			ActionValue:    formatDecimalToString(r.ActionValue),
+			MaxDiscount:    formatDecimalToString(r.MaxDiscount),
+			SortOrder:      r.SortOrder,
+		})
+	}
+	return out
+}
+
+// convertRulesPtrToResp mirrors convertRulesToResp but accepts the
+// pointer slice returned by PromotionApp.GetRules / CreateRules.
+func convertRulesPtrToResp(rules []*apppromotion.PromotionRuleResponse) []*types.PromotionRuleResp {
+	if len(rules) == 0 {
+		return nil
+	}
+	out := make([]*types.PromotionRuleResp, 0, len(rules))
+	for _, r := range rules {
+		if r == nil {
+			continue
+		}
+		out = append(out, &types.PromotionRuleResp{
+			ID:             r.ID,
+			ConditionType:  mapWireConditionTypeToString(r.ConditionType),
+			ConditionValue: formatDecimalToString(r.ConditionValue),
+			ActionType:     mapWireActionTypeToString(r.ActionType),
+			ActionValue:    formatDecimalToString(r.ActionValue),
+			MaxDiscount:    formatDecimalToString(r.MaxDiscount),
+			SortOrder:      r.SortOrder,
 		})
 	}
 	return out
@@ -364,75 +410,58 @@ func convertRulesToResp(rules []*apppromotion.PromotionRuleResponse) []*types.Pr
 // =============================================================================
 
 // convertPromotionToDetailResp maps a unified PromotionResponse to the
-// wire PromotionDetailResp. The wire type still has the OLD shape
-// (no Kind / MarketID / Code / TotalCount / Rules fields); Task 8
-// will regenerate them. Until then, those fields stay zero/empty so
-// existing forms continue to render.
+// wire PromotionDetailResp. The wire type uses the unified shape
+// (Kind / MarketID / Code / TotalCount / Rules) so the form can
+// render either promotion or coupon detail from a single endpoint.
 func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.PromotionDetailResp {
 	status := mapPromotionStatus(p.Status)
 	if isPromotionExpired(p.EndAt) {
 		status = "expired"
 	}
 
-	// DiscountType/DiscountValue/MinOrderAmount/MaxDiscount aren't
-	// stored on the Promotion row; they're stored as PromotionRules.
-	// Surface the first rule's values when present so the form
-	// re-renders correctly after the user refreshes.
-	var (
-		discountType, discountValue, minOrderAmount, maxDiscount string
-	)
-	if len(p.Rules) > 0 {
-		first := p.Rules[0]
-		discountType = mapActionTypeIntToString(first.ActionType)
-		if !first.ActionValue.IsZero() {
-			discountValue = first.ActionValue.StringFixed(2)
-		}
-		if first.ConditionType == pkgpromotion.ConditionMinAmount && !first.ConditionValue.IsZero() {
-			minOrderAmount = first.ConditionValue.StringFixed(2)
-		}
-		if !first.MaxDiscount.IsZero() {
-			maxDiscount = first.MaxDiscount.StringFixed(2)
-		}
+	code := ""
+	if p.Code != nil {
+		code = *p.Code
 	}
 
-	// Split the stored Scope.IDs back into the per-type wire field
-	// so the form re-hydrates correctly after a refresh. Only the
-	// array matching ScopeType is populated — the others stay nil
-	// to mirror how the form sends a single non-empty ID array.
-	var productIDs, categoryIDs, brandIDs []string
-	if len(p.Scope.IDs) > 0 {
-		switch p.Scope.Type {
-		case pkgpromotion.ScopeTypeProducts:
-			productIDs = idsToStrings(p.Scope.IDs)
-		case pkgpromotion.ScopeTypeCategories:
-			categoryIDs = idsToStrings(p.Scope.IDs)
-		case pkgpromotion.ScopeTypeBrands:
-			brandIDs = idsToStrings(p.Scope.IDs)
-		}
+	var totalCount int
+	if p.TotalCount != nil {
+		totalCount = *p.TotalCount
+	}
+
+	var marketID int64
+	if p.MarketID != nil {
+		marketID = *p.MarketID
+	}
+
+	var usedCount int
+	if p.UsedCount != nil {
+		usedCount = *p.UsedCount
 	}
 
 	resp := &types.PromotionDetailResp{
-		ID:             p.ID,
-		Name:           p.Name,
-		Description:    p.Description,
-		Type:           mapPromotionTypeToString(p.Type),
-		Status:         status,
-		StartTime:      p.StartAt.Format(time.RFC3339),
-		EndTime:        p.EndAt.Format(time.RFC3339),
-		DiscountType:   discountType,
-		DiscountValue:  discountValue,
-		MinOrderAmount: minOrderAmount,
-		MaxDiscount:    maxDiscount,
-		Currency:       p.Currency,
-		UsageLimit:     p.UsageLimit,
-		PerUserLimit:   p.PerUserLimit,
-		ProductIDs:     productIDs,
-		CategoryIDs:    categoryIDs,
-		BrandIDs:       brandIDs,
-		Tags:           p.Tags,
-		ScopeType:      string(p.Scope.Type),
-		CreatedAt:      p.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      p.UpdatedAt.Format(time.RFC3339),
+		ID:           p.ID,
+		Kind:         mapPromotionKindToString(p.Kind),
+		Name:         p.Name,
+		Description:  p.Description,
+		Code:         code,
+		Type:         mapPromotionTypeToString(p.Type),
+		Status:       status,
+		MarketID:     marketID,
+		Currency:     p.Currency,
+		UsageLimit:   p.UsageLimit,
+		UsedCount:    usedCount,
+		PerUserLimit: p.PerUserLimit,
+		TotalCount:   totalCount,
+		ScopeType:    strings.ToLower(string(p.Scope.Type)),
+		ScopeIDs:     idsToStrings(p.Scope.IDs),
+		ExcludeIDs:   idsToStrings(p.Scope.ExcludeIDs),
+		Tags:         p.Tags,
+		Rules:        convertRulesToResp(p.Rules),
+		StartTime:    p.StartAt.Format(time.RFC3339),
+		EndTime:      p.EndAt.Format(time.RFC3339),
+		CreatedAt:    p.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    p.UpdatedAt.Format(time.RFC3339),
 	}
 	return resp
 }

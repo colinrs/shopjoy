@@ -6,7 +6,6 @@ import (
 	apppromotion "github.com/colinrs/shopjoy/admin/internal/application/promotion"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	pkgpromotion "github.com/colinrs/shopjoy/pkg/domain/promotion"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +25,7 @@ func NewUpdatePromotionLogic(ctx context.Context, svcCtx *svc.ServiceContext) Up
 }
 
 // UpdatePromotion mirrors CreatePromotion: parse times, build a
-// PromotionRule from the wire discount fields, then call the unified
+// PromotionRule slice from the wire Rules, then call the unified
 // PromotionApp.Update with Rules wrapped in a pointer (so the app
 // layer knows to replace — not preserve — the rules).
 func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (resp *types.PromotionDetailResp, err error) {
@@ -39,40 +38,25 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 		return nil, err
 	}
 
-	scope := buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs, req.BrandIDs)
-
-	var rulesPtr *[]pkgpromotion.PromotionRule
-	if req.DiscountType != "" && req.DiscountValue != "" {
-		rule := pkgpromotion.PromotionRule{
-			ConditionType: pkgpromotion.ConditionMinAmount,
-			ActionType:    mapDiscountActionType(req.DiscountType),
-		}
-		if req.MinOrderAmount != "" {
-			rule.ConditionValue = parseMoneyToDecimal(req.MinOrderAmount)
-		}
-		if req.DiscountValue != "" {
-			rule.ActionValue = parseMoneyToDecimal(req.DiscountValue)
-		}
-		if req.MaxDiscount != "" {
-			rule.MaxDiscount = parseMoneyToDecimal(req.MaxDiscount)
-		}
-		rules := []pkgpromotion.PromotionRule{rule}
-		rulesPtr = &rules
-	}
+	scope := buildPromotionScopeFromWire(req.ScopeType, req.ScopeIDs, req.ExcludeIDs)
+	rules := convertRuleReqsToDomainPtr(req.Rules)
 
 	updateReq := &apppromotion.UpdatePromotionRequest{
 		ID:           req.ID,
 		Name:         req.Name,
 		Description:  req.Description,
+		Code:         optionalString(req.Code),
 		Type:         parsePromotionType(req.Type),
+		MarketID:     optionalInt64(req.MarketID),
 		Currency:     currencyWithDefault(req.Currency),
-		Scope:        scope,
+		TotalCount:   optionalInt(req.TotalCount),
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
 		Tags:         req.Tags,
+		Scope:        scope,
 		StartAt:      startAt,
 		EndAt:        endAt,
-		Rules:        rulesPtr,
+		Rules:        &rules,
 		ActorID:      actorID(l.ctx),
 	}
 
