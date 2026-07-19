@@ -196,7 +196,9 @@ type promotionRuleModel struct {
 	MaxDiscountCurrency string          `gorm:"column:max_discount_currency;size:10;default:CNY"`
 	Currency            string          `gorm:"column:currency;size:10;not null;default:CNY"`
 	SortOrder           int             `gorm:"column:sort_order;not null;default:0"`
-	Audit               shared.AuditInfo `gorm:"embedded"`
+	// NOTE: promotion_rules does NOT have created_by/updated_by columns.
+	// Do NOT embed shared.AuditInfo here — it would inject those columns into
+	// INSERT statements and fail with "Unknown column 'created_by'".
 }
 
 func (*promotionRuleModel) TableName() string { return "promotion_rules" }
@@ -220,8 +222,8 @@ func (m *promotionRuleModel) toEntity() *promotion.PromotionRule {
 		MaxDiscount:    m.MaxDiscountAmount,
 		Currency:       m.Currency,
 		SortOrder:      m.SortOrder,
-		CreatedAt:      m.Audit.CreatedAt.UTC(),
-		UpdatedAt:      m.Audit.UpdatedAt.UTC(),
+		CreatedAt:      m.CreatedAt.UTC(),
+		UpdatedAt:      m.UpdatedAt.UTC(),
 	}
 }
 
@@ -239,12 +241,8 @@ func fromPromotionRuleEntity(r *promotion.PromotionRule) *promotionRuleModel {
 		MaxDiscountCurrency: r.Currency,
 		Currency:            r.Currency,
 		SortOrder:           r.SortOrder,
-		Audit: shared.AuditInfo{
-			CreatedAt: r.CreatedAt.UTC(),
-			UpdatedAt: r.UpdatedAt.UTC(),
-			CreatedBy: 0,
-			UpdatedBy: 0,
-		},
+		// NOTE: promotion_rules table has no created_by/updated_by columns.
+		// application.Model (embedded above) handles created_at/updated_at.
 	}
 	if r.OwnerKind == promotion.KindPromotion {
 		pid := r.OwnerID
