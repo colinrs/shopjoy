@@ -218,7 +218,7 @@
                       v-for="(rule, idx) in row.rules.slice(0, 1)"
                       :key="idx"
                     >
-                      <span v-if="rule.action_type === 'fixed_amount'">¥{{ rule.action_value }}</span>
+                      <span v-if="rule.action_type === 'fixed_amount'">{{ currencySymbol(row.currency) }}{{ rule.action_value }}</span>
                       <span v-else-if="rule.action_type === 'percentage'">{{ rule.action_value }}%</span>
                       <span v-else>{{ rule.action_type }}</span>
                     </span>
@@ -516,7 +516,7 @@
                       v-for="(rule, idx) in row.rules.slice(0, 1)"
                       :key="idx"
                     >
-                      <span v-if="rule.action_type === 'fixed_amount'">¥{{ rule.action_value }}</span>
+                      <span v-if="rule.action_type === 'fixed_amount'">{{ currencySymbol(row.currency) }}{{ rule.action_value }}</span>
                       <span v-else-if="rule.action_type === 'percentage'">{{ rule.action_value }}%</span>
                       <span v-else-if="rule.action_type === 'free_shipping'">{{ $t('promotions.freeShipping') }}</span>
                       <span v-else>-</span>
@@ -732,7 +732,6 @@
         <el-form-item :label="$t('promotions.rules')">
           <div class="rules-editor">
             <el-button
-              v-if="!(form.kind === 'coupon' && (form.rules || []).length >= 1)"
               size="small"
               type="primary"
               @click="showAddRuleDialogInForm"
@@ -748,7 +747,7 @@
                 :key="idx"
                 class="rule-item"
               >
-                <span class="rule-text">{{ formatRuleSummary(rule) }}</span>
+                <span class="rule-text">{{ formatRuleSummary(rule, form.currency) }}</span>
                 <el-button
                   type="primary"
                   link
@@ -1226,6 +1225,7 @@ import {
   type GenerateCouponCodesRequest
 } from '@/api/promotion'
 import { getMarkets, type Market } from '@/api/market'
+import { currencySymbol } from '@/utils/currency'
 import { getUserList, type User as UserAccount } from '@/api/user'
 import TablePagination from '@/components/common/TablePagination.vue'
 import StatsCard from '@/components/common/StatsCard.vue'
@@ -1526,14 +1526,21 @@ const getPromotionTypeText = (type: string) => {
   return texts[type] || type
 }
 
-const formatRuleSummary = (rule: PromotionRuleRequest | PromotionRule) => {
+const formatRuleSummary = (rule: PromotionRuleRequest | PromotionRule, currency?: string) => {
   const cond = rule.condition_type === 'min_amount'
-    ? t('promotions.minAmountEquals', { value: rule.condition_value })
-    : t('promotions.minQuantityEquals', { value: rule.condition_value })
+    ? t('promotions.minAmountEquals', { amount: rule.condition_value })
+    : t('promotions.minQuantityEquals', { quantity: rule.condition_value })
   let action = ''
-  if (rule.action_type === 'fixed_amount') action = `减 ¥${rule.action_value}`
-  else if (rule.action_type === 'percentage') action = `${rule.action_value}% off`
-  else if (rule.action_type === 'free_shipping') action = t('promotions.freeShipping')
+  if (rule.action_type === 'fixed_amount') {
+    action = t('promotions.fixedAmountEquals', {
+      symbol: currencySymbol(currency),
+      amount: rule.action_value
+    })
+  } else if (rule.action_type === 'percentage') {
+    action = t('promotions.percentageEquals', { value: rule.action_value })
+  } else if (rule.action_type === 'free_shipping') {
+    action = t('promotions.freeShipping')
+  }
   return `${cond} → ${action}`
 }
 
@@ -1582,7 +1589,9 @@ const fillFormFromRow = (row: Promotion) => {
     name: row.name,
     description: row.description || '',
     code: row.code || '',
-    type: row.type || (row.kind === 'coupon' ? 'fixed_amount' : 'discount'),
+    type: row.kind === 'coupon'
+      ? (row.rules?.[0]?.action_type || 'fixed_amount')
+      : (row.type || 'discount'),
     currency: row.currency || 'CNY',
     market_id: row.market_id || '',
     scope_type: row.scope_type || 'storewide',
@@ -1624,6 +1633,11 @@ const handleEditCoupon = async (row: Promotion) => {
   // Defensive: handlers know which kind they're editing. Don't rely on the
   // row's kind field being populated if the API omitted it.
   form.kind = 'coupon'
+  // Coupon type radio values are aligned with the rule's action_type
+  // (fixed_amount / percentage / free_shipping). The wire `type` field
+  // comes from the legacy domain Type enum ("discount" etc.) and does not
+  // match any coupon radio — derive from the first rule instead.
+  form.type = form.rules[0]?.action_type || 'fixed_amount'
   isFormEdit.value = true
   formDialogVisible.value = true
 }

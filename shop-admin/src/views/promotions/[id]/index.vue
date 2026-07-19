@@ -217,7 +217,7 @@
               >
                 <template #default="{ row }">
                   <template v-if="row.action_type === 'fixed_amount'">
-                    ¥{{ row.action_value }}
+                    {{ currencySymbol(promotionForm.currency) }}{{ row.action_value }}
                   </template>
                   <template v-else-if="row.action_type === 'percentage'">
                     {{ row.action_value }}%
@@ -232,7 +232,7 @@
                 width="120"
               >
                 <template #default="{ row }">
-                  {{ row.max_discount && parseFloat(row.max_discount) > 0 ? `¥${row.max_discount}` : '-' }}
+                  {{ row.max_discount && parseFloat(row.max_discount) > 0 ? `${currencySymbol(promotionForm.currency)}${row.max_discount}` : '-' }}
                 </template>
               </el-table-column>
               <el-table-column
@@ -494,7 +494,7 @@
               <span class="discount-label">{{ $t('promotions.previewDiscount') }}</span>
               <span class="discount-value">
                 <template v-if="rulesList[0].action_type === 'fixed_amount'">
-                  ¥{{ rulesList[0].action_value || 0 }}
+                  {{ currencySymbol(promotionForm.currency) }}{{ rulesList[0].action_value || 0 }}
                 </template>
                 <template v-else-if="rulesList[0].action_type === 'percentage'">
                   {{ rulesList[0].action_value || 0 }}%
@@ -655,6 +655,7 @@ import { getMarkets, type Market } from '@/api/market'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { t } from '@/plugins/i18n'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { currencySymbol } from '@/utils/currency'
 
 const router = useRouter()
 const route = useRoute()

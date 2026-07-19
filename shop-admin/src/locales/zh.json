@@ -1207,6 +1207,8 @@
     "maxDiscountUpTo": "最大优惠",
     "minAmount": "最低金额",
     "minAmountEquals": "满 {amount} 元",
+    "fixedAmountEquals": "减 {symbol}{amount}",
+    "percentageEquals": "{value}% 折扣",
     "minQuantity": "最低数量",
     "minQuantityEquals": "满 {quantity} 件",
     "ruleCount": "{count} 条规则",

@@ -1207,6 +1207,8 @@
     "maxDiscountUpTo": "Max Discount",
     "minAmount": "Minimum Amount",
     "minAmountEquals": "Spend {amount} or more",
+    "fixedAmountEquals": "Off {symbol}{amount}",
+    "percentageEquals": "{value}% off",
     "minQuantity": "Minimum Quantity",
     "minQuantityEquals": "Buy {quantity} or more",
     "ruleCount": "{count} rules",
