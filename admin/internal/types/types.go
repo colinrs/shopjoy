@@ -475,8 +475,7 @@ type CouponDetailResp struct {
 	ProductIDs     string `json:"product_ids"`
 	CategoryIDs    string `json:"category_ids"`
 	MarketIDs      string `json:"market_ids"`
-	Status         string `json:"status"` // inactive, active, expired, depleted
-	ScopeType      string `json:"scope_type"`
+	Status         string `json:"status"` // inactive, active, expired, depleted (expired is computed: now > EndAt)
 	CreatedAt      string `json:"created_at"`
 	UpdatedAt      string `json:"updated_at"`
 }
@@ -547,7 +546,6 @@ type CreateCouponReq struct {
 	ProductIDs     string `json:"product_ids,optional"`  // JSON array as string
 	CategoryIDs    string `json:"category_ids,optional"` // JSON array as string
 	MarketIDs      string `json:"market_ids,optional"`   // JSON array as string
-	ScopeType      string `json:"scope_type,optional"`   // storewide | products | categories | brands
 }
 
 type CreateCouponResp struct {
@@ -625,24 +623,23 @@ type CreateProductResp struct {
 }
 
 type CreatePromotionReq struct {
-	Name           string   `json:"name"`
-	Description    string   `json:"description,optional"`
-	Type           string   `json:"type"`                      // discount, coupon, flash_sale, bundle
-	Currency       string   `json:"currency,optional"`         // ISO 4217, defaults to CNY
-	StartTime      string   `json:"start_time"`                // RFC3339
-	EndTime        string   `json:"end_time"`                  // RFC3339
-	DiscountType   string   `json:"discount_type,optional"`    // percentage, fixed_amount, buy_x_get_y
-	DiscountValue  string   `json:"discount_value,optional"`   // Using string for decimal precision
-	MinOrderAmount string   `json:"min_order_amount,optional"` // Using string for decimal precision
-	MaxDiscount    string   `json:"max_discount,optional"`     // Using string for decimal precision
-	UsageLimit     int      `json:"usage_limit,optional"`
-	PerUserLimit   int      `json:"per_user_limit,optional"`
-	ProductIDs     []string `json:"product_ids,optional"`
-	CategoryIDs    []string `json:"category_ids,optional"`
-	BrandIDs       []string `json:"brand_ids,optional"`
-	MarketIDs      []string `json:"market_ids,optional"`
-	Tags           []string `json:"tags,optional"`
-	ScopeType      string   `json:"scope_type,optional"` // storewide | products | categories | brands
+	Kind         string              `json:"kind"` // "promotion" | "coupon"
+	Name         string              `json:"name"`
+	Description  string              `json:"description,optional"`
+	Code         string              `json:"code,optional"` // coupon only
+	Type         string              `json:"type,optional"`
+	MarketID     int64               `json:"market_id,optional,string"`
+	Currency     string              `json:"currency,optional"`
+	UsageLimit   int                 `json:"usage_limit,optional"`
+	PerUserLimit int                 `json:"per_user_limit,optional"`
+	TotalCount   int                 `json:"total_count,optional"` // coupon only
+	ScopeType    string              `json:"scope_type,optional"`
+	ScopeIDs     []string            `json:"scope_ids,optional"`
+	ExcludeIDs   []string            `json:"exclude_ids,optional"`
+	Tags         []string            `json:"tags,optional"`
+	Rules        []*PromotionRuleReq `json:"rules,optional"`
+	StartTime    string              `json:"start_time"`
+	EndTime      string              `json:"end_time"`
 }
 
 type CreatePromotionResp struct {
@@ -650,8 +647,9 @@ type CreatePromotionResp struct {
 }
 
 type CreatePromotionRulesReq struct {
-	PromotionID int64              `path:"id"`
-	Rules       []PromotionRuleReq `json:"rules"`
+	OwnerKind string             `path:"owner_kind"` // "promotion" | "coupon"
+	OwnerID   int64              `path:"owner_id"`
+	Rules     []PromotionRuleReq `json:"rules"`
 }
 
 type CreatePromotionRulesResp struct {
@@ -1198,7 +1196,8 @@ type GetPromotionReq struct {
 }
 
 type GetPromotionRulesReq struct {
-	PromotionID int64 `path:"id"`
+	OwnerKind string `path:"owner_kind"`
+	OwnerID   int64  `path:"owner_id"`
 }
 
 type GetRedeemRuleReq struct {
@@ -1571,10 +1570,11 @@ type ListPromotionRulesResp struct {
 }
 
 type ListPromotionsReq struct {
+	Kind     string `form:"kind,optional"`
 	Name     string `form:"name,optional"`
 	Type     string `form:"type,optional"`
 	Status   string `form:"status,optional"`
-	MarketID int64  `form:"market_id,optional"`
+	MarketID int64  `form:"market_id,optional,string"`
 	Page     int    `form:"page,default=1"`
 	PageSize int    `form:"page_size,default=20"`
 }
@@ -2199,53 +2199,47 @@ type ProductStatsResp struct {
 }
 
 type PromotionDetailResp struct {
-	ID             int64    `json:"id,string"`
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
-	Type           string   `json:"type"`   // discount, coupon, flash_sale, bundle, buy_x_get_y
-	Status         string   `json:"status"` // pending, active, paused, ended, expired
-	StartTime      string   `json:"start_time"`
-	EndTime        string   `json:"end_time"`
-	DiscountType   string   `json:"discount_type"` // percentage, fixed_amount, buy_x_get_y
-	DiscountValue  string   `json:"discount_value"`
-	MinOrderAmount string   `json:"min_order_amount"`
-	MaxDiscount    string   `json:"max_discount"`
-	Currency       string   `json:"currency"`
-	UsageLimit     int      `json:"usage_limit"`
-	UsedCount      int      `json:"used_count"`
-	PerUserLimit   int      `json:"per_user_limit"`
-	ProductIDs     []string `json:"product_ids"`
-	CategoryIDs    []string `json:"category_ids"`
-	BrandIDs       []string `json:"brand_ids"`
-	MarketIDs      []string `json:"market_ids"`
-	Tags           []string `json:"tags"`
-	// ScopeType reflects the stored Scope.Type for the promotion and
-	// tells the frontend which ID array is authoritative.
-	ScopeType string `json:"scope_type"` // storewide | products | categories | brands
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID           int64                `json:"id,string"`
+	Kind         string               `json:"kind"` // "promotion" | "coupon"
+	Name         string               `json:"name"`
+	Description  string               `json:"description"`
+	Code         string               `json:"code,optional"` // coupon only
+	Type         string               `json:"type"`
+	Status       string               `json:"status"` // pending, active, paused, ended, expired (expired is computed: now > EndAt)
+	MarketID     int64                `json:"market_id,optional,string"`
+	Currency     string               `json:"currency"`
+	UsageLimit   int                  `json:"usage_limit"`
+	UsedCount    int                  `json:"used_count"`
+	PerUserLimit int                  `json:"per_user_limit"`
+	TotalCount   int                  `json:"total_count,optional"` // coupon only
+	ScopeType    string               `json:"scope_type"`
+	ScopeIDs     []string             `json:"scope_ids"`
+	ExcludeIDs   []string             `json:"exclude_ids"`
+	Tags         []string             `json:"tags"`
+	Rules        []*PromotionRuleResp `json:"rules"`
+	StartTime    string               `json:"start_time"`
+	EndTime      string               `json:"end_time"`
+	CreatedAt    string               `json:"created_at"`
+	UpdatedAt    string               `json:"updated_at"`
 }
 
 type PromotionRuleReq struct {
-	RuleType      string `json:"rule_type"` // product, category, amount, quantity, user_group, market
-	Operator      string `json:"operator"`  // eq, ne, gt, gte, lt, lte, in, not_in, contains
-	Value         string `json:"value"`
-	DiscountType  string `json:"discount_type,optional"` // percentage, fixed_amount
-	DiscountValue string `json:"discount_value,optional"`
-	Priority      int    `json:"priority,optional"`
+	ConditionType  string `json:"condition_type"`  // "min_amount" | "min_quantity"
+	ConditionValue string `json:"condition_value"` // decimal string
+	ActionType     string `json:"action_type"`     // "fixed_amount" | "percentage" | "free_shipping"
+	ActionValue    string `json:"action_value"`    // decimal string
+	MaxDiscount    string `json:"max_discount,optional"`
+	SortOrder      int    `json:"sort_order,optional"`
 }
 
 type PromotionRuleResp struct {
-	ID            int64  `json:"id,string"`
-	PromotionID   int64  `json:"promotion_id,string"`
-	RuleType      string `json:"rule_type"`
-	Operator      string `json:"operator"`
-	Value         string `json:"value"`
-	DiscountType  string `json:"discount_type"`
-	DiscountValue string `json:"discount_value"`
-	Priority      int    `json:"priority"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
+	ID             int64  `json:"id,string"`
+	ConditionType  string `json:"condition_type"`
+	ConditionValue string `json:"condition_value"`
+	ActionType     string `json:"action_type"`
+	ActionValue    string `json:"action_value"`
+	MaxDiscount    string `json:"max_discount"`
+	SortOrder      int    `json:"sort_order"`
 }
 
 type PublishPageRequest struct {
@@ -3030,7 +3024,6 @@ type UpdateCouponReq struct {
 	ProductIDs     string `json:"product_ids,optional"`
 	CategoryIDs    string `json:"category_ids,optional"`
 	MarketIDs      string `json:"market_ids,optional"`
-	ScopeType      string `json:"scope_type,optional"`
 }
 
 type UpdateDecorationRequest struct {
@@ -3134,39 +3127,34 @@ type UpdateProfileRequest struct {
 }
 
 type UpdatePromotionReq struct {
-	ID             int64    `path:"id"`
-	Name           string   `json:"name"`
-	Description    string   `json:"description,optional"`
-	Type           string   `json:"type"`
-	Currency       string   `json:"currency,optional"`
-	StartTime      string   `json:"start_time"`
-	EndTime        string   `json:"end_time"`
-	DiscountType   string   `json:"discount_type,optional"`
-	DiscountValue  string   `json:"discount_value,optional"`
-	MinOrderAmount string   `json:"min_order_amount,optional"`
-	MaxDiscount    string   `json:"max_discount,optional"`
-	UsageLimit     int      `json:"usage_limit,optional"`
-	PerUserLimit   int      `json:"per_user_limit,optional"`
-	ProductIDs     []string `json:"product_ids,optional"`
-	CategoryIDs    []string `json:"category_ids,optional"`
-	BrandIDs       []string `json:"brand_ids,optional"`
-	MarketIDs      []string `json:"market_ids,optional"`
-	Tags           []string `json:"tags,optional"`
-	// ScopeType selects how ProductIDs/CategoryIDs/BrandIDs map onto
-	// the promotion's stored Scope. Valid values: "storewide",
-	// "products", "categories", "brands". When empty, the logic
-	// layer derives it from the populated ID arrays.
-	ScopeType string `json:"scope_type,optional"`
+	ID           int64               `path:"id"`
+	Kind         string              `json:"kind"`
+	Name         string              `json:"name"`
+	Description  string              `json:"description,optional"`
+	Code         string              `json:"code,optional"`
+	Type         string              `json:"type,optional"`
+	MarketID     int64               `json:"market_id,optional,string"`
+	Currency     string              `json:"currency,optional"`
+	UsageLimit   int                 `json:"usage_limit,optional"`
+	PerUserLimit int                 `json:"per_user_limit,optional"`
+	TotalCount   int                 `json:"total_count,optional"`
+	ScopeType    string              `json:"scope_type,optional"`
+	ScopeIDs     []string            `json:"scope_ids,optional"`
+	ExcludeIDs   []string            `json:"exclude_ids,optional"`
+	Tags         []string            `json:"tags,optional"`
+	Rules        []*PromotionRuleReq `json:"rules,optional"`
+	StartTime    string              `json:"start_time"`
+	EndTime      string              `json:"end_time"`
 }
 
 type UpdatePromotionRuleReq struct {
-	ID            int64  `path:"id"`
-	RuleType      string `json:"rule_type"`
-	Operator      string `json:"operator"`
-	Value         string `json:"value"`
-	DiscountType  string `json:"discount_type,optional"`
-	DiscountValue string `json:"discount_value,optional"`
-	Priority      int    `json:"priority,optional"`
+	ID             int64  `path:"id"`
+	ConditionType  string `json:"condition_type"`
+	ConditionValue string `json:"condition_value"`
+	ActionType     string `json:"action_type"`
+	ActionValue    string `json:"action_value"`
+	MaxDiscount    string `json:"max_discount,optional"`
+	SortOrder      int    `json:"sort_order,optional"`
 }
 
 type UpdateRedeemRuleReq struct {
