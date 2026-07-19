@@ -76,26 +76,26 @@ func encodeJSONStringSlice(in []string) string {
 // UsedCount) are nullable per the live schema.
 type promotionModel struct {
 	application.Model
-	TenantID     int64     `gorm:"column:tenant_id;not null;index"`
-	Kind         string    `gorm:"column:kind;type:enum('PROMOTION','COUPON');not null;default:PROMOTION"`
-	Name         string    `gorm:"column:name;size:255;not null"`
-	Code         *string   `gorm:"column:code;size:100"`
-	Description  string    `gorm:"column:description;type:text"`
-	Type         int       `gorm:"column:type;not null;default:0"`
-	Status       int       `gorm:"column:status;not null;default:0;index"`
-	Priority     int       `gorm:"column:priority;not null;default:0"`
-	MarketID     *int64    `gorm:"column:market_id;index"`
-	Currency     string    `gorm:"column:currency;size:10;not null;default:CNY"`
-	TotalCount   *int      `gorm:"column:total_count"`
-	UsedCount    *int      `gorm:"column:used_count"`
-	UsageLimit   int       `gorm:"column:usage_limit;not null;default:0"`
-	PerUserLimit int       `gorm:"column:per_user_limit;not null;default:1"`
-	Tags         string    `gorm:"column:tags;type:json"` // JSON-encoded []string
-	ScopeType    string    `gorm:"column:scope_type;size:32;not null;default:STOREWIDE"`
-	ScopeIDs     string    `gorm:"column:scope_ids;type:json"`   // JSON array of int64
-	ExcludeIDs   string    `gorm:"column:exclude_ids;type:json"` // JSON array of int64
-	StartAt      time.Time `gorm:"column:start_at;not null"`
-	EndAt        time.Time `gorm:"column:end_at;not null"`
+	TenantID     int64            `gorm:"column:tenant_id;not null;index"`
+	Kind         string           `gorm:"column:kind;type:enum('PROMOTION','COUPON');not null;default:PROMOTION"`
+	Name         string           `gorm:"column:name;size:255;not null"`
+	Code         *string          `gorm:"column:code;size:100"`
+	Description  string           `gorm:"column:description;type:text"`
+	Type         int              `gorm:"column:type;not null;default:0"`
+	Status       int              `gorm:"column:status;not null;default:0;index"`
+	Priority     int              `gorm:"column:priority;not null;default:0"`
+	MarketID     *int64           `gorm:"column:market_id;index"`
+	Currency     string           `gorm:"column:currency;size:10;not null;default:CNY"`
+	TotalCount   *int             `gorm:"column:total_count"`
+	UsedCount    *int             `gorm:"column:used_count"`
+	UsageLimit   int              `gorm:"column:usage_limit;not null;default:0"`
+	PerUserLimit int              `gorm:"column:per_user_limit;not null;default:1"`
+	Tags         string           `gorm:"column:tags;type:json"` // JSON-encoded []string
+	ScopeType    string           `gorm:"column:scope_type;size:32;not null;default:STOREWIDE"`
+	ScopeIDs     string           `gorm:"column:scope_ids;type:json"`   // JSON array of int64
+	ExcludeIDs   string           `gorm:"column:exclude_ids;type:json"` // JSON array of int64
+	StartAt      time.Time        `gorm:"column:start_at;not null"`
+	EndAt        time.Time        `gorm:"column:end_at;not null"`
 	Audit        shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -256,14 +256,14 @@ func fromPromotionRuleEntity(r *promotion.PromotionRule) *promotionRuleModel {
 // coupon_id numerically equals promotions.id for COUPON rows.
 type userCouponModel struct {
 	application.Model
-	TenantID   int64      `gorm:"column:tenant_id;not null;index"`
-	UserID     int64      `gorm:"column:user_id;not null;index"`
-	CouponID   int64      `gorm:"column:coupon_id;not null;index"`
-	Status     int        `gorm:"column:status;not null;index"`
-	UsedAt     *time.Time `gorm:"column:used_at"`
-	OrderID    int64      `gorm:"column:order_id"`
-	ReceivedAt time.Time  `gorm:"column:received_at;not null"`
-	ExpireAt   time.Time  `gorm:"column:expire_at;not null;index"`
+	TenantID   int64            `gorm:"column:tenant_id;not null;index"`
+	UserID     int64            `gorm:"column:user_id;not null;index"`
+	CouponID   int64            `gorm:"column:coupon_id;not null;index"`
+	Status     int              `gorm:"column:status;not null;index"`
+	UsedAt     *time.Time       `gorm:"column:used_at"`
+	OrderID    int64            `gorm:"column:order_id"`
+	ReceivedAt time.Time        `gorm:"column:received_at;not null"`
+	ExpireAt   time.Time        `gorm:"column:expire_at;not null;index"`
 	Audit      shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -288,16 +288,16 @@ func (m *userCouponModel) toEntity() *promotion.UserCoupon {
 // promotionUsageModel represents the database model for promotion_usage.
 type promotionUsageModel struct {
 	application.Model
-	TenantID       int64           `gorm:"column:tenant_id;not null;index"`
-	PromotionID    int64           `gorm:"column:promotion_id;not null;index"`
-	RuleID         *int64          `gorm:"column:rule_id;index"`
-	OrderID        int64           `gorm:"column:order_id;not null;index"`
-	UserID         int64           `gorm:"column:user_id;not null;index"`
-	DiscountAmount decimal.Decimal `gorm:"column:discount_amount;type:decimal(19,4);not null"`
-	Currency       string          `gorm:"column:currency;size:10;not null"`
-	OriginalAmount decimal.Decimal `gorm:"column:original_amount;type:decimal(19,4);not null"`
-	FinalAmount    decimal.Decimal `gorm:"column:final_amount;type:decimal(19,4);not null"`
-	CouponID       *int64          `gorm:"column:coupon_id;index"`
+	TenantID       int64            `gorm:"column:tenant_id;not null;index"`
+	PromotionID    int64            `gorm:"column:promotion_id;not null;index"`
+	RuleID         *int64           `gorm:"column:rule_id;index"`
+	OrderID        int64            `gorm:"column:order_id;not null;index"`
+	UserID         int64            `gorm:"column:user_id;not null;index"`
+	DiscountAmount decimal.Decimal  `gorm:"column:discount_amount;type:decimal(19,4);not null"`
+	Currency       string           `gorm:"column:currency;size:10;not null"`
+	OriginalAmount decimal.Decimal  `gorm:"column:original_amount;type:decimal(19,4);not null"`
+	FinalAmount    decimal.Decimal  `gorm:"column:final_amount;type:decimal(19,4);not null"`
+	CouponID       *int64           `gorm:"column:coupon_id;index"`
 	Audit          shared.AuditInfo `gorm:"embedded"`
 }
 
@@ -498,6 +498,35 @@ func (r *promotionRepo) FindRulesByOwner(ctx context.Context, db *gorm.DB, owner
 		rules[i] = *m.toEntity()
 	}
 	return rules, nil
+}
+
+// FindRulesByOwners fetches every rule whose owner_id appears in the
+// given set and groups the result by owner_id. Owner_kind is intentionally
+// not part of the filter: owner_id is unique within the promotions table,
+// so matching on id alone is sufficient. One round-trip replaces N.
+func (r *promotionRepo) FindRulesByOwners(ctx context.Context, db *gorm.DB, ownerIDs []int64) (map[int64][]promotion.PromotionRule, error) {
+	out := make(map[int64][]promotion.PromotionRule, len(ownerIDs))
+	if len(ownerIDs) == 0 {
+		return out, nil
+	}
+	var models []promotionRuleModel
+	err := db.WithContext(ctx).
+		Where("owner_id IN ?", ownerIDs).
+		Order("sort_order ASC, id ASC").
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range models {
+		ownerID := m.OwnerID
+		if m.OwnerKind == string(promotion.KindPromotion) && m.PromotionID != nil {
+			ownerID = *m.PromotionID
+		}
+		rule := m.toEntity()
+		rule.OwnerID = ownerID
+		out[ownerID] = append(out[ownerID], *rule)
+	}
+	return out, nil
 }
 
 // UpdateRule updates an existing rule row.

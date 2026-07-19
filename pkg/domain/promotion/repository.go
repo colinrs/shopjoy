@@ -21,6 +21,9 @@ type Repository interface {
 	// Rules
 	CreateRules(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64, rules []PromotionRule) error
 	FindRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) ([]PromotionRule, error)
+	// FindRulesByOwners batches the per-owner lookup so list endpoints can
+	// hydrate rules in a single query rather than N+1.
+	FindRulesByOwners(ctx context.Context, db *gorm.DB, ownerIDs []int64) (map[int64][]PromotionRule, error)
 	UpdateRule(ctx context.Context, db *gorm.DB, rule *PromotionRule) error
 	DeleteRule(ctx context.Context, db *gorm.DB, id int64) error
 	DeleteRulesByOwner(ctx context.Context, db *gorm.DB, ownerKind Kind, ownerID int64) error

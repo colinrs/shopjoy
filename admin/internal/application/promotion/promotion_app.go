@@ -278,13 +278,26 @@ func (a *PromotionApp) Get(ctx context.Context, id int64) (*PromotionResponse, e
 // List paginates with optional filters (Name, Kind, Status, Type, MarketID,
 // ExpiredOnly). Status / Type / Kind / MarketID must be pointers in the query
 // so the iota-zero value can be expressed as a real filter, not "unset".
+//
+// Rules are loaded in a single batch query (FindRulesByOwners) instead of
+// N+1 — the list response feeds the admin table's "优惠内容" column which
+// renders the first rule's action_value, so empty rules would render as "-".
 func (a *PromotionApp) List(ctx context.Context, q promotion.Query) (*ListPromotionResponse, error) {
 	list, total, err := a.repo.FindList(ctx, a.db, q)
 	if err != nil {
 		return nil, err
 	}
+	ownerIDs := make([]int64, len(list))
+	for i, p := range list {
+		ownerIDs[i] = p.ID
+	}
+	rulesByOwner, err := a.repo.FindRulesByOwners(ctx, a.db, ownerIDs)
+	if err != nil {
+		return nil, err
+	}
 	out := make([]*PromotionResponse, len(list))
 	for i, p := range list {
+		p.Rules = rulesByOwner[p.ID]
 		out[i] = a.toResponse(p)
 	}
 	return &ListPromotionResponse{
@@ -601,7 +614,7 @@ func randomCode(n int) string {
 //	_tenant_id (int64)                 — tenant scope (injected by logic layer)
 //
 // Per handoff I2, usage_limit=0 leaves TotalCount unset so the repo
-//'s consume-inventory SQL guard treats the coupon as unlimited.
+// 's consume-inventory SQL guard treats the coupon as unlimited.
 func couponFromConfig(code string, cfg map[string]any) *CreatePromotionRequest {
 	if cfg == nil {
 		return nil
