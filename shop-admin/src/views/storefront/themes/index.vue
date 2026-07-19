@@ -165,19 +165,7 @@
               @click="previewTheme(theme)"
             >
               <div class="theme-thumbnail">
-                <el-image
-                  :src="theme.thumbnail"
-                  fit="cover"
-                  class="thumbnail-image"
-                >
-                  <template #error>
-                    <div class="image-placeholder">
-                      <el-icon size="32">
-                        <Picture />
-                      </el-icon>
-                    </div>
-                  </template>
-                </el-image>
+                <ThemePreviewCard :theme="theme" />
                 <div class="theme-overlay">
                   <el-button
                     type="primary"
@@ -314,6 +302,7 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Picture, Check } from '@element-plus/icons-vue'
 import PageHeader from '@/components/common/PageHeader.vue'
+import ThemePreviewCard from './components/ThemePreviewCard.vue'
 import {
   listThemes,
   getCurrentTheme,
