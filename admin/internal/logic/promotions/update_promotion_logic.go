@@ -45,8 +45,8 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 	// needs synthesizing because the form posts ID arrays but not
 	// scope_type (see wire UpdatePromotionReq). If the form supplies
 	// scope_type we trust it, otherwise we derive from whichever ID
-	// array is non-empty (PRODUCTS wins when both are populated).
-	scope := buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs)
+	// array is non-empty (PRODUCTS wins when multiple are populated).
+	scope := buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs, req.BrandIDs)
 
 	updateReq := apppromotion.UpdatePromotionRequest{
 		ID:           req.ID,
@@ -90,14 +90,15 @@ func (l *UpdatePromotionLogic) UpdatePromotion(req *types.UpdatePromotionReq) (r
 }
 
 // buildPromotionScope maps the wire-level (scope_type, product_ids,
-// category_ids) triple onto the domain's PromotionScope. Empty IDs
-// for the chosen scope are normalized to nil so the storage layer
-// doesn't carry stale empty arrays.
+// category_ids, brand_ids) tuple onto the domain's PromotionScope.
+// Empty IDs for the chosen scope are normalized to nil so the
+// storage layer doesn't carry stale empty arrays.
 //
-// Wire values are lowercase ("products", "categories", …) but the
-// domain constants are uppercase ("PRODUCTS", …). We uppercase
-// before comparing so the form's emitted value matches the enum.
-func buildPromotionScope(scopeType string, productIDs, categoryIDs []string) pkgpromotion.PromotionScope {
+// Wire values are lowercase ("products", "categories", "brands", …)
+// but the domain constants are uppercase ("PRODUCTS", …). We
+// uppercase before comparing so the form's emitted value matches
+// the enum.
+func buildPromotionScope(scopeType string, productIDs, categoryIDs, brandIDs []string) pkgpromotion.PromotionScope {
 	normalize := func(s string) pkgpromotion.ScopeType {
 		switch strings.ToUpper(s) {
 		case string(pkgpromotion.ScopeTypeProducts):
@@ -119,6 +120,8 @@ func buildPromotionScope(scopeType string, productIDs, categoryIDs []string) pkg
 			st = pkgpromotion.ScopeTypeProducts
 		case len(categoryIDs) > 0:
 			st = pkgpromotion.ScopeTypeCategories
+		case len(brandIDs) > 0:
+			st = pkgpromotion.ScopeTypeBrands
 		default:
 			st = pkgpromotion.ScopeTypeStorewide
 		}
@@ -130,6 +133,8 @@ func buildPromotionScope(scopeType string, productIDs, categoryIDs []string) pkg
 		ids = parseInt64Slice(productIDs)
 	case pkgpromotion.ScopeTypeCategories:
 		ids = parseInt64Slice(categoryIDs)
+	case pkgpromotion.ScopeTypeBrands:
+		ids = parseInt64Slice(brandIDs)
 	default:
 		ids = nil
 	}

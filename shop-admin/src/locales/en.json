@@ -1115,6 +1115,8 @@
     "configurePromotionInfo": "Configure promotion info",
     "selectCategoryPlaceholder": "Select category",
     "loadCategoriesFailed": "Failed to load categories",
+    "selectBrand": "Select brand",
+    "loadBrandsFailed": "Failed to load brands",
     "searchProductsFailed": "Failed to search products",
     "activateSuccess": "Activated successfully",
     "deactivateSuccess": "Deactivated successfully",

@@ -22,6 +22,7 @@ type (
 		PerUserLimit   int      `json:"per_user_limit,optional"`
 		ProductIDs     []string `json:"product_ids,optional"`
 		CategoryIDs    []string `json:"category_ids,optional"`
+		BrandIDs       []string `json:"brand_ids,optional"`
 		MarketIDs      []string `json:"market_ids,optional"`
 		Tags           []string `json:"tags,optional"`
 	}
@@ -43,6 +44,7 @@ type (
 		PerUserLimit   int      `json:"per_user_limit,optional"`
 		ProductIDs     []string `json:"product_ids,optional"`
 		CategoryIDs    []string `json:"category_ids,optional"`
+		BrandIDs       []string `json:"brand_ids,optional"`
 		MarketIDs      []string `json:"market_ids,optional"`
 		Tags           []string `json:"tags,optional"`
 	}
@@ -61,11 +63,13 @@ type (
 		DiscountValue  string   `json:"discount_value"`
 		MinOrderAmount string   `json:"min_order_amount"`
 		MaxDiscount    string   `json:"max_discount"`
+		Currency       string   `json:"currency"`
 		UsageLimit     int      `json:"usage_limit"`
 		UsedCount      int      `json:"used_count"`
 		PerUserLimit   int      `json:"per_user_limit"`
 		ProductIDs     []string `json:"product_ids"`
 		CategoryIDs    []string `json:"category_ids"`
+		BrandIDs       []string `json:"brand_ids"`
 		MarketIDs      []string `json:"market_ids"`
 		Tags           []string `json:"tags"`
 		CreatedAt      string   `json:"created_at"`

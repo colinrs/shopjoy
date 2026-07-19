@@ -47,7 +47,7 @@ func (l *CreatePromotionLogic) CreatePromotion(req *types.CreatePromotionReq) (r
 		Description:  req.Description,
 		Type:         promotionType,
 		Currency:     currencyWithDefault(req.Currency),
-		Scope:        buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs),
+		Scope:        buildPromotionScope(req.ScopeType, req.ProductIDs, req.CategoryIDs, req.BrandIDs),
 		UsageLimit:   req.UsageLimit,
 		PerUserLimit: req.PerUserLimit,
 		Tags:         req.Tags,

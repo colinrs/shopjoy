@@ -290,6 +290,25 @@
               </el-select>
             </el-form-item>
 
+            <el-form-item
+              v-if="promotionForm.scope_type === 'brands'"
+              :label="$t('promotions.selectBrand')"
+            >
+              <el-select
+                v-model="promotionForm.brand_ids"
+                multiple
+                :placeholder="$t('promotions.selectBrand')"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in brandOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+
             <!-- Usage Limits -->
             <div class="section-title">
               {{ $t('promotions.usageLimits') }}
@@ -581,6 +600,7 @@ import {
 } from '@/api/promotion'
 import { getProductList } from '@/api/product'
 import { getCategories } from '@/api/category'
+import { getBrands } from '@/api/brand'
 import PageHeader from '@/components/common/PageHeader.vue'
 import { t } from '@/plugins/i18n'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -606,6 +626,7 @@ const promotionForm = reactive({
   scope_type: 'storewide' as 'storewide' | 'products' | 'categories' | 'brands',
   product_ids: [] as string[],
   category_ids: [] as string[],
+  brand_ids: [] as string[],
   usage_limit: 0,
   per_user_limit: 0,
   status: 'pending' as string
@@ -619,6 +640,7 @@ const rules = {
 
 const productOptions = ref<{ id: string; name: string }[]>([])
 const categoryOptions = ref<{ id: string; name: string }[]>([])
+const brandOptions = ref<{ id: string; name: string }[]>([])
 
 const loadPromotion = async () => {
   if (!promotionId.value) return
@@ -631,8 +653,12 @@ const loadPromotion = async () => {
     promotionForm.type = res.type as 'discount' | 'flash_sale' | 'bundle' | 'buy_x_get_y'
     promotionForm.currency = res.currency || 'CNY'
     promotionForm.dateRange = [res.start_time, res.end_time]
+    if (res.scope_type) {
+      promotionForm.scope_type = res.scope_type
+    }
     promotionForm.product_ids = res.product_ids || []
     promotionForm.category_ids = res.category_ids || []
+    promotionForm.brand_ids = res.brand_ids || []
     promotionForm.usage_limit = res.usage_limit || 0
     promotionForm.per_user_limit = res.per_user_limit || 0
     promotionForm.status = res.status
@@ -649,6 +675,15 @@ const loadCategories = async () => {
     categoryOptions.value = (res.list || []).map(c => ({ id: c.id, name: c.name }))
   } catch (error) {
     handleError(error, t('promotions.loadCategoriesFailed'))
+  }
+}
+
+const loadBrands = async () => {
+  try {
+    const res = await getBrands({ page: 1, page_size: 200 })
+    brandOptions.value = (res.list || []).map(b => ({ id: b.id, name: b.name }))
+  } catch (error) {
+    handleError(error, t('promotions.loadBrandsFailed'))
   }
 }
 
@@ -685,6 +720,7 @@ const handleSave = async () => {
         per_user_limit: promotionForm.per_user_limit,
         product_ids: promotionForm.product_ids,
         category_ids: promotionForm.category_ids,
+        brand_ids: promotionForm.brand_ids,
         scope_type: promotionForm.scope_type
       }
 
@@ -888,6 +924,7 @@ const getOperatorText = (operator: string) => {
 
 onMounted(() => {
   loadCategories()
+  loadBrands()
   if (isEdit.value) {
     loadPromotion()
     loadRules()

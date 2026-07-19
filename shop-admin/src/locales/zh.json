@@ -1115,6 +1115,8 @@
     "configurePromotionInfo": "配置促销活动信息",
     "selectCategoryPlaceholder": "请选择分类",
     "loadCategoriesFailed": "加载分类列表失败",
+    "selectBrand": "选择品牌",
+    "loadBrandsFailed": "加载品牌列表失败",
     "searchProductsFailed": "搜索商品失败",
     "activateSuccess": "激活成功",
     "deactivateSuccess": "停用成功",

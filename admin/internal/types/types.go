@@ -639,6 +639,7 @@ type CreatePromotionReq struct {
 	PerUserLimit   int      `json:"per_user_limit,optional"`
 	ProductIDs     []string `json:"product_ids,optional"`
 	CategoryIDs    []string `json:"category_ids,optional"`
+	BrandIDs       []string `json:"brand_ids,optional"`
 	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
 	ScopeType      string   `json:"scope_type,optional"` // storewide | products | categories | brands
@@ -2209,11 +2210,13 @@ type PromotionDetailResp struct {
 	DiscountValue  string   `json:"discount_value"`
 	MinOrderAmount string   `json:"min_order_amount"`
 	MaxDiscount    string   `json:"max_discount"`
+	Currency       string   `json:"currency"`
 	UsageLimit     int      `json:"usage_limit"`
 	UsedCount      int      `json:"used_count"`
 	PerUserLimit   int      `json:"per_user_limit"`
 	ProductIDs     []string `json:"product_ids"`
 	CategoryIDs    []string `json:"category_ids"`
+	BrandIDs       []string `json:"brand_ids"`
 	MarketIDs      []string `json:"market_ids"`
 	Tags           []string `json:"tags"`
 	// ScopeType reflects the stored Scope.Type for the promotion and
@@ -3146,10 +3149,11 @@ type UpdatePromotionReq struct {
 	PerUserLimit   int      `json:"per_user_limit,optional"`
 	ProductIDs     []string `json:"product_ids,optional"`
 	CategoryIDs    []string `json:"category_ids,optional"`
+	BrandIDs       []string `json:"brand_ids,optional"`
 	MarketIDs      []string `json:"market_ids,optional"`
 	Tags           []string `json:"tags,optional"`
-	// ScopeType selects how ProductIDs/CategoryIDs map onto the
-	// promotion's stored Scope. Valid values: "storewide",
+	// ScopeType selects how ProductIDs/CategoryIDs/BrandIDs map onto
+	// the promotion's stored Scope. Valid values: "storewide",
 	// "products", "categories", "brands". When empty, the logic
 	// layer derives it from the populated ID arrays.
 	ScopeType string `json:"scope_type,optional"`

@@ -43,13 +43,16 @@ export interface Promotion {
   discount_value: string
   min_order_amount: string
   max_discount: string
+  currency: string
   usage_limit: number
   used_count: number
   per_user_limit: number
   product_ids: string[]
   category_ids: string[]
+  brand_ids: string[]
   market_ids: string[]
   tags: string[]
+  scope_type: ScopeType
   created_at: string
   updated_at: string
 }
@@ -84,6 +87,7 @@ export interface CreatePromotionRequest {
   per_user_limit?: number
   product_ids?: string[]
   category_ids?: string[]
+  brand_ids?: string[]
   market_ids?: string[]
   tags?: string[]
 }
@@ -107,6 +111,7 @@ export interface UpdatePromotionRequest {
   per_user_limit?: number
   product_ids?: string[]
   category_ids?: string[]
+  brand_ids?: string[]
   market_ids?: string[]
   tags?: string[]
 }

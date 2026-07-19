@@ -168,6 +168,23 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 		}
 	}
 
+	// Split the stored Scope.IDs back into the per-type wire field
+	// so the form re-hydrates correctly after a refresh. Only the
+	// array matching ScopeType is populated — the others stay nil
+	// to mirror how the form sends a single non-empty ID array.
+	var productIDs, categoryIDs, brandIDs []string
+	scopeIDs := pkgpromotion.ScopeType(p.ScopeType)
+	if len(p.ScopeIDs) > 0 {
+		switch scopeIDs {
+		case pkgpromotion.ScopeTypeProducts:
+			productIDs = p.ScopeIDs
+		case pkgpromotion.ScopeTypeCategories:
+			categoryIDs = p.ScopeIDs
+		case pkgpromotion.ScopeTypeBrands:
+			brandIDs = p.ScopeIDs
+		}
+	}
+
 	return &types.PromotionDetailResp{
 		ID:             p.ID,
 		Name:           p.Name,
@@ -180,8 +197,12 @@ func convertPromotionToDetailResp(p *apppromotion.PromotionResponse) *types.Prom
 		DiscountValue:  discountValue,
 		MinOrderAmount: minOrderAmount,
 		MaxDiscount:    maxDiscount,
+		Currency:       p.Currency,
 		UsageLimit:     p.UsageLimit,
 		PerUserLimit:   p.PerUserLimit,
+		ProductIDs:     productIDs,
+		CategoryIDs:    categoryIDs,
+		BrandIDs:       brandIDs,
 		Tags:           p.Tags,
 		ScopeType:      p.ScopeType,
 		CreatedAt:      p.CreatedAt,

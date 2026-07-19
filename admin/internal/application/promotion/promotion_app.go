@@ -2,6 +2,7 @@ package promotion
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -120,8 +121,15 @@ type PromotionResponse struct {
 	// ScopeType mirrors the stored Scope.Type so the wire can carry
 	// the same flag the form posts without forcing the frontend to
 	// re-derive it from product_ids / category_ids arrays.
-	ScopeType    string                   `json:"scope_type"`
+	ScopeType string `json:"scope_type"`
+	// ScopeIDs carries the raw IDs from Scope.IDs as strings so the
+	// helper layer can route them to product_ids / category_ids /
+	// brand_ids based on ScopeType. Without this, the form loses
+	// scope IDs on a re-fetch (e.g. when the user refreshes the
+	// edit page).
+	ScopeIDs     []string                 `json:"scope_ids,omitempty"`
 	Rules        []*PromotionRuleResponse `json:"rules"`
+	Currency     string                   `json:"currency"`
 	UsageLimit   int                      `json:"usage_limit"`
 	PerUserLimit int                      `json:"per_user_limit"`
 	Tags         []string                 `json:"tags"`
@@ -493,6 +501,13 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		})
 	}
 
+	// Convert scope IDs from int64 to string so the wire keeps its
+	// declared []string type without leaking int64 semantics.
+	scopeIDs := make([]string, 0, len(p.Scope.IDs))
+	for _, id := range p.Scope.IDs {
+		scopeIDs = append(scopeIDs, strconv.FormatInt(id, 10))
+	}
+
 	return &PromotionResponse{
 		ID:           p.ID,
 		Name:         p.Name,
@@ -502,7 +517,9 @@ func toPromotionResponse(p *pkgpromotion.Promotion) *PromotionResponse {
 		StartAt:      p.StartAt.Format(time.RFC3339),
 		EndAt:        p.EndAt.Format(time.RFC3339),
 		ScopeType:    string(p.Scope.Type),
+		ScopeIDs:     scopeIDs,
 		Rules:        rules,
+		Currency:     p.Currency,
 		UsageLimit:   p.UsageLimit,
 		PerUserLimit: p.PerUserLimit,
 		Tags:         p.Tags,
