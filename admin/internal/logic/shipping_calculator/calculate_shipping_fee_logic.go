@@ -110,10 +110,11 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 
 	// Build response
 	return &types.CalculateShippingFeeResp{
-		ShippingFee: formatAmount(shippingFee),
-		Currency:    template.Currency,
-		TemplateID:  int64(template.ID),
-		ZoneName:    zone.Name,
+		ShippingFee:  formatAmount(shippingFee),
+		Currency:     template.Currency,
+		TemplateID:   int64(template.ID),
+		TemplateName: template.Name,
+		ZoneName:     zone.Name,
 		FeeDetail: types.FeeCalculationDetail{
 			FeeType:          string(zone.FeeType),
 			FirstUnit:        zone.FirstUnit,
