@@ -1,29 +1,53 @@
 import request from '@/utils/request'
 
 // Types
+
+// 模板：所有 ID 为 string（后端 int64 序列化为 string），金额为 string（元）
 export interface ShippingTemplate {
   id: string
+  tenant_id: string
+  market_id: string        // 0 = 全市场
+  currency: string         // ISO 4217
+  carrier_code: string
+  warehouse_id: string
   name: string
   is_default: boolean
   is_active: boolean
   zone_count: number
-  product_count: number
-  category_count: number
   created_at: string
 }
 
+// 区域名称多语言条目
+export interface NameI18nEntry {
+  locale: string           // 'en-US', 'ja-JP', 'zh-CN' ...
+  name: string
+}
+
+// 运费区域：与后端 ShippingZone 1:1
 export interface ShippingZone {
   id: string
+  tenant_id: string
   template_id: string
+  market_id: string
+  currency: string
   name: string
+  name_i18n?: NameI18nEntry[]
   regions: string[]
-  fee_type: 'fixed' | 'by_count' | 'by_weight' | 'free'
+  fee_type: 'fixed' | 'by_count' | 'by_weight' | 'by_volume' | 'free'
   first_unit: number
   first_fee: string
   additional_unit: number
   additional_fee: string
   free_threshold_amount: string
   free_threshold_count: number
+  taxable: boolean
+  tax_rate: string
+  tax_included: boolean
+  ioss_applicable: boolean
+  remote_surcharge: string
+  remote_zip_patterns: string[]
+  fuel_surcharge_pct: string
+  volumetric_divisor: number
   sort: number
 }
 
@@ -60,7 +84,7 @@ export interface UpdateTemplateRequest {
 export interface CreateZoneRequest {
   name: string
   regions: string[]
-  fee_type: 'fixed' | 'by_count' | 'by_weight' | 'free'
+  fee_type: 'fixed' | 'by_count' | 'by_weight' | 'by_volume' | 'free'
   first_unit?: number
   first_fee?: string
   additional_unit?: number
@@ -72,38 +96,58 @@ export interface CreateZoneRequest {
 
 export interface UpdateZoneRequest extends Partial<CreateZoneRequest> {}
 
-export interface CalculateRequest {
-  address: {
-    province_code: string
-    city_code: string
-    district_code: string
-  }
-  items: Array<{
-    product_id: string
-    sku_id?: string
-    quantity: number
-    weight: number
-    price: string
-  }>
+// ---- 运费试算（Calculator）：与后端 CalculateShippingFee 契约 1:1 ----
+
+export interface CalculatorAddress {
+  country_code: string         // ISO 3166-1 alpha-2 (REQUIRED)
+  province_code?: string
+  city_code: string
+  district_code?: string
+  postal_code?: string
 }
 
-export interface FeeDetail {
+export interface CalculatorItem {
+  product_id: string
+  sku_id?: string
+  quantity: number
+  weight: number              // 克
+  length?: number             // mm
+  width?: number              // mm
+  height?: number             // mm
+  price: string
+}
+
+export interface CalculateShippingFeeReq {
+  market_id: string           // REQUIRED
+  address: CalculatorAddress
+  items: CalculatorItem[]
+}
+
+export interface FeeCalculationDetail {
   fee_type: string
   first_unit: number
   first_fee: string
   additional_unit: number
   additional_fee: string
   calculated_weight: number
+  volumetric_weight?: number
   calculated_units: number
+  applied_surcharge?: string
+  applied_tax?: string
 }
 
-export interface CalculateResult {
+export interface CalculateShippingFeeResp {
   shipping_fee: string
+  tax?: string
+  total: string
   currency: string
+  price_includes_tax: boolean
   template_id: string
   template_name: string
   zone_name: string
-  fee_detail: FeeDetail
+  carrier_code: string
+  estimated_days?: number
+  fee_detail: FeeCalculationDetail
 }
 
 export interface Region {
@@ -173,8 +217,8 @@ export const deleteTemplateMapping = (id: string) => {
 }
 
 // Calculator
-export const calculateShippingFee = (data: CalculateRequest) => {
-  return request.post<CalculateResult>('/api/v1/shipping/calculate', data)
+export const calculateShippingFee = (data: CalculateShippingFeeReq) => {
+  return request.post<CalculateShippingFeeResp>('/api/v1/shipping/calculate', data)
 }
 
 // Regions
