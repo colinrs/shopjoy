@@ -61,6 +61,8 @@ __debug_*
 # Added by code-review-graph
 .code-review-graph/
 .gstack/
+.claude/worktrees/
 
 # Local config files (env-specific secrets, real credentials)
 *local.yaml
+.superpowers/

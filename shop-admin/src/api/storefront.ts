@@ -133,16 +133,6 @@ export interface SEOConfigDTO {
   keywords: string
 }
 
-export interface PageSEOConfigDTO {
-  page_type: string
-  page_id?: string
-  config: SEOConfigDTO
-}
-
-export interface ListPageSEOConfigsResponse {
-  configs: PageSEOConfigDTO[]
-}
-
 export interface UpdateSEOConfigRequest {
   title: string
   description: string
@@ -382,30 +372,6 @@ export function updateGlobalSEO(data: UpdateSEOConfigRequest) {
     url: '/api/v1/seo/global',
     method: 'put',
     data
-  })
-}
-
-export function listPageSEO() {
-  return request<ListPageSEOConfigsResponse>({
-    url: '/api/v1/seo/pages',
-    method: 'get'
-  })
-}
-
-export function getPageSEO(pageType: string, pageId?: string) {
-  return request<PageSEOConfigDTO>({
-    url: `/api/v1/seo/pages/${pageType}`,
-    method: 'get',
-    params: pageId ? { page_id: pageId } : {}
-  })
-}
-
-export function updatePageSEO(pageType: string, data: UpdateSEOConfigRequest, pageId?: string) {
-  return request({
-    url: `/api/v1/seo/pages/${pageType}`,
-    method: 'put',
-    data,
-    params: pageId ? { page_id: pageId } : {}
   })
 }
 
