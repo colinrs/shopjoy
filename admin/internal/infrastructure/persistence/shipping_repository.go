@@ -228,6 +228,7 @@ func (r *shippingTemplateRepo) SetDefault(ctx context.Context, db *gorm.DB, id i
 // UnsetAllDefault 取消所有默认模板
 func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
+		Where("is_default = ?", true).
 		Update("is_default", false).Error
 }
 
