@@ -98,15 +98,21 @@ CREATE TABLE IF NOT EXISTS `refunds` (
 CREATE TABLE IF NOT EXISTS `shipping_templates` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `tenant_id` BIGINT NOT NULL COMMENT 'Tenant ID',
+    `market_id` BIGINT NOT NULL DEFAULT 0 COMMENT '市场ID，0=全市场通用',
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'CNY' COMMENT 'ISO 4217',
     `name` VARCHAR(100) NOT NULL COMMENT 'Template name',
     `is_default` TINYINT NOT NULL DEFAULT 0 COMMENT 'Is default template (0=no, 1=yes)',
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT 'Is active (0=inactive, 1=active)',
+    `carrier_code` VARCHAR(50) NOT NULL DEFAULT 'standard' COMMENT '物流商代码',
+    `warehouse_id` BIGINT NOT NULL DEFAULT 0 COMMENT '发货仓库ID',
     `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
-    INDEX `idx_is_default` (`is_default`)
+    INDEX `idx_is_default` (`is_default`),
+    INDEX `idx_market_default` (`market_id`, `is_default`),
+    INDEX `idx_warehouse_id` (`warehouse_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping templates table';
 
 -- ============================================
@@ -117,7 +123,10 @@ CREATE TABLE IF NOT EXISTS `shipping_zones` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `tenant_id` BIGINT NOT NULL COMMENT 'Tenant ID',
     `template_id` BIGINT NOT NULL COMMENT 'Template ID',
+    `market_id` BIGINT NOT NULL DEFAULT 0 COMMENT '市场ID',
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'CNY' COMMENT 'ISO 4217',
     `name` VARCHAR(100) NOT NULL COMMENT 'Zone name',
+    `name_i18n` JSON NULL COMMENT '多语言名称',
     `regions` JSON NOT NULL COMMENT 'Region codes (city codes array)',
     `fee_type` VARCHAR(20) NOT NULL COMMENT 'Fee type: fixed, by_count, by_weight, free',
     `first_unit` INT NOT NULL DEFAULT 1 COMMENT 'First unit (count or grams)',
@@ -126,13 +135,22 @@ CREATE TABLE IF NOT EXISTS `shipping_zones` (
     `additional_fee` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Additional fee',
     `free_threshold_amount` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT 'Free shipping threshold amount, 0=disabled',
     `free_threshold_count` INT NOT NULL DEFAULT 0 COMMENT 'Free shipping threshold count, 0=disabled',
+    `taxable` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否计税',
+    `tax_rate` DECIMAL(5,4) NOT NULL DEFAULT 0 COMMENT '税率 0.0000-1.0000',
+    `tax_included` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '价格含税',
+    `ioss_applicable` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '欧盟IOSS申报',
+    `remote_surcharge` DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '偏远地区附加费',
+    `remote_zip_patterns` JSON NULL COMMENT '偏远邮编正则',
+    `fuel_surcharge_pct` DECIMAL(5,4) NOT NULL DEFAULT 0 COMMENT '燃油附加费%',
+    `volumetric_divisor` INT NOT NULL DEFAULT 5000 COMMENT '体积重除数 cm³/kg',
     `sort` INT NOT NULL DEFAULT 0 COMMENT 'Sort order',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
     `deleted_at` TIMESTAMP NULL COMMENT 'Deleted at',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
-    INDEX `idx_template_id` (`template_id`)
+    INDEX `idx_template_id` (`template_id`),
+    INDEX `idx_zone_market` (`market_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping zones table';
 
 -- ============================================
