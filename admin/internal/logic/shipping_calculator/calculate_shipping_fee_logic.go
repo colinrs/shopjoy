@@ -45,6 +45,9 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	if req.Address.CityCode == "" {
 		return nil, code.ErrShippingCalcAddressRequired
 	}
+	if req.MarketID == 0 {
+		return nil, code.ErrShippingCalcMarketRequired
+	}
 
 	// Validate each item + convert wire string IDs to int64 in one pass.
 	parsed := make([]parsedItem, 0, len(req.Items))

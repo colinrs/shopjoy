@@ -397,6 +397,7 @@ var (
 	ErrShippingCalcInvalidQuantity   = &Err{HTTPCode: http.StatusBadRequest, Code: 230305, Msg: "invalid quantity in items"}
 	ErrShippingCalcInvalidWeight     = &Err{HTTPCode: http.StatusBadRequest, Code: 230306, Msg: "invalid weight in items"}
 	ErrShippingCalcInvalidPrice      = &Err{HTTPCode: http.StatusBadRequest, Code: 230307, Msg: "invalid price in items"}
+	ErrShippingCalcMarketRequired    = &Err{HTTPCode: http.StatusBadRequest, Code: 230308, Msg: "market_id is required"}
 
 	// ==================== Upload Module (240xxx) ====================
 	ErrUploadUnsupportedFileType = &Err{HTTPCode: http.StatusBadRequest, Code: 240001, Msg: "unsupported file type"}
