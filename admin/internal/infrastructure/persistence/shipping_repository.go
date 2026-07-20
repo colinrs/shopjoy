@@ -23,6 +23,18 @@ type ShippingTemplateRepository interface {
 	SetDefault(ctx context.Context, db *gorm.DB, id int64) error
 	UnsetAllDefault(ctx context.Context, db *gorm.DB) error
 
+	// Market-aware lookups (P1-5). FindDefaultByMarket tries the given market
+	// first, then falls back to market_id=0 (全市场通用) default so the
+	// storefront never has zero template coverage for a configured market.
+	// FindListByMarket with marketID=0 returns all markets.
+	// UnsetAllDefaultByMarket with marketID=0 unsets defaults across every
+	// market (operator override). UnsetAllDefault is kept for backward
+	// compatibility with existing logic callers and behaves like the
+	// marketID=0 variant.
+	FindDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) (*shipping.ShippingTemplate, error)
+	FindListByMarket(ctx context.Context, db *gorm.DB, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
+	UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) error
+
 	// Zone operations
 	CreateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error
 	UpdateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error
@@ -230,6 +242,77 @@ func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB)
 	return db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
 		Where("is_default = ?", true).
 		Update("is_default", false).Error
+}
+
+// FindDefaultByMarket 查找指定市场的默认模板；找不到则回退到 market_id=0 的全市场默认。
+// 该回退逻辑是店铺前端的"安全网"：当某个市场尚未配置独立默认模板时，
+// 必须有一个全市场通用模板兜底，否则会出现运费计算无可用模板的故障。
+// 两层都找不到时返回 code.ErrShippingTemplateNotFound，调用方可通过 errors.Is 识别。
+func (r *shippingTemplateRepo) FindDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) (*shipping.ShippingTemplate, error) {
+	var tmpl shipping.ShippingTemplate
+	// 1. 优先匹配 marketID
+	err := db.WithContext(ctx).
+		Where("market_id = ? AND is_default = ? AND is_active = ?", marketID, true, true).
+		First(&tmpl).Error
+	if err == nil {
+		return &tmpl, nil
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	// 2. 回退到 market_id=0 的全市场默认
+	err = db.WithContext(ctx).
+		Where("market_id = ? AND is_default = ? AND is_active = ?", int64(0), true, true).
+		First(&tmpl).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, code.ErrShippingTemplateNotFound
+		}
+		return nil, err
+	}
+	return &tmpl, nil
+}
+
+// FindListByMarket 按市场过滤列表（marketID=0 表示返回全部市场模板）。
+// 可选过滤：name（模糊匹配）、isActive（精确匹配）。
+// 排序：默认模板在前（is_default DESC），其次 id DESC（新模板在前）。
+func (r *shippingTemplateRepo) FindListByMarket(ctx context.Context, db *gorm.DB, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
+	var templates []*shipping.ShippingTemplate
+	var total int64
+	q := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
+	if marketID > 0 {
+		q = q.Where("market_id = ?", marketID)
+	}
+	if name != "" {
+		q = q.Where("name LIKE ?", "%"+name+"%")
+	}
+	if isActive != nil {
+		q = q.Where("is_active = ?", *isActive)
+	}
+	if err := q.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := q.Order("is_default DESC, id DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&templates).Error
+	return templates, total, err
+}
+
+// UnsetAllDefaultByMarket 按市场范围取消默认模板标记。
+// marketID > 0：只清同一市场的默认模板，保留其他市场的默认不受影响。
+// marketID = 0：清空所有市场的默认模板（运营级整体重置，与 UnsetAllDefault 语义一致）。
+// 之所以新增本方法而非修改 UnsetAllDefault 签名：现有 logic 层
+// （create_shipping_template_logic.go、set_default_template_logic.go）已调用
+// UnsetAllDefault(ctx, tx)；本 Task 不应触碰 logic 层（Task 1.7+ 改写）。
+// 后续 logic 层切到市场维度时调用本方法即可。
+func (r *shippingTemplateRepo) UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) error {
+	q := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
+		Where("is_default = ?", true)
+	if marketID > 0 {
+		q = q.Where("market_id = ?", marketID)
+	}
+	return q.Update("is_default", false).Error
 }
 
 // CreateZone 创建配送区域
