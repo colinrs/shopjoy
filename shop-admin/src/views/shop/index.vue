@@ -182,52 +182,6 @@
             </div>
           </div>
         </el-card>
-
-        <!-- Shipping Settings -->
-        <el-card
-          class="settings-card"
-          shadow="never"
-          style="margin-top: 20px"
-        >
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><Van /></el-icon>
-                {{ $t('shop.shippingSettings') }}
-              </span>
-            </div>
-          </template>
-
-          <el-form
-            :model="shippingForm"
-            label-width="120px"
-          >
-            <el-form-item :label="$t('shop.defaultShippingFee')">
-              <el-input-number
-                v-model="shippingForm.default_shipping_fee"
-                :precision="2"
-                :min="0"
-                :placeholder="$t('shop.defaultShippingFee')"
-                style="width: 200px"
-              />
-              <span style="margin-left: 8px; color: #909399">{{ shippingForm.currency || 'CNY' }}</span>
-            </el-form-item>
-
-            <el-form-item :label="$t('shop.freeShippingThreshold')">
-              <el-input-number
-                v-model="shippingForm.free_shipping_threshold"
-                :precision="2"
-                :min="0"
-                :placeholder="$t('shop.freeShippingThreshold')"
-                style="width: 200px"
-              />
-              <span style="margin-left: 8px; color: #909399">{{ shippingForm.currency || 'CNY' }}</span>
-              <div class="form-tip">
-                {{ $t('shop.freeShippingThresholdTip') }}
-              </div>
-            </el-form-item>
-          </el-form>
-        </el-card>
       </el-col>
 
       <!-- Right Column - Status & Settings -->
@@ -349,58 +303,6 @@
           </el-form>
         </el-card>
 
-        <!-- Payment Settings -->
-        <el-card
-          class="settings-card"
-          shadow="never"
-          style="margin-top: 20px"
-        >
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">
-                <el-icon><CreditCard /></el-icon>
-                {{ $t('shop.paymentSettings') }}
-              </span>
-            </div>
-          </template>
-
-          <el-form
-            :model="paymentForm"
-            label-position="top"
-          >
-            <div class="notify-item">
-              <el-checkbox v-model="paymentForm.stripe_enabled">
-                {{ $t('shop.enableStripe') }}
-              </el-checkbox>
-            </div>
-            <el-form-item
-              v-if="paymentForm.stripe_enabled"
-              :label="$t('shop.stripePublicKey')"
-              style="margin-top: 12px"
-            >
-              <el-input
-                v-model="paymentForm.stripe_public_key"
-                :placeholder="$t('shop.stripePublicKeyPlaceholder')"
-              />
-            </el-form-item>
-            <el-form-item
-              v-if="paymentForm.stripe_enabled"
-              :label="$t('shop.stripeSecretKey')"
-            >
-              <el-input
-                v-model="paymentForm.stripe_secret_key"
-                type="password"
-                :placeholder="$t('shop.stripeSecretKeyPlaceholder')"
-                show-password
-                @change="paymentForm.stripe_secret_key_changed = true"
-              />
-              <div class="form-tip">
-                {{ $t('shop.stripeSecretKeyTip') }}
-              </div>
-            </el-form-item>
-          </el-form>
-        </el-card>
-
         <!-- Quick Actions -->
         <el-card
           class="settings-card"
@@ -460,7 +362,7 @@ import { ElMessage } from 'element-plus'
 import {
   Shop, Phone, Message, Location, Link,
   InfoFilled, Bell, Operation, Document, Share, Check,
-  Clock, Van, CreditCard
+  Clock
 } from '@element-plus/icons-vue'
 import {
   getShopSettings,
@@ -469,10 +371,6 @@ import {
   updateBusinessHours,
   getNotificationSettings,
   updateNotificationSettings,
-  getPaymentSettings,
-  updatePaymentSettings,
-  getShippingSettings,
-  updateShippingSettings,
   type ShopSettings,
   type BusinessHours,
   type NotificationSettings
@@ -512,20 +410,6 @@ const notificationForm = reactive<NotificationSettings>({
   low_stock_threshold: 10,
   refund_requested: true,
   new_review: true
-})
-
-const paymentForm = reactive({
-  stripe_enabled: false,
-  stripe_public_key: '',
-  stripe_secret_key: '',
-  stripe_secret_key_changed: false  // Track if secret key was modified
-})
-
-// Shipping form uses numbers for el-input-number, converts to/from strings for API
-const shippingForm = reactive({
-  free_shipping_threshold: 0,  // Number for UI
-  default_shipping_fee: 0,      // Number for UI
-  currency: 'CNY'
 })
 
 const shopRules = {
@@ -591,19 +475,6 @@ const loadSettings = async () => {
     // Load notification settings
     const notifyData = await getNotificationSettings()
     Object.assign(notificationForm, notifyData)
-
-    // Load payment settings - secret key not returned for security
-    const paymentData = await getPaymentSettings()
-    paymentForm.stripe_enabled = paymentData.stripe_enabled
-    paymentForm.stripe_public_key = paymentData.stripe_public_key || ''
-    paymentForm.stripe_secret_key = ''  // Never returned from backend
-    paymentForm.stripe_secret_key_changed = false
-
-    // Load shipping settings - convert strings to numbers for el-input-number
-    const shippingData = await getShippingSettings()
-    shippingForm.free_shipping_threshold = parseFloat(shippingData.free_shipping_threshold) || 0
-    shippingForm.default_shipping_fee = parseFloat(shippingData.default_shipping_fee) || 0
-    shippingForm.currency = shippingData.currency || 'CNY'
   } catch (error) {
     handleError(error, t('shop.loadFailed'))
   } finally {
@@ -697,22 +568,7 @@ const handleSave = async () => {
     // Save notification settings
     await updateNotificationSettings(notificationForm)
 
-    // Save payment settings - only send secret key if it was changed
-    await updatePaymentSettings({
-      stripe_enabled: paymentForm.stripe_enabled,
-      stripe_secret_key: paymentForm.stripe_secret_key_changed ? paymentForm.stripe_secret_key : undefined
-    })
-
-    // Save shipping settings - convert numbers to strings for API
-    await updateShippingSettings({
-      free_shipping_threshold: shippingForm.free_shipping_threshold.toString(),
-      default_shipping_fee: shippingForm.default_shipping_fee.toString()
-    })
-
     ElMessage.success(t('shop.settingsSaved'))
-
-    // Reset secret key change flag
-    paymentForm.stripe_secret_key_changed = false
 
     // Reload settings to get updated values
     await loadSettings()
@@ -730,7 +586,7 @@ onMounted(() => {
 
 <style scoped>
 .shop-settings {
-  padding: 0;
+  padding: 0 0 88px;
 }
 
 .settings-card {

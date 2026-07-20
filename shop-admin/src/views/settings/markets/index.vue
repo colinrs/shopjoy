@@ -41,7 +41,7 @@
         >
           <template #default="{ row }">
             <div class="market-cell">
-              <span class="market-flag">{{ row.flag || getFlagEmoji(row.code) }}</span>
+              <span class="market-flag">{{ getMarketFlag(row) }}</span>
               <div class="market-details">
                 <p class="market-name">
                   {{ row.name }}
@@ -332,13 +332,13 @@
               <span class="form-hint">{{ t('settings.markets.gstRateDescription') }}</span>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item :label="t('settings.markets.iossEnabled')">
               <el-switch v-model="marketForm.tax_rules.ioss_enabled" />
               <span class="form-hint">{{ t('settings.markets.iossDescription') }}</span>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item :label="t('settings.markets.priceIncludesTax')">
               <el-switch v-model="marketForm.tax_rules.include_tax" />
               <span class="form-hint">{{ t('settings.markets.priceTaxDescription') }}</span>
@@ -467,7 +467,17 @@ const availableMarkets = computed(() => {
 
 const getFlagEmoji = (code: string) => {
   const market = availableMarketsRaw.find(m => m.code === code)
-  return market?.flag || '🌐'
+  // Common code aliases (e.g. backend uses "UK" instead of ISO "GB")
+  const codeAliases: Record<string, string> = { UK: '🇬🇧', EL: '🇬🇷' }
+  return market?.flag || codeAliases[code] || '🌐'
+}
+
+// Resolve the flag to display: ignore corrupted/invalid values (e.g. "??"
+// stored in DB when the emoji failed to persist) and derive from the code.
+const getMarketFlag = (row: Market) => {
+  const flag = (row.flag || '').trim()
+  const isValidFlag = flag && !/^\?+$/.test(flag)
+  return isValidFlag ? flag : getFlagEmoji(row.code)
 }
 
 const resetForm = () => {
@@ -747,12 +757,16 @@ onMounted(() => {
 .tax-config {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   font-size: 12px;
   color: #6B7280;
 }
 
 .tax-config span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 20px;
   padding: 2px 8px;
   background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
   border-radius: 6px;
@@ -764,6 +778,7 @@ onMounted(() => {
   margin-left: 12px;
   font-size: 12px;
   color: #9CA3AF;
+  white-space: nowrap;
 }
 
 /* Tags */
