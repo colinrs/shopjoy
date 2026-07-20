@@ -35,16 +35,6 @@
         <span class="stat-value">{{ template.zone_count }}</span>
         <span class="stat-label">{{ $t('shipping.zoneCount') }}</span>
       </div>
-      <div class="stat-item">
-        <el-icon><Goods /></el-icon>
-        <span class="stat-value">{{ template.product_count }}</span>
-        <span class="stat-label">{{ $t('shipping.productCount') }}</span>
-      </div>
-      <div class="stat-item">
-        <el-icon><Menu /></el-icon>
-        <span class="stat-value">{{ template.category_count }}</span>
-        <span class="stat-label">{{ $t('shipping.categoryCount') }}</span>
-      </div>
     </div>
 
     <!-- Actions -->
@@ -92,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { Location, Goods, Menu, Edit, Delete, Star } from '@element-plus/icons-vue'
+import { Location, Edit, Delete, Star } from '@element-plus/icons-vue'
 import type { ShippingTemplate } from '@/api/shipping'
 
 const props = defineProps<{

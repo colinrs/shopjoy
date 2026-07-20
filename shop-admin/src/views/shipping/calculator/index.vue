@@ -289,9 +289,10 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Location, Goods, Plus, Coin } from '@element-plus/icons-vue'
-import { calculateShippingFee, getRegions, type CalculateResult, type Region } from '@/api/shipping'
+import { calculateShippingFee, getRegions, type CalculateShippingFeeResp, type Region } from '@/api/shipping'
 import { getProductList } from '@/api/product'
 import type { Product } from '@/api/product'
+import { getMarkets, type Market } from '@/api/market'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const { t } = useI18n()
@@ -308,13 +309,16 @@ interface TestItem {
 // State
 const calculating = ref(false)
 const address = reactive({
+  country_code: '',
   province_code: '',
   city_code: '',
   district_code: ''
 })
 
 const testItems = ref<TestItem[]>([])
-const result = ref<CalculateResult | null>(null)
+const result = ref<CalculateShippingFeeResp | null>(null)
+const marketOptions = ref<Market[]>([])
+const selectedMarketId = ref<string>('')
 
 // Region data loaded from API
 const allProvinces = ref<Region[]>([])
@@ -334,7 +338,8 @@ const products = ref<Product[]>([])
 
 // Computed
 const isFormValid = computed(() => {
-  return address.province_code &&
+  return selectedMarketId.value &&
+         address.province_code &&
          address.city_code &&
          address.district_code &&
          testItems.value.length > 0 &&
@@ -358,6 +363,21 @@ const loadProducts = async () => {
   try {
     const data = await getProductList({ page: 1, page_size: 100 })
     products.value = data.list || []
+  } catch (error) {
+    handleError(error, t('shipping.loadProductsFailed'))
+  }
+}
+
+const loadMarkets = async () => {
+  try {
+    const res = await getMarkets()
+    const list = res.list || []
+    marketOptions.value = list
+    // Default to the default market, else first active market
+    const def = list.find(m => m.is_default) || list.find(m => m.is_active) || list[0]
+    if (def) {
+      selectedMarketId.value = def.id
+    }
   } catch (error) {
     handleError(error, t('shipping.loadProductsFailed'))
   }
@@ -440,7 +460,9 @@ const calculateShipping = async () => {
   calculating.value = true
   try {
     const data = await calculateShippingFee({
+      market_id: selectedMarketId.value,
       address: {
+        country_code: address.country_code,
         province_code: address.province_code,
         city_code: address.city_code,
         district_code: address.district_code
@@ -479,6 +501,7 @@ const getFeeTypeLabel = (feeType: string) => {
 
 // Lifecycle
 onMounted(() => {
+  loadMarkets()
   loadProducts()
   loadProvinces()
   addTestItem() // Add one item by default
