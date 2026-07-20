@@ -1,6 +1,7 @@
 package shipping
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 
@@ -63,20 +64,28 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 	if zone.Currency != "USD" {
 		t.Errorf("expected Currency=USD, got %s", zone.Currency)
 	}
+	wantNameI18n := json.RawMessage(`{"en":"US Zone","zh":"美国区域"}`)
+	if !bytes.Equal(zone.NameI18n, wantNameI18n) {
+		t.Errorf("expected NameI18n=%s, got %s", wantNameI18n, zone.NameI18n)
+	}
 	if !zone.Taxable {
 		t.Error("expected Taxable=true")
 	}
 	if !zone.TaxRate.Equal(decimal.NewFromFloat(0.0825)) {
 		t.Errorf("expected TaxRate=0.0825, got %s", zone.TaxRate)
 	}
-	if !zone.TaxIncluded == zone.TaxIncluded {
-		t.Errorf("expected TaxIncluded=false, got %v", zone.TaxIncluded)
+	if zone.TaxIncluded {
+		t.Error("expected TaxIncluded=false")
 	}
 	if !zone.IossApplicable {
 		t.Error("expected IossApplicable=true")
 	}
 	if !zone.RemoteSurcharge.Equal(decimal.NewFromInt(500)) {
 		t.Errorf("expected RemoteSurcharge=500, got %s", zone.RemoteSurcharge)
+	}
+	wantZipPatterns := json.RawMessage(`["99*","88*"]`)
+	if !bytes.Equal(zone.RemoteZipPatterns, wantZipPatterns) {
+		t.Errorf("expected RemoteZipPatterns=%s, got %s", wantZipPatterns, zone.RemoteZipPatterns)
 	}
 	if !zone.FuelSurchargePct.Equal(decimal.NewFromFloat(0.1500)) {
 		t.Errorf("expected FuelSurchargePct=0.1500, got %s", zone.FuelSurchargePct)
