@@ -34,16 +34,22 @@ func (l *GetShippingTemplateLogic) GetShippingTemplate(req *types.GetShippingTem
 		return nil, err
 	}
 
-	// Build response
+	// ─── entity → response field map ───
+	// All ShippingTemplateDetailResp fields must be populated below.
 	return &types.ShippingTemplateDetailResp{
-		ID:        int64(template.ID),
-		Name:      template.Name,
-		IsDefault: template.IsDefault,
-		IsActive:  template.IsActive,
-		Zones:     buildZoneDetails(zones),
-		Mappings:  buildMappingDetails(mappings),
-		CreatedAt: template.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: template.UpdatedAt.Format(time.RFC3339),
+		ID:          int64(template.ID),
+		TenantID:    template.TenantID,
+		MarketID:    template.MarketID,
+		Currency:    template.Currency,
+		CarrierCode: template.CarrierCode,
+		WarehouseID: template.WarehouseID,
+		Name:        template.Name,
+		IsDefault:   template.IsDefault,
+		IsActive:    template.IsActive,
+		Zones:       buildZoneDetails(zones),
+		Mappings:    buildMappingDetails(mappings),
+		CreatedAt:   template.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   template.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }
 

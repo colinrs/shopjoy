@@ -35,8 +35,10 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 
 	// Use transaction to ensure atomicity
 	err = l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
-		// Unset all defaults first
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, tx); err != nil {
+		// Unset all defaults within this template's market first.
+		// (market_id, is_default=true) is a per-market partial unique index,
+		// so we must scope the unset to the same market_id we're about to set.
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, tx, template.MarketID); err != nil {
 			return err
 		}
 
@@ -62,13 +64,18 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 	}
 
 	return &types.ShippingTemplateDetailResp{
-		ID:        int64(template.ID),
-		Name:      template.Name,
-		IsDefault: template.IsDefault,
-		IsActive:  template.IsActive,
-		Zones:     buildZoneDetails(zones),
-		Mappings:  buildMappingDetails(mappings),
-		CreatedAt: template.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: template.UpdatedAt.Format(time.RFC3339),
+		ID:          int64(template.ID),
+		TenantID:    template.TenantID,
+		MarketID:    template.MarketID,
+		Currency:    template.Currency,
+		CarrierCode: template.CarrierCode,
+		WarehouseID: template.WarehouseID,
+		Name:        template.Name,
+		IsDefault:   template.IsDefault,
+		IsActive:    template.IsActive,
+		Zones:       buildZoneDetails(zones),
+		Mappings:    buildMappingDetails(mappings),
+		CreatedAt:   template.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   template.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

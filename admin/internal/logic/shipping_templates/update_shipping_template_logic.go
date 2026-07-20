@@ -32,12 +32,23 @@ func (l *UpdateShippingTemplateLogic) UpdateShippingTemplate(req *types.UpdateSh
 		return nil, err
 	}
 
-	// Update fields if provided
+	// ─── wire → entity field map (anti-silent-drop guard) ───
+	// Every UpdateShippingTemplateReq field must be conditionally assigned below.
+	//   wire.Name         → entity.Name        (only if non-empty)
+	//   wire.IsActive     → entity.IsActive    (only if pointer != nil)
+	//   wire.CarrierCode  → entity.CarrierCode (only if non-empty)
+	//   wire.WarehouseID  → entity.WarehouseID (only if non-zero)
 	if req.Name != "" {
 		template.Name = req.Name
 	}
 	if req.IsActive != nil {
 		template.IsActive = *req.IsActive
+	}
+	if req.CarrierCode != "" {
+		template.CarrierCode = req.CarrierCode
+	}
+	if req.WarehouseID != 0 {
+		template.WarehouseID = req.WarehouseID
 	}
 
 	// Save changes
@@ -51,14 +62,21 @@ func (l *UpdateShippingTemplateLogic) UpdateShippingTemplate(req *types.UpdateSh
 		return nil, err
 	}
 
+	// ─── entity → response field map ───
+	// All response fields on ShippingTemplateDetailResp must be populated below.
 	return &types.ShippingTemplateDetailResp{
-		ID:        int64(template.ID),
-		Name:      template.Name,
-		IsDefault: template.IsDefault,
-		IsActive:  template.IsActive,
-		Zones:     buildZoneDetails(zones),
-		Mappings:  buildMappingDetails(mappings),
-		CreatedAt: template.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: template.UpdatedAt.Format(time.RFC3339),
+		ID:          int64(template.ID),
+		TenantID:    template.TenantID,
+		MarketID:    template.MarketID,
+		Currency:    template.Currency,
+		CarrierCode: template.CarrierCode,
+		WarehouseID: template.WarehouseID,
+		Name:        template.Name,
+		IsDefault:   template.IsDefault,
+		IsActive:    template.IsActive,
+		Zones:       buildZoneDetails(zones),
+		Mappings:    buildMappingDetails(mappings),
+		CreatedAt:   template.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   template.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

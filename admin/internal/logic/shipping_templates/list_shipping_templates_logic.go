@@ -26,28 +26,52 @@ func NewListShippingTemplatesLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippingTemplatesReq) (resp *types.ListShippingTemplatesResp, err error) {
 
-	// Find templates with stats (single query with subqueries)
-	results, total, err := l.svcCtx.ShippingRepo.FindListWithStats(
+	// Market-aware list: marketID=0 means "all markets".
+	templates, total, err := l.svcCtx.ShippingRepo.FindListByMarket(
 		l.ctx, l.svcCtx.DB,
-		req.Name, req.IsActive,
+		req.MarketID,
+		req.Name,
+		req.IsActive,
 		req.Page, req.PageSize,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// Build response
-	list := make([]*types.ShippingTemplateListItem, 0, len(results))
-	for _, t := range results {
+	// Build response. ProductCount/CategoryCount were removed from the wire
+	// (ShippingTemplateListItem no longer carries them), so we don't compute
+	// them — only ZoneCount is required.
+	list := make([]*types.ShippingTemplateListItem, 0, len(templates))
+	for _, t := range templates {
+		zoneCount, zErr := l.svcCtx.ShippingRepo.CountZonesByTemplateID(l.ctx, l.svcCtx.DB, int64(t.ID))
+		if zErr != nil {
+			return nil, zErr
+		}
+
+		// ─── entity → response field map ───
+		//   entity.ID          → resp.ID
+		//   entity.TenantID    → resp.TenantID
+		//   entity.MarketID    → resp.MarketID
+		//   entity.Currency    → resp.Currency
+		//   entity.CarrierCode → resp.CarrierCode
+		//   entity.WarehouseID → resp.WarehouseID
+		//   entity.Name        → resp.Name
+		//   entity.IsDefault   → resp.IsDefault
+		//   entity.IsActive    → resp.IsActive
+		//   repo count         → resp.ZoneCount
+		//   entity.CreatedAt   → resp.CreatedAt
 		list = append(list, &types.ShippingTemplateListItem{
-			ID:            int64(t.ID),
-			Name:          t.Name,
-			IsDefault:     t.IsDefault,
-			IsActive:      t.IsActive,
-			ZoneCount:     int(t.ZoneCount),
-			ProductCount:  int(t.ProductCount),
-			CategoryCount: int(t.CategoryCount),
-			CreatedAt:     t.CreatedAt.Format(time.RFC3339),
+			ID:          int64(t.ID),
+			TenantID:    t.TenantID,
+			MarketID:    t.MarketID,
+			Currency:    t.Currency,
+			CarrierCode: t.CarrierCode,
+			WarehouseID: t.WarehouseID,
+			Name:        t.Name,
+			IsDefault:   t.IsDefault,
+			IsActive:    t.IsActive,
+			ZoneCount:   int(zoneCount),
+			CreatedAt:   t.CreatedAt.Format(time.RFC3339),
 		})
 	}
 

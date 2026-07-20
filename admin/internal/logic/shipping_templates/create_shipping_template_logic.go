@@ -6,6 +6,8 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,17 +27,42 @@ func NewCreateShippingTemplateLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateShippingTemplateReq) (resp *types.CreateShippingTemplateResp, err error) {
-
-	// Create template entity
-	template := &shipping.ShippingTemplate{
-		Name:      req.Name,
-		IsDefault: req.IsDefault,
-		IsActive:  true,
+	// Validate
+	if req.Name == "" {
+		return nil, code.ErrShippingTemplateNameRequired
+	}
+	if req.Currency != "" && !isValidCurrency(req.Currency) {
+		return nil, code.ErrShippingTemplateInvalidCurrency
 	}
 
-	// If setting as default, unset other defaults first
+	// Resolve tenantID from context (REQUIRED for multi-tenancy)
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// Create template entity.
+	// ─── wire → entity field map (anti-silent-drop guard) ───
+	//   wire.Name         → entity.Name        (required)
+	//   wire.IsDefault    → entity.IsDefault   (bool, optional)
+	//   wire.MarketID     → entity.MarketID    (int64, default 0 = 全市场通用)
+	//   wire.Currency     → entity.Currency    (default "CNY")
+	//   wire.CarrierCode  → entity.CarrierCode (default "standard")
+	//   wire.WarehouseID  → entity.WarehouseID (int64, default 0)
+	//   hardcoded         → entity.IsActive    (true)
+	//   from ctx          → entity.TenantID
+	template := &shipping.ShippingTemplate{
+		TenantID:    tenantID,
+		MarketID:    req.MarketID,
+		Currency:    defaultCurrency(req.Currency),
+		CarrierCode: defaultCarrierCode(req.CarrierCode),
+		WarehouseID: req.WarehouseID,
+		Name:        req.Name,
+		IsDefault:   req.IsDefault,
+		IsActive:    true,
+	}
+
+	// If setting as default, unset other defaults in the same market first.
+	// This enforces the (market_id, is_default=true) unique partial index.
 	if req.IsDefault {
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefault(l.ctx, l.svcCtx.DB); err != nil {
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, l.svcCtx.DB, req.MarketID); err != nil {
 			return nil, err
 		}
 	}
@@ -49,4 +76,30 @@ func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateSh
 		ID:   int64(template.ID),
 		Name: template.Name,
 	}, nil
+}
+
+// isValidCurrency checks whether c is one of the supported ISO 4217 currency
+// codes the platform accepts for shipping templates.
+func isValidCurrency(c string) bool {
+	switch c {
+	case "CNY", "USD", "EUR", "GBP", "JPY", "KRW", "SGD", "MYR", "THB", "IDR", "PHP", "VND":
+		return true
+	}
+	return false
+}
+
+// defaultCurrency returns the wire-supplied currency or "CNY" if empty.
+func defaultCurrency(c string) string {
+	if c == "" {
+		return "CNY"
+	}
+	return c
+}
+
+// defaultCarrierCode returns the wire-supplied carrier code or "standard".
+func defaultCarrierCode(c string) string {
+	if c == "" {
+		return "standard"
+	}
+	return c
 }

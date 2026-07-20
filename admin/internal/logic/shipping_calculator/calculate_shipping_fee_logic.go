@@ -2,6 +2,7 @@ package shipping_calculator
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
@@ -26,9 +27,17 @@ func NewCalculateShippingFeeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 	}
 }
 
-func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShippingFeeReq) (resp *types.CalculateShippingFeeResp, err error) {
-	// Get tenant ID from context
+// parsedItem holds the converted (int64, decimal) form of a wire CalculatorItem
+// so we don't repeat strconv.ParseInt at every call site.
+type parsedItem struct {
+	productID int64
+	skuID     int64
+	quantity  int
+	weight    int
+	price     decimal.Decimal
+}
 
+func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShippingFeeReq) (resp *types.CalculateShippingFeeResp, err error) {
 	// Validate input
 	if len(req.Items) == 0 {
 		return nil, code.ErrShippingCalcItemsRequired
@@ -37,7 +46,13 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		return nil, code.ErrShippingCalcAddressRequired
 	}
 
-	// Validate each item
+	// Validate each item + convert wire string IDs to int64 in one pass.
+	parsed := make([]parsedItem, 0, len(req.Items))
+	items := make([]shipping.CalculateItem, 0, len(req.Items))
+	var orderAmount decimal.Decimal
+	var totalWeight int
+	var totalQuantity int
+
 	for _, item := range req.Items {
 		if item.Quantity <= 0 {
 			return nil, code.ErrShippingCalcInvalidQuantity
@@ -45,33 +60,47 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		if item.Weight <= 0 {
 			return nil, code.ErrShippingCalcInvalidWeight
 		}
-		if item.Price == "" || parseAmount(item.Price).IsNegative() {
+		price := parseAmount(item.Price)
+		if item.Price == "" || price.IsNegative() {
 			return nil, code.ErrShippingCalcInvalidPrice
 		}
-	}
 
-	// Convert calculator items to calculate items
-	items := make([]shipping.CalculateItem, 0, len(req.Items))
-	var orderAmount decimal.Decimal
-	var totalWeight int
-	var totalQuantity int
+		// wire.ProductID is a JSON string of int64 — must parse before use.
+		productID, perr := strconv.ParseInt(item.ProductID, 10, 64)
+		if perr != nil || productID <= 0 {
+			return nil, code.ErrSharedInvalidParam
+		}
+		// wire.SKUID is optional; default to 0 if empty.
+		var skuID int64
+		if item.SKUID != "" {
+			skuID, perr = strconv.ParseInt(item.SKUID, 10, 64)
+			if perr != nil || skuID < 0 {
+				return nil, code.ErrSharedInvalidParam
+			}
+		}
 
-	for _, item := range req.Items {
-		price := parseAmount(item.Price)
+		pi := parsedItem{
+			productID: productID,
+			skuID:     skuID,
+			quantity:  item.Quantity,
+			weight:    item.Weight,
+			price:     price,
+		}
+		parsed = append(parsed, pi)
 		items = append(items, shipping.CalculateItem{
-			ProductID: item.ProductID,
-			SKUID:     item.SKUID,
-			Quantity:  item.Quantity,
-			Weight:    item.Weight,
-			Price:     price,
+			ProductID: pi.productID,
+			SKUID:     pi.skuID,
+			Quantity:  pi.quantity,
+			Weight:    pi.weight,
+			Price:     pi.price,
 		})
-		orderAmount = orderAmount.Add(price.Mul(decimal.NewFromInt(int64(item.Quantity))))
-		totalWeight += item.Weight * item.Quantity
-		totalQuantity += item.Quantity
+		orderAmount = orderAmount.Add(pi.price.Mul(decimal.NewFromInt(int64(pi.quantity))))
+		totalWeight += pi.weight * pi.quantity
+		totalQuantity += pi.quantity
 	}
 
-	// Find template using priority: Product > Category > Default
-	template, zone := l.findTemplateForItems(req.Address.CityCode, req.Items)
+	// Find template using priority: Product > Default (market-aware)
+	template, zone := l.findTemplateForItems(req.MarketID, req.Address.CityCode, parsed)
 	if template == nil || zone == nil {
 		return nil, code.ErrShippingTemplateNotFound
 	}
@@ -81,11 +110,10 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 
 	// Build response
 	return &types.CalculateShippingFeeResp{
-		ShippingFee:  formatAmount(shippingFee),
-		Currency:     "CNY",
-		TemplateID:   int64(template.ID),
-		TemplateName: template.Name,
-		ZoneName:     zone.Name,
+		ShippingFee: formatAmount(shippingFee),
+		Currency:    template.Currency,
+		TemplateID:  int64(template.ID),
+		ZoneName:    zone.Name,
 		FeeDetail: types.FeeCalculationDetail{
 			FeeType:          string(zone.FeeType),
 			FirstUnit:        zone.FirstUnit,
@@ -98,11 +126,12 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	}, nil
 }
 
-// findTemplateForItems finds the appropriate template and zone using priority: Product > Category > Default
-func (l *CalculateShippingFeeLogic) findTemplateForItems(cityCode string, reqItems []types.CalculatorItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
+// findTemplateForItems finds the appropriate template and zone using priority: Product > Default.
+// marketID scopes the default-template lookup via FindDefaultByMarket (with fallback to marketID=0).
+func (l *CalculateShippingFeeLogic) findTemplateForItems(marketID int64, cityCode string, items []parsedItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
 	// Priority 1: Check for product-specific template
-	for _, item := range reqItems {
-		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.ProductID)
+	for _, item := range items {
+		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.productID)
 		if err == nil && mapping != nil {
 			template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, mapping.TemplateID)
 			if err == nil && template != nil && template.IsActive {
@@ -114,12 +143,8 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(cityCode string, reqIte
 		}
 	}
 
-	// Priority 2: Check for category-specific template
-	// Note: This would require looking up product categories from ProductRepo
-	// For now, we skip this step as products would need category info
-
-	// Priority 3: Use default template
-	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefault(l.ctx, l.svcCtx.DB)
+	// Priority 2: Use market-scoped default template (falls back to marketID=0).
+	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefaultByMarket(l.ctx, l.svcCtx.DB, marketID)
 	if err == nil && defaultTemplate != nil {
 		zone := l.findZoneForCity(int64(defaultTemplate.ID), cityCode)
 		if zone != nil {
@@ -149,7 +174,7 @@ func (l *CalculateShippingFeeLogic) findZoneForCity(templateID int64, cityCode s
 	return nil
 }
 
-// parseAmount converts string amount to int64 cents
+// parseAmount converts string amount to decimal.Decimal; empty/invalid → 0.
 func parseAmount(s string) decimal.Decimal {
 	if s == "" {
 		return decimal.Zero
@@ -161,7 +186,7 @@ func parseAmount(s string) decimal.Decimal {
 	return d
 }
 
-// formatAmount converts decimal.Decimal to string
+// formatAmount converts decimal.Decimal to 2-decimal string.
 func formatAmount(amount decimal.Decimal) string {
 	return amount.StringFixed(2)
 }
