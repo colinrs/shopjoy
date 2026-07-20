@@ -114,7 +114,7 @@ type ShippingZone struct {
 	MarketID            int64           `gorm:"column:market_id;not null;default:0;index"` // 冗余便于查询
 	Currency            string          `gorm:"column:currency;size:3;not null;default:'CNY'"`
 	Name                string          `gorm:"column:name;size:100;not null"`
-	NameI18n            json.RawMessage `gorm:"column:name_i18n;type:jsonb"` // P1-10 多语言名称（Task 1.3 替换为 StringI18n 值对象）
+	NameI18n            StringI18n      `gorm:"column:name_i18n;type:jsonb"` // P1-10 多语言名称
 	Regions             Regions         `gorm:"column:regions;type:jsonb;not null"`
 	FeeType             FeeType         `gorm:"column:fee_type;size:20;not null"`
 	FirstUnit           int             `gorm:"column:first_unit;not null;default:1"`
@@ -128,7 +128,7 @@ type ShippingZone struct {
 	TaxIncluded         bool            `gorm:"column:tax_included;not null;default:false"`                   // P1-6 价格含税
 	IossApplicable      bool            `gorm:"column:ioss_applicable;not null;default:false"`                // P1-6 欧盟 IOSS 适用
 	RemoteSurcharge     decimal.Decimal `gorm:"column:remote_surcharge;type:decimal(19,4);not null;default:0"` // P1-7 偏远地区附加费
-	RemoteZipPatterns   json.RawMessage `gorm:"column:remote_zip_patterns;type:jsonb"`                         // P1-7 偏远地区邮编匹配（Task 1.3 替换为 StringArray 值对象）
+	RemoteZipPatterns   StringArray     `gorm:"column:remote_zip_patterns;type:jsonb"`                         // P1-7 偏远地区邮编匹配
 	FuelSurchargePct    decimal.Decimal `gorm:"column:fuel_surcharge_pct;type:decimal(5,4);not null;default:0"` // P1-8 燃油附加费比例
 	VolumetricDivisor   int             `gorm:"column:volumetric_divisor;not null;default:5000"`              // P1-9 体积重除数（cm³/kg，默认 5000）
 	Sort                int             `gorm:"column:sort;not null;default:0"`

@@ -1,8 +1,7 @@
 package shipping
 
 import (
-	"bytes"
-	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/shopspring/decimal"
@@ -47,7 +46,7 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 		MarketID:            2,
 		Currency:            "USD",
 		Name:                "US Zone",
-		NameI18n:            json.RawMessage(`{"en":"US Zone","zh":"美国区域"}`),
+		NameI18n:            StringI18n{"en": "US Zone", "zh": "美国区域"},
 		Regions:             Regions{"US-NY", "US-CA"},
 		FeeType:             FeeTypeByWeight,
 		Taxable:             true,
@@ -55,7 +54,7 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 		TaxIncluded:         false,
 		IossApplicable:      true,
 		RemoteSurcharge:     decimal.NewFromInt(500),
-		RemoteZipPatterns:   json.RawMessage(`["99*","88*"]`),
+		RemoteZipPatterns:   StringArray{"99*", "88*"},
 		FuelSurchargePct:    decimal.NewFromFloat(0.1500),
 		VolumetricDivisor:   6000,
 		Sort:                5,
@@ -64,9 +63,9 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 	if zone.Currency != "USD" {
 		t.Errorf("expected Currency=USD, got %s", zone.Currency)
 	}
-	wantNameI18n := json.RawMessage(`{"en":"US Zone","zh":"美国区域"}`)
-	if !bytes.Equal(zone.NameI18n, wantNameI18n) {
-		t.Errorf("expected NameI18n=%s, got %s", wantNameI18n, zone.NameI18n)
+	wantNameI18n := StringI18n{"en": "US Zone", "zh": "美国区域"}
+	if !reflect.DeepEqual(zone.NameI18n, wantNameI18n) {
+		t.Errorf("expected NameI18n=%v, got %v", wantNameI18n, zone.NameI18n)
 	}
 	if !zone.Taxable {
 		t.Error("expected Taxable=true")
@@ -83,9 +82,9 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 	if !zone.RemoteSurcharge.Equal(decimal.NewFromInt(500)) {
 		t.Errorf("expected RemoteSurcharge=500, got %s", zone.RemoteSurcharge)
 	}
-	wantZipPatterns := json.RawMessage(`["99*","88*"]`)
-	if !bytes.Equal(zone.RemoteZipPatterns, wantZipPatterns) {
-		t.Errorf("expected RemoteZipPatterns=%s, got %s", wantZipPatterns, zone.RemoteZipPatterns)
+	wantZipPatterns := StringArray{"99*", "88*"}
+	if !reflect.DeepEqual(zone.RemoteZipPatterns, wantZipPatterns) {
+		t.Errorf("expected RemoteZipPatterns=%v, got %v", wantZipPatterns, zone.RemoteZipPatterns)
 	}
 	if !zone.FuelSurchargePct.Equal(decimal.NewFromFloat(0.1500)) {
 		t.Errorf("expected FuelSurchargePct=0.1500, got %s", zone.FuelSurchargePct)
