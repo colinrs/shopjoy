@@ -325,31 +325,42 @@ type BusinessHours struct {
 }
 
 type CalculateShippingFeeReq struct {
-	Address CalculatorAddress `json:"address"`
-	Items   []CalculatorItem  `json:"items"`
+	MarketID int64             `json:"market_id,string"` // 多市场必填
+	Address  CalculatorAddress `json:"address"`
+	Items    []CalculatorItem  `json:"items"`
 }
 
 type CalculateShippingFeeResp struct {
-	ShippingFee  string               `json:"shipping_fee"`
-	Currency     string               `json:"currency"`
-	TemplateID   int64                `json:"template_id,string"`
-	TemplateName string               `json:"template_name"`
-	ZoneName     string               `json:"zone_name"`
-	FeeDetail    FeeCalculationDetail `json:"fee_detail"`
+	ShippingFee      string               `json:"shipping_fee"` // 不含税基础运费
+	Tax              string               `json:"tax,optional"` // 税费
+	Total            string               `json:"total"`        // 含税总价
+	Currency         string               `json:"currency"`
+	PriceIncludesTax bool                 `json:"price_includes_tax"` // 展示口径
+	TemplateID       int64                `json:"template_id,string"`
+	TemplateName     string               `json:"template_name"`
+	ZoneName         string               `json:"zone_name"`
+	CarrierCode      string               `json:"carrier_code"`
+	EstimatedDays    int                  `json:"estimated_days,optional"` // P2-12
+	FeeDetail        FeeCalculationDetail `json:"fee_detail"`
 }
 
 type CalculatorAddress struct {
-	ProvinceCode string `json:"province_code"`
-	CityCode     string `json:"city_code"`
-	DistrictCode string `json:"district_code"`
+	CountryCode  string `json:"country_code"`           // ISO 3166-1 alpha-2 (REQUIRED)
+	ProvinceCode string `json:"province_code,optional"` // state/province
+	CityCode     string `json:"city_code"`              // 兼容旧中国城市码
+	DistrictCode string `json:"district_code,optional"`
+	PostalCode   string `json:"postal_code,optional"` // 邮编（P1-7 偏远判定）
 }
 
 type CalculatorItem struct {
-	ProductID int64  `json:"product_id,string"`
-	SKUID     int64  `json:"sku_id,optional,string"`
+	ProductID string `json:"product_id"`
+	SKUID     string `json:"sku_id,optional"`
 	Quantity  int    `json:"quantity"`
-	Weight    int    `json:"weight"` // grams
-	Price     string `json:"price"`  // unit price
+	Weight    int    `json:"weight"`          // 单位：克（统一）
+	Length    int    `json:"length,optional"` // mm（P1-9 体积）
+	Width     int    `json:"width,optional"`  // mm
+	Height    int    `json:"height,optional"` // mm
+	Price     string `json:"price"`           // decimal string
 }
 
 type CancelOrderReq struct {
@@ -725,8 +736,12 @@ type CreateShipmentResp struct {
 }
 
 type CreateShippingTemplateReq struct {
-	Name      string `json:"name"`
-	IsDefault bool   `json:"is_default,optional"`
+	MarketID    int64  `json:"market_id,string,optional"` // 默认 0
+	Currency    string `json:"currency,optional"`         // 默认 CNY
+	CarrierCode string `json:"carrier_code,optional"`     // 默认 standard
+	WarehouseID int64  `json:"warehouse_id,string,optional"`
+	Name        string `json:"name"`
+	IsDefault   bool   `json:"is_default,optional"`
 }
 
 type CreateShippingTemplateResp struct {
@@ -735,17 +750,27 @@ type CreateShippingTemplateResp struct {
 }
 
 type CreateShippingZoneReq struct {
-	TemplateID          int64    `path:"template_id"`
-	Name                string   `json:"name"`
-	Regions             []string `json:"regions"`
-	FeeType             string   `json:"fee_type"` // fixed, by_count, by_weight, free
-	FirstUnit           int      `json:"first_unit,optional"`
-	FirstFee            string   `json:"first_fee,optional"`
-	AdditionalUnit      int      `json:"additional_unit,optional"`
-	AdditionalFee       string   `json:"additional_fee,optional"`
-	FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
-	FreeThresholdCount  int      `json:"free_threshold_count,optional"`
-	Sort                int      `json:"sort,optional"`
+	TemplateID          int64           `path:"template_id"`
+	Currency            string          `json:"currency,optional"`
+	Name                string          `json:"name"`
+	NameI18n            []NameI18nEntry `json:"name_i18n,optional"`
+	Regions             []string        `json:"regions"`
+	FeeType             string          `json:"fee_type"` // fixed|by_count|by_weight|by_volume|free
+	FirstUnit           int             `json:"first_unit"`
+	FirstFee            string          `json:"first_fee"`
+	AdditionalUnit      int             `json:"additional_unit"`
+	AdditionalFee       string          `json:"additional_fee"`
+	FreeThresholdAmount string          `json:"free_threshold_amount,optional"`
+	FreeThresholdCount  int             `json:"free_threshold_count,optional"`
+	Taxable             bool            `json:"taxable,optional"`
+	TaxRate             string          `json:"tax_rate,optional"`
+	TaxIncluded         bool            `json:"tax_included,optional"`
+	IossApplicable      bool            `json:"ioss_applicable,optional"`
+	RemoteSurcharge     string          `json:"remote_surcharge,optional"`
+	RemoteZipPatterns   []string        `json:"remote_zip_patterns,optional"`
+	FuelSurchargePct    string          `json:"fuel_surcharge_pct,optional"`
+	VolumetricDivisor   int             `json:"volumetric_divisor,optional"`
+	Sort                int             `json:"sort,optional"`
 }
 
 type CreateTemplateMappingReq struct {
@@ -1005,8 +1030,11 @@ type FeeCalculationDetail struct {
 	FirstFee         string `json:"first_fee"`
 	AdditionalUnit   int    `json:"additional_unit"`
 	AdditionalFee    string `json:"additional_fee"`
-	CalculatedWeight int    `json:"calculated_weight,optional"`
-	CalculatedUnits  int    `json:"calculated_units,optional"`
+	CalculatedWeight int    `json:"calculated_weight"` // 计费重（实重 or 体积重）
+	VolumetricWeight int    `json:"volumetric_weight,optional"`
+	CalculatedUnits  int    `json:"calculated_units"`
+	AppliedSurcharge string `json:"applied_surcharge,optional"` // 总附加费
+	AppliedTax       string `json:"applied_tax,optional"`       // 税费
 }
 
 type FulfillmentOverview struct {
@@ -1715,10 +1743,11 @@ type ListShipmentsResp struct {
 }
 
 type ListShippingTemplatesReq struct {
-	Page     int    `form:"page,default=1"`
-	PageSize int    `form:"page_size,default=20"`
+	MarketID int64  `form:"market_id,string,optional"`
 	Name     string `form:"name,optional"`
 	IsActive *bool  `form:"is_active,optional"`
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
 }
 
 type ListShippingTemplatesResp struct {
@@ -1872,6 +1901,11 @@ type MarketResponse struct {
 type MoveCategoryReq struct {
 	ID          int64 `path:"id"`
 	NewParentID int64 `json:"new_parent_id,string"`
+}
+
+type NameI18nEntry struct {
+	Locale string `json:"locale"` // en-US, ja-JP, ...
+	Name   string `json:"name"`
 }
 
 type NotificationSettings struct {
@@ -2720,40 +2754,60 @@ type ShippingSettings struct {
 }
 
 type ShippingTemplateDetailResp struct {
-	ID        int64                    `json:"id,string"`
-	Name      string                   `json:"name"`
-	IsDefault bool                     `json:"is_default"`
-	IsActive  bool                     `json:"is_active"`
-	Zones     []*ShippingZoneDetail    `json:"zones"`
-	Mappings  []*TemplateMappingDetail `json:"mappings"`
-	CreatedAt string                   `json:"created_at"`
-	UpdatedAt string                   `json:"updated_at"`
+	ID          int64                    `json:"id,string"`
+	TenantID    int64                    `json:"tenant_id,string"`
+	MarketID    int64                    `json:"market_id,string"`
+	Currency    string                   `json:"currency"`
+	CarrierCode string                   `json:"carrier_code"`
+	WarehouseID int64                    `json:"warehouse_id,string"`
+	Name        string                   `json:"name"`
+	IsDefault   bool                     `json:"is_default"`
+	IsActive    bool                     `json:"is_active"`
+	Zones       []*ShippingZoneDetail    `json:"zones"`
+	Mappings    []*TemplateMappingDetail `json:"mappings"`
+	CreatedAt   string                   `json:"created_at"`
+	UpdatedAt   string                   `json:"updated_at"`
 }
 
 type ShippingTemplateListItem struct {
-	ID            int64  `json:"id,string"`
-	Name          string `json:"name"`
-	IsDefault     bool   `json:"is_default"`
-	IsActive      bool   `json:"is_active"`
-	ZoneCount     int    `json:"zone_count"`
-	ProductCount  int    `json:"product_count"`
-	CategoryCount int    `json:"category_count"`
-	CreatedAt     string `json:"created_at"`
+	ID          int64  `json:"id,string"`
+	TenantID    int64  `json:"tenant_id,string"`
+	MarketID    int64  `json:"market_id,string"`    // 0=全市场通用
+	Currency    string `json:"currency"`            // ISO 4217
+	CarrierCode string `json:"carrier_code"`        // 物流商代码
+	WarehouseID int64  `json:"warehouse_id,string"` // 仓库ID
+	Name        string `json:"name"`
+	IsDefault   bool   `json:"is_default"`
+	IsActive    bool   `json:"is_active"`
+	ZoneCount   int    `json:"zone_count"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type ShippingZoneDetail struct {
-	ID                  int64    `json:"id,string"`
-	TemplateID          int64    `json:"template_id,string"`
-	Name                string   `json:"name"`
-	Regions             []string `json:"regions"`               // City codes
-	FeeType             string   `json:"fee_type"`              // fixed, by_count, by_weight, free
-	FirstUnit           int      `json:"first_unit"`            // First unit (count or grams)
-	FirstFee            string   `json:"first_fee"`             // First fee (yuan)
-	AdditionalUnit      int      `json:"additional_unit"`       // Additional unit
-	AdditionalFee       string   `json:"additional_fee"`        // Additional fee (yuan)
-	FreeThresholdAmount string   `json:"free_threshold_amount"` // Free shipping threshold amount, 0 = disabled
-	FreeThresholdCount  int      `json:"free_threshold_count"`  // Free shipping threshold count, 0 = disabled
-	Sort                int      `json:"sort"`
+	ID                  int64           `json:"id,string"`
+	TenantID            int64           `json:"tenant_id,string"`
+	TemplateID          int64           `json:"template_id,string"`
+	MarketID            int64           `json:"market_id,string"`
+	Currency            string          `json:"currency"`
+	Name                string          `json:"name"`
+	NameI18n            []NameI18nEntry `json:"name_i18n,optional"` // P1-10
+	Regions             []string        `json:"regions"`
+	FeeType             string          `json:"fee_type"` // fixed|by_count|by_weight|by_volume|free
+	FirstUnit           int             `json:"first_unit"`
+	FirstFee            string          `json:"first_fee"` // decimal string
+	AdditionalUnit      int             `json:"additional_unit"`
+	AdditionalFee       string          `json:"additional_fee"`
+	FreeThresholdAmount string          `json:"free_threshold_amount"`
+	FreeThresholdCount  int             `json:"free_threshold_count"`
+	Taxable             bool            `json:"taxable"`             // P1-6
+	TaxRate             string          `json:"tax_rate"`            // P1-6
+	TaxIncluded         bool            `json:"tax_included"`        // P1-6
+	IossApplicable      bool            `json:"ioss_applicable"`     // P1-6
+	RemoteSurcharge     string          `json:"remote_surcharge"`    // P1-7
+	RemoteZipPatterns   []string        `json:"remote_zip_patterns"` // P1-7
+	FuelSurchargePct    string          `json:"fuel_surcharge_pct"`  // P1-8
+	VolumetricDivisor   int             `json:"volumetric_divisor"`  // P1-9
+	Sort                int             `json:"sort"`
 }
 
 type ShopSettings struct {
@@ -3245,23 +3299,34 @@ type UpdateShippingSettingsRequest struct {
 }
 
 type UpdateShippingTemplateReq struct {
-	ID       int64  `path:"id"`
-	Name     string `json:"name,optional"`
-	IsActive *bool  `json:"is_active,optional"`
+	ID          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	IsActive    *bool  `json:"is_active,optional"`
+	CarrierCode string `json:"carrier_code,optional"`
+	WarehouseID int64  `json:"warehouse_id,string,optional"`
 }
 
 type UpdateShippingZoneReq struct {
-	ID                  int64    `path:"id"`
-	Name                string   `json:"name,optional"`
-	Regions             []string `json:"regions,optional"`
-	FeeType             string   `json:"fee_type,optional"`
-	FirstUnit           int      `json:"first_unit,optional"`
-	FirstFee            string   `json:"first_fee,optional"`
-	AdditionalUnit      int      `json:"additional_unit,optional"`
-	AdditionalFee       string   `json:"additional_fee,optional"`
-	FreeThresholdAmount string   `json:"free_threshold_amount,optional"`
-	FreeThresholdCount  int      `json:"free_threshold_count,optional"`
-	Sort                int      `json:"sort,optional"`
+	ID                  int64           `path:"id"`
+	Name                string          `json:"name,optional"`
+	NameI18n            []NameI18nEntry `json:"name_i18n,optional"`
+	Regions             []string        `json:"regions,optional"`
+	FeeType             string          `json:"fee_type,optional"`
+	FirstUnit           int             `json:"first_unit,optional"`
+	FirstFee            string          `json:"first_fee,optional"`
+	AdditionalUnit      int             `json:"additional_unit,optional"`
+	AdditionalFee       string          `json:"additional_fee,optional"`
+	FreeThresholdAmount string          `json:"free_threshold_amount,optional"`
+	FreeThresholdCount  int             `json:"free_threshold_count,optional"`
+	Taxable             bool            `json:"taxable,optional"`
+	TaxRate             string          `json:"tax_rate,optional"`
+	TaxIncluded         bool            `json:"tax_included,optional"`
+	IossApplicable      bool            `json:"ioss_applicable,optional"`
+	RemoteSurcharge     string          `json:"remote_surcharge,optional"`
+	RemoteZipPatterns   []string        `json:"remote_zip_patterns,optional"`
+	FuelSurchargePct    string          `json:"fuel_surcharge_pct,optional"`
+	VolumetricDivisor   int             `json:"volumetric_divisor,optional"`
+	Sort                int             `json:"sort,optional"`
 }
 
 type UpdateShopSettingsRequest struct {
