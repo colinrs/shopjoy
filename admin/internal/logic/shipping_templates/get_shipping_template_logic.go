@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
+	"github.com/colinrs/shopjoy/admin/internal/logic/shipping_zones"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/utils"
@@ -53,13 +54,46 @@ func (l *GetShippingTemplateLogic) GetShippingTemplate(req *types.GetShippingTem
 	}, nil
 }
 
+// buildZoneDetails converts entity ShippingZone → wire ShippingZoneDetail.
+// Must populate ALL 22 ShippingZoneDetail fields (Task 1.7 review found
+// this function silently dropped 10 new fields added in Tasks 1.2/1.6).
+//
+// ─── entity → response field map (must include all 22 fields) ───
+//   entity.ID                  → resp.ID
+//   entity.TenantID            → resp.TenantID            (P1-2)
+//   entity.TemplateID          → resp.TemplateID
+//   entity.MarketID            → resp.MarketID            (P1-5)
+//   entity.Currency            → resp.Currency            (P1-2)
+//   entity.Name                → resp.Name
+//   entity.NameI18n            → resp.NameI18n            (P1-10, via fromStringI18n)
+//   entity.Regions             → resp.Regions
+//   entity.FeeType             → resp.FeeType
+//   entity.FirstUnit           → resp.FirstUnit
+//   entity.FirstFee            → resp.FirstFee            (decimal → string)
+//   entity.AdditionalUnit      → resp.AdditionalUnit
+//   entity.AdditionalFee       → resp.AdditionalFee       (decimal → string)
+//   entity.FreeThresholdAmount → resp.FreeThresholdAmount (decimal → string)
+//   entity.FreeThresholdCount  → resp.FreeThresholdCount
+//   entity.Taxable             → resp.Taxable             (P1-6)
+//   entity.TaxRate             → resp.TaxRate             (P1-6, decimal → string)
+//   entity.TaxIncluded         → resp.TaxIncluded         (P1-6)
+//   entity.IossApplicable      → resp.IossApplicable      (P1-6)
+//   entity.RemoteSurcharge     → resp.RemoteSurcharge     (P1-7, decimal → string)
+//   entity.RemoteZipPatterns   → resp.RemoteZipPatterns   (P1-7)
+//   entity.FuelSurchargePct    → resp.FuelSurchargePct    (P1-8, decimal → string)
+//   entity.VolumetricDivisor   → resp.VolumetricDivisor   (P1-9)
+//   entity.Sort                → resp.Sort
 func buildZoneDetails(zones []*shipping.ShippingZone) []*types.ShippingZoneDetail {
 	result := make([]*types.ShippingZoneDetail, 0, len(zones))
 	for _, z := range zones {
 		result = append(result, &types.ShippingZoneDetail{
 			ID:                  int64(z.ID),
+			TenantID:            z.TenantID,
 			TemplateID:          z.TemplateID,
+			MarketID:            z.MarketID,
+			Currency:            z.Currency,
 			Name:                z.Name,
+			NameI18n:            shipping_zones.FromStringI18n(z.NameI18n),
 			Regions:             z.Regions,
 			FeeType:             string(z.FeeType),
 			FirstUnit:           z.FirstUnit,
@@ -68,6 +102,14 @@ func buildZoneDetails(zones []*shipping.ShippingZone) []*types.ShippingZoneDetai
 			AdditionalFee:       utils.FormatAmount(z.AdditionalFee),
 			FreeThresholdAmount: utils.FormatAmount(z.FreeThresholdAmount),
 			FreeThresholdCount:  z.FreeThresholdCount,
+			Taxable:             z.Taxable,
+			TaxRate:             utils.FormatAmount(z.TaxRate),
+			TaxIncluded:         z.TaxIncluded,
+			IossApplicable:      z.IossApplicable,
+			RemoteSurcharge:     utils.FormatAmount(z.RemoteSurcharge),
+			RemoteZipPatterns:   z.RemoteZipPatterns,
+			FuelSurchargePct:    utils.FormatAmount(z.FuelSurchargePct),
+			VolumetricDivisor:   z.VolumetricDivisor,
 			Sort:                z.Sort,
 		})
 	}

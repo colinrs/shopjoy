@@ -18,13 +18,28 @@ const (
 	FeeTypeFixed    FeeType = "fixed"     // 固定运费
 	FeeTypeByCount  FeeType = "by_count"  // 按件计费
 	FeeTypeByWeight FeeType = "by_weight" // 按重量计费
+	FeeTypeByVolume FeeType = "by_volume" // P1-9 按体积重计费（cm³ / VolumetricDivisor）
 	FeeTypeFree     FeeType = "free"      // 免运费
 )
 
-// IsValid 检查计费类型是否有效
+// DefaultVolumetricDivisor 默认体积重除数（cm³/kg），与行业惯例 5000 一致。
+const DefaultVolumetricDivisor = 5000
+
+// IsValid 检查计费类型是否有效（兼容旧逻辑，不含 by_volume）
 func (f FeeType) IsValid() bool {
 	switch f {
 	case FeeTypeFixed, FeeTypeByCount, FeeTypeByWeight, FeeTypeFree:
+		return true
+	default:
+		return false
+	}
+}
+
+// IsValidV2 检查计费类型是否有效（含 P1-9 by_volume）。
+// Logic 层 wire → entity 校验使用此方法。
+func (f FeeType) IsValidV2() bool {
+	switch f {
+	case FeeTypeFixed, FeeTypeByCount, FeeTypeByWeight, FeeTypeByVolume, FeeTypeFree:
 		return true
 	default:
 		return false
@@ -147,7 +162,7 @@ func (z *ShippingZone) Validate() error {
 	if len(z.Regions) == 0 {
 		return code.ErrShippingZoneRegionsRequired
 	}
-	if !z.FeeType.IsValid() {
+	if !z.FeeType.IsValidV2() {
 		return code.ErrShippingZoneInvalidFeeType
 	}
 	// 非免运费类型需要配置运费
@@ -164,6 +179,10 @@ func (z *ShippingZone) Validate() error {
 		if z.AdditionalFee.IsNegative() {
 			return code.ErrShippingZoneFeeConfigRequired
 		}
+	}
+	// P1-9 by_volume 类型必须设置 VolumetricDivisor > 0
+	if z.FeeType == FeeTypeByVolume && z.VolumetricDivisor <= 0 {
+		return code.ErrShippingZoneFeeConfigRequired
 	}
 	return nil
 }
