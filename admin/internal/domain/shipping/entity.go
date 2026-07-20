@@ -63,10 +63,14 @@ func (r *Regions) Scan(value any) error {
 // ShippingTemplate 运费模板实体
 type ShippingTemplate struct {
 	application.Model
-	TenantID  int64  `gorm:"column:tenant_id;not null;index"`
-	Name      string `gorm:"column:name;size:100;not null"`
-	IsDefault bool   `gorm:"column:is_default;not null;default:false;index"`
-	IsActive  bool   `gorm:"column:is_active;not null;default:true"`
+	TenantID    int64  `gorm:"column:tenant_id;not null;index"`
+	MarketID    int64  `gorm:"column:market_id;not null;default:0;index:idx_market_default"` // 0=全市场通用
+	Currency    string `gorm:"column:currency;size:3;not null;default:'CNY'"`
+	Name        string `gorm:"column:name;size:100;not null"`
+	IsDefault   bool   `gorm:"column:is_default;not null;default:false;index:idx_market_default"`
+	IsActive    bool   `gorm:"column:is_active;not null;default:true"`
+	CarrierCode string `gorm:"column:carrier_code;size:50;not null;default:'standard'"` // P2 预留
+	WarehouseID int64  `gorm:"column:warehouse_id;not null;default:0;index"`             // P2 预留
 }
 
 // TableName 返回表名
