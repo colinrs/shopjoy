@@ -48,12 +48,10 @@ type ShippingTemplateRepository interface {
 	FindZoneByID(ctx context.Context, db *gorm.DB, id int64) (*shipping.ShippingZone, error)
 	FindZonesByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) ([]*shipping.ShippingZone, error)
 	ReorderZones(ctx context.Context, db *gorm.DB, templateID int64, zoneIDs []int64) error
-	FindZoneByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]*shipping.ShippingZone, error)
 
 	// Zone region operations (for indexed lookup)
 	CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error
 	DeleteZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64) error
-	FindZoneIDsByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]int64, error)
 
 	// Mapping operations
 	CreateMapping(ctx context.Context, db *gorm.DB, mapping *shipping.ShippingTemplateMapping) error
@@ -421,27 +419,6 @@ func (r *shippingTemplateRepo) ReorderZones(ctx context.Context, db *gorm.DB, te
 	})
 }
 
-// FindZoneByCityCode 根据城市代码查找匹配的配送区域
-// Uses the junction table for efficient indexed lookup
-func (r *shippingTemplateRepo) FindZoneByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]*shipping.ShippingZone, error) {
-	// First find zone IDs via junction table (indexed)
-	zoneIDs, err := r.FindZoneIDsByCityCode(ctx, db, cityCode)
-	if err != nil {
-		return nil, err
-	}
-	if len(zoneIDs) == 0 {
-		return []*shipping.ShippingZone{}, nil
-	}
-
-	// Then fetch zones
-	var zones []*shipping.ShippingZone
-	err = db.WithContext(ctx).
-		Where("id IN ?", zoneIDs).
-		Order("sort ASC").
-		Find(&zones).Error
-	return zones, err
-}
-
 // CreateZoneRegions 创建配送区域城市关联
 func (r *shippingTemplateRepo) CreateZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64, cityCodes []string) error {
 	if len(cityCodes) == 0 {
@@ -463,16 +440,6 @@ func (r *shippingTemplateRepo) DeleteZoneRegions(ctx context.Context, db *gorm.D
 	return db.WithContext(ctx).
 		Where("zone_id = ?", zoneID).
 		Delete(&shipping.ShippingZoneRegion{}).Error
-}
-
-// FindZoneIDsByCityCode 根据城市代码查找区域ID列表
-func (r *shippingTemplateRepo) FindZoneIDsByCityCode(ctx context.Context, db *gorm.DB, cityCode string) ([]int64, error) {
-	var zoneIDs []int64
-	err := db.WithContext(ctx).
-		Model(&shipping.ShippingZoneRegion{}).
-		Where("city_code = ?", cityCode).
-		Pluck("zone_id", &zoneIDs).Error
-	return zoneIDs, err
 }
 
 // CreateMapping 创建模板关联
