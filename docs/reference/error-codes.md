@@ -372,6 +372,7 @@ This document lists all error codes used in the ShopJoy API.
 | 230104 | 400 | invalid fee type | Invalid fee type |
 | 230105 | 400 | fee configuration is required | Fee config required |
 | 230106 | 409 | region already assigned to another zone | Duplicate region |
+| 230107 | 400 | invalid tax rate | TaxRate 非法或超出 [0,1] |
 
 ### Shipping Mapping Errors (2302xx)
 
@@ -392,6 +393,7 @@ This document lists all error codes used in the ShopJoy API.
 | 230305 | 400 | invalid quantity in items | Invalid quantity |
 | 230306 | 400 | invalid weight in items | Invalid weight |
 | 230307 | 400 | invalid price in items | Invalid price |
+| 230308 | 400 | market_id is required | CalculateShippingFee 时 market_id 缺失 |
 
 ---
 
