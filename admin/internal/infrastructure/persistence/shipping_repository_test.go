@@ -40,12 +40,13 @@ func TestShippingRepo_FindDefaultByMarket_MarketHit(t *testing.T) {
 	)
 
 	// Single SELECT — market-scoped row found, no fallback needed.
-	// Args: marketID, is_default=true, is_active=true, LIMIT 1 (GORM's First()).
+	// Args: tenantID, marketID, is_default=true, is_active=true, LIMIT 1 (GORM's First()).
+	const tenantID = int64(1)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(marketID, true, true, 1).
+		WithArgs(tenantID, marketID, true, true, 1).
 		WillReturnRows(rows)
 
-	got, err := repo.FindDefaultByMarket(context.Background(), gdb, marketID)
+	got, err := repo.FindDefaultByMarket(context.Background(), gdb, tenantID, marketID)
 	if err != nil {
 		t.Fatalf("FindDefaultByMarket: %v", err)
 	}
@@ -87,19 +88,20 @@ func TestShippingRepo_FindDefaultByMarket_FallbackToZero(t *testing.T) {
 	})
 
 	// First query: market-scoped → no row → ErrRecordNotFound.
+	const tenantID = int64(1)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(marketID, true, true, 1).
+		WithArgs(tenantID, marketID, true, true, 1).
 		WillReturnError(gorm.ErrRecordNotFound)
 	// Second query: fallback to market_id=0 → global default row.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(int64(0), true, true, 1).
+		WithArgs(tenantID, int64(0), true, true, 1).
 		WillReturnRows(emptyRows.AddRow(
 			fallbackID, int64(1), int64(0), "CNY", "Global-Default",
 			true, true, "standard", int64(0),
 			time.Now(), time.Now(), sql.NullTime{},
 		))
 
-	got, err := repo.FindDefaultByMarket(context.Background(), gdb, marketID)
+	got, err := repo.FindDefaultByMarket(context.Background(), gdb, tenantID, marketID)
 	if err != nil {
 		t.Fatalf("FindDefaultByMarket: %v", err)
 	}
@@ -128,14 +130,15 @@ func TestShippingRepo_FindDefaultByMarket_NotFound(t *testing.T) {
 	const marketID = int64(7)
 
 	// Both queries miss.
+	const tenantID = int64(1)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(marketID, true, true, 1).
+		WithArgs(tenantID, marketID, true, true, 1).
 		WillReturnError(gorm.ErrRecordNotFound)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(int64(0), true, true, 1).
+		WithArgs(tenantID, int64(0), true, true, 1).
 		WillReturnError(gorm.ErrRecordNotFound)
 
-	got, err := repo.FindDefaultByMarket(context.Background(), gdb, marketID)
+	got, err := repo.FindDefaultByMarket(context.Background(), gdb, tenantID, marketID)
 	if !errors.Is(err, code.ErrShippingTemplateNotFound) {
 		t.Fatalf("expected ErrShippingTemplateNotFound, got %v", err)
 	}
@@ -156,9 +159,10 @@ func TestShippingRepo_FindListByMarket_Filtered(t *testing.T) {
 	const marketID = int64(7)
 
 	countRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
-	// Count query also receives LIMIT/OFFSET args from GORM's Count+Find chain.
+	const tenantID = int64(1)
+	// Count query: tenant_id, market_id.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `shipping_templates`")).
-		WithArgs(marketID).
+		WithArgs(tenantID, marketID).
 		WillReturnRows(countRows)
 
 	listRows := sqlmock.NewRows([]string{
@@ -166,17 +170,17 @@ func TestShippingRepo_FindListByMarket_Filtered(t *testing.T) {
 		"is_default", "is_active", "carrier_code", "warehouse_id",
 		"created_at", "updated_at", "deleted_at",
 	}).
-		AddRow(int64(1), int64(1), marketID, "HKD", "tmpl-a",
+		AddRow(int64(1), tenantID, marketID, "HKD", "tmpl-a",
 			false, true, "standard", int64(0), time.Now(), time.Now(), sql.NullTime{}).
-		AddRow(int64(2), int64(1), marketID, "HKD", "tmpl-b",
+		AddRow(int64(2), tenantID, marketID, "HKD", "tmpl-b",
 			true, true, "standard", int64(0), time.Now(), time.Now(), sql.NullTime{})
 
-	// Find: market_id, LIMIT (GORM emits LIMIT but no OFFSET for our offset=0).
+	// Find: tenant_id, market_id, LIMIT (GORM emits LIMIT but no OFFSET for our offset=0).
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(marketID, 10).
+		WithArgs(tenantID, marketID, 10).
 		WillReturnRows(listRows)
 
-	got, total, err := repo.FindListByMarket(context.Background(), gdb, marketID, "", nil, 1, 10)
+	got, total, err := repo.FindListByMarket(context.Background(), gdb, tenantID, marketID, "", nil, 1, 10)
 	if err != nil {
 		t.Fatalf("FindListByMarket: %v", err)
 	}
@@ -204,8 +208,10 @@ func TestShippingRepo_FindListByMarket_AllMarkets(t *testing.T) {
 	repo := persistence.NewShippingTemplateRepository()
 
 	countRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
-	// No WithArgs — count query must have NO market_id filter arg.
+	const tenantID = int64(1)
+	// tenant_id is always present; market_id omitted (marketID=0 = all); name LIKE included.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `shipping_templates`")).
+		WithArgs(tenantID, "%name%").
 		WillReturnRows(countRows)
 
 	listRows := sqlmock.NewRows([]string{
@@ -214,9 +220,10 @@ func TestShippingRepo_FindListByMarket_AllMarkets(t *testing.T) {
 		"created_at", "updated_at", "deleted_at",
 	})
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenantID, "%name%", 10).
 		WillReturnRows(listRows)
 
-	got, total, err := repo.FindListByMarket(context.Background(), gdb, 0, "name", nil, 1, 10)
+	got, total, err := repo.FindListByMarket(context.Background(), gdb, tenantID, 0, "name", nil, 1, 10)
 	if err != nil {
 		t.Fatalf("FindListByMarket: %v", err)
 	}
@@ -238,28 +245,31 @@ func TestShippingRepo_FindListByMarket_NameAndActiveFilter(t *testing.T) {
 	gdb, mock := newMockDB(t)
 	repo := persistence.NewShippingTemplateRepository()
 
-	const marketID = int64(3)
+	const (
+		marketID = int64(3)
+		tenantID = int64(1)
+	)
 	isActive := true
 
 	countRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
-	// Count args: market_id, name LIKE, is_active.
+	// Count args: tenant_id, market_id, name LIKE, is_active.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `shipping_templates`")).
-		WithArgs(marketID, "%express%", isActive).
+		WithArgs(tenantID, marketID, "%express%", isActive).
 		WillReturnRows(countRows)
 
 	listRows := sqlmock.NewRows([]string{
 		"id", "tenant_id", "market_id", "currency", "name",
 		"is_default", "is_active", "carrier_code", "warehouse_id",
 		"created_at", "updated_at", "deleted_at",
-	}).AddRow(int64(11), int64(1), marketID, "USD", "Express",
+	}).AddRow(int64(11), tenantID, marketID, "USD", "Express",
 		false, isActive, "standard", int64(0), time.Now(), time.Now(), sql.NullTime{})
 
-	// Find args: market_id, name LIKE, is_active, LIMIT.
+	// Find args: tenant_id, market_id, name LIKE, is_active, LIMIT.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
-		WithArgs(marketID, "%express%", isActive, 10).
+		WithArgs(tenantID, marketID, "%express%", isActive, 10).
 		WillReturnRows(listRows)
 
-	got, total, err := repo.FindListByMarket(context.Background(), gdb, marketID, "express", &isActive, 1, 10)
+	got, total, err := repo.FindListByMarket(context.Background(), gdb, tenantID, marketID, "express", &isActive, 1, 10)
 	if err != nil {
 		t.Fatalf("FindListByMarket: %v", err)
 	}
@@ -285,15 +295,16 @@ func TestShippingRepo_UnsetAllDefaultByMarket(t *testing.T) {
 	const marketID = int64(7)
 
 	// GORM auto-wraps single UPDATE in a transaction.
+	const tenantID = int64(1)
 	mock.ExpectBegin()
 	// UPDATE args (GORM ordering): is_default=false, updated_at=now,
-	// is_default=true (WHERE), market_id=marketID (WHERE).
-	mock.ExpectExec(regexp.QuoteMeta("UPDATE `shipping_templates` SET `is_default`=?,`updated_at`=? WHERE is_default = ? AND market_id = ?")).
-		WithArgs(false, sqlmock.AnyArg(), true, marketID).
+	// tenant_id (WHERE), is_default=true (WHERE), market_id=marketID (WHERE).
+	mock.ExpectExec(regexp.QuoteMeta("UPDATE `shipping_templates` SET `is_default`=?,`updated_at`=? WHERE tenant_id = ? AND is_default = ? AND market_id = ?")).
+		WithArgs(false, sqlmock.AnyArg(), tenantID, true, marketID).
 		WillReturnResult(sqlmock.NewResult(0, 2))
 	mock.ExpectCommit()
 
-	if err := repo.UnsetAllDefaultByMarket(context.Background(), gdb, marketID); err != nil {
+	if err := repo.UnsetAllDefaultByMarket(context.Background(), gdb, tenantID, marketID); err != nil {
 		t.Fatalf("UnsetAllDefaultByMarket: %v", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -310,14 +321,187 @@ func TestShippingRepo_UnsetAllDefaultByMarket_AllMarkets(t *testing.T) {
 	repo := persistence.NewShippingTemplateRepository()
 
 	mock.ExpectBegin()
-	// marketID=0: WHERE clause has only is_default=true (no market_id).
-	mock.ExpectExec(regexp.QuoteMeta("UPDATE `shipping_templates` SET `is_default`=?,`updated_at`=? WHERE is_default = ?")).
-		WithArgs(false, sqlmock.AnyArg(), true).
+	// marketID=0: WHERE clause has tenant_id + is_default=true (no market_id).
+	const tenantID = int64(1)
+	mock.ExpectExec(regexp.QuoteMeta("UPDATE `shipping_templates` SET `is_default`=?,`updated_at`=? WHERE tenant_id = ? AND is_default = ?")).
+		WithArgs(false, sqlmock.AnyArg(), tenantID, true).
 		WillReturnResult(sqlmock.NewResult(0, 5))
 	mock.ExpectCommit()
 
-	if err := repo.UnsetAllDefaultByMarket(context.Background(), gdb, 0); err != nil {
+	if err := repo.UnsetAllDefaultByMarket(context.Background(), gdb, tenantID, 0); err != nil {
 		t.Fatalf("UnsetAllDefaultByMarket(0): %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// TestShippingRepo_FindDefaultByMarket_TenantIsolation pins the C3 fix:
+// FindDefaultByMarket must scope the lookup to the supplied tenantID.
+// Seed two templates in the same market but different tenants; each call
+// must return only its own tenant's row, never the other tenant's.
+//
+// This is a SQL-shape assertion: the mocked query receives (tenantID, marketID,
+// is_default, is_active, LIMIT) — proving tenant_id appears in WHERE.
+func TestShippingRepo_FindDefaultByMarket_TenantIsolation(t *testing.T) {
+	const (
+		marketID    = int64(7)
+		tenant1ID   = int64(100)
+		tenant2ID   = int64(200)
+		tenant1Row  = int64(101)
+		tenant2Row  = int64(202)
+	)
+	row := func(id, tenant int64) *sqlmock.Rows {
+		return sqlmock.NewRows([]string{
+			"id", "tenant_id", "market_id", "currency", "name",
+			"is_default", "is_active", "carrier_code", "warehouse_id",
+			"created_at", "updated_at", "deleted_at",
+		}).AddRow(
+			id, tenant, marketID, "CNY", "T",
+			true, true, "standard", int64(0),
+			time.Now(), time.Now(), sql.NullTime{},
+		)
+	}
+
+	// Tenant 1 → tenant1Row
+	gdb1, mock1 := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+	mock1.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenant1ID, marketID, true, true, 1).
+		WillReturnRows(row(tenant1Row, tenant1ID))
+	got1, err := repo.FindDefaultByMarket(context.Background(), gdb1, tenant1ID, marketID)
+	if err != nil {
+		t.Fatalf("tenant1 FindDefaultByMarket: %v", err)
+	}
+	if got1 == nil || got1.ID != tenant1Row || got1.TenantID != tenant1ID {
+		t.Fatalf("tenant1: expected id=%d tenant=%d, got %+v", tenant1Row, tenant1ID, got1)
+	}
+	if err := mock1.ExpectationsWereMet(); err != nil {
+		t.Fatalf("tenant1 expectations: %v", err)
+	}
+
+	// Tenant 2 → tenant2Row (proves the call does NOT silently return tenant 1's row).
+	gdb2, mock2 := newMockDB(t)
+	mock2.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenant2ID, marketID, true, true, 1).
+		WillReturnRows(row(tenant2Row, tenant2ID))
+	got2, err := repo.FindDefaultByMarket(context.Background(), gdb2, tenant2ID, marketID)
+	if err != nil {
+		t.Fatalf("tenant2 FindDefaultByMarket: %v", err)
+	}
+	if got2 == nil || got2.ID != tenant2Row || got2.TenantID != tenant2ID {
+		t.Fatalf("tenant2: expected id=%d tenant=%d, got %+v", tenant2Row, tenant2ID, got2)
+	}
+	if err := mock2.ExpectationsWereMet(); err != nil {
+		t.Fatalf("tenant2 expectations: %v", err)
+	}
+}
+
+// TestShippingRepo_FindDefaultByMarket_TenantFallbackIsolation pins the
+// fallback path under tenant scope: when tenant A has no market=7 default
+// but has a market=0 fallback, the call must return that fallback — and
+// must NOT return tenant B's fallback (which would leak cross-tenant data).
+func TestShippingRepo_FindDefaultByMarket_TenantFallbackIsolation(t *testing.T) {
+	const (
+		marketID  = int64(7)
+		tenantAID = int64(300)
+		fallbackA = int64(301)
+	)
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+
+	// Step 1: market-scoped lookup for tenant A → no row.
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenantAID, marketID, true, true, 1).
+		WillReturnError(gorm.ErrRecordNotFound)
+	// Step 2: tenant-scoped fallback to market_id=0 → tenant A's global default.
+	fallbackRows := sqlmock.NewRows([]string{
+		"id", "tenant_id", "market_id", "currency", "name",
+		"is_default", "is_active", "carrier_code", "warehouse_id",
+		"created_at", "updated_at", "deleted_at",
+	}).AddRow(
+		fallbackA, tenantAID, int64(0), "CNY", "Global",
+		true, true, "standard", int64(0),
+		time.Now(), time.Now(), sql.NullTime{},
+	)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenantAID, int64(0), true, true, 1).
+		WillReturnRows(fallbackRows)
+
+	got, err := repo.FindDefaultByMarket(context.Background(), gdb, tenantAID, marketID)
+	if err != nil {
+		t.Fatalf("FindDefaultByMarket tenant fallback: %v", err)
+	}
+	if got == nil || got.ID != fallbackA || got.TenantID != tenantAID {
+		t.Fatalf("expected tenant A fallback id=%d tenant=%d, got %+v", fallbackA, tenantAID, got)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// TestShippingRepo_FindListByMarket_TenantIsolation pins that the listing
+// query is scoped to tenantID — cross-tenant rows must not leak into the
+// result set. Asserts WHERE receives (tenantID, marketID, ...) args.
+func TestShippingRepo_FindListByMarket_TenantIsolation(t *testing.T) {
+	const (
+		tenantID = int64(400)
+		marketID = int64(7)
+	)
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+
+	countRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `shipping_templates`")).
+		WithArgs(tenantID, marketID).
+		WillReturnRows(countRows)
+
+	listRows := sqlmock.NewRows([]string{
+		"id", "tenant_id", "market_id", "currency", "name",
+		"is_default", "is_active", "carrier_code", "warehouse_id",
+		"created_at", "updated_at", "deleted_at",
+	}).AddRow(int64(501), tenantID, marketID, "CNY", "Mine",
+		true, true, "standard", int64(0), time.Now(), time.Now(), sql.NullTime{})
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `shipping_templates`")).
+		WithArgs(tenantID, marketID, 10).
+		WillReturnRows(listRows)
+
+	got, total, err := repo.FindListByMarket(context.Background(), gdb, tenantID, marketID, "", nil, 1, 10)
+	if err != nil {
+		t.Fatalf("FindListByMarket: %v", err)
+	}
+	if total != 1 || len(got) != 1 {
+		t.Fatalf("expected 1 row, got total=%d len=%d", total, len(got))
+	}
+	if got[0].TenantID != tenantID {
+		t.Fatalf("expected tenant=%d, got %d", tenantID, got[0].TenantID)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// TestShippingRepo_UnsetAllDefaultByMarket_TenantIsolation pins the critical
+// safety property: UnsetAllDefaultByMarket must NOT touch another tenant's
+// default when promoting tenant A's template. Asserts WHERE receives
+// (false, ts, tenantID, true, marketID) — GORM keeps the .Where() order.
+func TestShippingRepo_UnsetAllDefaultByMarket_TenantIsolation(t *testing.T) {
+	const (
+		tenantID = int64(500)
+		marketID = int64(7)
+	)
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta("UPDATE `shipping_templates` SET `is_default`=?,`updated_at`=? WHERE tenant_id = ? AND is_default = ? AND market_id = ?")).
+		WithArgs(false, sqlmock.AnyArg(), tenantID, true, marketID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	if err := repo.UnsetAllDefaultByMarket(context.Background(), gdb, tenantID, marketID); err != nil {
+		t.Fatalf("UnsetAllDefaultByMarket: %v", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf("expectations: %v", err)

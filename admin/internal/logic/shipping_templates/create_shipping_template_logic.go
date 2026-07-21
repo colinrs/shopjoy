@@ -59,10 +59,10 @@ func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateSh
 		IsActive:    true,
 	}
 
-	// If setting as default, unset other defaults in the same market first.
-	// This enforces the (market_id, is_default=true) unique partial index.
+	// If setting as default, unset other defaults in the same (tenant, market) first.
+	// This enforces the (tenant_id, market_id, is_default=true) unique partial index.
 	if req.IsDefault {
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, l.svcCtx.DB, req.MarketID); err != nil {
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, l.svcCtx.DB, tenantID, req.MarketID); err != nil {
 			return nil, err
 		}
 	}

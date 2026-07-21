@@ -31,9 +31,15 @@ type ShippingTemplateRepository interface {
 	// market (operator override). UnsetAllDefault is kept for backward
 	// compatibility with existing logic callers and behaves like the
 	// marketID=0 variant.
-	FindDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) (*shipping.ShippingTemplate, error)
-	FindListByMarket(ctx context.Context, db *gorm.DB, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
-	UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) error
+	//
+	// C3 fix: every market-aware method is also tenant-scoped. Without
+	// tenant_id in the WHERE clause, two tenants sharing the same market_id
+	// would see each other's defaults — a cross-tenant data leak. All three
+	// methods take tenantID as a required parameter (callers extract it from
+	// ctx via contextx.GetTenantID).
+	FindDefaultByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64) (*shipping.ShippingTemplate, error)
+	FindListByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error)
+	UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64) error
 
 	// Zone operations
 	CreateZone(ctx context.Context, db *gorm.DB, zone *shipping.ShippingZone) error
@@ -248,11 +254,13 @@ func (r *shippingTemplateRepo) UnsetAllDefault(ctx context.Context, db *gorm.DB)
 // 该回退逻辑是店铺前端的"安全网"：当某个市场尚未配置独立默认模板时，
 // 必须有一个全市场通用模板兜底，否则会出现运费计算无可用模板的故障。
 // 两层都找不到时返回 code.ErrShippingTemplateNotFound，调用方可通过 errors.Is 识别。
-func (r *shippingTemplateRepo) FindDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) (*shipping.ShippingTemplate, error) {
+//
+// C3 fix: 整个查找链都必须限定在 tenantID 内，否则不同租户可能看到对方的默认模板。
+func (r *shippingTemplateRepo) FindDefaultByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64) (*shipping.ShippingTemplate, error) {
 	var tmpl shipping.ShippingTemplate
-	// 1. 优先匹配 marketID
+	// 1. 优先匹配 marketID（同租户）
 	err := db.WithContext(ctx).
-		Where("market_id = ? AND is_default = ? AND is_active = ?", marketID, true, true).
+		Where("tenant_id = ? AND market_id = ? AND is_default = ? AND is_active = ?", tenantID, marketID, true, true).
 		First(&tmpl).Error
 	if err == nil {
 		return &tmpl, nil
@@ -260,9 +268,9 @@ func (r *shippingTemplateRepo) FindDefaultByMarket(ctx context.Context, db *gorm
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	// 2. 回退到 market_id=0 的全市场默认
+	// 2. 回退到 market_id=0 的全市场默认（同租户）
 	err = db.WithContext(ctx).
-		Where("market_id = ? AND is_default = ? AND is_active = ?", int64(0), true, true).
+		Where("tenant_id = ? AND market_id = ? AND is_default = ? AND is_active = ?", tenantID, int64(0), true, true).
 		First(&tmpl).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -276,10 +284,14 @@ func (r *shippingTemplateRepo) FindDefaultByMarket(ctx context.Context, db *gorm
 // FindListByMarket 按市场过滤列表（marketID=0 表示返回全部市场模板）。
 // 可选过滤：name（模糊匹配）、isActive（精确匹配）。
 // 排序：默认模板在前（is_default DESC），其次 id DESC（新模板在前）。
-func (r *shippingTemplateRepo) FindListByMarket(ctx context.Context, db *gorm.DB, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
+//
+// C3 fix: 列表同样必须限定在 tenantID 内。marketID=0 表示该租户的全部市场模板，
+// 而不是跨租户的全集——后者会直接泄漏其他租户的运费模板。
+func (r *shippingTemplateRepo) FindListByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64, name string, isActive *bool, page, pageSize int) ([]*shipping.ShippingTemplate, int64, error) {
 	var templates []*shipping.ShippingTemplate
 	var total int64
-	q := db.WithContext(ctx).Model(&shipping.ShippingTemplate{})
+	q := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
+		Where("tenant_id = ?", tenantID)
 	if marketID > 0 {
 		q = q.Where("market_id = ?", marketID)
 	}
@@ -306,8 +318,12 @@ func (r *shippingTemplateRepo) FindListByMarket(ctx context.Context, db *gorm.DB
 // （create_shipping_template_logic.go、set_default_template_logic.go）已调用
 // UnsetAllDefault(ctx, tx)；本 Task 不应触碰 logic 层（Task 1.7+ 改写）。
 // 后续 logic 层切到市场维度时调用本方法即可。
-func (r *shippingTemplateRepo) UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, marketID int64) error {
+//
+// C3 fix: 必须同时限定在 tenantID 内。否则 tenant A 在 market=7 设置默认时
+// 会把 tenant B 在同一 market 的默认一起清掉——属于严重安全/数据问题。
+func (r *shippingTemplateRepo) UnsetAllDefaultByMarket(ctx context.Context, db *gorm.DB, tenantID, marketID int64) error {
 	q := db.WithContext(ctx).Model(&shipping.ShippingTemplate{}).
+		Where("tenant_id = ?", tenantID).
 		Where("is_default = ?", true)
 	if marketID > 0 {
 		q = q.Where("market_id = ?", marketID)

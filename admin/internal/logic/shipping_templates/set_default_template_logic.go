@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -27,6 +28,9 @@ func NewSetDefaultTemplateLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTemplateReq) (resp *types.ShippingTemplateDetailResp, err error) {
 
+	// C3 fix: tenant scope required to avoid clearing another tenant's defaults.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
 	// Verify template exists and belongs to tenant
 	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
@@ -35,10 +39,11 @@ func (l *SetDefaultTemplateLogic) SetDefaultTemplate(req *types.SetDefaultTempla
 
 	// Use transaction to ensure atomicity
 	err = l.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
-		// Unset all defaults within this template's market first.
-		// (market_id, is_default=true) is a per-market partial unique index,
-		// so we must scope the unset to the same market_id we're about to set.
-		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, tx, template.MarketID); err != nil {
+		// Unset all defaults within this template's (tenant, market) first.
+		// (tenant_id, market_id, is_default=true) is a per-tenant per-market
+		// partial unique index, so we must scope the unset to the same
+		// tenant_id + market_id we're about to set.
+		if err := l.svcCtx.ShippingRepo.UnsetAllDefaultByMarket(l.ctx, tx, tenantID, template.MarketID); err != nil {
 			return err
 		}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,9 +27,14 @@ func NewListShippingTemplatesLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippingTemplatesReq) (resp *types.ListShippingTemplatesResp, err error) {
 
-	// Market-aware list: marketID=0 means "all markets".
+	// C3 fix: tenant scope is required to prevent cross-tenant data leak.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+
+	// Market-aware + tenant-aware list: marketID=0 means "all markets within
+	// this tenant"; the query never crosses tenant boundaries.
 	templates, total, err := l.svcCtx.ShippingRepo.FindListByMarket(
 		l.ctx, l.svcCtx.DB,
+		tenantID,
 		req.MarketID,
 		req.Name,
 		req.IsActive,

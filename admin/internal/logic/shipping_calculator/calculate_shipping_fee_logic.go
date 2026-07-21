@@ -8,6 +8,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/shopspring/decimal"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -102,8 +103,9 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		totalQuantity += pi.quantity
 	}
 
-	// Find template using priority: Product > Default (market-aware)
-	template, zone := l.findTemplateForItems(req.MarketID, req.Address.CityCode, parsed)
+	// Find template using priority: Product > Default (market-aware, tenant-scoped)
+	tenantID, _ := contextx.GetTenantID(l.ctx)
+	template, zone := l.findTemplateForItems(tenantID, req.MarketID, req.Address.CityCode, parsed)
 	if template == nil || zone == nil {
 		return nil, code.ErrShippingTemplateNotFound
 	}
@@ -132,7 +134,8 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 
 // findTemplateForItems finds the appropriate template and zone using priority: Product > Default.
 // marketID scopes the default-template lookup via FindDefaultByMarket (with fallback to marketID=0).
-func (l *CalculateShippingFeeLogic) findTemplateForItems(marketID int64, cityCode string, items []parsedItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
+// tenantID is REQUIRED (C3 fix) — without it, the storefront could see another tenant's defaults.
+func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID, marketID int64, cityCode string, items []parsedItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
 	// Priority 1: Check for product-specific template
 	for _, item := range items {
 		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.productID)
@@ -147,8 +150,9 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(marketID int64, cityCod
 		}
 	}
 
-	// Priority 2: Use market-scoped default template (falls back to marketID=0).
-	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefaultByMarket(l.ctx, l.svcCtx.DB, marketID)
+	// Priority 2: Use tenant-scoped + market-scoped default template
+	// (falls back to marketID=0 within the same tenant).
+	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefaultByMarket(l.ctx, l.svcCtx.DB, tenantID, marketID)
 	if err == nil && defaultTemplate != nil {
 		zone := l.findZoneForCity(int64(defaultTemplate.ID), cityCode)
 		if zone != nil {
