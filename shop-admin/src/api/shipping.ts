@@ -168,6 +168,8 @@ export interface Region {
   name: string
   level: number
   parent_code: string
+  country_code: string      // ISO 3166-1 alpha-2 (REQUIRED, backend always sends)
+  postal_pattern?: string  // Optional postal code regex pattern (only at leaf level)
   children?: Region[]
 }
 
