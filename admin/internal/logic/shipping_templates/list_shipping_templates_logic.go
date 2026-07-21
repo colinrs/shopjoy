@@ -44,15 +44,32 @@ func (l *ListShippingTemplatesLogic) ListShippingTemplates(req *types.ListShippi
 		return nil, err
 	}
 
+	// Batch the per-template zone counts in one GROUP BY query.
+	// Important/N+1 fix: previously this loop called
+	// CountZonesByTemplateID once per template (page_size extra queries).
+	// Now we collect all template IDs first and let the repo issue a single
+	// SELECT … GROUP BY template_id query — constant query count regardless
+	// of page size. An empty page short-circuits inside the repo (no SQL).
+	var ids []int64
+	if len(templates) > 0 {
+		ids = make([]int64, len(templates))
+		for i, t := range templates {
+			ids[i] = int64(t.ID)
+		}
+	}
+	zoneCounts, zErr := l.svcCtx.ShippingRepo.CountZonesByTemplateIDs(l.ctx, l.svcCtx.DB, ids)
+	if zErr != nil {
+		return nil, zErr
+	}
+
 	// Build response. ProductCount/CategoryCount were removed from the wire
 	// (ShippingTemplateListItem no longer carries them), so we don't compute
 	// them — only ZoneCount is required.
 	list := make([]*types.ShippingTemplateListItem, 0, len(templates))
 	for _, t := range templates {
-		zoneCount, zErr := l.svcCtx.ShippingRepo.CountZonesByTemplateID(l.ctx, l.svcCtx.DB, int64(t.ID))
-		if zErr != nil {
-			return nil, zErr
-		}
+		// Templates with zero zones are absent from the map; map lookup
+		// returns the zero value (0) which is what we want for ZoneCount.
+		zoneCount := zoneCounts[int64(t.ID)]
 
 		// ─── entity → response field map ───
 		//   entity.ID          → resp.ID

@@ -70,11 +70,14 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 	}
 
 	// Validate taxable/tax_rate (P1-6): rate in [0, 1] (stored as decimal(5,4)).
-	if req.Taxable && req.TaxRate != "" {
-		rate, err := decimal.NewFromString(req.TaxRate)
-		if err != nil || rate.IsNegative() || rate.GreaterThan(decimal.NewFromInt(1)) {
-			return nil, code.ErrShippingZoneFeeConfigRequired
-		}
+	// Important/TaxRate fix: any non-empty TaxRate that fails to parse as a
+	// decimal, or falls outside [0, 1], now surfaces
+	// code.ErrShippingZoneInvalidTaxRate at the API boundary instead of
+	// being silently coerced to 0 (which previously masqueraded as a valid
+	// config but disabled tax computation). Empty TaxRate is still allowed
+	// (operator may flip Taxable on without yet configuring a rate).
+	if err := validateTaxRate(req.Taxable, req.TaxRate); err != nil {
+		return nil, err
 	}
 
 	// Load the parent template. Two invariants we must enforce before
@@ -194,6 +197,36 @@ func parseAmount(s string) decimal.Decimal {
 		return decimal.Zero
 	}
 	return d
+}
+
+// validateTaxRate enforces the strict contract on (Taxable, TaxRate):
+//   - When Taxable is false, TaxRate is ignored (validation skipped).
+//   - When Taxable is true and TaxRate is empty, validation passes
+//     (caller toggled tax on but hasn't picked a rate yet — leaves the
+//     setting service-layer-acceptable).
+//   - When Taxable is true and TaxRate is non-empty, it must parse as a
+//     decimal in [0, 1] (stored as decimal(5,4)).
+//
+// Any failure — parse error, negative, or > 1 — returns
+// code.ErrShippingZoneInvalidTaxRate. We intentionally do NOT silently
+// coerce to 0 (the prior behavior) because doing so let a caller-side
+// typo of "0.0825%" → 8.25 quietly disable tax computation while the
+// rest of the config appeared valid.
+func validateTaxRate(taxable bool, taxRate string) error {
+	if !taxable {
+		return nil
+	}
+	if taxRate == "" {
+		return nil
+	}
+	rate, err := decimal.NewFromString(taxRate)
+	if err != nil {
+		return code.ErrShippingZoneInvalidTaxRate
+	}
+	if rate.IsNegative() || rate.GreaterThan(decimal.NewFromInt(1)) {
+		return code.ErrShippingZoneInvalidTaxRate
+	}
+	return nil
 }
 
 // formatAmount converts decimal.Decimal to a fixed 2-decimal-place string.

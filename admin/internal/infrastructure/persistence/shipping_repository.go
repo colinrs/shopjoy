@@ -65,6 +65,7 @@ type ShippingTemplateRepository interface {
 
 	// Statistics
 	CountZonesByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) (int64, error)
+	CountZonesByTemplateIDs(ctx context.Context, db *gorm.DB, templateIDs []int64) (map[int64]int64, error)
 	CountProductsByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) (int64, error)
 	CountCategoriesByTemplateID(ctx context.Context, db *gorm.DB, templateID int64) (int64, error)
 }
@@ -534,6 +535,37 @@ func (r *shippingTemplateRepo) CountZonesByTemplateID(ctx context.Context, db *g
 		Where("template_id = ?", templateID).
 		Count(&count).Error
 	return count, err
+}
+
+// CountZonesByTemplateIDs 批量统计一组模板各自的配送区域数量 —— 用一条
+// SELECT template_id, COUNT(*) ... GROUP BY 查询完成，替换原先 list logic
+// 在循环内逐个调 CountZonesByTemplateID 的 N+1 模式：N=0 时不发出 SQL
+// 也不返回 nil map，避免调用方做空指针判断；返回的 map 仅包含计数 > 0
+// 的模板（count(*) 在带 GROUP BY 的查询里天然不会写出 0 行，所以 0 计数的
+// 模板不出现在 map 中）——调用方通过 `m[id]`（不存在 key 返回 zero value）
+// 或显式 `_, ok := m[id]` 区分"无区域"和"未知模板"。
+func (r *shippingTemplateRepo) CountZonesByTemplateIDs(ctx context.Context, db *gorm.DB, templateIDs []int64) (map[int64]int64, error) {
+	out := make(map[int64]int64)
+	if len(templateIDs) == 0 {
+		return out, nil
+	}
+	type row struct {
+		TemplateID int64 `gorm:"column:template_id"`
+		Count      int64 `gorm:"column:count"`
+	}
+	var rows []row
+	if err := db.WithContext(ctx).
+		Model(&shipping.ShippingZone{}).
+		Select("template_id, COUNT(*) AS count").
+		Where("template_id IN ?", templateIDs).
+		Group("template_id").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	for _, r2 := range rows {
+		out[r2.TemplateID] = r2.Count
+	}
+	return out, nil
 }
 
 // CountProductsByTemplateID 统计模板关联的商品数量

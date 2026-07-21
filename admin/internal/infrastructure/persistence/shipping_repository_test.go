@@ -511,3 +511,72 @@ func TestShippingRepo_UnsetAllDefaultByMarket_TenantIsolation(t *testing.T) {
 // silence unused-import warning for shipping pkg when the only reference is
 // in the rows-set helper above (kept for type clarity).
 var _ = shipping.ShippingTemplate{}
+
+// TestShippingRepo_CountZonesByTemplateIDs pins the contract of the new
+// batch count helper used to kill the N+1 in list_shipping_templates_logic:
+// when a list of template IDs is passed in, exactly ONE SELECT … GROUP BY
+// query must be issued, returning a map[templateID]count. Templates that
+// own zero zones are absent from the result map (callers must fall back to 0).
+//
+// Rationale: prior implementation called CountZonesByTemplateID inside a
+// per-row loop in the list logic — for a 20-row page that fired 20 extra
+// queries. Replacing it with one GROUP BY changes that to a constant 1
+// query regardless of page size.
+func TestShippingRepo_CountZonesByTemplateIDs(t *testing.T) {
+	gdb, mock := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+
+	templateIDs := []int64{101, 102, 103}
+
+	// Single GROUP BY query. GORM adds the soft-delete predicate and a
+	// GROUP BY backtick-quoted column list, so use a Regexp matcher to
+	// focus on intent (one SELECT … GROUP BY on shipping_zones with the
+	// three template IDs in IN clause) rather than exact byte-match.
+	mock.ExpectQuery("SELECT template_id, COUNT\\(\\*\\) AS count FROM `shipping_zones` WHERE template_id IN .* GROUP BY .template_id.").
+		WithArgs(int64(101), int64(102), int64(103)).
+		WillReturnRows(sqlmock.NewRows([]string{"template_id", "count"}).
+			AddRow(int64(101), int64(3)).
+			AddRow(int64(102), int64(0)).
+			AddRow(int64(103), int64(7)))
+
+	got, err := repo.CountZonesByTemplateIDs(context.Background(), gdb, templateIDs)
+	if err != nil {
+		t.Fatalf("CountZonesByTemplateIDs: %v", err)
+	}
+	if len(got) != 3 {
+		t.Fatalf("expected 3 entries, got %d (map=%v)", len(got), got)
+	}
+	if got[101] != 3 {
+		t.Errorf("template 101 count = %d, want 3", got[101])
+	}
+	if got[102] != 0 {
+		t.Errorf("template 102 count = %d, want 0", got[102])
+	}
+	if got[103] != 7 {
+		t.Errorf("template 103 count = %d, want 7", got[103])
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
+
+// TestShippingRepo_CountZonesByTemplateIDs_EmptyInput pins the
+// short-circuit contract: when the caller passes an empty template-ID list
+// the repository must NOT issue a SQL query (skipping an empty IN clause is
+// an SQLite quirk worth avoiding even on MySQL), and must return an empty
+// (non-nil) map so callers can read from it without nil checks.
+func TestShippingRepo_CountZonesByTemplateIDs_EmptyInput(t *testing.T) {
+	gdb, _ := newMockDB(t)
+	repo := persistence.NewShippingTemplateRepository()
+
+	got, err := repo.CountZonesByTemplateIDs(context.Background(), gdb, []int64{})
+	if err != nil {
+		t.Fatalf("CountZonesByTemplateIDs: %v", err)
+	}
+	if got == nil {
+		t.Fatal("expected non-nil map (so callers don't need nil check)")
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty map, got %v", got)
+	}
+}

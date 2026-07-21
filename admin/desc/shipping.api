@@ -133,10 +133,10 @@ type (
 		AdditionalFee       string          `json:"additional_fee,optional"`
 		FreeThresholdAmount string          `json:"free_threshold_amount,optional"`
 		FreeThresholdCount  int             `json:"free_threshold_count,optional"`
-		Taxable             bool            `json:"taxable,optional"`
+		Taxable             *bool           `json:"taxable,optional"`
 		TaxRate             string          `json:"tax_rate,optional"`
-		TaxIncluded         bool            `json:"tax_included,optional"`
-		IossApplicable      bool            `json:"ioss_applicable,optional"`
+		TaxIncluded         *bool           `json:"tax_included,optional"`
+		IossApplicable      *bool           `json:"ioss_applicable,optional"`
 		RemoteSurcharge     string          `json:"remote_surcharge,optional"`
 		RemoteZipPatterns   []string        `json:"remote_zip_patterns,optional"`
 		FuelSurchargePct    string          `json:"fuel_surcharge_pct,optional"`

@@ -29,11 +29,11 @@ func NewUpdateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 // existing shipping.ShippingZone entity. Each field is conditionally
 // assigned — only updates that the caller explicitly provided.
 //
-// Wire-level design note: UpdateShippingZoneReq uses value-type (non-pointer)
-// optional fields, so we apply zero-value detection. This means callers
-// cannot explicitly set a field to its zero value (e.g. Taxable=false after
-// it was true). If that becomes required, switch the wire type to pointer
-// fields. This task preserves the brief's pattern: `if req.X != zero {...}`.
+// Wire-level design note: UpdateShippingZoneReq uses pointer fields for
+// the 3 boolean toggles (Taxable, TaxIncluded, IossApplicable). The old
+// non-pointer `bool` form silently dropped a caller-side `false` when the
+// current value was `true` (because `if req.Taxable` only fires on true).
+// Switching to `*bool` lets the caller explicitly set these to false.
 //
 // ─── wire → entity field map (anti-silent-drop guard) ───
 //   wire.Name                → entity.Name                 (if != "")
@@ -46,10 +46,10 @@ func NewUpdateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 //   wire.AdditionalFee       → entity.AdditionalFee        (parseAmount)
 //   wire.FreeThresholdAmount → entity.FreeThresholdAmount  (parseAmount)
 //   wire.FreeThresholdCount  → entity.FreeThresholdCount   (if != 0)
-//   wire.Taxable             → entity.Taxable              (true only — false is silent no-op)
+//   wire.Taxable             → entity.Taxable              (if *bool != nil — explicit false OK)
 //   wire.TaxRate             → entity.TaxRate              (parseAmount)
-//   wire.TaxIncluded         → entity.TaxIncluded          (true only — false is silent no-op)
-//   wire.IossApplicable      → entity.IossApplicable       (true only — false is silent no-op)
+//   wire.TaxIncluded         → entity.TaxIncluded          (if *bool != nil — explicit false OK)
+//   wire.IossApplicable      → entity.IossApplicable       (if *bool != nil — explicit false OK)
 //   wire.RemoteSurcharge     → entity.RemoteSurcharge      (parseAmount)
 //   wire.RemoteZipPatterns   → entity.RemoteZipPatterns    ([]string → StringArray, if != nil)
 //   wire.FuelSurchargePct    → entity.FuelSurchargePct     (parseAmount)
@@ -100,21 +100,19 @@ func (l *UpdateShippingZoneLogic) UpdateShippingZone(req *types.UpdateShippingZo
 	if req.FreeThresholdCount != 0 {
 		zone.FreeThresholdCount = req.FreeThresholdCount
 	}
-	// Taxable/TaxIncluded/IossApplicable: zero-value (false) is a no-op.
-	// Callers cannot disable these via this endpoint unless the wire type
-	// is changed to pointer-bool. Documented limitation.
-	if req.Taxable {
-		zone.Taxable = true
-	}
+	// Taxable/TaxIncluded/IossApplicable: pointer fields on the wire so that
+	// callers can EXPLICITLY set these to false. Old non-pointer bool fields
+	// silently dropped a `false` when the current value was `true` because
+	// `if req.Taxable` only fired on `true`. Pointer form: nil=skip, non-nil
+	// dereference wins. This is the Important/bool-pointer fix and is
+	// implemented as a pure helper (applyBoolPtrOverride) so the explicit-
+	// false contract can be unit-tested without a DB.
+	zone.Taxable = applyBoolPtrOverride(zone.Taxable, req.Taxable)
 	if req.TaxRate != "" {
 		zone.TaxRate = parseAmount(req.TaxRate)
 	}
-	if req.TaxIncluded {
-		zone.TaxIncluded = true
-	}
-	if req.IossApplicable {
-		zone.IossApplicable = true
-	}
+	zone.TaxIncluded = applyBoolPtrOverride(zone.TaxIncluded, req.TaxIncluded)
+	zone.IossApplicable = applyBoolPtrOverride(zone.IossApplicable, req.IossApplicable)
 	if req.RemoteSurcharge != "" {
 		zone.RemoteSurcharge = parseAmount(req.RemoteSurcharge)
 	}
@@ -168,4 +166,22 @@ func (l *UpdateShippingZoneLogic) UpdateShippingZone(req *types.UpdateShippingZo
 		VolumetricDivisor:   zone.VolumetricDivisor,
 		Sort:                zone.Sort,
 	}, nil
+}
+
+// applyBoolPtrOverride returns the new bool value for an updatable field,
+// preserving a *bool → bool wire contract:
+//   - nil pointer → keep current (caller did not supply the field).
+//   - non-nil pointer → caller explicitly chose the dereferenced value.
+//
+// The Important/bool-pointer fix changes three tax/fulfillment toggles on
+// UpdateShippingZoneReq from `bool` to `*bool`. Old form: callers could not
+// explicitly disable a flag that was currently true (because `if req.X`
+// only fired on true, dropping false-on-true). New form: caller owns the
+// value, including the explicit false. This helper centralises that
+// contract so it can be unit-tested without a DB.
+func applyBoolPtrOverride(current bool, override *bool) bool {
+	if override == nil {
+		return current
+	}
+	return *override
 }

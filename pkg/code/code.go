@@ -383,6 +383,7 @@ var (
 	ErrShippingZoneInvalidFeeType    = &Err{HTTPCode: http.StatusBadRequest, Code: 230104, Msg: "invalid fee type"}
 	ErrShippingZoneFeeConfigRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 230105, Msg: "fee configuration is required"}
 	ErrShippingZoneDuplicateRegion   = &Err{HTTPCode: http.StatusBadRequest, Code: 230106, Msg: "region already assigned to another zone"}
+	ErrShippingZoneInvalidTaxRate    = &Err{HTTPCode: http.StatusBadRequest, Code: 230107, Msg: "invalid tax rate: must be a decimal string in [0, 1]"}
 
 	// Shipping Mapping errors (2302xx)
 	ErrShippingMappingNotFound      = &Err{HTTPCode: http.StatusNotFound, Code: 230201, Msg: "shipping mapping not found"}

@@ -1,11 +1,13 @@
 package shipping_zones
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/shopspring/decimal"
 )
 
@@ -294,5 +296,52 @@ func TestFeeType_IsValid_Legacy(t *testing.T) {
 func TestDefaultVolumetricDivisor(t *testing.T) {
 	if shipping.DefaultVolumetricDivisor != 5000 {
 		t.Errorf("DefaultVolumetricDivisor = %d, want 5000", shipping.DefaultVolumetricDivisor)
+	}
+}
+
+// TestValidateTaxRate pins the strict TaxRate validation contract added by
+// the Important/TaxRate fix: when Taxable=true and the caller supplies a
+// non-empty TaxRate string, that string MUST parse as a decimal in [0, 1].
+// "abc" / "1.5" / "-0.1" must be rejected with code.ErrShippingZoneInvalidTaxRate;
+// empty TaxRate (i.e., caller didn't supply one) stays allowed.
+//
+// Rationale: previously, an invalid rate was silently coerced to 0 — a
+// caller-side typo of "0.0825%" → 8.25 would quietly disable tax
+// computation, masquerading as a config that worked. Strict parsing
+// surfaces the error at the API boundary where the operator can fix it.
+func TestValidateTaxRate(t *testing.T) {
+	cases := []struct {
+		name    string
+		taxable bool
+		taxRate string
+		wantErr bool
+	}{
+		{"not taxable → no validation", false, "abc", false},
+		{"taxable, empty TaxRate → allowed", true, "", false},
+		{"taxable, 0 → allowed", true, "0", false},
+		{"taxable, 1 → allowed (upper bound inclusive)", true, "1", false},
+		{"taxable, 0.0825 → allowed", true, "0.0825", false},
+		{"taxable, abc → rejected", true, "abc", true},
+		{"taxable, 1.5 → rejected (above 1)", true, "1.5", true},
+		{"taxable, -0.1 → rejected (negative)", true, "-0.1", true},
+		{"taxable, whitespace → rejected", true, " ", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateTaxRate(tc.taxable, tc.taxRate)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("validateTaxRate(%v, %q) = nil, want error",
+						tc.taxable, tc.taxRate)
+				}
+				if !errors.Is(err, code.ErrShippingZoneInvalidTaxRate) {
+					t.Errorf("validateTaxRate(%v, %q) = %v, want errors.Is == ErrShippingZoneInvalidTaxRate",
+						tc.taxable, tc.taxRate, err)
+				}
+			} else if err != nil {
+				t.Errorf("validateTaxRate(%v, %q) = %v, want nil",
+					tc.taxable, tc.taxRate, err)
+			}
+		})
 	}
 }
