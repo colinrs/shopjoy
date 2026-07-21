@@ -13,7 +13,7 @@ func TestCalculateShippingFee_FillsTaxAndTotal(t *testing.T) {
 	fee := decimal.RequireFromString("100.00")
 	rate := decimal.RequireFromString("0.19")
 
-	tax, total := calculateTax(fee, rate, false /* taxIncluded */)
+	tax, total := shipping.CalculateTax(fee, rate, false /* taxIncluded */)
 
 	if !tax.Equal(decimal.RequireFromString("19.00")) {
 		t.Errorf("expected tax=19.00, got %s", tax)
@@ -29,7 +29,7 @@ func TestCalculateTax_TaxIncluded(t *testing.T) {
 	fee := decimal.RequireFromString("119.00")
 	rate := decimal.RequireFromString("0.19")
 
-	tax, total := calculateTax(fee, rate, true /* taxIncluded */)
+	tax, total := shipping.CalculateTax(fee, rate, true /* taxIncluded */)
 
 	// total must equal the inclusive fee unchanged.
 	if !total.Equal(fee) {
@@ -46,7 +46,7 @@ func TestCalculateTax_TaxIncluded(t *testing.T) {
 func TestCalculateTax_ZeroRate(t *testing.T) {
 	fee := decimal.RequireFromString("50.00")
 
-	tax, total := calculateTax(fee, decimal.Zero, false)
+	tax, total := shipping.CalculateTax(fee, decimal.Zero, false)
 
 	if !tax.IsZero() {
 		t.Errorf("expected tax=0, got %s", tax)

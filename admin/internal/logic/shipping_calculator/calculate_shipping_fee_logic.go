@@ -124,7 +124,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	// Non-taxable zones (or a zero rate) yield tax=0 and total==shippingFee.
 	var tax, total decimal.Decimal
 	if zone.Taxable {
-		tax, total = calculateTax(shippingFee, zone.TaxRate, zone.TaxIncluded)
+		tax, total = shipping.CalculateTax(shippingFee, zone.TaxRate, zone.TaxIncluded)
 	} else {
 		total = shippingFee
 	}
@@ -168,25 +168,6 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 			AppliedTax:       formatAmount(tax),
 		},
 	}, nil
-}
-
-// calculateTax derives (tax, total) from a shipping fee.
-//   - taxIncluded=false: the fee is net of tax, so tax = fee*rate and
-//     total = fee + tax.
-//   - taxIncluded=true: the fee already contains tax, so total = fee and
-//     tax = fee - fee/(1+rate) (the embedded tax portion).
-//
-// A zero rate always yields tax=0 and total=fee.
-func calculateTax(shippingFee, taxRate decimal.Decimal, taxIncluded bool) (tax, total decimal.Decimal) {
-	if !taxRate.IsPositive() {
-		return decimal.Zero, shippingFee
-	}
-	if taxIncluded {
-		net := shippingFee.Div(decimal.NewFromInt(1).Add(taxRate))
-		return shippingFee.Sub(net), shippingFee
-	}
-	tax = shippingFee.Mul(taxRate)
-	return tax, shippingFee.Add(tax)
 }
 
 // resolveCarrierCode returns the template carrier code, falling back to
