@@ -173,6 +173,31 @@ CREATE TABLE IF NOT EXISTS `shipping_template_mappings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Shipping template mappings table';
 
 -- ============================================
+-- 区域目录表 (regions) - 多层级国家/省/市/区
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `regions` (
+    `id` BIGINT NOT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0=平台预置数据',
+    `code` VARCHAR(20) NOT NULL COMMENT '区域编码（如 US、US-CA、110000）',
+    `name` VARCHAR(100) NOT NULL,
+    `level` INT NOT NULL DEFAULT 1 COMMENT '1=country, 2=province, 3=city, 4=district',
+    `parent_code` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '父级区域code',
+    `country_code` VARCHAR(2) NOT NULL DEFAULT 'CN' COMMENT 'ISO 3166-1 alpha-2',
+    `postal_pattern` VARCHAR(255) NULL COMMENT '邮编正则模式',
+    `sort` INT NOT NULL DEFAULT 0,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`, `deleted_at`),
+    INDEX `idx_country` (`country_code`),
+    INDEX `idx_country_parent` (`country_code`, `parent_code`),
+    INDEX `idx_parent` (`parent_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='区域目录表（多层级国家/省/市）';
+
+-- ============================================
 -- 运费区域城市关联表 (shipping_zone_regions)
 -- ============================================
 
