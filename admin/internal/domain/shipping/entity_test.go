@@ -99,3 +99,25 @@ func TestShippingZone_I18nAndSurchargeFields(t *testing.T) {
 		t.Errorf("expected MarketID=2, got %d", zone.MarketID)
 	}
 }
+
+func TestShippingZone_CalculateFee_ByVolume(t *testing.T) {
+	zone := &ShippingZone{
+		FeeType:           FeeTypeByVolume,
+		FirstUnit:         1000, // 首件 1000g
+		FirstFee:          decimal.RequireFromString("10.00"),
+		AdditionalUnit:    500,
+		AdditionalFee:     decimal.RequireFromString("3.00"),
+		VolumetricDivisor: 5000,
+	}
+	// 商品: 长宽高 200mm × 200mm × 200mm → 体积 = 8,000,000 mm³ = 8000 cm³ → 体积重 1600g
+	items := []CalculateItem{
+		{ProductID: 1, Quantity: 1, Weight: 500, Length: 200, Width: 200, Height: 200, Price: decimal.NewFromInt(20)},
+	}
+	fee := zone.CalculateFee(items, decimal.NewFromInt(20), 1)
+	// 实重 500g, 体积重 1600g, 取大 = 1600g
+	// 超过首件 1000g 600g, 600/500=1.2, 向上取整 = 2 续件
+	// fee = 10 + 3*2 = 16
+	if !fee.Equal(decimal.RequireFromString("16.00")) {
+		t.Errorf("expected 16.00, got %s", fee)
+	}
+}

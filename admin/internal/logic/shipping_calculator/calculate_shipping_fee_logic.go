@@ -35,6 +35,9 @@ type parsedItem struct {
 	skuID     int64
 	quantity  int
 	weight    int
+	length    int
+	width     int
+	height    int
 	price     decimal.Decimal
 }
 
@@ -88,6 +91,9 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 			skuID:     skuID,
 			quantity:  item.Quantity,
 			weight:    item.Weight,
+			length:    item.Length,
+			width:     item.Width,
+			height:    item.Height,
 			price:     price,
 		}
 		parsed = append(parsed, pi)
@@ -96,6 +102,9 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 			SKUID:     pi.skuID,
 			Quantity:  pi.quantity,
 			Weight:    pi.weight,
+			Length:    pi.length,
+			Width:     pi.width,
+			Height:    pi.height,
 			Price:     pi.price,
 		})
 		orderAmount = orderAmount.Add(pi.price.Mul(decimal.NewFromInt(int64(pi.quantity))))

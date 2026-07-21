@@ -257,8 +257,30 @@ type CalculateItem struct {
 	ProductID int64
 	SKUID     int64
 	Quantity  int
-	Weight    int             // 克
+	Weight    int             // 克（实重）
+	Length    int             // mm
+	Width     int             // mm
+	Height    int             // mm
 	Price     decimal.Decimal // 金额
+}
+
+// VolumetricWeight 计算体积重（克）：L*W*H mm³ → cm³ * 1000 / divisor。
+// 任何维度为 0 或 divisor 非正时返回 0。
+func (item CalculateItem) VolumetricWeight(divisor int) int {
+	if item.Length <= 0 || item.Width <= 0 || item.Height <= 0 || divisor <= 0 {
+		return 0
+	}
+	volumeCm3 := (item.Length * item.Width * item.Height) / 1000
+	return (volumeCm3 * 1000) / divisor
+}
+
+// ChargeableWeight 取实重与体积重的较大值（计费重量）。
+func (item CalculateItem) ChargeableWeight(divisor int) int {
+	volumetric := item.VolumetricWeight(divisor)
+	if volumetric > item.Weight {
+		return volumetric
+	}
+	return item.Weight
 }
 
 // CalculateShippingFeeResult 计算运费结果
@@ -299,14 +321,19 @@ func (z *ShippingZone) CalculateFee(items []CalculateItem, orderAmount decimal.D
 
 	// 计算总单位数
 	var totalUnits int
+	divisor := z.VolumetricDivisor
+	if divisor <= 0 {
+		divisor = DefaultVolumetricDivisor
+	}
 	switch z.FeeType {
 	case FeeTypeByCount:
 		for _, item := range items {
 			totalUnits += item.Quantity
 		}
-	case FeeTypeByWeight:
+	case FeeTypeByWeight, FeeTypeByVolume:
 		for _, item := range items {
-			totalUnits += item.Weight
+			cw := item.ChargeableWeight(divisor)
+			totalUnits += cw * item.Quantity
 		}
 	}
 
