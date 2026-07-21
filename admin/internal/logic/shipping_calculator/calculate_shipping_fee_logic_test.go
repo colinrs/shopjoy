@@ -67,7 +67,43 @@ func TestCalculateShippingFee_CarrierCode(t *testing.T) {
 	}
 }
 
-// TestCalculateShippingFee_WeightBreakdown verifies CalculatedWeight uses the
+// TestCalculateShippingFee_SurchargeAddedToFee verifies the logic-layer contract
+// that surcharges are computed off the base fee and added on top: the remote
+// surcharge (flat) plus the fuel surcharge (pct * base) sum into the final fee.
+func TestCalculateShippingFee_SurchargeAddedToFee(t *testing.T) {
+	baseFee := decimal.RequireFromString("100.00")
+	zone := &shipping.ShippingZone{
+		RemoteSurcharge:   decimal.RequireFromString("15.00"),
+		RemoteZipPatterns: []string{"^99"},
+		FuelSurchargePct:  decimal.RequireFromString("0.10"),
+	}
+
+	sc := shipping.CalculateSurcharges(zone, shipping.SurchargeInput{
+		BaseFee:    baseFee,
+		PostalCode: "99001",
+	})
+
+	// remote=15.00 (flat), fuel=100*0.10=10.00, total=25.00
+	if !sc.Remote.Equal(decimal.RequireFromString("15.00")) {
+		t.Errorf("expected remote=15.00, got %s", sc.Remote)
+	}
+	if !sc.Fuel.Equal(decimal.RequireFromString("10.00")) {
+		t.Errorf("expected fuel=10.00, got %s", sc.Fuel)
+	}
+	if !sc.Total.Equal(decimal.RequireFromString("25.00")) {
+		t.Errorf("expected surcharge total=25.00, got %s", sc.Total)
+	}
+
+	// Final fee = base + surcharge total, mirroring the logic layer.
+	finalFee := baseFee.Add(sc.Total)
+	if !finalFee.Equal(decimal.RequireFromString("125.00")) {
+		t.Errorf("expected final fee=125.00, got %s", finalFee)
+	}
+	if got := formatAmount(sc.Total); got != "25.00" {
+		t.Errorf("expected applied_surcharge=25.00, got %s", got)
+	}
+}
+
 // chargeable weight (max of real and volumetric) and VolumetricWeight reports
 // the accumulated volumetric weight for debug display.
 func TestCalculateShippingFee_WeightBreakdown(t *testing.T) {

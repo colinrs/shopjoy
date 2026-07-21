@@ -120,6 +120,14 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	// Calculate shipping fee
 	shippingFee := zone.CalculateFee(items, orderAmount, totalQuantity)
 
+	// Surcharges: remote-area + fuel are computed off the base shipping fee and
+	// added on top before tax is derived, so tax applies to the surcharged fee.
+	surcharge := shipping.CalculateSurcharges(zone, shipping.SurchargeInput{
+		BaseFee:    shippingFee,
+		PostalCode: req.Address.PostalCode,
+	})
+	shippingFee = shippingFee.Add(surcharge.Total)
+
 	// Tax + Total: when the zone is taxable, derive tax from the shipping fee.
 	// Non-taxable zones (or a zero rate) yield tax=0 and total==shippingFee.
 	var tax, total decimal.Decimal
@@ -165,6 +173,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 			CalculatedWeight: chargeableWeight,
 			VolumetricWeight: volumetricWeight,
 			CalculatedUnits:  totalQuantity,
+			AppliedSurcharge: formatAmount(surcharge.Total),
 			AppliedTax:       formatAmount(tax),
 		},
 	}, nil
