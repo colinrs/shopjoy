@@ -36,28 +36,29 @@ func NewCreateShippingZoneLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 // mapping in a comment block.
 //
 // ─── wire → entity field map (anti-silent-drop guard) ───
-//   wire.TemplateID          → entity.TemplateID           (required, path)
-//   wire.Currency            → entity.Currency             (optional, default "CNY")
-//   wire.Name                → entity.Name                 (required)
-//   wire.NameI18n ([]Entry)  → entity.NameI18n (StringI18n) via toStringI18n()
-//   wire.Regions             → entity.Regions              (required)
-//   wire.FeeType             → entity.FeeType              (required, validated IsValidV2)
-//   wire.FirstUnit           → entity.FirstUnit            (int)
-//   wire.FirstFee            → entity.FirstFee             (string → decimal via parseAmount)
-//   wire.AdditionalUnit      → entity.AdditionalUnit       (int)
-//   wire.AdditionalFee       → entity.AdditionalFee        (string → decimal via parseAmount)
-//   wire.FreeThresholdAmount → entity.FreeThresholdAmount  (string → decimal via parseAmount)
-//   wire.FreeThresholdCount  → entity.FreeThresholdCount   (int)
-//   wire.Taxable             → entity.Taxable              (bool, P1-6)
-//   wire.TaxRate             → entity.TaxRate              (string → decimal via parseAmount)
-//   wire.TaxIncluded         → entity.TaxIncluded          (bool, P1-6)
-//   wire.IossApplicable      → entity.IossApplicable       (bool, P1-6)
-//   wire.RemoteSurcharge     → entity.RemoteSurcharge      (string → decimal via parseAmount, P1-7)
-//   wire.RemoteZipPatterns   → entity.RemoteZipPatterns    ([]string → StringArray, P1-7)
-//   wire.FuelSurchargePct    → entity.FuelSurchargePct     (string → decimal via parseAmount, P1-8)
-//   wire.VolumetricDivisor   → entity.VolumetricDivisor    (int, P1-9; default 5000)
-//   wire.Sort                → entity.Sort                 (int)
-//   from ctx                 → entity.TenantID
+//
+//	wire.TemplateID          → entity.TemplateID           (required, path)
+//	wire.Currency            → entity.Currency             (optional, default "CNY")
+//	wire.Name                → entity.Name                 (required)
+//	wire.NameI18n ([]Entry)  → entity.NameI18n (StringI18n) via toStringI18n()
+//	wire.Regions             → entity.Regions              (required)
+//	wire.FeeType             → entity.FeeType              (required, validated IsValidV2)
+//	wire.FirstUnit           → entity.FirstUnit            (int)
+//	wire.FirstFee            → entity.FirstFee             (string → decimal via parseAmount)
+//	wire.AdditionalUnit      → entity.AdditionalUnit       (int)
+//	wire.AdditionalFee       → entity.AdditionalFee        (string → decimal via parseAmount)
+//	wire.FreeThresholdAmount → entity.FreeThresholdAmount  (string → decimal via parseAmount)
+//	wire.FreeThresholdCount  → entity.FreeThresholdCount   (int)
+//	wire.Taxable             → entity.Taxable              (bool, P1-6)
+//	wire.TaxRate             → entity.TaxRate              (string → decimal via parseAmount)
+//	wire.TaxIncluded         → entity.TaxIncluded          (bool, P1-6)
+//	wire.IossApplicable      → entity.IossApplicable       (bool, P1-6)
+//	wire.RemoteSurcharge     → entity.RemoteSurcharge      (string → decimal via parseAmount, P1-7)
+//	wire.RemoteZipPatterns   → entity.RemoteZipPatterns    ([]string → StringArray, P1-7)
+//	wire.FuelSurchargePct    → entity.FuelSurchargePct     (string → decimal via parseAmount, P1-8)
+//	wire.VolumetricDivisor   → entity.VolumetricDivisor    (int, P1-9; default 5000)
+//	wire.Sort                → entity.Sort                 (int)
+//	from ctx                 → entity.TenantID
 func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZoneReq) (resp *types.ShippingZoneDetail, err error) {
 	// Resolve tenantID from context (REQUIRED for multi-tenancy).
 	tenantID, _ := contextx.GetTenantID(l.ctx)
@@ -76,8 +77,20 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 		}
 	}
 
-	// Verify template exists (and inherit Currency/MarketID from template
-	// when not supplied — wire zone Currency/MarketID optional).
+	// Load the parent template. Two invariants we must enforce before
+	// constructing the zone entity:
+	//   1. Tenant ownership — a zone under a template from another tenant
+	//      would leak cross-tenant state. We treat "template not owned by
+	//      caller's tenant" as not-found (same error code as a missing
+	//      template) to avoid leaking the existence of another tenant's row.
+	//   2. Currency consistency — a zone's monetary amounts and the parent
+	//      template's currency must agree. Previously, a caller passing
+	//      req.Currency = "EUR" against a USD template was silently coerced
+	//      (the request was overridden with the template's currency while
+	//      keeping the caller's numbers, producing a zone whose config
+	//      displayed in one currency but stored amounts in another).
+	//      We now reject the request with ErrShippingTemplateMarketMismatch
+	//      when both sides specify a currency and they disagree.
 	var (
 		templateCurrency = defaultCurrency(req.Currency)
 		marketID         int64
@@ -87,11 +100,20 @@ func (l *CreateShippingZoneLogic) CreateShippingZone(req *types.CreateShippingZo
 		return nil, tplErr
 	}
 	if tpl != nil {
-		marketID = tpl.MarketID
-		// If caller didn't specify currency, inherit from template.
-		if req.Currency == "" {
-			templateCurrency = tpl.Currency
+		// Tenant ownership check.
+		if tpl.TenantID != tenantID {
+			return nil, code.ErrShippingTemplateNotFound
 		}
+		marketID = tpl.MarketID
+		// Currency consistency: if caller specified a currency AND the
+		// template also has one, they must match. Mismatch rejects the
+		// request rather than silently coercing (the previous behavior
+		// caused zone configs to display in one currency while storing
+		// amounts in another).
+		if req.Currency != "" && tpl.Currency != "" && req.Currency != tpl.Currency {
+			return nil, code.ErrShippingTemplateMarketMismatch
+		}
+		templateCurrency = resolveZoneCurrency(req.Currency, tpl.Currency)
 	}
 
 	// Build zone entity with ALL 9 new fields explicitly mapped.
@@ -185,6 +207,29 @@ func defaultCurrency(c string) string {
 		return "CNY"
 	}
 	return c
+}
+
+// resolveZoneCurrency determines the Currency value to persist on a zone,
+// enforcing consistency with the parent template.
+//
+//   - When the caller passes no currency, the template's currency is
+//     inherited (with a fallback to "CNY" if the template also has none).
+//   - When the caller passes a currency and the template has one set,
+//     the two must match exactly. A mismatch indicates the caller's
+//     amounts are denominated in a different currency than the parent
+//     template's monetary amounts — persisting both would create a zone
+//     whose config is displayed in one currency while storing amounts in
+//     another. We reject with ErrShippingTemplateMarketMismatch.
+//   - When the caller passes a currency but the template's currency is
+//     empty (legacy/unspecified templates), we trust the caller.
+func resolveZoneCurrency(callerCurrency, templateCurrency string) string {
+	if callerCurrency == "" {
+		if templateCurrency != "" {
+			return templateCurrency
+		}
+		return "CNY"
+	}
+	return callerCurrency
 }
 
 // defaultInt returns v if non-zero, otherwise def.

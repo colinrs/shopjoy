@@ -169,6 +169,42 @@ func TestDefaultCurrency(t *testing.T) {
 	}
 }
 
+// TestResolveZoneCurrency documents the C4 currency-resolution contract:
+// a zone's persisted currency is determined by the combination of the
+// caller's input and the parent template's currency.
+//
+// Rules:
+//   - Caller empty + template empty   → "CNY" (safe default).
+//   - Caller empty + template set     → template's currency (inherit).
+//   - Caller set   + template empty   → caller's currency (trust caller).
+//   - Caller set   + template set + match   → caller's currency.
+//   - Caller set   + template set + MISMATCH → caller currency preserved
+//     by the helper, but the caller of CreateShippingZone must short-circuit
+//     with ErrShippingTemplateMarketMismatch BEFORE invoking this helper.
+//     (The mismatch path is covered by TestCreateShippingZone_CurrencyMismatch
+//     behavior contract in the C4 brief; this helper verifies only the
+//     non-rejected paths.)
+func TestResolveZoneCurrency(t *testing.T) {
+	cases := []struct {
+		name                                   string
+		callerCurrency, templateCurrency, want string
+	}{
+		{"both empty → CNY", "", "", "CNY"},
+		{"caller empty, template USD → inherit USD", "", "USD", "USD"},
+		{"caller USD, template empty → trust caller", "USD", "", "USD"},
+		{"caller EUR, template EUR → EUR (match)", "EUR", "EUR", "EUR"},
+		{"caller CNY, template CNY → CNY (match)", "CNY", "CNY", "CNY"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := resolveZoneCurrency(c.callerCurrency, c.templateCurrency); got != c.want {
+				t.Errorf("resolveZoneCurrency(%q, %q) = %q, want %q",
+					c.callerCurrency, c.templateCurrency, got, c.want)
+			}
+		})
+	}
+}
+
 // TestDefaultInt verifies zero input defaults to the supplied fallback.
 func TestDefaultInt(t *testing.T) {
 	cases := []struct {
@@ -190,13 +226,13 @@ func TestDefaultInt(t *testing.T) {
 func TestShippingZone_ValidateByVolume(t *testing.T) {
 	// Missing VolumetricDivisor → must fail.
 	z := &shipping.ShippingZone{
-		Name:            "EU Zone",
-		Regions:         shipping.Regions{"DE"},
-		FeeType:         shipping.FeeTypeByVolume,
-		FirstUnit:       1,
-		FirstFee:        decimal.RequireFromString("5.00"),
-		AdditionalUnit:  1,
-		AdditionalFee:   decimal.RequireFromString("2.00"),
+		Name:           "EU Zone",
+		Regions:        shipping.Regions{"DE"},
+		FeeType:        shipping.FeeTypeByVolume,
+		FirstUnit:      1,
+		FirstFee:       decimal.RequireFromString("5.00"),
+		AdditionalUnit: 1,
+		AdditionalFee:  decimal.RequireFromString("2.00"),
 	}
 	if err := z.Validate(); err == nil {
 		t.Error("expected Validate() to fail when by_volume lacks VolumetricDivisor")
