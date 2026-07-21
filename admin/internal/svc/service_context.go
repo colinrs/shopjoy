@@ -22,6 +22,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/media"
 	"github.com/colinrs/shopjoy/admin/internal/domain/points"
 	"github.com/colinrs/shopjoy/admin/internal/domain/product"
+	"github.com/colinrs/shopjoy/admin/internal/domain/region"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
@@ -86,6 +87,8 @@ type ServiceContext struct {
 	AdminUserRepo  adminuser.Repository
 	// Shipping
 	ShippingRepo persistence.ShippingTemplateRepository
+	// Region directory
+	RegionRepo region.RegionRepository
 	// Media
 	MediaRepo media.Repository
 	// Storage
@@ -279,6 +282,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminUserRepo:  adminUserRepo,
 		// Shipping
 		ShippingRepo: persistence.NewShippingTemplateRepository(),
+		// Region directory
+		RegionRepo: persistence.NewRegionRepository(),
 
 		// Media
 		MediaRepo: mediaRepo,

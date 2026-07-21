@@ -1670,7 +1670,9 @@ type ListRefundsResp struct {
 }
 
 type ListRegionsReq struct {
-	ParentCode string `form:"parent_code,optional"`
+	CountryCode string `form:"country_code,optional"` // ISO 3166-1 alpha-2
+	ParentCode  string `form:"parent_code,optional"`
+	Level       int    `form:"level,optional"`
 }
 
 type ListRegionsResp struct {
@@ -2426,11 +2428,13 @@ type RefundStatisticsResp struct {
 }
 
 type RegionItem struct {
-	Code       string        `json:"code"`
-	Name       string        `json:"name"`
-	Level      int           `json:"level"`
-	ParentCode string        `json:"parent_code"`
-	Children   []*RegionItem `json:"children,optional"`
+	Code          string        `json:"code"`
+	Name          string        `json:"name"`
+	Level         int           `json:"level"`
+	ParentCode    string        `json:"parent_code"`
+	CountryCode   string        `json:"country_code"`
+	PostalPattern string        `json:"postal_pattern,optional"`
+	Children      []*RegionItem `json:"children,optional"`
 }
 
 type RegisterTenantAdminRequest struct {
