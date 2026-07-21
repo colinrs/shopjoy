@@ -56,3 +56,26 @@ func TestWeightConverter_FromGrams(t *testing.T) {
 		})
 	}
 }
+
+func TestWeightUnit_IsValid(t *testing.T) {
+	tests := []struct {
+		name string
+		unit WeightUnit
+		want bool
+	}{
+		{"gram valid", WeightUnitGram, true},
+		{"kilogram valid", WeightUnitKilogram, true},
+		{"pound valid", WeightUnitPound, true},
+		{"ounce valid", WeightUnitOunce, true},
+		{"misspelled lbs", WeightUnit("lbs"), false},
+		{"wrong case KG", WeightUnit("KG"), false},
+		{"empty string", WeightUnit(""), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.unit.IsValid(); got != tt.want {
+				t.Errorf("WeightUnit(%q).IsValid() = %v, want %v", tt.unit, got, tt.want)
+			}
+		})
+	}
+}

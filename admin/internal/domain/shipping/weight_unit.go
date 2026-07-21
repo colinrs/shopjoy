@@ -23,6 +23,15 @@ const (
 	gramsPerOunce    = 28.349523125
 )
 
+// IsValid 检查 WeightUnit 是否在已知单位列表内
+func (u WeightUnit) IsValid() bool {
+	switch u {
+	case WeightUnitGram, WeightUnitKilogram, WeightUnitPound, WeightUnitOunce:
+		return true
+	}
+	return false
+}
+
 // gramsPerUnit 返回 1 个指定单位对应的克数；未知单位按克处理。
 func gramsPerUnit(unit WeightUnit) float64 {
 	switch unit {
