@@ -18,6 +18,10 @@
         <el-icon><Odometer /></el-icon>
         {{ $t('shipping.byWeight') }}
       </el-radio-button>
+      <el-radio-button value="by_volume">
+        <el-icon><DataLine /></el-icon>
+        {{ $t('shipping.byVolume') }}
+      </el-radio-button>
       <el-radio-button value="free">
         <el-icon><Present /></el-icon>
         {{ $t('shipping.free') }}
@@ -162,6 +166,81 @@
           </span>
         </div>
       </template>
+
+      <!-- By Volume -->
+      <template v-if="localFeeType === 'by_volume'">
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item :label="$t('shipping.firstVolumeCm3')">
+              <el-input-number
+                v-model="localForm.first_unit"
+                :min="1"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="$t('shipping.firstVolumeFee')">
+              <el-input-number
+                v-model="localForm.first_fee"
+                :min="0"
+                :precision="2"
+                style="width: 100%"
+              >
+                <template #prefix>
+                  ¥
+                </template>
+              </el-input-number>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item :label="$t('shipping.additionalVolumeCm3')">
+              <el-input-number
+                v-model="localForm.additional_unit"
+                :min="1"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="$t('shipping.additionalVolumeFee')">
+              <el-input-number
+                v-model="localForm.additional_fee"
+                :min="0"
+                :precision="2"
+                style="width: 100%"
+              >
+                <template #prefix>
+                  ¥
+                </template>
+              </el-input-number>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="24">
+            <el-form-item :label="$t('shipping.volumetricDivisor')">
+              <el-input-number
+                :model-value="props.modelValue.volumetric_divisor"
+                :min="1"
+                :max="100000"
+                style="width: 200px"
+                @update:model-value="updateVolumetricDivisor"
+              />
+              <span class="volumetric-tip">
+                {{ $t('shipping.volumetricDivisorTip') }}
+              </span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <div class="fee-preview">
+          <span class="preview-text">
+            {{ $t('shipping.billingExampleVolume', { first: localForm.first_unit, fee: localForm.first_fee, add: localForm.additional_unit, addFee: localForm.additional_fee }) }}
+          </span>
+        </div>
+      </template>
     </div>
 
     <!-- Free Shipping Note -->
@@ -178,7 +257,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Coin, Box, Odometer, Present } from '@element-plus/icons-vue'
+import { Coin, Box, Odometer, Present, DataLine } from '@element-plus/icons-vue'
 import type { CreateZoneRequest } from '@/api/shipping'
 
 const props = defineProps<{
@@ -201,6 +280,13 @@ const localForm = ref({
 // Methods
 const handleFeeTypeChange = () => {
   emitUpdate()
+}
+
+const updateVolumetricDivisor = (val: number | undefined) => {
+  emit('update:modelValue', {
+    ...props.modelValue,
+    volumetric_divisor: val || undefined
+  })
 }
 
 const emitUpdate = () => {
@@ -286,6 +372,12 @@ watch([localFeeType, localForm], () => {
 .preview-text {
   font-size: 13px;
   color: #374151;
+}
+
+.volumetric-tip {
+  margin-left: 12px;
+  font-size: 12px;
+  color: #9CA3AF;
 }
 
 :deep(.el-alert--success) {

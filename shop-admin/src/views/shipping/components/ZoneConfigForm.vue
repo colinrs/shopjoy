@@ -128,6 +128,130 @@
       <FeeTypeSelector v-model="form" />
     </el-form-item>
 
+    <!-- P1-6: Tax Settings -->
+    <el-divider content-position="left">
+      <span class="section-label">{{ $t('shipping.taxSettings') }}</span>
+    </el-divider>
+    <el-row :gutter="16">
+      <el-col :span="6">
+        <el-form-item :label="$t('shipping.taxable')">
+          <el-switch v-model="form.taxable" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="6">
+        <el-form-item :label="$t('shipping.taxRate')">
+          <el-input
+            v-model="form.tax_rate"
+            :placeholder="$t('shipping.taxRatePlaceholder')"
+            :disabled="!form.taxable"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="6">
+        <el-form-item :label="$t('shipping.taxIncluded')">
+          <el-switch v-model="form.tax_included" :disabled="!form.taxable" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="6">
+        <el-form-item :label="$t('shipping.iossApplicable')">
+          <el-switch v-model="form.ioss_applicable" :disabled="!form.taxable" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- P1-7: Remote Area Surcharge -->
+    <el-divider content-position="left">
+      <span class="section-label">{{ $t('shipping.remoteArea') }}</span>
+    </el-divider>
+    <el-row :gutter="16">
+      <el-col :span="8">
+        <el-form-item :label="$t('shipping.remoteSurcharge')">
+          <el-input
+            v-model="form.remote_surcharge"
+            placeholder="0.00"
+          >
+            <template #prefix>
+              ¥
+            </template>
+          </el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="16">
+        <el-form-item :label="$t('shipping.remoteZipPatterns')">
+          <el-input
+            v-model="remoteZipText"
+            type="textarea"
+            :rows="2"
+            :placeholder="$t('shipping.remoteZipPatternsPlaceholder')"
+            @blur="syncRemoteZipPatterns"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- P1-8: Fuel Surcharge -->
+    <el-divider content-position="left">
+      <span class="section-label">{{ $t('shipping.fuelSurcharge') }}</span>
+    </el-divider>
+    <el-row :gutter="16">
+      <el-col :span="8">
+        <el-form-item :label="$t('shipping.fuelSurchargePct')">
+          <el-input
+            v-model="form.fuel_surcharge_pct"
+            placeholder="0"
+          >
+            <template #append>
+              %
+            </template>
+          </el-input>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- P1-10: Multilingual Name -->
+    <el-divider content-position="left">
+      <span class="section-label">{{ $t('shipping.nameI18n') }}</span>
+    </el-divider>
+    <div
+      v-for="(entry, idx) in form.name_i18n"
+      :key="idx"
+      class="i18n-row"
+    >
+      <el-row :gutter="8" align="middle">
+        <el-col :span="8">
+          <el-input
+            v-model="entry.locale"
+            :placeholder="$t('shipping.localePlaceholder')"
+          />
+        </el-col>
+        <el-col :span="14">
+          <el-input
+            v-model="entry.name"
+            :placeholder="$t('shipping.zoneName')"
+          />
+        </el-col>
+        <el-col :span="2">
+          <el-button
+            link
+            type="danger"
+            @click="removeNameI18nEntry(idx)"
+          >
+            <el-icon><Delete /></el-icon>
+          </el-button>
+        </el-col>
+      </el-row>
+    </div>
+    <el-form-item>
+      <el-button
+        link
+        type="primary"
+        @click="addNameI18nEntry"
+      >
+        <el-icon><Plus /></el-icon>
+        {{ $t('shipping.addNameI18n') }}
+      </el-button>
+    </el-form-item>
+
     <el-form-item :label="$t('shipping.freeShippingCondition')">
       <el-row :gutter="12">
         <el-col :span="12">
@@ -186,8 +310,8 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormItemRule } from 'element-plus'
-import { Rank, Edit, Delete, Location } from '@element-plus/icons-vue'
-import type { ShippingZone, CreateZoneRequest } from '@/api/shipping'
+import { Rank, Edit, Delete, Location, Plus } from '@element-plus/icons-vue'
+import type { ShippingZone, CreateZoneRequest, NameI18nEntry } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'
 import RegionSelector from './RegionSelector.vue'
 
@@ -211,10 +335,12 @@ const formRef = ref()
 const submitting = ref(false)
 const selectedRegionsText = ref('')
 const regionSelectorVisible = ref(false)
+const remoteZipText = ref('')
 
 interface ZoneForm extends CreateZoneRequest {
   enable_amount_threshold: boolean
   enable_count_threshold: boolean
+  name_i18n: NameI18nEntry[]
 }
 
 const form = reactive<ZoneForm>({
@@ -229,7 +355,21 @@ const form = reactive<ZoneForm>({
   free_threshold_count: 0,
   sort: 0,
   enable_amount_threshold: false,
-  enable_count_threshold: false
+  enable_count_threshold: false,
+  // P1-6 税费
+  taxable: false,
+  tax_rate: '0',
+  tax_included: false,
+  ioss_applicable: false,
+  // P1-7 偏远地区
+  remote_surcharge: '0',
+  remote_zip_patterns: [],
+  // P1-8 燃油附加费
+  fuel_surcharge_pct: '0',
+  // P1-9 体积重除数
+  volumetric_divisor: 5000,
+  // P1-10 多语言
+  name_i18n: []
 })
 
 const rules = {
@@ -274,6 +414,7 @@ const getFeeTypeLabel = (feeType: string) => {
     case 'fixed': return t('shipping.fixed')
     case 'by_count': return t('shipping.byCount')
     case 'by_weight': return t('shipping.byWeight')
+    case 'by_volume': return t('shipping.byVolume')
     case 'free': return t('shipping.free')
     default: return feeType
   }
@@ -295,6 +436,8 @@ const formatFeeConfig = (zone: ShippingZone) => {
       return t('shipping.feeConfigByCount', { first: zone.first_unit, fee: zone.first_fee, add: zone.additional_unit, addFee: zone.additional_fee })
     case 'by_weight':
       return t('shipping.feeConfigByWeight', { first: zone.first_unit, fee: zone.first_fee, add: zone.additional_unit, addFee: zone.additional_fee })
+    case 'by_volume':
+      return t('shipping.feeConfigByVolume', { first: zone.first_unit, fee: zone.first_fee, add: zone.additional_unit, addFee: zone.additional_fee })
     case 'free':
       return t('shipping.free')
     default:
@@ -336,8 +479,15 @@ const handleSubmit = async () => {
     if (valid) {
       submitting.value = true
       try {
+        // Sync textarea → array before submit
+        syncRemoteZipPatterns()
+        // Filter empty i18n entries
+        const cleanNameI18n = (form.name_i18n || []).filter(
+          (e) => e.locale && e.locale.trim() && e.name && e.name.trim()
+        )
         const data: CreateZoneRequest = {
           name: form.name,
+          name_i18n: cleanNameI18n.length > 0 ? cleanNameI18n : undefined,
           regions: form.regions,
           fee_type: form.fee_type,
           first_unit: form.first_unit,
@@ -346,6 +496,18 @@ const handleSubmit = async () => {
           additional_fee: form.additional_fee,
           free_threshold_amount: form.enable_amount_threshold ? form.free_threshold_amount : '0',
           free_threshold_count: form.enable_count_threshold ? form.free_threshold_count : 0,
+          // P1-6
+          taxable: form.taxable,
+          tax_rate: form.taxable ? (form.tax_rate || '0') : undefined,
+          tax_included: form.taxable ? form.tax_included : undefined,
+          ioss_applicable: form.taxable ? form.ioss_applicable : undefined,
+          // P1-7
+          remote_surcharge: form.remote_surcharge || '0',
+          remote_zip_patterns: form.remote_zip_patterns || [],
+          // P1-8
+          fuel_surcharge_pct: form.fuel_surcharge_pct || '0',
+          // P1-9
+          volumetric_divisor: form.fee_type === 'by_volume' ? (form.volumetric_divisor || 5000) : undefined,
           sort: form.sort
         }
         emit('save', data)
@@ -354,6 +516,26 @@ const handleSubmit = async () => {
       }
     }
   })
+}
+
+// Multilingual name helpers
+const addNameI18nEntry = () => {
+  if (!form.name_i18n) form.name_i18n = []
+  form.name_i18n.push({ locale: '', name: '' })
+}
+
+const removeNameI18nEntry = (idx: number) => {
+  if (!form.name_i18n) return
+  form.name_i18n.splice(idx, 1)
+}
+
+// Remote ZIP patterns: textarea (one per line) → string[]
+const syncRemoteZipPatterns = () => {
+  const lines = remoteZipText.value
+    .split(/[\n,]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+  form.remote_zip_patterns = lines
 }
 
 // Initialize form when editing
@@ -373,6 +555,21 @@ watch(() => props.zone, (newZone) => {
     form.free_threshold_count = count
     form.enable_amount_threshold = amount > 0
     form.enable_count_threshold = count > 0
+    // P1-6
+    form.taxable = newZone.taxable
+    form.tax_rate = newZone.tax_rate || '0'
+    form.tax_included = newZone.tax_included
+    form.ioss_applicable = newZone.ioss_applicable
+    // P1-7
+    form.remote_surcharge = newZone.remote_surcharge || '0'
+    form.remote_zip_patterns = newZone.remote_zip_patterns || []
+    remoteZipText.value = (newZone.remote_zip_patterns || []).join('\n')
+    // P1-8
+    form.fuel_surcharge_pct = newZone.fuel_surcharge_pct || '0'
+    // P1-9
+    form.volumetric_divisor = newZone.volumetric_divisor || 5000
+    // P1-10
+    form.name_i18n = newZone.name_i18n ? newZone.name_i18n.map((e) => ({ ...e })) : []
     selectedRegionsText.value = formatRegions(form.regions)
   }
 }, { immediate: true })
@@ -468,5 +665,15 @@ watch(() => props.zone, (newZone) => {
   background-color: rgba(99, 102, 241, 0.1);
   border-color: rgba(99, 102, 241, 0.2);
   color: #6366F1;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6366F1;
+}
+
+.i18n-row {
+  margin-bottom: 8px;
 }
 </style>

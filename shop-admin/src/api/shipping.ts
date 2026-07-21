@@ -83,6 +83,7 @@ export interface UpdateTemplateRequest {
 
 export interface CreateZoneRequest {
   name: string
+  name_i18n?: NameI18nEntry[]
   regions: string[]
   fee_type: 'fixed' | 'by_count' | 'by_weight' | 'by_volume' | 'free'
   first_unit?: number
@@ -91,6 +92,18 @@ export interface CreateZoneRequest {
   additional_fee?: string
   free_threshold_amount?: string
   free_threshold_count?: number
+  // P1-6 税费
+  taxable?: boolean
+  tax_rate?: string
+  tax_included?: boolean
+  ioss_applicable?: boolean
+  // P1-7 偏远地区
+  remote_surcharge?: string
+  remote_zip_patterns?: string[]
+  // P1-8 燃油附加费
+  fuel_surcharge_pct?: string
+  // P1-9 体积重除数
+  volumetric_divisor?: number
   sort?: number
 }
 

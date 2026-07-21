@@ -32,7 +32,39 @@
               {{ $t('shipping.shippingAddress') }}
             </h3>
 
-            <el-form label-width="80px">
+            <el-form label-width="100px">
+              <el-form-item :label="$t('shipping.market')">
+                <el-select
+                  v-model="selectedMarketId"
+                  :placeholder="$t('shipping.market')"
+                  filterable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="m in marketOptions"
+                    :key="m.id"
+                    :label="m.name"
+                    :value="m.id"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item :label="$t('shipping.countryCode')">
+                <el-input
+                  v-model="address.country_code"
+                  :placeholder="$t('shipping.countryCodePlaceholder')"
+                  maxlength="2"
+                  style="text-transform: uppercase"
+                />
+              </el-form-item>
+
+              <el-form-item :label="$t('shipping.postalCode')">
+                <el-input
+                  v-model="address.postal_code"
+                  :placeholder="$t('shipping.postalCode')"
+                />
+              </el-form-item>
+
               <el-form-item :label="$t('shipping.province')">
                 <el-select
                   v-model="address.province_code"
@@ -312,7 +344,8 @@ const address = reactive({
   country_code: '',
   province_code: '',
   city_code: '',
-  district_code: ''
+  district_code: '',
+  postal_code: ''
 })
 
 const testItems = ref<TestItem[]>([])
@@ -337,13 +370,19 @@ const districts = computed(() =>
 const products = ref<Product[]>([])
 
 // Computed
+// International address: country_code + postal_code (city_code optional)
+// China address: province + city + district (country_code defaults to CN)
 const isFormValid = computed(() => {
-  return selectedMarketId.value &&
-         address.province_code &&
-         address.city_code &&
-         address.district_code &&
-         testItems.value.length > 0 &&
-         testItems.value.every(item => item.weight > 0 && item.price > 0)
+  const hasMarket = !!selectedMarketId.value
+  const hasInternationalAddress =
+    address.country_code && address.postal_code
+  const hasChinaAddress =
+    address.province_code && address.city_code && address.district_code
+  const hasAddress = hasInternationalAddress || hasChinaAddress
+  const hasItems =
+    testItems.value.length > 0 &&
+    testItems.value.every((item) => item.weight > 0 && item.price > 0)
+  return hasMarket && hasAddress && hasItems
 })
 
 const getAdditionalUnits = computed(() => {
@@ -459,13 +498,17 @@ const calculateShipping = async () => {
 
   calculating.value = true
   try {
+    // Default country_code to 'CN' for China address mode
+    const countryCode = address.country_code ||
+      (address.province_code ? 'CN' : '')
     const data = await calculateShippingFee({
       market_id: selectedMarketId.value,
       address: {
-        country_code: address.country_code,
+        country_code: countryCode,
         province_code: address.province_code,
         city_code: address.city_code,
-        district_code: address.district_code
+        district_code: address.district_code,
+        postal_code: address.postal_code
       },
       items: testItems.value.map(item => ({
         product_id: item.product_id || '',
