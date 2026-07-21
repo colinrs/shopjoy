@@ -112,7 +112,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 
 	// Find template using priority: Product > Default (market-aware, tenant-scoped)
 	tenantID, _ := contextx.GetTenantID(l.ctx)
-	template, zone := l.findTemplateForItems(tenantID, req.MarketID, req.Address.CityCode, parsed)
+	template, zone := l.findTemplateForItems(tenantID, req.MarketID, req.Address, parsed)
 	if template == nil || zone == nil {
 		return nil, code.ErrShippingTemplateNotFound
 	}
@@ -212,14 +212,14 @@ func sumWeights(items []shipping.CalculateItem, divisor int) (chargeable, volume
 // findTemplateForItems finds the appropriate template and zone using priority: Product > Default.
 // marketID scopes the default-template lookup via FindDefaultByMarket (with fallback to marketID=0).
 // tenantID is REQUIRED (C3 fix) — without it, the storefront could see another tenant's defaults.
-func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID, marketID int64, cityCode string, items []parsedItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
+func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID, marketID int64, address types.CalculatorAddress, items []parsedItem) (*shipping.ShippingTemplate, *shipping.ShippingZone) {
 	// Priority 1: Check for product-specific template
 	for _, item := range items {
 		mapping, err := l.svcCtx.ShippingRepo.FindMappingByTarget(l.ctx, l.svcCtx.DB, shipping.TargetTypeProduct, item.productID)
 		if err == nil && mapping != nil {
 			template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, mapping.TemplateID)
 			if err == nil && template != nil && template.IsActive {
-				zone := l.findZoneForCity(int64(template.ID), cityCode)
+				zone := l.findZoneForAddress(int64(template.ID), address)
 				if zone != nil {
 					return template, zone
 				}
@@ -231,7 +231,7 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID, marketID int6
 	// (falls back to marketID=0 within the same tenant).
 	defaultTemplate, err := l.svcCtx.ShippingRepo.FindDefaultByMarket(l.ctx, l.svcCtx.DB, tenantID, marketID)
 	if err == nil && defaultTemplate != nil {
-		zone := l.findZoneForCity(int64(defaultTemplate.ID), cityCode)
+		zone := l.findZoneForAddress(int64(defaultTemplate.ID), address)
 		if zone != nil {
 			return defaultTemplate, zone
 		}
@@ -240,23 +240,23 @@ func (l *CalculateShippingFeeLogic) findTemplateForItems(tenantID, marketID int6
 	return nil, nil
 }
 
-// findZoneForCity finds a zone matching the city code, or returns the first zone if no match
-func (l *CalculateShippingFeeLogic) findZoneForCity(templateID int64, cityCode string) *shipping.ShippingZone {
-	// Try to find zone matching the city code
-	if cityCode != "" {
-		zones, err := l.svcCtx.ShippingRepo.FindZoneByCityCode(l.ctx, l.svcCtx.DB, cityCode)
-		if err == nil && len(zones) > 0 {
-			return zones[0]
-		}
-	}
-
-	// Fall back to first zone of the template
+// findZoneForAddress picks the best zone for a destination address using the
+// multi-level ZoneMatcher: exact (province/city) > country fallback. The
+// matcher sorts zones by Sort ascending, so the first exact match wins; if
+// none, the lowest-sort zone whose regions include the country code wins.
+// Returns nil when no zone matches and the template has no zones at all.
+func (l *CalculateShippingFeeLogic) findZoneForAddress(templateID int64, address types.CalculatorAddress) *shipping.ShippingZone {
 	zones, err := l.svcCtx.ShippingRepo.FindZonesByTemplateID(l.ctx, l.svcCtx.DB, templateID)
-	if err == nil && len(zones) > 0 {
-		return zones[0]
+	if err != nil || len(zones) == 0 {
+		return nil
 	}
-
-	return nil
+	matcher := shipping.NewZoneMatcher(zones)
+	return matcher.Match(shipping.MatchInput{
+		CountryCode:  address.CountryCode,
+		ProvinceCode: address.ProvinceCode,
+		CityCode:     address.CityCode,
+		PostalCode:   address.PostalCode,
+	})
 }
 
 // parseAmount converts string amount to decimal.Decimal; empty/invalid → 0.
