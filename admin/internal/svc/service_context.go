@@ -56,6 +56,7 @@ type ServiceContext struct {
 	RefundReasonApp         appfulfillment.RefundReasonApp
 	JWTManager              *auth.JWTManager
 	AuthMiddleware          rest.Middleware
+	AcceptLanguage          rest.Middleware
 	ProductRepo             product.Repository
 	ProductMarketRepo       product.ProductMarketRepository
 	MarketRepo              market.Repository
@@ -252,6 +253,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RefundReasonApp:         refundReasonApp,
 		JWTManager:              jwtManager,
 		AuthMiddleware:          authMiddleware,
+		AcceptLanguage:          middleware.AcceptLanguage(),
 		ProductRepo:             productRepo,
 		ProductMarketRepo:       productMarketRepo,
 		MarketRepo:              marketRepo,
