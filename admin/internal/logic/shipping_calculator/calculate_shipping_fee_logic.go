@@ -151,6 +151,13 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	// days so callers always receive a usable SLA instead of 0.
 	estimatedDays := resolveEstimatedDays(l.svcCtx.CarrierRegistry, carrierCode, req.Address.CountryCode)
 
+	// IOSS evaluation: returns the reason string ("", "not_applicable",
+	// "currency_not_eur", "exceeds_threshold") so the frontend can render
+	// the IOSS badge/explanation without re-deriving the threshold logic.
+	// orderAmount + zone.Currency + zone.IossApplicable are all already in
+	// scope from the template/zone resolved above.
+	_, iossReason := shipping.EvaluateIOSS(orderAmount, zone.IossApplicable, zone.Currency)
+
 	// Fee-detail weight breakdown: CalculatedWeight is the chargeable weight
 	// (max of real vs. volumetric), VolumetricWeight is the accumulated
 	// volumetric weight for debug display. Uses the zone's divisor.
@@ -172,6 +179,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		ZoneName:         shippingapp.ResolveZoneName(zone, acceptLanguage),
 		CarrierCode:      carrierCode,
 		EstimatedDays:    estimatedDays,
+		IOSSStatus:       iossReason,
 		FeeDetail: types.FeeCalculationDetail{
 			FeeType:          string(zone.FeeType),
 			FirstUnit:        zone.FirstUnit,

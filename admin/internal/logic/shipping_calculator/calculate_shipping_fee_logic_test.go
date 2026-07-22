@@ -119,6 +119,60 @@ func TestResolveEstimatedDays_NilRegistryIsSafe(t *testing.T) {
 	}
 }
 
+// TestEvaluateIOSS_AllFourReasons exercises the four canonical IOSS outcomes
+// returned by shipping.EvaluateIOSS so the wire string values are pinned.
+// These reason strings are part of the API contract — the frontend renders
+// them directly to explain why IOSS did or did not apply.
+func TestEvaluateIOSS_AllFourReasons(t *testing.T) {
+	cases := []struct {
+		name           string
+		orderValue     string
+		iossApplicable bool
+		currency       string
+		wantReason     string
+	}{
+		{
+			name:           "EUR + under threshold + ioss on → empty reason (applies)",
+			orderValue:     "100.00",
+			iossApplicable: true,
+			currency:       "EUR",
+			wantReason:     "",
+		},
+		{
+			name:           "EUR + >= threshold → exceeds_threshold",
+			orderValue:     "150.00",
+			iossApplicable: true,
+			currency:       "EUR",
+			wantReason:     shipping.IOSSReasonExceedsThreshold,
+		},
+		{
+			name:           "non-EUR currency → currency_not_eur",
+			orderValue:     "50.00",
+			iossApplicable: true,
+			currency:       "USD",
+			wantReason:     shipping.IOSSReasonCurrencyNotEUR,
+		},
+		{
+			name:           "ioss_applicable=false → not_applicable (wins over currency/value)",
+			orderValue:     "50.00",
+			iossApplicable: false,
+			currency:       "EUR",
+			wantReason:     shipping.IOSSReasonNotApplicable,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			orderValue := decimal.RequireFromString(tc.orderValue)
+			_, reason := shipping.EvaluateIOSS(orderValue, tc.iossApplicable, tc.currency)
+			if reason != tc.wantReason {
+				t.Errorf("EvaluateIOSS(%s, applicable=%v, %q) reason=%q, want %q",
+					tc.orderValue, tc.iossApplicable, tc.currency, reason, tc.wantReason)
+			}
+		})
+	}
+}
+
 // TestCalculateShippingFee_SurchargeAddedToFee verifies the logic-layer contract
 // that surcharges are computed off the base fee and added on top: the remote
 // surcharge (flat) plus the fuel surcharge (pct * base) sum into the final fee.

@@ -342,6 +342,7 @@ type CalculateShippingFeeResp struct {
 	CarrierCode      string               `json:"carrier_code"`
 	EstimatedDays    int                  `json:"estimated_days,optional"` // P2-12
 	FeeDetail        FeeCalculationDetail `json:"fee_detail"`
+	IOSSStatus       string               `json:"ioss_status,optional"` // P1-6 EU IOSS reason: ""=applies, "not_applicable" | "currency_not_eur" | "exceeds_threshold"
 }
 
 type CalculatorAddress struct {
