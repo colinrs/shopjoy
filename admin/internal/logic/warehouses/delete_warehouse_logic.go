@@ -25,13 +25,10 @@ func NewDeleteWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) De
 
 func (l *DeleteWarehouseLogic) DeleteWarehouse(req *types.GetWarehouseReq) (resp *types.CreateWarehouseResp, err error) {
 
-	// Find warehouse
-	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
+	// Resolve and authorize: rejects missing TenantID and cross-tenant access.
+	warehouse, err := requireWarehouseOwnership(l.ctx, l.svcCtx, req.ID)
 	if err != nil {
 		return nil, err
-	}
-	if warehouse == nil {
-		return nil, code.ErrInventoryWarehouseNotFound
 	}
 
 	// Cannot delete default warehouse

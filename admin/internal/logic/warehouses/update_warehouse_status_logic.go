@@ -6,7 +6,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,13 +25,10 @@ func NewUpdateWarehouseStatusLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 func (l *UpdateWarehouseStatusLogic) UpdateWarehouseStatus(req *types.UpdateWarehouseStatusReq) (resp *types.WarehouseDetailResp, err error) {
 
-	// Find warehouse
-	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
+	// Resolve and authorize: rejects missing TenantID and cross-tenant access.
+	warehouse, err := requireWarehouseOwnership(l.ctx, l.svcCtx, req.ID)
 	if err != nil {
 		return nil, err
-	}
-	if warehouse == nil {
-		return nil, code.ErrInventoryWarehouseNotFound
 	}
 
 	// Update status

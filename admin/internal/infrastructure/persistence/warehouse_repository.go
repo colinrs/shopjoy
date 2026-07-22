@@ -134,6 +134,22 @@ func (r *warehouseRepo) FindAll(ctx context.Context, db *gorm.DB) ([]*product.Wa
 	return warehouses, nil
 }
 
+func (r *warehouseRepo) FindByTenant(ctx context.Context, db *gorm.DB, tenantID int64) ([]*product.Warehouse, error) {
+	var models []warehouseModel
+	err := db.WithContext(ctx).
+		Where("tenant_id = ? AND deleted_at IS NULL", tenantID).
+		Order("is_default DESC, code ASC").
+		Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+	warehouses := make([]*product.Warehouse, len(models))
+	for i, m := range models {
+		warehouses[i] = m.toEntity()
+	}
+	return warehouses, nil
+}
+
 func (r *warehouseRepo) FindDefault(ctx context.Context, db *gorm.DB) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).

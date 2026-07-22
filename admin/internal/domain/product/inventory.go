@@ -99,6 +99,7 @@ type WarehouseRepository interface {
 	FindByID(ctx context.Context, db *gorm.DB, id int64) (*Warehouse, error)
 	FindByCode(ctx context.Context, db *gorm.DB, code string) (*Warehouse, error)
 	FindAll(ctx context.Context, db *gorm.DB) ([]*Warehouse, error)
+	FindByTenant(ctx context.Context, db *gorm.DB, tenantID int64) ([]*Warehouse, error)
 	FindDefault(ctx context.Context, db *gorm.DB) (*Warehouse, error)
 }
 
