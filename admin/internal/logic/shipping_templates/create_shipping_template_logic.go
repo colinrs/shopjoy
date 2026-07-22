@@ -38,6 +38,18 @@ func (l *CreateShippingTemplateLogic) CreateShippingTemplate(req *types.CreateSh
 	// Resolve tenantID from context (REQUIRED for multi-tenancy)
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 
+	// If a warehouse is specified, validate ownership: must exist and belong to the same tenant.
+	// Warehouse has no MarketID field, so market-level validation is skipped here.
+	if req.WarehouseID > 0 {
+		warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.WarehouseID)
+		if err != nil {
+			return nil, err
+		}
+		if warehouse == nil || warehouse.TenantID.Int64() != tenantID {
+			return nil, code.ErrShippingTemplateWarehouseMismatch
+		}
+	}
+
 	// Create template entity.
 	// ─── wire → entity field map (anti-silent-drop guard) ───
 	//   wire.Name         → entity.Name        (required)

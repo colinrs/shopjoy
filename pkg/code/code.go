@@ -368,13 +368,14 @@ var (
 	ErrInventoryCannotDeleteDefault = &Err{HTTPCode: http.StatusBadRequest, Code: 170009, Msg: "cannot delete default warehouse"}
 
 	// ==================== Shipping Module (230xxx) ====================
-	ErrShippingTemplateNotFound     = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}
-	ErrShippingTemplateNameRequired = &Err{HTTPCode: http.StatusBadRequest, Code: 230002, Msg: "template name is required"}
-	ErrShippingTemplateHasZones     = &Err{HTTPCode: http.StatusBadRequest, Code: 230003, Msg: "cannot delete template with zones"}
-	ErrShippingTemplateIsDefault    = &Err{HTTPCode: http.StatusBadRequest, Code: 230004, Msg: "cannot delete default template"}
-	ErrShippingTemplateDuplicate     = &Err{HTTPCode: http.StatusConflict, Code: 230005, Msg: "template name already exists"}
-	ErrShippingTemplateInvalidCurrency = &Err{HTTPCode: http.StatusBadRequest, Code: 230006, Msg: "invalid currency code"}
-	ErrShippingTemplateMarketMismatch  = &Err{HTTPCode: http.StatusBadRequest, Code: 230007, Msg: "template market does not match zone"}
+	ErrShippingTemplateNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 230001, Msg: "shipping template not found"}
+	ErrShippingTemplateNameRequired      = &Err{HTTPCode: http.StatusBadRequest, Code: 230002, Msg: "template name is required"}
+	ErrShippingTemplateHasZones          = &Err{HTTPCode: http.StatusBadRequest, Code: 230003, Msg: "cannot delete template with zones"}
+	ErrShippingTemplateIsDefault         = &Err{HTTPCode: http.StatusBadRequest, Code: 230004, Msg: "cannot delete default template"}
+	ErrShippingTemplateDuplicate         = &Err{HTTPCode: http.StatusConflict, Code: 230005, Msg: "template name already exists"}
+	ErrShippingTemplateInvalidCurrency   = &Err{HTTPCode: http.StatusBadRequest, Code: 230006, Msg: "invalid currency code"}
+	ErrShippingTemplateMarketMismatch    = &Err{HTTPCode: http.StatusBadRequest, Code: 230007, Msg: "template market does not match zone"}
+	ErrShippingTemplateWarehouseMismatch = &Err{HTTPCode: http.StatusBadRequest, Code: 230008, Msg: "warehouse does not belong to current tenant or does not exist"}
 
 	// Shipping Zone errors (2301xx)
 	ErrShippingZoneNotFound          = &Err{HTTPCode: http.StatusNotFound, Code: 230101, Msg: "shipping zone not found"}

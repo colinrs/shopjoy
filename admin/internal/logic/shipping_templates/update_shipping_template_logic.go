@@ -6,6 +6,8 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
+	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,6 +32,19 @@ func (l *UpdateShippingTemplateLogic) UpdateShippingTemplate(req *types.UpdateSh
 	template, err := l.svcCtx.ShippingRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
+	}
+
+	// If a new warehouse is specified, validate ownership: must exist and belong to the same tenant.
+	// Warehouse has no MarketID field, so market-level validation is skipped here.
+	if req.WarehouseID > 0 {
+		tenantID, _ := contextx.GetTenantID(l.ctx)
+		warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.WarehouseID)
+		if err != nil {
+			return nil, err
+		}
+		if warehouse == nil || warehouse.TenantID.Int64() != tenantID {
+			return nil, code.ErrShippingTemplateWarehouseMismatch
+		}
 	}
 
 	// ─── wire → entity field map (anti-silent-drop guard) ───
