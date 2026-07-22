@@ -23,6 +23,7 @@ require (
 	github.com/zeromicro/go-zero v1.10.1
 	go.etcd.io/etcd/client/v3 v3.6.8
 	golang.org/x/crypto v0.48.0
+	golang.org/x/text v0.36.0
 	google.golang.org/grpc v1.79.3
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/driver/sqlite v1.6.0
@@ -117,7 +118,6 @@ require (
 	golang.org/x/net v0.50.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d // indirect
