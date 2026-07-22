@@ -118,22 +118,6 @@ func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID in
 	return model.toEntity(), nil
 }
 
-func (r *warehouseRepo) FindAll(ctx context.Context, db *gorm.DB) ([]*product.Warehouse, error) {
-	var models []warehouseModel
-	err := db.WithContext(ctx).
-		Where("deleted_at IS NULL").
-		Order("is_default DESC, code ASC").
-		Find(&models).Error
-	if err != nil {
-		return nil, err
-	}
-	warehouses := make([]*product.Warehouse, len(models))
-	for i, m := range models {
-		warehouses[i] = m.toEntity()
-	}
-	return warehouses, nil
-}
-
 func (r *warehouseRepo) FindByTenant(ctx context.Context, db *gorm.DB, tenantID int64) ([]*product.Warehouse, error) {
 	var models []warehouseModel
 	err := db.WithContext(ctx).
@@ -148,18 +132,4 @@ func (r *warehouseRepo) FindByTenant(ctx context.Context, db *gorm.DB, tenantID 
 		warehouses[i] = m.toEntity()
 	}
 	return warehouses, nil
-}
-
-func (r *warehouseRepo) FindDefault(ctx context.Context, db *gorm.DB) (*product.Warehouse, error) {
-	var model warehouseModel
-	err := db.WithContext(ctx).
-		Where("is_default = ? AND deleted_at IS NULL", true).
-		First(&model).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return model.toEntity(), nil
 }
