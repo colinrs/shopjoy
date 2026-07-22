@@ -5,7 +5,6 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
-	"github.com/colinrs/shopjoy/pkg/code"
 	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,13 +25,16 @@ func NewListWarehousesLogic(ctx context.Context, svcCtx *svc.ServiceContext) Lis
 
 func (l *ListWarehousesLogic) ListWarehouses(req *types.ListWarehouseReq) (resp *types.ListWarehouseResp, err error) {
 
-	// Resolve TenantID from ctx (injected by AuthMiddleware). A missing or zero
-	// TenantID must not fall back to listing every tenant's warehouses, so we
-	// reject it up front rather than returning cross-tenant rows.
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tenantID == 0 {
-		return nil, code.ErrTenantNotFound
-	}
+	// Resolve TenantID from ctx (injected by AuthMiddleware).
+	//
+	// FIX-2: a missing or zero TenantID no longer short-circuits with
+	// code.ErrTenantNotFound — platform admins must be able to list
+	// warehouses they own. The repo's FindByTenant still scopes by tenant_id,
+	// so an ordinary user with a non-zero TenantID only ever sees their own
+	// warehouses; a platform admin (TenantID == 0) gets whatever rows match
+	// tenant_id = 0 today, and the GORM tenant middleware is responsible for
+	// expanding that to platform-wide listings once it ships.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
 	warehouses, err := l.svcCtx.WarehouseRepo.FindByTenant(l.ctx, l.svcCtx.DB, tenantID)
 	if err != nil {

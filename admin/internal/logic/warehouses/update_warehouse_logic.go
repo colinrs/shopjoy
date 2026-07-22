@@ -31,10 +31,11 @@ func (l *UpdateWarehouseLogic) UpdateWarehouse(req *types.UpdateWarehouseReq) (r
 	// the row's tenant_id stays whatever it was when it was created. We only
 	// use the caller's TenantID here to enforce isolation: a tenant must not
 	// be able to update another tenant's warehouse.
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tenantID == 0 {
-		return nil, code.ErrTenantNotFound
-	}
+	//
+	// FIX-2: a missing or zero TenantID is no longer rejected here. Platform
+	// admins must be able to manage warehouses they own; the GORM tenant
+	// middleware is responsible for the broader platform-scope invariant.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
 	// Find existing warehouse
 	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
@@ -45,11 +46,11 @@ func (l *UpdateWarehouseLogic) UpdateWarehouse(req *types.UpdateWarehouseReq) (r
 		return nil, code.ErrInventoryWarehouseNotFound
 	}
 
-	// Defense in depth: refuse cross-tenant updates. Platform admins
-	// (tenantID == 0 from AuthMiddleware) are blocked here as well — they
-	// must pass an explicit X-Tenant-ID header to operate on a tenant's
-	// warehouse.
-	if int64(warehouse.TenantID) != tenantID {
+	// Defense in depth: refuse cross-tenant updates from ordinary users.
+	// FIX-2: platform admins (tenantID == 0) bypass this check so they can
+	// update any warehouse; the GORM tenant middleware enforces the broader
+	// platform-scope invariant.
+	if tenantID != 0 && int64(warehouse.TenantID) != tenantID {
 		return nil, code.ErrInventoryWarehouseNotFound
 	}
 

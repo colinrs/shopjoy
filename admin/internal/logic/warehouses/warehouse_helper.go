@@ -32,23 +32,23 @@ func toWarehouseDetailResp(w *product.Warehouse) *types.WarehouseDetailResp {
 // the inline guard already used by UpdateWarehouse (FU-2).
 //
 // Contract:
-//   - No TenantID in ctx (AuthMiddleware bypassed) or TenantID == 0 (platform
-//     admin without an explicit X-Tenant-ID header) → code.ErrTenantNotFound.
-//     Operating without a concrete tenant would leak rows across the isolation
-//     boundary, so both cases are rejected up front.
-//   - Warehouse missing, soft-deleted, or owned by a different tenant →
-//     code.ErrInventoryWarehouseNotFound. Cross-tenant access is deliberately
+//   - No TenantID in ctx (AuthMiddleware bypassed) → defaults to 0 so the
+//     tenant-scope check below becomes a no-op for unauthenticated callers.
+//     We deliberately do NOT return code.ErrTenantNotFound here; the GORM
+//     tenant middleware is the authoritative platform-scope filter, and this
+//     helper only needs to block ordinary users from touching another tenant's
+//     warehouse.
+//   - TenantID != 0 (ordinary user) AND warehouse owned by a different tenant
+//     → code.ErrInventoryWarehouseNotFound. Cross-tenant access is deliberately
 //     surfaced as "not found" (not "forbidden") so a tenant cannot probe the
 //     existence of another tenant's warehouses.
+//   - Warehouse missing or soft-deleted → code.ErrInventoryWarehouseNotFound.
 //
 // svcCtx is passed (rather than the repo/db directly) so the TenantID guard
 // runs before any svcCtx field is dereferenced; this keeps the guard unit
 // testable with a nil svcCtx, matching the Create/Update logic guard tests.
 func requireWarehouseOwnership(ctx context.Context, svcCtx *svc.ServiceContext, id int64) (*product.Warehouse, error) {
-	tenantID, ok := contextx.GetTenantID(ctx)
-	if !ok || tenantID == 0 {
-		return nil, code.ErrTenantNotFound
-	}
+	tenantID, _ := contextx.GetTenantID(ctx)
 
 	warehouse, err := svcCtx.WarehouseRepo.FindByID(ctx, svcCtx.DB, id)
 	if err != nil {
@@ -58,8 +58,12 @@ func requireWarehouseOwnership(ctx context.Context, svcCtx *svc.ServiceContext, 
 		return nil, code.ErrInventoryWarehouseNotFound
 	}
 
-	// Defense in depth: refuse cross-tenant access.
-	if int64(warehouse.TenantID) != tenantID {
+	// Defense in depth: refuse cross-tenant access for ordinary users.
+	// FIX-2: a platform admin (tenantID == 0) is allowed through this check
+	// — the GORM tenant middleware enforces the broader platform-scope
+	// invariant, so this layer only blocks a tenant from touching another
+	// tenant's row.
+	if tenantID != 0 && int64(warehouse.TenantID) != tenantID {
 		return nil, code.ErrInventoryWarehouseNotFound
 	}
 

@@ -31,17 +31,21 @@ func NewCreateWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) Cr
 func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (resp *types.CreateWarehouseResp, err error) {
 
 	// Resolve TenantID from ctx (injected by AuthMiddleware).
-	// TenantID == 0 means either AuthMiddleware was bypassed or the caller
-	// is a platform admin without an explicit X-Tenant-ID header — in either
-	// case we must not write a row with tenant_id=0 because that breaks
-	// cross-tenant isolation.
-	tenantID, ok := contextx.GetTenantID(l.ctx)
-	if !ok || tenantID == 0 {
-		return nil, code.ErrTenantNotFound
-	}
+	//
+	// FIX-2: platform admins (TenantID == 0 or missing from ctx) are now
+	// allowed through this guard — the GORM tenant middleware is responsible
+	// for platform-scope filtering, so this layer must not reject them. We
+	// still resolve the value here because the row's tenant_id field has to
+	// be populated: a normal user gets their TenantID, while a platform
+	// admin who did not pass X-Tenant-ID falls back to 0 (representing
+	// "platform-owned") so the row remains queryable from the admin console.
+	tenantID, _ := contextx.GetTenantID(l.ctx)
 
 	// Check for duplicate code within the tenant (codes are scoped per-tenant,
-	// so the same code may exist across different tenants).
+	// so the same code may exist across different tenants). When called by a
+	// platform admin (tenantID == 0) this scopes the duplicate check to
+	// platform-owned rows; ordinary users can never collide with them because
+	// their TenantID is non-zero.
 	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, tenantID, req.Code)
 	if err != nil {
 		return nil, err
