@@ -7,6 +7,7 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,12 +27,29 @@ func NewUpdateWarehouseLogic(ctx context.Context, svcCtx *svc.ServiceContext) Up
 
 func (l *UpdateWarehouseLogic) UpdateWarehouse(req *types.UpdateWarehouseReq) (resp *types.WarehouseDetailResp, err error) {
 
+	// Resolve TenantID from ctx. UpdateWarehouse never rewrites TenantID —
+	// the row's tenant_id stays whatever it was when it was created. We only
+	// use the caller's TenantID here to enforce isolation: a tenant must not
+	// be able to update another tenant's warehouse.
+	tenantID, ok := contextx.GetTenantID(l.ctx)
+	if !ok || tenantID == 0 {
+		return nil, code.ErrTenantNotFound
+	}
+
 	// Find existing warehouse
 	warehouse, err := l.svcCtx.WarehouseRepo.FindByID(l.ctx, l.svcCtx.DB, req.ID)
 	if err != nil {
 		return nil, err
 	}
 	if warehouse == nil {
+		return nil, code.ErrInventoryWarehouseNotFound
+	}
+
+	// Defense in depth: refuse cross-tenant updates. Platform admins
+	// (tenantID == 0 from AuthMiddleware) are blocked here as well — they
+	// must pass an explicit X-Tenant-ID header to operate on a tenant's
+	// warehouse.
+	if int64(warehouse.TenantID) != tenantID {
 		return nil, code.ErrInventoryWarehouseNotFound
 	}
 
