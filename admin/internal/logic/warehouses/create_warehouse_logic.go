@@ -40,8 +40,9 @@ func (l *CreateWarehouseLogic) CreateWarehouse(req *types.CreateWarehouseReq) (r
 		return nil, code.ErrTenantNotFound
 	}
 
-	// Check for duplicate code
-	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, req.Code)
+	// Check for duplicate code within the tenant (codes are scoped per-tenant,
+	// so the same code may exist across different tenants).
+	existing, err := l.svcCtx.WarehouseRepo.FindByCode(l.ctx, l.svcCtx.DB, tenantID, req.Code)
 	if err != nil {
 		return nil, err
 	}

@@ -104,10 +104,10 @@ func (r *warehouseRepo) FindByID(ctx context.Context, db *gorm.DB, id int64) (*p
 	return model.toEntity(), nil
 }
 
-func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, code string) (*product.Warehouse, error) {
+func (r *warehouseRepo) FindByCode(ctx context.Context, db *gorm.DB, tenantID int64, code string) (*product.Warehouse, error) {
 	var model warehouseModel
 	err := db.WithContext(ctx).
-		Where("code = ? AND deleted_at IS NULL", code).
+		Where("tenant_id = ? AND code = ? AND deleted_at IS NULL", tenantID, code).
 		First(&model).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
