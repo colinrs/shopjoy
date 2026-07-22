@@ -6,6 +6,7 @@ import (
 
 	shippingapp "github.com/colinrs/shopjoy/admin/internal/application/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
+	"github.com/colinrs/shopjoy/pkg/contextx"
 	"github.com/shopspring/decimal"
 )
 
@@ -183,16 +184,16 @@ func TestCalculateShippingFee_WeightBreakdown(t *testing.T) {
 // treats "" as "no locale signal" and falls back to zone.Name, so production
 // behaviour is identical to the pre-i18n wiring.
 func TestGetAcceptLanguage_AbsentReturnsEmpty(t *testing.T) {
-	if got := getAcceptLanguage(context.Background()); got != "" {
+	if got := contextx.GetAcceptLanguage(context.Background()); got != "" {
 		t.Errorf("expected empty string when ctx has no accept-language value, got %q", got)
 	}
 }
 
 // TestGetAcceptLanguage_Injected verifies the helper reads the value the
-// handler would inject via context.WithValue(ctx, acceptLanguageKey, ...).
+// handler would inject via contextx.SetAcceptLanguage(ctx, ...).
 func TestGetAcceptLanguage_Injected(t *testing.T) {
-	ctx := context.WithValue(context.Background(), acceptLanguageKey, "en-US,en;q=0.9")
-	if got := getAcceptLanguage(ctx); got != "en-US,en;q=0.9" {
+	ctx := contextx.SetAcceptLanguage(context.Background(), "en-US,en;q=0.9")
+	if got := contextx.GetAcceptLanguage(ctx); got != "en-US,en;q=0.9" {
 		t.Errorf("expected injected accept-language to round-trip, got %q", got)
 	}
 }
@@ -219,26 +220,26 @@ func TestZoneNameResolution_RespectsAcceptLanguage(t *testing.T) {
 		},
 		{
 			name: "exact match en-US → returns en-US name",
-			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "en-US"),
+			ctx:  contextx.SetAcceptLanguage(context.Background(), "en-US"),
 			want: "East China",
 		},
 		{
 			name: "language-base match en-GB → returns en-US name (base=en)",
-			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "en-GB"),
+			ctx:  contextx.SetAcceptLanguage(context.Background(), "en-GB"),
 			want: "East China",
 		},
 		{
 			name: "no match for fr-FR → first non-empty",
-			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "fr-FR"),
+			ctx:  contextx.SetAcceptLanguage(context.Background(), "fr-FR"),
 			want: "East China",
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := shippingapp.ResolveZoneName(zone, getAcceptLanguage(tc.ctx))
+			got := shippingapp.ResolveZoneName(zone, contextx.GetAcceptLanguage(tc.ctx))
 			if got != tc.want {
-				t.Errorf("ResolveZoneName(%q)=%q, want %q", getAcceptLanguage(tc.ctx), got, tc.want)
+				t.Errorf("ResolveZoneName(%q)=%q, want %q", contextx.GetAcceptLanguage(tc.ctx), got, tc.want)
 			}
 		})
 	}

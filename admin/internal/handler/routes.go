@@ -47,6 +47,8 @@ import (
 	webhooks "github.com/colinrs/shopjoy/admin/internal/handler/webhooks"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 
+	"github.com/colinrs/shopjoy/admin/internal/middleware"
+
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -1478,7 +1480,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthMiddleware},
+			[]rest.Middleware{serverCtx.AuthMiddleware, middleware.AcceptLanguage()},
 			[]rest.Route{
 				{
 					// 计算运费

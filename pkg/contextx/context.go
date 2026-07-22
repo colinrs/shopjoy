@@ -11,11 +11,12 @@ import (
 type contextKey string
 
 const (
-	userIDKey    contextKey = "user_id"
-	tenantIDKey  contextKey = "tenant_id"
-	userTypeKey  contextKey = "user_type"
-	userNameKey  contextKey = "user_name"
-	userEmailKey contextKey = "user_email"
+	userIDKey          contextKey = "user_id"
+	tenantIDKey        contextKey = "tenant_id"
+	userTypeKey        contextKey = "user_type"
+	userNameKey        contextKey = "user_name"
+	userEmailKey       contextKey = "user_email"
+	acceptLanguageKey  contextKey = "accept_language"
 )
 
 // User type constants
@@ -156,3 +157,21 @@ var (
 	ErrTenantNotFound = &code.Err{HTTPCode: http.StatusBadRequest, Code: 90001, Msg: "tenant not found in context"}
 	ErrUserNotFound   = &code.Err{HTTPCode: http.StatusBadRequest, Code: 11004, Msg: "user not found in context"}
 )
+
+// SetAcceptLanguage stores the raw Accept-Language header value (e.g.
+// "en-US,en;q=0.9,zh;q=0.8") into ctx. The header is stored verbatim —
+// downstream resolvers are responsible for parsing BCP-47 tags via
+// golang.org/x/text/language.Parse. Empty string means "no locale signal".
+func SetAcceptLanguage(ctx context.Context, acceptLanguage string) context.Context {
+	return context.WithValue(ctx, acceptLanguageKey, acceptLanguage)
+}
+
+// GetAcceptLanguage returns the Accept-Language header injected by the
+// middleware, or "" when absent. Empty string is a valid signal meaning
+// "no locale preference; use the default fallback".
+func GetAcceptLanguage(ctx context.Context) string {
+	if v, ok := ctx.Value(acceptLanguageKey).(string); ok {
+		return v
+	}
+	return ""
+}
