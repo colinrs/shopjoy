@@ -435,10 +435,11 @@ func (r *shippingTemplateRepo) CreateZoneRegions(ctx context.Context, db *gorm.D
 	return db.WithContext(ctx).CreateInBatches(regions, 100).Error
 }
 
-// DeleteZoneRegions 删除配送区域城市关联
+// DeleteZoneRegions 删除配送区域城市关联（硬删除以绕过软删除 unique 冲突）
 func (r *shippingTemplateRepo) DeleteZoneRegions(ctx context.Context, db *gorm.DB, zoneID int64) error {
 	return db.WithContext(ctx).
 		Where("zone_id = ?", zoneID).
+		Unscoped().
 		Delete(&shipping.ShippingZoneRegion{}).Error
 }
 
