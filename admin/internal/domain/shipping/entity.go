@@ -85,7 +85,7 @@ type ShippingTemplate struct {
 	IsDefault   bool   `gorm:"column:is_default;not null;default:false;index:idx_market_default"`
 	IsActive    bool   `gorm:"column:is_active;not null;default:true"`
 	CarrierCode string `gorm:"column:carrier_code;size:50;not null;default:'standard'"` // P2 预留
-	WarehouseID int64  `gorm:"column:warehouse_id;not null;default:0;index"`             // P2 预留
+	WarehouseID int64  `gorm:"column:warehouse_id;not null;default:0;index"`            // P2 预留
 }
 
 // TableName 返回表名
@@ -138,14 +138,14 @@ type ShippingZone struct {
 	AdditionalFee       decimal.Decimal `gorm:"column:additional_fee;type:decimal(19,4);not null;default:0"`
 	FreeThresholdAmount decimal.Decimal `gorm:"column:free_threshold_amount;type:decimal(19,4);not null;default:0"`
 	FreeThresholdCount  int             `gorm:"column:free_threshold_count;not null;default:0"`
-	Taxable             bool            `gorm:"column:taxable;not null;default:false"`                       // P1-6 是否计税
-	TaxRate             decimal.Decimal `gorm:"column:tax_rate;type:decimal(5,4);not null;default:0"`          // P1-6 税率（0.0000-1.0000）
-	TaxIncluded         bool            `gorm:"column:tax_included;not null;default:false"`                   // P1-6 价格含税
-	IossApplicable      bool            `gorm:"column:ioss_applicable;not null;default:false"`                // P1-6 欧盟 IOSS 适用
-	RemoteSurcharge     decimal.Decimal `gorm:"column:remote_surcharge;type:decimal(19,4);not null;default:0"` // P1-7 偏远地区附加费
-	RemoteZipPatterns   StringArray     `gorm:"column:remote_zip_patterns;type:jsonb"`                         // P1-7 偏远地区邮编匹配
+	Taxable             bool            `gorm:"column:taxable;not null;default:false"`                          // P1-6 是否计税
+	TaxRate             decimal.Decimal `gorm:"column:tax_rate;type:decimal(5,4);not null;default:0"`           // P1-6 税率（0.0000-1.0000）
+	TaxIncluded         bool            `gorm:"column:tax_included;not null;default:false"`                     // P1-6 价格含税
+	IossApplicable      bool            `gorm:"column:ioss_applicable;not null;default:false"`                  // P1-6 欧盟 IOSS 适用
+	RemoteSurcharge     decimal.Decimal `gorm:"column:remote_surcharge;type:decimal(19,4);not null;default:0"`  // P1-7 偏远地区附加费
+	RemoteZipPatterns   StringArray     `gorm:"column:remote_zip_patterns;type:jsonb"`                          // P1-7 偏远地区邮编匹配
 	FuelSurchargePct    decimal.Decimal `gorm:"column:fuel_surcharge_pct;type:decimal(5,4);not null;default:0"` // P1-8 燃油附加费比例
-	VolumetricDivisor   int             `gorm:"column:volumetric_divisor;not null;default:5000"`              // P1-9 体积重除数（cm³/kg，默认 5000）
+	VolumetricDivisor   int             `gorm:"column:volumetric_divisor;not null;default:5000"`                // P1-9 体积重除数（cm³/kg，默认 5000）
 	Sort                int             `gorm:"column:sort;not null;default:0"`
 }
 

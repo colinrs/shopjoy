@@ -21,6 +21,7 @@ import (
 //	made every tenant's warehouses visible to every other tenant.
 //
 // We exercise only the early-return guard here because the rest of
+//
 //	CreateWarehouse requires a fully wired *svc.ServiceContext
 //	(WarehouseRepo, IDGen, DB) and is covered by handler-level tests.
 func TestCreateWarehouseLogic_RequiresTenantID(t *testing.T) {
@@ -91,7 +92,7 @@ func TestCreateWarehouseLogic_RequiresTenantID(t *testing.T) {
 //
 // We exercise only the early-return guard for symmetry with the create
 // test. The cross-tenant mismatch path requires a working
-//*svc.ServiceContext and is covered by integration tests.
+// *svc.ServiceContext and is covered by integration tests.
 func TestUpdateWarehouseLogic_RequiresTenantID(t *testing.T) {
 	cases := []struct {
 		name       string

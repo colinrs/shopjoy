@@ -11,12 +11,12 @@ import (
 type contextKey string
 
 const (
-	userIDKey          contextKey = "user_id"
-	tenantIDKey        contextKey = "tenant_id"
-	userTypeKey        contextKey = "user_type"
-	userNameKey        contextKey = "user_name"
-	userEmailKey       contextKey = "user_email"
-	acceptLanguageKey  contextKey = "accept_language"
+	userIDKey         contextKey = "user_id"
+	tenantIDKey       contextKey = "tenant_id"
+	userTypeKey       contextKey = "user_type"
+	userNameKey       contextKey = "user_name"
+	userEmailKey      contextKey = "user_email"
+	acceptLanguageKey contextKey = "accept_language"
 )
 
 // User type constants

@@ -25,8 +25,8 @@ import (
 	"github.com/colinrs/shopjoy/admin/internal/domain/region"
 	"github.com/colinrs/shopjoy/admin/internal/domain/review"
 	"github.com/colinrs/shopjoy/admin/internal/domain/role"
-	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
+	"github.com/colinrs/shopjoy/admin/internal/domain/shop"
 	"github.com/colinrs/shopjoy/admin/internal/domain/user"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/persistence"
 	"github.com/colinrs/shopjoy/admin/internal/infrastructure/storage"
@@ -87,8 +87,8 @@ type ServiceContext struct {
 	PermissionRepo role.PermissionRepository
 	AdminUserRepo  adminuser.Repository
 	// Shipping
-	ShippingRepo     persistence.ShippingTemplateRepository
-	CarrierRegistry  *shipping.CarrierRegistry
+	ShippingRepo    persistence.ShippingTemplateRepository
+	CarrierRegistry *shipping.CarrierRegistry
 	// Region directory
 	RegionRepo region.RegionRepository
 	// Media

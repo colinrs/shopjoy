@@ -59,30 +59,31 @@ func (l *GetShippingTemplateLogic) GetShippingTemplate(req *types.GetShippingTem
 // this function silently dropped 10 new fields added in Tasks 1.2/1.6).
 //
 // ─── entity → response field map (must include all 22 fields) ───
-//   entity.ID                  → resp.ID
-//   entity.TenantID            → resp.TenantID            (P1-2)
-//   entity.TemplateID          → resp.TemplateID
-//   entity.MarketID            → resp.MarketID            (P1-5)
-//   entity.Currency            → resp.Currency            (P1-2)
-//   entity.Name                → resp.Name
-//   entity.NameI18n            → resp.NameI18n            (P1-10, via fromStringI18n)
-//   entity.Regions             → resp.Regions
-//   entity.FeeType             → resp.FeeType
-//   entity.FirstUnit           → resp.FirstUnit
-//   entity.FirstFee            → resp.FirstFee            (decimal → string)
-//   entity.AdditionalUnit      → resp.AdditionalUnit
-//   entity.AdditionalFee       → resp.AdditionalFee       (decimal → string)
-//   entity.FreeThresholdAmount → resp.FreeThresholdAmount (decimal → string)
-//   entity.FreeThresholdCount  → resp.FreeThresholdCount
-//   entity.Taxable             → resp.Taxable             (P1-6)
-//   entity.TaxRate             → resp.TaxRate             (P1-6, decimal → string)
-//   entity.TaxIncluded         → resp.TaxIncluded         (P1-6)
-//   entity.IossApplicable      → resp.IossApplicable      (P1-6)
-//   entity.RemoteSurcharge     → resp.RemoteSurcharge     (P1-7, decimal → string)
-//   entity.RemoteZipPatterns   → resp.RemoteZipPatterns   (P1-7)
-//   entity.FuelSurchargePct    → resp.FuelSurchargePct    (P1-8, decimal → string)
-//   entity.VolumetricDivisor   → resp.VolumetricDivisor   (P1-9)
-//   entity.Sort                → resp.Sort
+//
+//	entity.ID                  → resp.ID
+//	entity.TenantID            → resp.TenantID            (P1-2)
+//	entity.TemplateID          → resp.TemplateID
+//	entity.MarketID            → resp.MarketID            (P1-5)
+//	entity.Currency            → resp.Currency            (P1-2)
+//	entity.Name                → resp.Name
+//	entity.NameI18n            → resp.NameI18n            (P1-10, via fromStringI18n)
+//	entity.Regions             → resp.Regions
+//	entity.FeeType             → resp.FeeType
+//	entity.FirstUnit           → resp.FirstUnit
+//	entity.FirstFee            → resp.FirstFee            (decimal → string)
+//	entity.AdditionalUnit      → resp.AdditionalUnit
+//	entity.AdditionalFee       → resp.AdditionalFee       (decimal → string)
+//	entity.FreeThresholdAmount → resp.FreeThresholdAmount (decimal → string)
+//	entity.FreeThresholdCount  → resp.FreeThresholdCount
+//	entity.Taxable             → resp.Taxable             (P1-6)
+//	entity.TaxRate             → resp.TaxRate             (P1-6, decimal → string)
+//	entity.TaxIncluded         → resp.TaxIncluded         (P1-6)
+//	entity.IossApplicable      → resp.IossApplicable      (P1-6)
+//	entity.RemoteSurcharge     → resp.RemoteSurcharge     (P1-7, decimal → string)
+//	entity.RemoteZipPatterns   → resp.RemoteZipPatterns   (P1-7)
+//	entity.FuelSurchargePct    → resp.FuelSurchargePct    (P1-8, decimal → string)
+//	entity.VolumetricDivisor   → resp.VolumetricDivisor   (P1-9)
+//	entity.Sort                → resp.Sort
 func buildZoneDetails(zones []*shipping.ShippingZone) []*types.ShippingZoneDetail {
 	result := make([]*types.ShippingZoneDetail, 0, len(zones))
 	for _, z := range zones {

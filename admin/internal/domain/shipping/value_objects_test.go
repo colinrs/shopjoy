@@ -74,14 +74,14 @@ func TestStringI18n_Get(t *testing.T) {
 	cases := []struct {
 		locale, fallback, want string
 	}{
-		{"zh-CN", "en-US", "华东区域"},      // exact
-		{"en-US", "ja-JP", "East Region"},  // exact
-		{"ja-JP", "en-US", "華東"},          // exact
-		{"fr-FR", "en-US", "East Region"},  // fallback exact hit
-		{"de-DE", "en-US", "East Region"},  // fallback exact hit
-		{"fr-FR", "ja-JP", "華東"},          // both miss → first non-empty
-		{"", "en-US", "East Region"},       // empty locale → fallback hit (skip empty-key collision)
-		{"en-US", "", "East Region"},       // exact hit regardless of fallback
+		{"zh-CN", "en-US", "华东区域"},          // exact
+		{"en-US", "ja-JP", "East Region"},   // exact
+		{"ja-JP", "en-US", "華東"},            // exact
+		{"fr-FR", "en-US", "East Region"},   // fallback exact hit
+		{"de-DE", "en-US", "East Region"},   // fallback exact hit
+		{"fr-FR", "ja-JP", "華東"},            // both miss → first non-empty
+		{"", "en-US", "East Region"},        // empty locale → fallback hit (skip empty-key collision)
+		{"en-US", "", "East Region"},        // exact hit regardless of fallback
 		{"empty-v", "en-US", "East Region"}, // exact hit but empty value → fallback
 	}
 

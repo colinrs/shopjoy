@@ -345,11 +345,11 @@ func TestShippingRepo_UnsetAllDefaultByMarket_AllMarkets(t *testing.T) {
 // is_default, is_active, LIMIT) — proving tenant_id appears in WHERE.
 func TestShippingRepo_FindDefaultByMarket_TenantIsolation(t *testing.T) {
 	const (
-		marketID    = int64(7)
-		tenant1ID   = int64(100)
-		tenant2ID   = int64(200)
-		tenant1Row  = int64(101)
-		tenant2Row  = int64(202)
+		marketID   = int64(7)
+		tenant1ID  = int64(100)
+		tenant2ID  = int64(200)
+		tenant1Row = int64(101)
+		tenant2Row = int64(202)
 	)
 	row := func(id, tenant int64) *sqlmock.Rows {
 		return sqlmock.NewRows([]string{
