@@ -204,7 +204,7 @@ func TestGetAcceptLanguage_Injected(t *testing.T) {
 func TestZoneNameResolution_RespectsAcceptLanguage(t *testing.T) {
 	zone := &shipping.ShippingZone{
 		Name:     "华东",
-		NameI18n: shipping.StringI18n{"en-US": "East China", "ja-JP": "華東"},
+		NameI18n: shipping.StringI18n{"en-US": "East China"},
 	}
 
 	cases := []struct {
