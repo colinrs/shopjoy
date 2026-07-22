@@ -65,4 +65,4 @@ __debug_*
 
 # Local config files (env-specific secrets, real credentials)
 *local.yaml
-.superpowers/
+.superpowers/sdd/

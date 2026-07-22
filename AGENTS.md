@@ -646,8 +646,9 @@ createdAt := now.Format("2006-01-02 15:04:05")  // loses type info
 ## ANTI-PATTERNS
 
 ### Go Backend
-- **DO NOT** edit `internal/types/types.go` or `internal/handler/routes.go` - auto-generated
-- **DO NOT** add middleware by editing `routes.go` - use `.api` files with `middleware:` directive instead
+- **DO NOT** edit `internal/types/types.go` or `internal/handler/routes.go` - auto-generated from `.api` via `make api`. Manual edits are silently overwritten on the next regeneration, causing "where did my middleware/route go?" bugs.
+- **DO NOT** add middleware by editing `routes.go` - use `.api` files with `middleware:` directive in the `@server` block, then run `cd admin && make api` (or `cd shop && make api`). The generated routes.go will wire it automatically via `serverCtx.{MiddlewareName}`.
+- When adding a new middleware: declare in `.api` with `middleware: Name`, run `make api` to scaffold `ServiceContext.{Name}` field + `routes.go` reference, then implement the middleware function and initialize the field in `NewServiceContext`.
 - **DO NOT** hardcode cache keys - use `cache_key.go` utilities
 - **DO NOT** use cache as primary storage
 - **NEVER** ignore context cancellation in long operations
