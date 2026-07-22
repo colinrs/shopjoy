@@ -69,6 +69,55 @@ func TestCalculateShippingFee_CarrierCode(t *testing.T) {
 	}
 }
 
+// TestResolveEstimatedDays_StandardRegistered checks the happy path: the
+// default registry (registered with StandardCarrier) returns the documented
+// country-tier days from StandardCarrier.EstimateDays.
+func TestResolveEstimatedDays_StandardRegistered(t *testing.T) {
+	registry := shipping.NewCarrierRegistry()
+
+	cases := []struct {
+		country string
+		want    int
+	}{
+		{"CN", 3},
+		{"US", 7},
+		{"DE", 7},
+		{"JP", 5},
+		{"SG", 5},
+		{"ZZ", 10}, // unknown country → default tier
+		{"cn", 3},  // case-insensitive
+	}
+	for _, tc := range cases {
+		t.Run(tc.country, func(t *testing.T) {
+			got := resolveEstimatedDays(registry, "standard", tc.country)
+			if got != tc.want {
+				t.Errorf("estimateDays(standard, %q)=%d, want %d", tc.country, got, tc.want)
+			}
+		})
+	}
+}
+
+// TestResolveEstimatedDays_UnknownCarrierFallsBack ensures that an unregistered
+// carrier code (e.g. a future "dhl" carrier before it is wired into the
+// registry) falls back to the 5-day default rather than silently returning 0.
+func TestResolveEstimatedDays_UnknownCarrierFallsBack(t *testing.T) {
+	registry := shipping.NewCarrierRegistry()
+	got := resolveEstimatedDays(registry, "dhl", "US")
+	if got != 5 {
+		t.Errorf("expected fallback=5 for unknown carrier, got %d", got)
+	}
+}
+
+// TestResolveEstimatedDays_NilRegistryIsSafe verifies defensive handling: a nil
+// registry (e.g. an older ServiceContext from before Phase 7-2 wiring) yields
+// the fallback instead of panicking.
+func TestResolveEstimatedDays_NilRegistryIsSafe(t *testing.T) {
+	got := resolveEstimatedDays(nil, "standard", "US")
+	if got != 5 {
+		t.Errorf("expected fallback=5 for nil registry, got %d", got)
+	}
+}
+
 // TestCalculateShippingFee_SurchargeAddedToFee verifies the logic-layer contract
 // that surcharges are computed off the base fee and added on top: the remote
 // surcharge (flat) plus the fuel surcharge (pct * base) sum into the final fee.

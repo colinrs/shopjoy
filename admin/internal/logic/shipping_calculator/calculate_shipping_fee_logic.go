@@ -146,6 +146,11 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	// Carrier code from the template (fallback "standard").
 	carrierCode := resolveCarrierCode(template.CarrierCode)
 
+	// EstimatedDays from the carrier registry, keyed by the template's carrier
+	// code. Unknown carriers (registry miss, future-proofing) fall back to 5
+	// days so callers always receive a usable SLA instead of 0.
+	estimatedDays := resolveEstimatedDays(l.svcCtx.CarrierRegistry, carrierCode, req.Address.CountryCode)
+
 	// Fee-detail weight breakdown: CalculatedWeight is the chargeable weight
 	// (max of real vs. volumetric), VolumetricWeight is the accumulated
 	// volumetric weight for debug display. Uses the zone's divisor.
@@ -166,10 +171,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		TemplateName:     template.Name,
 		ZoneName:         shippingapp.ResolveZoneName(zone, acceptLanguage),
 		CarrierCode:      carrierCode,
-		// EstimatedDays is left 0: no carrier-lookup registry is wired into
-		// svc.ServiceContext yet (see task-3 report concern). Populate once a
-		// CarrierRegistry with EstimateDays(countryCode) exists.
-		EstimatedDays: 0,
+		EstimatedDays:    estimatedDays,
 		FeeDetail: types.FeeCalculationDetail{
 			FeeType:          string(zone.FeeType),
 			FirstUnit:        zone.FirstUnit,
@@ -192,6 +194,25 @@ func resolveCarrierCode(carrierCode string) string {
 		return "standard"
 	}
 	return carrierCode
+}
+
+// resolveEstimatedDays looks up the carrier by code in the registry and asks
+// it to estimate transit days for the destination country. When the registry
+// is nil, when the carrier code is unknown, or when the carrier lookup errors
+// silently, it falls back to a 5-day default so downstream code never sees 0.
+//
+// 5 is chosen as a neutral SLA between StandardCarrier's "regional" tier
+// (CN=3, JP/KR/SEA=5) and its "long-haul" tier (US/EU=7, default=10).
+func resolveEstimatedDays(registry *shipping.CarrierRegistry, carrierCode, countryCode string) int {
+	const fallbackDays = 5
+	if registry == nil {
+		return fallbackDays
+	}
+	carrier, ok := registry.Get(carrierCode)
+	if !ok || carrier == nil {
+		return fallbackDays
+	}
+	return carrier.EstimateDays(countryCode)
 }
 
 // sumWeights accumulates the chargeable weight (max of real vs. volumetric,
