@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	shippingapp "github.com/colinrs/shopjoy/admin/internal/application/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/svc"
 	"github.com/colinrs/shopjoy/admin/internal/types"
@@ -113,6 +114,11 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	// Find template using priority: Product > Default (market-aware, tenant-scoped)
 	tenantID, _ := contextx.GetTenantID(l.ctx)
 	template, zone := l.findTemplateForItems(tenantID, req.MarketID, req.Address, parsed)
+
+	// ZoneName is locale-aware when Accept-Language is injected into ctx by the
+	// handler (see handler header-injection block). Empty/missing header falls
+	// back to zone.Name inside ResolveZoneName.
+	acceptLanguage := getAcceptLanguage(l.ctx)
 	if template == nil || zone == nil {
 		return nil, code.ErrShippingTemplateNotFound
 	}
@@ -158,7 +164,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 		PriceIncludesTax: zone.TaxIncluded,
 		TemplateID:       int64(template.ID),
 		TemplateName:     template.Name,
-		ZoneName:         zone.Name,
+		ZoneName:         shippingapp.ResolveZoneName(zone, acceptLanguage),
 		CarrierCode:      carrierCode,
 		// EstimatedDays is left 0: no carrier-lookup registry is wired into
 		// svc.ServiceContext yet (see task-3 report concern). Populate once a
@@ -259,6 +265,26 @@ func parseAmount(s string) decimal.Decimal {
 		return decimal.Zero
 	}
 	return d
+}
+
+// acceptLanguageKey is the local ctx key under which the handler injects the
+// raw HTTP Accept-Language header value (e.g. "en-US,en;q=0.9,zh;q=0.8").
+// We store the whole header string verbatim — ResolveZoneName takes the first
+// BCP-47 tag from it via language.Parse. Storing verbatim means q-values and
+// trailing tags are ignored for now, matching what most locale resolvers do
+// with Accept-Language in practice.
+type ctxKey string
+
+const acceptLanguageKey ctxKey = "accept-language"
+
+// getAcceptLanguage returns the Accept-Language header that the handler
+// injected into ctx, or "" when absent. Empty string is fine — the resolver
+// treats it as "no locale signal" and falls back to zone.Name.
+func getAcceptLanguage(ctx context.Context) string {
+	if v, ok := ctx.Value(acceptLanguageKey).(string); ok {
+		return v
+	}
+	return ""
 }
 
 // formatAmount converts decimal.Decimal to 2-decimal string.

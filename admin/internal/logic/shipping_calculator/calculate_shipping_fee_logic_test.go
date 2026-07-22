@@ -1,8 +1,10 @@
 package shipping_calculator
 
 import (
+	"context"
 	"testing"
 
+	shippingapp "github.com/colinrs/shopjoy/admin/internal/application/shipping"
 	"github.com/colinrs/shopjoy/admin/internal/domain/shipping"
 	"github.com/shopspring/decimal"
 )
@@ -124,5 +126,71 @@ func TestCalculateShippingFee_WeightBreakdown(t *testing.T) {
 	// volumetric = 1600*2 + 0*1 = 3200
 	if volumetric != 3200 {
 		t.Errorf("expected volumetric weight=3200, got %d", volumetric)
+	}
+}
+
+// TestGetAcceptLanguage_AbsentReturnsEmpty verifies that the helper returns ""
+// when the handler has not injected Accept-Language into ctx. The resolver
+// treats "" as "no locale signal" and falls back to zone.Name, so production
+// behaviour is identical to the pre-i18n wiring.
+func TestGetAcceptLanguage_AbsentReturnsEmpty(t *testing.T) {
+	if got := getAcceptLanguage(context.Background()); got != "" {
+		t.Errorf("expected empty string when ctx has no accept-language value, got %q", got)
+	}
+}
+
+// TestGetAcceptLanguage_Injected verifies the helper reads the value the
+// handler would inject via context.WithValue(ctx, acceptLanguageKey, ...).
+func TestGetAcceptLanguage_Injected(t *testing.T) {
+	ctx := context.WithValue(context.Background(), acceptLanguageKey, "en-US,en;q=0.9")
+	if got := getAcceptLanguage(ctx); got != "en-US,en;q=0.9" {
+		t.Errorf("expected injected accept-language to round-trip, got %q", got)
+	}
+}
+
+// TestZoneNameResolution_RespectsAcceptLanguage models the response-building
+// step's ZoneName computation without requiring a DB. It proves that the
+// helper + shippingapp.ResolveZoneName composition behaves correctly end-to-end
+// when ctx carries an Accept-Language header value.
+func TestZoneNameResolution_RespectsAcceptLanguage(t *testing.T) {
+	zone := &shipping.ShippingZone{
+		Name:     "华东",
+		NameI18n: shipping.StringI18n{"en-US": "East China", "ja-JP": "華東"},
+	}
+
+	cases := []struct {
+		name string
+		ctx  context.Context
+		want string
+	}{
+		{
+			name: "no accept-language in ctx → fallback to zone.Name",
+			ctx:  context.Background(),
+			want: "华东",
+		},
+		{
+			name: "exact match en-US → returns en-US name",
+			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "en-US"),
+			want: "East China",
+		},
+		{
+			name: "language-base match en-GB → returns en-US name (base=en)",
+			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "en-GB"),
+			want: "East China",
+		},
+		{
+			name: "no match for fr-FR → first non-empty",
+			ctx:  context.WithValue(context.Background(), acceptLanguageKey, "fr-FR"),
+			want: "East China",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := shippingapp.ResolveZoneName(zone, getAcceptLanguage(tc.ctx))
+			if got != tc.want {
+				t.Errorf("ResolveZoneName(%q)=%q, want %q", getAcceptLanguage(tc.ctx), got, tc.want)
+			}
+		})
 	}
 }
