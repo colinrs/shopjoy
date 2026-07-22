@@ -50,7 +50,7 @@ func (l *CalculateShippingFeeLogic) CalculateShippingFee(req *types.CalculateShi
 	if req.Address.CityCode == "" {
 		return nil, code.ErrShippingCalcAddressRequired
 	}
-	if req.MarketID == 0 {
+	if req.MarketID < 0 {
 		return nil, code.ErrShippingCalcMarketRequired
 	}
 
