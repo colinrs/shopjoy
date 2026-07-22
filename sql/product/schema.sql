@@ -230,7 +230,7 @@ CREATE TABLE IF NOT EXISTS `warehouses` (
     `deleted_at` TIMESTAMP NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_tenant_id` (`tenant_id`),
-    UNIQUE KEY `idx_tenant_code` (`tenant_id`, `code`)
+    UNIQUE KEY `uk_tenant_code` (`tenant_id`, `code`, `deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库表';
 
 -- ============================================
