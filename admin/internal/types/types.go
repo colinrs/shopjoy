@@ -963,7 +963,7 @@ type ExportOrdersReq struct {
 type ExportPaymentTransactionsReq struct {
 	OrderNo       string `form:"order_no,optional"`
 	TransactionID string `form:"transaction_id,optional"`
-	Status        int8   `form:"status,optional"` // 0=pending, 1=succeeded, 2=failed
+	Status        *int8  `form:"status,optional"` // nil=no filter, 0=pending, 1=succeeded, 2=failed
 	PaymentMethod string `form:"payment_method,optional"`
 	StartTime     string `form:"start_time,optional"` // RFC3339
 	EndTime       string `form:"end_time,optional"`   // RFC3339
@@ -1783,7 +1783,7 @@ type ListTransactionsReq struct {
 	OrderNo       string `form:"order_no,optional"`
 	TransactionID string `form:"transaction_id,optional"`
 	PaymentMethod string `form:"payment_method,optional"`
-	Status        int8   `form:"status,optional"` // 0=pending, 1=succeeded, 2=failed
+	Status        *int8  `form:"status,optional"` // nil=no filter, 0=pending, 1=succeeded, 2=failed
 	StartTime     string `form:"start_time,optional"`
 	EndTime       string `form:"end_time,optional"`
 }

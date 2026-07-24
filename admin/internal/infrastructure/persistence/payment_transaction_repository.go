@@ -6,6 +6,7 @@ import (
 
 	"github.com/colinrs/shopjoy/admin/internal/domain/payment"
 	"github.com/colinrs/shopjoy/pkg/code"
+	"github.com/colinrs/shopjoy/pkg/infra"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,15 @@ func (r *paymentTransactionRepository) Create(ctx context.Context, db *gorm.DB, 
 
 func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB, id int64) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
-	query := db.WithContext(ctx).Where("id = ?", id)
+	// Skip tenant scope: this repo aggregates across tenants (the payments page
+	// is a platform-wide view), so we don't want the global TenantScopePlugin to
+	// restrict by tenant_id.
+	ctx = infra.SkipTenantScope(ctx)
+	query := db.WithContext(ctx).
+		Model(&payment.PaymentTransaction{}).
+		Joins("LEFT JOIN orders ON orders.id = payment_transactions.order_id").
+		Select("payment_transactions.*, orders.order_no AS order_no").
+		Where("payment_transactions.id = ?", id)
 	err := query.First(&txn).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -34,6 +43,7 @@ func (r *paymentTransactionRepository) FindByID(ctx context.Context, db *gorm.DB
 
 func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, db *gorm.DB, txnID string) (*payment.PaymentTransaction, error) {
 	var txn payment.PaymentTransaction
+	ctx = infra.SkipTenantScope(ctx)
 	query := db.WithContext(ctx).Where("transaction_id = ?", txnID)
 	err := query.First(&txn).Error
 	if err != nil {
@@ -48,7 +58,14 @@ func (r *paymentTransactionRepository) FindByTransactionID(ctx context.Context, 
 func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB, query payment.TransactionQuery) ([]*payment.PaymentTransaction, int64, error) {
 	query.Validate()
 
-	dbQuery := db.WithContext(ctx).Model(&payment.PaymentTransaction{})
+	// Skip tenant scope: the TenantScopePlugin injects unqualified `tenant_id = ?`
+	// into the WHERE clause, which collides with the LEFT JOIN to orders
+	// (both tables have tenant_id). Bypassing the scope is also semantically
+	// correct — the payments page must aggregate across tenants.
+	db = db.WithContext(infra.SkipTenantScope(ctx))
+	dbQuery := db.Model(&payment.PaymentTransaction{}).
+		Joins("LEFT JOIN orders ON orders.id = payment_transactions.order_id").
+		Select("payment_transactions.*, orders.order_no AS order_no")
 
 	if query.OrderID > 0 {
 		dbQuery = dbQuery.Where("order_id = ?", query.OrderID)
@@ -59,14 +76,14 @@ func (r *paymentTransactionRepository) FindList(ctx context.Context, db *gorm.DB
 	if query.PaymentMethod != "" {
 		dbQuery = dbQuery.Where("payment_method = ?", query.PaymentMethod)
 	}
-	if query.Status.IsValid() {
-		dbQuery = dbQuery.Where("status = ?", query.Status)
+	if query.Status != nil {
+		dbQuery = dbQuery.Where("payment_transactions.status = ?", *query.Status)
 	}
 	if !query.StartTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at >= ?", query.StartTime)
+		dbQuery = dbQuery.Where("payment_transactions.created_at >= ?", query.StartTime)
 	}
 	if !query.EndTime.IsZero() {
-		dbQuery = dbQuery.Where("created_at < ?", query.EndTime)
+		dbQuery = dbQuery.Where("payment_transactions.created_at < ?", query.EndTime)
 	}
 
 	var total int64
@@ -93,7 +110,7 @@ func (r *paymentTransactionRepository) GetStats(ctx context.Context, db *gorm.DB
 	}
 	var results []statsResult
 
-	query := db.WithContext(ctx).
+	query := db.WithContext(infra.SkipTenantScope(ctx)).
 		Model(&payment.PaymentTransaction{}).
 		Select("status, COUNT(*) as count").
 		Group("status")

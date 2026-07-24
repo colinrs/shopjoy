@@ -61,7 +61,12 @@ func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Re
 			ctx = contextx.SetUserID(ctx, claims.UserID)
 			ctx = contextx.SetUserType(ctx, claims.Type)
 
-			// For platform admins, allow overriding tenant_id via X-Tenant-ID header
+			// Resolve effective tenant_id:
+			//  - Tenant admins use the value from their JWT (non-zero, immutable).
+			//  - Platform admins may override via X-Tenant-ID header; if neither
+			//    JWT nor header provides a positive id, fall back to tenant 1
+			//    so that downstream tenant-scoped queries don't silently match
+			//    nothing.
 			tenantID := claims.TenantID
 			if claims.Type == contextx.UserTypePlatformAdmin {
 				if headerTenantID := r.Header.Get("X-Tenant-ID"); headerTenantID != "" {
@@ -69,6 +74,9 @@ func NewAuthMiddleware(jwtSecret string, db *gorm.DB, adminUserRepo adminuser.Re
 					if _, err := fmt.Sscanf(headerTenantID, "%d", &id); err == nil && id > 0 {
 						tenantID = id
 					}
+				}
+				if tenantID <= 0 {
+					tenantID = 1
 				}
 			}
 			ctx = contextx.SetTenantID(ctx, tenantID)

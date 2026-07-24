@@ -125,7 +125,15 @@
       :label="$t('shipping.feeType')"
       prop="fee_type"
     >
-      <FeeTypeSelector v-model="form" />
+      <FeeTypeSelector
+        :fee-type="form.fee_type"
+        :first-unit="form.first_unit"
+        :first-fee="form.first_fee"
+        :additional-unit="form.additional_unit"
+        :additional-fee="form.additional_fee"
+        :volumetric-divisor="form.volumetric_divisor"
+        @update="(patch) => Object.assign(form, patch)"
+      />
     </el-form-item>
 
     <!-- P1-6: Tax Settings -->
@@ -311,7 +319,8 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormItemRule } from 'element-plus'
 import { Rank, Edit, Delete, Location, Plus } from '@element-plus/icons-vue'
-import type { ShippingZone, CreateZoneRequest, NameI18nEntry } from '@/api/shipping'
+import type { ShippingZone, CreateZoneRequest, NameI18nEntry, Region } from '@/api/shipping'
+import { getRegions } from '@/api/shipping'
 import FeeTypeSelector from './FeeTypeSelector.vue'
 import RegionSelector from './RegionSelector.vue'
 
@@ -324,7 +333,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  update: [zone: ShippingZone]
+  edit: [zone: ShippingZone]
   delete: [zoneId: string]
   save: [zone: CreateZoneRequest]
   cancel: []
@@ -336,6 +345,13 @@ const submitting = ref(false)
 const selectedRegionsText = ref('')
 const regionSelectorVisible = ref(false)
 const remoteZipText = ref('')
+// Track selected region objects for display; codes are stored in form.regions
+const selectedRegionObjects = ref<Region[]>([])
+// Map of region code → name for display of pre-existing zones (loaded on demand)
+const regionNameMap = ref<Record<string, string>>({})
+// Caches for lazy region-name resolution
+const provincesCache = ref<Region[]>([])
+const childrenCache = ref<Record<string, Region[]>>({})
 
 interface ZoneForm extends CreateZoneRequest {
   enable_amount_threshold: boolean
@@ -374,15 +390,15 @@ const form = reactive<ZoneForm>({
 
 const rules = {
   name: [
-    { required: true, message: 'shipping.templateNameRequired', trigger: 'blur' },
-    { min: 2, max: 50, message: 'shipping.templateNameLength', trigger: 'blur' }
+    { required: true, message: t('shipping.zoneNameRequired'), trigger: 'blur' },
+    { min: 2, max: 50, message: t('shipping.zoneNameLength'), trigger: 'blur' }
   ],
   regions: [
     {
       // eslint-disable-next-line no-unused-vars
       validator: (_rule: FormItemRule, value: string[], callback: (error?: Error) => void) => {
         if (!value || value.length === 0) {
-          callback(new Error('shipping.selectFeeType'))
+          callback(new Error(t('shipping.selectDeliveryArea')))
         } else {
           callback()
         }
@@ -391,7 +407,7 @@ const rules = {
     }
   ],
   fee_type: [
-    { required: true, message: 'shipping.selectFeeType', trigger: 'change' }
+    { required: true, message: t('shipping.selectFeeType'), trigger: 'change' }
   ]
 }
 
@@ -404,8 +420,16 @@ const hasFreeThreshold = computed(() => {
 })
 
 const displayRegions = computed(() => {
-  // Return first 10 regions for display
-  return props.zone?.regions?.slice(0, 10) || []
+  // Return first 10 region names for display (in dialog mode use the
+  // currently selected Region objects; in card mode use props.zone.regions
+  // resolved through the regionNameMap).
+  if (selectedRegionObjects.value.length > 0) {
+    return selectedRegionObjects.value.slice(0, 10).map(r => r.name)
+  }
+  if (props.zone?.regions) {
+    return props.zone.regions.slice(0, 10).map(code => regionNameMap.value[code] || code)
+  }
+  return []
 })
 
 // Methods
@@ -422,10 +446,16 @@ const getFeeTypeLabel = (feeType: string) => {
 
 const formatRegions = (regions: string[]) => {
   if (!regions || regions.length === 0) return t('shipping.areaNotSet')
-  if (regions.length <= 3) {
-    return regions.join(', ')
+  // Prefer names from selectedRegionObjects (just confirmed), then regionNameMap,
+  // then fall back to the code itself.
+  const names = regions.map(code => {
+    const obj = selectedRegionObjects.value.find(r => r.code === code)
+    return obj?.name || regionNameMap.value[code] || code
+  })
+  if (names.length <= 3) {
+    return names.join(', ')
   }
-  return `${regions.slice(0, 3).join(', ')} ${t('shipping.andMoreCount', { count: regions.length })}`
+  return `${names.slice(0, 3).join(', ')} ${t('shipping.andMoreCount', { count: names.length })}`
 }
 
 const formatFeeConfig = (zone: ShippingZone) => {
@@ -460,16 +490,63 @@ const formatFreeThreshold = (zone: ShippingZone) => {
 }
 
 const startEdit = () => {
-  emit('update', props.zone!)
+  emit('edit', props.zone!)
 }
 
 const showRegionSelector = () => {
   regionSelectorVisible.value = true
 }
 
-const handleRegionConfirm = (regions: string[]) => {
-  form.regions = regions
+const handleRegionConfirm = (regions: Region[]) => {
+  // Store full Region objects for display
+  selectedRegionObjects.value = [...regions]
+  // Store codes for API submission
+  form.regions = regions.map(r => r.code)
+  // Update name map so future renders use names
+  for (const r of regions) {
+    regionNameMap.value[r.code] = r.name
+  }
   selectedRegionsText.value = formatRegions(form.regions)
+}
+
+// Lazily resolve names for any codes we don't yet know.
+// For codes already in regionNameMap this is a no-op; otherwise we
+// load provinces and (for cities) the parent's children to populate the map.
+const resolveRegionNames = async (codes: string[]) => {
+  const missing = codes.filter(c => !regionNameMap.value[c])
+  if (missing.length === 0) return
+  try {
+    // Load provinces first; many missing codes will resolve at the province level
+    if (provincesCache.value.length === 0) {
+      provincesCache.value = await getRegions()
+    }
+    for (const p of provincesCache.value) {
+      regionNameMap.value[p.code] = p.name
+    }
+    // For any codes still missing, try fetching their parent's children
+    const stillMissing = missing.filter(c => !regionNameMap.value[c])
+    for (const code of stillMissing) {
+      // Assume the code's parent is a province we've loaded; pick the first
+      // province that has this code as a child.
+      for (const p of provincesCache.value) {
+        // Cache children to avoid repeated calls
+        if (!childrenCache.value[p.code]) {
+          try {
+            childrenCache.value[p.code] = await getRegions(p.code)
+          } catch {
+            childrenCache.value[p.code] = []
+          }
+        }
+        const child = childrenCache.value[p.code].find(c => c.code === code)
+        if (child) {
+          regionNameMap.value[code] = child.name
+          break
+        }
+      }
+    }
+  } catch (err) {
+    // Non-fatal: display will fall back to showing the code
+  }
 }
 
 const handleSubmit = async () => {
@@ -570,7 +647,18 @@ watch(() => props.zone, (newZone) => {
     form.volumetric_divisor = newZone.volumetric_divisor || 5000
     // P1-10
     form.name_i18n = newZone.name_i18n ? newZone.name_i18n.map((e) => ({ ...e })) : []
+    // Reset in-memory selection so display reflects the zone being edited
+    selectedRegionObjects.value = []
     selectedRegionsText.value = formatRegions(form.regions)
+    // Lazily fetch region names so display shows "Beijing" instead of "110000"
+    if (form.regions.length > 0) {
+      resolveRegionNames(form.regions)
+    }
+  } else if (newZone && !props.isDialog) {
+    // Card mode: just resolve names for display
+    if (newZone.regions && newZone.regions.length > 0) {
+      resolveRegionNames(newZone.regions)
+    }
   }
 }, { immediate: true })
 </script>

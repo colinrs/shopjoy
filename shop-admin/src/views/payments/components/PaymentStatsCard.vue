@@ -106,13 +106,24 @@
           :xs="24"
           :md="12"
         >
-          <!-- Chart Placeholder -->
-          <div class="chart-container">
-            <div class="chart-placeholder">
-              <el-icon :size="48">
-                <PieChart />
-              </el-icon>
-              <p>{{ $t('payments.channelDistribution') }}</p>
+          <!-- Pie Chart -->
+          <div
+            ref="chartRef"
+            class="chart-container"
+          />
+          <!-- Legend (name + percent) -->
+          <div class="chart-legend">
+            <div
+              v-for="channel in stats.channel_distribution"
+              :key="channel.name"
+              class="legend-item"
+            >
+              <span
+                class="legend-dot"
+                :style="{ backgroundColor: channel.color }"
+              />
+              <span class="legend-name">{{ channel.name }}</span>
+              <span class="legend-percent">{{ channel.percent }}%</span>
             </div>
           </div>
         </el-col>
@@ -122,8 +133,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { Calendar, Timer, RefreshLeft, TrendCharts, PieChart } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
 import type { PaymentStats } from '@/api/payment'
 import { t } from '@/plugins/i18n'
 
@@ -161,6 +173,58 @@ const isPositiveGrowth = (growth: string) => {
   const num = parseFloat(growth)
   return !isNaN(num) && num >= 0
 }
+
+const chartRef = ref<HTMLDivElement | null>(null)
+let chartInstance: echarts.ECharts | null = null
+
+const renderChart = () => {
+  if (!chartRef.value) return
+  if (!chartInstance) {
+    chartInstance = echarts.init(chartRef.value)
+  }
+  const data = (props.stats.channel_distribution || []).map(c => ({
+    name: c.name,
+    value: parseFloat(c.amount) || 0,
+    itemStyle: { color: c.color }
+  }))
+  chartInstance.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: (p: { name: string; value: number; percent: number }) =>
+        `${p.name}<br/>${p.value.toFixed(2)} ${currency.value} (${p.percent}%)`
+    },
+    legend: { show: false },
+    series: [{
+      type: 'pie',
+      radius: ['55%', '78%'],
+      center: ['50%', '50%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: { show: false },
+      labelLine: { show: false },
+      data
+    }]
+  }, true)
+}
+
+watch(
+  () => props.stats.channel_distribution,
+  () => nextTick(renderChart),
+  { deep: true }
+)
+
+const handleResize = () => chartInstance?.resize()
+
+onMounted(() => {
+  nextTick(renderChart)
+  window.addEventListener('resize', handleResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  chartInstance?.dispose()
+  chartInstance = null
+})
 </script>
 
 <style scoped>
@@ -332,22 +396,45 @@ const isPositiveGrowth = (growth: string) => {
 }
 
 .chart-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
+  width: 100%;
+  height: 280px;
   background: #F9FAFB;
   border-radius: 12px;
 }
 
-.chart-placeholder {
-  text-align: center;
-  color: #9CA3AF;
+.chart-legend {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
 }
 
-.chart-placeholder p {
-  margin: 8px 0 0 0;
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
+  color: #1E1B4B;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-name {
+  font-weight: 500;
+}
+
+.legend-percent {
+  font-weight: 600;
+  color: #6366F1;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 /* Responsive */

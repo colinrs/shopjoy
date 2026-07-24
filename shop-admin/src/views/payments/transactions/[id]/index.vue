@@ -158,7 +158,7 @@
           </el-timeline-item>
           <el-timeline-item
             v-if="transaction.paid_at"
-            timestamp="formatTime(transaction.paid_at)"
+            :timestamp="formatTime(transaction.paid_at)"
             type="success"
           >
             <p class="timeline-title">

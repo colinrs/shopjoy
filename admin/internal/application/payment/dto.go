@@ -42,7 +42,7 @@ type ListTransactionsRequest struct {
 	OrderID       int64
 	TransactionID string
 	PaymentMethod payment.PaymentMethod
-	Status        payment.TransactionStatus
+	Status        *payment.TransactionStatus
 	StartTime     time.Time
 	EndTime       time.Time
 }
@@ -143,7 +143,7 @@ func toTransactionDTO(txn *payment.PaymentTransaction) *TransactionDTO {
 		ID:                   txn.ID,
 		TransactionID:        txn.TransactionID,
 		OrderID:              txn.OrderID,
-		OrderNo:              "", // Would need to fetch from order service
+		OrderNo:              txn.OrderNo,
 		PaymentMethod:        string(txn.PaymentMethod),
 		PaymentMethodText:    getPaymentMethodText(txn.PaymentMethod),
 		ChannelTransactionID: txn.ChannelTransactionID,

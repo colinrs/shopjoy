@@ -81,7 +81,7 @@
                 :key="zone.id || `new-${index}`"
                 :zone="zone"
                 :index="index"
-                @update="handleZoneUpdate"
+                @edit="handleZoneEdit"
                 @delete="handleZoneDelete"
               />
             </div>
@@ -213,6 +213,7 @@
       :close-on-click-modal="false"
     >
       <ZoneConfigForm
+        :key="editingZone?.id ?? 'new'"
         :zone="editingZone ?? undefined"
         :is-dialog="true"
         @save="handleZoneSave"
@@ -435,16 +436,9 @@ const showAddZoneDialog = () => {
   zoneDialogVisible.value = true
 }
 
-const handleZoneUpdate = async (zone: ShippingZone) => {
-  try {
-    if (zone.id) {
-      await updateShippingZone(zone.id, zone)
-    }
-    ElMessage.success(t('shipping.updateZoneSuccess'))
-    loadTemplate()
-  } catch (error) {
-    handleError(error, t('shipping.updateZoneFailed'))
-  }
+const handleZoneEdit = (zone: ShippingZone) => {
+  editingZone.value = zone
+  zoneDialogVisible.value = true
 }
 
 const handleZoneDelete = async (zoneId: string) => {

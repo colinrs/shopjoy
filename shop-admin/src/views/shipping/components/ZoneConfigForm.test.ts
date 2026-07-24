@@ -43,6 +43,8 @@ const i18n = createI18n({
       shipping: {
         zoneName: 'Zone Name',
         enterZoneName: 'Enter zone name',
+        zoneNameRequired: 'Please enter zone name',
+        zoneNameLength: 'Zone name must be 2-50 characters',
         deliveryArea: 'Delivery Area',
         selectDeliveryArea: 'Select area',
         feeType: 'Fee Type',

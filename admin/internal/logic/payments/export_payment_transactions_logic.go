@@ -43,7 +43,10 @@ func (l *ExportPaymentTransactionsLogic) ExportPaymentTransactions(req *types.Ex
 		PageSize:      10001, // Check if exceeds limit
 		TransactionID: req.TransactionID,
 		PaymentMethod: payment.PaymentMethod(req.PaymentMethod),
-		Status:        payment.TransactionStatus(req.Status),
+	}
+	if req.Status != nil {
+		s := payment.TransactionStatus(*req.Status)
+		queryReq.Status = &s
 	}
 
 	// Parse start time

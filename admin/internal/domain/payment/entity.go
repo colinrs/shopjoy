@@ -304,6 +304,8 @@ type PaymentTransaction struct {
 	TransactionFee       decimal.Decimal   `gorm:"column:transaction_fee;type:decimal(19,4);not null;default:0"`
 	PaidAt               *time.Time        `gorm:"column:paid_at"`
 	FailedReason         string            `gorm:"column:failed_reason;not null;default:''"`
+	// OrderNo is populated via LEFT JOIN orders ON orders.id = order_id; never written.
+	OrderNo string `gorm:"<-:false;column:order_no"`
 }
 
 func (t *PaymentTransaction) TableName() string {
@@ -351,7 +353,7 @@ type TransactionQuery struct {
 	OrderID       int64
 	TransactionID string
 	PaymentMethod PaymentMethod
-	Status        TransactionStatus
+	Status        *TransactionStatus // nil means no status filter
 	StartTime     time.Time
 	EndTime       time.Time
 }

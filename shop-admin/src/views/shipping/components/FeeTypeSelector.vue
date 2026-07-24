@@ -223,7 +223,7 @@
           <el-col :span="24">
             <el-form-item :label="$t('shipping.volumetricDivisor')">
               <el-input-number
-                :model-value="props.modelValue.volumetric_divisor"
+                :model-value="props.volumetricDivisor"
                 :min="1"
                 :max="100000"
                 style="width: 200px"
@@ -260,21 +260,35 @@ import { ref, watch } from 'vue'
 import { Coin, Box, Odometer, Present, DataLine } from '@element-plus/icons-vue'
 import type { CreateZoneRequest } from '@/api/shipping'
 
+interface FeePatch {
+  fee_type?: CreateZoneRequest['fee_type']
+  first_unit?: number
+  first_fee?: string
+  additional_unit?: number
+  additional_fee?: string
+  volumetric_divisor?: number
+}
+
 const props = defineProps<{
-  modelValue: Partial<CreateZoneRequest>
+  feeType: CreateZoneRequest['fee_type']
+  firstUnit?: number
+  firstFee?: string
+  additionalUnit?: number
+  additionalFee?: string
+  volumetricDivisor?: number
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: Partial<CreateZoneRequest>]
+  update: [patch: FeePatch]
 }>()
 
-// Local state
-const localFeeType = ref(props.modelValue.fee_type || 'fixed')
+// Local state mirrors props
+const localFeeType = ref<string>(props.feeType || 'fixed')
 const localForm = ref({
-  first_unit: props.modelValue.first_unit || 1,
-  first_fee: props.modelValue.first_fee || '0',
-  additional_unit: props.modelValue.additional_unit || 1,
-  additional_fee: props.modelValue.additional_fee || '0'
+  first_unit: props.firstUnit || 1,
+  first_fee: props.firstFee || '0',
+  additional_unit: props.additionalUnit || 1,
+  additional_fee: props.additionalFee || '0'
 })
 
 // Methods
@@ -283,16 +297,12 @@ const handleFeeTypeChange = () => {
 }
 
 const updateVolumetricDivisor = (val: number | undefined) => {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    volumetric_divisor: val || undefined
-  })
+  emit('update', { volumetric_divisor: val })
 }
 
 const emitUpdate = () => {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    fee_type: localFeeType.value as any,
+  emit('update', {
+    fee_type: localFeeType.value as CreateZoneRequest['fee_type'],
     first_unit: localForm.value.first_unit,
     first_fee: String(localForm.value.first_fee),
     additional_unit: localForm.value.additional_unit,
@@ -300,18 +310,14 @@ const emitUpdate = () => {
   })
 }
 
-// Watch for external changes
-watch(() => props.modelValue, (newVal) => {
-  localFeeType.value = newVal.fee_type || 'fixed'
-  localForm.value = {
-    first_unit: newVal.first_unit || 1,
-    first_fee: newVal.first_fee || '0',
-    additional_unit: newVal.additional_unit || 1,
-    additional_fee: newVal.additional_fee || '0'
-  }
-}, { immediate: true })
+// Sync external prop changes → local state
+watch(() => props.feeType, (v) => { localFeeType.value = v || 'fixed' })
+watch(() => props.firstUnit, (v) => { localForm.value.first_unit = v || 1 })
+watch(() => props.firstFee, (v) => { localForm.value.first_fee = v || '0' })
+watch(() => props.additionalUnit, (v) => { localForm.value.additional_unit = v || 1 })
+watch(() => props.additionalFee, (v) => { localForm.value.additional_fee = v || '0' })
 
-// Watch local changes
+// Emit when local state changes
 watch([localFeeType, localForm], () => {
   emitUpdate()
 }, { deep: true })

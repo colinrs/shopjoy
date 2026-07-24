@@ -35,7 +35,10 @@ func (l *ListTransactionsLogic) ListTransactions(req *types.ListTransactionsReq)
 		PageSize:      req.PageSize,
 		TransactionID: req.TransactionID,
 		PaymentMethod: payment.PaymentMethod(req.PaymentMethod),
-		Status:        payment.TransactionStatus(req.Status),
+	}
+	if req.Status != nil {
+		s := payment.TransactionStatus(*req.Status)
+		appReq.Status = &s
 	}
 
 	// Parse time filters

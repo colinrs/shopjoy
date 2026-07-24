@@ -208,7 +208,7 @@ func (s *service) ListTransactions(ctx context.Context, req ListTransactionsRequ
 		PaymentMethod: req.PaymentMethod,
 	}
 
-	if req.Status.IsValid() {
+	if req.Status != nil {
 		query.Status = req.Status
 	}
 	if !req.StartTime.IsZero() {
