@@ -213,25 +213,6 @@
           </el-menu-item>
         </el-sub-menu>
       </el-menu>
-      
-      <!-- Sidebar Footer -->
-      <div class="sidebar-footer">
-        <div class="storage-info">
-          <div class="storage-header">
-            <span>{{ $t('common.storageSpace') }}</span>
-            <span>75%</span>
-          </div>
-          <el-progress
-            :percentage="75"
-            :stroke-width="6"
-            :show-text="false"
-            color="#10B981"
-          />
-          <p class="storage-detail">
-            7.5GB / 10GB {{ $t('common.used') }}
-          </p>
-        </div>
-      </div>
     </el-aside>
     
     <el-container>
@@ -709,33 +690,6 @@ onMounted(() => {
 
 .menu-badge {
   margin-left: 8px;
-}
-
-/* Sidebar Footer */
-.sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.storage-info {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 14px;
-}
-
-.storage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.storage-detail {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 8px 0 0 0;
 }
 
 /* Header */
